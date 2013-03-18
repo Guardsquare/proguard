@@ -1,0 +1,129 @@
+@charset "iso-8859-1";
+
+/* Global settings. */
+
+body
+{
+  background: #FFFFFF;
+}
+
+h1
+{
+  text-align: center;
+}
+
+h2
+{
+  background: #EEEEFF;
+  padding: 10px;
+}
+
+dt
+{
+  padding: 6px;
+}
+
+dt div 
+{
+  color: grey;
+  float: right;
+}
+
+dd
+{
+  padding: 6px;
+}
+
+pre
+{
+  padding: 10px;
+  background: #E0E0E0;
+}
+
+.spacious li
+{
+  padding: 8px;
+}
+
+.shifted li
+{
+  margin-left: 50px;
+}
+
+img.float
+{
+  float: left;
+}
+
+a
+{
+  text-decoration: none;
+}
+
+a.button
+{
+  color: #000000;
+  text-decoration: none;
+  background: #E0E0E0;
+  border: 1px outset #FFFFFF;
+  float: right;
+}
+
+/* Settings for variable width code. */
+
+p.code
+{
+  padding: 10px;
+  background: #E0E0E0;
+}
+
+
+/* Settings for diagrams. */
+
+table.diagram
+{
+  padding: 8px;
+  border: none;
+  border-spacing: 2px;
+}
+
+td.transparentblock
+{
+  text-align: center;
+  padding: 10px 0px;
+}
+
+td.whiteblock
+{
+  width: 100px;
+  text-align: center;
+  border: 1px solid #C0C0C0;
+  background: #E0E0E0;
+  padding: 10px 0px;
+}
+
+td.lightblock
+{
+  width: 100px;
+  text-align: center;
+  border: 1px solid #8888FF;
+  background: #BBBBFF;
+  padding: 20px 0px;
+}
+
+td.darkblock
+{
+  width: 100px;
+  text-align: center;
+  background: #8888FF;
+  padding: 20px 0px;
+}
+
+/* Settings for buttons. */
+
+td.button
+{
+  background: #E0E0E0;
+  border: 1px outset #FFFFFF;
+  font-weight: bold;
+}

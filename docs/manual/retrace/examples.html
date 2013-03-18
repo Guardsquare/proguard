@@ -1,0 +1,345 @@
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="content-style-type" content="text/css">
+<link rel="stylesheet" type="text/css" href="../style.css">
+<title>ReTrace Examples</title>
+<script type="text/javascript" language="JavaScript">
+<!--
+if (window.self==window.top)
+  window.top.location.replace("../../index.html#"+window.location.pathname+window.location.hash);
+else {
+  var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
+  if (window.top.location.hash!=hash)
+    window.top.location.hash=hash;
+}
+//-->
+</script>
+</head>
+<body>
+
+<h2>Examples</h2>
+
+Some typical example uses:
+<ol>
+<li><a href="#with">Restoring a stack trace with line numbers</a></li>
+<li><a href="#withverbose">Restoring a stack trace with line numbers
+    (verbose)</a></li>
+<li><a href="#without">Restoring a stack trace without line numbers</a></li>
+</ol>
+
+<h3><a name="with">Restoring a stack trace with line numbers</a></h3>
+
+Assume for instance ProGuard itself has been obfuscated using the following
+extra options:
+<pre>
+-printmapping proguard.map
+
+-renamesourcefileattribute ProGuard
+-keepattributes SourceFile,LineNumberTable
+</pre>
+<p>
+
+Now assume the processed application throws an exception, and we have saved the
+stack trace in <code>proguard.trace</code>, shown below. Of course, in real
+life ProGuard rarely throws exceptions, so this is a purposely generated
+exception. :)
+
+<pre>
+Exception in thread "main" java.lang.Error: Random exception
+        at pro.bY.a(ProGuard:576)
+        at pro.bO.a(ProGuard:431)
+        at pro.bj.a(ProGuard:145)
+        at pro.bY.a(ProGuard:522)
+        at pro.bj.a(ProGuard:129)
+        at pro.bN.a(ProGuard:125)
+        at pro.bY.a(ProGuard:251)
+        at pro.bY.a(ProGuard:229)
+        at pro.l.a(ProGuard:55)
+        at pro.bo.b(ProGuard:405)
+        at pro.ci.a(ProGuard:51)
+        at pro.bo.a(ProGuard:356)
+        at pro.be.a(ProGuard:109)
+        at pro.bo.a(ProGuard:356)
+        at pro.be.a(ProGuard:186)
+        at pro.bg.a(ProGuard:369)
+        at pro.bY.a(ProGuard:286)
+        at pro.bh.a(ProGuard:55)
+        at pro.bg.b(ProGuard:408)
+        at pro.bY.a(ProGuard:190)
+        at pro.bg.a(ProGuard:369)
+        at pro.M.a(ProGuard:110)
+        at pro.bY.a(ProGuard:449)
+        at pro.M.a(ProGuard:99)
+        at pro.bo.a(ProGuard:372)
+        at pro.bY.a(ProGuard:649)
+        at pro.bY.a(ProGuard:112)
+        at pro.P.a(ProGuard:66)
+        at pro.p.a(ProGuard:83)
+        at pro.bU.a(ProGuard:69)
+        at pro.bo.a(ProGuard:356)
+        at pro.J.a(ProGuard:149)
+        at pro.I.a(ProGuard:49)
+        at pro.J.a(ProGuard:105)
+        at pro.cf.c(ProGuard:370)
+        at pro.cf.a(ProGuard:317)
+        at pro.bc.a(ProGuard:55)
+        at proguard.ProGuard.a(ProGuard:363)
+        at proguard.ProGuard.c(ProGuard:187)
+        at proguard.ProGuard.b(ProGuard:385)
+        at proguard.ProGuard.main(ProGuard:429)
+</pre>
+<p>
+
+We can then use the following command to recover the stack trace:
+<pre>
+<b>java -jar retrace.jar proguard.map proguard.trace</b>
+</pre>
+<p>
+
+The output will look as follows:
+<pre>
+Exception in thread "main" java.lang.Error: Random exception
+        at proguard.shrink.UsageMarker.visitInstruction(ProGuard:576)
+        at proguard.classfile.instruction.GenericInstruction.accept(ProGuard:431)
+        at proguard.classfile.CodeAttrInfo.instructionsAccept(ProGuard:145)
+        at proguard.shrink.UsageMarker.visitCodeAttrInfo(ProGuard:522)
+        at proguard.classfile.CodeAttrInfo.accept(ProGuard:129)
+        at proguard.classfile.ProgramMemberInfo.attributesAccept(ProGuard:125)
+        at proguard.shrink.UsageMarker.visitMemberInfo(ProGuard:251)
+        at proguard.shrink.UsageMarker.visitProgramMethodInfo(ProGuard:229)
+        at proguard.classfile.ProgramMethodInfo.accept(ProGuard:55)
+        at proguard.classfile.ProgramClassFile.methodAccept(ProGuard:405)
+        at proguard.classfile.visitor.NamedMethodVisitor.visitProgramClassFile(ProGuard:51)
+        at proguard.classfile.ProgramClassFile.accept(ProGuard:356)
+        at proguard.classfile.visitor.ClassFileUpDownTraveler.visitProgramClassFile(ProGuard:109)
+        at proguard.classfile.ProgramClassFile.accept(ProGuard:356)
+        at proguard.classfile.visitor.ClassFileUpDownTraveler.visitLibraryClassFile(ProGuard:186)
+        at proguard.classfile.LibraryClassFile.accept(ProGuard:369)
+        at proguard.shrink.UsageMarker.visitLibraryMethodInfo(ProGuard:286)
+        at proguard.classfile.LibraryMethodInfo.accept(ProGuard:55)
+        at proguard.classfile.LibraryClassFile.methodsAccept(ProGuard:408)
+        at proguard.shrink.UsageMarker.visitLibraryClassFile(ProGuard:190)
+        at proguard.classfile.LibraryClassFile.accept(ProGuard:369)
+        at proguard.classfile.ClassCpInfo.referencedClassAccept(ProGuard:110)
+        at proguard.shrink.UsageMarker.visitClassCpInfo(ProGuard:449)
+        at proguard.classfile.ClassCpInfo.accept(ProGuard:99)
+        at proguard.classfile.ProgramClassFile.constantPoolEntryAccept(ProGuard:372)
+        at proguard.shrink.UsageMarker.markCpEntry(ProGuard:649)
+        at proguard.shrink.UsageMarker.visitProgramClassFile(ProGuard:112)
+        at proguard.classfile.visitor.VariableClassFileVisitor.visitProgramClassFile(ProGuard:66)
+        at proguard.classfile.visitor.MultiClassFileVisitor.visitProgramClassFile(ProGuard:83)
+        at proguard.classfile.visitor.FilteredClassFileVisitor.visitProgramClassFile(ProGuard:69)
+        at proguard.classfile.ProgramClassFile.accept(ProGuard:356)
+        at proguard.classfile.ClassPool.classFileAccept(ProGuard:149)
+        at proguard.classfile.visitor.NamedClassFileVisitor.visitClassPool(ProGuard:49)
+        at proguard.classfile.ClassPool.accept(ProGuard:105)
+        at proguard.KeepCommand.executeShrinkingPhase(ProGuard:370)
+        at proguard.KeepCommand.execute(ProGuard:317)
+        at proguard.CompoundCommand.execute(ProGuard:55)
+        at proguard.ProGuard.executeCommands(ProGuard:363)
+        at proguard.ProGuard.shrink(ProGuard:187)
+        at proguard.ProGuard.execute(ProGuard:385)
+        at proguard.ProGuard.main(ProGuard:429)
+</pre>
+
+<h3><a name="withverbose">Restoring a stack trace with line numbers (verbose)</a></h3>
+
+In the previous example, we could also use the verbose flag:
+<pre>
+<b>java -jar retrace.jar -verbose proguard.map proguard.trace</b>
+</pre>
+<p>
+
+The output will then look as follows:
+<pre>
+Exception in thread "main" java.lang.Error: Random exception
+        at proguard.shrink.UsageMarker.void visitInstruction(proguard.classfile.ClassFile,proguard.classfile.instruction.Instruction)(ProGuard:576)
+        at proguard.classfile.instruction.GenericInstruction.void accept(proguard.classfile.ClassFile,proguard.classfile.instruction.InstructionVisitor)(ProGuard:431)
+        at proguard.classfile.CodeAttrInfo.void instructionsAccept(proguard.classfile.ClassFile,proguard.classfile.instruction.InstructionVisitor)(ProGuard:145)
+        at proguard.shrink.UsageMarker.void visitCodeAttrInfo(proguard.classfile.ClassFile,proguard.classfile.CodeAttrInfo)(ProGuard:522)
+        at proguard.classfile.CodeAttrInfo.void accept(proguard.classfile.ClassFile,proguard.classfile.visitor.AttrInfoVisitor)(ProGuard:129)
+        at proguard.classfile.ProgramMemberInfo.void attributesAccept(proguard.classfile.ProgramClassFile,proguard.classfile.visitor.AttrInfoVisitor)(ProGuard:125)
+        at proguard.shrink.UsageMarker.void visitMemberInfo(proguard.classfile.ProgramClassFile,proguard.classfile.ProgramMemberInfo)(ProGuard:251)
+        at proguard.shrink.UsageMarker.void visitProgramMethodInfo(proguard.classfile.ProgramClassFile,proguard.classfile.ProgramMethodInfo)(ProGuard:229)
+        at proguard.classfile.ProgramMethodInfo.void accept(proguard.classfile.ProgramClassFile,proguard.classfile.visitor.MemberInfoVisitor)(ProGuard:55)
+        at proguard.classfile.ProgramClassFile.void methodAccept(proguard.classfile.visitor.MemberInfoVisitor,java.lang.String,java.lang.String)(ProGuard:405)
+        at proguard.classfile.visitor.NamedMethodVisitor.void visitProgramClassFile(proguard.classfile.ProgramClassFile)(ProGuard:51)
+        at proguard.classfile.ProgramClassFile.void accept(proguard.classfile.visitor.ClassFileVisitor)(ProGuard:356)
+        at proguard.classfile.visitor.ClassFileUpDownTraveler.void visitProgramClassFile(proguard.classfile.ProgramClassFile)(ProGuard:109)
+        at proguard.classfile.ProgramClassFile.void accept(proguard.classfile.visitor.ClassFileVisitor)(ProGuard:356)
+        at proguard.classfile.visitor.ClassFileUpDownTraveler.void visitLibraryClassFile(proguard.classfile.LibraryClassFile)(ProGuard:186)
+        at proguard.classfile.LibraryClassFile.void accept(proguard.classfile.visitor.ClassFileVisitor)(ProGuard:369)
+        at proguard.shrink.UsageMarker.void visitLibraryMethodInfo(proguard.classfile.LibraryClassFile,proguard.classfile.LibraryMethodInfo)(ProGuard:286)
+        at proguard.classfile.LibraryMethodInfo.void accept(proguard.classfile.LibraryClassFile,proguard.classfile.visitor.MemberInfoVisitor)(ProGuard:55)
+        at proguard.classfile.LibraryClassFile.void methodsAccept(proguard.classfile.visitor.MemberInfoVisitor)(ProGuard:408)
+        at proguard.shrink.UsageMarker.void visitLibraryClassFile(proguard.classfile.LibraryClassFile)(ProGuard:190)
+        at proguard.classfile.LibraryClassFile.void accept(proguard.classfile.visitor.ClassFileVisitor)(ProGuard:369)
+        at proguard.classfile.ClassCpInfo.void referencedClassAccept(proguard.classfile.visitor.ClassFileVisitor)(ProGuard:110)
+        at proguard.shrink.UsageMarker.void visitClassCpInfo(proguard.classfile.ClassFile,proguard.classfile.ClassCpInfo)(ProGuard:449)
+        at proguard.classfile.ClassCpInfo.void accept(proguard.classfile.ClassFile,proguard.classfile.visitor.CpInfoVisitor)(ProGuard:99)
+        at proguard.classfile.ProgramClassFile.void constantPoolEntryAccept(proguard.classfile.visitor.CpInfoVisitor,int)(ProGuard:372)
+        at proguard.shrink.UsageMarker.void markCpEntry(proguard.classfile.ClassFile,int)(ProGuard:649)
+        at proguard.shrink.UsageMarker.void visitProgramClassFile(proguard.classfile.ProgramClassFile)(ProGuard:112)
+        at proguard.classfile.visitor.VariableClassFileVisitor.void visitProgramClassFile(proguard.classfile.ProgramClassFile)(ProGuard:66)
+        at proguard.classfile.visitor.MultiClassFileVisitor.void visitProgramClassFile(proguard.classfile.ProgramClassFile)(ProGuard:83)
+        at proguard.classfile.visitor.FilteredClassFileVisitor.void visitProgramClassFile(proguard.classfile.ProgramClassFile)(ProGuard:69)
+        at proguard.classfile.ProgramClassFile.void accept(proguard.classfile.visitor.ClassFileVisitor)(ProGuard:356)
+        at proguard.classfile.ClassPool.void classFileAccept(proguard.classfile.visitor.ClassFileVisitor,java.lang.String)(ProGuard:149)
+        at proguard.classfile.visitor.NamedClassFileVisitor.void visitClassPool(proguard.classfile.ClassPool)(ProGuard:49)
+        at proguard.classfile.ClassPool.void accept(proguard.classfile.visitor.ClassPoolVisitor)(ProGuard:105)
+        at proguard.KeepCommand.void executeShrinkingPhase(proguard.classfile.ClassPool,proguard.classfile.ClassPool)(ProGuard:370)
+        at proguard.KeepCommand.void execute(int,proguard.classfile.ClassPool,proguard.classfile.ClassPool)(ProGuard:317)
+        at proguard.CompoundCommand.void execute(int,proguard.classfile.ClassPool,proguard.classfile.ClassPool)(ProGuard:55)
+        at proguard.ProGuard.void executeCommands(int)(ProGuard:363)
+        at proguard.ProGuard.void shrink()(ProGuard:187)
+        at proguard.ProGuard.void execute(java.lang.String[])(ProGuard:385)
+        at proguard.ProGuard.void main(java.lang.String[])(ProGuard:429)
+</pre>
+
+
+<h3><a name="without">Restoring a stack trace without line numbers</a></h3>
+
+Assume for instance ProGuard itself has been obfuscated using the following
+extra options, this time without preserving the line number tables:
+<pre>
+-printmapping proguard.map
+</pre>
+<p>
+
+A stack trace <code>proguard.trace</code> will then lack line number
+information:
+<pre>
+Exception in thread "main" java.lang.Error: Random exception
+        at pro.bY.a(Unknown Source)
+        at pro.bO.a(Unknown Source)
+        at pro.bj.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.bj.a(Unknown Source)
+        at pro.bN.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.l.a(Unknown Source)
+        at pro.bo.b(Unknown Source)
+        at pro.ci.a(Unknown Source)
+        at pro.bo.a(Unknown Source)
+        at pro.be.a(Unknown Source)
+        at pro.bo.a(Unknown Source)
+        at pro.be.a(Unknown Source)
+        at pro.bg.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.bh.a(Unknown Source)
+        at pro.bg.b(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.bg.a(Unknown Source)
+        at pro.M.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.M.a(Unknown Source)
+        at pro.bo.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.bY.a(Unknown Source)
+        at pro.P.a(Unknown Source)
+        at pro.p.a(Unknown Source)
+        at pro.bU.a(Unknown Source)
+        at pro.bo.a(Unknown Source)
+        at pro.J.a(Unknown Source)
+        at pro.I.a(Unknown Source)
+        at pro.J.a(Unknown Source)
+        at pro.cf.c(Unknown Source)
+        at pro.cf.a(Unknown Source)
+        at pro.bc.a(Unknown Source)
+        at proguard.ProGuard.a(Unknown Source)
+        at proguard.ProGuard.c(Unknown Source)
+        at proguard.ProGuard.b(Unknown Source)
+        at proguard.ProGuard.main(Unknown Source)
+</pre>
+<p>
+
+We can still use the same command to recover the stack trace:
+<pre>
+<b>java -jar retrace.jar proguard.map proguard.trace</b>
+</pre>
+<p>
+
+The output will now give a list of alternative original method names for each
+ambiguous obfuscated method name:
+<pre>
+Exception in thread "main" java.lang.Error: Random exception
+        at proguard.shrink.UsageMarker.visitProgramClassFile(Unknown Source)
+                                       visitLibraryClassFile
+                                       visitProgramFieldInfo
+                                       visitProgramMethodInfo
+                                       visitMemberInfo
+                                       visitLibraryFieldInfo
+                                       visitLibraryMethodInfo
+                                       visitIntegerCpInfo
+                                       visitLongCpInfo
+                                       visitFloatCpInfo
+                                       visitDoubleCpInfo
+                                       visitStringCpInfo
+                                       visitUtf8CpInfo
+                                       visitFieldrefCpInfo
+                                       visitInterfaceMethodrefCpInfo
+                                       visitMethodrefCpInfo
+                                       visitClassCpInfo
+                                       visitNameAndTypeCpInfo
+                                       visitUnknownAttrInfo
+                                       visitInnerClassesAttrInfo
+                                       visitConstantValueAttrInfo
+                                       visitExceptionsAttrInfo
+                                       visitCodeAttrInfo
+                                       visitLineNumberTableAttrInfo
+                                       visitLocalVariableTableAttrInfo
+                                       visitSourceFileAttrInfo
+                                       visitDeprecatedAttrInfo
+                                       visitSyntheticAttrInfo
+                                       visitInstruction
+                                       visitCpInstruction
+                                       visitExceptionInfo
+                                       visitInnerClassesInfo
+                                       visitLocalVariableInfo
+                                       markCpEntry
+                                       markAsUnused
+                                       isUsed
+        at proguard.classfile.instruction.GenericInstruction.create(Unknown Source)
+                                                             isWide
+                                                             getLength
+                                                             accept
+        at proguard.classfile.CodeAttrInfo.getAttribute(Unknown Source)
+                                           getAttrInfoLength
+                                           readInfo
+                                           accept
+                                           instructionsAccept
+                                           exceptionsAccept
+        [...]
+        at proguard.KeepCommand.executeShrinkingPhase(Unknown Source)
+                                access$100
+        at proguard.KeepCommand.keepField(Unknown Source)
+                                ensureMultiClassFileVisitorForMembers
+                                execute
+                                executeObfuscationPhase
+                                access$002
+                                access$000
+                                access$102
+                                access$108
+        at proguard.CompoundCommand.addCommand(Unknown Source)
+                                    execute
+        at proguard.ProGuard.readCommands(Unknown Source)
+                             obfuscate
+                             executeCommands
+        at proguard.ProGuard.shrink(Unknown Source)
+        at proguard.ProGuard.check(Unknown Source)
+                             execute
+        at proguard.ProGuard.main(Unknown Source)
+</pre>
+
+<hr />
+<noscript><div><a target="_top" href="../../index.html" class="button">Show menu</a></div></noscript>
+<address>
+Copyright &copy; 2002-2013
+<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a>.
+</address>
+</body>
+</html>
+
