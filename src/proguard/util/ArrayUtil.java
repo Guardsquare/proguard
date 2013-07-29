@@ -350,7 +350,7 @@ public class ArrayUtil
      * Ensures the given array has a given size.
      * @param array        the array.
      * @param size         the target size of the array.
-     * @param initialValue the intial value of the elements.
+     * @param initialValue the initial value of the elements.
      * @return             the original array, or a copy if it had to be
      *                     extended.
      */
@@ -466,7 +466,7 @@ public class ArrayUtil
      * Ensures the given array has a given size.
      * @param array        the array.
      * @param size         the target size of the array.
-     * @param initialValue the intial value of the elements.
+     * @param initialValue the initial value of the elements.
      * @return             the original array, or a copy if it had to be
      *                     extended.
      */
@@ -582,7 +582,7 @@ public class ArrayUtil
      * Ensures the given array has a given size.
      * @param array        the array.
      * @param size         the target size of the array.
-     * @param initialValue the intial value of the elements.
+     * @param initialValue the initial value of the elements.
      * @return             the original array, or a copy if it had to be
      *                     extended.
      */
@@ -698,7 +698,7 @@ public class ArrayUtil
      * Ensures the given array has a given size.
      * @param array        the array.
      * @param size         the target size of the array.
-     * @param initialValue the intial value of the elements.
+     * @param initialValue the initial value of the elements.
      * @return             the original array, or a copy if it had to be
      *                     extended.
      */
@@ -814,7 +814,7 @@ public class ArrayUtil
      * Ensures the given array has a given size.
      * @param array        the array.
      * @param size         the target size of the array.
-     * @param initialValue the intial value of the elements.
+     * @param initialValue the initial value of the elements.
      * @return             the original array, or a copy if it had to be
      *                     extended.
      */
@@ -930,7 +930,7 @@ public class ArrayUtil
      * Ensures the given array has a given size.
      * @param array        the array.
      * @param size         the target size of the array.
-     * @param initialValue the intial value of the elements.
+     * @param initialValue the initial value of the elements.
      * @return             the original array, or a copy if it had to be
      *                     extended.
      */

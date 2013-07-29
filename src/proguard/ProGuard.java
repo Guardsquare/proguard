@@ -38,7 +38,7 @@ import java.util.Properties;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 4.9";
+    public static final String VERSION = "ProGuard, version 4.10";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();

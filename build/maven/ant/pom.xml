@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>4.9</version>
+        <version>4.10</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>proguard-anttask</artifactId>

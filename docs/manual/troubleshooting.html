@@ -26,9 +26,10 @@ few problems. The following sections discuss some common issues and solutions:
 
 <h3><a href="#processing">Problems while processing</a></h3>
 <ul>
-<li><a href="#dynamicalclass">Note: can't find dynamically referenced class</a></li>
+<li><a href="#dynamicalclass">Note: can't find dynamically referenced class ...</a></li>
 <li><a href="#dynamicalclasscast">Note: ... calls '(...)Class.forName(variable).newInstance()'</a></li>
 <li><a href="#dynamicalclassmember">Note: ... accesses a field/method '...' dynamically</a></li>
+<li><a href="#unknownclass">Note: the configuration refers to the unknown class  '...'</a></li>
 <li><a href="#descriptorclass">Note: the configuration keeps the entry point '...', but not the descriptor class '...'</a></li>
 <li><a href="#classmembers">Note: the configuration doesn't specify which class members to keep for class '...'</a></li>
 <li><a href="#duplicateclass">Note: duplicate definition of program/library class</a></li>
@@ -37,7 +38,8 @@ few problems. The following sections discuss some common issues and solutions:
 <li><a href="#unresolvedclass">Warning: can't find referenced class</a></li>
 <li><a href="#superclass">Error: Can't find any super classes of ... (not even immediate super class ...)</a></li>
 <li><a href="#superclass">Error: Can't find common super class of ... and ...</a></li>
-<li><a href="#unresolvedclassmember">Warning: can't find referenced field/method</a></li>
+<li><a href="#unresolvedprogramclassmember">Warning: can't find referenced field/method '...' in program class ...</a></li>
+<li><a href="#unresolvedlibraryclassmember">Warning: can't find referenced field/method '...' in library class ...</a></li>
 <li><a href="#unresolvedenclosingmethod">Warning: can't find enclosing class/method</a></li>
 <li><a href="#dependency">Warning: library class ... depends on program class ...</a></li>
 <li><a href="#unexpectedclass">Warning: class file ... unexpectedly contains class ...</a></li>
@@ -107,11 +109,11 @@ few problems. The following sections discuss some common issues and solutions:
 ProGuard may print out some notes and non-fatal warnings:
 
 <dl>
-<dt><a name="dynamicalclass"><b>Note: can't find dynamically referenced class</b></a></dt>
+<dt><a name="dynamicalclass"><b>Note: can't find dynamically referenced class ...</b></a></dt>
 
 <dd>ProGuard can't find a class or interface that your code is accessing by
-    means of introspection. You should check if you want to add the jar that
-    contains this class.</dd>
+    means of introspection. You should consider adding the jar that contains
+    this class.</dd>
 
 <dt><a name="dynamicalclasscast"><b>Note: ... calls '(...)Class.forName(variable).newInstance()'</b></a></dt>
 
@@ -135,6 +137,13 @@ ProGuard may print out some notes and non-fatal warnings:
     notes by specifying the <a
     href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
 
+<dt><a name="unknownclass"><b>Note: the configuration refers to the unknown class  '...'</b></a></dt>
+
+<dd>Your configuration refers to the name of a class that is not present in
+    the program jars or library jars. You should check whether the name is
+    correct. Notably, you should make sure that you always specify
+    fully-qualified names, not forgetting the package names.</dd>
+
 <dt><a name="descriptorclass"><b>Note: the configuration keeps the entry point '...', but not the descriptor class '...'</b></a></dt>
 
 <dd>Your configuration contains a <code>-keep</code> option to preserve the
@@ -149,12 +158,16 @@ ProGuard may print out some notes and non-fatal warnings:
 <dt><a name="classmembers"><b>Note: the configuration doesn't specify which class members to keep for class '...'</b></a></dt>
 
 <dd>Your configuration contains
-    a <code>-keepclassmembers/-keepclasseswithmembers</code> option to
-    preserve fields or methods in the given class, but it doesn't specify
-    which fields or methods. This way, the option simply won't have any
-    effect. You probably want to specify one or more fields or methods, as
+    a <a href="usage.html#keepclassmembers"><code>-keepclassmembers</code></a>/<a href="usage.html#keepclasseswithmembers">-keepclasseswithmembers</code></a>
+    option to preserve fields or methods in the given class, but it doesn't
+    specify which fields or methods. This way, the option simply won't have
+    any effect. You probably want to specify one or more fields or methods, as
     usual between curly braces. You can specify all fields or methods with a
-    wildcard "<code>*;</code>". You can switch off these notes by specifying
+    wildcard "<code>*;</code>". You should also consider if you just need the
+    more common <a href="usage.html#keep"><code>-keep</code></a> option, which
+    preserves all specified classes <i>and</i> class members.
+    The <a href="usage.html#keepoverview">overview of all <code>keep</code>
+    options</a> can help. You can switch off these notes by specifying
     the <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
 
 <dt><a name="duplicateclass"><b>Note: duplicate definition of program/library class</b></a></dt>
@@ -165,7 +178,21 @@ ProGuard may print out some notes and non-fatal warnings:
     though, so it's advisable to remove the duplicates. A convenient way to do
     so is by specifying filters on the input jars or library jars. You can
     switch off these notes by specifying the <a
-    href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
+    href="usage.html#dontnote"><code>-dontnote</code></a> option.
+    <p>
+    <img class="float" src="android_small.png" width="32" height="32"
+    alt="android" /> The standard Android build process automatically
+    specifies the input jars for you. There may not be an easy way to filter
+    them to remove these notes. You could remove the duplicate classes
+    manually from your libraries. You should never explicitly specify the
+    input jars yourself (with <code>-injars</code> or
+    <code>-libraryjars</code>), since you'll then get duplicate definitions.
+    You should also not add libraries to your application that are already
+    part of the Android run-time (notably <code>org.w3c.dom</code>,
+    <code>org.xml.sax</code>, <code>org.xmlpull.v1</code>,
+    <code>org.apache.commons.logging.Log</code>, <code>org.apache.http</code>,
+    and <code>org.json</code>). They are possibly inconsistent, and the
+    run-time libraries would get precedence anyway.</dd>
 
 <dt><a name="duplicatezipentry"><b>Warning: can't write resource ... Duplicate zip entry</b></a></dt>
 
@@ -174,7 +201,13 @@ ProGuard may print out some notes and non-fatal warnings:
     with previously used names. Once more, the warning may be an indication of
     some problem though, so it's advisable to remove the duplicates. A
     convenient way to do so is by specifying filters on the input jars. There
-    is no option to switch off these warnings.</dd>
+    is no option to switch off these warnings.
+    <p>
+    <img class="float" src="android_small.png" width="32" height="32"
+    alt="android" /> The standard Android build process automatically
+    specifies the input jars for you. There may not be an easy way to filter
+    them to remove these warnings. You could remove the duplicate resource files
+    manually from the input and the libraries.</dd>
 
 </dl>
 <p>
@@ -186,7 +219,7 @@ some more serious warnings:
 <dt><a name="unresolvedclass"><b>Warning: can't find superclass or interface</b><br/><b>Warning: can't find referenced class</b></a></dt>
 
 <dd>A class in one of your program jars or library jars is referring to a
-    class or interface that is missing from the input. The output lists both
+    class or interface that is missing from the input. The warning lists both
     the referencing class(es) and the missing referenced class(es). There can
     be a few reasons, with their own solutions:
     <p>
@@ -216,15 +249,15 @@ some more serious warnings:
         library, and your original code runs fine without it, then the missing
         dependency doesn't seem to hurt. The cleanest solution is to
         <a href="usage.html#filters">filter out</a> the <i>referencing</i>
-        class or classes from the input, with a filter like "<code>-injars
-        myapplication.jar(!somepackage/SomeUnusedReferencingClass.class)</code>".
+        class or classes from the input, with a filter like "<code>-libraryjars
+        mylibrary.jar(!somepackage/SomeUnusedReferencingClass.class)</code>".
         ProGuard will then skip this class entirely in the input, and it will
         not bump into the problem of its missing reference. However, you may
         then have to filter out other classes that are in turn referencing the
         removed class. In practice, this works best if you can filter out
         entire unused packages at once, with a wildcard filter like
-        "<code>-injars
-        myapplication.jar(!someunusedpackage/**)</code>".<p></li>
+        "<code>-libraryjars
+        mylibrary.jar(!someunusedpackage/**)</code>".<p></li>
     <li>If you don't feel like filtering out the problematic classes, you can
         try your luck with the <a
         href="usage.html#ignorewarnings"><code>-ignorewarnings</code></a>
@@ -233,18 +266,18 @@ some more serious warnings:
         Only use these options if you really know what you're doing though.</li>
     </ol>
     <p>
-    This last solution is commonly necessary in the standard Android build
-    process. The standard build script automatically passes the libraries that
-    it can find in the <code>libs</code> directory to ProGuard. Unfortunately,
-    many third-party libraries refer to other libraries that are not actually
-    used and not present. This works fine in debug builds, but in release
+    <img class="float" src="android_small.png" width="32" height="32"
+    alt="android" /> The standard Android build process automatically
+    specifies the input jars for you. Unfortunately, many pre-compiled
+    third-party libraries refer to other libraries that are not actually used
+    and therefore not present. This works fine in debug builds, but in release
     builds, ProGuard expects all libraries, so it can perform a proper static
     analysis. For example, if ProGuard complains that it can't find
     a <code>java.awt</code> class, then some library that you are using is
     referring to <code>java.awt</code>. This is a bit shady, since Android
     doesn't have this package at all, but if your application works anyway,
-    you can let ProGuard accept it with "<code>-dontwarn
-    java.awt.**</code>".</dd>
+    you can let ProGuard accept it with "<code>-dontwarn java.awt.**</code>",
+    for instance.</dd>
 
 <dt><a name="superclass"><b>Error: Can't find any super classes of ... (not even immediate super class ...)</b><br/><b>Error: Can't find common super class of ... and ...</b></a></dt>
 
@@ -265,43 +298,45 @@ some more serious warnings:
     preverification
     (<a href="usage.html#dontpreverify"><code>-dontpreverify</code></a>).</dd>
 
-<dt><a name="unresolvedclassmember"><b>Warning: can't find referenced field/method</b></a></dt>
+<dt><a name="unresolvedprogramclassmember"><b>Warning: can't find referenced field/method '...' in program class ...</b></a></dt>
 
-<dd>A class in one of your program jars is referring to a field or a method
-    that is missing from the input, even though its class is present. The
-    output lists both the referencing class and the missing referenced class
-    member. There can be a few reasons, with their own solutions:
+<dd>A program class is referring to a field or a method that is missing from
+    another program class. The warning lists both the referencing class and
+    the missing referenced class member. Your compiled class files are most
+    likely inconsistent. Possibly, some class file didn't get recompiled
+    properly, or some class file was left behind after its source file was
+    removed. Try removing all compiled class files and rebuilding your
+    project.</dd>
+
+<dt><a name="unresolvedlibraryclassmember"><b>Warning: can't find referenced field/method '...' in library class ...</b></a></dt>
+
+<dd>A program class is referring to a field or a method that is missing from a
+    library class. The warning lists both the referencing class and the
+    missing referenced class member. Your compiled class files are
+    inconsistent with the libraries. You may need to recompile the class
+    files, or otherwise upgrade the libraries to consistent versions.
     <p>
-    <ol>
-    <li>If there are unresolved references to class members in <i>program
-        classes</i>, your compiled class files are most likely inconsistent.
-        Possibly, some class file didn't get recompiled properly, or some
-        class file was left behind after its source file was removed. Try
-        removing all compiled class files and rebuilding your project.</li>
-    <li>If there are unresolved references to class members in <i>library
-        classes</i>, your compiled class files are inconsistent with the
-        libraries. You may need to recompile the class files, or otherwise
-        upgrade the libraries to consistent versions.
-        <p>
-        For example, if you're developing for Android, and ProGuard complains
-        that it can't find a run-time method that is only available in recent
-        versions of Android, you should change the target in
-        <code>project.properties</code> to that recent version.
-        <p>
-        Alternatively, you may get away with ignoring the inconsistency with
-        the options
-        <a href="usage.html#ignorewarnings"><code>-ignorewarnings</code></a>
-        or even
-        <a href="usage.html#dontwarn"><code>-dontwarn</code></a>. For
-        instance if the code contains a class to optionally support recent
-        versions of Android, you can specify "<code>-dontwarn
-        mypackage.MySupportClass</code>".</li>
-    <li>If your program classes reside in the same packages as library classes,
-        and refer to their package visible class members, then you should also
-        specify the
-        <a href="usage.html#dontskipnonpubliclibraryclassmembers"><code>-dontskipnonpubliclibraryclassmembers</code></a>
-        option.</li>
-    </ol></dd>
+    <img class="float" src="android_small.png" width="32" height="32"
+    alt="android" /> If you're developing for Android and ProGuard complains
+    that it can't find a method that is only available in a recent version of
+    the Android run-time, you should change the build target in your
+    <code>project.properties</code> file or <code>build.gradle</code> file to
+    that recent version. You can still specify a different
+    <code>minSdkVersion</code> and a different <code>targetSdkVersion</code>
+    in your <code>AndroidManifest.xml</code> file.
+    <p>
+    Alternatively, you may get away with ignoring the inconsistency with the
+    options
+    <a href="usage.html#ignorewarnings"><code>-ignorewarnings</code></a> or
+    even
+    <a href="usage.html#dontwarn"><code>-dontwarn</code></a>. For instance, you
+    can specify "<code>-dontwarn mypackage.MyInconsistentClass</code>".
+    <p>
+    Finally, should your program classes reside in the same packages as
+    library classes and should they refer to their package visible class
+    members, then you should also specify the
+    <a href="usage.html#dontskipnonpubliclibraryclassmembers"><code>-dontskipnonpubliclibraryclassmembers</code></a>
+    option.</dd>
 
 <dt><a name="unresolvedenclosingmethod"><b>Warning: can't find enclosing class/method</b></a></dt>
 
@@ -326,10 +361,12 @@ some more serious warnings:
     href="usage.html#libraryjars"><code>-libraryjars</code></a>), and try
     again.
     <p>
-    On Android, it is not uncommon that sloppy libraries contain duplicates of
-    classes that are already present in the Android run-time
-    (e.g. <code>org.json</code>, <code>org.xml</code>, <code>org.xmlpull</code>,
-    <code>org.w3c.dom</code>, or <code>org.apache.http</code>). You must remove
+    <img class="float" src="android_small.png" width="32" height="32"
+    alt="android" /> In Android development, sloppy libraries may contain
+    duplicates of classes that are already present in the Android run-time
+    (notably <code>org.w3c.dom</code>, <code>org.xml.sax</code>,
+    <code>org.xmlpull.v1</code>, <code>org.apache.commons.logging.Log</code>,
+    <code>org.apache.http</code>, and <code>org.json</code>). You must remove
     these classes from your libraries, since they are possibly inconsistent,
     and the run-time libraries would get precedence anyway.</dd>
 

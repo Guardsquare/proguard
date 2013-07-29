@@ -13,19 +13,23 @@
 </head>
 
 <script type="text/javascript" language="JavaScript">
-<!--
-var main="main.html";
-if (window.location.hash.length > 1)
-  main=window.location.hash.substr(1);
-var sections="sections.html";
-if (main.search(/manual\//) >= 0)
-  sections="manual/sections.html";
-
-document.write("<frameset rows=\"50,*\" framespacing=\"0\" frameborder=\"no\"><frame id=\"title\" name=\"title\" src=\"title.html\" scrolling=\"no\" marginwidth=\"0\" marginheight=\"0\" noresize /><frameset cols=\"120,*\" framespacing=\"0\" frameborder=\"no\"><frame id=\"sections\" name=\"sections\" src=\""+sections+"\" scrolling=\"no\" marginwidth=\"0\" marginheight=\"0\" noresize /><frame id=\"main\" name=\"main\" src=\""+main+"\" scrolling=\"auto\" marginwidth=\"10\" marginheight=\"10\" noresize /></frameset></frameset>");
+//<!--
+  var destWindowHash = window.location.hash;
+  function mainFrameLoaded() {
+    if (destWindowHash.length > 1) {
+      var destFrameFile = destWindowHash.substring(1);
+      var currFrameFile = frames["main"].location.href.replace(window.location.href.replace(/index.html.*/, ""), "");
+      if (currFrameFile != destFrameFile) {
+        frames["main"].location.replace(destFrameFile);
+        if (destFrameFile.search("manual/") >= 0)
+          frames["sections"].location.replace("manual/sections.html");
+      }
+      destWindowHash = "";
+    }
+  }
 //-->
 </script>
 
-<noscript>
 <frameset
  rows="50,*"
  framespacing="0"
@@ -38,7 +42,7 @@ document.write("<frameset rows=\"50,*\" framespacing=\"0\" frameborder=\"no\"><f
  scrolling="no"
  marginwidth="0"
  marginheight="0"
- noresize />
+ noresize="noresize" />
 
 <frameset
  cols="120,*"
@@ -52,7 +56,7 @@ document.write("<frameset rows=\"50,*\" framespacing=\"0\" frameborder=\"no\"><f
  scrolling="no"
  marginwidth="0"
  marginheight="0"
- noresize />
+ noresize="noresize" />
 
 <frame
  id="main"
@@ -61,11 +65,11 @@ document.write("<frameset rows=\"50,*\" framespacing=\"0\" frameborder=\"no\"><f
  scrolling="auto"
  marginwidth="10"
  marginheight="10"
- noresize />
+ noresize="noresize"
+ onload="mainFrameLoaded()" />
 
 </frameset>
 </frameset>
-</noscript>
 
 <noframes>
 <body>

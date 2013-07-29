@@ -64,7 +64,8 @@ implements   ClassVisitor,
     private final ClassPool      programClassPool;
     private final ClassPool      libraryClassPool;
     private final WarningPrinter missingClassWarningPrinter;
-    private final WarningPrinter missingMemberWarningPrinter;
+    private final WarningPrinter missingProgramMemberWarningPrinter;
+    private final WarningPrinter missingLibraryMemberWarningPrinter;
     private final WarningPrinter dependencyWarningPrinter;
 
     private final MemberFinder memberFinder = new MemberFinder();
@@ -78,14 +79,16 @@ implements   ClassVisitor,
     public ClassReferenceInitializer(ClassPool      programClassPool,
                                      ClassPool      libraryClassPool,
                                      WarningPrinter missingClassWarningPrinter,
-                                     WarningPrinter missingMemberWarningPrinter,
+                                     WarningPrinter missingProgramMemberWarningPrinter,
+                                     WarningPrinter missingLibraryMemberWarningPrinter,
                                      WarningPrinter dependencyWarningPrinter)
     {
-        this.programClassPool            = programClassPool;
-        this.libraryClassPool            = libraryClassPool;
-        this.missingClassWarningPrinter  = missingClassWarningPrinter;
-        this.missingMemberWarningPrinter = missingMemberWarningPrinter;
-        this.dependencyWarningPrinter    = dependencyWarningPrinter;
+        this.programClassPool                   = programClassPool;
+        this.libraryClassPool                   = libraryClassPool;
+        this.missingClassWarningPrinter         = missingClassWarningPrinter;
+        this.missingProgramMemberWarningPrinter = missingProgramMemberWarningPrinter;
+        this.missingLibraryMemberWarningPrinter = missingLibraryMemberWarningPrinter;
+        this.dependencyWarningPrinter           = dependencyWarningPrinter;
     }
 
 
@@ -208,6 +211,12 @@ implements   ClassVisitor,
             if (refConstant.referencedMember == null)
             {
                 // We haven't found the class member anywhere in the hierarchy.
+                boolean isProgramClass = referencedClass instanceof ProgramClass;
+
+                WarningPrinter missingMemberWarningPrinter = isProgramClass ?
+                    missingProgramMemberWarningPrinter :
+                    missingLibraryMemberWarningPrinter;
+
                 missingMemberWarningPrinter.print(clazz.getName(),
                                                   className,
                                                   "Warning: " +
@@ -216,7 +225,11 @@ implements   ClassVisitor,
                                                   (isFieldRef ?
                                                       "field '"  + ClassUtil.externalFullFieldDescription(0, name, type) :
                                                       "method '" + ClassUtil.externalFullMethodDescription(className, 0, name, type)) +
-                                                  "' in class " +
+                                                  "' in " +
+                                                  (isProgramClass ?
+                                                      "program" :
+                                                      "library") +
+                                                  " class " +
                                                   ClassUtil.externalClassName(className));
             }
         }
@@ -275,14 +288,14 @@ implements   ClassVisitor,
                 if (enclosingMethodAttribute.referencedMethod == null)
                 {
                     // We couldn't find the enclosing method.
-                    missingMemberWarningPrinter.print(className,
-                                                      enclosingClassName,
-                                                      "Warning: " +
-                                                      ClassUtil.externalClassName(className) +
-                                                      ": can't find enclosing method '" +
-                                                      ClassUtil.externalFullMethodDescription(enclosingClassName, 0, name, type) +
-                                                      "' in class " +
-                                                      ClassUtil.externalClassName(enclosingClassName));
+                    missingProgramMemberWarningPrinter.print(className,
+                                                             enclosingClassName,
+                                                             "Warning: " +
+                                                             ClassUtil.externalClassName(className) +
+                                                             ": can't find enclosing method '" +
+                                                             ClassUtil.externalFullMethodDescription(enclosingClassName, 0, name, type) +
+                                                             "' in program class " +
+                                                             ClassUtil.externalClassName(enclosingClassName));
                 }
             }
         }

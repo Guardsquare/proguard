@@ -78,22 +78,26 @@ The ProGuard task supports the following settings in its closure:
 <dl>
 
 <dt><a name="configuration_attribute"><code><b>configuration</b></code></a>
-    <a href="#file"><i>file</i></a></dt>
+    <a href="#file"><i>files</i></a></dt>
 <dd>Read and merge options from the given ProGuard-style configuration
-    file.</dd>
+    files. The files are resolved and parsed lazily, during the execution
+    phase.</dd>
 
 <dt><a href="usage.html#injars"><code><b>injars</b></code></a>
     <a href="#classpath"><i>class_path</i></a></dt>
-<dd>Specifies the program jars (or wars, ears, zips, or directories).</dd>
+<dd>Specifies the program jars (or wars, ears, zips, or directories). The files
+    are resolved and read lazily, during the execution phase.</dd>
 
 <dt><a href="usage.html#outjars"><code><b>outjars</b></code></a>
     <a href="#classpath"><i>class_path</i></a></dt>
 <dd>Specifies the names of the output jars (or wars, ears, zips, or
-    directories).</dd>
+    directories). The files are resolved and written lazily, during the
+    execution phase.</dd>
 
 <dt><a href="usage.html#libraryjars"><code><b>libraryjars</b></code></a>
     <a href="#classpath"><i>class_path</i></a></dt>
-<dd>Specifies the library jars (or wars, ears, zips, or directories).</dd>
+<dd>Specifies the library jars (or wars, ears, zips, or directories). The files
+    are resolved and read lazily, during the execution phase.</dd>
 
 <dt><a href="usage.html#skipnonpubliclibraryclasses"><code><b>skipnonpubliclibraryclasses</b></code></a></dt>
 <dd>Ignore non-public library classes.</dd>
@@ -340,15 +344,11 @@ In Gradle, file names (any strings really) in double quotes can contain
 properties or code inside <code>${...}</code>. These are automatically
 expanded.
 <p>
-Like in ProGuard-style configurations, the names can also contain Java system
-properties, delimited by angular brackets, '<b>&lt;</b>' and '<b>&gt;</b>'.
-These properties are automatically replaced by their corresponding values.
-<p>
-For example, <code>&lt;java.home&gt;/lib/rt.jar</code> is automatically
-expanded to something like <code>/usr/local/java/jdk/jre/lib/rt.jar</code>.
-Similarly, <code>&lt;user.home&gt;</code> is expanded to the user's home
-directory, and <code>&lt;user.dir&gt;</code> is expanded to the current
-working directory.
+For example, <code>"${System.getProperty('java.home')}/lib/rt.jar"</code> is
+expanded to something like <code>'/usr/local/java/jdk/jre/lib/rt.jar'</code>.
+Similarly, <code>System.getProperty('user.home')</code> is expanded to the
+user's home directory, and <code>System.getProperty('user.dir')</code> is
+expanded to the current working directory.
 
 <h2><a name="keepmodifier">Keep Modifiers</a></h2>
 

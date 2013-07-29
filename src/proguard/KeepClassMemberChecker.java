@@ -73,12 +73,13 @@ implements   ClassVisitor
                         className = keepClassSpecification.extendsClassName;
                     }
 
-                    if (className != null &&
-                        notePrinter.accepts(className))
+                    if (notePrinter.accepts(className))
                     {
                         notePrinter.print(className,
                                           "Note: the configuration doesn't specify which class members to keep for class '" +
-                                          ClassUtil.externalClassName(className) + "'");
+                                          (className == null ?
+                                              ConfigurationConstants.ANY_CLASS_KEYWORD :
+                                              ClassUtil.externalClassName(className)) + "'");
                     }
                 }
             }

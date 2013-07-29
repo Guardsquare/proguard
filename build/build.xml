@@ -145,7 +145,7 @@
         <path location="${gradle.jar2}"/>
         <path location="${gradle.jar3}"/>
         <path location="${gradle.jar4}"/>
-      <classpath>
+      </classpath>
     </javac>
 
     <copy todir = "${classes}">

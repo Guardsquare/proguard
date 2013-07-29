@@ -23,7 +23,8 @@ package proguard.gradle;
 import groovy.lang.Closure;
 import org.gradle.api.*;
 import org.gradle.api.file.*;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.logging.*;
+import org.gradle.api.tasks.*;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
@@ -39,76 +40,103 @@ import java.util.*;
  */
 public class ProGuardTask extends DefaultTask
 {
-    private final Configuration configuration = new Configuration();
+    // Accumulated input and output, for the sake of Gradle's lazy file
+    // resolution and lazy task execution.
+    private final List          inJarFiles         = new ArrayList();
+    private final List          inJarFilters       = new ArrayList();
+    private final List          outJarFiles        = new ArrayList();
+    private final List          outJarFilters      = new ArrayList();
+    private final List          inJarCounts        = new ArrayList();
+    private final List          libraryJarFiles    = new ArrayList();
+    private final List          libraryJarFilters  = new ArrayList();
+    private final List          configurationFiles = new ArrayList();
+
+    // Accumulated configuration.
+    private final Configuration configuration      = new Configuration();
 
     // Field acting as a parameter for the class member specification methods.
     private ClassSpecification classSpecification;
 
 
-    // Gradle task settings.
+    // Gradle task inputs and outputs, because annotations on the List fields
+    // (private or not) don't seem to work. Private methods don't work either,
+    // but package visible or protected methods are ok.
 
-    public void configuration(Object configurationFile)
+    @InputFiles
+    protected FileCollection getInJarFiles() throws ParseException
+    {
+        return getProject().files(inJarFiles);
+    }
+
+    @Optional @OutputFiles
+    protected FileCollection getOutJarFiles() throws ParseException
+    {
+        return getProject().files(outJarFiles);
+    }
+
+    @InputFiles
+    protected FileCollection getLibraryJarFiles() throws ParseException
+    {
+        return getProject().files(libraryJarFiles);
+    }
+
+    @InputFiles
+    protected FileCollection getConfigurationFiles() throws ParseException
+    {
+        return getProject().files(configurationFiles);
+    }
+
+
+    // Gradle task settings corresponding to all ProGuard options.
+
+    public void configuration(Object configurationFiles)
     throws ParseException, IOException
     {
-        ConfigurationParser parser =
-            new ConfigurationParser(resolvedFile(configurationFile),
-                                    System.getProperties());
-        try
-        {
-            parser.parse(configuration);
-        }
-        finally
-        {
-            parser.close();
-        }
+        // Just collect the arguments, so they can be resolved lazily.
+        this.configurationFiles.add(configurationFiles);
     }
 
-    public void injars(Object programJars)
+    public void injars(Object inJarFiles)
     throws ParseException
     {
-        injars(null, programJars);
+        injars(null, inJarFiles);
     }
 
-    public void injars(Map filterArgs, Object programJars)
+    public void injars(Map filterArgs, Object inJarFiles)
     throws ParseException
     {
-        configuration.programJars =
-            extendClassPath(configuration.programJars,
-                            resolvedFiles(programJars),
-                            filterArgs,
-                            false);
+        // Just collect the arguments, so they can be resolved lazily.
+        this.inJarFiles.add(inJarFiles);
+        this.inJarFilters.add(filterArgs);
     }
 
-    public void outjars(Object programJars)
+    public void outjars(Object outJarFiles)
     throws ParseException
     {
-        outjars(null, programJars);
+        outjars(null, outJarFiles);
     }
 
-    public void outjars(Map filterArgs, Object programJars)
+    public void outjars(Map filterArgs, Object outJarFiles)
     throws ParseException
     {
-        configuration.programJars =
-            extendClassPath(configuration.programJars,
-                            resolvedFiles(programJars),
-                            filterArgs,
-                            true);
+        // Just collect the arguments, so they can be resolved lazily.
+        this.outJarFiles.add(getProject().file(outJarFiles));
+        this.outJarFilters.add(filterArgs);
+        this.inJarCounts.add(Integer.valueOf(inJarFiles.size()));
     }
 
-    public void libraryjars(Object libraryJars)
+    public void libraryjars(Object libraryJarFiles)
     throws ParseException
     {
-        libraryjars(null, libraryJars);
+        libraryjars(null, libraryJarFiles);
     }
 
-    public void libraryjars(Map filterArgs, Object libraryJars)
+    public void libraryjars(Map filterArgs, Object libraryJarFiles)
     throws ParseException
     {
-        configuration.libraryJars =
-            extendClassPath(configuration.libraryJars,
-                            resolvedFiles(libraryJars),
-                            filterArgs,
-                            false);
+        // Just collect the arguments, so they can be resolved lazily.
+        this.libraryJarFiles.add(libraryJarFiles);
+        this.libraryJarFilters.add(filterArgs);
     }
 
     // Hack: support the keyword without parentheses in Groovy.
@@ -414,7 +442,7 @@ public class ProGuardTask extends DefaultTask
     public void printseeds(Object printSeeds)
     throws ParseException
     {
-        configuration.printSeeds = resolvedFile(printSeeds);
+        configuration.printSeeds = getProject().file(printSeeds);
     }
 
     // Hack: support the keyword without parentheses in Groovy.
@@ -444,7 +472,7 @@ public class ProGuardTask extends DefaultTask
     public void printusage(Object printUsage)
     throws ParseException
     {
-        configuration.printUsage = resolvedFile(printUsage);
+        configuration.printUsage = getProject().file(printUsage);
     }
 
     public void whyareyoukeeping(String classSpecificationString)
@@ -564,34 +592,34 @@ public class ProGuardTask extends DefaultTask
     public void printmapping(Object printMapping)
     throws ParseException
     {
-        configuration.printMapping = resolvedFile(printMapping);
+        configuration.printMapping = getProject().file(printMapping);
     }
 
     public void applymapping(Object applyMapping)
     throws ParseException
     {
-        configuration.applyMapping = resolvedFile(applyMapping);
+        configuration.applyMapping = getProject().file(applyMapping);
     }
 
     public void obfuscationdictionary(Object obfuscationDictionary)
     throws ParseException
     {
         configuration.obfuscationDictionary =
-            resolvedFile(obfuscationDictionary);
+            getProject().file(obfuscationDictionary);
     }
 
     public void classobfuscationdictionary(Object classObfuscationDictionary)
     throws ParseException
     {
         configuration.classObfuscationDictionary =
-            resolvedFile(classObfuscationDictionary);
+            getProject().file(classObfuscationDictionary);
     }
 
     public void packageobfuscationdictionary(Object packageObfuscationDictionary)
     throws ParseException
     {
         configuration.packageObfuscationDictionary =
-            resolvedFile(packageObfuscationDictionary);
+            getProject().file(packageObfuscationDictionary);
     }
 
     // Hack: support the keyword without parentheses in Groovy.
@@ -884,7 +912,8 @@ public class ProGuardTask extends DefaultTask
     public void printconfiguration(Object printConfiguration)
     throws ParseException
     {
-        configuration.printConfiguration = resolvedFile(printConfiguration);
+        configuration.printConfiguration =
+            getProject().file(printConfiguration);
     }
 
     // Hack: support the keyword without parentheses in Groovy.
@@ -902,7 +931,7 @@ public class ProGuardTask extends DefaultTask
     public void dump(Object dump)
     throws ParseException
     {
-        configuration.dump = resolvedFile(dump);
+        configuration.dump = getProject().file(dump);
     }
 
 
@@ -953,99 +982,139 @@ public class ProGuardTask extends DefaultTask
     // Gradle task execution.
 
     @TaskAction
-    public void proguard() throws IOException
+    public void proguard()
+    throws ParseException, IOException
     {
+        // Weave the input jars and the output jars into a single class path,
+        // with lazy resolution of the files.
+        configuration.programJars = new ClassPath();
+
+        int outJarIndex = 0;
+
+        int inJarCount = inJarCounts.size() == 0 ? -1 :
+                ((Integer)inJarCounts.get(0)).intValue();
+
+        for (int inJarIndex = 0; inJarIndex < inJarFiles.size(); inJarIndex++)
+        {
+            configuration.programJars =
+                extendClassPath(configuration.programJars,
+                                inJarFiles.get(inJarIndex),
+                                (Map)inJarFilters.get(inJarIndex),
+                                false);
+
+            while (inJarIndex == inJarCount - 1)
+            {
+                configuration.programJars =
+                    extendClassPath(configuration.programJars,
+                                    outJarFiles.get(outJarIndex),
+                                    (Map)outJarFilters.get(outJarIndex),
+                                    true);
+
+                outJarIndex++;
+
+                inJarCount = inJarCounts.size() == outJarIndex ? -1 :
+                    ((Integer)inJarCounts.get(outJarIndex)).intValue();
+            }
+        }
+
+        // Copy the library jars into a single class path, with lazy resolution
+        // of the files.
+        configuration.libraryJars = new ClassPath();
+
+        for (int libraryJarIndex = 0; libraryJarIndex < libraryJarFiles.size(); libraryJarIndex++)
+        {
+            configuration.libraryJars =
+                extendClassPath(configuration.libraryJars,
+                                libraryJarFiles.get(libraryJarIndex),
+                                (Map)libraryJarFilters.get(libraryJarIndex),
+                                false);
+        }
+
+        // Lazily apply the external configuration files.
+        ConfigurableFileCollection fileCollection =
+            getProject().files(configurationFiles);
+
+        Iterator<File> files = fileCollection.iterator();
+        while (files.hasNext())
+        {
+            ConfigurationParser parser =
+                new ConfigurationParser(files.next(), System.getProperties());
+
+            try
+            {
+                parser.parse(configuration);
+            }
+            finally
+            {
+                parser.close();
+            }
+        }
+
+        // Make sure the code is processed. Gradle has already checked that it
+        // was necessary.
+        configuration.lastModified = Long.MAX_VALUE;
+
+        // Let the logging manager capture the standard output and errors from
+        // ProGuard.
+        LoggingManager loggingManager = getLogging();
+        loggingManager.captureStandardOutput(LogLevel.INFO);
+        loggingManager.captureStandardError(LogLevel.WARN);
+
+        // Run ProGuard with the collected configuration.
         new ProGuard(configuration).execute();
+
     }
 
 
     // Small utility methods.
 
     /**
-     * Returns a file that is properly resolved with respect to the project
-     * directory.
+     * Extends the given class path with the given filtered input or output
+     * files.
      */
-    private File resolvedFile(Object file)
-    throws ParseException
+    private ClassPath extendClassPath(ClassPath classPath,
+                                      Object    files,
+                                      Map       filterArgs,
+                                      boolean   output)
     {
-        return getProject().file(resolvedString(file));
-    }
+        ConfigurableFileCollection fileCollection = getProject().files(files);
 
-
-    /**
-     * Returns a file collection that is properly resolved with respect to the
-     * project directory.
-     */
-    private ConfigurableFileCollection resolvedFiles(Object files)
-    throws ParseException
-    {
-        return getProject().files(new Object[] { resolvedString(files) });
-    }
-
-
-    /**
-     * Returns the given Object, with resolved properties if it is a String.
-     */
-    private Object resolvedString(Object object)
-    throws ParseException
-    {
-        if (object instanceof String)
-        {
-            try
-            {
-                String fileName = (String)object;
-                return
-                    new ConfigurationParser(fileName,
-                                            "Gradle setting",
-                                            null,
-                                            System.getProperties())
-                        .replaceSystemProperties(fileName);
-            }
-            catch (IOException e)
-            {
-                throw new ParseException(e.getMessage());
-            }
-        }
-
-        return object;
-    }
-
-
-    private ClassPath extendClassPath(ClassPath                  classPath,
-                                      ConfigurableFileCollection fileCollection,
-                                      Map                        filterArgs,
-                                      boolean                    output)
-    {
         if (classPath == null)
         {
             classPath = new ClassPath();
         }
 
-        Iterator files = fileCollection.iterator();
-        while (files.hasNext())
+        Iterator fileIterator = fileCollection.iterator();
+        while (fileIterator.hasNext())
         {
-            File file = (File)files.next();
-
-            // Create the class path entry.
-            ClassPathEntry classPathEntry = new ClassPathEntry(file, output);
-
-            // Add any filters to the class path entry.
-            if (filterArgs != null)
+            File file = (File)fileIterator.next();
+            if (output || file.exists())
             {
-                classPathEntry.setFilter(ListUtil.commaSeparatedList((String)filterArgs.get("filter")));
-                classPathEntry.setJarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("jarfilter")));
-                classPathEntry.setWarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("warfilter")));
-                classPathEntry.setEarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("earfilter")));
-                classPathEntry.setZipFilter(ListUtil.commaSeparatedList((String)filterArgs.get("zipfilter")));
-            }
+                // Create the class path entry.
+                ClassPathEntry classPathEntry = new ClassPathEntry(file, output);
 
-            classPath.add(classPathEntry);
+                // Add any filters to the class path entry.
+                if (filterArgs != null)
+                {
+                    classPathEntry.setFilter(ListUtil.commaSeparatedList((String)filterArgs.get("filter")));
+                    classPathEntry.setJarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("jarfilter")));
+                    classPathEntry.setWarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("warfilter")));
+                    classPathEntry.setEarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("earfilter")));
+                    classPathEntry.setZipFilter(ListUtil.commaSeparatedList((String)filterArgs.get("zipfilter")));
+                }
+
+                classPath.add(classPathEntry);
+            }
         }
 
         return classPath;
     }
 
 
+    /**
+     * Creates specifications to keep classes and class members, based on the
+     * given parameters.
+     */
     private KeepClassSpecification createKeepClassSpecification(boolean allowShrinking,
                                                                 boolean markClasses,
                                                                 boolean markConditionally,
@@ -1065,6 +1134,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Creates specifications to keep classes and class members, based on the
+     * given parameters.
+     */
     private KeepClassSpecification createKeepClassSpecification(boolean allowShrinking,
                                                                 boolean markClasses,
                                                                 boolean markConditionally,
@@ -1084,6 +1157,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Creates specifications to keep classes and class members, based on the
+     * given parameters.
+     */
     private KeepClassSpecification createKeepClassSpecification(boolean            allowShrinking,
                                                                 boolean            markClasses,
                                                                 boolean            markConditionally,
@@ -1100,6 +1177,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Creates specifications to keep classes and class members, based on the
+     * given ProGuard-style class specification.
+     */
     private ClassSpecification createClassSpecification(String classSpecificationString)
     throws ParseException
     {
@@ -1124,6 +1205,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Creates a specification of classes and class members, based on the
+     * given parameters.
+     */
     private ClassSpecification createClassSpecification(Map     classSpecificationArgs,
                                                         Closure classMembersClosure)
     throws ParseException
@@ -1164,6 +1249,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Parses the class access flags that must be set (or not), based on the
+     * given ProGuard-style flag specification.
+     */
     private int requiredClassAccessFlags(boolean set,
                                          String  access,
                                          String  type)
@@ -1223,6 +1312,9 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Creates a specification of class members, based on the given parameters.
+     */
     private MemberSpecification createMemberSpecification(boolean isMethod,
                                                           boolean isConstructor,
                                                           Map     classSpecificationArgs)
@@ -1285,6 +1377,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Parses the class member access flags that must be set (or not), based on
+     * the given ProGuard-style flag specification.
+     */
     private int requiredMemberAccessFlags(boolean set,
                                           String  access)
     throws ParseException
@@ -1335,6 +1431,9 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Retrieves a specified boolean flag from the given map.
+     */
     private boolean retrieveBoolean(Map args, String name, boolean defaultValue)
     {
         if (args == null)
@@ -1348,6 +1447,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Adds the given class specification to the given list, creating a new list
+     * if necessary.
+     */
     private List extendClassSpecifications(List               classSpecifications,
                                            ClassSpecification classSpecification)
     {
@@ -1362,6 +1465,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Adds the given class specifications to the given list, creating a new
+     * list if necessary.
+     */
     private List extendClassSpecifications(List classSpecifications,
                                            List additionalClassSpecifications)
     {
@@ -1379,6 +1486,10 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Adds the given filter to the given list, creating a new list if
+     * necessary.
+     */
     private List extendFilter(List   filter,
                               String filterString)
     {
@@ -1386,9 +1497,14 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    /**
+     * Adds the given filter to the given list, creating a new list if
+     * necessary. External class names are converted to internal class names,
+     * if requested.
+     */
     private List extendFilter(List    filter,
                               String  filterString,
-                              boolean internal)
+                              boolean convertExternalClassNames)
     {
         if (filter == null)
         {
@@ -1402,7 +1518,7 @@ public class ProGuardTask extends DefaultTask
         }
         else
         {
-            if (internal)
+            if (convertExternalClassNames)
             {
                 filterString = ClassUtil.internalClassName(filterString);
             }

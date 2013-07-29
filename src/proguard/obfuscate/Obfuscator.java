@@ -146,17 +146,23 @@ public class Obfuscator
             reader.pump(keeper);
 
             // Print out a summary of the warnings if necessary.
-            int mappingWarningCount = warningPrinter.getWarningCount();
-            if (mappingWarningCount > 0)
+            int warningCount = warningPrinter.getWarningCount();
+            if (warningCount > 0)
             {
-                System.err.println("Warning: there were " + mappingWarningCount +
-                                                            " kept classes and class members that were remapped anyway.");
+                System.err.println("Warning: there were " + warningCount +
+                                   " kept classes and class members that were remapped anyway.");
                 System.err.println("         You should adapt your configuration or edit the mapping file.");
 
                 if (!configuration.ignoreWarnings)
                 {
-                    System.err.println("         If you are sure this remapping won't hurt,");
-                    System.err.println("         you could try your luck using the '-ignorewarnings' option.");
+                    System.err.println("         If you are sure this remapping won't hurt, you could try your luck");
+                    System.err.println("         using the '-ignorewarnings' option.");
+                }
+
+                System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict1)");
+
+                if (!configuration.ignoreWarnings)
+                {
                     throw new IOException("Please correct the above warnings first.");
                 }
             }
@@ -385,6 +391,12 @@ public class Obfuscator
             {
                 System.err.println("         If you are sure the conflicts are harmless,");
                 System.err.println("         you could try your luck using the '-ignorewarnings' option.");
+                }
+
+                System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict2)");
+
+                if (!configuration.ignoreWarnings)
+                {
                 throw new IOException("Please correct the above warnings first.");
             }
         }

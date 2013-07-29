@@ -125,7 +125,13 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     // through introspection.
 
     keepclassmembers 'class **.R$* { \
-      public static <fields>; \
+        public static <fields>; \
+    }'
+
+    // Preserve annotated Javascript interface methods.
+
+    keepclassmembers 'class * { \
+        @android.webkit.JavascriptInterface <methods>; \
     }'
 
     // Preserve the required interface from the License Verification Library

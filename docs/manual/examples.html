@@ -344,6 +344,10 @@ and content providers from the compiled classes and external libraries:
 -keepclassmembers class **.R$* {
     public static &lt;fields&gt;;
 }
+
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface &lt;methods&gt;;
+}
 </pre>
 <p>
 Most importantly, we're keeping all fundamental classes that may be referenced
@@ -364,11 +368,16 @@ XML layout files.
 We're also keeping the required static fields in <code>Parcelable</code>
 implementations, since they are accessed by introspection.
 <p>
-Finally, we're keeping the static fields of referenced inner classes of
-auto-generated <code>R</code> classes, just in case your code is accessing
-those fields by introspection. Note that the compiler already inlines
-primitive fields, so ProGuard can generally remove all these classes entirely
-anyway (because the classes are not referenced and therefore not required).
+We're keeping the static fields of referenced inner classes of auto-generated
+ <code>R</code> classes, just in case your code is accessing those fields by
+introspection. Note that the compiler already inlines primitive fields, so
+ProGuard can generally remove all these classes entirely anyway (because the
+classes are not referenced and therefore not required).
+<p>
+Finally, we're keeping annotated Javascript interface methods, so they can be
+exported and accessed by their original names. Javascript interface methods
+that are not annotated (in code targeted at Android versions older than 4.2)
+still need to be preserved manually.
 <p>
 If you're using additional Google APIs, you'll have to specify
 those as well, for instance:

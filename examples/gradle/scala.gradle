@@ -33,7 +33,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     //injars  '/usr/local/java/scala-2.9.1/lib/jline.jar', filter: '!META-INF/MANIFEST.MF'
     outjars 'out.jar'
 
-    libraryjars '<java.home>/lib/rt.jar'
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
     //libraryjars '/usr/local/java/ant/lib/ant.jar'
     //...
 

@@ -108,6 +108,12 @@
   public static <fields>;
 }
 
+# Preserve annotated Javascript interface methods.
+
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
 # Preserve the required interface from the License Verification Library
 # (but don't nag the developer if the library is not used at all).
 

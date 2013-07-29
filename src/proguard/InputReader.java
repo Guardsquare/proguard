@@ -115,6 +115,7 @@ public class InputReader
         {
             System.err.println("Note: there were " + noteCount +
                                " duplicate class definitions.");
+            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#duplicateclass)");
         }
 
         // Print out a summary of the warnings, if necessary.
@@ -125,6 +126,7 @@ public class InputReader
                                " classes in incorrectly named files.");
             System.err.println("         You should make sure all file names correspond to their class names.");
             System.err.println("         The directory hierarchies must correspond to the package hierarchies.");
+            System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unexpectedclass)");
 
             if (!configuration.ignoreWarnings)
             {

@@ -64,17 +64,26 @@ public class DataEntryCopier implements DataEntryReader
                 {
                     InputStream inputStream = dataEntry.getInputStream();
 
-                    // Copy the data from the input entry to the output entry.
-                    copyData(inputStream, outputStream);
-
-                    // Close the data entries.
-                    dataEntry.closeInputStream();
+                    try
+                    {
+                        // Copy the data from the input entry to the output entry.
+                        copyData(inputStream, outputStream);
+                    }
+                    finally
+                    {
+                        // Close the data entries.
+                        dataEntry.closeInputStream();
+                    }
                 }
             }
         }
         catch (IOException ex)
         {
             System.err.println("Warning: can't write resource [" + dataEntry.getName() + "] (" + ex.getMessage() + ")");
+        }
+        catch (Exception ex)
+        {
+            throw (IOException)new IOException("Can't write resource ["+dataEntry.getName()+"] ("+ex.getMessage()+")").initCause(ex);
         }
     }
 

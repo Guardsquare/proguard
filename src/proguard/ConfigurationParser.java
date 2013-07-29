@@ -1127,7 +1127,7 @@ public class ConfigurationParser
      * Replaces any properties in the given word by their values.
      * For instance, the substring "<java.home>" is replaced by its value.
      */
-    public String replaceSystemProperties(String word) throws ParseException
+    private String replaceSystemProperties(String word) throws ParseException
     {
         int fromIndex = 0;
         while (true)

@@ -34,7 +34,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
                                  !proguard/ant/**,!proguard/wtk/**)
     outjars 'retrace_out.jar'
 
-    libraryjars '<java.home>/lib/rt.jar'
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
 
     // If we wanted to reuse the previously obfuscated proguard_out.jar, we could
     // perform incremental obfuscation based on its mapping file, and only keep the

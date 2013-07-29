@@ -29,7 +29,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     injars  'in.jar'
     outjars 'out.jar'
 
-    libraryjars '<java.home>/lib/rt.jar'
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
     libraryjars '/usr/local/java/servlet/servlet.jar'
 
     // Save the obfuscation mapping to a file, so you can de-obfuscate any stack

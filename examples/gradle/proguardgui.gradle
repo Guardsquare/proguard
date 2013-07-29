@@ -35,7 +35,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     injars  '../../lib/retrace.jar', filter: '!META-INF/**'
     outjars 'proguardgui_out.jar'
 
-    libraryjars '<java.home>/lib/rt.jar'
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
 
     // If we wanted to reuse the previously obfuscated proguard_out.jar, we could
     // perform incremental obfuscation based on its mapping file, and only keep the
@@ -46,7 +46,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     //outjars     'proguardgui_out.jar'
     //libraryjars '../../lib/proguard.jar', filter: '!proguard/ant/**,!proguard/wtk/**'
     //libraryjars '../../lib/retrace.jar'
-    //libraryjars '<java.home>/lib/rt.jar'
+    //libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
 
 
     // Allow methods with the same signature, except for the return type,
