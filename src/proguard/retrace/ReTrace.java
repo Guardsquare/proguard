@@ -41,7 +41,7 @@ implements   MappingProcessor
     private static final String VERBOSE_OPTION = "-verbose";
 
 
-    public static final String STACK_TRACE_EXPRESSION = "(?:.*?\\bat\\s+%c.%m\\s*\\(.*?(?::%l)?\\)\\s*)|(?:(?:.*?[:\"]\\s+)?%c(?::.*)?)";
+    public static final String STACK_TRACE_EXPRESSION = "(?:.*?\\bat\\s+%c\\.%m\\s*\\(.*?(?::%l)?\\)\\s*)|(?:(?:.*?[:\"]\\s+)?%c(?::.*)?)";
 
     private static final String REGEX_CLASS       = "\\b(?:[A-Za-z0-9_$]+\\.)*[A-Za-z0-9_$]+\\b";
     private static final String REGEX_CLASS_SLASH = "\\b(?:[A-Za-z0-9_$]+/)*[A-Za-z0-9_$]+\\b";
@@ -112,7 +112,7 @@ implements   MappingProcessor
         MappingReader mappingReader = new MappingReader(mappingFile);
         mappingReader.pump(this);
 
-
+        // Construct the regular expression.
         StringBuffer expressionBuffer    = new StringBuffer(regularExpression.length() + 32);
         char[]       expressionTypes     = new char[32];
         int          expressionTypeCount = 0;
@@ -173,39 +173,42 @@ implements   MappingProcessor
 
         Pattern pattern = Pattern.compile(expressionBuffer.toString());
 
-        // Read the stack trace file.
+        // Open the stack trace file.
         LineNumberReader reader =
             new LineNumberReader(stackTraceFile == null ?
                 (Reader)new InputStreamReader(System.in) :
                 (Reader)new BufferedReader(new FileReader(stackTraceFile)));
 
-
+        // Read and process the lines of the stack trace.
         try
         {
-            StringBuffer outLine = new StringBuffer(256);
-            List         extraOutLines  = new ArrayList();
+            StringBuffer outLine       = new StringBuffer(256);
+            List         extraOutLines = new ArrayList();
 
             String className = null;
 
-            // Read the line in the stack trace.
+            // Read all lines from the stack trace.
             while (true)
             {
+                // Read a line.
                 String line = reader.readLine();
                 if (line == null)
                 {
                     break;
                 }
 
+                // Try to match it against the regular expression.
                 Matcher matcher = pattern.matcher(line);
 
                 if (matcher.matches())
                 {
+                    // The line matched the regular expression.
                     int    lineNumber = 0;
                     String type       = null;
                     String arguments  = null;
 
-                    // Figure out a class name, line number, type, and
-                    // arguments beforehand.
+                    // Extract a class name, a line number, a type, and
+                    // arguments.
                     for (int expressionTypeIndex = 0; expressionTypeIndex < expressionTypeCount; expressionTypeIndex++)
                     {
                         int startIndex = matcher.start(expressionTypeIndex + 1);
@@ -239,7 +242,9 @@ implements   MappingProcessor
                         }
                     }
 
-                    // Actually construct the output line.
+                    // Deconstruct the input line and reconstruct the output
+                    // line. Also collect any additional output lines for this
+                    // line.
                     int lineIndex = 0;
 
                     outLine.setLength(0);
@@ -253,9 +258,10 @@ implements   MappingProcessor
                             int    endIndex = matcher.end(expressionTypeIndex + 1);
                             String match    = matcher.group(expressionTypeIndex + 1);
 
-                            // Copy a literal piece of input line.
+                            // Copy a literal piece of the input line.
                             outLine.append(line.substring(lineIndex, startIndex));
 
+                            // Copy a matched and translated piece of the input line.
                             char expressionType = expressionTypes[expressionTypeIndex];
                             switch (expressionType)
                             {
@@ -309,10 +315,10 @@ implements   MappingProcessor
                         }
                     }
 
-                    // Copy the last literal piece of input line.
+                    // Copy the last literal piece of the input line.
                     outLine.append(line.substring(lineIndex));
 
-                    // Print out the main line.
+                    // Print out the processed line.
                     System.out.println(outLine);
 
                     // Print out any additional lines.
@@ -323,6 +329,7 @@ implements   MappingProcessor
                 }
                 else
                 {
+                    // The line didn't match the regular expression.
                     // Print out the original line.
                     System.out.println(line);
                 }

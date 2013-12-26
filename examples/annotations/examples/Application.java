@@ -8,7 +8,8 @@ import proguard.annotation.KeepApplication;
  * You can then process it with:
  *     java -jar ../../../lib/proguard.jar @ ../examples.pro
  *
- * The annotation will preserve the class and its main method.
+ * The annotation will preserve the class and its main method,
+ * as a result of the specifications in lib/annotations.pro.
  */
 @KeepApplication
 public class Application

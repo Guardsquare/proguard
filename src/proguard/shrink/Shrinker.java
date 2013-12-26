@@ -146,7 +146,7 @@ public class Shrinker
             }
         }
 
-        // Discard unused program classes.
+        // Clean up used program classes and discard unused program classes.
         int originalProgramClassPoolSize = programClassPool.size();
 
         ClassPool newProgramClassPool = new ClassPool();
@@ -159,6 +159,10 @@ public class Shrinker
             })));
 
         programClassPool.clear();
+
+        // Clean up library classes.
+        libraryClassPool.classesAccept(
+            new ClassShrinker(usageMarker));
 
         // Check if we have at least some output classes.
         int newProgramClassPoolSize = newProgramClassPool.size();

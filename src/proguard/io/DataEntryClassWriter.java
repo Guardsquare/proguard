@@ -21,9 +21,9 @@
 package proguard.io;
 
 import proguard.classfile.*;
-import proguard.classfile.io.*;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.io.ProgramClassWriter;
+import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.visitor.ClassVisitor;
 
 import java.io.*;
 

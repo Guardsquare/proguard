@@ -10,9 +10,9 @@ CLASSES = $(PROGUARD_HOME)/classes
 LIB     = $(PROGUARD_HOME)/lib
 
 ANT_JAR     = $(ANT_HOME)/lib/ant.jar
-GRADLE_JARS = $(GRADLE_HOME)/lib/plugins/gradle-plugins-1.3.jar \
-              $(GRADLE_HOME)/lib/gradle-base-services-1.3.jar \
-              $(GRADLE_HOME)/lib/gradle-core-1.3.jar \
+GRADLE_JARS = $(GRADLE_HOME)/lib/plugins/gradle-plugins-1.8.jar \
+              $(GRADLE_HOME)/lib/gradle-base-services-1.8.jar \
+              $(GRADLE_HOME)/lib/gradle-core-1.8.jar \
               $(GRADLE_HOME)/lib/groovy-all-1.8.6.jar
 WTK_JAR     = $(WTK_HOME)/wtklib/kenv.zip
 

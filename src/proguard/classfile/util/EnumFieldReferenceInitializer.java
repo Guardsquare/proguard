@@ -24,13 +24,12 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.*;
-import proguard.classfile.visitor.*;
-import proguard.util.StringMatcher;
+import proguard.classfile.visitor.MemberVisitor;
 
 /**
  * This ElementValueVisitor initializes the field references of the
@@ -44,10 +43,10 @@ implements   ElementValueVisitor,
              InstructionVisitor,
              ConstantVisitor
 {
-    /*
-    private static       boolean DEBUG = true;
-    /*/
+    //*
     private static final boolean DEBUG = false;
+    /*/
+    private static       boolean DEBUG = true;
     //*/
 
     private MemberVisitor enumFieldFinder = new AllAttributeVisitor(

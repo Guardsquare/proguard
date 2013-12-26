@@ -24,12 +24,13 @@ import proguard.evaluation.value.Value;
 
 /**
  * This Stack saves additional information with stack elements, to keep track
- * of their origins and destinations.
+ * of their origins.
  * <p>
  * The stack stores a given producer Value along with each Value it stores.
  * It then generalizes a given collected Value with the producer Value
  * of each Value it loads. The producer Value and the initial collected Value
- * can be set; the generalized collected Value can be retrieved.
+ * can be set. The generalized collected Value can be retrieved, either taking
+ * into account dup/swap instructions as proper instructions or ignoring them.
  *
  * @author Eric Lafortune
  */
@@ -37,6 +38,7 @@ public class TracedStack extends Stack
 {
     private Value producerValue;
     private Stack producerStack;
+    private Stack actualProducerStack;
 
 
     /**
@@ -46,7 +48,8 @@ public class TracedStack extends Stack
     {
         super(maxSize);
 
-        producerStack = new Stack(maxSize);
+        producerStack       = new Stack(maxSize);
+        actualProducerStack = new Stack(maxSize);
     }
 
 
@@ -57,7 +60,8 @@ public class TracedStack extends Stack
     {
         super(tracedStack);
 
-        producerStack = new Stack(tracedStack.producerStack);
+        producerStack       = new Stack(tracedStack.producerStack);
+        actualProducerStack = new Stack(tracedStack.actualProducerStack);
     }
 
 
@@ -84,14 +88,15 @@ public class TracedStack extends Stack
 
 
     /**
-     * Sets the specified producer Value on the stack, without disturbing it.
+     * Gets the specified actual producer Value from the stack, ignoring
+     * dup/swap instructions, without disturbing it.
      * @param index the index of the stack element, counting from the bottom
      *              of the stack.
-     * @param value the producer value to set.
+     * @return the producer value at the specified position.
      */
-    public void setBottomProducerValue(int index, Value value)
+    public Value getBottomActualProducerValue(int index)
     {
-        producerStack.setBottom(index, value);
+        return actualProducerStack.getBottom(index);
     }
 
 
@@ -108,14 +113,15 @@ public class TracedStack extends Stack
 
 
     /**
-     * Sets the specified producer Value on the stack, without disturbing it.
+     * Gets the specified actual producer Value from the stack, ignoring
+     * dup/swap instructions, without disturbing it.
      * @param index the index of the stack element, counting from the top
      *              of the stack.
-     * @param value the producer value to set.
+     * @return the producer value at the specified position.
      */
-    public void setTopProducerValue(int index, Value value)
+    public Value getTopActualProducerValue(int index)
     {
-        producerStack.setTop(index, value);
+        return actualProducerStack.getTop(index);
     }
 
 
@@ -126,6 +132,7 @@ public class TracedStack extends Stack
         super.reset(size);
 
         producerStack.reset(size);
+        actualProducerStack.reset(size);
     }
 
     public void copy(TracedStack other)
@@ -133,13 +140,15 @@ public class TracedStack extends Stack
         super.copy(other);
 
         producerStack.copy(other.producerStack);
+        actualProducerStack.copy(other.actualProducerStack);
     }
 
     public boolean generalize(TracedStack other)
     {
         return
             super.generalize(other) |
-            producerStack.generalize(other.producerStack);
+            producerStack.generalize(other.producerStack) |
+            actualProducerStack.generalize(other.actualProducerStack);
     }
 
     public void clear()
@@ -147,6 +156,7 @@ public class TracedStack extends Stack
         super.clear();
 
         producerStack.clear();
+        actualProducerStack.clear();
     }
 
     public void removeTop(int index)
@@ -154,6 +164,7 @@ public class TracedStack extends Stack
         super.removeTop(index);
 
         producerStack.removeTop(index);
+        actualProducerStack.removeTop(index);
     }
 
     public void push(Value value)
@@ -203,85 +214,99 @@ public class TracedStack extends Stack
     {
         super.dup();
 
-        producerPop();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.dup();
     }
 
     public void dup_x1()
     {
         super.dup_x1();
 
-        producerPop();
-        producerPop();
-        producerPush();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.dup_x1();
     }
 
     public void dup_x2()
     {
         super.dup_x2();
 
-        producerPop();
-        producerPop();
-        producerPop();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.dup_x2();
     }
 
     public void dup2()
     {
         super.dup2();
 
-        producerPop();
-        producerPop();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.dup2();
     }
 
     public void dup2_x1()
     {
         super.dup2_x1();
 
-        producerPop();
-        producerPop();
-        producerPop();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.dup2_x1();
     }
 
     public void dup2_x2()
     {
         super.dup2_x2();
 
-        producerPop();
-        producerPop();
-        producerPop();
-        producerPop();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.dup2_x2();
     }
 
     public void swap()
     {
         super.swap();
 
-        producerPop();
-        producerPop();
-        producerPush();
-        producerPush();
+        producerStack.pop();
+        producerStack.pop();
+        producerStack.push(producerValue);
+        producerStack.push(producerValue);
+
+        actualProducerStack.swap();
     }
 
 
@@ -298,14 +323,16 @@ public class TracedStack extends Stack
         TracedStack other = (TracedStack)object;
 
         return super.equals(object) &&
-               this.producerStack.equals(other.producerStack);
+               this.producerStack.equals(other.producerStack) &&
+               this.actualProducerStack.equals(other.actualProducerStack);
     }
 
 
     public int hashCode()
     {
-        return super.hashCode() ^
-               producerStack.hashCode();
+        return super.hashCode()         ^
+               producerStack.hashCode() ^
+               actualProducerStack.hashCode();
     }
 
 
@@ -315,10 +342,13 @@ public class TracedStack extends Stack
 
         for (int index = 0; index < this.size(); index++)
         {
-            Value value         = this.values[index];
-            Value producerValue = producerStack.getBottom(index);
+            Value value               = this.values[index];
+            Value producerValue       = producerStack.getBottom(index);
+            Value actualProducerValue = actualProducerStack.getBottom(index);
             buffer = buffer.append('[')
-                           .append(producerValue == null ? "empty:" : producerValue.toString())
+                           .append(producerValue == null ? "empty:" :
+                                                           producerValue.equals(actualProducerValue) ? producerValue.toString() :
+                                                                                                       producerValue.toString() + actualProducerValue.toString())
                            .append(value         == null ? "empty"  : value.toString())
                            .append(']');
         }
@@ -332,11 +362,13 @@ public class TracedStack extends Stack
     private void producerPush()
     {
         producerStack.push(producerValue);
+        actualProducerStack.push(producerValue);
     }
 
 
     private void producerPop()
     {
         producerStack.pop();
+        actualProducerStack.pop();
     }
 }

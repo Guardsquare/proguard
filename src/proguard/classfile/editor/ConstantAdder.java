@@ -23,7 +23,6 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.ListUtil;
 
 /**
  * This ConstantVisitor adds all constants that it visits to the constant pool

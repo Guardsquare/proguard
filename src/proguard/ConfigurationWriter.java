@@ -188,6 +188,10 @@ public class ConfigurationWriter
                 // Append the filters, if any.
                 boolean filtered = false;
 
+                // For backward compatibility, the aar and apk filters come
+                // first.
+                filtered = writeFilter(filtered, entry.getAarFilter());
+                filtered = writeFilter(filtered, entry.getApkFilter());
                 filtered = writeFilter(filtered, entry.getZipFilter());
                 filtered = writeFilter(filtered, entry.getEarFilter());
                 filtered = writeFilter(filtered, entry.getWarFilter());

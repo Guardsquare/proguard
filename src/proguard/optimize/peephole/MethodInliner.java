@@ -30,7 +30,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.optimize.*;
+import proguard.optimize.KeepMarker;
 import proguard.optimize.info.*;
 
 import java.util.*;
@@ -155,6 +155,8 @@ implements   AttributeVisitor,
                 System.err.println("  Inlined method = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
             }
             System.err.println("  Exception      = ["+ex.getClass().getName()+"] ("+ex.getMessage()+")");
+
+            ex.printStackTrace();
             System.err.println("Not inlining this method");
 
             if (DEBUG)
@@ -554,9 +556,11 @@ implements   AttributeVisitor,
 
             // Only inline the method if it comes from the a class with at most
             // a subset of the initialized superclasses.
-            (programClass.equals(targetClass) ||
+            ((accessFlags & ClassConstants.INTERNAL_ACC_STATIC) == 0 ||
+             programClass.equals(targetClass)                        ||
              initializedSuperClasses(targetClass).containsAll(initializedSuperClasses(programClass))))
-        {                                                                                                   boolean oldInlining = inlining;
+        {
+            boolean oldInlining = inlining;
             inlining = true;
             inliningMethods.push(programMethod);
 

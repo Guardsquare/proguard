@@ -22,7 +22,6 @@ package proguard.gui;
 
 import javax.swing.*;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 
 
 /**

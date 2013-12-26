@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -320,25 +325,27 @@ elements:
 <dt><a href="usage.html#injars"><code><b>&lt;injar</b></code></a>
     <a href="#classpath"><i>class_path</i></a>
     <code><b>/&gt;</b></code></dt>
-<dd>Specifies the program jars (or wars, ears, zips, or directories).</dd>
+<dd>Specifies the program jars (or aars, wars, ears, zips, apks, or
+    directories).</dd>
 
 <dt><a href="usage.html#outjars"><code><b>&lt;outjar</b></code></a>
     <a href="#classpath"><i>class_path</i></a>
     <code><b>/&gt;</b></code></dt>
-<dd>Specifies the names of the output jars (or wars, ears, zips, or
+<dd>Specifies the names of the output jars (or aars, wars, ears, zips, apks, or
     directories).</dd>
 
 <dt><a href="usage.html#libraryjars"><code><b>&lt;libraryjar</b></code></a>
     <a href="#classpath"><i>class_path</i></a>
     <code><b>/&gt;</b></code></dt>
-<dd>Specifies the library jars (or wars, ears, zips, or directories).</dd>
+<dd>Specifies the library jars (or aars, wars, ears, zips, apks, or
+    directories).</dd>
 
 <dt><a href="usage.html#keepdirectories"><code><b>&lt;keepdirectory name = </b></code></a>"<i>directory_name</i>"
     <code><b>/&gt;</b></code><br/>
     <a href="usage.html#keepdirectories"><code><b>&lt;keepdirectories filter = </b></code></a>"<a href="usage.html#filefilters"><i>directory_filter</i></a>"
     <code><b>/&gt;</b></code></dt>
-<dd>Keep the specified directories in the output jars (or wars, ears, zips, or
-    directories).</dd>
+<dd>Keep the specified directories in the output jars (or aars, wars, ears,
+    zips, apks, or directories).</dd>
 
 <dt><a href="usage.html#keep"><code><b>&lt;keep</b></code></a>
     <a href="#keepmodifier"><i>modifiers</i></a>
@@ -481,13 +488,13 @@ attributes are:
 <dl>
 
 <dt><code><b>path</b></code> = "<i>path</i>"</dt>
-<dd>The names of the jars (or wars, ears, zips, or directories), separated by
-    the path separator.</dd>
+<dd>The names of the jars (or aars, wars, ears, zips, apks, or directories),
+    separated by the path separator.</dd>
 
 <dt><code><b>location</b></code> = "<i>name</i>" (or <code><b>file</b></code>
     = "<i>name</i>", or <code><b>dir</b></code> = "<i>name</i>", or
     <code><b>name</b></code> = "<i>name</i>")</dt>
-<dd>Alternatively, the name of a single jar (or war, ear, zip, or
+<dd>Alternatively, the name of a single jar (or aar, war, ear, zip, or
     directory).</dd>
 
 <dt><code><b>refid</b></code> = "<i>ref_id</i>"</dt>
@@ -505,9 +512,17 @@ In addition, the jar elements can have ProGuard-style filter attributes:
 <dd>An optional filter for all class file names and resource file names that
     are encountered.</dd>
 
+<dt><code><b>apkfilter</b></code> =
+    "<a href="usage.html#filefilters"><i>file_filter</i></a>"</dt>
+<dd>An optional filter for all apk names that are encountered.</dd>
+
 <dt><code><b>jarfilter</b></code> =
     "<a href="usage.html#filefilters"><i>file_filter</i></a>"</dt>
 <dd>An optional filter for all jar names that are encountered.</dd>
+
+<dt><code><b>aarfilter</b></code> =
+    "<a href="usage.html#filefilters"><i>file_filter</i></a>"</dt>
+<dd>An optional filter for all aar names that are encountered.</dd>
 
 <dt><code><b>warfilter</b></code> =
     "<a href="usage.html#filefilters"><i>file_filter</i></a>"</dt>

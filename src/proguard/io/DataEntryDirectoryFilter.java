@@ -20,8 +20,6 @@
  */
 package proguard.io;
 
-import proguard.util.StringMatcher;
-
 /**
  * This DataEntryFilter filters data entries based on whether they represent
  * directories.

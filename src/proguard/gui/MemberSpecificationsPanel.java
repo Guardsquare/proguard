@@ -20,7 +20,7 @@
  */
 package proguard.gui;
 
-import proguard.*;
+import proguard.MemberSpecification;
 import proguard.classfile.ClassConstants;
 import proguard.classfile.util.ClassUtil;
 

@@ -21,160 +21,196 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
-import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
 /**
- * This ConstantVisitor fixes the access modifiers of all classes and class
- * members that are referenced by the constants that it visits.
+ * This ClassVisitor fixes the access modifiers of all classes and class
+ * members that are referenced by the classes that it visits.
  *
  * @author Eric Lafortune
  */
 public class AccessFixer
-extends      SimplifiedVisitor
-implements   ConstantVisitor,
-             ClassVisitor,
-             MemberVisitor
+extends      ReferencedClassVisitor
+implements   ClassVisitor
 {
-    private MyReferencedClassFinder referencedClassFinder = new MyReferencedClassFinder();
+    /**
+     * Creates a new AccessFixer.
+     */
+    public AccessFixer()
+    {
+        // Unfortunately, the inner class must be static to be passed to the
+        // super constructor. We therefore can't let it refer to this class;
+        // we'll let this class refer to the inner class instead.
+        super(new MyAccessFixer());
+    }
 
-    private Clazz referencingClass;
-    private Clazz referencedClass;
+
+    // Overridden methods for ClassVisitor.
+
+    public void visitProgramClass(ProgramClass programClass)
+    {
+        // Remember the referencing class.
+        ((MyAccessFixer)classVisitor).referencingClass = programClass;
+
+        // Start visiting and fixing the referenced classes and class members.
+        super.visitProgramClass(programClass);
+    }
 
 
-    // Implementations for ConstantVisitor.
+    public void visitLibraryClass(LibraryClass libraryClass)
+    {
+        // Remember the referencing class.
+        ((MyAccessFixer)classVisitor).referencingClass = libraryClass;
 
-    public void visitAnyConstant(Clazz clazz, Constant constant) {}
+        // Start visiting and fixing the referenced classes and class members.
+        super.visitLibraryClass(libraryClass);
+    }
 
+
+    // Overridden methods for MemberVisitor.
+
+    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
+    {
+        // Fix the referenced classes and class members.
+        super.visitProgramMember(programClass, programMethod);
+
+        // Fix overridden or implemented methods higher up the hierarchy.
+        // We can ignore private and static methods and initializers.
+        if ((programMethod.getAccessFlags() & (ClassConstants.INTERNAL_ACC_PRIVATE |
+                                               ClassConstants.INTERNAL_ACC_STATIC)) == 0 &&
+            !ClassUtil.isInitializer(programMethod.getName(programClass)))
+        {
+            programClass.hierarchyAccept(false, true, false, false,
+                new NamedMethodVisitor(programMethod.getName(programClass),
+                                       programMethod.getDescriptor(programClass),
+                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE |
+                                          ClassConstants.INTERNAL_ACC_STATIC,
+                                       (MemberVisitor)classVisitor)));
+        }
+    }
+
+
+    public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
+    {
+        // Fix the referenced classes and class members.
+        super.visitLibraryMember(libraryClass, libraryMethod);
+
+        // Fix overridden or implemented methods higher up the hierarchy.
+        // We can ignore private and static methods and initializers.
+        if ((libraryMethod.getAccessFlags() & (ClassConstants.INTERNAL_ACC_PRIVATE |
+                                               ClassConstants.INTERNAL_ACC_STATIC)) == 0 &&
+            !ClassUtil.isInitializer(libraryMethod.getName(libraryClass)))
+        {
+            libraryClass.hierarchyAccept(false, true, false, false,
+                new NamedMethodVisitor(libraryMethod.getName(libraryClass),
+                                       libraryMethod.getDescriptor(libraryClass),
+                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE |
+                                          ClassConstants.INTERNAL_ACC_STATIC,
+                                       (MemberVisitor)classVisitor)));
+        }
+    }
+
+
+    // Overridden methods for ConstantVisitor.
 
     public void visitStringConstant(Clazz clazz, StringConstant stringConstant)
     {
-        referencingClass = clazz;
-        referencedClass  = stringConstant.referencedClass;
+        // Fix the access flags of the referenced class, if any.
+        super.visitStringConstant(clazz, stringConstant);
 
-        // Make sure the access flags of the referenced class or class member,
-        // if any, are acceptable.
-        stringConstant.referencedClassAccept(this);
-        stringConstant.referencedMemberAccept(this);
-    }
-
-
-    public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
-    {
-        // Check the bootstrap method.
-        invokeDynamicConstant.bootstrapMethodHandleAccept(clazz, this);
-    }
-
-
-    public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)
-    {
-        // Check the method reference.
-        clazz.constantPoolEntryAccept(methodHandleConstant.u2referenceIndex, this);
+        // Fix the access flags of the referenced class member, if any.
+        stringConstant.referencedMemberAccept((MemberVisitor)classVisitor);
     }
 
 
     public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
     {
-        referencingClass = clazz;
+        // Fix the access flags of the referenced class.
+        super.visitAnyRefConstant(clazz, refConstant);
 
-        // Remember the specified class, since it might be different from
-        // the referenced class that actually contains the class member.
-        clazz.constantPoolEntryAccept(refConstant.u2classIndex, referencedClassFinder);
-
-        // Make sure the access flags of the referenced class member are
-        // acceptable.
-        refConstant.referencedMemberAccept(this);
-    }
-
-
-    public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
-    {
-        referencingClass = clazz;
-
-        // Make sure the access flags of the referenced class are acceptable.
-        classConstant.referencedClassAccept(this);
-    }
-
-
-    // Implementations for ClassVisitor.
-
-    public void visitLibraryClass(LibraryClass libraryClass) {}
-
-
-    public void visitProgramClass(ProgramClass programClass)
-    {
-        int currentAccessFlags = programClass.getAccessFlags();
-        int currentAccessLevel = AccessUtil.accessLevel(currentAccessFlags);
-
-        // Compute the required access level.
-        Clazz referencingClass = this.referencingClass;
-        int requiredAccessLevel =
-            inSamePackage(programClass, referencingClass) ? AccessUtil.PACKAGE_VISIBLE :
-                                                            AccessUtil.PUBLIC;
-
-        // Fix the class access flags if necessary.
-        if (currentAccessLevel < requiredAccessLevel)
-        {
-            programClass.u2accessFlags =
-                AccessUtil.replaceAccessFlags(currentAccessFlags,
-                                              AccessUtil.accessFlags(requiredAccessLevel));
-        }
-    }
-
-
-    // Implementations for MemberVisitor.
-
-    public void visitLibraryMember(LibraryClass libraryClass, LibraryMember libraryMember) {}
-
-
-    public void visitProgramMember(ProgramClass programClass, ProgramMember programMember)
-    {
-        int currentAccessFlags = programMember.getAccessFlags();
-        int currentAccessLevel = AccessUtil.accessLevel(currentAccessFlags);
-
-        // Compute the required access level.
-        int requiredAccessLevel =
-            programClass.equals(referencingClass)         ? AccessUtil.PRIVATE         :
-            inSamePackage(programClass, referencingClass) ? AccessUtil.PACKAGE_VISIBLE :
-            referencedClass.extends_(referencingClass) &&
-            referencingClass.extends_(programClass)       ? AccessUtil.PROTECTED       :
-                                                            AccessUtil.PUBLIC;
-
-        // Fix the class member access flags if necessary.
-        if (currentAccessLevel < requiredAccessLevel)
-        {
-            programMember.u2accessFlags =
-                AccessUtil.replaceAccessFlags(currentAccessFlags,
-                                              AccessUtil.accessFlags(requiredAccessLevel));
-        }
+        // Fix the access flags of the referenced class member.
+        refConstant.referencedMemberAccept((MemberVisitor)classVisitor);
     }
 
 
     /**
-     * This ConstantVisitor returns the referenced class of the class constant
-     * that it visits.
+     * This ClassVisitor and MemberVisitor fixes the access flags of the
+     * classes and class members that it visits, relative to the referencing
+     * class.
      */
-    private class MyReferencedClassFinder
-    extends       SimplifiedVisitor
-    implements    ConstantVisitor
+    private static class MyAccessFixer
+    extends              SimplifiedVisitor
+    implements           ClassVisitor,
+                         MemberVisitor
     {
-        // Implementations for ConstantVisitor.
-        public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
+        private Clazz referencingClass;
+
+
+        // Implementations for ClassVisitor.
+
+        public void visitLibraryClass(LibraryClass libraryClass) {}
+
+
+        public void visitProgramClass(ProgramClass programClass)
         {
-            referencedClass = classConstant.referencedClass;
+            int currentAccessFlags = programClass.getAccessFlags();
+            int currentAccessLevel = AccessUtil.accessLevel(currentAccessFlags);
+
+            // Compute the required access level.
+            int requiredAccessLevel =
+                inSamePackage(programClass, referencingClass) ?
+                    AccessUtil.PACKAGE_VISIBLE :
+                    AccessUtil.PUBLIC;
+
+            // Fix the class access flags if necessary.
+            if (currentAccessLevel < requiredAccessLevel)
+            {
+                programClass.u2accessFlags =
+                    AccessUtil.replaceAccessFlags(currentAccessFlags,
+                                                  AccessUtil.accessFlags(requiredAccessLevel));
+            }
         }
-    }
 
 
-    // Small utility methods.
+        // Implementations for MemberVisitor.
 
-    private boolean inSamePackage(ProgramClass class1, Clazz class2)
-    {
-        return ClassUtil.internalPackageName(class1.getName()).equals(
-               ClassUtil.internalPackageName(class2.getName()));
+        public void visitLibraryMember(LibraryClass libraryClass, LibraryMember libraryMember) {}
+
+
+        public void visitProgramMember(ProgramClass programClass, ProgramMember programMember)
+        {
+            int currentAccessFlags = programMember.getAccessFlags();
+            int currentAccessLevel = AccessUtil.accessLevel(currentAccessFlags);
+
+            // Compute the required access level.
+            int requiredAccessLevel =
+                programClass.equals(referencingClass)         ? AccessUtil.PRIVATE         :
+                inSamePackage(programClass, referencingClass) ? AccessUtil.PACKAGE_VISIBLE :
+                programClass.extends_(referencingClass) &&
+                referencingClass.extends_(programClass)       ? AccessUtil.PROTECTED       :
+                                                                AccessUtil.PUBLIC;
+
+            // Fix the class member access flags if necessary.
+            if (currentAccessLevel < requiredAccessLevel)
+            {
+                programMember.u2accessFlags =
+                    AccessUtil.replaceAccessFlags(currentAccessFlags,
+                                                  AccessUtil.accessFlags(requiredAccessLevel));
+            }
+        }
+
+
+        // Small utility methods.
+
+        /**
+         * Returns whether the two given classes are in the same package.
+         */
+        private boolean inSamePackage(ProgramClass class1, Clazz class2)
+        {
+            return ClassUtil.internalPackageName(class1.getName()).equals(
+                   ClassUtil.internalPackageName(class2.getName()));
+        }
     }
 }

@@ -256,6 +256,13 @@ public class MethodOptimizationInfo
     }
 
 
+    // For setting enum return values.
+    public void setReturnValue(Value returnValue)
+    {
+        this.returnValue = returnValue;
+    }
+
+
     public void merge(MethodOptimizationInfo other)
     {
         if (other != null)

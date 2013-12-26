@@ -41,7 +41,11 @@ public class ParameterShrinker
 extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
+    //*
     private static final boolean DEBUG = false;
+    /*/
+    private static       boolean DEBUG = System.getProperty("ps") != null;
+    //*/
 
 
     private final MemberVisitor extraVariableMemberVisitor;

@@ -41,12 +41,12 @@ extends      SimplifiedVisitor
 implements   InstructionVisitor,
              ConstantVisitor
 {
-    /*
-    public  static       boolean DEBUG      = true;
-    public  static       boolean DEBUG_MORE = true;
-    /*/
+    //*
     private static final boolean DEBUG      = false;
     private static final boolean DEBUG_MORE = false;
+    /*/
+    public  static       boolean DEBUG      = true;
+    public  static       boolean DEBUG_MORE = true;
     //*/
 
     public static final int X = 0x40000000;

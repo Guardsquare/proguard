@@ -30,7 +30,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.evaluation.*;
+import proguard.evaluation.TracedStack;
 import proguard.evaluation.value.*;
 import proguard.optimize.info.*;
 
@@ -50,8 +50,8 @@ implements   AttributeVisitor
     private static final boolean DEBUG_RESULTS  = false;
     private static final boolean DEBUG          = false;
     /*/
-    private static boolean DEBUG_RESULTS  = true;
-    private static boolean DEBUG          = true;
+    private static boolean DEBUG          = System.getProperty("es") != null;
+    private static boolean DEBUG_RESULTS  = DEBUG;
     //*/
 
     private static final int UNSUPPORTED      = -1;
@@ -177,11 +177,7 @@ implements   AttributeVisitor
         if (DEBUG_RESULTS)
         {
             System.out.println();
-            System.out.println("Class "+ClassUtil.externalClassName(clazz.getName()));
-            System.out.println("Method "+ClassUtil.externalFullMethodDescription(clazz.getName(),
-                                                                                 0,
-                                                                                 method.getName(clazz),
-                                                                                 method.getDescriptor(clazz)));
+            System.out.println("EvaluationShrinker ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]");
         }
 
         // Initialize the necessary array.
@@ -705,7 +701,7 @@ implements   AttributeVisitor
             {
                 // Mark any variable initializations for this variable load that
                 // are required according to the JVM.
-                markVariableInitializers(offset, variableInstruction.variableIndex);
+                markVariableInitializersBefore(offset, variableInstruction.variableIndex);
             }
         }
     }
@@ -729,6 +725,8 @@ implements   AttributeVisitor
             if (isInstructionNecessary(offset))
             {
                 // Check all stack entries that are popped.
+                // Unusual case: an exception handler with an exception that is
+                // no longer consumed directly by a method.
                 // Typical case: a freshly marked variable initialization that
                 // requires some value on the stack.
                 int popCount = instruction.stackPopCount(clazz);
@@ -739,14 +737,33 @@ implements   AttributeVisitor
 
                     int stackSize = tracedStack.size();
 
+                    int requiredPopCount  = 0;
                     int requiredPushCount = 0;
                     for (int stackIndex = stackSize - popCount; stackIndex < stackSize; stackIndex++)
                     {
-                        if (!isStackSimplifiedBefore(offset, stackIndex))
+                        boolean stackSimplifiedBefore =
+                            isStackSimplifiedBefore(offset, stackIndex);
+                        boolean stackEntryPresentBefore =
+                            isStackEntryPresentBefore(offset, stackIndex);
+
+                        if (stackSimplifiedBefore)
+                        {
+                            // Is this stack entry pushed by any producer
+                            // (maybe an exception in an exception handler)?
+                            if (isStackEntryPresentBefore(offset, stackIndex))
+                            {
+                                // Mark all produced stack entries.
+                                markStackEntryProducers(offset, stackIndex);
+
+                                // Remember to pop it.
+                                requiredPopCount++;
+                            }
+                        }
+                        else
                         {
                             // Is this stack entry pushed by any producer
                             // (because it is required by other consumers)?
-                            if (isStackEntryPresentBefore(offset, stackIndex))
+                            if (stackEntryPresentBefore)
                             {
                                 // Mark all produced stack entries.
                                 markStackEntryProducers(offset, stackIndex);
@@ -759,6 +776,14 @@ implements   AttributeVisitor
                         }
                     }
 
+                    // Pop some unnecessary stack entries.
+                    if (requiredPopCount > 0)
+                    {
+                        if (DEBUG) System.out.println("  Inserting before marked consumer "+instruction.toString(offset));
+
+                        insertPopInstructions(offset, false, true, popCount);
+                    }
+
                     // Push some necessary stack entries.
                     if (requiredPushCount > 0)
                     {
@@ -769,7 +794,7 @@ implements   AttributeVisitor
                             throw new IllegalArgumentException("Unsupported stack size increment ["+requiredPushCount+"] at ["+offset+"]");
                         }
 
-                        insertPushInstructions(offset, false, tracedStack.getTop(0).computationalType());
+                        insertPushInstructions(offset, false, true, tracedStack.getTop(0).computationalType());
                     }
                 }
 
@@ -826,7 +851,7 @@ implements   AttributeVisitor
                     {
                         if (DEBUG) System.out.println("  Inserting after marked producer "+instruction.toString(offset));
 
-                        insertPopInstructions(offset, false, requiredPopCount);
+                        insertPopInstructions(offset, false, false, requiredPopCount);
                     }
                 }
             }
@@ -863,7 +888,7 @@ implements   AttributeVisitor
                     {
                         if (DEBUG) System.out.println("  Replacing unmarked consumer "+instruction.toString(offset));
 
-                        insertPopInstructions(offset, true, expectedPopCount);
+                        insertPopInstructions(offset, true, false, expectedPopCount);
                     }
                 }
 
@@ -893,7 +918,7 @@ implements   AttributeVisitor
                     {
                         if (DEBUG) System.out.println("  Replacing unmarked producer "+instruction.toString(offset));
 
-                        insertPushInstructions(offset, true, tracedStack.getTop(0).computationalType());
+                        insertPushInstructions(offset, true, false, tracedStack.getTop(0).computationalType());
                     }
                 }
             }
@@ -1434,35 +1459,65 @@ implements   AttributeVisitor
 
 
     /**
-     * Marks the initializing instructions of the variable consumer at the given
-     * offset.
-     * @param consumerOffset the offset of the variable consumer.
-     * @param variableIndex  the index of the variable that is loaded.
+     * Ensures that the given variable is initialized before the specified
+     * consumer of that variable, in the JVM's view.
+     * @param consumerOffset the instruction offset before which the variable
+     *                       needs to be initialized.
+     * @param variableIndex  the index of the variable.
      */
-    private void markVariableInitializers(int consumerOffset,
-                                          int variableIndex)
+    private void markVariableInitializersBefore(int consumerOffset,
+                                                int variableIndex)
     {
+        // Make sure the variable is initialized after all producers.
+        // Use the simple evaluator, to get the JVM's view of what is
+        // initialized.
         InstructionOffsetValue producerOffsets =
             simplePartialEvaluator.getVariablesBefore(consumerOffset).getProducerValue(variableIndex).instructionOffsetValue();
 
-        if (producerOffsets != null)
+        int offsetCount = producerOffsets.instructionOffsetCount();
+        for (int offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++)
         {
-            int offsetCount = producerOffsets.instructionOffsetCount();
-            for (int offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++)
+            // Avoid infinite loops by only looking at producers before
+            // the consumer.
+            int producerOffset =
+                producerOffsets.instructionOffset(offsetIndex);
+            if (producerOffset < consumerOffset)
             {
-                // Make sure the variable and the instruction are marked
-                // at the producing offset.
-                int offset = producerOffsets.instructionOffset(offsetIndex);
+                markVariableInitializersAfter(producerOffset, variableIndex);
+            }
+        }
+    }
 
-                if (!isInstructionNecessary(offset) &&
-                    isVariableInitialization(offset, variableIndex))
-                {
-                    if (DEBUG) System.out.print("  Marking initialization of v"+variableIndex+" at ");
 
-                    markInstruction(offset);
+    /**
+     * Ensures that the given variable is initialized after the specified
+     * producer of that variable, in the JVM's view.
+     * @param producerOffset the instruction offset after which the variable
+     *                       needs to be initialized.
+     * @param variableIndex  the index of the variable.
+     */
+    private void markVariableInitializersAfter(int producerOffset,
+                                               int variableIndex)
+    {
+        // No problem if the producer has already been marked.
+        if (!isInstructionNecessary(producerOffset))
+        {
+            // Is the unmarked producer a variable initialization?
+            if (isVariableInitialization(producerOffset, variableIndex))
+            {
+                // Mark the producer.
+                if (DEBUG) System.out.print("  Marking initialization of v"+variableIndex+" at ");
 
-                    if (DEBUG) System.out.println();
-                }
+                markInstruction(producerOffset);
+
+                if (DEBUG) System.out.println();
+            }
+            else
+            {
+                // Don't mark the producer, but recursively look at the
+                // preceding producers of the same variable. Their values
+                // will fall through, replacing this producer.
+                markVariableInitializersBefore(producerOffset, variableIndex);
             }
         }
     }
@@ -1645,6 +1700,7 @@ implements   AttributeVisitor
      */
     private void insertPushInstructions(int     offset,
                                         boolean replace,
+                                        boolean before,
                                         int     computationalType)
     {
         // Mark this instruction.
@@ -1657,21 +1713,7 @@ implements   AttributeVisitor
         if (DEBUG) System.out.println(": "+replacementInstruction.toString(offset));
 
         // Replace or insert the push instruction.
-        if (replace)
-        {
-            // Replace the push instruction.
-            codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
-        }
-        else
-        {
-            // Insert the push instruction.
-            codeAttributeEditor.insertBeforeInstruction(offset, replacementInstruction);
-
-            if (extraAddedInstructionVisitor != null)
-            {
-                replacementInstruction.accept(null, null, null, offset, extraAddedInstructionVisitor);
-            }
-        }
+        insertInstruction(offset, replace, before, replacementInstruction);
     }
 
 
@@ -1700,7 +1742,10 @@ implements   AttributeVisitor
      * Pops the given number of stack entries at or after the given offset.
      * The instructions are marked as necessary.
      */
-    private void insertPopInstructions(int offset, boolean replace, int popCount)
+    private void insertPopInstructions(int     offset,
+                                       boolean replace,
+                                       boolean before,
+                                       int     popCount)
     {
         // Mark this instruction.
         markInstruction(offset);
@@ -1713,19 +1758,7 @@ implements   AttributeVisitor
                 Instruction popInstruction =
                     new SimpleInstruction(InstructionConstants.OP_POP);
 
-                if (replace)
-                {
-                    codeAttributeEditor.replaceInstruction(offset, popInstruction);
-                }
-                else
-                {
-                    codeAttributeEditor.insertAfterInstruction(offset, popInstruction);
-
-                    if (extraAddedInstructionVisitor != null)
-                    {
-                        popInstruction.accept(null, null, null, offset, extraAddedInstructionVisitor);
-                    }
-                }
+                insertInstruction(offset, replace, before, popInstruction);
                 break;
             }
             case 2:
@@ -1734,19 +1767,7 @@ implements   AttributeVisitor
                 Instruction popInstruction =
                     new SimpleInstruction(InstructionConstants.OP_POP2);
 
-                if (replace)
-                {
-                    codeAttributeEditor.replaceInstruction(offset, popInstruction);
-                }
-                else
-                {
-                    codeAttributeEditor.insertAfterInstruction(offset, popInstruction);
-
-                    if (extraAddedInstructionVisitor != null)
-                    {
-                        popInstruction.accept(null, null, null, offset, extraAddedInstructionVisitor);
-                    }
-                }
+                insertInstruction(offset, replace, before, popInstruction);
                 break;
             }
             default:
@@ -1771,31 +1792,86 @@ implements   AttributeVisitor
                     popInstructions[popCount / 2] = popInstruction;
                 }
 
-                if (replace)
-                {
-                    codeAttributeEditor.replaceInstruction(offset, popInstructions);
-
-                    for (int index = 1; index < popInstructions.length; index++)
-                    {
-                        if (extraAddedInstructionVisitor != null)
-                        {
-                            popInstructions[index].accept(null, null, null, offset, extraAddedInstructionVisitor);
-                        }
-                    }
-                }
-                else
-                {
-                    codeAttributeEditor.insertAfterInstruction(offset, popInstructions);
-
-                    for (int index = 0; index < popInstructions.length; index++)
-                    {
-                        if (extraAddedInstructionVisitor != null)
-                        {
-                            popInstructions[index].accept(null, null, null, offset, extraAddedInstructionVisitor);
-                        }
-                    }
-                }
+                insertInstructions(offset,
+                                   replace,
+                                   before,
+                                   popInstruction,
+                                   popInstructions);
                 break;
+            }
+        }
+    }
+
+
+    /**
+     * Inserts or replaces the given instruction at the given offset.
+     */
+    private void insertInstruction(int         offset,
+                                   boolean     replace,
+                                   boolean     before,
+                                   Instruction instruction)
+    {
+        if (replace)
+        {
+            codeAttributeEditor.replaceInstruction(offset, instruction);
+        }
+        else
+        {
+            if (before)
+            {
+                codeAttributeEditor.insertBeforeInstruction(offset, instruction);
+            }
+            else
+            {
+                codeAttributeEditor.insertAfterInstruction(offset, instruction);
+            }
+
+            if (extraAddedInstructionVisitor != null)
+            {
+                instruction.accept(null, null, null, offset, extraAddedInstructionVisitor);
+            }
+        }
+    }
+
+
+    /**
+     * Inserts or replaces the given instruction at the given offset.
+     */
+    private void insertInstructions(int           offset,
+                                    boolean       replace,
+                                    boolean       before,
+                                    Instruction   instruction,
+                                    Instruction[] instructions)
+    {
+        if (replace)
+        {
+            codeAttributeEditor.replaceInstruction(offset, instructions);
+
+            if (extraAddedInstructionVisitor != null)
+            {
+                for (int index = 1; index < instructions.length; index++)
+                {
+                    instructions[index].accept(null, null, null, offset, extraAddedInstructionVisitor);
+                }
+            }
+        }
+        else
+        {
+            if (before)
+            {
+                codeAttributeEditor.insertBeforeInstruction(offset, instructions);
+            }
+            else
+            {
+                codeAttributeEditor.insertAfterInstruction(offset, instructions);
+            }
+
+            for (int index = 0; index < instructions.length; index++)
+            {
+                if (extraAddedInstructionVisitor != null)
+                {
+                    instructions[index].accept(null, null, null, offset, extraAddedInstructionVisitor);
+                }
             }
         }
     }

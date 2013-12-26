@@ -51,18 +51,18 @@ public class ProGuardTask extends ConfigurationTask
             {
                 parser.parse(configuration);
             }
-            catch (ParseException ex)
+            catch (ParseException e)
             {
-                throw new BuildException(ex.getMessage());
+                throw new BuildException(e.getMessage(), e);
             }
             finally
             {
                 parser.close();
             }
         }
-        catch (IOException ex)
+        catch (IOException e)
         {
-            throw new BuildException(ex.getMessage());
+            throw new BuildException(e.getMessage(), e);
         }
     }
 
@@ -315,9 +315,9 @@ public class ProGuardTask extends ConfigurationTask
             ProGuard proGuard = new ProGuard(configuration);
             proGuard.execute();
         }
-        catch (IOException ex)
+        catch (IOException e)
         {
-            throw new BuildException(ex.getMessage());
+            throw new BuildException(e.getMessage(), e);
         }
     }
 

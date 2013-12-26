@@ -21,8 +21,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.*;
-import proguard.classfile.visitor.*;
-import proguard.util.StringMatcher;
+import proguard.classfile.visitor.ClassVisitor;
 
 
 /**

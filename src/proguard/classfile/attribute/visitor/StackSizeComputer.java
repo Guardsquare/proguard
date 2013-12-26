@@ -21,11 +21,11 @@
 package proguard.classfile.attribute.visitor;
 
 import proguard.classfile.*;
-import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.attribute.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.visitor.ClassPrinter;
 
 import java.util.Arrays;
 

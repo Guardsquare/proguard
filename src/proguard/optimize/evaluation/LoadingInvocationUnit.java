@@ -26,7 +26,7 @@ import proguard.evaluation.BasicInvocationUnit;
 import proguard.evaluation.value.*;
 
 /**
- * This InvocationUbit loads parameter values and return values that were
+ * This InvocationUnit loads parameter values and return values that were
  * previously stored with the methods that are invoked.
  *
  * @see StoringInvocationUnit
@@ -45,7 +45,7 @@ extends      BasicInvocationUnit
      */
     public LoadingInvocationUnit(ValueFactory valueFactory)
     {
-        this(valueFactory, false, false, false);
+        this(valueFactory, true, true, true);
     }
 
 
@@ -80,8 +80,7 @@ extends      BasicInvocationUnit
             {
                 // Retrieve the stored field class value.
                 ReferenceValue value = StoringInvocationUnit.getFieldClassValue((Field)referencedMember);
-                if (value != null &&
-                    value.isParticular())
+                if (value != null)
                 {
                     return value;
                 }
@@ -104,8 +103,7 @@ extends      BasicInvocationUnit
             {
                 // Retrieve the stored field value.
                 Value value = StoringInvocationUnit.getFieldValue((Field)referencedMember);
-                if (value != null &&
-                    value.isParticular())
+                if (value != null)
                 {
                     return value;
                 }
@@ -126,8 +124,7 @@ extends      BasicInvocationUnit
         {
             // Retrieve the stored method parameter value.
             Value value = StoringInvocationUnit.getMethodParameterValue(method, parameterIndex);
-            if (value != null &&
-                value.isParticular())
+            if (value != null)
             {
                 return value;
             }
@@ -153,8 +150,7 @@ extends      BasicInvocationUnit
             {
                 // Retrieve the stored method return value.
                 Value value = StoringInvocationUnit.getMethodReturnValue((Method)referencedMember);
-                if (value != null &&
-                    value.isParticular())
+                if (value != null)
                 {
                     return value;
                 }
@@ -165,31 +161,4 @@ extends      BasicInvocationUnit
                                           refConstant,
                                           type);
     }
-
-
-//    // Small utility methods.
-//
-//    private Value refresh(Value value)
-//    {
-//        if (value.isParticular())
-//        {
-//            return value;
-//        }
-//
-//        switch (value.computationalType())
-//        {
-//            case Value.TYPE_INTEGER: return valueFactory.createIntegerValue();
-//            case Value.TYPE_LONG:    return valueFactory.createLongValue();
-//            case Value.TYPE_FLOAT:   return valueFactory.createFloatValue();
-//            case Value.TYPE_DOUBLE:  return valueFactory.createDoubleValue();
-//            default:
-//            {
-//                ReferenceValue referenceValue = value.referenceValue();
-//
-//                return valueFactory.createReferenceValue(referenceValue.getType(),
-//                                                         referenceValue.getReferencedClass(),
-//                                                         referenceValue.isNull() != Value.NEVER);
-//            }
-//        }
-//    }
 }

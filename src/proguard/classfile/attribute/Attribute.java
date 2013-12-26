@@ -84,7 +84,7 @@ public abstract class Attribute implements VisitorAccepter
      */
     public void accept(Clazz clazz, Field field, AttributeVisitor attributeVisitor)
     {
-        // Delegate the default invocation if the field is null anyway.
+        // Delegate to the default invocation if the field is null anyway.
         if (field == null)
         {
             accept(clazz, attributeVisitor);
@@ -100,7 +100,7 @@ public abstract class Attribute implements VisitorAccepter
      */
     public void accept(Clazz clazz, Method method, AttributeVisitor attributeVisitor)
     {
-        // Delegate the default invocation if the method is null anyway.
+        // Delegate to the default invocation if the method is null anyway.
         if (method == null)
         {
             accept(clazz, (Field)null, attributeVisitor);
@@ -116,7 +116,8 @@ public abstract class Attribute implements VisitorAccepter
      */
     public void accept(Clazz clazz, Method method, CodeAttribute codeAttribute, AttributeVisitor attributeVisitor)
     {
-        // Delegate the default invocation if the code attribute is null anyway.
+        // Delegate to the default invocation if the code attribute is null
+        // anyway.
         if (codeAttribute == null)
         {
             accept(clazz, method, attributeVisitor);

@@ -21,10 +21,8 @@
 package proguard.evaluation;
 
 import proguard.classfile.*;
-import proguard.classfile.constant.*;
-import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
-import proguard.evaluation.value.*;
+import proguard.classfile.constant.ClassConstant;
+import proguard.evaluation.value.ValueFactory;
 
 /**
  * This class creates java.lang.Class ReferenceValue instances that correspond

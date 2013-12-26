@@ -25,7 +25,6 @@ import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.util.*;
 
 /**
  * This AttributeVisitor and AnnotationVisitor lets a given ElementValueVisitor

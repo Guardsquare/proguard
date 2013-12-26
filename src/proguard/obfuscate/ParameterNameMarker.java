@@ -23,7 +23,7 @@ package proguard.obfuscate;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.*;
+import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This AttributeVisitor trims and marks all local variable (type) table
@@ -60,9 +60,9 @@ implements   AttributeVisitor
         if (!AttributeUsageMarker.isUsed(localVariableTableAttribute) &&
             hasParameters(clazz, method))
         {
-            // Shift the entries that start at offset 0 to the front. 
+            // Shift the entries that start at offset 0 to the front.
             int newIndex = 0;
-            
+
             for (int index = 0; index < localVariableTableAttribute.u2localVariableTableLength; index++)
             {
                 LocalVariableInfo localVariableInfo =
@@ -92,9 +92,9 @@ implements   AttributeVisitor
         if (!AttributeUsageMarker.isUsed(localVariableTypeTableAttribute) &&
             hasParameters(clazz, method))
         {
-            // Shift the entries that start at offset 0 to the front. 
+            // Shift the entries that start at offset 0 to the front.
             int newIndex = 0;
-            
+
             for (int index = 0; index < localVariableTypeTableAttribute.u2localVariableTypeTableLength; index++)
             {
                 LocalVariableTypeInfo localVariableTypeInfo =
@@ -109,7 +109,7 @@ implements   AttributeVisitor
 
             // Trim the table.
             localVariableTypeTableAttribute.u2localVariableTypeTableLength = newIndex;
-            
+
             // Mark the table if there are any entries.
             if (newIndex > 0)
             {

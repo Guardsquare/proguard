@@ -158,7 +158,6 @@ public class ClassNameParser implements StringParser
 
     // Small utility methods.
 
-
     /**
      * Creates a StringMatcher that matches any type (class or primitive type,
      * array or non-array) and then the given matcher.

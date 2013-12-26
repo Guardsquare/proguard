@@ -21,11 +21,11 @@
 package proguard.optimize.evaluation;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.editor.*;
-import proguard.classfile.visitor.MemberVisitor;
-import proguard.classfile.attribute.*;
 import proguard.classfile.util.*;
+import proguard.classfile.visitor.MemberVisitor;
 
 /**
  * This AttributeVisitor optimizes variable allocation based on their the liveness,

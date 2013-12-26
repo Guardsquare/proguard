@@ -36,7 +36,9 @@ import java.io.File;
 public class ClassPathElement extends Path
 {
     private String filter;
+    private String apkFilter;
     private String jarFilter;
+    private String aarFilter;
     private String warFilter;
     private String earFilter;
     private String zipFilter;
@@ -120,7 +122,9 @@ public class ClassPathElement extends Path
                 new ClassPathEntry(file.isAbsolute() ? file : new File(baseDir, fileName),
                                    output);
             entry.setFilter(ListUtil.commaSeparatedList(filter));
+            entry.setApkFilter(ListUtil.commaSeparatedList(apkFilter));
             entry.setJarFilter(ListUtil.commaSeparatedList(jarFilter));
+            entry.setAarFilter(ListUtil.commaSeparatedList(aarFilter));
             entry.setWarFilter(ListUtil.commaSeparatedList(warFilter));
             entry.setEarFilter(ListUtil.commaSeparatedList(earFilter));
             entry.setZipFilter(ListUtil.commaSeparatedList(zipFilter));
@@ -166,9 +170,21 @@ public class ClassPathElement extends Path
     }
 
 
+    public void setApkfilter(String apkFilter)
+    {
+        this.apkFilter = apkFilter;
+    }
+
+
     public void setJarfilter(String jarFilter)
     {
         this.jarFilter = jarFilter;
+    }
+
+
+    public void setAarfilter(String aarFilter)
+    {
+        this.aarFilter = aarFilter;
     }
 
 

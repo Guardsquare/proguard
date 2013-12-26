@@ -20,12 +20,6 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
-import proguard.util.ExtensionMatcher;
-
-import java.io.IOException;
-
-
 /**
  * This DataEntryReader delegates to one of two other DataEntryReader instances,
  * depending on whether the data entry represents a directory or not.

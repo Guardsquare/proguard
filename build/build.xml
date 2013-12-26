@@ -9,9 +9,9 @@
   <property name = "classes" value = "classes"/>
   <property name = "lib"     value = "lib"/>
 
-  <property name = "gradle.jar1" value = "${gradle.home}/lib/plugins/gradle-plugins-1.3.jar"/>
-  <property name = "gradle.jar2" value = "${gradle.home}/lib/gradle-base-services-1.3.jar"/>
-  <property name = "gradle.jar3" value = "${gradle.home}/lib/gradle-core-1.3.jar"/>
+  <property name = "gradle.jar1" value = "${gradle.home}/lib/plugins/gradle-plugins-1.8.jar"/>
+  <property name = "gradle.jar2" value = "${gradle.home}/lib/gradle-base-services-1.8.jar"/>
+  <property name = "gradle.jar3" value = "${gradle.home}/lib/gradle-core-1.8.jar"/>
   <property name = "gradle.jar4" value = "${gradle.home}/lib/groovy-all-1.8.6.jar"/>
   <property name = "wtk.jar"     value = "${wtk.home}/wtklib/kenv.zip"/>
 

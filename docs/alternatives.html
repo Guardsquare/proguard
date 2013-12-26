@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -185,16 +190,6 @@ below is incorrect.
 </tr>
 
 <tr>
-<td><a target="other" rel="nofollow" href="http://www.garret.ru/~knizhnik/">Konstantin Knizhnik</a></td>
-<td><a target="other" href="http://www.garret.ru/~knizhnik/javago/ReadMe.htm">JavaGO</a></td>
-<td align="center"><br /></td>
-<td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
-<td align="center"><br /></td>
-<td align="center"><br /></td>
-<td>Free</td>
-</tr>
-
-<tr>
 <td><a target="other" rel="nofollow" href="http://www.sable.mcgill.ca/">Sable</a></td>
 <td><a target="other" href="http://www.sable.mcgill.ca/JBCO/">JBCO</a></td>
 <td align="center"><br /></td>
@@ -315,16 +310,6 @@ below is incorrect.
 </tr>
 
 <tr>
-<td><a target="other" rel="nofollow" href="http://www.leesw.com/">LeeSoftware</a></td>
-<td><a target="other" href="http://www.leesw.com/">Smokescreen Obfuscator</a></td>
-<td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
-<td align="center"><br /></td>
-<td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
-<td align="center"><br /></td>
-<td>Commercial</td>
-</tr>
-
-<tr>
 <td><a target="other" rel="nofollow" href="http://www.innaworks.com/">Innaworks</a></td>
 <td><a target="other" href="http://www.innaworks.com/mBooster">mBooster</a></td>
 <td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
@@ -376,7 +361,7 @@ below is incorrect.
 
 <tr>
 <td><a target="other" rel="nofollow" href="http://www.bisguard.com/">BIS Guard &amp; Co.</a></td>
-<td><a target="other" href="http://www.bisguard.com/java.html">Java Antidecompiler</a></td>
+<td><a target="other" href="http://www.bisguard.com/">Java Antidecompiler</a></td>
 <td align="center"><br /></td>
 <td align="center"><br /></td>
 <td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
@@ -426,7 +411,7 @@ below is incorrect.
 
 <tr>
 <td><a target="other" rel="nofollow" href="http://www.arxan.com/">Arxan</a></td>
-<td><a target="other" href="http://www.arxan.com/products/guardit-for-java/">GuardIT</a></td>
+<td><a target="other" href="http://www.arxan.com/products/desktop/guardit-for-java/">GuardIT</a></td>
 <td align="center"><br /></td>
 <td align="center"><br /></td>
 <td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
@@ -502,6 +487,16 @@ below is incorrect.
 <td align="center"><br /></td>
 <td align="center"><br /></td>
 <td>(disappeared?)</td>
+</tr>
+
+<tr class="disappeared">
+<td><a target="other" rel="nofollow" href="http://www.garret.ru/~knizhnik/">Konstantin Knizhnik</a></td>
+<td><a target="other" rel="nofollow" href="http://www.garret.ru/~knizhnik/javago/ReadMe.htm">JavaGO</a></td>
+<td align="center"><br /></td>
+<td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
+<td align="center"><br /></td>
+<td align="center"><br /></td>
+<td>()disappeared?</td>
 </tr>
 
 <tr class="disappeared">
@@ -677,6 +672,16 @@ below is incorrect.
 <tr class="disappeared">
 <td><a target="other" rel="nofollow" href="http://www.vegatech.com/">Vega Technologies</a></td>
 <td><a target="other" rel="nofollow" href="http://www.vegatech.com/jzipper/">JZipper</a></td>
+<td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
+<td align="center"><br /></td>
+<td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
+<td align="center"><br /></td>
+<td>Commercial (disappeared?)</td>
+</tr>
+
+<tr class="disappeared">
+<td><a target="other" rel="nofollow" href="http://www.leesw.com/">LeeSoftware</a></td>
+<td><a target="other" rel="nofollow" href="http://www.leesw.com/">Smokescreen Obfuscator</a></td>
 <td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>
 <td align="center"><br /></td>
 <td align="center"><img src="checkmark.gif" width="11" height="11" alt="x" /></td>

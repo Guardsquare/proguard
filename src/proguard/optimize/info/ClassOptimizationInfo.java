@@ -34,6 +34,7 @@ public class ClassOptimizationInfo
     private boolean isInstanceofed                = false;
     private boolean isDotClassed                  = false;
     private boolean isCaught                      = false;
+    private boolean isSimpleEnum                  = false;
     private boolean containsStaticInitializer     = false;
     private boolean containsPackageVisibleMembers = false;
     private boolean invokesPackageVisibleMembers  = false;
@@ -85,6 +86,18 @@ public class ClassOptimizationInfo
     public boolean isCaught()
     {
         return isCaught;
+    }
+
+
+    public void setSimpleEnum(boolean simple)
+    {
+        isSimpleEnum = simple;
+    }
+
+
+    public boolean isSimpleEnum()
+    {
+        return isSimpleEnum;
     }
 
 
@@ -157,7 +170,6 @@ public class ClassOptimizationInfo
     public static ClassOptimizationInfo getClassOptimizationInfo(Clazz clazz)
     {
         Object visitorInfo = clazz.getVisitorInfo();
-
         return visitorInfo instanceof ClassOptimizationInfo ?
             (ClassOptimizationInfo)visitorInfo :
             null;

@@ -20,9 +20,9 @@
  */
 package proguard.classfile.visitor;
 
-import proguard.classfile.*;
-import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.Clazz;
 import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**

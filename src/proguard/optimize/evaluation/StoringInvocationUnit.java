@@ -27,7 +27,7 @@ import proguard.evaluation.value.*;
 import proguard.optimize.info.*;
 
 /**
- * This InvocationUbit stores parameter values and return values with the
+ * This InvocationUnit stores parameter values and return values with the
  * methods that are invoked.
  *
  * @see LoadingInvocationUnit
@@ -126,7 +126,7 @@ extends      BasicInvocationUnit
             generalizeMethodReturnValue(method, value);
         }
     }
-    
+
 
     // Small utility methods.
 

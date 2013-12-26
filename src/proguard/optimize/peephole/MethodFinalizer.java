@@ -22,7 +22,7 @@ package proguard.optimize.peephole;
 
 import proguard.classfile.*;
 import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.visitor.MemberVisitor;
 import proguard.optimize.KeepMarker;
 
 /**
@@ -61,7 +61,7 @@ implements   MemberVisitor
 
 
     // Implementations for MemberVisitor.
-    
+
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         String name = programMethod.getName(programClass);

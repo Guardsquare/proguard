@@ -21,7 +21,6 @@
 package proguard.optimize.peephole;
 
 import proguard.classfile.ProgramClass;
-import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
@@ -80,6 +79,7 @@ implements   ClassVisitor
 
     public void visitProgramClass(ProgramClass programClass)
     {
+        // Try inlining all immediate subclasses into this class.
         programClass.subclassesAccept(new ClassMerger(programClass,
                                                       allowAccessModification,
                                                       mergeInterfacesAggressively,

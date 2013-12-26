@@ -48,7 +48,7 @@ implements   ClassVisitor,
              AnnotationVisitor,
              ElementValueVisitor
 {
-    private final ClassVisitor classVisitor;
+    protected final ClassVisitor classVisitor;
 
 
     public ReferencedClassVisitor(ClassVisitor classVisitor)
@@ -244,6 +244,13 @@ implements   ClassVisitor,
     {
         // Let the visitor visit the classes referenced in the class element value.
         classElementValue.referencedClassesAccept(classVisitor);
+    }
+
+
+    public void visitAnnotationElementValue(Clazz clazz, Annotation annotation, AnnotationElementValue annotationElementValue)
+    {
+        // Visit the contained annotation.
+        annotationElementValue.annotationAccept(clazz, this);
     }
 
 

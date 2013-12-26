@@ -23,8 +23,8 @@ package proguard.shrink;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.Constant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;

@@ -849,7 +849,7 @@ implements   ClassVisitor,
             attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)   ? (Attribute)new RuntimeVisibleParameterAnnotationsAttribute():
             attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations) ? (Attribute)new RuntimeInvisibleParameterAnnotationsAttribute():
             attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                    ? (Attribute)new AnnotationDefaultAttribute():
-                                                                                             (Attribute)new UnknownAttribute(u4attributeLength);
+                                                                                             (Attribute)new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
         attribute.u2attributeNameIndex = u2attributeNameIndex;
 
         return attribute;

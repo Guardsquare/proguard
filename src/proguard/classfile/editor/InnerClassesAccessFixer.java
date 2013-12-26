@@ -21,12 +21,12 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.visitor.InnerClassesInfoVisitor;
 import proguard.classfile.attribute.InnerClassesInfo;
+import proguard.classfile.attribute.visitor.InnerClassesInfoVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.visitor.ClassVisitor;
 
 /**
  * This InnerClassesInfoVisitor fixes the inner class access flags of the

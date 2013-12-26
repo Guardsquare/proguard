@@ -148,7 +148,7 @@ implements Comparable, ConstantVisitor
     }
 
     public void visitDoubleConstant(Clazz clazz, DoubleConstant doubleConstant)
-    {                    
+    {
         result = Double.compare(doubleConstant.getValue(),
                                 ((DoubleConstant)otherConstant).getValue());
     }
@@ -172,11 +172,10 @@ implements Comparable, ConstantVisitor
 
         result = index < otherIndex ? -1 :
                  index > otherIndex ?  1 :
-                 (invokeDynamicConstant.getName(clazz) + ' ' +
-                  invokeDynamicConstant.getType(clazz))
-                 .compareTo
-                 (otherInvokeDynamicConstant.getName(clazz) + ' ' +
-                  otherInvokeDynamicConstant.getType(clazz)); 
+                     compare(invokeDynamicConstant.getName(clazz),
+                             invokeDynamicConstant.getType(clazz),
+                             otherInvokeDynamicConstant.getName(clazz),
+                             otherInvokeDynamicConstant.getType(clazz));
     }
 
     public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)
@@ -184,27 +183,25 @@ implements Comparable, ConstantVisitor
         MethodHandleConstant otherMethodHandleConstant = (MethodHandleConstant)otherConstant;
 
         int kind      = methodHandleConstant.getReferenceKind();
-        int otherKind = methodHandleConstant.getReferenceKind();
+        int otherKind = otherMethodHandleConstant.getReferenceKind();
 
         result = kind < otherKind ? -1 :
                  kind > otherKind ?  1 :
-                 (methodHandleConstant.getName(clazz) + ' ' +
-                  methodHandleConstant.getType(clazz))
-                 .compareTo
-                 (otherMethodHandleConstant.getName(clazz) + ' ' +
-                  otherMethodHandleConstant.getType(clazz));
+                     compare(methodHandleConstant.getName(clazz),
+                             methodHandleConstant.getType(clazz),
+                             otherMethodHandleConstant.getName(clazz),
+                             otherMethodHandleConstant.getType(clazz));
     }
 
     public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
     {
         RefConstant otherRefConstant = (RefConstant)otherConstant;
-        result = (refConstant.getClassName(clazz) + ' ' +
-                  refConstant.getName(clazz)      + ' ' +
-                  refConstant.getType(clazz))
-                 .compareTo
-                 (otherRefConstant.getClassName(clazz) + ' ' +
-                  otherRefConstant.getName(clazz)      + ' ' +
-                  otherRefConstant.getType(clazz));
+        result = compare(refConstant.getClassName(clazz),
+                         refConstant.getName(clazz),
+                         refConstant.getType(clazz),
+                         otherRefConstant.getClassName(clazz),
+                         otherRefConstant.getName(clazz),
+                         otherRefConstant.getType(clazz));
     }
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
@@ -223,11 +220,10 @@ implements Comparable, ConstantVisitor
     public void visitNameAndTypeConstant(Clazz clazz, NameAndTypeConstant nameAndTypeConstant)
     {
         NameAndTypeConstant otherNameAndTypeConstant = (NameAndTypeConstant)otherConstant;
-        result = (nameAndTypeConstant.getName(clazz) + ' ' +
-                  nameAndTypeConstant.getType(clazz))
-                 .compareTo
-                 (otherNameAndTypeConstant.getName(clazz) + ' ' +
-                  otherNameAndTypeConstant.getType(clazz));
+        result = compare(nameAndTypeConstant.getName(clazz),
+                         nameAndTypeConstant.getType(clazz),
+                         otherNameAndTypeConstant.getName(clazz),
+                         otherNameAndTypeConstant.getType(clazz));
     }
 
 
@@ -245,5 +241,34 @@ implements Comparable, ConstantVisitor
     public int hashCode()
     {
         return this.getClass().hashCode();
+    }
+
+
+    // Small utility methods.
+
+    /**
+     * Compares the given two pairs of strings.
+     */
+    private int compare(String string1a, String string1b,
+                        String string2a, String string2b)
+    {
+        int comparison;
+        return
+            (comparison = string1a.compareTo(string2a)) != 0 ? comparison :
+                          string1b.compareTo(string2b);
+    }
+
+
+    /**
+     * Compares the given two triplets of strings.
+     */
+    private int compare(String string1a, String string1b, String string1c,
+                        String string2a, String string2b, String string2c)
+    {
+        int comparison;
+        return
+            (comparison = string1a.compareTo(string2a)) != 0 ? comparison :
+            (comparison = string1b.compareTo(string2b)) != 0 ? comparison :
+                          string1c.compareTo(string2c);
     }
 }

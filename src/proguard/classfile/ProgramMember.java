@@ -21,7 +21,7 @@
 package proguard.classfile;
 
 
-import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 

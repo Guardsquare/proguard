@@ -32,15 +32,17 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 public class UnknownAttribute extends Attribute
 {
     public final int    u4attributeLength;
-    public byte[] info;
+    public       byte[] info;
 
 
     /**
-     * Creates an uninitialized UnknownAttribute with the given length.
+     * Creates an uninitialized UnknownAttribute with the specified name and
+     * length.
      */
-    public UnknownAttribute(int attributeLength)
+    public UnknownAttribute(int u2attributeNameIndex,
+                            int attributeLength)
     {
-        u4attributeLength = attributeLength;
+        this(u2attributeNameIndex, attributeLength, null);
     }
 
 

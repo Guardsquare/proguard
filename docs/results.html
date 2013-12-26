@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>

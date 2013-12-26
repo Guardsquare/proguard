@@ -417,9 +417,4 @@ implements   InvocationUnit,
             returnTypeClass = referencedClasses[referencedClasses.length - 1];
         }
     }
-
-
-//    public void visitLibraryMember(LibraryClass libraryClass, LibraryMember libraryMember)
-//    {
-//    }
 }

@@ -48,26 +48,34 @@ public class DataEntryReaderFactory
                                                         ClassPathEntry  classPathEntry,
                                                         DataEntryReader reader)
     {
+        boolean isApk = classPathEntry.isApk();
         boolean isJar = classPathEntry.isJar();
+        boolean isAar = classPathEntry.isAar();
         boolean isWar = classPathEntry.isWar();
         boolean isEar = classPathEntry.isEar();
         boolean isZip = classPathEntry.isZip();
 
         List filter    = classPathEntry.getFilter();
+        List apkFilter = classPathEntry.getApkFilter();
         List jarFilter = classPathEntry.getJarFilter();
+        List aarFilter = classPathEntry.getAarFilter();
         List warFilter = classPathEntry.getWarFilter();
         List earFilter = classPathEntry.getEarFilter();
         List zipFilter = classPathEntry.getZipFilter();
 
         System.out.println(messagePrefix +
-                           (isJar ? "jar" :
+                           (isApk ? "apk" :
+                            isJar ? "jar" :
+                            isAar ? "aar" :
                             isWar ? "war" :
                             isEar ? "ear" :
                             isZip ? "zip" :
                                     "directory") +
                            " [" + classPathEntry.getName() + "]" +
                            (filter    != null ||
+                            apkFilter != null ||
                             jarFilter != null ||
+                            aarFilter != null ||
                             warFilter != null ||
                             earFilter != null ||
                             zipFilter != null ? " (filtered)" : ""));
@@ -81,20 +89,30 @@ public class DataEntryReaderFactory
                          reader);
         }
 
-        // Unzip any jars, if necessary.
-        reader = wrapInJarReader(reader, isJar, jarFilter, ".jar");
-        if (!isJar)
+        // Unzip any apks, if necessary.
+        reader = wrapInJarReader(reader, isApk, apkFilter, ".apk");
+        if (!isApk)
         {
-            // Unzip any wars, if necessary.
-            reader = wrapInJarReader(reader, isWar, warFilter, ".war");
-            if (!isWar)
+            // Unzip any jars, if necessary.
+            reader = wrapInJarReader(reader, isJar, jarFilter, ".jar");
+            if (!isJar)
             {
-                // Unzip any ears, if necessary.
-                reader = wrapInJarReader(reader, isEar, earFilter, ".ear");
-                if (!isEar)
+                // Unzip any aars, if necessary.
+                reader = wrapInJarReader(reader, isAar, aarFilter, ".aar");
+                if (!isAar)
                 {
-                    // Unzip any zips, if necessary.
-                    reader = wrapInJarReader(reader, isZip, zipFilter, ".zip");
+                    // Unzip any wars, if necessary.
+                    reader = wrapInJarReader(reader, isWar, warFilter, ".war");
+                    if (!isWar)
+                    {
+                        // Unzip any ears, if necessary.
+                        reader = wrapInJarReader(reader, isEar, earFilter, ".ear");
+                        if (!isEar)
+                        {
+                            // Unzip any zips, if necessary.
+                            reader = wrapInJarReader(reader, isZip, zipFilter, ".zip");
+                        }
+                    }
                 }
             }
         }

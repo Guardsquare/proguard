@@ -25,7 +25,6 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.value.Value;
 import proguard.optimize.evaluation.StoringInvocationUnit;
-import proguard.optimize.info.ParameterUsageMarker;
 
 /**
  * This <code>MemberVisitor</code> delegates its visits to program methods

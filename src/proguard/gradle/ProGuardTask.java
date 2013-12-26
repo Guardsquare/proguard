@@ -21,12 +21,12 @@
 package proguard.gradle;
 
 import groovy.lang.Closure;
-import org.gradle.api.*;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import proguard.*;
-import proguard.classfile.*;
+import proguard.classfile.ClassConstants;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.ListUtil;
 
@@ -63,27 +63,106 @@ public class ProGuardTask extends DefaultTask
     // but package visible or protected methods are ok.
 
     @InputFiles
-    protected FileCollection getInJarFiles() throws ParseException
+    protected FileCollection getInJarFileCollection() throws ParseException
     {
         return getProject().files(inJarFiles);
     }
 
     @Optional @OutputFiles
-    protected FileCollection getOutJarFiles() throws ParseException
+    protected FileCollection getOutJarFileCollection() throws ParseException
     {
         return getProject().files(outJarFiles);
     }
 
     @InputFiles
-    protected FileCollection getLibraryJarFiles() throws ParseException
+    protected FileCollection getLibraryJarFileCollection() throws ParseException
     {
         return getProject().files(libraryJarFiles);
     }
 
     @InputFiles
-    protected FileCollection getConfigurationFiles() throws ParseException
+    protected FileCollection getConfigurationFileCollection() throws ParseException
     {
         return getProject().files(configurationFiles);
+    }
+
+
+    // Convenience methods to retrieve settings from outside the task.
+
+    /**
+     * Returns the collected list of input files (directory, jar, aar, etc,
+     * represented as Object, String, File, etc).
+     */
+    public List getInJarFiles()
+    {
+        return inJarFiles;
+    }
+
+    /**
+     * Returns the collected list of filters (represented as argument Maps)
+     * corresponding to the list of input files.
+     */
+    public List getInJarFilters()
+    {
+        return inJarFilters;
+    }
+
+    /**
+     * Returns the collected list of output files (directory, jar, aar, etc,
+     * represented as Object, String, File, etc).
+     */
+    public List getOutJarFiles()
+    {
+        return outJarFiles;
+    }
+
+    /**
+     * Returns the collected list of filters (represented as argument Maps)
+     * corresponding to the list of output files.
+     */
+    public List getOutJarFilters()
+    {
+        return outJarFilters;
+    }
+
+    /**
+     * Returns the list with the numbers of input files that correspond to the
+     * list of output files.
+     *
+     * For instance, [2, 3] means that
+     *   the contents of the first 2 input files go to the first output file and
+     *   the contents of the next 3 input files go to the second output file.
+     */
+    public List getInJarCounts()
+    {
+        return inJarCounts;
+    }
+
+    /**
+     * Returns the collected list of library files (directory, jar, aar, etc,
+     * represented as Object, String, File, etc).
+     */
+    public List getLibraryJarFiles()
+    {
+        return libraryJarFiles;
+    }
+
+    /**
+     * Returns the collected list of filters (represented as argument Maps)
+     * corresponding to the list of library files.
+     */
+    public List getLibraryJarFilters()
+    {
+        return libraryJarFilters;
+    }
+
+    /**
+     * Returns the collected list of configuration files to be included
+     * (represented as Object, String, File, etc).
+     */
+    public List getConfigurationFiles()
+    {
+        return configurationFiles;
     }
 
 
@@ -985,6 +1064,24 @@ public class ProGuardTask extends DefaultTask
     public void proguard()
     throws ParseException, IOException
     {
+        // Let the logging manager capture the standard output and errors from
+        // ProGuard.
+        LoggingManager loggingManager = getLogging();
+        loggingManager.captureStandardOutput(LogLevel.INFO);
+        loggingManager.captureStandardError(LogLevel.WARN);
+
+        // Run ProGuard with the collected configuration.
+        new ProGuard(getConfiguration()).execute();
+
+    }
+
+
+    /**
+     * Returns the configuration collected so far, resolving files and
+     * reading included configurations.
+     */
+    private Configuration getConfiguration() throws IOException, ParseException
+    {
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.
         configuration.programJars = new ClassPath();
@@ -1054,15 +1151,7 @@ public class ProGuardTask extends DefaultTask
         // was necessary.
         configuration.lastModified = Long.MAX_VALUE;
 
-        // Let the logging manager capture the standard output and errors from
-        // ProGuard.
-        LoggingManager loggingManager = getLogging();
-        loggingManager.captureStandardOutput(LogLevel.INFO);
-        loggingManager.captureStandardError(LogLevel.WARN);
-
-        // Run ProGuard with the collected configuration.
-        new ProGuard(configuration).execute();
-
+        return configuration;
     }
 
 
@@ -1097,7 +1186,9 @@ public class ProGuardTask extends DefaultTask
                 if (filterArgs != null)
                 {
                     classPathEntry.setFilter(ListUtil.commaSeparatedList((String)filterArgs.get("filter")));
+                    classPathEntry.setApkFilter(ListUtil.commaSeparatedList((String)filterArgs.get("apkfilter")));
                     classPathEntry.setJarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("jarfilter")));
+                    classPathEntry.setAarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("aarfilter")));
                     classPathEntry.setWarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("warfilter")));
                     classPathEntry.setEarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("earfilter")));
                     classPathEntry.setZipFilter(ListUtil.commaSeparatedList((String)filterArgs.get("zipfilter")));

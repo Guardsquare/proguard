@@ -53,7 +53,7 @@
     
     <!-- Preserve the methods that are required in all enumeration classes. -->
     
-    <keepclassmembers extends="java.lang.Enum">
+    <keepclassmembers allowoptimization="true" type="enum">
       <method access="public static"
               type="**[]"
               name="values"

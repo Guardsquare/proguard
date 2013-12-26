@@ -20,10 +20,8 @@
  */
 package proguard.classfile.attribute.visitor;
 
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-
-import java.beans.MethodDescriptor;
+import proguard.classfile.Clazz;
+import proguard.classfile.attribute.BootstrapMethodInfo;
 
 
 /**

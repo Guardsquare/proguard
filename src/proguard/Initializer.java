@@ -21,9 +21,9 @@
 package proguard;
 
 import proguard.classfile.ClassPool;
-import proguard.classfile.attribute.annotation.visitor.*;
+import proguard.classfile.attribute.annotation.visitor.AllElementValueVisitor;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.constant.visitor.*;
+import proguard.classfile.constant.visitor.AllConstantVisitor;
 import proguard.classfile.instruction.visitor.AllInstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;

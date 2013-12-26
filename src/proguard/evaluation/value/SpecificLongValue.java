@@ -153,14 +153,14 @@ abstract class SpecificLongValue extends LongValue
     public LongValue subtract(SpecificLongValue other)
     {
         return this.equals(other) ?
-            SpecificValueFactory.LONG_VALUE_0 :
+            ParticularValueFactory.LONG_VALUE_0 :
             new CompositeLongValue(this, CompositeLongValue.SUBTRACT, other);
     }
 
     public LongValue subtractFrom(SpecificLongValue other)
     {
         return this.equals(other) ?
-            SpecificValueFactory.LONG_VALUE_0 :
+            ParticularValueFactory.LONG_VALUE_0 :
             new CompositeLongValue(other, CompositeLongValue.SUBTRACT, this);
     }
 
@@ -225,7 +225,7 @@ abstract class SpecificLongValue extends LongValue
     public LongValue xor(SpecificLongValue other)
     {
         return this.equals(other) ?
-            SpecificValueFactory.LONG_VALUE_0 :
+            ParticularValueFactory.LONG_VALUE_0 :
             new CompositeLongValue(other, CompositeLongValue.XOR, this);
     }
 

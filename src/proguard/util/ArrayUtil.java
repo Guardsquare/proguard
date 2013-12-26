@@ -113,6 +113,36 @@ public class ArrayUtil
 
 
     /**
+     * Returns whether the elements of the two given arrays are the same, or
+     * both arrays are null.
+     * @param array1 the first array.
+     * @param array2 the second array.
+     * @return whether the elements are the same.
+     */
+    public static boolean equalOrNull(Object[] array1, Object[] array2)
+    {
+        return array1 == null ? array2 == null :
+            equalOrNull(array1, array2, array1.length);
+    }
+
+
+    /**
+     * Returns whether the elements of the two given arrays are the same, or
+     * both arrays are null.
+     * @param array1 the first array.
+     * @param array2 the second array.
+     * @param size   the size of the arrays to be checked.
+     * @return whether the elements are the same.
+     */
+    public static boolean equalOrNull(Object[] array1, Object[] array2, int size)
+    {
+        return array1 == null ? array2 == null :
+            array2 != null &&
+            equalOrNull(array1, array2, size);
+    }
+
+
+    /**
      * Returns a hash code for the elements of the given array.
      * @param array the array.
      * @param size  the size of the array to be taken into account.
@@ -185,6 +215,31 @@ public class ArrayUtil
         }
 
         return hashCode;
+    }
+
+
+    /**
+     * Returns a hash code for the elements of the given array, or 0 if it is
+     * null.
+     * @param array the array.
+     * @return a hash code.
+     */
+    public static int hashCodeOrNull(Object[] array)
+    {
+        return array == null ? 0 : hashCode(array, array.length);
+    }
+
+
+    /**
+     * Returns a hash code for the elements of the given array, or 0 if it is
+     * null.
+     * @param array the array.
+     * @param size  the size of the array to be taken into account.
+     * @return a hash code.
+     */
+    public static int hashCodeOrNull(Object[] array, int size)
+    {
+        return array == null ? 0 : hashCode(array, size);
     }
 
 

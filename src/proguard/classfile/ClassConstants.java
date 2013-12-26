@@ -25,7 +25,7 @@ package proguard.classfile;
  *
  * @author Eric Lafortune
  */
-public interface ClassConstants
+public class ClassConstants
 {
     public static final String CLASS_FILE_EXTENSION = ".class";
 
@@ -287,6 +287,12 @@ public interface ClassConstants
     public static final String INTERNAL_METHOD_TYPE_OBJECT_STRING_BUILDER  = "(Ljava/lang/Object;)Ljava/lang/StringBuilder;";
     public static final String INTERNAL_METHOD_NAME_TOSTRING               = "toString";
     public static final String INTERNAL_METHOD_TYPE_TOSTRING               = "()Ljava/lang/String;";
+    public static final String INTERNAL_METHOD_NAME_CLONE                  = "clone";
+    public static final String INTERNAL_METHOD_TYPE_CLONE                  = "()Ljava/lang/Object;";
+
+    public static final String INTERNAL_METHOD_NAME_VALUES                 = "values";
+    public static final String INTERNAL_METHOD_NAME_ORDINAL                = "ordinal";
+    public static final String INTERNAL_METHOD_TYPE_ORDINAL                = "()I";
 
     public static final char INTERNAL_TYPE_VOID                   = 'V';
     public static final char INTERNAL_TYPE_BOOLEAN                = 'Z';

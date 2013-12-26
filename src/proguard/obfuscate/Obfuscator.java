@@ -23,7 +23,6 @@ package proguard.obfuscate;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.visitor.AllConstantVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
@@ -105,7 +104,7 @@ public class Obfuscator
 
         AttributeVisitor optionalAttributeUsageMarker =
             configuration.keepAttributes == null ? null :
-                new AttributeNameFilter(new ListParser(new NameParser()).parse(configuration.keepAttributes),
+                new AttributeNameFilter(configuration.keepAttributes,
                                         attributeUsageMarker);
 
         programClassPool.classesAccept(
@@ -391,12 +390,12 @@ public class Obfuscator
             {
                 System.err.println("         If you are sure the conflicts are harmless,");
                 System.err.println("         you could try your luck using the '-ignorewarnings' option.");
-                }
+            }
 
-                System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict2)");
+            System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict2)");
 
-                if (!configuration.ignoreWarnings)
-                {
+            if (!configuration.ignoreWarnings)
+            {
                 throw new IOException("Please correct the above warnings first.");
             }
         }
@@ -438,8 +437,7 @@ public class Obfuscator
             configuration.allowAccessModification)
         {
             programClassPool.classesAccept(
-                new AllConstantVisitor(
-                new AccessFixer()));
+                new AccessFixer());
 
             // Fix the access flags of the inner classes information.
             programClassPool.classesAccept(

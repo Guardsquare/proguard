@@ -20,7 +20,7 @@
  */
 package proguard.classfile.editor;
 
-import proguard.classfile.*;
+import proguard.classfile.ProgramClass;
 import proguard.classfile.attribute.annotation.*;
 
 /**

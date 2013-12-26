@@ -22,7 +22,6 @@ package proguard.classfile.util;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
@@ -54,10 +53,10 @@ implements   InstructionVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    /*
-    private static       boolean DEBUG = true;
-    /*/
+    //*
     private static final boolean DEBUG = false;
+    /*/
+    private static       boolean DEBUG = true;
     //*/
 
     public static final int CLASS_INDEX       = InstructionSequenceMatcher.X;

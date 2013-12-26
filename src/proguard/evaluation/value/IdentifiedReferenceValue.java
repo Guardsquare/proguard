@@ -23,18 +23,19 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This LongValue represents a reference value that is identified by a unique ID.
+ * This TypedReferenceValue represents a reference value that is identified by a
+ * unique ID.
  *
  * @author Eric Lafortune
  */
-final class IdentifiedReferenceValue extends ReferenceValue
+class IdentifiedReferenceValue extends TypedReferenceValue
 {
     private final ValueFactory valuefactory;
     private final int          id;
 
 
     /**
-     * Creates a new long value with the given ID.
+     * Creates a new reference value with the given ID.
      */
     public IdentifiedReferenceValue(String       type,
                                     Clazz        referencedClass,
@@ -49,23 +50,79 @@ final class IdentifiedReferenceValue extends ReferenceValue
     }
 
 
-    // Implementations for ReferenceValue.
-
-    public int equal(ReferenceValue other)
-    {
-        return this.equals(other) ? ALWAYS : MAYBE;
-    }
-
-
     // Implementations of binary methods of ReferenceValue.
 
     public ReferenceValue generalize(ReferenceValue other)
     {
-        // Remove the ID if both values don't share the same ID.
-        return this.equals(other) ?
-            this :
-            new ReferenceValue(type, referencedClass, mayBeNull).generalize(other);
+        return other.generalize(this);
     }
+
+
+    public int equal(ReferenceValue other)
+    {
+        return other.equal(this);
+    }
+
+
+    // Implementations of binary ReferenceValue methods with
+    // IdentifiedReferenceValue arguments.
+
+//    public ReferenceValue generalize(IdentifiedReferenceValue other)
+//    {
+//        return generalize((TypedReferenceValue)other);
+//    }
+
+
+    public int equal(IdentifiedReferenceValue other)
+    {
+        return this.equals(other) ? ALWAYS :
+                                    this.equal((TypedReferenceValue)other);
+    }
+
+
+//    // Implementations of binary ReferenceValue methods with
+//    // ArrayReferenceValue arguments.
+//
+//    public ReferenceValue generalize(ArrayReferenceValue other)
+//    {
+//        return generalize((TypedReferenceValue)other);
+//    }
+//
+//
+//    public int equal(ArrayReferenceValue other)
+//    {
+//        return equal((TypedReferenceValue)other);
+//    }
+//
+//
+//    // Implementations of binary ReferenceValue methods with
+//    // IdentifiedArrayReferenceValue arguments.
+//
+//    public ReferenceValue generalize(IdentifiedArrayReferenceValue other)
+//    {
+//        return generalize((ArrayReferenceValue)other);
+//    }
+//
+//
+//    public int equal(IdentifiedArrayReferenceValue other)
+//    {
+//        return equal((ArrayReferenceValue)other);
+//    }
+//
+//
+//    // Implementations of binary ReferenceValue methods with
+//    // DetailedArrayReferenceValue arguments.
+//
+//    public ReferenceValue generalize(DetailedArrayReferenceValue other)
+//    {
+//        return generalize((IdentifiedArrayReferenceValue)other);
+//    }
+//
+//
+//    public int equal(DetailedArrayReferenceValue other)
+//    {
+//        return equal((IdentifiedArrayReferenceValue)other);
+//    }
 
 
     // Implementations for Value.

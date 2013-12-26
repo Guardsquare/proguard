@@ -8,7 +8,8 @@ import proguard.annotation.*;
  * You can then process it with:
  *     java -jar ../../../lib/proguard.jar @ ../examples.pro
  *
- * The annotations will preserve the class and its public getters and setters.
+ * The annotations will preserve the class and its public getters and setters,
+ * as a result of the specifications in lib/annotations.pro.
  */
 @Keep
 @KeepPublicGettersSetters

@@ -157,7 +157,7 @@ abstract class SpecificFloatValue extends FloatValue
 
         // Not handling NaN properly.
         //return this.equals(other) ?
-        //    SpecificValueFactory.INTEGER_VALUE_0 :
+        //    ParticularValueFactory.INTEGER_VALUE_0 :
         //    new ComparisonValue(this, other);
     }
 

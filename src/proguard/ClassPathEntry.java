@@ -27,10 +27,11 @@ import java.util.List;
 
 
 /**
- * This class represents an entry from a class path: a jar, a war, a zip, an
- * ear, or a directory, with a name and a flag to indicates whether the entry is
- * an input entry or an output entry. Optional filters can be specified for the
- * names of the contained resource/classes, jars, wars, ears, and zips.
+ * This class represents an entry from a class path: an apk, a jar, an aar, a
+ * war, a zip, an ear, or a directory, with a name and a flag to indicates
+ * whether the entry is an input entry or an output entry. Optional filters can
+ * be specified for the names of the contained resource/classes, apks, jars,
+ * aars, wars, ears, and zips.
  *
  * @author Eric Lafortune
  */
@@ -39,7 +40,9 @@ public class ClassPathEntry
     private File    file;
     private boolean output;
     private List    filter;
+    private List    apkFilter;
     private List    jarFilter;
+    private List    aarFilter;
     private List    warFilter;
     private List    earFilter;
     private List    zipFilter;
@@ -108,11 +111,39 @@ public class ClassPathEntry
 
 
     /**
+     * Returns whether this data entry is a dex file.
+     */
+    public boolean isDex()
+    {
+        return hasExtension(".dex");
+    }
+
+
+    /**
+     * Returns whether this data entry is an apk file.
+     */
+    public boolean isApk()
+    {
+        return hasExtension(".apk") ||
+               hasExtension(".ap_");
+    }
+
+
+    /**
      * Returns whether this data entry is a jar file.
      */
     public boolean isJar()
     {
         return hasExtension(".jar");
+    }
+
+
+    /**
+     * Returns whether this data entry is an aar file.
+     */
+    public boolean isAar()
+    {
+        return hasExtension(".aar");
     }
 
 
@@ -184,6 +215,23 @@ public class ClassPathEntry
 
 
     /**
+     * Returns the name filter that is applied to apk files in this entry, if any.
+     */
+    public List getApkFilter()
+    {
+        return apkFilter;
+    }
+
+    /**
+     * Sets the name filter that is applied to apk files in this entry, if any.
+     */
+    public void setApkFilter(List filter)
+    {
+        this.apkFilter = filter == null || filter.size() == 0 ? null : filter;
+    }
+
+
+    /**
      * Returns the name filter that is applied to jar files in this entry, if any.
      */
     public List getJarFilter()
@@ -197,6 +245,23 @@ public class ClassPathEntry
     public void setJarFilter(List filter)
     {
         this.jarFilter = filter == null || filter.size() == 0 ? null : filter;
+    }
+
+
+    /**
+     * Returns the name filter that is applied to aar files in this entry, if any.
+     */
+    public List getAarFilter()
+    {
+        return aarFilter;
+    }
+
+    /**
+     * Sets the name filter that is applied to aar files in this entry, if any.
+     */
+    public void setAarFilter(List filter)
+    {
+        this.aarFilter = filter == null || filter.size() == 0 ? null : filter;
     }
 
 
@@ -259,12 +324,17 @@ public class ClassPathEntry
 
         if (filter    != null ||
             jarFilter != null ||
+            aarFilter != null ||
             warFilter != null ||
             earFilter != null ||
             zipFilter != null)
         {
             string +=
                 ConfigurationConstants.OPEN_ARGUMENTS_KEYWORD +
+                (aarFilter != null ? ListUtil.commaSeparatedString(aarFilter, true) : "")  +
+                ConfigurationConstants.SEPARATOR_KEYWORD +
+                (apkFilter != null ? ListUtil.commaSeparatedString(apkFilter, true) : "")  +
+                ConfigurationConstants.SEPARATOR_KEYWORD +
                 (zipFilter != null ? ListUtil.commaSeparatedString(zipFilter, true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
                 (earFilter != null ? ListUtil.commaSeparatedString(earFilter, true) : "")  +

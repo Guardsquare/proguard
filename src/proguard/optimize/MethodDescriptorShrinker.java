@@ -23,7 +23,7 @@ package proguard.optimize;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;

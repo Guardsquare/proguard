@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -95,8 +100,8 @@ The sections below provide more details:
 <dt><a name="injars"><code><b>-injars</b></code></a>
     <a href="#classpath"><i>class_path</i></a></dt>
 
-<dd>Specifies the input jars (or wars, ears, zips, or directories) of the
-    application to be processed. The class files in these jars will be
+<dd>Specifies the input jars (or aars, wars, ears, zips, apks, or directories)
+    of the application to be processed. The class files in these jars will be
     processed and written to the output jars. By default, any non-class files
     will be copied without changes. Please be aware of any temporary files
     (e.g. created by IDEs), especially if you are reading your input files
@@ -108,8 +113,8 @@ The sections below provide more details:
 <dt><a name="outjars"><code><b>-outjars</b></code></a>
     <a href="#classpath"><i>class_path</i></a></dt>
 
-<dd>Specifies the names of the output jars (or wars, ears, zips, or
-    directories). The processed input of the preceding <code>-injars</code>
+<dd>Specifies the names of the output jars (or aars, wars, ears, zips, apks,
+    or directories). The processed input of the preceding <code>-injars</code>
     options will be written to the named jars. This allows you to collect the
     contents of groups of input jars into corresponding groups of output jars.
     In addition, the output entries can be filtered, as explained in
@@ -125,15 +130,16 @@ The sections below provide more details:
 <dt><a name="libraryjars"><code><b>-libraryjars</b></code></a>
     <a href="#classpath"><i>class_path</i></a></dt>
 
-<dd>Specifies the library jars (or wars, ears, zips, or directories) of the
-    application to be processed. The files in these jars will not be included
-    in the output jars. The specified library jars should at least contain the
-    class files that are <i>extended</i> by application class files. Library
-    class files that are only <i>called</i> needn't be present, although their
-    presence can improve the results of the optimization step. The entries in
-    the class path can be filtered, as explained in the <a
-    href="#filefilters">filters</a> section. For better readability, class path
-    entries can be specified using multiple <code>-libraryjars</code> options.
+<dd>Specifies the library jars (or aars, wars, ears, zips, apks, or
+    directories) of the application to be processed. The files in these jars
+    will not be included in the output jars. The specified library jars should
+    at least contain the class files that are <i>extended</i> by application
+    class files. Library class files that are only <i>called</i> needn't be
+    present, although their presence can improve the results of the
+    optimization step. The entries in the class path can be filtered, as
+    explained in the <a href="#filefilters">filters</a> section. For better
+    readability, class path entries can be specified using
+    multiple <code>-libraryjars</code> options.
     <p>
     Please note that the boot path and the class path set for running ProGuard
     are not considered when looking for library classes. This means that you
@@ -176,15 +182,15 @@ The sections below provide more details:
 <dt><a name="keepdirectories"><code><b>-keepdirectories</b></code></a>
     [<i><a href="#filefilters">directory_filter</a></i>]</dt>
 
-<dd>Specifies the directories to be kept in the output jars (or wars, ears,
-    zips, or directories). By default, directory entries are removed. This
-    reduces the jar size, but it may break your program if the code tries to
-    find them with constructs like
-    "<code>mypackage.MyClass.class.getResource("")</code>". You'll then want to
-    keep the directory corresponding to the package, "<code>-keepdirectories
-    mypackage</code>". If the option is specified without a filter, all
-    directories are kept. With a filter, only matching directories are
-    kept.</dd>
+<dd>Specifies the directories to be kept in the output jars (or aars, wars,
+    ears, zips, apks, or directories). By default, directory entries are
+    removed. This reduces the jar size, but it may break your program if the
+    code tries to find them with constructs like
+    "<code>mypackage.MyClass.class.getResource("")</code>". You'll then want
+    to keep the directory corresponding to the package,
+    "<code>-keepdirectories mypackage</code>". If the option is specified
+    without a filter, all directories are kept. With a filter, only matching
+    directories are kept.</dd>
 
 <dt><a name="target"><code><b>-target</b></code></a> <i>version</i></dt>
 
@@ -787,7 +793,9 @@ The order of the entries determines their priorities, in case of duplicates.
 Each input entry can be:
 <ul>
 <li>A class file or resource file,</li>
+<li>An apk file, containing any of the above,</li>
 <li>A jar file, containing any of the above,</li>
+<li>An aar file, containing any of the above,</li>
 <li>A war file, containing any of the above,</li>
 <li>An ear file, containing any of the above,</li>
 <li>A zip file, containing any of the above,</li>
@@ -795,15 +803,18 @@ Each input entry can be:
 </ul>
 <p>
 The paths of directly specified class files and resource files is ignored, so
-class files should generally be part of a jar file, a war file, an ear file, a
-zip file, or a directory. In addition, the paths of class files should not have
-any additional directory prefixes inside the archives or directories.
+class files should generally be part of a jar file, an aar file, a war file,
+an ear file, a zip file, or a directory. In addition, the paths of class files
+should not have any additional directory prefixes inside the archives or
+directories.
 
 <p>
 Each output entry can be:
 <ul>
-<li>A jar file, in which all processed class files and resource files will be
+<li>An apk file, in which all class files and resource files will be
     collected.</li>
+<li>A jar file, in which any and all of the above will be collected,</li>
+<li>An aar file, in which any and all of the above will be collected,</li>
 <li>A war file, in which any and all of the above will be collected,</li>
 <li>An ear file, in which any and all of the above will be collected,</li>
 <li>A zip file, in which any and all of the above will be collected,</li>
@@ -824,10 +835,12 @@ href="#filename">file names</a> below.
 <p>
 In addition, ProGuard provides the possibility to filter the class path
 entries and their contents, based on their full relative file names. Each
-class path entry can be followed by up to 5 types of <a
+class path entry can be followed by up to 7 types of <a
 href="#filefilters">file filters</a> between parentheses, separated by
 semi-colons:
 <ul>
+<li>A filter for all aar names that are encountered,</li>
+<li>A filter for all apk names that are encountered,</li>
 <li>A filter for all zip names that are encountered,</li>
 <li>A filter for all ear names that are encountered,</li>
 <li>A filter for all war names that are encountered,</li>
@@ -836,11 +849,11 @@ semi-colons:
     encountered.</li>
 </ul>
 <p>
-If fewer than 5 filters are specified, they are assumed to be the latter
+If fewer than 7 filters are specified, they are assumed to be the latter
 filters. Any empty filters are ignored. More formally, a filtered class path
 entry looks like this:
 <pre>
-<i>classpathentry</i><b>(</b>[[[[<i>zipfilter</i><b>;</b>]<i>earfilter</i><b>;</b>]<i>warfilter</i><b>;</b>]<i>jarfilter</i><b>;</b>]<i>filefilter</i><b>)</b>
+<i>classpathentry</i><b>(</b>[[[[[[<i>aarfilter</i><b>;</b>]<i>apkfilter</i><b>;</b>]<i>zipfilter</i><b>;</b>]<i>earfilter</i><b>;</b>]<i>warfilter</i><b>;</b>]<i>jarfilter</i><b>;</b>]<i>filefilter</i><b>)</b>
 </pre>
 <p>
 Square brackets "[]" mean that their contents are optional.
@@ -933,7 +946,7 @@ href="examples.html#filtering">filtering input and output</a>.
 
 ProGuard offers options with filters for many different aspects of the
 configuration: names of files, directories, classes, packages, attributes,
-optimizations, etc. 
+optimizations, etc.
 <p>
 A filter is a list of comma-separated names that can contain wildcards. Only
 names that match an item on the list pass the filter. The supported wildcards

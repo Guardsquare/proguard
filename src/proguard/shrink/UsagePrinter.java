@@ -138,7 +138,6 @@ implements   ClassVisitor,
         {
             printClassNameHeader();
 
-            ps.print("====");
             ps.print("    ");
             programMethod.attributesAccept(programClass, this);
             ps.println(ClassUtil.externalFullMethodDescription(

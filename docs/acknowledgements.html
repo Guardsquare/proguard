@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -57,6 +62,10 @@ and many more. Thanks! Your feedback has been invaluable.
 financial resources for this project. At Saikoa, we're also developing
 ProGuard's sibling for Android,
 <a href="http://www.saikoa.com/dexguard" target="_top">DexGuard</a>.
+<p>
+
+<a href="http://www.sky.com/" rel="nofollow" target="other">British Sky</a>
+has kindly sponsored the optimization of <i>enum</i> types.
 <p>
 
 <a href="http://sourceforge.net/projects/proguard/"

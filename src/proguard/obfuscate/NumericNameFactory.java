@@ -20,9 +20,6 @@
  */
 package proguard.obfuscate;
 
-import java.util.*;
-
-
 /**
  * This <code>NameFactory</code> generates unique numeric names, starting at
  * "1".

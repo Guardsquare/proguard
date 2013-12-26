@@ -21,11 +21,11 @@
 package proguard.obfuscate;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
-import proguard.classfile.constant.ClassConstant;
-import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 

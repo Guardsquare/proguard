@@ -22,7 +22,7 @@ package proguard.classfile.constant;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.visitor.ClassVisitor;
 
 /**
  * This Constant represents an invoke dynamic constant in the constant pool.

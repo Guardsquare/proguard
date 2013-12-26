@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -26,9 +31,9 @@ applications, commercial or not. Your code obviously remains yours after
 having been processed, and its license can remain the same.
 <p>
 
-<b>ProGuard</b> itself is copyrighted, but its distribution license provides
-you with some rights for modifying and redistributing its code and its
-documentation. More specifically, <b>ProGuard</b> is distributed under the
+The <b>ProGuard code</b> itself is copyrighted, but its distribution license
+provides you with some rights for modifying and redistributing its code and
+its documentation. More specifically, <b>ProGuard</b> is distributed under the
 terms of the <a href="GPL.html">GNU General Public License</a> (GPL), version
 2, as published by the <a href="http://www.fsf.org/" target="other">Free
 Software Foundation</a> (FSF). In short, this means that you may freely
@@ -47,9 +52,8 @@ Scala, the NeoMAD Tools by Neomades, the Javaground Tools, and the Sanaware
 Tools.
 
 <p>
-The <b>ProGuard user documentation</b> represents an important part of this
-work. It may only be redistributed without changes, along with the unmodified
-version of the code.
+The <b>ProGuard user documentation</b> is copyrighted as well. It may only be
+redistributed without changes, along with the unmodified version of the code.
 
 <hr />
 <noscript><div><a target="_top" href="index.html" class="button">Show menu</a></div></noscript>

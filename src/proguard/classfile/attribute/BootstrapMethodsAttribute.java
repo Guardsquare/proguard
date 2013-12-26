@@ -20,9 +20,8 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
  * This Attribute represents a bootstrap methods attribute.

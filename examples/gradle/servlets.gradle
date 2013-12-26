@@ -62,7 +62,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     // Preserve the special static methods that are required in all enumeration
     // classes.
 
-    keepclassmembers 'class * extends java.lang.Enum { \
+    keepclassmembers allowshrinking:true, 'enum * { \
         public static **[] values(); \
         public static ** valueOf(java.lang.String); \
     }'

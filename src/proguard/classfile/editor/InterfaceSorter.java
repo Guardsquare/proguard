@@ -23,12 +23,11 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.*;
-import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.constant.Utf8Constant;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassVisitor;
 
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * This ClassVisitor sorts the interfaces of the program classes that it visits.

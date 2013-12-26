@@ -22,14 +22,13 @@ package proguard;
 
 import proguard.classfile.ClassPool;
 import proguard.classfile.editor.ClassElementSorter;
-import proguard.classfile.visitor.*;
+import proguard.classfile.visitor.ClassPrinter;
 import proguard.obfuscate.Obfuscator;
-import proguard.optimize.*;
+import proguard.optimize.Optimizer;
 import proguard.preverify.*;
 import proguard.shrink.Shrinker;
 
 import java.io.*;
-import java.util.Properties;
 
 /**
  * Tool for shrinking, optimizing, obfuscating, and preverifying Java classes.
@@ -38,7 +37,7 @@ import java.util.Properties;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 4.10";
+    public static final String VERSION = "ProGuard, version 4.11";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();

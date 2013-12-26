@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -65,6 +70,9 @@ are added and reorganized.
 <dl>
 <dt><code><b>class/marking/final</b></code></dt>
 <dd>Marks classes as final, whenever possible.</dd>
+
+<dt><code><b>class/unboxing/enum</b></code></dt>
+<dd>Simplifies enum types to integer constants, whenever possible.</dd>
 
 <dt><code><b>class/merging/vertical</b></code></dt>
 <dd>Merges classes vertically in the class hierarchy, whenever possible.</dd>

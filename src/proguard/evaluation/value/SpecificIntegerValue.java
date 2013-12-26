@@ -208,14 +208,14 @@ abstract class SpecificIntegerValue extends IntegerValue
     public IntegerValue subtract(SpecificIntegerValue other)
     {
         return this.equals(other) ?
-            SpecificValueFactory.INTEGER_VALUE_0 :
+            ParticularValueFactory.INTEGER_VALUE_0 :
             new CompositeIntegerValue(this, CompositeIntegerValue.SUBTRACT, other);
     }
 
     public IntegerValue subtractFrom(SpecificIntegerValue other)
     {
         return this.equals(other) ?
-            SpecificValueFactory.INTEGER_VALUE_0 :
+            ParticularValueFactory.INTEGER_VALUE_0 :
             new CompositeIntegerValue(other, CompositeIntegerValue.SUBTRACT, this);
     }
 
@@ -310,7 +310,7 @@ abstract class SpecificIntegerValue extends IntegerValue
     public IntegerValue xor(SpecificIntegerValue other)
     {
         return this.equals(other) ?
-            SpecificValueFactory.INTEGER_VALUE_0 :
+            ParticularValueFactory.INTEGER_VALUE_0 :
             new CompositeIntegerValue(other, CompositeIntegerValue.XOR, this);
     }
 

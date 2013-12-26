@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -90,8 +95,8 @@ creating a new configuration from scratch.
 <h2><a name="inputoutput">The Input/Output Tab</a></h2>
 
 The <i>Input/Output</i> tab contains two lists, respectively to specify the
-program jars (or wars, ears, zips, or directories), and the library jars (or
-wars, ears, zips, or directories).
+program jars (or aars, wars, ears, zips, apks, or directories), and the
+library jars (or aars, wars, ears, zips, apks, or directories).
 
 <ul>
 <li>The list of program jars contains input entries and output entries. Input
@@ -140,11 +145,12 @@ right-hand side:
 </table>
 <p>
 
-Filters allow to filter files based on their names. One can specify filters
-for class file names and resource file names, for jar file names, for war file
-names, for ear file names, and for zip file names. Multiple entries in the
-program list only make sense when combined with filters; each output file is
-written to the first entry with a matching filter.
+Filters allow to filter files based on their names. You can specify filters
+for class file names and resource file names, for jar file names, for aar file
+names, for war file names, for ear file names, for zip file names, and for
+apk file names. Multiple entries in the program list only make sense when
+combined with filters; each output file is written to the first entry with a
+matching filter.
 <p>
 
 Input entries that are currently not readable are colored red.

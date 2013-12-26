@@ -21,13 +21,11 @@
 package proguard.optimize;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.annotation.*;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.attribute.BootstrapMethodInfo;
+import proguard.classfile.attribute.visitor.BootstrapMethodInfoVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.ConstantPoolEditor;
-import proguard.classfile.util.*;
+import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.optimize.info.*;
 import proguard.optimize.peephole.VariableShrinker;

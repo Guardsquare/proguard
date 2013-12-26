@@ -20,8 +20,8 @@
  */
 package proguard.classfile;
 
-import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.*;
 
 /**

@@ -114,70 +114,83 @@ implements   InstructionVisitor
             case InstructionConstants.OP_BALOAD:
             case InstructionConstants.OP_CALOAD:
             case InstructionConstants.OP_SALOAD:
-                stack.ipop();
-                stack.apop();
-                stack.push(valueFactory.createIntegerValue());
+            {
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                stack.push(arrayReference.integerArrayLoad(arrayIndex, valueFactory));
                 break;
-
+            }
             case InstructionConstants.OP_LALOAD:
-                stack.ipop();
-                stack.apop();
-                stack.push(valueFactory.createLongValue());
+            {
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                stack.push(arrayReference.longArrayLoad(arrayIndex, valueFactory));
                 break;
-
+            }
             case InstructionConstants.OP_FALOAD:
-                stack.ipop();
-                stack.apop();
-                stack.push(valueFactory.createFloatValue());
+            {
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                stack.push(arrayReference.floatArrayLoad(arrayIndex, valueFactory));
                 break;
-
+            }
             case InstructionConstants.OP_DALOAD:
-                stack.ipop();
-                stack.apop();
-                stack.push(valueFactory.createDoubleValue());
+            {
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                stack.push(arrayReference.doubleArrayLoad(arrayIndex, valueFactory));
                 break;
-
+            }
             case InstructionConstants.OP_AALOAD:
             {
                 IntegerValue   arrayIndex     = stack.ipop();
                 ReferenceValue arrayReference = stack.apop();
-                stack.push(arrayReference.arrayLoad(arrayIndex, valueFactory));
+                stack.push(arrayReference.referenceArrayLoad(arrayIndex, valueFactory));
                 break;
             }
-
             case InstructionConstants.OP_IASTORE:
             case InstructionConstants.OP_BASTORE:
             case InstructionConstants.OP_CASTORE:
             case InstructionConstants.OP_SASTORE:
-                stack.ipop();
-                stack.ipop();
-                stack.apop();
+            {
+                Value          value          = stack.ipop();
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                arrayReference.arrayStore(arrayIndex, value);
                 break;
-
+            }
             case InstructionConstants.OP_LASTORE:
-                stack.lpop();
-                stack.ipop();
-                stack.apop();
+            {
+                Value          value          = stack.lpop();
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                arrayReference.arrayStore(arrayIndex, value);
                 break;
-
+            }
             case InstructionConstants.OP_FASTORE:
-                stack.fpop();
-                stack.ipop();
-                stack.apop();
+            {
+                Value          value          = stack.fpop();
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                arrayReference.arrayStore(arrayIndex, value);
                 break;
-
+            }
             case InstructionConstants.OP_DASTORE:
-                stack.dpop();
-                stack.ipop();
-                stack.apop();
+            {
+                Value          value          = stack.dpop();
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                arrayReference.arrayStore(arrayIndex, value);
                 break;
-
+            }
             case InstructionConstants.OP_AASTORE:
-                stack.apop();
-                stack.ipop();
-                stack.apop();
+            {
+                Value          value          = stack.apop();
+                IntegerValue   arrayIndex     = stack.ipop();
+                ReferenceValue arrayReference = stack.apop();
+                arrayReference.arrayStore(arrayIndex, value);
                 break;
-
+            }
             case InstructionConstants.OP_POP:
                 stack.pop1();
                 break;
@@ -527,8 +540,8 @@ implements   InstructionVisitor
                 break;
 
             case InstructionConstants.OP_ARRAYLENGTH:
-                stack.apop();
-                stack.push(valueFactory.createIntegerValue());
+                ReferenceValue referenceValue = stack.apop();
+                stack.push(referenceValue.arrayLength(valueFactory));
                 break;
 
             case InstructionConstants.OP_ATHROW:

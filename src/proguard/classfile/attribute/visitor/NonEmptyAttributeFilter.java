@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.preverification.*;
-import proguard.util.StringMatcher;
 
 /**
  * This AttributeVisitor delegates its visits another AttributeVisitor, but

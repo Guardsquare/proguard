@@ -470,18 +470,38 @@ public class ClassUtil
      */
     public static int internalMethodParameterCount(String internalMethodDescriptor)
     {
-        InternalTypeEnumeration internalTypeEnumeration =
-            new InternalTypeEnumeration(internalMethodDescriptor);
-
         int counter = 0;
-        while (internalTypeEnumeration.hasMoreTypes())
+        int index   = 1;
+
+        while (true)
         {
-            internalTypeEnumeration.nextType();
+            char c = internalMethodDescriptor.charAt(index++);
+            switch (c)
+            {
+                case ClassConstants.INTERNAL_TYPE_ARRAY:
+                {
+                    // Just ignore all array characters.
+                    break;
+                }
+                case ClassConstants.INTERNAL_TYPE_CLASS_START:
+                {
+                    counter++;
 
-            counter++;
+                    // Skip the class name.
+                    index = internalMethodDescriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, index) + 1;
+                    break;
+                }
+                default:
+                {
+                    counter++;
+                    break;
+                }
+                case ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE:
+                {
+                    return counter;
+                }
+            }
         }
-
-        return counter;
     }
 
 
@@ -535,18 +555,53 @@ public class ClassUtil
     public static int internalMethodParameterSize(String  internalMethodDescriptor,
                                                   boolean isStatic)
     {
-        InternalTypeEnumeration internalTypeEnumeration =
-            new InternalTypeEnumeration(internalMethodDescriptor);
+        int size  = isStatic ? 0 : 1;
+        int index = 1;
 
-        int size = isStatic ? 0 : 1;
-        while (internalTypeEnumeration.hasMoreTypes())
+        while (true)
         {
-            String internalType = internalTypeEnumeration.nextType();
+            char c = internalMethodDescriptor.charAt(index++);
+            switch (c)
+            {
+                case ClassConstants.INTERNAL_TYPE_LONG:
+                case ClassConstants.INTERNAL_TYPE_DOUBLE:
+                {
+                    size += 2;
+                    break;
+                }
+                case ClassConstants.INTERNAL_TYPE_CLASS_START:
+                {
+                    size++;
 
-            size += internalTypeSize(internalType);
+                    // Skip the class name.
+                    index = internalMethodDescriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, index) + 1;
+                    break;
+                }
+                case ClassConstants.INTERNAL_TYPE_ARRAY:
+                {
+                    size++;
+
+                    // Skip all array characters.
+                    while ((c = internalMethodDescriptor.charAt(index++)) == ClassConstants.INTERNAL_TYPE_ARRAY) {}
+
+                    if (c == ClassConstants.INTERNAL_TYPE_CLASS_START)
+                    {
+                        // Skip the class type.
+                        index = internalMethodDescriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, index) + 1;
+                    }
+                    break;
+                }
+                default:
+                {
+                    size++;
+                    break;
+                }
+                case ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE:
+                {
+                    return size;
+                }
+            }
         }
-
-        return size;
     }
 
 

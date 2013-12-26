@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -72,15 +77,15 @@ efficient use in Java 6.
 </table>
 <p>
 
-ProGuard first reads the <b>input jars</b> (or wars, ears, zips, or
-directories). It then subsequently shrinks, optimizes, obfuscates, and
+ProGuard first reads the <b>input jars</b> (or aars, wars, ears, zips, apks,
+or directories). It then subsequently shrinks, optimizes, obfuscates, and
 preverifies them. You can optionally let ProGuard perform multiple
 optimization passes. ProGuard writes the processed results to one or
-more <b>output jars</b> (or wars, ears, zips, or directories). The input may
-contain resource files, whose names and contents can optionally be updated to
-reflect the obfuscated class names.
+more <b>output jars</b> (or aars, wars, ears, zips, apks, or directories). The
+input may contain resource files, whose names and contents can optionally be
+updated to reflect the obfuscated class names.
 <p>
-ProGuard requires the <b>library jars</b> (or wars, ears, zips, or
+ProGuard requires the <b>library jars</b> (or aars, wars, ears, zips, apks, or
 directories) of the input jars to be specified. These are essentially the
 libraries that you would need for compiling the code. ProGuard uses them to
 reconstruct the class dependencies that are necessary for proper processing.

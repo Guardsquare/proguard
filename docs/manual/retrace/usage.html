@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -60,7 +65,7 @@ The following options are supported:
     de-obfuscate more general types of input than just stack traces. The
     default is suitable for stack traces produced by most JVMs:
     <pre>
-    (?:.*?\bat\s+%c.%m\s*\(.*?(?::%l)?\)\s*)|(?:(?:.*?[:"]\s+)?%c(?::.*)?)
+    (?:.*?\bat\s+%c\.%m\s*\(.*?(?::%l)?\)\s*)|(?:(?:.*?[:"]\s+)?%c(?::.*)?)
     </pre>
     The regular expression is a Java regular expression (cfr. the documentation
     of <code>java.util.regex.Pattern</code>), with a few additional wildcards:

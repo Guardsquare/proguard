@@ -12,8 +12,13 @@ if (window.self==window.top)
   window.top.location.replace("index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -71,6 +76,20 @@ target="other">proguard-gradle</a>,
 target="other">proguard-wtk-plugin</a>, and
 <a href="http://search.maven.org/#search|ga|1|a:%22proguard-retrace%22"
 target="other">proguard-retrace</a>.
+
+<h3><div>Dec 2013</div> Version 4.11</h3>
+<ul>
+<li>Added simplification of basic enum types.
+<li>Added reading and writing of apk and aar archives.
+<li>Fixed criteria for class merging.
+<li>Fixed simplification of variable initializations.
+<li>Fixed simplification of redundant boolean variables.
+<li>Fixed optimization of unused stack entries in exception handlers.
+<li>Fixed correction of access flags after class merging, method inlining, and
+    class repackaging.
+<li>Refined criterion for method inlining.
+<li>Updated documentation and examples.
+</ul>
 
 <h3><div>Jul 2013</div> Version 4.10</h3>
 <ul>

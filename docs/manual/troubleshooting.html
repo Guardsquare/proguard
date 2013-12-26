@@ -11,8 +11,13 @@ if (window.self==window.top)
   window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
 else {
   var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash)
-    window.top.location.hash=hash;
+  if (window.top.location.hash!=hash) {
+    if (history.pushState) {
+      window.top.history.replaceState(null, window.document.title, hash);
+    } else {
+      window.top.location.hash=hash;
+    }
+  }
 }
 //-->
 </script>
@@ -157,8 +162,8 @@ ProGuard may print out some notes and non-fatal warnings:
 
 <dt><a name="classmembers"><b>Note: the configuration doesn't specify which class members to keep for class '...'</b></a></dt>
 
-<dd>Your configuration contains
-    a <a href="usage.html#keepclassmembers"><code>-keepclassmembers</code></a>/<a href="usage.html#keepclasseswithmembers">-keepclasseswithmembers</code></a>
+<dd>Your configuration contains a
+    <a href="usage.html#keepclassmembers"><code>-keepclassmembers</code></a>/<a href="usage.html#keepclasseswithmembers"><code>-keepclasseswithmembers</code></a>
     option to preserve fields or methods in the given class, but it doesn't
     specify which fields or methods. This way, the option simply won't have
     any effect. You probably want to specify one or more fields or methods, as
@@ -277,7 +282,15 @@ some more serious warnings:
     referring to <code>java.awt</code>. This is a bit shady, since Android
     doesn't have this package at all, but if your application works anyway,
     you can let ProGuard accept it with "<code>-dontwarn java.awt.**</code>",
-    for instance.</dd>
+    for instance.
+    <p>
+    If the missing class is an Android run-time class, you should make sure
+    that you are building against an Android run-time that is sufficiently
+    recent. You may need to change the build target in your
+    <code>project.properties</code> file or <code>build.gradle</code> file to
+    that recent version. You can still specify a different
+    <code>minSdkVersion</code> and a different <code>targetSdkVersion</code>
+    in your <code>AndroidManifest.xml</code> file.</dd>
 
 <dt><a name="superclass"><b>Error: Can't find any super classes of ... (not even immediate super class ...)</b><br/><b>Error: Can't find common super class of ... and ...</b></a></dt>
 
@@ -478,12 +491,22 @@ Should ProGuard crash while processing your application:
 <dl>
 <dt><a name="outofmemoryerror"><b>OutOfMemoryError</b></a></dt>
 
-<dd>You can try increasing the heap size of the Java virtual machine (with the
-    usual <code>-Xms</code> and <code>-Xmx</code> options). You can also
-    reduce the amount of memory that ProGuard needs by removing unnecessary
-    library jars from your configuration, or by filtering out unused library
-    packages and classes. Remember that only classes or interfaces that are
-    extended or implemented by classes in your input jars are required.</dd>
+<dd>You can try increasing the heap size of the Java virtual machine, with the
+    usual <code>-Xmx</code> option:
+    <ul>
+    <li>In Java, specify the option as an argument to the JVM: <code>java
+        -Xmx1024m</code> ...
+    <li>In Ant, set the environment variable <code>ANT_OPTS=-Xmx1024m</code>
+    <li>In Gradle, set the environment variable
+        <code>GRADLE_OPTS=-Xmx1024m</code>
+    <li>In Maven, set the environment variable
+        <code>MAVEN_OPTS=-Xmx1024m</code>
+    <li>In Eclipse, add the line  <code>-Xmx1024m</code> to the file
+        <code>eclipse.ini</code> inside your Eclipse install.
+    </ul>
+    You can also reduce the amount of memory that ProGuard needs by removing
+    unnecessary library jars from your configuration, or by filtering out
+    unused library packages and classes.</dd>
 
 <dt><a name="stackoverflowerror"><b>StackOverflowError</b></a></dt>
 

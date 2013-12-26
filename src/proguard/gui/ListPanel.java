@@ -20,13 +20,12 @@
  */
 package proguard.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.List;
-import java.util.*;
-
 import javax.swing.*;
 import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import java.util.List;
 
 /**
  * This <code>Jpanel</code> allows the user to move and remove entries in a

@@ -20,9 +20,9 @@
  */
 package proguard.classfile.editor;
 
-import proguard.classfile.attribute.visitor.LineNumberInfoVisitor;
-import proguard.classfile.attribute.*;
 import proguard.classfile.*;
+import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.visitor.LineNumberInfoVisitor;
 
 /**
  * This LineNumberInfoVisitor adds all line numbers that it visits to the given

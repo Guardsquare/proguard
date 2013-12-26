@@ -88,7 +88,7 @@ implements   MemberVisitor
         // Is the method unmarked?
         if (NonPrivateMemberMarker.canBeMadePrivate(programMethod))
         {
-            // Make the method private.
+            // Make the method private and no longer final.
             programMethod.u2accessFlags =
                 AccessUtil.replaceAccessFlags(programMethod.u2accessFlags,
                                               ClassConstants.INTERNAL_ACC_PRIVATE);

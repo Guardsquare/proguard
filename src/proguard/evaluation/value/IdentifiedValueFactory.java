@@ -21,21 +21,20 @@
 package proguard.evaluation.value;
 
 import proguard.classfile.*;
-import proguard.classfile.util.ClassUtil;
 
 /**
- * This class provides methods to create and reuse IntegerValue objects.
+ * This particular value factory attaches a unique ID to any unknown values.
  *
  * @author Eric Lafortune
  */
 public class IdentifiedValueFactory
-extends      SpecificValueFactory
+extends      ParticularValueFactory
 {
-    private int integerID;
-    private int longID;
-    private int floatID;
-    private int doubleID;
-    private int referenceID;
+    protected int integerID;
+    protected int longID;
+    protected int floatID;
+    protected int doubleID;
+    protected int referenceID;
 
 
     // Implementations for ValueFactory.
@@ -70,6 +69,24 @@ extends      SpecificValueFactory
     {
         return type == null ?
             REFERENCE_VALUE_NULL :
-            new IdentifiedReferenceValue(type, referencedClass, mayBeNull, this, referenceID++);
+            new IdentifiedReferenceValue(type,
+                                         referencedClass,
+                                         mayBeNull,
+                                         this,
+                                         referenceID++);
+    }
+
+
+    public ReferenceValue createArrayReferenceValue(String       type,
+                                                    Clazz        referencedClass,
+                                                    IntegerValue arrayLength)
+    {
+        return type == null ?
+            REFERENCE_VALUE_NULL :
+            new IdentifiedArrayReferenceValue(ClassConstants.INTERNAL_TYPE_ARRAY + type,
+                                              referencedClass,
+                                              arrayLength,
+                                              this,
+                                              referenceID++);
     }
 }

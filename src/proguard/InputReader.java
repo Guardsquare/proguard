@@ -115,7 +115,7 @@ public class InputReader
         {
             System.err.println("Note: there were " + noteCount +
                                " duplicate class definitions.");
-            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#duplicateclass)");
+            System.err.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#duplicateclass)");
         }
 
         // Print out a summary of the warnings, if necessary.

@@ -182,9 +182,9 @@ final class ParticularDoubleValue extends SpecificDoubleValue
 
     public IntegerValue compare(ParticularDoubleValue other)
     {
-        return this.value <  other.value ? SpecificValueFactory.INTEGER_VALUE_M1 :
-               this.value == other.value ? SpecificValueFactory.INTEGER_VALUE_0  :
-                                           SpecificValueFactory.INTEGER_VALUE_1;
+        return this.value <  other.value ? ParticularValueFactory.INTEGER_VALUE_M1 :
+               this.value == other.value ? ParticularValueFactory.INTEGER_VALUE_0  :
+                                           ParticularValueFactory.INTEGER_VALUE_1;
     }
 
 

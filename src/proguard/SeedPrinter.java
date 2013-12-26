@@ -21,16 +21,10 @@
 package proguard;
 
 import proguard.classfile.ClassPool;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.constant.visitor.AllConstantVisitor;
-import proguard.classfile.instruction.visitor.AllInstructionVisitor;
-import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.optimize.*;
-import proguard.util.*;
 
 import java.io.*;
-import java.util.*;
 
 /**
  * This class prints out the seeds specified by keep options.

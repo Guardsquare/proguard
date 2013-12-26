@@ -36,9 +36,9 @@ public class ValueFactory
     static final FloatValue   FLOAT_VALUE   = new UnknownFloatValue();
     static final DoubleValue  DOUBLE_VALUE  = new UnknownDoubleValue();
 
-    static final ReferenceValue REFERENCE_VALUE_NULL                        = new ReferenceValue(null, null, true);
-    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL = new ReferenceValue(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT, null, true);
-    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL   = new ReferenceValue(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT, null, false);
+    static final ReferenceValue REFERENCE_VALUE_NULL                        = new TypedReferenceValue(null, null, true);
+    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL = new TypedReferenceValue(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT, null, true);
+    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL   = new TypedReferenceValue(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT, null, false);
 
 
     /**
@@ -154,7 +154,7 @@ public class ValueFactory
                                                boolean mayBeNull)
     {
         return type == null                                                ? REFERENCE_VALUE_NULL                                 :
-               !type.equals(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT) ? new ReferenceValue(type, referencedClass, mayBeNull) :
+               !type.equals(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT) ? new TypedReferenceValue(type, referencedClass, mayBeNull) :
                mayBeNull                                                   ? REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL          :
                                                                              REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL;
     }
@@ -168,23 +168,6 @@ public class ValueFactory
     public ReferenceValue createArrayReferenceValue(String       type,
                                                     Clazz        referencedClass,
                                                     IntegerValue arrayLength)
-    {
-        return createArrayReferenceValue(type,
-                                         referencedClass,
-                                         arrayLength,
-                                         createValue(type, referencedClass, false));
-    }
-
-
-    /**
-     * Creates a new ReferenceValue for arrays of the given type and length,
-     * containing the given element. The type must be a fully specified internal
-     * type for primitives, classes, or arrays.
-     */
-    public ReferenceValue createArrayReferenceValue(String       type,
-                                                    Clazz        referencedClass,
-                                                    IntegerValue arrayLength,
-                                                    Value        elementValue)
     {
         return createReferenceValue(ClassConstants.INTERNAL_TYPE_ARRAY + type,
                                     referencedClass,

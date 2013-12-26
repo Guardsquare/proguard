@@ -20,9 +20,9 @@
  */
 package proguard.classfile.editor;
 
-import proguard.classfile.attribute.visitor.LocalVariableTypeInfoVisitor;
-import proguard.classfile.attribute.*;
 import proguard.classfile.*;
+import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.visitor.LocalVariableTypeInfoVisitor;
 
 /**
  * This LocalVariableTypeInfoVisitor adds all line numbers that it visits to the given

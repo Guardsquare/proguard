@@ -20,10 +20,8 @@
  */
 package proguard.classfile.editor;
 
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-
-import java.util.Arrays;
+import proguard.classfile.ProgramClass;
+import proguard.util.ArrayUtil;
 
 /**
  * This class can add and delete interfaces to and from classes. References to
@@ -54,22 +52,11 @@ public class InterfacesEditor
         // Is the interface not yet present?
         if (findInterfaceIndex(interfaceConstantIndex) < 0)
         {
-            int   interfacesCount = targetClass.u2interfacesCount++;
-            int[] interfaces      = targetClass.u2interfaces;
-
-            // Is the array too small to contain the additional interface?
-            if (interfaces.length <= interfacesCount)
-            {
-                // Create a new array and copy the interfaces into it.
-                int[] newinterfaces = new int[interfacesCount + 1];
-                System.arraycopy(interfaces, 0, newinterfaces, 0, interfacesCount);
-                interfaces = newinterfaces;
-
-                targetClass.u2interfaces = interfaces;
-            }
-
             // Append the interface.
-            interfaces[interfacesCount] = interfaceConstantIndex;
+            targetClass.u2interfaces =
+                ArrayUtil.add(targetClass.u2interfaces,
+                              targetClass.u2interfacesCount++,
+                              interfaceConstantIndex);
         }
     }
 
@@ -112,9 +99,9 @@ public class InterfacesEditor
         for (int index = 0; index < interfacesCount; index++)
         {
             if (interfaces[index] == interfaceConstantIndex)
-              {
-                  return index;
-              }
+            {
+                return index;
+            }
         }
 
         return -1;

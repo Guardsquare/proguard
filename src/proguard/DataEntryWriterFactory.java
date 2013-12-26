@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * This class can create DataEntryWriter instances based on class paths. The
- * writers will wrap the output in the proper jars, wars, ears, and zips.
+ * writers will wrap the output in the proper apks, jars, wars, ears, and zips.
  *
  * @author Eric Lafortune
  */
@@ -65,41 +65,53 @@ public class DataEntryWriterFactory
     private static DataEntryWriter createClassPathEntryWriter(ClassPathEntry  classPathEntry,
                                                               DataEntryWriter alternativeWriter)
     {
+        boolean isApk = classPathEntry.isApk();
         boolean isJar = classPathEntry.isJar();
+        boolean isAar = classPathEntry.isAar();
         boolean isWar = classPathEntry.isWar();
         boolean isEar = classPathEntry.isEar();
         boolean isZip = classPathEntry.isZip();
 
         List filter    = classPathEntry.getFilter();
+        List apkFilter = classPathEntry.getApkFilter();
         List jarFilter = classPathEntry.getJarFilter();
+        List aarFilter = classPathEntry.getAarFilter();
         List warFilter = classPathEntry.getWarFilter();
         List earFilter = classPathEntry.getEarFilter();
         List zipFilter = classPathEntry.getZipFilter();
 
         System.out.println("Preparing output " +
-                           (isJar ? "jar" :
+                           (isApk ? "apk" :
+                            isJar ? "jar" :
+                            isAar ? "aar" :
                             isWar ? "war" :
                             isEar ? "ear" :
                             isZip ? "zip" :
                                     "directory") +
                            " [" + classPathEntry.getName() + "]" +
                            (filter    != null ||
+                            apkFilter != null ||
                             jarFilter != null ||
+                            aarFilter != null ||
                             warFilter != null ||
                             earFilter != null ||
                             zipFilter != null ? " (filtered)" : ""));
 
         DataEntryWriter writer = new DirectoryWriter(classPathEntry.getFile(),
+                                                     isApk ||
                                                      isJar ||
+                                                     isAar ||
                                                      isWar ||
                                                      isEar ||
                                                      isZip);
 
         // Set up the filtered jar writers.
-        writer = wrapInJarWriter(writer, isZip, zipFilter, ".zip", isJar || isWar || isEar);
-        writer = wrapInJarWriter(writer, isEar, earFilter, ".ear", isJar || isWar);
-        writer = wrapInJarWriter(writer, isWar, warFilter, ".war", isJar);
-        writer = wrapInJarWriter(writer, isJar, jarFilter, ".jar", false);
+        writer = wrapInJarWriter(writer, isZip, zipFilter, ".zip", isApk || isJar || isAar || isWar || isEar);
+        writer = wrapInJarWriter(writer, isEar, earFilter, ".ear", isApk || isJar || isAar || isWar);
+        writer = wrapInJarWriter(writer, isWar, warFilter, ".war", isApk || isJar || isAar);
+        writer = wrapInJarWriter(writer, isAar, aarFilter, ".aar", isApk || isJar);
+        writer = wrapInJarWriter(writer, isJar, jarFilter, ".jar", isApk);
+        writer = wrapInJarWriter(writer, isApk, apkFilter, ".apk", false);
 
         // Add a filter, if specified.
         writer = filter != null?
