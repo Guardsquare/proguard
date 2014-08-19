@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,9 +24,9 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.*;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
-import proguard.classfile.editor.ConstantPoolRemapper;
+import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
@@ -50,8 +50,10 @@ implements   ClassVisitor,
 {
     private final UsageMarker usageMarker;
 
-    private       int[]                constantIndexMap     = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
-    private final ConstantPoolRemapper constantPoolRemapper = new ConstantPoolRemapper();
+    private       int[]                   constantIndexMap        = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private       int[]                   bootstrapMethodIndexMap = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private final ConstantPoolRemapper    constantPoolRemapper    = new ConstantPoolRemapper();
+    private final BootstrapMethodRemapper bootstrapMethodRemapper = new BootstrapMethodRemapper();
 
 
     /**
@@ -109,8 +111,10 @@ implements   ClassVisitor,
             constantPoolRemapper.visitProgramClass(programClass);
         }
 
-        // Remove the unused interfaces from the class signature.
-        programClass.attributesAccept(new SignatureShrinker());
+        // Remove the unused classes from the signatures.
+        programClass.fieldsAccept(new AllAttributeVisitor(new MySignatureShrinker()));
+        programClass.methodsAccept(new AllAttributeVisitor(new MySignatureShrinker()));
+        programClass.attributesAccept(new MySignatureShrinker());
 
         // Compact the extra field pointing to the subclasses of this class.
         programClass.subClasses =
@@ -150,9 +154,18 @@ implements   ClassVisitor,
     public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute)
     {
         // Shrink the array of BootstrapMethodInfo objects.
-        bootstrapMethodsAttribute.u2bootstrapMethodsCount =
-            shrinkArray(bootstrapMethodsAttribute.bootstrapMethods,
-                        bootstrapMethodsAttribute.u2bootstrapMethodsCount);
+        int newBootstrapMethodsCount =
+            shrinkBootstrapMethodArray(bootstrapMethodsAttribute.bootstrapMethods,
+                                       bootstrapMethodsAttribute.u2bootstrapMethodsCount);
+
+        if (newBootstrapMethodsCount < bootstrapMethodsAttribute.u2bootstrapMethodsCount)
+        {
+            bootstrapMethodsAttribute.u2bootstrapMethodsCount = newBootstrapMethodsCount;
+
+            // Remap all constant pool references.
+            bootstrapMethodRemapper.setConstantIndexMap(bootstrapMethodIndexMap);
+            clazz.constantPoolEntriesAccept(bootstrapMethodRemapper);
+        }
     }
 
 
@@ -228,7 +241,7 @@ implements   ClassVisitor,
     public void visitAnyParameterAnnotationsAttribute(Clazz clazz, Method method, ParameterAnnotationsAttribute parameterAnnotationsAttribute)
     {
         // Loop over all parameters.
-        for (int parameterIndex = 0; parameterIndex < parameterAnnotationsAttribute.u2parametersCount; parameterIndex++)
+        for (int parameterIndex = 0; parameterIndex < parameterAnnotationsAttribute.u1parametersCount; parameterIndex++)
         {
             // Shrink the parameter annotations array.
             parameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex] =
@@ -256,10 +269,10 @@ implements   ClassVisitor,
 
 
     /**
-     * This AttributeVisitor updates the Utf8 constants of class signatures,
-     * removing any unused interfaces.
+     * This AttributeVisitor updates the Utf8 constants of signatures
+     * of classes, fields, and methods.
      */
-    private class SignatureShrinker
+    private class MySignatureShrinker
     extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
@@ -271,48 +284,164 @@ implements   ClassVisitor,
             Clazz[] referencedClasses = signatureAttribute.referencedClasses;
             if (referencedClasses != null)
             {
-                // Go over the generic definitions, superclass and implemented interfaces.
-                String signature = clazz.getString(signatureAttribute.u2signatureIndex);
+                // Go over the generic definitions, superclass, implemented
+                // interfaces, etc.
+                String signature = signatureAttribute.getSignature(clazz);
 
-                InternalTypeEnumeration internalTypeEnumeration =
+                InternalTypeEnumeration typeEnumeration =
                     new InternalTypeEnumeration(signature);
 
                 StringBuffer newSignatureBuffer = new StringBuffer();
 
+                if (typeEnumeration.isMethodSignature())
+                {
+                    newSignatureBuffer.append(typeEnumeration.formalTypeParameters());
+                    newSignatureBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+                }
+
                 int referencedClassIndex    = 0;
                 int newReferencedClassIndex = 0;
 
-                while (internalTypeEnumeration.hasMoreTypes())
+                // Consider the classes referenced by this signature.
+                while (typeEnumeration.hasMoreTypes())
                 {
-                    // Consider the classes referenced by this signature.
-                    String type       = internalTypeEnumeration.nextType();
-                    int    classCount = new DescriptorClassEnumeration(type).classCount();
+                    String type = typeEnumeration.nextType();
 
-                    Clazz referencedClass = referencedClasses[referencedClassIndex];
-                    if (referencedClass == null ||
-                        usageMarker.isUsed(referencedClass))
+                    DescriptorClassEnumeration classEnumeration =
+                        new DescriptorClassEnumeration(type);
+
+                    String initialFluff = classEnumeration.nextFluff();
+
+                    if (classEnumeration.hasMoreClassNames())
                     {
-                        // Append the superclass or interface.
-                        newSignatureBuffer.append(type);
-
-                        // Copy the referenced classes.
-                        for (int counter = 0; counter < classCount; counter++)
+                        // Is the main type being used?
+                        Clazz referencedClass = referencedClasses[referencedClassIndex];
+                        if (referencedClass == null ||
+                            usageMarker.isUsed(referencedClass))
                         {
-                            referencedClasses[newReferencedClassIndex++] =
-                                referencedClasses[referencedClassIndex++];
+                            newSignatureBuffer.append(initialFluff);
+
+                            // Append the main type and its parameter types.
+                            while (classEnumeration.hasMoreClassNames())
+                            {
+                                String  className        = classEnumeration.nextClassName();
+                                boolean isInnerClassName = classEnumeration.isInnerClassName();
+                                String  fluff            = classEnumeration.nextFluff();
+
+                                referencedClass = referencedClasses[referencedClassIndex++];
+
+                                // Clear the parameter type if it is unused.
+                                if (referencedClass != null &&
+                                    !usageMarker.isUsed(referencedClass))
+                                {
+                                    className = ClassConstants.NAME_JAVA_LANG_OBJECT;
+
+                                    referencedClass = null;
+                                }
+
+                                // Strip the outer class name again, if it's an inner class.
+                                else if (isInnerClassName)
+                                {
+                                    className =
+                                        className.substring(className.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                                }
+
+                                newSignatureBuffer.append(className);
+                                newSignatureBuffer.append(fluff);
+
+                                referencedClasses[newReferencedClassIndex++] =
+                                    referencedClass;
+                            }
+                        }
+                        else
+                        {
+                            // Skip the type and all of its referenced classes.
+                            // This is only really suitable for superclass types
+                            // and interface types.
+                            referencedClassIndex += classEnumeration.classCount();
                         }
                     }
                     else
                     {
-                        // Skip the referenced classes.
-                        referencedClassIndex += classCount;
+                        newSignatureBuffer.append(initialFluff);
                     }
                 }
 
-                if (newReferencedClassIndex < referencedClassIndex)
+                if (typeEnumeration.isMethodSignature())
+                {
+                    newSignatureBuffer.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+
+                    // Is the main return type being used?
+                    String type = typeEnumeration.returnType();
+
+                    DescriptorClassEnumeration classEnumeration =
+                        new DescriptorClassEnumeration(type);
+
+                    String initialFluff = classEnumeration.nextFluff();
+
+                    if (classEnumeration.hasMoreClassNames())
+                    {
+                        // Is the main type being used?
+                        Clazz referencedClass = referencedClasses[referencedClassIndex];
+                        if (referencedClass == null ||
+                            usageMarker.isUsed(referencedClass))
+                        {
+                            newSignatureBuffer.append(initialFluff);
+
+                            // Append the main type and its parameter types.
+                            while (classEnumeration.hasMoreClassNames())
+                            {
+                                String  className        = classEnumeration.nextClassName();
+                                boolean isInnerClassName = classEnumeration.isInnerClassName();
+                                String  fluff            = classEnumeration.nextFluff();
+
+                                referencedClass = referencedClasses[referencedClassIndex++];
+
+                                // Clear the parameter type if it is unused.
+                                if (referencedClass != null &&
+                                    !usageMarker.isUsed(referencedClass))
+                                {
+                                    className = ClassConstants.NAME_JAVA_LANG_OBJECT;
+
+                                    referencedClass = null;
+                                }
+
+                                // Strip the outer class name again, if it's an inner class.
+                                else if (isInnerClassName)
+                                {
+                                    className =
+                                        className.substring(className.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                                }
+
+                                newSignatureBuffer.append(className);
+                                newSignatureBuffer.append(fluff);
+
+                                referencedClasses[newReferencedClassIndex++] =
+                                    referencedClass;
+                            }
+                        }
+                        else
+                        {
+                            newSignatureBuffer.append(ClassConstants.TYPE_JAVA_LANG_OBJECT);
+
+                            referencedClassIndex += classEnumeration.classCount();
+
+                            referencedClasses[newReferencedClassIndex++] = null;
+                        }
+                    }
+                    else
+                    {
+                        newSignatureBuffer.append(initialFluff);
+                    }
+                }
+
+
+                String newSignature = newSignatureBuffer.toString();
+
+                if (!newSignature.equals(signature))
                 {
                     // Update the signature.
-                    ((Utf8Constant)((ProgramClass)clazz).constantPool[signatureAttribute.u2signatureIndex]).setString(newSignatureBuffer.toString());
+                    ((Utf8Constant)((ProgramClass)clazz).constantPool[signatureAttribute.u2signatureIndex]).setString(newSignature);
 
                     // Clear the unused entries.
                     while (newReferencedClassIndex < referencedClassIndex)
@@ -353,7 +482,8 @@ implements   ClassVisitor,
 
     /**
      * Removes all entries that are not marked as being used from the given
-     * constant pool.
+     * constant pool. Creates a map from the old indices to the new indices
+     * as a side effect.
      * @return the new number of entries.
      */
     private int shrinkConstantPool(Constant[] constantPool, int length)
@@ -451,6 +581,41 @@ implements   ClassVisitor,
 
 
     /**
+     * Removes all entries that are not marked as being used from the given
+     * array of bootstrap methods. Creates a map from the old indices to the
+     * new indices as a side effect.
+     * @return the new number of entries.
+     */
+    private int shrinkBootstrapMethodArray(BootstrapMethodInfo[] bootstrapMethods, int length)
+    {
+        if (bootstrapMethodIndexMap.length < length)
+        {
+            bootstrapMethodIndexMap = new int[length];
+        }
+
+        int counter = 0;
+
+        // Shift the used bootstrap methods together.
+        for (int index = 0; index < length; index++)
+        {
+            bootstrapMethodIndexMap[index] = counter;
+
+            BootstrapMethodInfo bootstrapMethod = bootstrapMethods[index];
+
+            if (usageMarker.isUsed(bootstrapMethod))
+            {
+                bootstrapMethods[counter++] = bootstrapMethod;
+            }
+        }
+
+        // Clear the remaining bootstrap methods.
+        Arrays.fill(bootstrapMethods, counter, length, null);
+
+        return counter;
+    }
+
+
+    /**
      * Removes all VisitorAccepter objects that are not marked as being used
      * from the given array.
      * @return the new number of VisitorAccepter objects.
@@ -462,9 +627,11 @@ implements   ClassVisitor,
         // Shift the used objects together.
         for (int index = 0; index < length; index++)
         {
-            if (usageMarker.isUsed(array[index]))
+            VisitorAccepter visitorAccepter = array[index];
+
+            if (usageMarker.isUsed(visitorAccepter))
             {
-                array[counter++] = array[index];
+                array[counter++] = visitorAccepter;
             }
         }
 

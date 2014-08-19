@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,7 +20,7 @@
  */
 package proguard.classfile.util;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 
 import java.util.Stack;
 
@@ -58,6 +58,8 @@ public class DescriptorClassEnumeration
     {
         int count = 0;
 
+        reset();
+
         nextFluff();
         while (hasMoreClassNames())
         {
@@ -67,9 +69,22 @@ public class DescriptorClassEnumeration
             nextFluff();
         }
 
-        index = 0;
+        reset();
 
         return count;
+    }
+
+
+    /**
+     * Resets the enumeration.
+     */
+    private void reset()
+    {
+        index                 = 0;
+        nestingLevel          = 0;
+        isInnerClassName      = false;
+        accumulatedClassName  = null;
+        accumulatedClassNames = null;
     }
 
 
@@ -95,7 +110,7 @@ public class DescriptorClassEnumeration
         {
             switch (descriptor.charAt(index++))
             {
-                case ClassConstants.INTERNAL_TYPE_GENERIC_START:
+                case ClassConstants.TYPE_GENERIC_START:
                 {
                     nestingLevel++;
 
@@ -110,7 +125,7 @@ public class DescriptorClassEnumeration
 
                     break;
                 }
-                case ClassConstants.INTERNAL_TYPE_GENERIC_END:
+                case ClassConstants.TYPE_GENERIC_END:
                 {
                     nestingLevel--;
 
@@ -120,42 +135,42 @@ public class DescriptorClassEnumeration
 
                     continue loop;
                 }
-                case ClassConstants.INTERNAL_TYPE_GENERIC_BOUND:
+                case ClassConstants.TYPE_GENERIC_BOUND:
                 {
                     continue loop;
                 }
-                case ClassConstants.INTERNAL_TYPE_CLASS_START:
+                case ClassConstants.TYPE_CLASS_START:
                 {
                     // We've found the start of an ordinary class name.
                     nestingLevel += 2;
                     isInnerClassName = false;
                     break loop;
                 }
-                case ClassConstants.INTERNAL_TYPE_CLASS_END:
+                case ClassConstants.TYPE_CLASS_END:
                 {
                     nestingLevel -= 2;
                     break;
                 }
-                case ClassConstants.EXTERNAL_INNER_CLASS_SEPARATOR:
+                case JavaConstants.INNER_CLASS_SEPARATOR:
                 {
                     // We've found the start of an inner class name in a signature.
                     isInnerClassName = true;
                     break loop;
                 }
-                case ClassConstants.INTERNAL_TYPE_GENERIC_VARIABLE_START:
+                case ClassConstants.TYPE_GENERIC_VARIABLE_START:
                 {
                     // We've found the start of a type identifier. Skip to the end.
-                    while (descriptor.charAt(index++) != ClassConstants.INTERNAL_TYPE_CLASS_END);
+                    while (descriptor.charAt(index++) != ClassConstants.TYPE_CLASS_END);
                     break;
                 }
             }
 
             if (nestingLevel == 1 &&
-                descriptor.charAt(index) != ClassConstants.INTERNAL_TYPE_GENERIC_END)
+                descriptor.charAt(index) != ClassConstants.TYPE_GENERIC_END)
             {
                 // We're at the start of a type parameter. Skip to the start
                 // of the bounds.
-                while (descriptor.charAt(index++) != ClassConstants.INTERNAL_TYPE_GENERIC_BOUND);
+                while (descriptor.charAt(index++) != ClassConstants.TYPE_GENERIC_BOUND);
             }
         }
 
@@ -175,9 +190,9 @@ public class DescriptorClassEnumeration
         {
             switch (descriptor.charAt(index))
             {
-                case ClassConstants.INTERNAL_TYPE_GENERIC_START:
-                case ClassConstants.INTERNAL_TYPE_CLASS_END:
-                case ClassConstants.EXTERNAL_INNER_CLASS_SEPARATOR:
+                case ClassConstants.TYPE_GENERIC_START:
+                case ClassConstants.TYPE_CLASS_END:
+                case JavaConstants.INNER_CLASS_SEPARATOR:
                 {
                     break loop;
                 }
@@ -190,7 +205,7 @@ public class DescriptorClassEnumeration
 
         // Recompose the inner class name if necessary.
         accumulatedClassName = isInnerClassName ?
-            accumulatedClassName + ClassConstants.INTERNAL_INNER_CLASS_SEPARATOR + className :
+            accumulatedClassName + ClassConstants.INNER_CLASS_SEPARATOR + className :
             className;
 
         return accumulatedClassName;

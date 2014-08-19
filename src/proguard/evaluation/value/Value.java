@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -154,15 +154,15 @@ public abstract class Value
 
     /**
      * Returns the internal type of this Value.
-     * @return <code>ClassConstants.INTERNAL_TYPE_BOOLEAN</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_BYTE</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_CHAR</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_SHORT</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_INT</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_LONG</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_FLOAT</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_DOUBLE</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_CLASS_START ... ClassConstants.INTERNAL_TYPE_CLASS_END</code>, or
+     * @return <code>ClassConstants.TYPE_BOOLEAN</code>,
+     *         <code>ClassConstants.TYPE_BYTE</code>,
+     *         <code>ClassConstants.TYPE_CHAR</code>,
+     *         <code>ClassConstants.TYPE_SHORT</code>,
+     *         <code>ClassConstants.TYPE_INT</code>,
+     *         <code>ClassConstants.TYPE_LONG</code>,
+     *         <code>ClassConstants.TYPE_FLOAT</code>,
+     *         <code>ClassConstants.TYPE_DOUBLE</code>,
+     *         <code>ClassConstants.TYPE_CLASS_START ... ClassConstants.TYPE_CLASS_END</code>, or
      *         an array type containing any of these types (always as String).
      */
     public abstract String internalType();

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -163,7 +163,7 @@ public class MappingKeeper implements MappingProcessor
                         warningPrinter.print(ClassUtil.internalClassName(className),
                                              "Warning: " +
                                              className +
-                                             ": method '" + methodReturnType + " " + methodName + ClassConstants.EXTERNAL_METHOD_ARGUMENTS_OPEN + methodArguments + ClassConstants.EXTERNAL_METHOD_ARGUMENTS_CLOSE +
+                                             ": method '" + methodReturnType + " " + methodName + JavaConstants.METHOD_ARGUMENTS_OPEN + methodArguments + JavaConstants.METHOD_ARGUMENTS_CLOSE +
                                              "' is not being kept as '" + currentNewName +
                                              "', but remapped to '" + newMethodName + "'");
                     }

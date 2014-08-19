@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -78,15 +78,15 @@ implements   ClassVisitor
 
         // Fix overridden or implemented methods higher up the hierarchy.
         // We can ignore private and static methods and initializers.
-        if ((programMethod.getAccessFlags() & (ClassConstants.INTERNAL_ACC_PRIVATE |
-                                               ClassConstants.INTERNAL_ACC_STATIC)) == 0 &&
+        if ((programMethod.getAccessFlags() & (ClassConstants.ACC_PRIVATE |
+                                               ClassConstants.ACC_STATIC)) == 0 &&
             !ClassUtil.isInitializer(programMethod.getName(programClass)))
         {
             programClass.hierarchyAccept(false, true, false, false,
                 new NamedMethodVisitor(programMethod.getName(programClass),
                                        programMethod.getDescriptor(programClass),
-                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE |
-                                          ClassConstants.INTERNAL_ACC_STATIC,
+                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE |
+                                          ClassConstants.ACC_STATIC,
                                        (MemberVisitor)classVisitor)));
         }
     }
@@ -99,15 +99,15 @@ implements   ClassVisitor
 
         // Fix overridden or implemented methods higher up the hierarchy.
         // We can ignore private and static methods and initializers.
-        if ((libraryMethod.getAccessFlags() & (ClassConstants.INTERNAL_ACC_PRIVATE |
-                                               ClassConstants.INTERNAL_ACC_STATIC)) == 0 &&
+        if ((libraryMethod.getAccessFlags() & (ClassConstants.ACC_PRIVATE |
+                                               ClassConstants.ACC_STATIC)) == 0 &&
             !ClassUtil.isInitializer(libraryMethod.getName(libraryClass)))
         {
             libraryClass.hierarchyAccept(false, true, false, false,
                 new NamedMethodVisitor(libraryMethod.getName(libraryClass),
                                        libraryMethod.getDescriptor(libraryClass),
-                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE |
-                                          ClassConstants.INTERNAL_ACC_STATIC,
+                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE |
+                                          ClassConstants.ACC_STATIC,
                                        (MemberVisitor)classVisitor)));
         }
     }

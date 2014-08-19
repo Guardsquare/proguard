@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -40,6 +40,7 @@ implements   InstructionVisitor
     private final ValueFactory   valueFactory;
     private final BranchUnit     branchUnit;
     private final InvocationUnit invocationUnit;
+    private final boolean        alwaysCast;
 
     private final ConstantValueFactory      constantValueFactory;
     private final ClassConstantValueFactory classConstantValueFactory;
@@ -51,18 +52,22 @@ implements   InstructionVisitor
      * @param stack          the local stack.
      * @param branchUnit     the class that can affect the program counter.
      * @param invocationUnit the class that can access other program members.
+     * @param alwaysCast     a flag that specifies whether downcasts or casts
+     *                       of null values should always be performed.
      */
     public Processor(Variables      variables,
                      Stack          stack,
                      ValueFactory   valueFactory,
                      BranchUnit     branchUnit,
-                     InvocationUnit invocationUnit)
+                     InvocationUnit invocationUnit,
+                     boolean        alwaysCast)
     {
         this.variables      = variables;
         this.stack          = stack;
         this.valueFactory   = valueFactory;
         this.branchUnit     = branchUnit;
         this.invocationUnit = invocationUnit;
+        this.alwaysCast    = alwaysCast;
 
         constantValueFactory      = new ConstantValueFactory(valueFactory);
         classConstantValueFactory = new ClassConstantValueFactory(valueFactory);
@@ -604,6 +609,7 @@ implements   InstructionVisitor
                 // TODO: Check cast.
                 ReferenceValue castValue = stack.apop();
                 ReferenceValue castResultValue =
+                    !alwaysCast &&
                     castValue.isNull() == Value.ALWAYS ? castValue :
                     castValue.isNull() == Value.NEVER  ? constantValueFactory.constantValue(clazz, constantIndex).referenceValue() :
                                                          constantValueFactory.constantValue(clazz, constantIndex).referenceValue().generalize(valueFactory.createReferenceValueNull());

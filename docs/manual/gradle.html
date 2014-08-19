@@ -5,25 +5,21 @@
 <meta http-equiv="content-style-type" content="text/css">
 <link rel="stylesheet" type="text/css" href="style.css">
 <title>Gradle Task</title>
-<script type="text/javascript" language="JavaScript">
-<!--
-if (window.self==window.top) {
-  history.go(-1);
-  window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
-} else {
-  var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash) {
-    if (history.pushState) {
-      window.top.history.replaceState(null, window.document.title, hash);
-    } else {
-      window.top.location.hash=hash;
-    }
-  }
-}
-//-->
-</script>
 </head>
 <body>
+
+<script type="text/javascript" language="JavaScript">
+<!--
+if (window.self==window.top)
+  document.write('<a class="largebutton" target="_top" href="../index.html#manual/gradle.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/">Saikoa</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+//-->
+</script>
+<noscript>
+<a class="largebutton" target="_top"  href="../index.html#manual/gradle.html">ProGuard index</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/">Saikoa</a>
+<a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
+</noscript>
 
 <h2>Gradle Task</h2>
 
@@ -372,6 +368,12 @@ behaviors:
 
 <dl>
 
+<dt><a href="usage.html#includedescriptorclasses"><code><b>includedescriptorclasses:</b></code></a>
+    <i>boolean</i>
+    (default = false)</dt>
+<dd>Specifies whether the classes of the fields and methods specified in the
+    keep tag must be kept as well.</dd>
+
 <dt><a href="usage.html#allowshrinking"><code><b>allowshrinking:</b></code></a>
     <i>boolean</i>
     (default = false)</dt>
@@ -551,10 +553,9 @@ task proguard << {
 <p>
 
 <hr />
-<noscript><div><a target="_top" href="../index.html" class="button">Show menu</a></div></noscript>
 <address>
-Copyright &copy; 2002-2013
-<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a>.
+Copyright &copy; 2002-2014
+<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.saikoa.com/">Saikoa</a>.
 </address>
 </body>
 </html>

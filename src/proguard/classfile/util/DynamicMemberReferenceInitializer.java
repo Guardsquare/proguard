@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -74,9 +74,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_LANG_CLASS),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_CLASS_GET_FIELD),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_CLASS_GET_FIELD),
+        new Utf8Constant(ClassConstants.NAME_JAVA_LANG_CLASS),
+        new Utf8Constant(ClassConstants.METHOD_NAME_CLASS_GET_FIELD),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_CLASS_GET_FIELD),
     };
 
     private final Constant[] GET_DECLARED_FIELD_CONSTANTS = new Constant[]
@@ -84,9 +84,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_LANG_CLASS),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_CLASS_GET_DECLARED_FIELD),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_CLASS_GET_DECLARED_FIELD),
+        new Utf8Constant(ClassConstants.NAME_JAVA_LANG_CLASS),
+        new Utf8Constant(ClassConstants.METHOD_NAME_CLASS_GET_DECLARED_FIELD),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_CLASS_GET_DECLARED_FIELD),
     };
 
     private final Constant[] GET_CONSTRUCTOR_CONSTANTS = new Constant[]
@@ -94,9 +94,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_LANG_CLASS),
-        new Utf8Constant(ClassConstants.INTERNAL_CONSTRUCTOR_NAME_CLASS_GET_CONSTRUCTOR),
-        new Utf8Constant(ClassConstants.INTERNAL_CONSTRUCTOR_TYPE_CLASS_GET_CONSTRUCTOR),
+        new Utf8Constant(ClassConstants.NAME_JAVA_LANG_CLASS),
+        new Utf8Constant(ClassConstants.CONSTRUCTOR_NAME_CLASS_GET_CONSTRUCTOR),
+        new Utf8Constant(ClassConstants.CONSTRUCTOR_TYPE_CLASS_GET_CONSTRUCTOR),
     };
 
     private final Constant[] GET_DECLARED_CONSTRUCTOR_CONSTANTS = new Constant[]
@@ -104,9 +104,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_LANG_CLASS),
-        new Utf8Constant(ClassConstants.INTERNAL_CONSTRUCTOR_NAME_CLASS_GET_DECLARED_CONSTRUCTOR),
-        new Utf8Constant(ClassConstants.INTERNAL_CONSTRUCTOR_TYPE_CLASS_GET_DECLARED_CONSTRUCTOR),
+        new Utf8Constant(ClassConstants.NAME_JAVA_LANG_CLASS),
+        new Utf8Constant(ClassConstants.CONSTRUCTOR_NAME_CLASS_GET_DECLARED_CONSTRUCTOR),
+        new Utf8Constant(ClassConstants.CONSTRUCTOR_TYPE_CLASS_GET_DECLARED_CONSTRUCTOR),
     };
 
     private final Constant[] GET_METHOD_CONSTANTS = new Constant[]
@@ -114,9 +114,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_LANG_CLASS),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_CLASS_GET_METHOD),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_CLASS_GET_METHOD),
+        new Utf8Constant(ClassConstants.NAME_JAVA_LANG_CLASS),
+        new Utf8Constant(ClassConstants.METHOD_NAME_CLASS_GET_METHOD),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_CLASS_GET_METHOD),
     };
 
     private final Constant[] GET_DECLARED_METHOD_CONSTANTS = new Constant[]
@@ -124,9 +124,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_LANG_CLASS),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_CLASS_GET_DECLARED_METHOD),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_CLASS_GET_DECLARED_METHOD),
+        new Utf8Constant(ClassConstants.NAME_JAVA_LANG_CLASS),
+        new Utf8Constant(ClassConstants.METHOD_NAME_CLASS_GET_DECLARED_METHOD),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_CLASS_GET_DECLARED_METHOD),
     };
 
     private final Constant[] NEW_INTEGER_UPDATER_CONSTANTS = new Constant[]
@@ -134,9 +134,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_INTEGER_FIELD_UPDATER),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_NEW_UPDATER),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_NEW_INTEGER_UPDATER),
+        new Utf8Constant(ClassConstants.NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_INTEGER_FIELD_UPDATER),
+        new Utf8Constant(ClassConstants.METHOD_NAME_NEW_UPDATER),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_NEW_INTEGER_UPDATER),
     };
 
     private final Constant[] NEW_LONG_UPDATER_CONSTANTS = new Constant[]
@@ -144,9 +144,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_LONG_FIELD_UPDATER),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_NEW_UPDATER),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_NEW_LONG_UPDATER),
+        new Utf8Constant(ClassConstants.NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_LONG_FIELD_UPDATER),
+        new Utf8Constant(ClassConstants.METHOD_NAME_NEW_UPDATER),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_NEW_LONG_UPDATER),
     };
 
     private final Constant[] NEW_REFERENCE_UPDATER_CONSTANTS = new Constant[]
@@ -154,9 +154,9 @@ implements   InstructionVisitor,
         new MethodrefConstant(1, 2, null, null),
         new ClassConstant(3, null),
         new NameAndTypeConstant(4, 5),
-        new Utf8Constant(ClassConstants.INTERNAL_NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_REFERENCE_FIELD_UPDATER),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_NEW_UPDATER),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_NEW_REFERENCE_UPDATER),
+        new Utf8Constant(ClassConstants.NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_REFERENCE_FIELD_UPDATER),
+        new Utf8Constant(ClassConstants.METHOD_NAME_NEW_UPDATER),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_NEW_REFERENCE_UPDATER),
     };
 
     // SomeClass.class.get[Declared]Field("someField").
@@ -548,42 +548,42 @@ implements   InstructionVisitor,
 //        matchGetMember(clazz, method, codeAttribute, offset, instruction,
 //                       cnull, //onstantGetConstructorMatcher0,
 //                       getConstructorMatcher0, false, false,
-//                       ClassConstants.INTERNAL_METHOD_NAME_INIT, null);
+//                       ClassConstants.METHOD_NAME_INIT, null);
 //
 //        // Try to match the SomeClass.class.getDeclaredConstructor(new Class[]
 //        // {}) construct.
 //        matchGetMember(clazz, method, codeAttribute, offset, instruction,
 //                       null, //constantGetDeclaredConstructorMatcher0,
 //                       getDeclaredConstructorMatcher0, false, true,
-//                       ClassConstants.INTERNAL_METHOD_NAME_INIT, null);
+//                       ClassConstants.METHOD_NAME_INIT, null);
 
         // Try to match the SomeClass.class.getConstructor(new Class[]
         // { A.class }) construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        null, //constantGetConstructorMatcher1,
                        getConstructorMatcher1, false, false,
-                       ClassConstants.INTERNAL_METHOD_NAME_INIT, null);
+                       ClassConstants.METHOD_NAME_INIT, null);
 
         // Try to match the SomeClass.class.getDeclaredConstructor(new Class[]
         // { A.class }) construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        null, //constantGetDeclaredConstructorMatcher1,
                        getDeclaredConstructorMatcher1, false, true,
-                       ClassConstants.INTERNAL_METHOD_NAME_INIT, null);
+                       ClassConstants.METHOD_NAME_INIT, null);
 
         // Try to match the SomeClass.class.getConstructor(new Class[]
         // { A.class, B.class }) construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        null, //constantGetConstructorMatcher2,
                        getConstructorMatcher2, false, false,
-                       ClassConstants.INTERNAL_METHOD_NAME_INIT, null);
+                       ClassConstants.METHOD_NAME_INIT, null);
 
         // Try to match the SomeClass.class.getDeclaredConstructor(new Class[]
         // { A.class, B.class }) construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        null, //constantGetDeclaredConstructorMatcher2,
                        getDeclaredConstructorMatcher2, false, true,
-                       ClassConstants.INTERNAL_METHOD_NAME_INIT, null);
+                       ClassConstants.METHOD_NAME_INIT, null);
 
         // Try to match the SomeClass.class.getMethod("someMethod", new Class[]
         // {}) construct.
@@ -626,14 +626,14 @@ implements   InstructionVisitor,
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        constantGetIntegerUpdaterMatcher,
                        getIntegerUpdaterMatcher, true, false, null,
-                       "" + ClassConstants.INTERNAL_TYPE_INT);
+                       "" + ClassConstants.TYPE_INT);
 
         // Try to match the AtomicLongFieldUpdater.newUpdater(
         // SomeClass.class, "someField") construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        constantGetLongUpdaterMatcher,
                        getLongUpdaterMatcher, true, false, null,
-                       "" + ClassConstants.INTERNAL_TYPE_LONG);
+                       "" + ClassConstants.TYPE_LONG);
 
         // Try to match the AtomicReferenceFieldUpdater.newUpdater(
         // SomeClass.class, SomeClass.class, "someField") construct.
@@ -839,7 +839,7 @@ implements   InstructionVisitor,
                                   " accesses a " +
                                   (isDeclared ? "declared " : "") +
                                   (isField    ? "field" :
-                                   memberName.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT) ?
+                                   memberName.equals(ClassConstants.METHOD_NAME_INIT) ?
                                                 "constructor" : "method") +
                                   " '" +
                                   externalMemberDescription +

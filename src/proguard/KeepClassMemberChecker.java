@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,8 +32,6 @@ import java.util.List;
  * @author Eric Lafortune
  */
 public class KeepClassMemberChecker
-extends      SimplifiedVisitor
-implements   ClassVisitor
 {
     private final WarningPrinter notePrinter;
 
@@ -49,8 +47,7 @@ implements   ClassVisitor
 
     /**
      * Checks if the given class specifications try to keep class members
-     * without actually specifying any, printing notes if necessary. Returns
-     * the number of notes printed.
+     * without actually specifying any, printing notes if necessary.
      */
     public void checkClassSpecifications(List keepClassSpecifications)
     {
@@ -73,7 +70,8 @@ implements   ClassVisitor
                         className = keepClassSpecification.extendsClassName;
                     }
 
-                    if (notePrinter.accepts(className))
+                    if (className == null ||
+                        notePrinter.accepts(className))
                     {
                         notePrinter.print(className,
                                           "Note: the configuration doesn't specify which class members to keep for class '" +

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -43,15 +43,15 @@ public class ClassNameParser implements StringParser
 {
     private static final char[] INTERNAL_PRIMITIVE_TYPES = new char[]
     {
-        ClassConstants.INTERNAL_TYPE_VOID,
-        ClassConstants.INTERNAL_TYPE_BOOLEAN,
-        ClassConstants.INTERNAL_TYPE_BYTE,
-        ClassConstants.INTERNAL_TYPE_CHAR,
-        ClassConstants.INTERNAL_TYPE_SHORT,
-        ClassConstants.INTERNAL_TYPE_INT,
-        ClassConstants.INTERNAL_TYPE_LONG,
-        ClassConstants.INTERNAL_TYPE_FLOAT,
-        ClassConstants.INTERNAL_TYPE_DOUBLE,
+        ClassConstants.TYPE_VOID,
+        ClassConstants.TYPE_BOOLEAN,
+        ClassConstants.TYPE_BYTE,
+        ClassConstants.TYPE_CHAR,
+        ClassConstants.TYPE_SHORT,
+        ClassConstants.TYPE_INT,
+        ClassConstants.TYPE_LONG,
+        ClassConstants.TYPE_FLOAT,
+        ClassConstants.TYPE_DOUBLE,
     };
 
 
@@ -98,7 +98,7 @@ public class ClassNameParser implements StringParser
                 // remainder of the string.
                 nextMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.INTERNAL_TYPE_CLASS_END },
+                                              new char[] { ClassConstants.TYPE_CLASS_END },
                                               0,
                                               Integer.MAX_VALUE,
                                               parse(regularExpression.substring(index + 2)));
@@ -112,7 +112,7 @@ public class ClassNameParser implements StringParser
                 // remainder of the string.
                 nextMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.INTERNAL_TYPE_CLASS_END, ClassConstants.INTERNAL_PACKAGE_SEPARATOR },
+                                              new char[] { ClassConstants.TYPE_CLASS_END, ClassConstants.PACKAGE_SEPARATOR },
                                               0,
                                               Integer.MAX_VALUE,
                                               parse(regularExpression.substring(index + 1)));
@@ -126,7 +126,7 @@ public class ClassNameParser implements StringParser
                 // remainder of the string.
                 nextMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.INTERNAL_TYPE_CLASS_END, ClassConstants.INTERNAL_PACKAGE_SEPARATOR },
+                                              new char[] { ClassConstants.TYPE_CLASS_END, ClassConstants.PACKAGE_SEPARATOR },
                                               1,
                                               1,
                                               parse(regularExpression.substring(index + 1)));
@@ -164,7 +164,7 @@ public class ClassNameParser implements StringParser
      */
     private VariableStringMatcher createAnyTypeMatcher(StringMatcher nextMatcher)
     {
-        return new VariableStringMatcher(new char[] { ClassConstants.INTERNAL_TYPE_ARRAY },
+        return new VariableStringMatcher(new char[] { ClassConstants.TYPE_ARRAY },
                                   null,
                                   0,
                                   255,
@@ -174,15 +174,15 @@ public class ClassNameParser implements StringParser
                                   1,
                                   1,
                                   nextMatcher),
-        new VariableStringMatcher(new char[] { ClassConstants.INTERNAL_TYPE_CLASS_START },
+        new VariableStringMatcher(new char[] { ClassConstants.TYPE_CLASS_START },
                                   null,
                                   1,
                                   1,
         new VariableStringMatcher(null,
-                                  new char[] { ClassConstants.INTERNAL_TYPE_CLASS_END },
+                                  new char[] { ClassConstants.TYPE_CLASS_END },
                                   0,
                                   Integer.MAX_VALUE,
-        new VariableStringMatcher(new char[] { ClassConstants.INTERNAL_TYPE_CLASS_END },
+        new VariableStringMatcher(new char[] { ClassConstants.TYPE_CLASS_END },
                                   null,
                                   1,
                                   1,

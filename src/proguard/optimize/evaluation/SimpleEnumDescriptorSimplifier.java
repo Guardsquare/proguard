@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -137,6 +137,25 @@ implements   ClassVisitor,
     }
 
 
+    public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
+    {
+        // Update the descriptor if it has any simple enum classes.
+        String descriptor    = invokeDynamicConstant.getType(clazz);
+        String newDescriptor = simplifyDescriptor(descriptor, invokeDynamicConstant.referencedClasses);
+
+        if (!descriptor.equals(newDescriptor))
+        {
+            // Update the descriptor.
+            ConstantPoolEditor constantPoolEditor =
+                new ConstantPoolEditor((ProgramClass)clazz);
+
+            invokeDynamicConstant.u2nameAndTypeIndex =
+                constantPoolEditor.addNameAndTypeConstant(invokeDynamicConstant.getName(clazz),
+                                                          newDescriptor);
+        }
+    }
+
+
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
         // Does the constant refer to a simple enum type?
@@ -212,7 +231,7 @@ implements   ClassVisitor,
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
 //        // Skip the valueOf method.
-//        if (programMethod.getName(programClass).equals(ClassConstants.INTERNAL_METHOD_NAME_VALUEOF))
+//        if (programMethod.getName(programClass).equals(ClassConstants.METHOD_NAME_VALUEOF))
 //        {
 //            return;
 //        }
@@ -231,7 +250,7 @@ implements   ClassVisitor,
             String newName = name;
 
             // Append a code, if the method isn't a class instance initializer.
-            if (!name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+            if (!name.equals(ClassConstants.METHOD_NAME_INIT))
             {
                 newName += ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
             }
@@ -291,7 +310,7 @@ implements   ClassVisitor,
             signatureAttribute.referencedClasses.length > 0)
         {
             // Update the signature if it has any simple enum classes.
-            String signature    = clazz.getString(signatureAttribute.u2signatureIndex);
+            String signature    = signatureAttribute.getSignature(clazz);
             String newSignature = simplifyDescriptor(signature,
                                                      signatureAttribute.referencedClasses[0]);
 
@@ -311,7 +330,7 @@ implements   ClassVisitor,
     public void visitSignatureAttribute(Clazz clazz, Method method, SignatureAttribute signatureAttribute)
     {
         // Compute the new signature.
-        String signature    = clazz.getString(signatureAttribute.u2signatureIndex);
+        String signature    = signatureAttribute.getSignature(clazz);
         String newSignature = simplifyDescriptor(signature,
                                                  signatureAttribute.referencedClasses);
 
@@ -329,7 +348,7 @@ implements   ClassVisitor,
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
         // Update the descriptor if it has a simple enum class.
-        String descriptor    = clazz.getString(localVariableInfo.u2descriptorIndex);
+        String descriptor    = localVariableInfo.getDescriptor(clazz);
         String newDescriptor = simplifyDescriptor(descriptor, localVariableInfo.referencedClass);
 
         if (!descriptor.equals(newDescriptor))
@@ -353,7 +372,7 @@ implements   ClassVisitor,
             localVariableTypeInfo.referencedClasses.length > 0)
         {
             // Update the signature if it has any simple enum classes.
-            String signature    = clazz.getString(localVariableTypeInfo.u2signatureIndex);
+            String signature    = localVariableTypeInfo.getSignature(clazz);
             String newSignature = simplifyDescriptor(signature,
                                                      localVariableTypeInfo.referencedClasses[0]);
 
@@ -379,7 +398,7 @@ implements   ClassVisitor,
                                       Clazz  referencedClass)
     {
         return isSimpleEnum(referencedClass) ?
-                   descriptor.substring(0, ClassUtil.internalArrayTypeDimensionCount(descriptor)) + ClassConstants.INTERNAL_TYPE_INT :
+                   descriptor.substring(0, ClassUtil.internalArrayTypeDimensionCount(descriptor)) + ClassConstants.TYPE_INT :
                    descriptor;
     }
 
@@ -403,7 +422,7 @@ implements   ClassVisitor,
             StringBuffer newDescriptorBuffer = new StringBuffer();
 
             newDescriptorBuffer.append(internalTypeEnumeration.formalTypeParameters());
-            newDescriptorBuffer.append(ClassConstants.INTERNAL_METHOD_ARGUMENTS_OPEN);
+            newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
 
             // Also look at the formal type parameters.
             String type  = internalTypeEnumeration.formalTypeParameters();
@@ -441,7 +460,7 @@ implements   ClassVisitor,
                     {
                         type =
                             type.substring(0, ClassUtil.internalArrayTypeDimensionCount(type)) +
-                            ClassConstants.INTERNAL_TYPE_INT;
+                            ClassConstants.TYPE_INT;
                     }
                 }
 
@@ -467,11 +486,11 @@ implements   ClassVisitor,
                     type =
                         type.substring(0, ClassUtil.internalArrayTypeDimensionCount(
                             type)) +
-                        ClassConstants.INTERNAL_TYPE_INT;
+                        ClassConstants.TYPE_INT;
                 }
             }
 
-            newDescriptorBuffer.append(ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE);
+            newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
             newDescriptorBuffer.append(type);
 
             // Clear the unused entries.

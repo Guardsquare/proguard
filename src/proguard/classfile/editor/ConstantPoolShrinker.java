@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -52,6 +52,7 @@ implements   ClassVisitor,
              ExceptionInfoVisitor,
              StackMapFrameVisitor,
              VerificationTypeVisitor,
+             ParameterInfoVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
@@ -251,6 +252,15 @@ implements   ClassVisitor,
     }
 
 
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        markConstant(clazz, methodParametersAttribute.u2attributeNameIndex);
+
+        // Mark the constant pool entries referenced by the parameter information.
+        methodParametersAttribute.parametersAccept(clazz, method, this);
+    }
+
+
     public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
     {
         markConstant(clazz, exceptionsAttribute.u2attributeNameIndex);
@@ -402,6 +412,14 @@ implements   ClassVisitor,
     public void visitObjectType(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ObjectType objectType)
     {
         markConstant(clazz, objectType.u2classIndex);
+    }
+
+
+    // Implementations for ParameterInfoVisitor.
+
+    public void visitParameterInfo(Clazz clazz, Method method, int parameterIndex, ParameterInfo parameterInfo)
+    {
+        markConstant(clazz, parameterInfo.u2nameIndex);
     }
 
 

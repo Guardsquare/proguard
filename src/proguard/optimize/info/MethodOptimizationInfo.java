@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -38,6 +38,7 @@ public class MethodOptimizationInfo
     private boolean catchesExceptions     = false;
     private boolean branchesBackward      = false;
     private boolean invokesSuperMethods   = false;
+    private boolean invokesDynamically    = false;
     private boolean accessesPrivateCode   = false;
     private boolean accessesPackageCode   = false;
     private boolean accessesProtectedCode = false;
@@ -58,7 +59,7 @@ public class MethodOptimizationInfo
         int parameterCount =
             ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz));
 
-        if ((method.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) == 0)
+        if ((method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0)
         {
             parameterCount++;
         }
@@ -139,6 +140,18 @@ public class MethodOptimizationInfo
     public boolean invokesSuperMethods()
     {
         return invokesSuperMethods;
+    }
+
+
+    public void setInvokesDynamically()
+    {
+        invokesDynamically = true;
+    }
+
+
+    public boolean invokesDynamically()
+    {
+        return invokesDynamically;
     }
 
 
@@ -273,6 +286,7 @@ public class MethodOptimizationInfo
             this.catchesExceptions     |= other.catchesExceptions;
             this.branchesBackward      |= other.branchesBackward;
             this.invokesSuperMethods   |= other.invokesSuperMethods;
+            this.invokesDynamically    |= other.invokesDynamically;
             this.accessesPrivateCode   |= other.accessesPrivateCode;
             this.accessesPackageCode   |= other.accessesPackageCode;
             this.accessesProtectedCode |= other.accessesProtectedCode;

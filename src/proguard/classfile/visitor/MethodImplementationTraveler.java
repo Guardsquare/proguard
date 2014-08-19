@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -86,8 +86,8 @@ implements   MemberVisitor
                                          new NamedMethodVisitor(programMethod.getName(programClass),
                                                                 programMethod.getDescriptor(programClass),
                                          new MemberAccessFilter(0,
-                                                                ClassConstants.INTERNAL_ACC_PRIVATE |
-                                                                ClassConstants.INTERNAL_ACC_STATIC,
+                                                                ClassConstants.ACC_PRIVATE |
+                                                                ClassConstants.ACC_STATIC,
                                          memberVisitor)));
         }
     }
@@ -109,8 +109,8 @@ implements   MemberVisitor
                                          new NamedMethodVisitor(libraryMethod.getName(libraryClass),
                                                                 libraryMethod.getDescriptor(libraryClass),
                                          new MemberAccessFilter(0,
-                                                                ClassConstants.INTERNAL_ACC_PRIVATE |
-                                                                ClassConstants.INTERNAL_ACC_STATIC,
+                                                                ClassConstants.ACC_PRIVATE |
+                                                                ClassConstants.ACC_STATIC,
                                          memberVisitor)));
         }
     }
@@ -121,8 +121,8 @@ implements   MemberVisitor
     private boolean isSpecial(Clazz clazz, Method method)
     {
         return (method.getAccessFlags() &
-                (ClassConstants.INTERNAL_ACC_PRIVATE |
-                 ClassConstants.INTERNAL_ACC_STATIC)) != 0 ||
-               method.getName(clazz).equals(ClassConstants.INTERNAL_METHOD_NAME_INIT);
+                (ClassConstants.ACC_PRIVATE |
+                 ClassConstants.ACC_STATIC)) != 0 ||
+               method.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT);
     }
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -41,11 +41,11 @@ implements   MemberVisitor,
 
     private static final char[] TYPES = new char[]
     {
-        ClassConstants.INTERNAL_TYPE_BYTE,
-        ClassConstants.INTERNAL_TYPE_CHAR,
-        ClassConstants.INTERNAL_TYPE_SHORT,
-        ClassConstants.INTERNAL_TYPE_INT,
-        ClassConstants.INTERNAL_TYPE_BOOLEAN
+        ClassConstants.TYPE_BYTE,
+        ClassConstants.TYPE_CHAR,
+        ClassConstants.TYPE_SHORT,
+        ClassConstants.TYPE_INT,
+        ClassConstants.TYPE_BOOLEAN
     };
 
 
@@ -78,7 +78,7 @@ implements   MemberVisitor,
     {
         // Is it a class instance initializer?
         String name = programMethod.getName(programClass);
-        if (name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+        if (name.equals(ClassConstants.METHOD_NAME_INIT))
         {
             // Is there already another initializer with the same descriptor?
             String descriptor    = programMethod.getDescriptor(programClass);
@@ -92,7 +92,7 @@ implements   MemberVisitor,
                     programMethod = (ProgramMethod)similarMethod;
                 }
 
-                int index = descriptor.indexOf(ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE);
+                int index = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
 
                 // Try to find a new, unique descriptor.
                 int typeCounter = 0;
@@ -105,7 +105,7 @@ implements   MemberVisitor,
 
                     for (int arrayDimension = 0; arrayDimension < typeCounter / TYPES.length; arrayDimension++)
                     {
-                        newDescriptorBuffer.append(ClassConstants.INTERNAL_TYPE_ARRAY);
+                        newDescriptorBuffer.append(ClassConstants.TYPE_ARRAY);
                     }
 
                     newDescriptorBuffer.append(TYPES[typeCounter % TYPES.length]);
@@ -171,9 +171,9 @@ implements   MemberVisitor,
     public void visitSignatureAttribute(Clazz clazz, Method method, SignatureAttribute signatureAttribute)
     {
         String descriptor      = method.getDescriptor(clazz);
-        int    descriptorIndex = descriptor.indexOf(ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE);
-        String signature       = clazz.getString(signatureAttribute.u2signatureIndex);
-        int    signatureIndex  = signature.indexOf(ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE);
+        int    descriptorIndex = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        String signature       = signatureAttribute.getSignature(clazz);
+        int    signatureIndex  = signature.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
 
         String newSignature = signature.substring(0, signatureIndex) +
                               descriptor.charAt(descriptorIndex - 1) +
@@ -188,13 +188,13 @@ implements   MemberVisitor,
     public void visitAnyParameterAnnotationsAttribute(Clazz clazz, Method method, ParameterAnnotationsAttribute parameterAnnotationsAttribute)
     {
         // Update the number of parameters.
-        int oldParametersCount = parameterAnnotationsAttribute.u2parametersCount++;
+        int oldParametersCount = parameterAnnotationsAttribute.u1parametersCount++;
 
         if (parameterAnnotationsAttribute.u2parameterAnnotationsCount == null ||
-            parameterAnnotationsAttribute.u2parameterAnnotationsCount.length < parameterAnnotationsAttribute.u2parametersCount)
+            parameterAnnotationsAttribute.u2parameterAnnotationsCount.length < parameterAnnotationsAttribute.u1parametersCount)
         {
-            int[]          annotationsCounts = new int[parameterAnnotationsAttribute.u2parametersCount];
-            Annotation[][] annotations       = new Annotation[parameterAnnotationsAttribute.u2parametersCount][];
+            int[]          annotationsCounts = new int[parameterAnnotationsAttribute.u1parametersCount];
+            Annotation[][] annotations       = new Annotation[parameterAnnotationsAttribute.u1parametersCount][];
 
             System.arraycopy(parameterAnnotationsAttribute.u2parameterAnnotationsCount,
                              0,

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,6 +23,8 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.attribute.annotation.target.*;
+import proguard.classfile.attribute.annotation.target.visitor.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.preverification.visitor.*;
@@ -54,9 +56,14 @@ implements   ClassVisitor,
              StackMapFrameVisitor,
              VerificationTypeVisitor,
              LineNumberInfoVisitor,
+             ParameterInfoVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
+             TypeAnnotationVisitor,
+             TargetInfoVisitor,
+             LocalVariableTargetElementVisitor,
+             TypePathInfoVisitor,
              ElementValueVisitor,
              InstructionVisitor
 {
@@ -100,10 +107,10 @@ implements   ClassVisitor,
         println("  = target " + ClassUtil.externalClassVersion(programClass.u4version));
         println("Access flags:  0x" + Integer.toHexString(programClass.u2accessFlags));
         println("  = " +
-                ((programClass.u2accessFlags & ClassConstants.INTERNAL_ACC_ANNOTATTION) != 0 ? "@ " : "") +
+                ((programClass.u2accessFlags & ClassConstants.ACC_ANNOTATTION) != 0 ? "@ " : "") +
                 ClassUtil.externalClassAccessFlags(programClass.u2accessFlags) +
-                ((programClass.u2accessFlags & ClassConstants.INTERNAL_ACC_ENUM)      != 0 ? "enum " :
-                 (programClass.u2accessFlags & ClassConstants.INTERNAL_ACC_INTERFACE) == 0 ? "class " :
+                ((programClass.u2accessFlags & ClassConstants.ACC_ENUM)      != 0 ? "enum " :
+                 (programClass.u2accessFlags & ClassConstants.ACC_INTERFACE) == 0 ? "class " :
                                                                                              "") +
                 ClassUtil.externalClassName(programClass.getName()) +
                 (programClass.u2superClass == 0 ? "" : " extends " +
@@ -152,10 +159,10 @@ implements   ClassVisitor,
         println("Superclass:    " + libraryClass.getSuperName());
         println("Access flags:  0x" + Integer.toHexString(libraryClass.u2accessFlags));
         println("  = " +
-                ((libraryClass.u2accessFlags & ClassConstants.INTERNAL_ACC_ANNOTATTION) != 0 ? "@ " : "") +
+                ((libraryClass.u2accessFlags & ClassConstants.ACC_ANNOTATTION) != 0 ? "@ " : "") +
                 ClassUtil.externalClassAccessFlags(libraryClass.u2accessFlags) +
-                ((libraryClass.u2accessFlags & ClassConstants.INTERNAL_ACC_ENUM)      != 0 ? "enum " :
-                 (libraryClass.u2accessFlags & ClassConstants.INTERNAL_ACC_INTERFACE) == 0 ? "class " :
+                ((libraryClass.u2accessFlags & ClassConstants.ACC_ENUM)      != 0 ? "enum " :
+                 (libraryClass.u2accessFlags & ClassConstants.ACC_INTERFACE) == 0 ? "class " :
                                                                                              "") +
                 ClassUtil.externalClassName(libraryClass.getName()) +
                 (libraryClass.getSuperName() == null ? "" : " extends "  +
@@ -214,7 +221,7 @@ implements   ClassVisitor,
     public void visitStringConstant(Clazz clazz, StringConstant stringConstant)
     {
         println(visitorInfo(stringConstant) + " String [" +
-                clazz.getString(stringConstant.u2stringIndex) + "]");
+                stringConstant.getString(clazz) + "]");
     }
 
 
@@ -275,22 +282,22 @@ implements   ClassVisitor,
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
         println(visitorInfo(classConstant) + " Class [" +
-                clazz.getString(classConstant.u2nameIndex) + "]");
+                classConstant.getName(clazz) + "]");
     }
 
 
     public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
     {
         println(visitorInfo(methodTypeConstant) + " MethodType [" +
-                clazz.getString(methodTypeConstant.u2descriptorIndex) + "]");
+                methodTypeConstant.getType(clazz) + "]");
     }
 
 
     public void visitNameAndTypeConstant(Clazz clazz, NameAndTypeConstant nameAndTypeConstant)
     {
         println(visitorInfo(nameAndTypeConstant) + " NameAndType [" +
-                clazz.getString(nameAndTypeConstant.u2nameIndex) + " " +
-                clazz.getString(nameAndTypeConstant.u2descriptorIndex) + "]");
+                nameAndTypeConstant.getName(clazz) + " " +
+                nameAndTypeConstant.getType(clazz) + "]");
     }
 
 
@@ -387,7 +394,7 @@ implements   ClassVisitor,
     public void visitUnknownAttribute(Clazz clazz, UnknownAttribute unknownAttribute)
     {
         println(visitorInfo(unknownAttribute) +
-                " Unknown attribute (" + clazz.getString(unknownAttribute.u2attributeNameIndex) + ")");
+                " Unknown attribute (" + unknownAttribute.getAttributeName(clazz) + ")");
     }
 
 
@@ -482,6 +489,17 @@ implements   ClassVisitor,
                 " Constant value attribute:");
 
         clazz.constantPoolEntryAccept(constantValueAttribute.u2constantValueIndex, this);
+    }
+
+
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        println(visitorInfo(methodParametersAttribute) +
+                " Method parameters attribute (count = " + methodParametersAttribute.u1parametersCount + ")");
+
+        indent();
+        methodParametersAttribute.parametersAccept(clazz, method, this);
+        outdent();
     }
 
 
@@ -606,7 +624,7 @@ implements   ClassVisitor,
     public void visitRuntimeVisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeVisibleParameterAnnotationsAttribute runtimeVisibleParameterAnnotationsAttribute)
     {
         println(visitorInfo(runtimeVisibleParameterAnnotationsAttribute) +
-                " Runtime visible parameter annotations attribute (parameter count = " + runtimeVisibleParameterAnnotationsAttribute.u2parametersCount + "):");
+                " Runtime visible parameter annotations attribute (parameter count = " + runtimeVisibleParameterAnnotationsAttribute.u1parametersCount + "):");
 
         indent();
         runtimeVisibleParameterAnnotationsAttribute.annotationsAccept(clazz, method, this);
@@ -617,10 +635,32 @@ implements   ClassVisitor,
     public void visitRuntimeInvisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleParameterAnnotationsAttribute runtimeInvisibleParameterAnnotationsAttribute)
     {
         println(visitorInfo(runtimeInvisibleParameterAnnotationsAttribute) +
-                " Runtime invisible parameter annotations attribute (parameter count = " + runtimeInvisibleParameterAnnotationsAttribute.u2parametersCount + "):");
+                " Runtime invisible parameter annotations attribute (parameter count = " + runtimeInvisibleParameterAnnotationsAttribute.u1parametersCount + "):");
 
         indent();
         runtimeInvisibleParameterAnnotationsAttribute.annotationsAccept(clazz, method, this);
+        outdent();
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        println(visitorInfo(runtimeVisibleTypeAnnotationsAttribute) +
+                " Runtime visible type annotations attribute");
+
+        indent();
+        runtimeVisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
+        outdent();
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        println(visitorInfo(runtimeInvisibleTypeAnnotationsAttribute) +
+                " Runtime invisible type annotations attribute");
+
+        indent();
+        runtimeInvisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
         outdent();
     }
 
@@ -870,6 +910,16 @@ implements   ClassVisitor,
     }
 
 
+    // Implementations for ParameterInfoVisitor.
+
+    public void visitParameterInfo(Clazz clazz, Method method, int parameterIndex, ParameterInfo parameterInfo)
+    {
+        println("p" + parameterIndex + ":  Access flags: 0x" + Integer.toHexString(parameterInfo.u2accessFlags) + " = " +
+                ClassUtil.externalParameterAccessFlags(parameterInfo.u2accessFlags) + " [" +
+                (parameterInfo.u2nameIndex == 0 ? "" : parameterInfo.getName(clazz)) + "]");
+    }
+
+
     // Implementations for LocalVariableInfoVisitor.
 
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
@@ -877,8 +927,8 @@ implements   ClassVisitor,
         println("v" + localVariableInfo.u2index + ": " +
                 localVariableInfo.u2startPC + " -> " +
                 (localVariableInfo.u2startPC + localVariableInfo.u2length) + " [" +
-                clazz.getString(localVariableInfo.u2descriptorIndex) + " " +
-                clazz.getString(localVariableInfo.u2nameIndex) + "]");
+                localVariableInfo.getDescriptor(clazz) + " " +
+                localVariableInfo.getName(clazz) + "]");
     }
 
 
@@ -889,8 +939,8 @@ implements   ClassVisitor,
         println("v" + localVariableTypeInfo.u2index + ": " +
                 localVariableTypeInfo.u2startPC + " -> " +
                 (localVariableTypeInfo.u2startPC + localVariableTypeInfo.u2length) + " [" +
-                clazz.getString(localVariableTypeInfo.u2signatureIndex) + " " +
-                clazz.getString(localVariableTypeInfo.u2nameIndex) + "]");
+                localVariableTypeInfo.getSignature(clazz) + " " +
+                localVariableTypeInfo.getName(clazz) + "]");
     }
 
 
@@ -899,11 +949,131 @@ implements   ClassVisitor,
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
         println(visitorInfo(annotation) +
-                " Annotation [" + clazz.getString(annotation.u2typeIndex) + "]:");
+                " Annotation [" + annotation.getType(clazz) + "]:");
 
         indent();
         annotation.elementValuesAccept(clazz, this);
         outdent();
+    }
+
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        println(visitorInfo(typeAnnotation) +
+                " Type annotation [" + typeAnnotation.getType(clazz) + "]:");
+
+        indent();
+        typeAnnotation.targetInfoAccept(clazz, this);
+
+        println("Type path (count = " + typeAnnotation.typePath.length + "):");
+        indent();
+        typeAnnotation.typePathInfosAccept(clazz, this);
+        outdent();
+
+        typeAnnotation.elementValuesAccept(clazz, this);
+
+        outdent();
+    }
+
+
+    // Implementations for TargetInfoVisitor.
+
+    public void visitTypeParameterTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypeParameterTargetInfo typeParameterTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(typeParameterTargetInfo.u1targetType) + "): Parameter #" +
+                typeParameterTargetInfo.u1typeParameterIndex);
+    }
+
+
+    public void visitSuperTypeTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, SuperTypeTargetInfo superTypeTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(superTypeTargetInfo.u1targetType) + "): " +
+                (superTypeTargetInfo.u2superTypeIndex == 0xffff ?
+                     "super class" :
+                     "interface #" + superTypeTargetInfo.u2superTypeIndex));
+    }
+
+
+    public void visitTypeParameterBoundTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypeParameterBoundTargetInfo typeParameterBoundTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(typeParameterBoundTargetInfo.u1targetType) + "): parameter #" +
+                typeParameterBoundTargetInfo.u1typeParameterIndex + ", bound #" + typeParameterBoundTargetInfo.u1boundIndex);
+    }
+
+
+    public void visitEmptyTargetInfo(Clazz clazz, Member member, TypeAnnotation typeAnnotation, EmptyTargetInfo emptyTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(emptyTargetInfo.u1targetType) + ")");
+    }
+
+
+    public void visitFormalParameterTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, FormalParameterTargetInfo formalParameterTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(formalParameterTargetInfo.u1targetType) + "): formal parameter #" +
+                formalParameterTargetInfo.u1formalParameterIndex);
+    }
+
+
+    public void visitThrowsTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, ThrowsTargetInfo throwsTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(throwsTargetInfo.u1targetType) + "): throws #" +
+                throwsTargetInfo.u2throwsTypeIndex);
+    }
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(localVariableTargetInfo.u1targetType) + "): local variables (count = " +
+                localVariableTargetInfo.u2tableLength + ")");
+
+        indent();
+        localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
+        outdent();
+    }
+
+
+    public void visitCatchTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, CatchTargetInfo catchTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(catchTargetInfo.u1targetType) + "): catch #" +
+                catchTargetInfo.u2exceptionTableIndex);
+    }
+
+
+    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(offsetTargetInfo.u1targetType) + "): offset " +
+                offsetTargetInfo.u2offset);
+    }
+
+
+    public void visitTypeArgumentTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, TypeArgumentTargetInfo typeArgumentTargetInfo)
+    {
+        println("Target (type = 0x" + Integer.toHexString(typeArgumentTargetInfo.u1targetType) + "): offset " +
+                typeArgumentTargetInfo.u2offset + ", type argument " +
+                typeArgumentTargetInfo.u1typeArgumentIndex);
+    }
+
+
+    // Implementations for TypePathInfoVisitor.
+
+    public void visitTypePathInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        println("kind = " +
+                typePathInfo.u1typePathKind + ", argument index = " +
+                typePathInfo.u1typeArgumentIndex);
+    }
+
+
+    // Implementations for LocalVariableTargetElementVisitor.
+
+    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
+    {
+        println("v" +
+                localVariableTargetElement.u2index + ": " +
+                localVariableTargetElement.u2startPC + " -> " +
+                (localVariableTargetElement.u2startPC + localVariableTargetElement.u2length));
     }
 
 
@@ -914,7 +1084,7 @@ implements   ClassVisitor,
         println(visitorInfo(constantElementValue) +
                 " Constant element value [" +
                 (constantElementValue.u2elementNameIndex == 0 ? "(default)" :
-                clazz.getString(constantElementValue.u2elementNameIndex)) + " '" +
+                constantElementValue.getMethodName(clazz)) + " '" +
                 constantElementValue.u1tag + "']");
 
         indent();
@@ -928,9 +1098,9 @@ implements   ClassVisitor,
         println(visitorInfo(enumConstantElementValue) +
                 " Enum constant element value [" +
                 (enumConstantElementValue.u2elementNameIndex == 0 ? "(default)" :
-                clazz.getString(enumConstantElementValue.u2elementNameIndex)) + ", " +
-                clazz.getString(enumConstantElementValue.u2typeNameIndex)  + ", " +
-                clazz.getString(enumConstantElementValue.u2constantNameIndex) + "]");
+                enumConstantElementValue.getMethodName(clazz)) + ", " +
+                enumConstantElementValue.getTypeName(clazz)  + ", " +
+                enumConstantElementValue.getConstantName(clazz) + "]");
     }
 
 
@@ -939,8 +1109,8 @@ implements   ClassVisitor,
         println(visitorInfo(classElementValue) +
                 " Class element value [" +
                 (classElementValue.u2elementNameIndex == 0 ? "(default)" :
-                clazz.getString(classElementValue.u2elementNameIndex)) + ", " +
-                clazz.getString(classElementValue.u2classInfoIndex) + "]");
+                classElementValue.getMethodName(clazz)) + ", " +
+                classElementValue.getClassName(clazz) + "]");
     }
 
 
@@ -949,7 +1119,7 @@ implements   ClassVisitor,
         println(visitorInfo(annotationElementValue) +
                 " Annotation element value [" +
                 (annotationElementValue.u2elementNameIndex == 0 ? "(default)" :
-                clazz.getString(annotationElementValue.u2elementNameIndex)) + "]:");
+                annotationElementValue.getMethodName(clazz)) + "]:");
 
         indent();
         annotationElementValue.annotationAccept(clazz, this);
@@ -962,7 +1132,7 @@ implements   ClassVisitor,
         println(visitorInfo(arrayElementValue) +
                 " Array element value [" +
                 (arrayElementValue.u2elementNameIndex == 0 ? "(default)" :
-                clazz.getString(arrayElementValue.u2elementNameIndex)) + "]:");
+                arrayElementValue.getMethodName(clazz)) + "]:");
 
         indent();
         arrayElementValue.elementValuesAccept(clazz, annotation, this);

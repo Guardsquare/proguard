@@ -75,6 +75,16 @@ a.button {
   float: right;
 }
 
+a.largebutton {
+  font-weight: bold;
+  color: #000000;
+  margin: 0px;
+  padding: 10px;
+  background: url("steel.gif");
+  text-decoration: none;
+  border: 1px outset #FFFFFF;
+}
+
 /* Settings for the introductory paragraph. */
 
 p.intro

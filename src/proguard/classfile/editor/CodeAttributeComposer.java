@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -60,6 +60,7 @@ implements   AttributeVisitor,
     private static final int INVALID        = -1;
 
 
+    private final boolean allowExternalBranchTargets;
     private final boolean allowExternalExceptionHandlers;
     private final boolean shrinkInstructions;
 
@@ -85,17 +86,21 @@ implements   AttributeVisitor,
 
 
     /**
-     * Creates a new CodeAttributeComposer that doesn't allow external exception
-     * handlers and that automatically shrinks instructions.
+     * Creates a new CodeAttributeComposer that doesn't allow external branch
+     * targets or exception handlers and that automatically shrinks
+     * instructions.
      */
     public CodeAttributeComposer()
     {
-        this(false, true);
+        this(false, false, true);
     }
 
 
     /**
      * Creates a new CodeAttributeComposer.
+     * @param allowExternalBranchTargets     specifies whether branch targets
+     *                                       can lie outside the code fragment
+     *                                       of the branch instructions.
      * @param allowExternalExceptionHandlers specifies whether exception
      *                                       handlers can lie outside the code
      *                                       fragment in which exceptions are
@@ -104,9 +109,11 @@ implements   AttributeVisitor,
      *                                       should automatically be shrunk
      *                                       before being written.
      */
-    public CodeAttributeComposer(boolean allowExternalExceptionHandlers,
+    public CodeAttributeComposer(boolean allowExternalBranchTargets,
+                                 boolean allowExternalExceptionHandlers,
                                  boolean shrinkInstructions)
     {
+        this.allowExternalBranchTargets     = allowExternalBranchTargets;
         this.allowExternalExceptionHandlers = allowExternalExceptionHandlers;
         this.shrinkInstructions             = shrinkInstructions;
     }
@@ -122,7 +129,9 @@ implements   AttributeVisitor,
         exceptionTableLength = 0;
         level                = -1;
 
-        instructionWriter.reset(ClassConstants.TYPICAL_CODE_LENGTH);
+        // Make sure the instruction writer has at least the same buffer size
+        // as the local arrays.
+        instructionWriter.reset(code.length);
     }
 
 
@@ -362,9 +371,6 @@ implements   AttributeVisitor,
                                    instructionOffset,
                                    instructionWriter);
                 //instruction.write(code, codeLength);
-
-                // Don't remap this instruction again.
-                oldInstructionOffsets[instructionOffset] = -1;
             }
 
             // Continue remapping at the next instruction offset.
@@ -532,21 +538,48 @@ implements   AttributeVisitor,
 
     public void visitBranchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, BranchInstruction branchInstruction)
     {
-        // Adjust the branch offset.
-        branchInstruction.branchOffset = newBranchOffset(offset,
-                                                         branchInstruction.branchOffset);
+        try
+        {
+            // Adjust the branch offset.
+            branchInstruction.branchOffset =
+                newBranchOffset(offset, branchInstruction.branchOffset);
+
+            // Don't remap this instruction again.
+            oldInstructionOffsets[offset] = -1;
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (level == 0 || !allowExternalBranchTargets)
+            {
+                 throw e;
+            }
+        }
     }
 
 
     public void visitAnySwitchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SwitchInstruction switchInstruction)
     {
-        // Adjust the default jump offset.
-        switchInstruction.defaultOffset = newBranchOffset(offset,
-                                                          switchInstruction.defaultOffset);
+        try
+        {
+            // TODO: We're assuming we can adjust no offsets or all offsets at once.
+            // Adjust the default jump offset.
+            switchInstruction.defaultOffset =
+                newBranchOffset(offset, switchInstruction.defaultOffset);
 
-        // Adjust the jump offsets.
-        updateJumpOffsets(offset,
-                          switchInstruction.jumpOffsets);
+            // Adjust the jump offsets.
+            updateJumpOffsets(offset,
+                              switchInstruction.jumpOffsets);
+
+            // Don't remap this instruction again.
+            oldInstructionOffsets[offset] = -1;
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (level == 0 || !allowExternalBranchTargets)
+            {
+                 throw e;
+            }
+        }
     }
 
 
@@ -719,8 +752,10 @@ implements   AttributeVisitor,
 
         int oldInstructionOffset = oldInstructionOffsets[newInstructionOffset];
 
+        // For ordinary branch instructions, we can compute the offset
+        // relative to the instruction itself.
         return newInstructionOffset(oldInstructionOffset + oldBranchOffset) -
-               newInstructionOffset(oldInstructionOffset);
+               newInstructionOffset;
     }
 
 

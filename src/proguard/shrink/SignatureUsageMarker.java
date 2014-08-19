@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -67,8 +67,8 @@ implements   AttributeVisitor,
 
     public void visitSignatureAttribute(Clazz clazz, SignatureAttribute signatureAttribute)
     {
-        // Only keep the signature if all of its classes are used.
-        attributeUsed = true;
+        // Only keep the signature if any of its classes are used.
+        attributeUsed = false;
         signatureAttribute.referencedClassesAccept(this);
 
         if (attributeUsed)
@@ -84,15 +84,18 @@ implements   AttributeVisitor,
 
     // Implementations for ClassVisitor.
 
-    public void visitLibraryClass(LibraryClass libraryClass) {}
+    public void visitLibraryClass(LibraryClass libraryClass)
+    {
+        attributeUsed = true;
+    }
 
 
     public void visitProgramClass(ProgramClass programClass)
     {
         // Don't keep the signature if one of its classes is not used.
-        if (!usageMarker.isUsed(programClass))
+        if (usageMarker.isUsed(programClass))
         {
-            attributeUsed = false;
+            attributeUsed = true;
         }
     }
 

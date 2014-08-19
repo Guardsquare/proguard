@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -47,7 +47,7 @@ implements   InstructionVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    private static final boolean OPTIMIZE_CONSERVATIVELY = System.getProperty("optimize.conservatively") != null;
+    static final boolean OPTIMIZE_CONSERVATIVELY = System.getProperty("optimize.conservatively") != null;
 
 
     private final boolean includeReturnInstructions;
@@ -96,6 +96,10 @@ implements   InstructionVisitor,
         // Check for instructions that might cause side effects.
         switch (opcode)
         {
+            case InstructionConstants.OP_IDIV:
+            case InstructionConstants.OP_LDIV:
+            case InstructionConstants.OP_IREM:
+            case InstructionConstants.OP_LREM:
             case InstructionConstants.OP_IALOAD:
             case InstructionConstants.OP_LALOAD:
             case InstructionConstants.OP_FALOAD:
@@ -104,8 +108,13 @@ implements   InstructionVisitor,
             case InstructionConstants.OP_BALOAD:
             case InstructionConstants.OP_CALOAD:
             case InstructionConstants.OP_SALOAD:
+            case InstructionConstants.OP_NEWARRAY:
+            case InstructionConstants.OP_ARRAYLENGTH:
+            case InstructionConstants.OP_ANEWARRAY:
+            case InstructionConstants.OP_MULTIANEWARRAY:
                 // These instructions strictly taken may cause a side effect
-                // (NullPointerException, ArrayIndexOutOfBoundsException).
+                // (ArithmeticException, NullPointerException,
+                // ArrayIndexOutOfBoundsException, NegativeArraySizeException).
                 hasSideEffects = OPTIMIZE_CONSERVATIVELY;
                 break;
 
@@ -187,9 +196,11 @@ implements   InstructionVisitor,
                 }
                 break;
 
+            case InstructionConstants.OP_ANEWARRAY:
             case InstructionConstants.OP_CHECKCAST:
+            case InstructionConstants.OP_MULTIANEWARRAY:
                 // This instructions strictly taken may cause a side effect
-                // (ClassCastException).
+                // (ClassCastException, NegativeArraySizeException).
                 hasSideEffects = OPTIMIZE_CONSERVATIVELY;
                 break;
         }
@@ -254,7 +265,7 @@ implements   InstructionVisitor,
             (includeLocalFieldAccess || !programClass.equals(referencingClass)) &&
             ((ReadWriteFieldMarker.isRead(programField) &&
               ReadWriteFieldMarker.isWritten(programField))                                ||
-             ((programField.getAccessFlags() & ClassConstants.INTERNAL_ACC_VOLATILE) != 0) ||
+             ((programField.getAccessFlags() & ClassConstants.ACC_VOLATILE) != 0) ||
              (!programClass.equals(referencingClass) &&
               !initializedSuperClasses(referencingClass).containsAll(initializedSuperClasses(programClass))));
     }
@@ -296,8 +307,8 @@ implements   InstructionVisitor,
         // static initializers.
         clazz.hierarchyAccept(true, true, true, false,
                               new StaticInitializerContainingClassFilter(
-                              new NamedMethodVisitor(ClassConstants.INTERNAL_METHOD_NAME_CLINIT,
-                                                     ClassConstants.INTERNAL_METHOD_TYPE_CLINIT,
+                              new NamedMethodVisitor(ClassConstants.METHOD_NAME_CLINIT,
+                                                     ClassConstants.METHOD_TYPE_CLINIT,
                               new SideEffectMethodFilter(
                               new MemberToClassVisitor(
                               new ClassCollector(set))))));

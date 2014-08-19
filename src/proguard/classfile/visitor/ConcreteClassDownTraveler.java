@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -53,8 +53,8 @@ implements   ClassVisitor
     {
         // Is this an abstract class or an interface?
         if ((programClass.getAccessFlags() &
-             (ClassConstants.INTERNAL_ACC_INTERFACE |
-              ClassConstants.INTERNAL_ACC_ABSTRACT)) != 0)
+             (ClassConstants.ACC_INTERFACE |
+              ClassConstants.ACC_ABSTRACT)) != 0)
         {
             // Travel down the hierarchy.
             Clazz[] subClasses = programClass.subClasses;
@@ -78,8 +78,8 @@ implements   ClassVisitor
     {
         // Is this an abstract class or interface?
         if ((libraryClass.getAccessFlags() &
-             (ClassConstants.INTERNAL_ACC_INTERFACE |
-              ClassConstants.INTERNAL_ACC_ABSTRACT)) != 0)
+             (ClassConstants.ACC_INTERFACE |
+              ClassConstants.ACC_ABSTRACT)) != 0)
         {
             // Travel down the hierarchy.
             Clazz[] subClasses = libraryClass.subClasses;

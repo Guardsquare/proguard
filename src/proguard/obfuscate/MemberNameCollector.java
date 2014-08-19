@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,7 +21,7 @@
 package proguard.obfuscate;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
 
 import java.util.Map;
@@ -64,8 +64,7 @@ implements   MemberVisitor
         // Special cases: <clinit> and <init> are always kept unchanged.
         // We can ignore them here.
         String name = member.getName(clazz);
-        if (name.equals(ClassConstants.INTERNAL_METHOD_NAME_CLINIT) ||
-            name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+        if (ClassUtil.isInitializer(name))
         {
             return;
         }

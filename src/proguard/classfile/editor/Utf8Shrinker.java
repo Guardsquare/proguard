@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -46,6 +46,7 @@ implements   ClassVisitor,
              ConstantVisitor,
              AttributeVisitor,
              InnerClassesInfoVisitor,
+             ParameterInfoVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
@@ -197,6 +198,15 @@ implements   ClassVisitor,
     }
 
 
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        markCpUtf8Entry(clazz, methodParametersAttribute.u2attributeNameIndex);
+
+        // Mark the UTF-8 entries referenced by the parameter information.
+        methodParametersAttribute.parametersAccept(clazz, method, this);
+    }
+
+
     public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
     {
         markCpUtf8Entry(clazz, exceptionsAttribute.u2attributeNameIndex);
@@ -282,6 +292,17 @@ implements   ClassVisitor,
         if (innerClassesInfo.u2innerNameIndex != 0)
         {
             markCpUtf8Entry(clazz, innerClassesInfo.u2innerNameIndex);
+        }
+    }
+
+
+    // Implementations for ParameterInfoVisitor.
+
+    public void visitParameterInfo(Clazz clazz, Method method, int parameterIndex, ParameterInfo parameterInfo)
+    {
+        if (parameterInfo.u2nameIndex != 0)
+        {
+            markCpUtf8Entry(clazz, parameterInfo.u2nameIndex);
         }
     }
 

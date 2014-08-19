@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -37,8 +37,8 @@ public class ValueFactory
     static final DoubleValue  DOUBLE_VALUE  = new UnknownDoubleValue();
 
     static final ReferenceValue REFERENCE_VALUE_NULL                        = new TypedReferenceValue(null, null, true);
-    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL = new TypedReferenceValue(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT, null, true);
-    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL   = new TypedReferenceValue(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT, null, false);
+    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL = new TypedReferenceValue(ClassConstants.NAME_JAVA_LANG_OBJECT, null, true);
+    static final ReferenceValue REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL   = new TypedReferenceValue(ClassConstants.NAME_JAVA_LANG_OBJECT, null, false);
 
 
     /**
@@ -50,20 +50,20 @@ public class ValueFactory
     {
         switch (type.charAt(0))
         {
-            case ClassConstants.INTERNAL_TYPE_VOID:    return null;
-            case ClassConstants.INTERNAL_TYPE_BOOLEAN:
-            case ClassConstants.INTERNAL_TYPE_BYTE:
-            case ClassConstants.INTERNAL_TYPE_CHAR:
-            case ClassConstants.INTERNAL_TYPE_SHORT:
-            case ClassConstants.INTERNAL_TYPE_INT:     return createIntegerValue();
-            case ClassConstants.INTERNAL_TYPE_LONG:    return createLongValue();
-            case ClassConstants.INTERNAL_TYPE_FLOAT:   return createFloatValue();
-            case ClassConstants.INTERNAL_TYPE_DOUBLE:  return createDoubleValue();
-            default:                                   return createReferenceValue(ClassUtil.isInternalArrayType(type) ?
-                                                                                       type :
-                                                                                       ClassUtil.internalClassNameFromClassType(type),
-                                                                                   referencedClass,
-                                                                                   mayBeNull);
+            case ClassConstants.TYPE_VOID:    return null;
+            case ClassConstants.TYPE_BOOLEAN:
+            case ClassConstants.TYPE_BYTE:
+            case ClassConstants.TYPE_CHAR:
+            case ClassConstants.TYPE_SHORT:
+            case ClassConstants.TYPE_INT:     return createIntegerValue();
+            case ClassConstants.TYPE_LONG:    return createLongValue();
+            case ClassConstants.TYPE_FLOAT:   return createFloatValue();
+            case ClassConstants.TYPE_DOUBLE:  return createDoubleValue();
+            default:                          return createReferenceValue(ClassUtil.isInternalArrayType(type) ?
+                                                                              type :
+                                                                              ClassUtil.internalClassNameFromClassType(type),
+                                                                          referencedClass,
+                                                                          mayBeNull);
         }
     }
 
@@ -153,10 +153,10 @@ public class ValueFactory
                                                Clazz   referencedClass,
                                                boolean mayBeNull)
     {
-        return type == null                                                ? REFERENCE_VALUE_NULL                                 :
-               !type.equals(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT) ? new TypedReferenceValue(type, referencedClass, mayBeNull) :
-               mayBeNull                                                   ? REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL          :
-                                                                             REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL;
+        return type == null                                       ? REFERENCE_VALUE_NULL                                 :
+               !type.equals(ClassConstants.NAME_JAVA_LANG_OBJECT) ? new TypedReferenceValue(type, referencedClass, mayBeNull) :
+               mayBeNull                                          ? REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL          :
+                                                                    REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL;
     }
 
 
@@ -169,7 +169,7 @@ public class ValueFactory
                                                     Clazz        referencedClass,
                                                     IntegerValue arrayLength)
     {
-        return createReferenceValue(ClassConstants.INTERNAL_TYPE_ARRAY + type,
+        return createReferenceValue(ClassConstants.TYPE_ARRAY + type,
                                     referencedClass,
                                     false);
     }

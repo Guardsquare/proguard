@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,6 +23,7 @@ package proguard.classfile.util;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.attribute.annotation.target.*;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.instruction.*;
@@ -357,6 +358,12 @@ public abstract class SimplifiedVisitor
     }
 
 
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        visitAnyAttribute(clazz, methodParametersAttribute);
+    }
+
+
     public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
     {
         visitAnyAttribute(clazz, exceptionsAttribute);
@@ -480,6 +487,81 @@ public abstract class SimplifiedVisitor
     public void visitRuntimeInvisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleParameterAnnotationsAttribute runtimeInvisibleParameterAnnotationsAttribute)
     {
         visitAnyParameterAnnotationsAttribute(clazz, method, runtimeInvisibleParameterAnnotationsAttribute);
+    }
+
+
+    /**
+     * Visits any type of TypeAnnotationsAttribute of a class.
+     */
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        visitAnyAnnotationsAttribute(clazz, typeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        visitAnyTypeAnnotationsAttribute(clazz, runtimeVisibleTypeAnnotationsAttribute);
+    }
+
+
+    /**
+     * Visits the given RuntimeVisibleTypeAnnotationsAttribute of any type of class member.
+     */
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Member member, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeVisibleTypeAnnotationsAttribute(clazz, runtimeVisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Field field, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeVisibleTypeAnnotationsAttribute(clazz, (Member)field, runtimeVisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeVisibleTypeAnnotationsAttribute(clazz, (Member)method, runtimeVisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeVisibleTypeAnnotationsAttribute(clazz, method, runtimeVisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        visitAnyTypeAnnotationsAttribute(clazz, runtimeInvisibleTypeAnnotationsAttribute);
+    }
+
+
+    /**
+     * Visits the given RuntimeInvisibleTypeAnnotationsAttribute of any type of class member.
+     */
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Member member, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, runtimeInvisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Field field, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, (Member)field, runtimeInvisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, (Member)method, runtimeInvisibleTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, method, runtimeInvisibleTypeAnnotationsAttribute);
     }
 
 
@@ -795,8 +877,206 @@ public abstract class SimplifiedVisitor
     }
 
 
+    public void visitAnnotation(Clazz clazz, Method method, CodeAttribute codeAttribute, Annotation annotation)
+    {
+        visitAnnotation(clazz, method, annotation);
+    }
+
+
+    // Simplifications for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        throw new UnsupportedOperationException("Method must be overridden in ["+this.getClass().getName()+"] if ever called");
+    }
+
+
+    /**
+     * Visits the given TypeAnnotation of any type of class member.
+     */
+    public void visitTypeAnnotation(Clazz clazz, Member member, TypeAnnotation typeAnnotation)
+    {
+        visitTypeAnnotation(clazz, typeAnnotation);
+    }
+
+
+    public void visitTypeAnnotation(Clazz clazz, Field field, TypeAnnotation typeAnnotation)
+    {
+        visitTypeAnnotation(clazz, (Member)field, typeAnnotation);
+    }
+
+
+    public void visitTypeAnnotation(Clazz clazz, Method method, TypeAnnotation typeAnnotation)
+    {
+        visitTypeAnnotation(clazz, (Member)method, typeAnnotation);
+    }
+
+
+    public void visitTypeAnnotation(Clazz clazz, Method method, int parameterIndex, TypeAnnotation typeAnnotation)
+    {
+        visitTypeAnnotation(clazz, method, typeAnnotation);
+    }
+
+
+    public void visitTypeAnnotation(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation)
+    {
+        visitTypeAnnotation(clazz, method, typeAnnotation);
+    }
+
+
+    // Simplifications for TargetInfoVisitor.
+
+    /**
+     * Visits any type of TargetInfo.
+     */
+    public void visitAnyTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TargetInfo targetInfo)
+    {
+        throw new UnsupportedOperationException("Method must be overridden in ["+this.getClass().getName()+"] if ever called");
+    }
+
+
+    public void visitTypeParameterTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypeParameterTargetInfo typeParameterTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, typeParameterTargetInfo);
+    }
+
+
+    public void visitTypeParameterTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, TypeParameterTargetInfo typeParameterTargetInfo)
+    {
+        visitTypeParameterTargetInfo(clazz, typeAnnotation, typeParameterTargetInfo);
+    }
+
+
+    public void visitSuperTypeTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, SuperTypeTargetInfo superTypeTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, superTypeTargetInfo);
+    }
+
+
+    public void visitTypeParameterBoundTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypeParameterBoundTargetInfo typeParameterBoundTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, typeParameterBoundTargetInfo);
+    }
+
+
+    /**
+     * Visits the given TypeParameterBoundTargetInfo of any type of class member.
+     */
+    public void visitTypeParameterBoundTargetInfo(Clazz clazz, Member member, TypeAnnotation typeAnnotation, TypeParameterBoundTargetInfo typeParameterBoundTargetInfo)
+    {
+        visitTypeParameterBoundTargetInfo(clazz, typeAnnotation, typeParameterBoundTargetInfo);
+    }
+
+
+    public void visitTypeParameterBoundTargetInfo(Clazz clazz, Field field, TypeAnnotation typeAnnotation, TypeParameterBoundTargetInfo typeParameterBoundTargetInfo)
+    {
+        visitTypeParameterBoundTargetInfo(clazz, (Member)field, typeAnnotation, typeParameterBoundTargetInfo);
+    }
+
+
+    public void visitTypeParameterBoundTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, TypeParameterBoundTargetInfo typeParameterBoundTargetInfo)
+    {
+        visitTypeParameterBoundTargetInfo(clazz, (Member)method, typeAnnotation, typeParameterBoundTargetInfo);
+    }
+
+
+    /**
+     * Visits the given EmptyTargetInfo of any type of class member.
+     */
+    public void visitEmptyTargetInfo(Clazz clazz, Member member, TypeAnnotation typeAnnotation, EmptyTargetInfo emptyTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, emptyTargetInfo);
+    }
+
+
+    public void visitEmptyTargetInfo(Clazz clazz, Field field, TypeAnnotation typeAnnotation, EmptyTargetInfo emptyTargetInfo)
+    {
+        visitEmptyTargetInfo(clazz, (Member)field, typeAnnotation, emptyTargetInfo);
+    }
+
+
+    public void visitEmptyTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, EmptyTargetInfo emptyTargetInfo)
+    {
+        visitEmptyTargetInfo(clazz, (Member)method, typeAnnotation, emptyTargetInfo);
+    }
+
+
+    public void visitFormalParameterTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, FormalParameterTargetInfo formalParameterTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, formalParameterTargetInfo);
+    }
+
+
+    public void visitThrowsTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, ThrowsTargetInfo throwsTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, throwsTargetInfo);
+    }
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, localVariableTargetInfo);
+    }
+
+
+    public void visitCatchTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, CatchTargetInfo catchTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, catchTargetInfo);
+    }
+
+
+    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, offsetTargetInfo);
+    }
+
+
+    public void visitTypeArgumentTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, TypeArgumentTargetInfo typeArgumentTargetInfo)
+    {
+        visitAnyTargetInfo(clazz, typeAnnotation, typeArgumentTargetInfo);
+    }
+
+
+    // Simplifications for TypePathInfoVisitor.
+
+    public void visitTypePathInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        throw new UnsupportedOperationException("Method must be overridden in ["+this.getClass().getName()+"] if ever called");
+    }
+
+
+    /**
+     * Visits the given TypePathInfo of any type of class member.
+     */
+    public void visitTypePathInfo(Clazz clazz, Member member, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        visitTypePathInfo(clazz, typeAnnotation, typePathInfo);
+    }
+
+
+    public void visitTypePathInfo(Clazz clazz, Field field, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        visitTypePathInfo(clazz, (Member)field, typeAnnotation, typePathInfo);
+    }
+
+
+    public void visitTypePathInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        visitTypePathInfo(clazz, (Member)method, typeAnnotation, typePathInfo);
+    }
+
+
+    public void visitTypePathInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        visitTypePathInfo(clazz, method, typeAnnotation, typePathInfo);
+    }
+
+
     // Simplifications for ElementValueVisitor.
 
+    /**
+     * Visits any type of ElementValue.
+     */
     public void visitAnyElementValue(Clazz clazz, Annotation annotation, ElementValue elementValue)
     {
         throw new UnsupportedOperationException("Method must be overridden in ["+this.getClass().getName()+"] if ever called");

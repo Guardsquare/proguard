@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -110,8 +110,8 @@ implements   MemberVisitor
         //    // Is the field private or static?
         //    int targetAccessFlags = targetField.getAccessFlags();
         //    if ((targetAccessFlags &
-        //         (ClassConstants.INTERNAL_ACC_PRIVATE |
-        //          ClassConstants.INTERNAL_ACC_STATIC)) != 0)
+        //         (ClassConstants.ACC_PRIVATE |
+        //          ClassConstants.ACC_STATIC)) != 0)
         //    {
         //        if (DEBUG)
         //        {
@@ -192,7 +192,7 @@ implements   MemberVisitor
         if (targetMethod != null)
         {
             // is this source method abstract?
-            if ((accessFlags & ClassConstants.INTERNAL_ACC_ABSTRACT) != 0)
+            if ((accessFlags & ClassConstants.ACC_ABSTRACT) != 0)
             {
                 // Keep the target method.
                 if (DEBUG)
@@ -206,7 +206,7 @@ implements   MemberVisitor
 
             // Is the target method abstract?
             int targetAccessFlags = targetMethod.getAccessFlags();
-            if ((targetAccessFlags & ClassConstants.INTERNAL_ACC_ABSTRACT) != 0)
+            if ((targetAccessFlags & ClassConstants.ACC_ABSTRACT) != 0)
             {
                 // Keep the abstract method, but update its contents, in order
                 // to keep any references to it valid.
@@ -217,7 +217,7 @@ implements   MemberVisitor
 
                 // Replace the access flags.
                 targetMethod.u2accessFlags =
-                    accessFlags & ~ClassConstants.INTERNAL_ACC_FINAL;
+                    accessFlags & ~ClassConstants.ACC_FINAL;
 
                 // Add and replace the attributes.
                 programMethod.attributesAccept(programClass,
@@ -249,7 +249,7 @@ implements   MemberVisitor
 
         // Create a copy of the method.
         ProgramMethod newProgramMethod =
-            new ProgramMethod(accessFlags & ~ClassConstants.INTERNAL_ACC_FINAL,
+            new ProgramMethod(accessFlags & ~ClassConstants.ACC_FINAL,
                               constantAdder.addConstant(programClass, programMethod.u2nameIndex),
                               constantAdder.addConstant(programClass, programMethod.u2descriptorIndex),
                               0,
@@ -287,8 +287,8 @@ implements   MemberVisitor
      */
     private String newUniqueMemberName(String name, String descriptor)
     {
-        return name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT) ?
-            ClassConstants.INTERNAL_METHOD_NAME_INIT :
+        return name.equals(ClassConstants.METHOD_NAME_INIT) ?
+            ClassConstants.METHOD_NAME_INIT :
             name + ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
     }
 }

@@ -5,24 +5,21 @@
 <meta http-equiv="content-style-type" content="text/css">
 <link rel="stylesheet" type="text/css" href="style.css">
 <title>ProGuard Troubleshooting</title>
+</head>
+<body>
+
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
-else {
-  var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash) {
-    if (history.pushState) {
-      window.top.history.replaceState(null, window.document.title, hash);
-    } else {
-      window.top.location.hash=hash;
-    }
-  }
-}
+  document.write('<a class="largebutton" target="_top" href="../index.html#manual/troubleshooting.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/">Saikoa</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
-</head>
-<body>
+<noscript>
+<a class="largebutton" target="_top"  href="../index.html#manual/troubleshooting.html">ProGuard index</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/">Saikoa</a>
+<a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
+</noscript>
 
 <h2>Troubleshooting</h2>
 
@@ -34,9 +31,12 @@ few problems. The following sections discuss some common issues and solutions:
 <li><a href="#dynamicalclass">Note: can't find dynamically referenced class ...</a></li>
 <li><a href="#dynamicalclasscast">Note: ... calls '(...)Class.forName(variable).newInstance()'</a></li>
 <li><a href="#dynamicalclassmember">Note: ... accesses a field/method '...' dynamically</a></li>
+<li><a href="#attributes">Note: ... calls 'Class.get...', 'Field.get...', or 'Method.get...'</a></li>
 <li><a href="#unknownclass">Note: the configuration refers to the unknown class  '...'</a></li>
 <li><a href="#descriptorclass">Note: the configuration keeps the entry point '...', but not the descriptor class '...'</a></li>
+<li><a href="#libraryclass">Note: the configuration explicitly specifies '...' to keep library class '...'</a></li>
 <li><a href="#classmembers">Note: the configuration doesn't specify which class members to keep for class '...'</a></li>
+<li><a href="#nosideeffects">Note: the configuration specifies that none of the methods of class '...' have any side effects</a></li>
 <li><a href="#duplicateclass">Note: duplicate definition of program/library class</a></li>
 <li><a href="#duplicatezipentry">Warning: can't write resource ... Duplicate zip entry</a></li>
 <li><a href="#unresolvedclass">Warning: can't find superclass or interface</a></li>
@@ -101,6 +101,7 @@ few problems. The following sections discuss some common issues and solutions:
 <li><a href="#securityexception">SecurityException: SHA1 digest error</a></li>
 <li><a href="#classcastexception">ClassCastException: class not an enum</a></li><li><a href="#classcastexception">IllegalArgumentException: class not an enum type</a></li>
 <li><a href="#arraystoreexception">ArrayStoreException: sun.reflect.annotation.EnumConstantNotPresentExceptionProxy</a></li>
+<li><a href="#illegalargumentexception">IllegalArgumentException: methods with same signature but incompatible return types</a></li>
 <li><a href="#compilererror">CompilerError: duplicate addition</a></li>
 <li><a href="#classformaterror1">ClassFormatError: repetitive field name/signature</a></li>
 <li><a href="#classformaterror2">ClassFormatError: Invalid index in LocalVariableTable in class file</a></li>
@@ -122,25 +123,38 @@ ProGuard may print out some notes and non-fatal warnings:
 
 <dt><a name="dynamicalclasscast"><b>Note: ... calls '(...)Class.forName(variable).newInstance()'</b></a></dt>
 
-<dd>ProGuard lists all class casts of dynamically created class instances,
-    like "<code>(MyClass)Class.forName(variable).newInstance()</code>".
-    Depending on your application, you may need to keep the mentioned classes
-    with an option like "<code>-keep class MyClass</code>", or their
-    implementations with an option like "<code>-keep class * implements
-    MyClass</code>". You can switch off these notes by specifying the
+<dd>Your code uses reflection to dynamically create class instances, with a
+    construct like
+    "<code>(MyClass)Class.forName(variable).newInstance()</code>". Depending
+    on your application, you may need to keep the mentioned classes with an
+    option like "<code>-keep class MyClass</code>", or their implementations
+    with an option like "<code>-keep class * implements MyClass</code>". You
+    can switch off these notes by specifying the
     <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
 
 <dt><a name="dynamicalclassmember"><b>Note: ... accesses a field/method '...' dynamically</b></a></dt>
 
-<dd>ProGuard lists a number of constructs like
-    "<code>.getField("myField")</code>". Depending on your application, you
-    may need to figure out where the mentioned class members are defined and
-    keep them with an option like "<code>-keep class MyClass { MyFieldType
+<dd>Your code uses reflection to find a fields or a method, with a construct
+    like "<code>.getField("myField")</code>". Depending on your application,
+    you may need to figure out where the mentioned class members are defined
+    and keep them with an option like "<code>-keep class MyClass { MyFieldType
     myField; }</code>". Otherwise, ProGuard might remove or obfuscate the
     class members, since it can't know which ones they are exactly. It does
     list possible candidates, for your information. You can switch off these
-    notes by specifying the <a
-    href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
+    notes by specifying
+    the <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
+
+<dt><a name="attributes"><b>Note: ... calls 'Class.get...'</b>, <b>'Field.get...'</b>, or <b>'Method.get...'</b></a></dt>
+<dd>Your code uses reflection to access metadata from the code, with an
+    invocation like "<code>class.getAnnotations()</code>". You then generally
+    need to preserve optional <a href="attributes.html">class file
+    attributes</a>, which ProGuard removes by default. The attributes contain
+    information about annotations, enclosing classes, enclosing methods, etc.
+    In a summary in the log, ProGuard provides a suggested configuration,
+    like <a href="usage.html#keepattributes"><code>-keepattributes
+    *Annotation*</code></a>. If you're sure the attributes are not necessary,
+    you can switch off these notes by specifying
+    the <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
 
 <dt><a name="unknownclass"><b>Note: the configuration refers to the unknown class  '...'</b></a></dt>
 
@@ -157,8 +171,20 @@ ProGuard may print out some notes and non-fatal warnings:
     You may then want to keep the class too. Otherwise, ProGuard will
     obfuscate its name, thus changing the method's signature. The method might
     then become unfindable as an entry point, e.g. if it is part of a public
-    API. You can switch off these notes by specifying the <a
-    href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
+    API. You can automatically keep such descriptor classes with
+    the <code>-keep</code> option modifier
+    <a href="usage.html#includedescriptorclasses"><code>includedescriptorclasses</code></a>
+    (<code>-keep,includedescriptorclasses</code> ...). You can switch off
+    these notes by specifying
+    the <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
+
+<dt><a name="libraryclass"><b>Note: the configuration explicitly specifies '...' to keep library class '...'</b></a></dt>
+
+<dd>Your configuration contains a <code>-keep</code> option to preserve the
+    given library class. However, you don't need to keep any library classes.
+    ProGuard always leaves underlying libraries unchanged. You can switch off
+    these notes by specifying the
+    <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
 
 <dt><a name="classmembers"><b>Note: the configuration doesn't specify which class members to keep for class '...'</b></a></dt>
 
@@ -173,6 +199,19 @@ ProGuard may print out some notes and non-fatal warnings:
     preserves all specified classes <i>and</i> class members.
     The <a href="usage.html#keepoverview">overview of all <code>keep</code>
     options</a> can help. You can switch off these notes by specifying
+    the <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
+
+<dt><a name="nosideeffects"><b>Note: the configuration specifies that none of the methods of class '...' have any side effects</b></a></dt>
+
+<dd>Your configuration contains an option
+    <a href="usage.html#assumenosideeffects"><code>-assumenosideeffects</code></a>
+    to indicate that the specified methods don't have any side effects.
+    However, the configuration tries to match <i>all</i> methods, by using a
+    wildcard like "<code>*;</code>". This includes methods
+    from <code>java.lang.Object</code>, such as <code>wait()</code> and
+    <code>notify()</code>. Removing invocations of those methods will most
+    likely break your application. You should list the methods without side
+    effects more conservatively. You can switch off these notes by specifying
     the <a href="usage.html#dontnote"><code>-dontnote</code></a> option.</dd>
 
 <dt><a name="duplicateclass"><b>Note: duplicate definition of program/library class</b></a></dt>
@@ -822,6 +861,17 @@ might be several reasons:
     should make sure you're preserving the special methods of the enumeration
     type, as shown in the examples.</dd>
 
+<dt><a name="illegalargumentexception"><b>IllegalArgumentException: methods with same signature but incompatible return types</b></a></dt>
+
+<dd>You are probably running some code that has been obfuscated
+    with the <a
+    href="usage.html#overloadaggressively"><code>-overloadaggressively</code></a>
+    option. The class <code>java.lang.reflect.Proxy</code> can't handle
+    classes that contain methods with the same names and signatures, but
+    different return types. Its method <code>newProxyInstance</code> then
+    throws this exception. You can avoid the problem by not using the
+    option.</dd>
+
 <dt><a name="compilererror"><b>CompilerError: duplicate addition</b></a></dt>
 
 <dd>You are probably compiling or running some code that has been obfuscated
@@ -875,10 +925,9 @@ might be several reasons:
 </dl>
 
 <hr />
-<noscript><div><a target="_top" href="../index.html" class="button">Show menu</a></div></noscript>
 <address>
-Copyright &copy; 2002-2013
-<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a>.
+Copyright &copy; 2002-2014
+<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.saikoa.com/">Saikoa</a>.
 </address>
 </body>
 </html>

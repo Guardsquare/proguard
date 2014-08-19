@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -43,11 +43,13 @@ implements   ClassVisitor,
              ConstantVisitor,
              MemberVisitor,
              AttributeVisitor,
+             BootstrapMethodInfoVisitor,
              ExceptionInfoVisitor,
              InnerClassesInfoVisitor,
              StackMapFrameVisitor,
              VerificationTypeVisitor,
              AnnotationVisitor,
+             TypeAnnotationVisitor,
              ElementValueVisitor
 {
     // Implementations for ClassVisitor.
@@ -103,6 +105,14 @@ implements   ClassVisitor,
     public void visitAnyAttribute(Clazz clazz, Attribute attribute)
     {
         clean(attribute);
+    }
+
+
+    public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute)
+    {
+        clean(bootstrapMethodsAttribute);
+
+        bootstrapMethodsAttribute.bootstrapMethodEntriesAccept(clazz, this);
     }
 
 
@@ -163,11 +173,27 @@ implements   ClassVisitor,
     }
 
 
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        clean(typeAnnotationsAttribute);
+
+        typeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
+    }
+
+
     public void visitAnnotationDefaultAttribute(Clazz clazz, Method method, AnnotationDefaultAttribute annotationDefaultAttribute)
     {
         clean(annotationDefaultAttribute);
 
         annotationDefaultAttribute.defaultValueAccept(clazz, this);
+    }
+
+
+    // Implementations for BootstrapMethodInfoVisitor.
+
+    public void visitBootstrapMethodInfo(Clazz clazz, BootstrapMethodInfo bootstrapMethodInfo)
+    {
+        clean(bootstrapMethodInfo);
     }
 
 
@@ -241,6 +267,18 @@ implements   ClassVisitor,
         clean(annotation);
 
         annotation.elementValuesAccept(clazz, this);
+    }
+
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        clean(typeAnnotation);
+
+        //typeAnnotation.targetInfoAccept(clazz, this);
+        //typeAnnotation.typePathInfosAccept(clazz, this);
+        typeAnnotation.elementValuesAccept(clazz, this);
     }
 
 

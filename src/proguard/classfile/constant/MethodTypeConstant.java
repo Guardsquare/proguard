@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,7 @@ package proguard.classfile.constant;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.visitor.ClassVisitor;
 
 /**
  * This Constant represents a method handle constant in the constant pool.
@@ -40,6 +41,15 @@ public class MethodTypeConstant extends Constant
      * ClassReferenceInitializer}</code>..
      */
     public Clazz javaLangInvokeMethodTypeClass;
+
+
+    /**
+     * An extra field pointing to the Clazz objects referenced in the
+     * descriptor string. This field is filled out by the <code>{@link
+     * proguard.classfile.util.ClassReferenceInitializer ClassReferenceInitializer}</code>.
+     * References to primitive types are ignored.
+     */
+    public Clazz[] referencedClasses;
 
 
     /**
@@ -76,6 +86,25 @@ public class MethodTypeConstant extends Constant
     public String getType(Clazz clazz)
     {
         return clazz.getString(u2descriptorIndex);
+    }
+
+
+    /**
+     * Lets the Clazz objects referenced in the descriptor string
+     * accept the given visitor.
+     */
+    public void referencedClassesAccept(ClassVisitor classVisitor)
+    {
+        if (referencedClasses != null)
+        {
+            for (int index = 0; index < referencedClasses.length; index++)
+            {
+                if (referencedClasses[index] != null)
+                {
+                    referencedClasses[index].accept(classVisitor);
+                }
+            }
+        }
     }
 
 

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -42,12 +42,12 @@ public class RuntimeVisibleParameterAnnotationsAttribute extends ParameterAnnota
      * Creates an initialized RuntimeVisibleParameterAnnotationsAttribute.
      */
     public RuntimeVisibleParameterAnnotationsAttribute(int            u2attributeNameIndex,
-                                                       int            u2parametersCount,
+                                                       int            u1parametersCount,
                                                        int[]          u2parameterAnnotationsCount,
                                                        Annotation[][] parameterAnnotations)
     {
         super(u2attributeNameIndex,
-              u2parametersCount,
+              u1parametersCount,
               u2parameterAnnotationsCount,
               parameterAnnotations);
     }

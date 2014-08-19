@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -158,7 +158,7 @@ implements   AttributeVisitor
                                                partialEvaluator.getVariablesBefore(0));
 
             // Special case: the <init> method.
-            if (method.getName(programClass).equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+            if (method.getName(programClass).equals(ClassConstants.METHOD_NAME_INIT))
             {
                 initialVariables[0] = VerificationTypeFactory.createUninitializedThisType();
             }

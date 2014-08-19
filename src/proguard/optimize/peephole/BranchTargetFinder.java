@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -50,9 +50,14 @@ implements   AttributeVisitor,
     private static       boolean DEBUG = System.getProperty("btf") != null;
     //*/
 
-    public static final int NONE            = -2;
-    public static final int AT_METHOD_ENTRY = -1;
+    public static final int NONE = -1;
 
+    // We'll explicitly mark instructions that are not part of a subroutine,
+    // with NO_SUBROUTINE. Subroutines may just branch back into normal code
+    // (e.g. due to a break instruction in Java code), and we want to avoid
+    // marking such normal code as subroutine. The first mark wins, so we're
+    // assuming that such code is marked as normal code before it is marked
+    // as subroutine.
     public static final int UNKNOWN       = -1;
     public static final int NO_SUBROUTINE = -2;
 
@@ -355,23 +360,16 @@ implements   AttributeVisitor,
             currentSubroutineStart    = NO_SUBROUTINE;
             recentCreationOffsetIndex = 0;
 
-            // Initialize the stack of 'new' instruction offsets if this method
-            // is an instance initializer.
-            if (method.getName(clazz).equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
-            {
-                recentCreationOffsets[recentCreationOffsetIndex++] = AT_METHOD_ENTRY;
-            }
-
             // Mark branch targets by going over all instructions.
             codeAttribute.instructionsAccept(clazz, method, this);
+
+            // Mark branch targets in the exception table.
+            codeAttribute.exceptionsAccept(clazz, method, this);
         }
         while (repeat);
 
         // The end of the code is a branch target sentinel.
         instructionMarks[codeLength] = BRANCH_TARGET;
-
-        // Mark branch targets in the exception table.
-        codeAttribute.exceptionsAccept(clazz, method, this);
 
         if (containsSubroutines)
         {
@@ -487,33 +485,39 @@ implements   AttributeVisitor,
         // Check if this is an instruction of a subroutine.
         checkSubroutine(offset);
 
-        // Check if the instruction is a 'new' instruction.
-        if (constantInstruction.opcode == InstructionConstants.OP_NEW)
+        byte opcode = constantInstruction.opcode;
+        if (opcode == InstructionConstants.OP_NEW)
         {
             // Push the 'new' instruction offset on the stack.
             recentCreationOffsets[recentCreationOffsetIndex++] = offset;
         }
-        else
+        else if (opcode == InstructionConstants.OP_INVOKESPECIAL)
         {
-            // Check if the instruction is an initializer invocation.
+            // Is it calling an instance initializer?
             isInitializer = false;
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
             if (isInitializer)
             {
-                // Pop the 'new' instruction offset from the stack.
-                int recentCreationOffset = recentCreationOffsets[--recentCreationOffsetIndex];
-
-                // Fill it out in the creation offsets.
-                creationOffsets[offset] = recentCreationOffset;
-
-                // Fill out the initialization offsets.
-                if (recentCreationOffset == AT_METHOD_ENTRY)
+                // Do we have any 'new' instruction offsets on the stack?
+                if (recentCreationOffsetIndex > 0)
                 {
-                    superInitializationOffset = offset;
+                    // Pop the 'new' instruction offset from the stack.
+                    int recentCreationOffset = recentCreationOffsets[--recentCreationOffsetIndex];
+
+                    // Link the creation offset and the initialization offset.
+                    // TODO: There could be multiple initialization offsets.
+                    creationOffsets[offset] = recentCreationOffset;
+
+                    initializationOffsets[recentCreationOffset] = offset;
                 }
                 else
                 {
-                    initializationOffsets[recentCreationOffset] = offset;
+                    // Remember the super initialization offset.
+                    // TODO: There could be multiple initialization offsets.
+                    // For instance, in the constructor of the generated class
+                    // groovy.inspect.swingui.GeneratedBytecodeAwareGroovyClassLoader
+                    // in groovy-all-2.2.1.jar.
+                    superInitializationOffset = offset;
                 }
             }
         }
@@ -613,7 +617,8 @@ implements   AttributeVisitor,
 
     public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant)
     {
-        isInitializer = methodrefConstant.getName(clazz).equals(ClassConstants.INTERNAL_METHOD_NAME_INIT);
+        // Remember whether the method is an initializer.
+        isInitializer = methodrefConstant.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT);
     }
 
 
@@ -621,10 +626,24 @@ implements   AttributeVisitor,
 
     public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
     {
+        int startPC   = exceptionInfo.u2startPC;
+        int endPC     = exceptionInfo.u2endPC;
+        int handlerPC = exceptionInfo.u2handlerPC;
+
         // Mark the exception offsets.
-        instructionMarks[exceptionInfo.u2startPC]   |= EXCEPTION_START;
-        instructionMarks[exceptionInfo.u2endPC]     |= EXCEPTION_END;
-        instructionMarks[exceptionInfo.u2handlerPC] |= EXCEPTION_HANDLER;
+        instructionMarks[startPC]   |= EXCEPTION_START;
+        instructionMarks[endPC]     |= EXCEPTION_END;
+        instructionMarks[handlerPC] |= EXCEPTION_HANDLER;
+
+        // Mark the handler as part of a subroutine if necessary.
+        if (subroutineStarts[handlerPC] == UNKNOWN &&
+            subroutineStarts[startPC]   != UNKNOWN)
+        {
+            subroutineStarts[handlerPC] = subroutineStarts[startPC];
+
+            // We'll have to go over all instructions again.
+            repeat = true;
+        }
     }
 
 
@@ -737,12 +756,6 @@ implements   AttributeVisitor,
         {
             // Mark the subroutine start.
             subroutineStarts[offset] = currentSubroutineStart;
-
-            if (currentSubroutineStart >= 0)
-            {
-                // Mark the subroutine end at the subroutine start.
-                subroutineEnds[currentSubroutineStart] = offset;
-            }
         }
     }
 }

@@ -5,24 +5,21 @@
 <meta http-equiv="content-style-type" content="text/css">
 <link rel="stylesheet" type="text/css" href="style.css">
 <title>ProGuard Examples</title>
+</head>
+<body>
+
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  window.top.location.replace("../index.html#"+window.location.pathname+window.location.hash);
-else {
-  var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash) {
-    if (history.pushState) {
-      window.top.history.replaceState(null, window.document.title, hash);
-    } else {
-      window.top.location.hash=hash;
-    }
-  }
-}
+  document.write('<a class="largebutton" target="_top" href="../index.html#manual/examples.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/">Saikoa</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
-</head>
-<body>
+<noscript>
+<a class="largebutton" target="_top"  href="../index.html#manual/examples.html">ProGuard index</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/">Saikoa</a>
+<a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
+</noscript>
 
 <h2>Examples</h2>
 
@@ -273,13 +270,16 @@ methods</a>, <a href="#callback">callback methods</a>,
 
 <h3><a name="androidapplication">A complete Android application</a></h3>
 
-<img class="float" src="attention.gif" width="64" height="64" alt="attention" />
-The Ant and Eclipse build processes of the Android SDK already integrate
-ProGuard by default, with all the proper settings. You only need to enable
-ProGuard (for release builds), by uncommenting the line
-"<code>proguard.config=.....</code>" in the file
-<code>project.properties</code> (created or updated by Android SDK revision 17
-or higher). Notes:
+<img class="float" src="attention.gif" width="64" height="64" alt="attention"
+/> The standard build processes of the Android SDK (with Ant, Gradle, Android
+Studio, and Eclipse) already integrate ProGuard with all the proper settings.
+You only need to enable ProGuard by uncommenting the line
+"<code>proguard.config=.....</code>" in the
+file <code>project.properties</code> (created or updated by Android SDK
+revision 17 or higher) or by adapting your <code>build.gradle</code> file. You
+then <em>don't</em> need any of the configuration below.
+<p>
+Notes:
 <ul>
 <li>In case of problems, you may want to check if the configuration files that
     are listed on this line (<code>proguard-project.txt</code>,...) contain
@@ -301,9 +301,10 @@ For more information, you can consult the official <a target="other"
 href="http://developer.android.com/guide/developing/tools/proguard.html">Developer
 Guide</a> in the Android SDK.
 <p>
-If you're constructing a build process from scratch: these options shrink,
-optimize, and obfuscate all public activities, services, broadcast receivers,
-and content providers from the compiled classes and external libraries:
+If you're constructing a build process <em>from scratch</em>: these options
+shrink, optimize, and obfuscate all public activities, services, broadcast
+receivers, and content providers from the compiled classes and external
+libraries:
 <pre>
 -injars      bin/classes
 -injars      libs
@@ -439,7 +440,7 @@ used as such, for developing code based on its public API.
     java.lang.Class class$(java.lang.String, boolean);
 }
 
--keepclasseswithmembernames class * {
+-keepclasseswithmembernames,includedescriptorclasses class * {
     native &lt;methods&gt;;
 }
 
@@ -750,15 +751,19 @@ you'll want to preserve their names and their classes' names, so they can
 still be linked to the native library. The following additional option will
 ensure that:
 <pre>
--keepclasseswithmembernames class * {
+-keepclasseswithmembernames,includedescriptorclasses class * {
     native &lt;methods&gt;;
 }
 </pre>
 <p>
-Note the use of <a
-href="usage.html#keepclasseswithmembernames"><code>-keepclasseswithmembernames</code></a>.
+Note the use of
+<a href="usage.html#keepclasseswithmembernames"><code>-keepclasseswithmembernames</code></a>.
 We don't want to preserve all classes or all native methods; we just want to
-keep the relevant names from being obfuscated.
+keep the relevant names from being obfuscated. The modifier
+<a href="usage.html#includedescriptorclasses">includedescriptorclasses</a>
+additionally makes sure that the return types and parameter types aren't
+renamed either, so the entire signatures remain compatible with the native
+libraries.
 <p>
 ProGuard doesn't look at your native code, so it won't automatically preserve
 the classes or class members that are invoked by the native code. These are
@@ -862,9 +867,9 @@ may require special attention:
     is then computed from a list of features the serializable class. Changing
     the class ever so slightly may change the computed serial version UID. The
     list of features is specified in the section on <a
-    href="http://java.sun.com/javase/6/docs/platform/serialization/spec/class.html#4100">Stream
+    href="http://docs.oracle.com/javase/8/docs/platform/serialization/spec/class.html#a4100">Stream
     Unique Identifiers</a> of Sun's <a
-    href="http://java.sun.com/javase/6/docs/platform/serialization/spec/serialTOC.html">Java
+    href="http://docs.oracle.com/javase/8/docs/platform/serialization/spec/serialTOC.html">Java
     Object Serialization Specification</a>. The following directives should at
     least partially ensure compatibility with the original classes:
 
@@ -1587,10 +1592,9 @@ The directory <code>examples/annotations</code> contains more examples that
 illustrate some of the possibilities.
 
 <hr />
-<noscript><div><a target="_top" href="../index.html" class="button">Show menu</a></div></noscript>
 <address>
-Copyright &copy; 2002-2013
-<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a>.
+Copyright &copy; 2002-2014
+<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.saikoa.com/">Saikoa</a>.
 </address>
 </body>
 </html>

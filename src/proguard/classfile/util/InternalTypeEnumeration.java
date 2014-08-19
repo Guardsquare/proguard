@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -45,14 +45,23 @@ public class InternalTypeEnumeration
     public InternalTypeEnumeration(String descriptor)
     {
         this.descriptor = descriptor;
-        this.firstIndex = descriptor.indexOf(ClassConstants.INTERNAL_METHOD_ARGUMENTS_OPEN);
-        this.lastIndex  = descriptor.indexOf(ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE);
+        this.firstIndex = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_OPEN);
+        this.lastIndex  = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
         this.index      = firstIndex + 1;
 
         if (lastIndex < 0)
         {
             lastIndex = descriptor.length();
         }
+    }
+
+
+    /**
+     * Returns whether the type is a method signature.
+     */
+    public boolean isMethodSignature()
+    {
+        return firstIndex >= 0;
     }
 
 
@@ -88,13 +97,13 @@ public class InternalTypeEnumeration
         char c = descriptor.charAt(index++);
         switch (c)
         {
-            case ClassConstants.INTERNAL_TYPE_CLASS_START:
-            case ClassConstants.INTERNAL_TYPE_GENERIC_VARIABLE_START:
+            case ClassConstants.TYPE_CLASS_START:
+            case ClassConstants.TYPE_GENERIC_VARIABLE_START:
             {
                 skipClass();
                 break;
             }
-            case ClassConstants.INTERNAL_TYPE_GENERIC_START:
+            case ClassConstants.TYPE_GENERIC_START:
             {
                 skipGeneric();
                 break;
@@ -119,7 +128,7 @@ public class InternalTypeEnumeration
 
     private void skipArray()
     {
-        while (descriptor.charAt(index) == ClassConstants.INTERNAL_TYPE_ARRAY)
+        while (descriptor.charAt(index) == ClassConstants.TYPE_ARRAY)
         {
             index++;
         }
@@ -133,11 +142,11 @@ public class InternalTypeEnumeration
             char c = descriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.INTERNAL_TYPE_GENERIC_START:
+                case ClassConstants.TYPE_GENERIC_START:
                     skipGeneric();
                     break;
 
-                case ClassConstants.INTERNAL_TYPE_CLASS_END:
+                case ClassConstants.TYPE_CLASS_END:
                     return;
             }
         }
@@ -153,11 +162,11 @@ public class InternalTypeEnumeration
             char c = descriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.INTERNAL_TYPE_GENERIC_START:
+                case ClassConstants.TYPE_GENERIC_START:
                     nestingLevel++;
                     break;
 
-                case ClassConstants.INTERNAL_TYPE_GENERIC_END:
+                case ClassConstants.TYPE_GENERIC_END:
                     nestingLevel--;
                     break;
             }

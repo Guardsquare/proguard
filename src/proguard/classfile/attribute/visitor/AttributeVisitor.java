@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -62,8 +62,9 @@ public interface AttributeVisitor
 
     // Attributes that are attached to methods.
 
-    public void visitExceptionsAttribute(            Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute);
-    public void visitCodeAttribute(                  Clazz clazz, Method method, CodeAttribute       codeAttribute);
+    public void visitMethodParametersAttribute(      Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute);
+    public void visitExceptionsAttribute(            Clazz clazz, Method method, ExceptionsAttribute       exceptionsAttribute);
+    public void visitCodeAttribute(                  Clazz clazz, Method method, CodeAttribute             codeAttribute);
 
     // Attributes that are attached to code attributes.
 
@@ -85,6 +86,16 @@ public interface AttributeVisitor
 
     public void visitRuntimeVisibleParameterAnnotationsAttribute(  Clazz clazz, Method method, RuntimeVisibleParameterAnnotationsAttribute   runtimeVisibleParameterAnnotationsAttribute);
     public void visitRuntimeInvisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleParameterAnnotationsAttribute runtimeInvisibleParameterAnnotationsAttribute);
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(       Clazz clazz,                                             RuntimeVisibleTypeAnnotationsAttribute   runtimeVisibleTypeAnnotationsAttribute);
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(       Clazz clazz, Field  field,                               RuntimeVisibleTypeAnnotationsAttribute   runtimeVisibleTypeAnnotationsAttribute);
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(       Clazz clazz, Method method,                              RuntimeVisibleTypeAnnotationsAttribute   runtimeVisibleTypeAnnotationsAttribute);
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(       Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeVisibleTypeAnnotationsAttribute   runtimeVisibleTypeAnnotationsAttribute);
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(     Clazz clazz,                                             RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute);
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(     Clazz clazz, Field  field,                               RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute);
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(     Clazz clazz, Method method,                              RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute);
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(     Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute);
 
     public void visitAnnotationDefaultAttribute(                   Clazz clazz, Method method, AnnotationDefaultAttribute annotationDefaultAttribute);
 }

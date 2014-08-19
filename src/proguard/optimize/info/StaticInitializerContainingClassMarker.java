@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -37,8 +37,8 @@ implements   ClassVisitor
 
     public void visitAnyClass(Clazz clazz)
     {
-        if (clazz.findMethod(ClassConstants.INTERNAL_METHOD_NAME_CLINIT,
-                             ClassConstants.INTERNAL_METHOD_TYPE_CLINIT) != null)
+        if (clazz.findMethod(ClassConstants.METHOD_NAME_CLINIT,
+                             ClassConstants.METHOD_TYPE_CLINIT) != null)
         {
             setStaticInitializer(clazz);
         }

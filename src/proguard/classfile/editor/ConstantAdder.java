@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
@@ -28,12 +29,16 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
  * This ConstantVisitor adds all constants that it visits to the constant pool
  * of a given target class.
  *
+ * Bootstrap methods attributes are automatically updated for invokedynamic
+ * constants.
+ *
  * @author Eric Lafortune
  */
 public class ConstantAdder
 implements   ConstantVisitor
 {
-    private final ConstantPoolEditor constantPoolEditor;
+    private final ConstantPoolEditor             constantPoolEditor;
+    private final BootstrapMethodsAttributeAdder bootstrapMethodsAttributeAdder;
 
     private int constantIndex;
 
@@ -44,7 +49,8 @@ implements   ConstantVisitor
      */
     public ConstantAdder(ProgramClass targetClass)
     {
-        constantPoolEditor = new ConstantPoolEditor(targetClass);
+        constantPoolEditor             = new ConstantPoolEditor(targetClass);
+        bootstrapMethodsAttributeAdder = new BootstrapMethodsAttributeAdder(targetClass);
     }
 
 
@@ -130,7 +136,14 @@ implements   ConstantVisitor
 
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
-        // First add the name and type constant.
+        // Find the bootstrap methods attribute.
+        AttributesEditor attributesEditor =
+            new AttributesEditor((ProgramClass)clazz, false);
+
+        BootstrapMethodsAttribute bootstrapMethodsAttribute =
+            (BootstrapMethodsAttribute)attributesEditor.findAttribute(ClassConstants.ATTR_BootstrapMethods);
+
+        // Add the name and type constant.
         clazz.constantPoolEntryAccept(invokeDynamicConstant.u2nameAndTypeIndex, this);
 
         // Copy the referenced classes.
@@ -144,9 +157,13 @@ implements   ConstantVisitor
                              referencedClasses.length);
         }
 
+        bootstrapMethodsAttribute.bootstrapMethodEntryAccept(clazz,
+                                                             invokeDynamicConstant.getBootstrapMethodAttributeIndex(),
+                                                             bootstrapMethodsAttributeAdder);
+
         // Then add the actual invoke dynamic constant.
         constantIndex =
-            constantPoolEditor.addInvokeDynamicConstant(invokeDynamicConstant.getBootstrapMethodAttributeIndex(),
+            constantPoolEditor.addInvokeDynamicConstant(bootstrapMethodsAttributeAdder.getBootstrapMethodIndex(),
                                                         constantIndex,
                                                         referencedClassesCopy);
     }

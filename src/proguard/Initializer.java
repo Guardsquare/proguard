@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,7 +20,7 @@
  */
 package proguard;
 
-import proguard.classfile.ClassPool;
+import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.AllElementValueVisitor;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.constant.visitor.AllConstantVisitor;
@@ -63,13 +63,54 @@ public class Initializer
 
         // Perform basic checks on the configuration.
         WarningPrinter fullyQualifiedClassNameNotePrinter = new WarningPrinter(System.out, configuration.note);
-        WarningPrinter keepClassMemberNotePrinter         = new WarningPrinter(System.out, configuration.note);
 
-        new FullyQualifiedClassNameChecker(programClassPool,
-                                           libraryClassPool,
-                                           fullyQualifiedClassNameNotePrinter).checkClassSpecifications(configuration.keep);
+        FullyQualifiedClassNameChecker fullyQualifiedClassNameChecker =
+            new FullyQualifiedClassNameChecker(programClassPool,
+                                               libraryClassPool,
+                                               fullyQualifiedClassNameNotePrinter);
 
-        new KeepClassMemberChecker(keepClassMemberNotePrinter).checkClassSpecifications(configuration.keep);
+        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.keep);
+        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoSideEffects);
+
+        StringMatcher keepAttributesMatcher = configuration.keepAttributes != null ?
+            new ListParser(new NameParser()).parse(configuration.keepAttributes) :
+            new EmptyStringMatcher();
+
+        WarningPrinter getAnnotationNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_RuntimeVisibleAnnotations))
+        {
+            programClassPool.classesAccept(
+                new AllConstantVisitor(
+                new GetAnnotationChecker(getAnnotationNotePrinter)));
+        }
+
+        WarningPrinter getSignatureNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_Signature))
+        {
+            programClassPool.classesAccept(
+                new AllConstantVisitor(
+                new GetSignatureChecker(getSignatureNotePrinter)));
+        }
+
+        WarningPrinter getEnclosingClassNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_InnerClasses))
+        {
+            programClassPool.classesAccept(
+                new AllConstantVisitor(
+                new GetEnclosingClassChecker(getEnclosingClassNotePrinter)));
+        }
+
+        WarningPrinter getEnclosingMethodNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_EnclosingMethod))
+        {
+            programClassPool.classesAccept(
+                new AllConstantVisitor(
+                new GetEnclosingMethodChecker(getEnclosingMethodNotePrinter)));
+        }
 
         // Construct a reduced library class pool with only those library
         // classes whose hierarchies are referenced by the program classes.
@@ -172,18 +213,11 @@ public class Initializer
                                                libraryClassPool))));
         }
 
-        // Check for unkept descriptor classes of kept class members.
-        WarningPrinter descriptorKeepNotePrinter = new WarningPrinter(System.out, configuration.note);
-
-        new DescriptorKeepChecker(programClassPool,
-                                  libraryClassPool,
-                                  descriptorKeepNotePrinter).checkClassSpecifications(configuration.keep);
-
         // Initialize the class references of library class members.
         if (reducedLibraryClassPool != null)
         {
             // Collect the library classes that are referenced by program
-            // classes, directly or indirectly, with or without introspection.
+            // classes, directly or indirectly, with or without reflection.
             programClassPool.classesAccept(
                 new ReferencedClassVisitor(
                 new LibraryClassFilter(
@@ -241,6 +275,30 @@ public class Initializer
         programClassPool.classesAccept(new StringSharer());
         libraryClassPool.classesAccept(new StringSharer());
 
+        // Check for any unmatched class members.
+        WarningPrinter classMemberNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        ClassMemberChecker classMemberChecker =
+            new ClassMemberChecker(programClassPool,
+                                   classMemberNotePrinter);
+
+        classMemberChecker.checkClassSpecifications(configuration.keep);
+        classMemberChecker.checkClassSpecifications(configuration.assumeNoSideEffects);
+
+        // Check for unkept descriptor classes of kept class members.
+        WarningPrinter descriptorKeepNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        new DescriptorKeepChecker(programClassPool,
+                                  libraryClassPool,
+                                  descriptorKeepNotePrinter).checkClassSpecifications(configuration.keep);
+
+        // Check for keep options that only match library classes.
+        WarningPrinter libraryKeepNotePrinter = new WarningPrinter(System.out, configuration.note);
+
+        new LibraryKeepChecker(programClassPool,
+                               libraryClassPool,
+                               libraryKeepNotePrinter).checkClassSpecifications(configuration.keep);
+
         // Print out a summary of the notes, if necessary.
         int fullyQualifiedNoteCount = fullyQualifiedClassNameNotePrinter.getWarningCount();
         if (fullyQualifiedNoteCount > 0)
@@ -251,15 +309,52 @@ public class Initializer
             System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#unknownclass)");
         }
 
-        // Print out a summary of the notes, if necessary.
-        int keepClassMemberNoteCount = keepClassMemberNotePrinter.getWarningCount();
-        if (keepClassMemberNoteCount > 0)
+        int classMemberNoteCount = classMemberNotePrinter.getWarningCount();
+        if (classMemberNoteCount > 0)
         {
-            System.out.println("Note: there were " + keepClassMemberNoteCount +
-                               " '-keepclassmembers' options that didn't specify class");
-            System.out.println("      members. You should specify at least some class members or consider");
-            System.out.println("      if you just need '-keep'.");
-            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#classmembers)");
+            System.out.println("Note: there were " + classMemberNoteCount +
+                               " references to unknown class members.");
+            System.out.println("      You should check your configuration for typos.");
+        }
+
+        int getAnnotationNoteCount = getAnnotationNotePrinter.getWarningCount();
+        if (getAnnotationNoteCount > 0)
+        {
+            System.out.println("Note: there were " + getAnnotationNoteCount +
+                               " classes trying to access annotations using reflection.");
+            System.out.println("      You should consider keeping the annotation attributes");
+            System.out.println("      (using '-keepattributes *Annotation*').");
+            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+        }
+
+        int getSignatureNoteCount = getSignatureNotePrinter.getWarningCount();
+        if (getSignatureNoteCount > 0)
+        {
+            System.out.println("Note: there were " + getSignatureNoteCount +
+                               " classes trying to access generic signatures using reflection.");
+            System.out.println("      You should consider keeping the signature attributes");
+            System.out.println("      (using '-keepattributes Signature').");
+            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+        }
+
+        int getEnclosingClassNoteCount = getEnclosingClassNotePrinter.getWarningCount();
+        if (getEnclosingClassNoteCount > 0)
+        {
+            System.out.println("Note: there were " + getEnclosingClassNoteCount +
+                               " classes trying to access enclosing classes using reflection.");
+            System.out.println("      You should consider keeping the inner classes attributes");
+            System.out.println("      (using '-keepattributes InnerClasses').");
+            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+        }
+
+        int getEnclosingMethodNoteCount = getEnclosingMethodNotePrinter.getWarningCount();
+        if (getEnclosingMethodNoteCount > 0)
+        {
+            System.out.println("Note: there were " + getEnclosingMethodNoteCount +
+                               " classes trying to access enclosing methods using reflection.");
+            System.out.println("      You should consider keeping the enclosing method attributes");
+            System.out.println("      (using '-keepattributes InnerClasses,EnclosingMethod').");
+            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
         }
 
         int descriptorNoteCount = descriptorKeepNotePrinter.getWarningCount();
@@ -270,6 +365,15 @@ public class Initializer
             System.out.println("      You should consider explicitly keeping the mentioned classes");
             System.out.println("      (using '-keep').");
             System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#descriptorclass)");
+        }
+
+        int libraryNoteCount = libraryKeepNotePrinter.getWarningCount();
+        if (libraryNoteCount > 0)
+        {
+            System.out.println("Note: there were " + libraryNoteCount +
+                               " library classes explicitly being kept.");
+            System.out.println("      You don't need to keep library classes; they are already left unchanged.");
+            System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#libraryclass)");
         }
 
         int dynamicClassReferenceNoteCount = dynamicClassReferenceNotePrinter.getWarningCount();
@@ -375,7 +479,7 @@ public class Initializer
              configuration.warn.isEmpty() ||
              configuration.ignoreWarnings))
         {
-            System.out.println("Note: You're ignoring all warnings!");
+            System.out.println("Note: you're ignoring all warnings!");
         }
 
         // Discard unused library classes.

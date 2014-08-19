@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -53,7 +53,7 @@ implements   AttributeVisitor
         int accessFlags = field.getAccessFlags();
 
         isWritten =
-        isRead    = (accessFlags & ClassConstants.INTERNAL_ACC_VOLATILE) != 0;
+        isRead    = (accessFlags & ClassConstants.ACC_VOLATILE) != 0;
 
         resetValue(clazz, field);
     }
@@ -125,16 +125,19 @@ implements   AttributeVisitor
 
         value = null;
 
-        if ((accessFlags & ClassConstants.INTERNAL_ACC_STATIC) != 0)
+        // See if we can initialize a static field with a constant value.
+        if ((accessFlags & ClassConstants.ACC_STATIC) != 0)
         {
-            // See if we can initialize the static field with a constant value.
             field.accept(clazz, new AllAttributeVisitor(this));
         }
 
-        if ((accessFlags & ClassConstants.INTERNAL_ACC_FINAL) == 0 &&
-            value == null)
+        // Otherwise initialize a non-final field with the default value.
+        // Conservatively, even a final field needs to be initialized with the
+        // default value, because it may be accessed before it is set.
+        if (value == null &&
+            (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY ||
+             (accessFlags & ClassConstants.ACC_FINAL) == 0))
         {
-            // Otherwise initialize the non-final field with the default value.
             value = INITIAL_VALUE_FACTORY.createValue(field.getDescriptor(clazz));
         }
     }

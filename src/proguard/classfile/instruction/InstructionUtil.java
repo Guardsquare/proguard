@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -40,27 +40,27 @@ public class InstructionUtil
      *                  <code>InstructionConstants.ARRAY_T_LONG</code>,
      *                  <code>InstructionConstants.ARRAY_T_FLOAT</code>, or
      *                  <code>InstructionConstants.ARRAY_T_DOUBLE</code>.
-     * @return <code>ClassConstants.INTERNAL_TYPE_BOOLEAN</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_BYTE</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_CHAR</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_SHORT</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_INT</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_LONG</code>,
-     *         <code>ClassConstants.INTERNAL_TYPE_FLOAT</code>, or
-     *         <code>ClassConstants.INTERNAL_TYPE_DOUBLE</code>.
+     * @return <code>ClassConstants.TYPE_BOOLEAN</code>,
+     *         <code>ClassConstants.TYPE_BYTE</code>,
+     *         <code>ClassConstants.TYPE_CHAR</code>,
+     *         <code>ClassConstants.TYPE_SHORT</code>,
+     *         <code>ClassConstants.TYPE_INT</code>,
+     *         <code>ClassConstants.TYPE_LONG</code>,
+     *         <code>ClassConstants.TYPE_FLOAT</code>, or
+     *         <code>ClassConstants.TYPE_DOUBLE</code>.
      */
     public static char internalTypeFromArrayType(byte arrayType)
     {
         switch (arrayType)
         {
-            case InstructionConstants.ARRAY_T_BOOLEAN: return ClassConstants.INTERNAL_TYPE_BOOLEAN;
-            case InstructionConstants.ARRAY_T_CHAR:    return ClassConstants.INTERNAL_TYPE_CHAR;
-            case InstructionConstants.ARRAY_T_FLOAT:   return ClassConstants.INTERNAL_TYPE_FLOAT;
-            case InstructionConstants.ARRAY_T_DOUBLE:  return ClassConstants.INTERNAL_TYPE_DOUBLE;
-            case InstructionConstants.ARRAY_T_BYTE:    return ClassConstants.INTERNAL_TYPE_BYTE;
-            case InstructionConstants.ARRAY_T_SHORT:   return ClassConstants.INTERNAL_TYPE_SHORT;
-            case InstructionConstants.ARRAY_T_INT:     return ClassConstants.INTERNAL_TYPE_INT;
-            case InstructionConstants.ARRAY_T_LONG:    return ClassConstants.INTERNAL_TYPE_LONG;
+            case InstructionConstants.ARRAY_T_BOOLEAN: return ClassConstants.TYPE_BOOLEAN;
+            case InstructionConstants.ARRAY_T_CHAR:    return ClassConstants.TYPE_CHAR;
+            case InstructionConstants.ARRAY_T_FLOAT:   return ClassConstants.TYPE_FLOAT;
+            case InstructionConstants.ARRAY_T_DOUBLE:  return ClassConstants.TYPE_DOUBLE;
+            case InstructionConstants.ARRAY_T_BYTE:    return ClassConstants.TYPE_BYTE;
+            case InstructionConstants.ARRAY_T_SHORT:   return ClassConstants.TYPE_SHORT;
+            case InstructionConstants.ARRAY_T_INT:     return ClassConstants.TYPE_INT;
+            case InstructionConstants.ARRAY_T_LONG:    return ClassConstants.TYPE_LONG;
             default: throw new IllegalArgumentException("Unknown array type ["+arrayType+"]");
         }
     }

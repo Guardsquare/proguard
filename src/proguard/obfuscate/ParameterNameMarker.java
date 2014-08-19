@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -123,6 +123,6 @@ implements   AttributeVisitor
 
     private boolean hasParameters(Clazz clazz, Method method)
     {
-        return method.getDescriptor(clazz).charAt(1) != ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE;
+        return method.getDescriptor(clazz).charAt(1) != ClassConstants.METHOD_ARGUMENTS_CLOSE;
     }
 }

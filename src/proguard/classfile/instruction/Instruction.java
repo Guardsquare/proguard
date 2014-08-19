@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,6 +31,214 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
  */
 public abstract class Instruction
 {
+    // An array for marking instructions that may throw exceptions.
+    private static final boolean[] MAY_THROW_EXCEPTIONS = new boolean[]
+    {
+        false, // nop
+        false, // aconst_null
+        false, // iconst_m1
+        false, // iconst_0
+        false, // iconst_1
+        false, // iconst_2
+        false, // iconst_3
+        false, // iconst_4
+        false, // iconst_5
+        false, // lconst_0
+        false, // lconst_1
+        false, // fconst_0
+        false, // fconst_1
+        false, // fconst_2
+        false, // dconst_0
+        false, // dconst_1
+        false, // bipush
+        false, // sipush
+        false, // ldc
+        false, // ldc_w
+        false, // ldc2_w
+        false, // iload
+        false, // lload
+        false, // fload
+        false, // dload
+        false, // aload
+        false, // iload_0
+        false, // iload_1
+        false, // iload_2
+        false, // iload_3
+        false, // lload_0
+        false, // lload_1
+        false, // lload_2
+        false, // lload_3
+        false, // fload_0
+        false, // fload_1
+        false, // fload_2
+        false, // fload_3
+        false, // dload_0
+        false, // dload_1
+        false, // dload_2
+        false, // dload_3
+        false, // aload_0
+        false, // aload_1
+        false, // aload_2
+        false, // aload_3
+        true,  // iaload
+        true,  // laload
+        true,  // faload
+        true,  // daload
+        true,  // aaload
+        true,  // baload
+        true,  // caload
+        true,  // saload
+        false, // istore
+        false, // lstore
+        false, // fstore
+        false, // dstore
+        false, // astore
+        false, // istore_0
+        false, // istore_1
+        false, // istore_2
+        false, // istore_3
+        false, // lstore_0
+        false, // lstore_1
+        false, // lstore_2
+        false, // lstore_3
+        false, // fstore_0
+        false, // fstore_1
+        false, // fstore_2
+        false, // fstore_3
+        false, // dstore_0
+        false, // dstore_1
+        false, // dstore_2
+        false, // dstore_3
+        false, // astore_0
+        false, // astore_1
+        false, // astore_2
+        false, // astore_3
+        true,  // iastore
+        true,  // lastore
+        true,  // fastore
+        true,  // dastore
+        true,  // aastore
+        true,  // bastore
+        true,  // castore
+        true,  // sastore
+        false, // pop
+        false, // pop2
+        false, // dup
+        false, // dup_x1
+        false, // dup_x2
+        false, // dup2
+        false, // dup2_x1
+        false, // dup2_x2
+        false, // swap
+        false, // iadd
+        false, // ladd
+        false, // fadd
+        false, // dadd
+        false, // isub
+        false, // lsub
+        false, // fsub
+        false, // dsub
+        false, // imul
+        false, // lmul
+        false, // fmul
+        false, // dmul
+        true,  // idiv
+        true,  // ldiv
+        false, // fdiv
+        false, // ddiv
+        true,  // irem
+        true,  // lrem
+        false, // frem
+        false, // drem
+        false, // ineg
+        false, // lneg
+        false, // fneg
+        false, // dneg
+        false, // ishl
+        false, // lshl
+        false, // ishr
+        false, // lshr
+        false, // iushr
+        false, // lushr
+        false, // iand
+        false, // land
+        false, // ior
+        false, // lor
+        false, // ixor
+        false, // lxor
+        false, // iinc
+        false, // i2l
+        false, // i2f
+        false, // i2d
+        false, // l2i
+        false, // l2f
+        false, // l2d
+        false, // f2i
+        false, // f2l
+        false, // f2d
+        false, // d2i
+        false, // d2l
+        false, // d2f
+        false, // i2b
+        false, // i2c
+        false, // i2s
+        false, // lcmp
+        false, // fcmpl
+        false, // fcmpg
+        false, // dcmpl
+        false, // dcmpg
+        false, // ifeq
+        false, // ifne
+        false, // iflt
+        false, // ifge
+        false, // ifgt
+        false, // ifle
+        false, // ificmpeq
+        false, // ificmpne
+        false, // ificmplt
+        false, // ificmpge
+        false, // ificmpgt
+        false, // ificmple
+        false, // ifacmpeq
+        false, // ifacmpne
+        false, // goto
+        false, // jsr
+        false, // ret
+        false, // tableswitch
+        false, // lookupswitch
+        false, // ireturn
+        false, // lreturn
+        false, // freturn
+        false, // dreturn
+        false, // areturn
+        false, // return
+        true,  // getstatic
+        true,  // putstatic
+        true,  // getfield
+        true,  // putfield
+        true,  // invokevirtual
+        true,  // invokespecial
+        true,  // invokestatic
+        true,  // invokeinterface
+        true,  // invokedynamic
+        true,  // new
+        true,  // newarray
+        true,  // anewarray
+        true,  // arraylength
+        true,  // athrow
+        true,  // checkcast
+        false, // instanceof
+        true,  // monitorenter
+        true,  // monitorexit
+        false, // wide
+        true,  // multianewarray
+        false, // ifnull
+        false, // ifnonnull
+        false, // goto_w
+        false, // jsr_w
+    };
+
+
     // An array for marking Category 2 instructions.
     private static final boolean[] IS_CATEGORY2 = new boolean[]
     {
@@ -755,6 +963,15 @@ public abstract class Instruction
     public String getName()
     {
         return InstructionConstants.NAMES[opcode & 0xff];
+    }
+
+
+    /**
+     * Returns whether the instruction may throw exceptions.
+     */
+    public boolean mayThrowExceptions()
+    {
+        return MAY_THROW_EXCEPTIONS[opcode & 0xff];
     }
 
 

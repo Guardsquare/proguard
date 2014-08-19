@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -48,9 +48,8 @@ implements   AttributeVisitor,
     private static       boolean DEBUG = System.getProperty("csi") != null;
     //*/
 
-
     private final BranchTargetFinder    branchTargetFinder    = new BranchTargetFinder();
-    private final CodeAttributeComposer codeAttributeComposer = new CodeAttributeComposer(true, true);
+    private final CodeAttributeComposer codeAttributeComposer = new CodeAttributeComposer(true, true, true);
 
     private ExceptionInfoVisitor subroutineExceptionInliner = this;
     private int                  clipStart                  = 0;
@@ -119,7 +118,7 @@ implements   AttributeVisitor,
             Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
             int instructionLength = instruction.length(offset);
 
-            // Is this returning subroutine?
+            // Is this a returning subroutine?
             if (branchTargetFinder.isSubroutine(offset) &&
                 branchTargetFinder.isSubroutineReturning(offset))
             {
@@ -228,8 +227,22 @@ implements   AttributeVisitor,
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
     {
-        // Append the instruction.
-        codeAttributeComposer.appendInstruction(offset, instruction);
+        if (branchTargetFinder.isSubroutineStart(offset))
+        {
+            if (DEBUG)
+            {
+                System.out.println("    Replacing first subroutine instruction "+instruction.toString(offset)+" by a label");
+            }
+
+            // Append a label at this offset instead of saving the subroutine
+            // return address.
+            codeAttributeComposer.appendLabel(offset);
+        }
+        else
+        {
+            // Append the instruction.
+            codeAttributeComposer.appendInstruction(offset, instruction);
+        }
     }
 
 
@@ -268,7 +281,7 @@ implements   AttributeVisitor,
         {
             if (DEBUG)
             {
-                System.out.println("    Replacing first subroutine instruction at ["+offset+"] by a label");
+                System.out.println("    Replacing first subroutine instruction "+variableInstruction.toString(offset)+" by a label");
             }
 
             // Append a label at this offset instead of saving the subroutine

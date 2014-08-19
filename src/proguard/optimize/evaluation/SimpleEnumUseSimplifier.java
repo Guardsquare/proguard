@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -107,7 +107,7 @@ implements   AttributeVisitor,
 
         // Skip the non-static methods of simple enum classes.
         if (SimpleEnumMarker.isSimpleEnum(clazz) &&
-            (method.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) == 0)
+            (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0)
         {
             return;
         }
@@ -226,7 +226,8 @@ implements   AttributeVisitor,
             case InstructionConstants.OP_ASTORE_2:
             case InstructionConstants.OP_ASTORE_3:
             {
-                if (isPoppingSimpleEnum(offset))
+                if (!partialEvaluator.isSubroutineStart(offset) &&
+                    isPoppingSimpleEnum(offset))
                 {
                     // Store a simple enum integer instead of an enum.
                     replaceInstruction(clazz,
@@ -581,8 +582,8 @@ implements   AttributeVisitor,
                                         String      name,
                                         String      type)
     {
-        if (name.equals(ClassConstants.INTERNAL_METHOD_NAME_ORDINAL) &&
-            type.equals(ClassConstants.INTERNAL_METHOD_TYPE_ORDINAL))
+        if (name.equals(ClassConstants.METHOD_NAME_ORDINAL) &&
+            type.equals(ClassConstants.METHOD_TYPE_ORDINAL))
         {
             Instruction[] replacementInstructions = new Instruction[]
             {

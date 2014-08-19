@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -51,7 +51,7 @@ implements   ClassVisitor,
         // Collect all non-private members in this class hierarchy.
         clazz.hierarchyAccept(true, true, true, false,
             new AllMethodVisitor(
-            new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE | ClassConstants.INTERNAL_ACC_STATIC,
+            new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE | ClassConstants.ACC_STATIC,
             this)));
 
         // Clean up for the next class hierarchy.
@@ -69,8 +69,7 @@ implements   ClassVisitor,
 
         // Special cases: <clinit> and <init> are always kept unchanged.
         // We can ignore them here.
-        if (name.equals(ClassConstants.INTERNAL_METHOD_NAME_CLINIT) ||
-            name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+        if (ClassUtil.isInitializer(name))
         {
             return;
         }

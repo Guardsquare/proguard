@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,6 +23,8 @@ package proguard.classfile.io;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.attribute.annotation.target.*;
+import proguard.classfile.attribute.annotation.target.visitor.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.preverification.visitor.*;
@@ -52,9 +54,14 @@ implements   ClassVisitor,
              StackMapFrameVisitor,
              VerificationTypeVisitor,
              LineNumberInfoVisitor,
+             ParameterInfoVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
+             TypeAnnotationVisitor,
+             TargetInfoVisitor,
+             TypePathInfoVisitor,
+             LocalVariableTargetElementVisitor,
              ElementValueVisitor
 {
     private final RuntimeDataInput dataInput;
@@ -375,6 +382,21 @@ implements   ClassVisitor,
     }
 
 
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        // Read the parameter information.
+        methodParametersAttribute.u1parametersCount = dataInput.readUnsignedByte();
+
+        methodParametersAttribute.parameters = new ParameterInfo[methodParametersAttribute.u1parametersCount];
+        for (int index = 0; index < methodParametersAttribute.u1parametersCount; index++)
+        {
+            ParameterInfo parameterInfo = new ParameterInfo();
+            visitParameterInfo(clazz, method, index, parameterInfo);
+            methodParametersAttribute.parameters[index] = parameterInfo;
+        }
+    }
+
+
     public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
     {
         // Read the exceptions.
@@ -518,23 +540,23 @@ implements   ClassVisitor,
     public void visitAnyParameterAnnotationsAttribute(Clazz clazz, Method method, ParameterAnnotationsAttribute parameterAnnotationsAttribute)
     {
         // Read the parameter annotations.
-        parameterAnnotationsAttribute.u2parametersCount           = dataInput.readUnsignedByte();
+        parameterAnnotationsAttribute.u1parametersCount           = dataInput.readUnsignedByte();
 
         // The java compilers of JDK 1.5, JDK 1.6, and Eclipse all count the
         // number of parameters of constructors of non-static inner classes
         // incorrectly. Fix it right here.
         int parameterStart = 0;
-        if (method.getName(clazz).equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+        if (method.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT))
         {
             int realParametersCount = ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz));
-            parameterStart = realParametersCount - parameterAnnotationsAttribute.u2parametersCount;
-            parameterAnnotationsAttribute.u2parametersCount = realParametersCount;
+            parameterStart = realParametersCount - parameterAnnotationsAttribute.u1parametersCount;
+            parameterAnnotationsAttribute.u1parametersCount = realParametersCount;
         }
 
-        parameterAnnotationsAttribute.u2parameterAnnotationsCount = new int[parameterAnnotationsAttribute.u2parametersCount];
-        parameterAnnotationsAttribute.parameterAnnotations        = new Annotation[parameterAnnotationsAttribute.u2parametersCount][];
+        parameterAnnotationsAttribute.u2parameterAnnotationsCount = new int[parameterAnnotationsAttribute.u1parametersCount];
+        parameterAnnotationsAttribute.parameterAnnotations        = new Annotation[parameterAnnotationsAttribute.u1parametersCount][];
 
-        for (int parameterIndex = parameterStart; parameterIndex < parameterAnnotationsAttribute.u2parametersCount; parameterIndex++)
+        for (int parameterIndex = parameterStart; parameterIndex < parameterAnnotationsAttribute.u1parametersCount; parameterIndex++)
         {
             // Read the parameter annotations of the given parameter.
             int u2annotationsCount = dataInput.readUnsignedShort();
@@ -550,6 +572,21 @@ implements   ClassVisitor,
 
             parameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex] = u2annotationsCount;
             parameterAnnotationsAttribute.parameterAnnotations[parameterIndex]        = annotations;
+        }
+    }
+
+
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        // Read the type annotations.
+        typeAnnotationsAttribute.u2annotationsCount = dataInput.readUnsignedShort();
+
+        typeAnnotationsAttribute.annotations = new TypeAnnotation[typeAnnotationsAttribute.u2annotationsCount];
+        for (int index = 0; index < typeAnnotationsAttribute.u2annotationsCount; index++)
+        {
+            TypeAnnotation typeAnnotation = new TypeAnnotation();
+            visitTypeAnnotation(clazz, typeAnnotation);
+            typeAnnotationsAttribute.annotations[index] = typeAnnotation;
         }
     }
 
@@ -702,6 +739,15 @@ implements   ClassVisitor,
     }
 
 
+    // Implementations for ParameterInfoVisitor.
+
+    public void visitParameterInfo(Clazz clazz, Method method, int parameterIndex, ParameterInfo parameterInfo)
+    {
+        parameterInfo.u2nameIndex   = dataInput.readUnsignedShort();
+        parameterInfo.u2accessFlags = dataInput.readUnsignedShort();
+    }
+
+
     // Implementations for LocalVariableInfoVisitor.
 
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
@@ -745,6 +791,122 @@ implements   ClassVisitor,
             elementValue.accept(clazz, annotation, this);
             annotation.elementValues[index] = elementValue;
         }
+    }
+
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        // Read the target info.
+        TargetInfo targetInfo = createTargetInfo();
+        targetInfo.accept(clazz, typeAnnotation, this);
+        typeAnnotation.targetInfo = targetInfo;
+
+        // Read the type path.
+        int u1pathLength = dataInput.readUnsignedByte();
+
+        typeAnnotation.typePath = new TypePathInfo[u1pathLength];
+        for (int index = 0; index < u1pathLength; index++)
+        {
+            TypePathInfo typePathInfo = new TypePathInfo();
+            visitTypePathInfo(clazz, typeAnnotation, typePathInfo);
+            typeAnnotation.typePath[index] = typePathInfo;
+        }
+
+        // Read the actual annotation.
+        visitAnnotation(clazz, typeAnnotation);
+    }
+
+
+    // Implementations for TargetInfoVisitor.
+
+    public void visitTypeParameterTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypeParameterTargetInfo typeParameterTargetInfo)
+    {
+        typeParameterTargetInfo.u1typeParameterIndex = dataInput.readUnsignedByte();
+    }
+
+
+    public void visitSuperTypeTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, SuperTypeTargetInfo superTypeTargetInfo)
+    {
+        superTypeTargetInfo.u2superTypeIndex = dataInput.readUnsignedShort();
+    }
+
+
+    public void visitTypeParameterBoundTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypeParameterBoundTargetInfo typeParameterBoundTargetInfo)
+    {
+        typeParameterBoundTargetInfo.u1typeParameterIndex = dataInput.readUnsignedByte();
+        typeParameterBoundTargetInfo.u1boundIndex         = dataInput.readUnsignedByte();
+    }
+
+
+    public void visitEmptyTargetInfo(Clazz clazz, Member member, TypeAnnotation typeAnnotation, EmptyTargetInfo emptyTargetInfo)
+    {
+    }
+
+
+    public void visitFormalParameterTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, FormalParameterTargetInfo formalParameterTargetInfo)
+    {
+        formalParameterTargetInfo.u1formalParameterIndex = dataInput.readUnsignedByte();
+    }
+
+
+    public void visitThrowsTargetInfo(Clazz clazz, Method method, TypeAnnotation typeAnnotation, ThrowsTargetInfo throwsTargetInfo)
+    {
+        throwsTargetInfo.u2throwsTypeIndex = dataInput.readUnsignedShort();
+    }
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        // Read the local variable target elements.
+        localVariableTargetInfo.u2tableLength = dataInput.readUnsignedShort();
+
+        localVariableTargetInfo.table = new LocalVariableTargetElement[localVariableTargetInfo.u2tableLength];
+        for (int index = 0; index < localVariableTargetInfo.u2tableLength; index++)
+        {
+            LocalVariableTargetElement element = new LocalVariableTargetElement();
+            visitLocalVariableTargetElement(clazz, method, codeAttribute, typeAnnotation, localVariableTargetInfo, element);
+            localVariableTargetInfo.table[index] = element;
+        }
+    }
+
+
+    public void visitCatchTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, CatchTargetInfo catchTargetInfo)
+    {
+        catchTargetInfo.u2exceptionTableIndex = dataInput.readUnsignedShort();
+    }
+
+
+    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
+    {
+        offsetTargetInfo.u2offset = dataInput.readUnsignedShort();
+    }
+
+
+    public void visitTypeArgumentTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, TypeArgumentTargetInfo typeArgumentTargetInfo)
+    {
+        typeArgumentTargetInfo.u2offset            = dataInput.readUnsignedShort();
+        typeArgumentTargetInfo.u1typeArgumentIndex = dataInput.readUnsignedByte();
+    }
+
+
+    // Implementations for TypePathInfoVisitor.
+
+    public void visitTypePathInfo(Clazz clazz, TypeAnnotation typeAnnotation, TypePathInfo typePathInfo)
+    {
+        typePathInfo.u1typePathKind      = dataInput.readUnsignedByte();
+        typePathInfo.u1typeArgumentIndex = dataInput.readUnsignedByte();
+    }
+
+
+    // Implementations for LocalVariableTargetElementVisitor.
+
+    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
+    {
+        localVariableTargetElement.u2startPC = dataInput.readShort();
+        localVariableTargetElement.u2length  = dataInput.readShort();
+        localVariableTargetElement.u2index   = dataInput.readShort();
     }
 
 
@@ -813,7 +975,7 @@ implements   ClassVisitor,
             case ClassConstants.CONSTANT_Methodref:          return new MethodrefConstant();
             case ClassConstants.CONSTANT_InterfaceMethodref: return new InterfaceMethodrefConstant();
             case ClassConstants.CONSTANT_Class:              return new ClassConstant();
-            case ClassConstants.CONSTANT_MethodType  :       return new MethodTypeConstant();
+            case ClassConstants.CONSTANT_MethodType:         return new MethodTypeConstant();
             case ClassConstants.CONSTANT_NameAndType:        return new NameAndTypeConstant();
 
             default: throw new RuntimeException("Unknown constant type ["+u1tag+"] in constant pool");
@@ -837,6 +999,7 @@ implements   ClassVisitor,
             attributeName.equals(ClassConstants.ATTR_Synthetic)                            ? (Attribute)new SyntheticAttribute():
             attributeName.equals(ClassConstants.ATTR_Signature)                            ? (Attribute)new SignatureAttribute():
             attributeName.equals(ClassConstants.ATTR_ConstantValue)                        ? (Attribute)new ConstantValueAttribute():
+            attributeName.equals(ClassConstants.ATTR_MethodParameters)                     ? (Attribute)new MethodParametersAttribute():
             attributeName.equals(ClassConstants.ATTR_Exceptions)                           ? (Attribute)new ExceptionsAttribute():
             attributeName.equals(ClassConstants.ATTR_Code)                                 ? (Attribute)new CodeAttribute():
             attributeName.equals(ClassConstants.ATTR_StackMap)                             ? (Attribute)new StackMapAttribute():
@@ -848,6 +1011,8 @@ implements   ClassVisitor,
             attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleAnnotations)          ? (Attribute)new RuntimeInvisibleAnnotationsAttribute():
             attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)   ? (Attribute)new RuntimeVisibleParameterAnnotationsAttribute():
             attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations) ? (Attribute)new RuntimeInvisibleParameterAnnotationsAttribute():
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleTypeAnnotations)        ? (Attribute)new RuntimeVisibleTypeAnnotationsAttribute():
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations)      ? (Attribute)new RuntimeInvisibleTypeAnnotationsAttribute():
             attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                    ? (Attribute)new AnnotationDefaultAttribute():
                                                                                              (Attribute)new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
         attribute.u2attributeNameIndex = u2attributeNameIndex;
@@ -892,20 +1057,54 @@ implements   ClassVisitor,
     }
 
 
+    private TargetInfo createTargetInfo()
+    {
+        byte u1targetType = dataInput.readByte();
+
+        switch (u1targetType)
+        {
+            case ClassConstants.ANNOTATION_TARGET_ParameterGenericClass:
+            case ClassConstants.ANNOTATION_TARGET_ParameterGenericMethod:            return new TypeParameterTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_Extends:                           return new SuperTypeTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_BoundGenericClass:
+            case ClassConstants.ANNOTATION_TARGET_BoundGenericMethod:                return new TypeParameterBoundTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_Field:
+            case ClassConstants.ANNOTATION_TARGET_Return:
+            case ClassConstants.ANNOTATION_TARGET_Receiver:                          return new EmptyTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_Parameter:                         return new FormalParameterTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_Throws:                            return new ThrowsTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_LocalVariable:
+            case ClassConstants.ANNOTATION_TARGET_ResourceVariable:                  return new LocalVariableTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_Catch:                             return new CatchTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_InstanceOf:
+            case ClassConstants.ANNOTATION_TARGET_New:
+            case ClassConstants.ANNOTATION_TARGET_MethodReferenceNew:
+            case ClassConstants.ANNOTATION_TARGET_MethodReference:                   return new OffsetTargetInfo(u1targetType);
+            case ClassConstants.ANNOTATION_TARGET_Cast:
+            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethodNew:
+            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethod:
+            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethodReferenceNew:
+            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethodReference:    return new TypeArgumentTargetInfo(u1targetType);
+
+            default: throw new RuntimeException("Unknown annotation target type ["+u1targetType+"]");
+        }
+    }
+
+
     private ElementValue createElementValue()
     {
         int u1tag = dataInput.readUnsignedByte();
 
         switch (u1tag)
         {
-            case ClassConstants.INTERNAL_TYPE_BOOLEAN:
-            case ClassConstants.INTERNAL_TYPE_BYTE:
-            case ClassConstants.INTERNAL_TYPE_CHAR:
-            case ClassConstants.INTERNAL_TYPE_SHORT:
-            case ClassConstants.INTERNAL_TYPE_INT:
-            case ClassConstants.INTERNAL_TYPE_FLOAT:
-            case ClassConstants.INTERNAL_TYPE_LONG:
-            case ClassConstants.INTERNAL_TYPE_DOUBLE:
+            case ClassConstants.TYPE_BOOLEAN:
+            case ClassConstants.TYPE_BYTE:
+            case ClassConstants.TYPE_CHAR:
+            case ClassConstants.TYPE_SHORT:
+            case ClassConstants.TYPE_INT:
+            case ClassConstants.TYPE_FLOAT:
+            case ClassConstants.TYPE_LONG:
+            case ClassConstants.TYPE_DOUBLE:
             case ClassConstants.ELEMENT_VALUE_STRING_CONSTANT: return new ConstantElementValue((char)u1tag);
 
             case ClassConstants.ELEMENT_VALUE_ENUM_CONSTANT:   return new EnumConstantElementValue();

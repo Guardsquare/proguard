@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,6 @@ import java.io.*;
 import java.util.*;
 import java.util.jar.*;
 import java.util.zip.*;
-
 
 /**
  * This DataEntryWriter sends data entries to a given jar/zip file.
@@ -75,7 +74,7 @@ public class JarWriter implements DataEntryWriter, Finisher
 
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
-        //Make sure we can start with a new entry.
+        // Make sure we can start with a new entry.
         if (!prepareEntry(dataEntry))
         {
             return false;
@@ -85,7 +84,7 @@ public class JarWriter implements DataEntryWriter, Finisher
         closeEntry();
 
         // Get the directory entry name.
-        String name = dataEntry.getName() + ClassConstants.INTERNAL_PACKAGE_SEPARATOR;
+        String name = dataEntry.getName() + ClassConstants.PACKAGE_SEPARATOR;
 
         // We have to check if the name is already used, because
         // ZipOutputStream doesn't handle this case properly (it throws
@@ -182,7 +181,7 @@ public class JarWriter implements DataEntryWriter, Finisher
      */
     private boolean prepareEntry(DataEntry dataEntry) throws IOException
     {
-        // Get the parent stream, new or exisiting.
+        // Get the parent stream, new or existing.
         // This may finish our own jar output stream.
         OutputStream parentOutputStream =
             dataEntryWriter.getOutputStream(dataEntry.getParent(), this);

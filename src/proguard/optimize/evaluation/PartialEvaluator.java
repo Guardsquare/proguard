@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -96,9 +96,10 @@ implements   AttributeVisitor,
      *                        during evaluation.
      * @param invocationUnit  the invocation unit that will handle all
      *                        communication with other fields and methods.
-     * @param evaluateAllCode a flag that specifies whether all branch targets
-     *                        and exception handlers should be evaluated,
-     *                        even if they are unreachable.
+     * @param evaluateAllCode a flag that specifies whether all casts, branch
+     *                        targets, and exception handlers should be
+     *                        evaluated, even if they are unnecessary or
+     *                        unreachable.
      */
     public PartialEvaluator(ValueFactory   valueFactory,
                             InvocationUnit invocationUnit,
@@ -132,17 +133,22 @@ implements   AttributeVisitor,
 
     /**
      * Creates a new PartialEvaluator.
-     * @param valueFactory            the value factory that will create all
-     *                                values during evaluation.
-     * @param invocationUnit          the invocation unit that will handle all
-     *                                communication with other fields and methods.
-     * @param evaluateAllCode         a flag that specifies whether all branch
-     *                                targets and exception handlers should be
-     *                                evaluated, even if they are unreachable.
-     * @param branchUnit              the branch unit that will handle all
-     *                                branches.
-     * @param branchTargetFinder      the utility class that will find all
-     *                                branches.
+     * @param valueFactory                 the value factory that will create
+     *                                     all values during evaluation.
+     * @param invocationUnit               the invocation unit that will handle
+     *                                     all communication with other fields
+     *                                     and methods.
+     * @param evaluateAllCode              a flag that specifies whether all
+     *                                     casts, branch targets, and exception
+     *                                     handlers should be evaluated, even
+     *                                     if they are unnecessary or
+     *                                     unreachable.
+     * @param branchUnit                   the branch unit that will handle all
+     *                                     branches.
+     * @param branchTargetFinder           the utility class that will find all
+     *                                     branches.
+     * @param callingInstructionBlockStack the stack of instruction blocks to
+     *                                     be evaluated
      */
     private PartialEvaluator(ValueFactory       valueFactory,
                              InvocationUnit     invocationUnit,
@@ -639,7 +645,8 @@ implements   AttributeVisitor,
                                             stack,
                                             valueFactory,
                                             branchUnit,
-                                            invocationUnit);
+                                            invocationUnit,
+                                            evaluateAllCode);
 
         int instructionOffset = startOffset;
 
@@ -1055,7 +1062,7 @@ implements   AttributeVisitor,
             //stack.push(valueFactory.createReference((ClassConstant)((ProgramClass)clazz).getConstant(exceptionInfo.u2catchType), false));
             String catchClassName = catchType != 0 ?
                  clazz.getClassName(catchType) :
-                 ClassConstants.INTERNAL_NAME_JAVA_LANG_THROWABLE;
+                 ClassConstants.NAME_JAVA_LANG_THROWABLE;
 
             Clazz catchClass = catchType != 0 ?
                 ((ClassConstant)((ProgramClass)clazz).getConstant(catchType)).referencedClass :

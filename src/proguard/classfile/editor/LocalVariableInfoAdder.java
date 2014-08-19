@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,8 +25,8 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.LocalVariableInfoVisitor;
 
 /**
- * This LocalVariableInfoVisitor adds all line numbers that it visits to the given
- * target line number attribute.
+ * This LocalVariableInfoVisitor adds all local variables that it visits to the
+ * given target local variable table attribute.
  */
 public class LocalVariableInfoAdder
 implements   LocalVariableInfoVisitor
@@ -36,8 +36,8 @@ implements   LocalVariableInfoVisitor
 
 
     /**
-     * Creates a new LocalVariableInfoAdder that will copy line numbers into the
-     * given target line number table.
+     * Creates a new LocalVariableInfoAdder that will copy local variables
+     * into the given target local variable table.
      */
     public LocalVariableInfoAdder(ProgramClass                targetClass,
                                   LocalVariableTableAttribute targetLocalVariableTableAttribute)
@@ -51,7 +51,7 @@ implements   LocalVariableInfoVisitor
 
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
-        // Create a new line number.
+        // Create a new local variable.
         LocalVariableInfo newLocalVariableInfo =
             new LocalVariableInfo(localVariableInfo.u2startPC,
                                   localVariableInfo.u2length,

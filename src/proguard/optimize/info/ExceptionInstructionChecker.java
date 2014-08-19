@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -42,15 +42,90 @@ implements   InstructionVisitor
 
 
     /**
+     * Returns whether the specified method may throw exceptions.
+     */
+    public boolean mayThrowExceptions(Clazz         clazz,
+                                      Method        method,
+                                      CodeAttribute codeAttribute)
+    {
+        return mayThrowExceptions(clazz,
+                                  method,
+                                  codeAttribute,
+                                  0,
+                                  codeAttribute.u4codeLength);
+    }
+
+
+    /**
+     * Returns whether the specified block of code may throw exceptions.
+     */
+    public boolean mayThrowExceptions(Clazz         clazz,
+                                      Method        method,
+                                      CodeAttribute codeAttribute,
+                                      int           startOffset,
+                                      int           endOffset)
+    {
+        byte[] code = codeAttribute.code;
+
+        // Go over all instructions.
+        int offset = startOffset;
+        while (offset < endOffset)
+        {
+            // Get the current instruction.
+            Instruction instruction = InstructionFactory.create(code, offset);
+
+            // Check if it may be throwing exceptions.
+            if (mayThrowExceptions(clazz,
+                                   method,
+                                   codeAttribute,
+                                   offset,
+                                   instruction))
+            {
+                return true;
+            }
+
+            // Go to the next instruction.
+            offset += instruction.length(offset);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Returns whether the specified instruction may throw exceptions.
+     */
+    public boolean mayThrowExceptions(Clazz         clazz,
+                                      Method        method,
+                                      CodeAttribute codeAttribute,
+                                      int           offset)
+    {
+        Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
+
+        return mayThrowExceptions(clazz,
+                                  method,
+                                  codeAttribute,
+                                  offset,
+                                  instruction);
+    }
+
+
+    /**
      * Returns whether the given instruction may throw exceptions.
      */
-    public boolean mayThrowExceptions(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
+    public boolean mayThrowExceptions(Clazz         clazz,
+                                      Method        method,
+                                      CodeAttribute codeAttribute,
+                                      int           offset,
+                                      Instruction   instruction)
     {
-        mayThrowExceptions = false;
+        return instruction.mayThrowExceptions();
 
-        instruction.accept(clazz, method,  codeAttribute, offset, this);
-
-        return mayThrowExceptions;
+//        mayThrowExceptions = false;
+//
+//        instruction.accept(clazz, method,  codeAttribute, offset, this);
+//
+//        return mayThrowExceptions;
     }
 
 
@@ -61,15 +136,13 @@ implements   InstructionVisitor
 
     public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction)
     {
-        byte opcode = simpleInstruction.opcode;
-
         // Check for instructions that may throw exceptions.
         // Note that monitorexit can not sensibly throw exceptions, except the
         // broken and deprecated asynchronous ThreadDeath. Removing the
         // artificial infinite looping exception blocks that recent compilers
         // add does not strictly follow the JVM specs, but it does have the
         // additional benefit of avoiding a bug in the JVM in JDK 1.1.
-        switch (opcode)
+        switch (simpleInstruction.opcode)
         {
             case InstructionConstants.OP_IDIV:
             case InstructionConstants.OP_LDIV:
@@ -98,16 +171,13 @@ implements   InstructionVisitor
                 // These instructions may throw exceptions.
                 mayThrowExceptions = true;
         }
-
     }
 
 
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        byte opcode = constantInstruction.opcode;
-
         // Check for instructions that may throw exceptions.
-        switch (opcode)
+        switch (constantInstruction.opcode)
         {
             case InstructionConstants.OP_GETSTATIC:
             case InstructionConstants.OP_PUTSTATIC:
@@ -125,7 +195,6 @@ implements   InstructionVisitor
             case InstructionConstants.OP_MULTIANEWARRAY:
                 // These instructions may throw exceptions.
                 mayThrowExceptions = true;
-        }
 
 //          case InstructionConstants.OP_INVOKEVIRTUAL:
 //          case InstructionConstants.OP_INVOKESPECIAL:
@@ -133,6 +202,7 @@ implements   InstructionVisitor
 //          case InstructionConstants.OP_INVOKEINTERFACE:
 //            // Check if the invoking the method may throw an exception.
 //            clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
+        }
     }
 
 

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -240,7 +240,7 @@ final class MemberSpecificationsPanel extends ListPanel
                 (descriptor == null ? name == null ?
                     "<methods>" :
                     "***" + ' ' + name + "(...)" :
-                    ClassUtil.externalFullMethodDescription(ClassConstants.INTERNAL_METHOD_NAME_INIT,
+                    ClassUtil.externalFullMethodDescription(ClassConstants.METHOD_NAME_INIT,
                                                             0,
                                                             name == null ? "*" : name,
                                                             descriptor)));

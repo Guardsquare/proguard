@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -73,6 +73,24 @@ public class LocalVariableTypeInfo implements VisitorAccepter, Comparable
         this.u2nameIndex      = u2nameIndex;
         this.u2signatureIndex = u2signatureIndex;
         this.u2index          = u2index;
+    }
+
+
+    /**
+     * Returns the name.
+     */
+    public String getName(Clazz clazz)
+    {
+        return clazz.getString(u2nameIndex);
+    }
+
+
+    /**
+     * Returns the signature.
+     */
+    public String getSignature(Clazz clazz)
+    {
+        return clazz.getString(u2signatureIndex);
     }
 
 

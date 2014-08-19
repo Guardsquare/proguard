@@ -7,7 +7,7 @@
 
     <groupId>net.sf.proguard</groupId>
     <artifactId>proguard-parent</artifactId>
-    <version>4.11</version>
+    <version>5.0</version>
     <packaging>pom</packaging>
     <name>[${project.groupId}] ${project.artifactId}</name>
     <description>ProGuard is a free Java class file shrinker, optimizer, obfuscator, and preverifier.</description>

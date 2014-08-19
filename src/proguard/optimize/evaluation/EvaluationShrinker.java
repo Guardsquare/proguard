@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -538,7 +538,7 @@ implements   AttributeVisitor
             int parameterSize = ParameterUsageMarker.getParameterSize(programMethod);
 
             // Make the method invocation static, if possible.
-            if ((programMethod.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) == 0 &&
+            if ((programMethod.getAccessFlags() & ClassConstants.ACC_STATIC) == 0 &&
                 !ParameterUsageMarker.isParameterUsed(programMethod, 0))
             {
                 replaceByStaticInvocation(programClass,

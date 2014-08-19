@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -42,8 +42,8 @@ implements   ClassVisitor
 
     private final SimpleEnumMarker simpleEnumMarker     = new SimpleEnumMarker(true);
     private final MemberVisitor    virtualMethodChecker = new MemberAccessFilter(0,
-                                                                                 ClassConstants.INTERNAL_ACC_PRIVATE |
-                                                                                 ClassConstants.INTERNAL_ACC_STATIC,
+                                                                                 ClassConstants.ACC_PRIVATE |
+                                                                                 ClassConstants.ACC_STATIC,
                                                           new MemberToClassVisitor(
                                                           new SimpleEnumMarker(false)));
 
@@ -55,8 +55,8 @@ implements   ClassVisitor
     public void visitProgramClass(ProgramClass programClass)
     {
         // Does the class have the simple enum constructor?
-        if (programClass.findMethod(ClassConstants.INTERNAL_METHOD_NAME_INIT,
-                                    ClassConstants.INTERNAL_METHOD_TYPE_INIT_ENUM) != null)
+        if (programClass.findMethod(ClassConstants.METHOD_NAME_INIT,
+                                    ClassConstants.METHOD_TYPE_INIT_ENUM) != null)
         {
             if (DEBUG)
             {

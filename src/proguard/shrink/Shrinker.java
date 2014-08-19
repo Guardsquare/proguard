@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -73,8 +73,8 @@ public class Shrinker
             new MultiClassVisitor(new ClassVisitor[]
             {
                 usageMarker,
-                new NamedMethodVisitor(ClassConstants.INTERNAL_METHOD_NAME_INIT,
-                                       ClassConstants.INTERNAL_METHOD_TYPE_INIT,
+                new NamedMethodVisitor(ClassConstants.METHOD_NAME_INIT,
+                                       ClassConstants.METHOD_TYPE_INIT,
                                        usageMarker)
             });
 

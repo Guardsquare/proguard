@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,6 +27,9 @@ import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 /**
  * This AttributeVisitor adds all attributes that it visits to the given
  * target class, class member, or attribute.
@@ -41,6 +44,7 @@ implements   AttributeVisitor
     private static final int[]           EMPTY_INTS        = new int[0];
     private static final Attribute[]     EMPTY_ATTRIBUTES  = new Attribute[0];
     private static final ExceptionInfo[] EMPTY_EXCEPTIONS  = new ExceptionInfo[0];
+    private static final Annotation[]    EMPTY_ANNOTATIONS = new Annotation[0];
 
 
     private final ProgramClass  targetClass;
@@ -211,6 +215,24 @@ implements   AttributeVisitor
 
         // Add it to the target field.
         attributesEditor.addAttribute(newConstantValueAttribute);
+    }
+
+
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        // Create a new local variable table attribute.
+        MethodParametersAttribute newMethodParametersAttribute =
+            new MethodParametersAttribute(constantAdder.addConstant(clazz, methodParametersAttribute.u2attributeNameIndex),
+                                          methodParametersAttribute.u1parametersCount,
+                                          new ParameterInfo[methodParametersAttribute.u1parametersCount]);
+
+        // Add the local variables.
+        methodParametersAttribute.parametersAccept(clazz,
+                                                   method,
+                                                   new ParameterInfoAdder(targetClass, newMethodParametersAttribute));
+
+        // Add it to the target.
+        attributesEditor.addAttribute(newMethodParametersAttribute);
     }
 
 
@@ -399,11 +421,16 @@ implements   AttributeVisitor
     public void visitRuntimeVisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeVisibleParameterAnnotationsAttribute runtimeVisibleParameterAnnotationsAttribute)
     {
         // Create a new annotations attribute.
+        Annotation[][] parameterAnnotations =
+            new Annotation[runtimeVisibleParameterAnnotationsAttribute.u1parametersCount][];
+
+        Arrays.fill(parameterAnnotations, EMPTY_ANNOTATIONS);
+
         RuntimeVisibleParameterAnnotationsAttribute newParameterAnnotationsAttribute =
             new RuntimeVisibleParameterAnnotationsAttribute(constantAdder.addConstant(clazz, runtimeVisibleParameterAnnotationsAttribute.u2attributeNameIndex),
                                                             0,
-                                                            new int[runtimeVisibleParameterAnnotationsAttribute.u2parametersCount],
-                                                            new Annotation[runtimeVisibleParameterAnnotationsAttribute.u2parametersCount][]);
+                                                            new int[runtimeVisibleParameterAnnotationsAttribute.u1parametersCount],
+                                                            parameterAnnotations);
 
         // Add the annotations.
         runtimeVisibleParameterAnnotationsAttribute.annotationsAccept(clazz,
@@ -419,11 +446,16 @@ implements   AttributeVisitor
     public void visitRuntimeInvisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleParameterAnnotationsAttribute runtimeInvisibleParameterAnnotationsAttribute)
     {
         // Create a new annotations attribute.
+        Annotation[][] parameterAnnotations =
+            new Annotation[runtimeInvisibleParameterAnnotationsAttribute.u1parametersCount][];
+
+        Arrays.fill(parameterAnnotations, EMPTY_ANNOTATIONS);
+
         RuntimeInvisibleParameterAnnotationsAttribute newParameterAnnotationsAttribute =
             new RuntimeInvisibleParameterAnnotationsAttribute(constantAdder.addConstant(clazz, runtimeInvisibleParameterAnnotationsAttribute.u2attributeNameIndex),
                                                               0,
-                                                              new int[runtimeInvisibleParameterAnnotationsAttribute.u2parametersCount],
-                                                              new Annotation[runtimeInvisibleParameterAnnotationsAttribute.u2parametersCount][]);
+                                                              new int[runtimeInvisibleParameterAnnotationsAttribute.u1parametersCount],
+                                                              parameterAnnotations);
 
         // Add the annotations.
         runtimeInvisibleParameterAnnotationsAttribute.annotationsAccept(clazz,

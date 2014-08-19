@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -255,7 +255,7 @@ public class Optimizer
         // We also keep all classes that are involved in .class constructs.
         // We're not looking at enum classes though, so they can be simplified.
         programClassPool.classesAccept(
-            new ClassAccessFilter(0, ClassConstants.INTERNAL_ACC_ENUM,
+            new ClassAccessFilter(0, ClassConstants.ACC_ENUM,
             new AllMethodVisitor(
             new AllAttributeVisitor(
             new AllInstructionVisitor(
@@ -275,13 +275,22 @@ public class Optimizer
 
         // We also keep all bootstrap method signatures.
         programClassPool.classesAccept(
-            new ClassVersionFilter(ClassConstants.INTERNAL_CLASS_VERSION_1_7,
+            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
             new AllAttributeVisitor(
             new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
             new AllBootstrapMethodInfoVisitor(
             new BootstrapMethodHandleTraveler(
             new MethodrefTraveler(
             new ReferencedMemberVisitor(keepMarker))))))));
+
+        // We also keep all methods of classes that are returned by dynamic
+        // method invocations. They may return dynamic implementations of
+        // interfaces that otherwise appear unused.
+        programClassPool.classesAccept(
+            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
+            new AllConstantVisitor(
+            new DynamicReturnedClassVisitor(
+            new AllMemberVisitor(keepMarker)))));
 
         // Attach some optimization info to all classes and class members, so
         // it can be filled out later.
@@ -315,8 +324,9 @@ public class Optimizer
         {
             // Make methods final, whereever possible.
             programClassPool.classesAccept(
+                new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
                 new AllMethodVisitor(
-                new MethodFinalizer(methodMarkingFinalCounter)));
+                new MethodFinalizer(methodMarkingFinalCounter))));
         }
 
         if (fieldRemovalWriteonly)
@@ -347,8 +357,8 @@ public class Optimizer
 
             // Mark all final enums that qualify as simple enums.
             programClassPool.classesAccept(
-                new ClassAccessFilter(ClassConstants.INTERNAL_ACC_FINAL |
-                                      ClassConstants.INTERNAL_ACC_ENUM, 0,
+                new ClassAccessFilter(ClassConstants.ACC_FINAL |
+                                      ClassConstants.ACC_ENUM, 0,
                 new SimpleEnumClassChecker()));
 
             // Count the preliminary number of simple enums.
@@ -426,14 +436,14 @@ public class Optimizer
             // Evaluate synthetic classes in more detail, notably to propagate
             // the arrays of the classes generated for enum switch statements.
             programClassPool.classesAccept(
-                new ClassAccessFilter(ClassConstants.INTERNAL_ACC_SYNTHETIC, 0,
+                new ClassAccessFilter(ClassConstants.ACC_SYNTHETIC, 0,
                 new AllMethodVisitor(
                 new AllAttributeVisitor(
                 new PartialEvaluator(detailedValueFactory, storingInvocationUnit, false)))));
 
             // Evaluate non-synthetic classes.
             programClassPool.classesAccept(
-                new ClassAccessFilter(0, ClassConstants.INTERNAL_ACC_SYNTHETIC,
+                new ClassAccessFilter(0, ClassConstants.ACC_SYNTHETIC,
                 new AllMethodVisitor(
                 new AllAttributeVisitor(
                 new PartialEvaluator(valueFactory, storingInvocationUnit, false)))));
@@ -482,7 +492,7 @@ public class Optimizer
                                               methodPropagationReturnvalue);
 
                 programClassPool.classesAccept(
-                    new ClassAccessFilter(ClassConstants.INTERNAL_ACC_SYNTHETIC, 0,
+                    new ClassAccessFilter(ClassConstants.ACC_SYNTHETIC, 0,
                     new AllMethodVisitor(
                     new AllAttributeVisitor(
                     new PartialEvaluator(valueFactory, loadingInvocationUnit, false)))));
@@ -540,7 +550,7 @@ public class Optimizer
             programClassPool.classesAccept(
                 new AllMethodVisitor(
                 new OptimizationInfoMemberFilter(
-                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_STATIC,
+                new MemberAccessFilter(0, ClassConstants.ACC_STATIC,
                 new MethodStaticizer(methodMarkingStaticCounter)))));
         }
 
@@ -642,6 +652,7 @@ public class Optimizer
                             new DotClassMarker(),
                             new MethodInvocationMarker(),
                             new SuperInvocationMarker(),
+                            new DynamicInvocationMarker(),
                             new BackwardBranchMarker(),
                             new AccessMethodMarker(),
                         })),
@@ -761,9 +772,9 @@ public class Optimizer
         {
             // Make all non-private fields private, whereever possible.
             programClassPool.classesAccept(
-                new ClassAccessFilter(0, ClassConstants.INTERNAL_ACC_INTERFACE,
+                new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
                 new AllFieldVisitor(
-                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE,
+                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
                 new MemberPrivatizer(fieldMarkingPrivateCounter)))));
         }
 
@@ -771,9 +782,9 @@ public class Optimizer
         {
             // Make all non-private methods private, whereever possible.
             programClassPool.classesAccept(
-                new ClassAccessFilter(0, ClassConstants.INTERNAL_ACC_INTERFACE,
+                new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
                 new AllMethodVisitor(
-                new MemberAccessFilter(0, ClassConstants.INTERNAL_ACC_PRIVATE,
+                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
                 new MemberPrivatizer(methodMarkingPrivateCounter)))));
         }
 

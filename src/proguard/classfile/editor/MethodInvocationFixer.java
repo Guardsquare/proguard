@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -92,7 +92,7 @@ implements   AttributeVisitor,
             byte opcode = constantInstruction.opcode;
 
             // Is the method static?
-            if ((referencedMethod.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) != 0)
+            if ((referencedMethod.getAccessFlags() & ClassConstants.ACC_STATIC) != 0)
             {
                 // But is it not a static invocation?
                 if (opcode != InstructionConstants.OP_INVOKESTATIC)
@@ -112,8 +112,8 @@ implements   AttributeVisitor,
             }
 
             // Is the method private, or an instance initializer?
-            else if ((referencedMethod.getAccessFlags() & ClassConstants.INTERNAL_ACC_PRIVATE) != 0 ||
-                     referencedMethod.getName(referencedMethodClass).equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+            else if ((referencedMethod.getAccessFlags() & ClassConstants.ACC_PRIVATE) != 0 ||
+                     referencedMethod.getName(referencedMethodClass).equals(ClassConstants.METHOD_NAME_INIT))
             {
                 // But is it not a special invocation?
                 if (opcode != InstructionConstants.OP_INVOKESPECIAL)
@@ -133,7 +133,7 @@ implements   AttributeVisitor,
             }
 
             // Is the method an interface method?
-            else if ((referencedClass.getAccessFlags() & ClassConstants.INTERNAL_ACC_INTERFACE) != 0)
+            else if ((referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0)
             {
                 int invokeinterfaceConstant =
                     (ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)) << 8;
@@ -234,7 +234,7 @@ implements   AttributeVisitor,
         System.out.println("  Instruction = "+constantInstruction.toString(offset));
         System.out.println("  -> Class    = "+referencedClass);
         System.out.println("     Method   = "+referencedMethod);
-        if ((referencedClass.getAccessFlags() & ClassConstants.INTERNAL_ACC_INTERFACE) != 0)
+        if ((referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0)
         {
             System.out.println("     Parameter size   = "+(ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)));
         }

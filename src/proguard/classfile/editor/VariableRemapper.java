@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,10 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.attribute.annotation.target.*;
+import proguard.classfile.attribute.annotation.target.visitor.*;
+import proguard.classfile.attribute.annotation.visitor.TypeAnnotationVisitor;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
@@ -38,7 +42,10 @@ extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              LocalVariableInfoVisitor,
-             LocalVariableTypeInfoVisitor
+             LocalVariableTypeInfoVisitor,
+             TypeAnnotationVisitor,
+             TargetInfoVisitor,
+             LocalVariableTargetElementVisitor
 {
     private static final boolean DEBUG = false;
 
@@ -61,6 +68,22 @@ implements   AttributeVisitor,
     // Implementations for AttributeVisitor.
 
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        // Reorder the array with parameter information.
+        ParameterInfo[] oldParameters = methodParametersAttribute.parameters;
+        ParameterInfo[] newParameters =
+            new ParameterInfo[methodParametersAttribute.u1parametersCount];
+
+        for (int index = 0; index < methodParametersAttribute.u1parametersCount; index++)
+        {
+            newParameters[remapVariable(index)] = oldParameters[index];
+        }
+
+        methodParametersAttribute.parameters = newParameters;
+    }
 
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
@@ -103,6 +126,13 @@ implements   AttributeVisitor,
     }
 
 
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        // Remap the variable references of local variable type annotations.
+        typeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
+    }
+
+
     // Implementations for LocalVariableInfoVisitor.
 
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
@@ -118,6 +148,34 @@ implements   AttributeVisitor,
     {
         localVariableTypeInfo.u2index =
             remapVariable(localVariableTypeInfo.u2index);
+    }
+
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        typeAnnotation.targetInfoAccept(clazz, this);
+    }
+
+
+    // Implementations for TargetInfoVisitor.
+
+    public void visitAnyTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TargetInfo targetInfo) {}
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
+    }
+
+
+    // Implementations for LocalVariableTargetElementVisitor.
+
+    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
+    {
+        localVariableTargetElement.u2index  =
+            remapVariable(localVariableTargetElement.u2index);
     }
 
 

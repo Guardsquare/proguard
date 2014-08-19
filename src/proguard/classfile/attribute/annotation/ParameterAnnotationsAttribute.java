@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,13 +25,13 @@ import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
 
 /**
- * This Attribute represents a runtime parameter annotations attribute.
+ * This Attribute represents a parameter annotations attribute.
  *
  * @author Eric Lafortune
  */
 public abstract class ParameterAnnotationsAttribute extends Attribute
 {
-    public int            u2parametersCount;
+    public int            u1parametersCount;
     public int[]          u2parameterAnnotationsCount;
     public Annotation[][] parameterAnnotations;
 
@@ -48,13 +48,13 @@ public abstract class ParameterAnnotationsAttribute extends Attribute
      * Creates an initialized ParameterAnnotationsAttribute.
      */
     protected ParameterAnnotationsAttribute(int            u2attributeNameIndex,
-                                            int            u2parametersCount,
+                                            int            u1parametersCount,
                                             int[]          u2parameterAnnotationsCount,
                                             Annotation[][] parameterAnnotations)
     {
         super(u2attributeNameIndex);
 
-        this.u2parametersCount           = u2parametersCount;
+        this.u1parametersCount           = u1parametersCount;
         this.u2parameterAnnotationsCount = u2parameterAnnotationsCount;
         this.parameterAnnotations        = parameterAnnotations;
     }
@@ -66,7 +66,7 @@ public abstract class ParameterAnnotationsAttribute extends Attribute
     public void annotationsAccept(Clazz clazz, Method method, AnnotationVisitor annotationVisitor)
     {
         // Loop over all parameters.
-        for (int parameterIndex = 0; parameterIndex < u2parametersCount; parameterIndex++)
+        for (int parameterIndex = 0; parameterIndex < u1parametersCount; parameterIndex++)
         {
             int          annotationsCount = u2parameterAnnotationsCount[parameterIndex];
             Annotation[] annotations      = parameterAnnotations[parameterIndex];

@@ -6,24 +6,21 @@
 <meta http-equiv="content-style-type" content="text/css">
 <link rel="stylesheet" type="text/css" href="style.css">
 <title>ProGuard Downloads</title>
+</head>
+<body>
+
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  window.top.location.replace("index.html#"+window.location.pathname+window.location.hash);
-else {
-  var hash="#"+window.location.pathname.replace(window.top.location.pathname.replace("index.html", ""), "");
-  if (window.top.location.hash!=hash) {
-    if (history.pushState) {
-      window.top.history.replaceState(null, window.document.title, hash);
-    } else {
-      window.top.location.hash=hash;
-    }
-  }
-}
+  document.write('<a class="largebutton" target="_top" href="index.html#downloads.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/">Saikoa</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
-</head>
-<body>
+<noscript>
+<a class="largebutton" target="_top"  href="index.html#downloads.html">ProGuard index</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.saikoa.com/">Saikoa</a>
+<a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
+</noscript>
 
 <h2>Downloads</h2>
 
@@ -76,6 +73,32 @@ target="other">proguard-gradle</a>,
 target="other">proguard-wtk-plugin</a>, and
 <a href="http://search.maven.org/#search|ga|1|a:%22proguard-retrace%22"
 target="other">proguard-retrace</a>.
+
+<h3><div>Aug 2014</div> Version 5.0</h3>
+<ul>
+<li>Added support for Java 8.
+<li>Added <code>-keep</code> modifier <code>includedescriptorclasses</code>.
+<li>Added automatic suggestions for keeping attributes.
+<li>Clearing preverification information when <code>-dontpreverify</code> is
+    specified.
+<li>Extended optimization support for conservative optimization with java
+    system property <code>optimize.conservatively</code>.
+<li>Fixed occasional preverification problem.
+<li>Fixed shrinking of generic class signatures.
+<li>Fixed analysis of unused parameters for bootstrap methods in library
+    classes.
+<li>Fixed inlining problem of non-returning subroutines.
+<li>Fixed possible IllegalArgumentException and ArrayIndexOutOfBoundsException
+    in enum simplification.
+<li>Fixed unnecessary notes about dynamic class instantiations with constant
+    class names.
+<li>Fixed preverification of unnecessary casts of null values.
+<li>Fixed lazy resolution of output jars in Gradle task.
+<li>Fixed processing of synthetic code with alternative initializer invocations.
+<li>Improved handling of symbolic links in shell scripts.
+<li>Improved default path in Windows bat files.
+<li>Updated documentation and examples.
+</ul>
 
 <h3><div>Dec 2013</div> Version 4.11</h3>
 <ul>
@@ -710,10 +733,9 @@ Upgrade considerations:
 </ul>
 
 <hr />
-<noscript><div><a target="_top" href="index.html" class="button">Show menu</a></div></noscript>
 <address>
-Copyright &copy; 2002-2013
-<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a>.
+Copyright &copy; 2002-2014
+<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.saikoa.com/">Saikoa</a>.
 </address>
 
 </body>

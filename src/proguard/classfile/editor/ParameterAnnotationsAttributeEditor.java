@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.attribute.annotation.*;
+import proguard.util.ArrayUtil;
 
 /**
  * This class can add annotations to a given parameter annotations attribute.
@@ -48,24 +49,8 @@ public class ParameterAnnotationsAttributeEditor
      */
     public void addAnnotation(int parameterIndex, Annotation annotation)
     {
-        int          annotationsCount = targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex];
-        Annotation[] annotations      = targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex];
-
-        // Make sure there is enough space for the new annotation.
-        if (annotations == null ||
-            annotations.length <= annotationsCount)
-        {
-            targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex] = new Annotation[annotationsCount+1];
-            if (annotations != null)
-            {
-                System.arraycopy(annotations, 0,
-                                 targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex], 0,
-                                 annotationsCount);
-            }
-            annotations = targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex];
-        }
-
-        // Add the annotation.
-        annotations[targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex]++] = annotation;
+        ArrayUtil.add(targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex],
+                      targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex]++,
+                      annotation);
     }
 }

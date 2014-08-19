@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -54,18 +54,6 @@ public class InputReader
     public void execute(ClassPool programClassPool,
                         ClassPool libraryClassPool) throws IOException
     {
-        // Check if we have at least some input classes.
-        if (configuration.programJars == null)
-        {
-            throw new IOException("The input is empty. You have to specify one or more '-injars' options");
-        }
-
-        // Perform some sanity checks on the class paths.
-        checkInputOutput(configuration.libraryJars,
-                         configuration.programJars);
-        checkInputOutput(configuration.programJars,
-                         configuration.programJars);
-
         WarningPrinter warningPrinter = new WarningPrinter(System.err, configuration.warn);
         WarningPrinter notePrinter    = new WarningPrinter(System.out, configuration.note);
 
@@ -133,38 +121,6 @@ public class InputReader
                 System.err.println("         If you don't mind the mentioned classes not being written out,");
                 System.err.println("         you could try your luck using the '-ignorewarnings' option.");
                 throw new IOException("Please correct the above warnings first.");
-            }
-        }
-    }
-
-
-    /**
-     * Performs some sanity checks on the class paths.
-     */
-    private void checkInputOutput(ClassPath inputClassPath,
-                                  ClassPath outputClassPath)
-    throws IOException
-    {
-        if (inputClassPath == null ||
-            outputClassPath == null)
-        {
-            return;
-        }
-
-        for (int index1 = 0; index1 < inputClassPath.size(); index1++)
-        {
-            ClassPathEntry entry1 = inputClassPath.get(index1);
-            if (!entry1.isOutput())
-            {
-                for (int index2 = 0; index2 < outputClassPath.size(); index2++)
-                {
-                    ClassPathEntry entry2 = outputClassPath.get(index2);
-                    if (entry2.isOutput() &&
-                        entry2.getName().equals(entry1.getName()))
-                    {
-                        throw new IOException("Input jars and output jars must be different ["+entry1.getName()+"]");
-                    }
-                }
             }
         }
     }

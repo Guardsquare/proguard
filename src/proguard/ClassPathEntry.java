@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -47,6 +47,8 @@ public class ClassPathEntry
     private List    earFilter;
     private List    zipFilter;
 
+    private String cachedName;
+
 
     /**
      * Creates a new ClassPathEntry with the given file and output flag.
@@ -62,6 +64,20 @@ public class ClassPathEntry
      * Returns the path name of the entry.
      */
     public String getName()
+    {
+        if (cachedName == null)
+        {
+            cachedName = getUncachedName();
+        }
+
+        return cachedName;
+    }
+
+
+    /**
+     * Returns the uncached path name of the entry.
+     */
+    private String getUncachedName()
     {
         try
         {
@@ -88,7 +104,8 @@ public class ClassPathEntry
      */
     public void setFile(File file)
     {
-        this.file = file;
+        this.file       = file;
+        this.cachedName = null;
     }
 
 
@@ -194,6 +211,21 @@ public class ClassPathEntry
 
         return string.regionMatches(true, stringLength -
                                           suffixLength, suffix, 0, suffixLength);
+    }
+
+
+    /**
+     * Returns whether this data entry has any kind of filter.
+     */
+    public boolean isFiltered()
+    {
+        return filter    != null ||
+               apkFilter != null ||
+               jarFilter != null ||
+               aarFilter != null ||
+               warFilter != null ||
+               earFilter != null ||
+               zipFilter != null;
     }
 
 

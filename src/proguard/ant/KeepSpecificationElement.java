@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,6 +31,7 @@ import java.util.List;
  */
 public class KeepSpecificationElement extends ClassSpecificationElement
 {
+    private boolean markDescriptorClasses;
     private boolean allowShrinking;
     private boolean allowOptimization;
     private boolean allowObfuscation;
@@ -56,6 +57,7 @@ public class KeepSpecificationElement extends ClassSpecificationElement
         KeepClassSpecification keepClassSpecification =
             new KeepClassSpecification(markClasses,
                                        markConditionally,
+                                       markDescriptorClasses,
                                        allowShrinking,
                                        allowOptimization,
                                        allowObfuscation,
@@ -67,6 +69,12 @@ public class KeepSpecificationElement extends ClassSpecificationElement
 
 
     // Ant task attributes.
+
+    public void setIncludedescriptorclasses(boolean markDescriptorClasses)
+    {
+        this.markDescriptorClasses = markDescriptorClasses;
+    }
+
 
     public void setAllowshrinking(boolean allowShrinking)
     {

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,10 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.attribute.annotation.target.*;
+import proguard.classfile.attribute.annotation.target.visitor.*;
+import proguard.classfile.attribute.annotation.visitor.TypeAnnotationVisitor;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.preverification.visitor.*;
 import proguard.classfile.attribute.visitor.*;
@@ -47,7 +51,10 @@ implements   AttributeVisitor,
              VerificationTypeVisitor,
              LineNumberInfoVisitor,
              LocalVariableInfoVisitor,
-             LocalVariableTypeInfoVisitor
+             LocalVariableTypeInfoVisitor,
+             TypeAnnotationVisitor,
+             TargetInfoVisitor,
+             LocalVariableTargetElementVisitor
 {
     //*
     private static final boolean DEBUG = false;
@@ -179,7 +186,6 @@ implements   AttributeVisitor,
 
         modified = true;
         simple   = false;
-
     }
 
 
@@ -206,7 +212,6 @@ implements   AttributeVisitor,
 
         modified = true;
         simple   = false;
-
     }
 
 
@@ -509,6 +514,12 @@ implements   AttributeVisitor,
     {
         // Update all local variable table entries.
         localVariableTypeTableAttribute.localVariablesAccept(clazz, method, codeAttribute, this);
+    }
+
+
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        typeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
     }
 
 
@@ -840,9 +851,9 @@ implements   AttributeVisitor,
 
     public void visitBranchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, BranchInstruction branchInstruction)
     {
-        // Adjust the branch offset.
-        branchInstruction.branchOffset = newBranchOffset(offset,
-                                                         branchInstruction.branchOffset);
+        // Update the branch offset, relative to the precise new offset.
+        branchInstruction.branchOffset =
+            newBranchOffset(offset, branchInstruction.branchOffset, newOffset);
 
         // Write out the instruction.
         instructionWriter.visitBranchInstruction(clazz,
@@ -857,13 +868,14 @@ implements   AttributeVisitor,
 
     public void visitTableSwitchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, TableSwitchInstruction tableSwitchInstruction)
     {
-        // Adjust the default jump offset.
-        tableSwitchInstruction.defaultOffset = newBranchOffset(offset,
-                                                               tableSwitchInstruction.defaultOffset);
+        // Update the default jump offset, relative to the precise new offset.
+        tableSwitchInstruction.defaultOffset =
+            newBranchOffset(offset, tableSwitchInstruction.defaultOffset, newOffset);
 
-        // Adjust the jump offsets.
+        // Update the jump offsets, relative to the precise new offset.
         newJumpOffsets(offset,
-                         tableSwitchInstruction.jumpOffsets);
+                       tableSwitchInstruction.jumpOffsets,
+                       newOffset);
 
         // Write out the instruction.
         instructionWriter.visitTableSwitchInstruction(clazz,
@@ -878,13 +890,14 @@ implements   AttributeVisitor,
 
     public void visitLookUpSwitchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, LookUpSwitchInstruction lookUpSwitchInstruction)
     {
-        // Adjust the default jump offset.
-        lookUpSwitchInstruction.defaultOffset = newBranchOffset(offset,
-                                                                lookUpSwitchInstruction.defaultOffset);
+        // Update the default jump offset, relative to the precise new offset.
+        lookUpSwitchInstruction.defaultOffset =
+            newBranchOffset(offset, lookUpSwitchInstruction.defaultOffset, newOffset);
 
-        // Adjust the jump offsets.
+        // Update the jump offsets, relative to the precise new offset.
         newJumpOffsets(offset,
-                         lookUpSwitchInstruction.jumpOffsets);
+                       lookUpSwitchInstruction.jumpOffsets,
+                       newOffset);
 
         // Write out the instruction.
         instructionWriter.visitLookUpSwitchInstruction(clazz,
@@ -901,8 +914,8 @@ implements   AttributeVisitor,
 
     public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
     {
-        // Update the code offsets. Note that the instruction offset map also has
-        // an entry for the first offset after the code, for u2endPC.
+        // Update the code offsets. Note that the instruction offset map also
+        // has an entry for the first offset after the code, for u2endPC.
         exceptionInfo.u2startPC   = newInstructionOffset(exceptionInfo.u2startPC);
         exceptionInfo.u2endPC     = newInstructionOffset(exceptionInfo.u2endPC);
         exceptionInfo.u2handlerPC = newInstructionOffset(exceptionInfo.u2handlerPC);
@@ -988,12 +1001,9 @@ implements   AttributeVisitor,
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
         // Update the code offset and length.
-        int newStartPC = newInstructionOffset(localVariableInfo.u2startPC);
-        int newEndPC   = newInstructionOffset(localVariableInfo.u2startPC +
-                                              localVariableInfo.u2length);
-
-        localVariableInfo.u2length  = newEndPC - newStartPC;
-        localVariableInfo.u2startPC = newStartPC;
+        // Be careful to update the length first.
+        localVariableInfo.u2length  = newBranchOffset(localVariableInfo.u2startPC, localVariableInfo.u2length);
+        localVariableInfo.u2startPC = newInstructionOffset(localVariableInfo.u2startPC);
     }
 
 
@@ -1002,41 +1012,99 @@ implements   AttributeVisitor,
     public void visitLocalVariableTypeInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeInfo localVariableTypeInfo)
     {
         // Update the code offset and length.
-        int newStartPC = newInstructionOffset(localVariableTypeInfo.u2startPC);
-        int newEndPC   = newInstructionOffset(localVariableTypeInfo.u2startPC +
-                                              localVariableTypeInfo.u2length);
+        // Be careful to update the length first.
+        localVariableTypeInfo.u2length  = newBranchOffset(localVariableTypeInfo.u2startPC, localVariableTypeInfo.u2length);
+        localVariableTypeInfo.u2startPC = newInstructionOffset(localVariableTypeInfo.u2startPC);
+    }
 
-        localVariableTypeInfo.u2length  = newEndPC - newStartPC;
-        localVariableTypeInfo.u2startPC = newStartPC;
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        // Update all local variable targets.
+        typeAnnotation.targetInfoAccept(clazz, this);
+    }
+
+
+    // Implementations for TargetInfoVisitor.
+
+    public void visitAnyTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TargetInfo targetInfo) {}
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        // Update the offsets of the variables.
+        localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
+    }
+
+
+    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
+    {
+        // Update the offset.
+        offsetTargetInfo.u2offset = newInstructionOffset(offsetTargetInfo.u2offset);
+    }
+
+
+    // Implementations for LocalVariableTargetElementVisitor.
+
+    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
+    {
+        // Update the variable start offset and length.
+        // Be careful to update the length first.
+        localVariableTargetElement.u2length  = newBranchOffset(localVariableTargetElement.u2startPC, localVariableTargetElement.u2length);
+        localVariableTargetElement.u2startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
     }
 
 
     // Small utility methods.
 
     /**
-     * Adjusts the given jump offsets for the instruction at the given offset.
+     * Updates the given jump offsets for the instruction at the given offset,
+     * relative to the given new offset.
      */
-    private void newJumpOffsets(int oldInstructionOffset, int[] oldJumpOffsets)
+    private void newJumpOffsets(int   oldInstructionOffset,
+                                int[] oldJumpOffsets,
+                                int   newInstructionOffset)
     {
         for (int index = 0; index < oldJumpOffsets.length; index++)
         {
-            oldJumpOffsets[index] = newBranchOffset(oldInstructionOffset, oldJumpOffsets[index]);
+            oldJumpOffsets[index] = newBranchOffset(oldInstructionOffset,
+                                                    oldJumpOffsets[index],
+                                                    newInstructionOffset);
         }
     }
 
 
     /**
      * Computes the new branch offset for the instruction at the given offset
-     * with the given branch offset.
+     * with the given branch offset, relative to the new instruction (block)
+     * offset.
      */
-    private int newBranchOffset(int oldInstructionOffset, int oldBranchOffset)
+    private int newBranchOffset(int oldInstructionOffset,
+                                int oldBranchOffset)
     {
-        return newInstructionOffset(oldInstructionOffset + oldBranchOffset) - newOffset;
+        return newInstructionOffset(oldInstructionOffset + oldBranchOffset) -
+               newInstructionOffset(oldInstructionOffset);
     }
 
 
     /**
-     * Computes the new instruction offset for the instruction at the given offset.
+     * Computes the new branch offset for the instruction at the given offset
+     * with the given branch offset, relative to the given new offset.
+     */
+    private int newBranchOffset(int oldInstructionOffset,
+                                int oldBranchOffset,
+                                int newInstructionOffset)
+    {
+        return newInstructionOffset(oldInstructionOffset + oldBranchOffset) -
+               newInstructionOffset;
+    }
+
+
+    /**
+     * Computes the new instruction offset for the instruction at the given
+     * offset.
      */
     private int newInstructionOffset(int oldInstructionOffset)
     {

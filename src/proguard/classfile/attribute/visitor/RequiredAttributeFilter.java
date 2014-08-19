@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -77,7 +77,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            unknownAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitUnknownAttribute(clazz, unknownAttribute);
         }
     }
 
@@ -86,7 +86,7 @@ implements   AttributeVisitor
     {
         if (requiredAttributeVisitor != null)
         {
-            bootstrapMethodsAttribute.accept(clazz, requiredAttributeVisitor);
+            requiredAttributeVisitor.visitBootstrapMethodsAttribute(clazz, bootstrapMethodsAttribute);
         }
     }
 
@@ -95,7 +95,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            sourceFileAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSourceFileAttribute(clazz, sourceFileAttribute);
         }
     }
 
@@ -104,7 +104,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            sourceDirAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSourceDirAttribute(clazz, sourceDirAttribute);
         }
     }
 
@@ -113,7 +113,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            innerClassesAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitInnerClassesAttribute(clazz, innerClassesAttribute);
         }
     }
 
@@ -122,7 +122,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            enclosingMethodAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitEnclosingMethodAttribute(clazz, enclosingMethodAttribute);
         }
     }
 
@@ -131,7 +131,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            deprecatedAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitDeprecatedAttribute(clazz, deprecatedAttribute);
         }
     }
 
@@ -140,7 +140,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            deprecatedAttribute.accept(clazz, field, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitDeprecatedAttribute(clazz, field, deprecatedAttribute);
         }
     }
 
@@ -149,7 +149,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            deprecatedAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitDeprecatedAttribute(clazz, method, deprecatedAttribute);
         }
     }
 
@@ -158,7 +158,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            syntheticAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSyntheticAttribute(clazz, syntheticAttribute);
         }
     }
 
@@ -167,7 +167,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            syntheticAttribute.accept(clazz, field, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSyntheticAttribute(clazz, field, syntheticAttribute);
         }
     }
 
@@ -176,7 +176,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            syntheticAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSyntheticAttribute(clazz, method, syntheticAttribute);
         }
     }
 
@@ -185,7 +185,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            signatureAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSignatureAttribute(clazz, signatureAttribute);
         }
     }
 
@@ -194,7 +194,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            signatureAttribute.accept(clazz, field, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSignatureAttribute(clazz, field, signatureAttribute);
         }
     }
 
@@ -203,7 +203,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            signatureAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitSignatureAttribute(clazz, method, signatureAttribute);
         }
     }
 
@@ -212,7 +212,16 @@ implements   AttributeVisitor
     {
         if (requiredAttributeVisitor != null)
         {
-            constantValueAttribute.accept(clazz, field, requiredAttributeVisitor);
+            requiredAttributeVisitor.visitConstantValueAttribute(clazz, field, constantValueAttribute);
+        }
+    }
+
+
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute exceptionsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitMethodParametersAttribute(clazz, method, exceptionsAttribute);
         }
     }
 
@@ -221,7 +230,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            exceptionsAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitExceptionsAttribute(clazz, method, exceptionsAttribute);
         }
     }
 
@@ -230,7 +239,7 @@ implements   AttributeVisitor
     {
         if (requiredAttributeVisitor != null)
         {
-            codeAttribute.accept(clazz, method, requiredAttributeVisitor);
+            requiredAttributeVisitor.visitCodeAttribute(clazz, method, codeAttribute);
         }
     }
 
@@ -239,7 +248,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            stackMapAttribute.accept(clazz, method, codeAttribute, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitStackMapAttribute(clazz, method, codeAttribute, stackMapAttribute);
         }
     }
 
@@ -248,7 +257,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            stackMapTableAttribute.accept(clazz, method, codeAttribute, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitStackMapTableAttribute(clazz, method, codeAttribute, stackMapTableAttribute);
         }
     }
 
@@ -257,7 +266,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            lineNumberTableAttribute.accept(clazz, method, codeAttribute, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitLineNumberTableAttribute(clazz, method, codeAttribute, lineNumberTableAttribute);
         }
     }
 
@@ -266,7 +275,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            localVariableTableAttribute.accept(clazz, method, codeAttribute, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitLocalVariableTableAttribute(clazz, method, codeAttribute, localVariableTableAttribute);
         }
     }
 
@@ -275,7 +284,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            localVariableTypeTableAttribute.accept(clazz, method, codeAttribute, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitLocalVariableTypeTableAttribute(clazz, method, codeAttribute, localVariableTypeTableAttribute);
         }
     }
 
@@ -284,7 +293,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeVisibleAnnotationsAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeVisibleAnnotationsAttribute(clazz, runtimeVisibleAnnotationsAttribute);
         }
     }
 
@@ -293,7 +302,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeVisibleAnnotationsAttribute.accept(clazz, field, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeVisibleAnnotationsAttribute(clazz, field, runtimeVisibleAnnotationsAttribute);
         }
     }
 
@@ -302,7 +311,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeVisibleAnnotationsAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeVisibleAnnotationsAttribute(clazz, method, runtimeVisibleAnnotationsAttribute);
         }
     }
 
@@ -311,7 +320,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeInvisibleAnnotationsAttribute.accept(clazz, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeInvisibleAnnotationsAttribute(clazz, runtimeInvisibleAnnotationsAttribute);
         }
     }
 
@@ -320,7 +329,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeInvisibleAnnotationsAttribute.accept(clazz, field, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeInvisibleAnnotationsAttribute(clazz, field, runtimeInvisibleAnnotationsAttribute);
         }
     }
 
@@ -329,7 +338,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeInvisibleAnnotationsAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeInvisibleAnnotationsAttribute(clazz, method, runtimeInvisibleAnnotationsAttribute);
         }
     }
 
@@ -338,7 +347,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeVisibleParameterAnnotationsAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeVisibleParameterAnnotationsAttribute(clazz, method, runtimeVisibleParameterAnnotationsAttribute);
         }
     }
 
@@ -347,7 +356,79 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            runtimeInvisibleParameterAnnotationsAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitRuntimeInvisibleParameterAnnotationsAttribute(clazz, method, runtimeInvisibleParameterAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeVisibleTypeAnnotationsAttribute(clazz, runtimeVisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Field field, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeVisibleTypeAnnotationsAttribute(clazz, field, runtimeVisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeVisibleTypeAnnotationsAttribute(clazz, method, runtimeVisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeVisibleTypeAnnotationsAttribute(clazz, method, codeAttribute, runtimeVisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, runtimeInvisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Field field, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, field, runtimeInvisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, method, runtimeInvisibleTypeAnnotationsAttribute);
+        }
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitRuntimeInvisibleTypeAnnotationsAttribute(clazz, method, codeAttribute, runtimeInvisibleTypeAnnotationsAttribute);
         }
     }
 
@@ -356,7 +437,7 @@ implements   AttributeVisitor
     {
         if (optionalAttributeVisitor != null)
         {
-            annotationDefaultAttribute.accept(clazz, method, optionalAttributeVisitor);
+            optionalAttributeVisitor.visitAnnotationDefaultAttribute(clazz, method, annotationDefaultAttribute);
         }
     }
 }

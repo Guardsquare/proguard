@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -70,13 +70,13 @@ public class ProGuardGUI extends JFrame
     private final JCheckBox[]              boilerplateKeepCheckBoxes;
     private final JTextField[]             boilerplateKeepTextFields;
 
-    private final KeepSpecificationsPanel additionalKeepPanel = new KeepSpecificationsPanel(this, true, false, false, false, false);
+    private final KeepSpecificationsPanel additionalKeepPanel = new KeepSpecificationsPanel(this, true, false, false, false, false, false);
 
     private       KeepClassSpecification[] boilerplateKeepNames;
     private final JCheckBox[]              boilerplateKeepNamesCheckBoxes;
     private final JTextField[]             boilerplateKeepNamesTextFields;
 
-    private final KeepSpecificationsPanel additionalKeepNamesPanel = new KeepSpecificationsPanel(this, true, false, true, false, false);
+    private final KeepSpecificationsPanel additionalKeepNamesPanel = new KeepSpecificationsPanel(this, true, false, false, true, false, false);
 
     private       ClassSpecification[] boilerplateNoSideEffectMethods;
     private final JCheckBox[]          boilerplateNoSideEffectMethodCheckBoxes;

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.attribute.*;
+import proguard.util.ArrayUtil;
 
 /**
  * This class can add local variables to a given local variable type table
@@ -31,12 +32,12 @@ import proguard.classfile.attribute.*;
  */
 public class LocalVariableTypeTableAttributeEditor
 {
-    private LocalVariableTypeTableAttribute targetLocalVariableTypeTableAttribute;
+    private final LocalVariableTypeTableAttribute targetLocalVariableTypeTableAttribute;
 
 
     /**
-     * Creates a new LocalVariableTypeTableAttributeEditor that will edit line numbers
-     * in the given line number table attribute.
+     * Creates a new LocalVariableTypeTableAttributeEditor that will edit local
+     * variable types in the given local variable type table attribute.
      */
     public LocalVariableTypeTableAttributeEditor(LocalVariableTypeTableAttribute targetLocalVariableTypeTableAttribute)
     {
@@ -45,24 +46,13 @@ public class LocalVariableTypeTableAttributeEditor
 
 
     /**
-     * Adds a given line number to the line number table attribute.
+     * Adds a given local variable type to the local variable type table attribute.
      */
     public void addLocalVariableTypeInfo(LocalVariableTypeInfo localVariableTypeInfo)
     {
-        int                     localVariableTypeTableLength = targetLocalVariableTypeTableAttribute.u2localVariableTypeTableLength;
-        LocalVariableTypeInfo[] localVariableTypeTable       = targetLocalVariableTypeTableAttribute.localVariableTypeTable;
-
-        // Make sure there is enough space for the new localVariableTypeInfo.
-        if (localVariableTypeTable.length <= localVariableTypeTableLength)
-        {
-            targetLocalVariableTypeTableAttribute.localVariableTypeTable = new LocalVariableTypeInfo[localVariableTypeTableLength+1];
-            System.arraycopy(localVariableTypeTable, 0,
-                             targetLocalVariableTypeTableAttribute.localVariableTypeTable, 0,
-                             localVariableTypeTableLength);
-            localVariableTypeTable = targetLocalVariableTypeTableAttribute.localVariableTypeTable;
-        }
-
-        // Add the localVariableTypeInfo.
-        localVariableTypeTable[targetLocalVariableTypeTableAttribute.u2localVariableTypeTableLength++] = localVariableTypeInfo;
+        targetLocalVariableTypeTableAttribute.localVariableTypeTable =
+            (LocalVariableTypeInfo[])ArrayUtil.add(targetLocalVariableTypeTableAttribute.localVariableTypeTable,
+                                                   targetLocalVariableTypeTableAttribute.u2localVariableTypeTableLength++,
+                                                   localVariableTypeInfo);
     }
 }

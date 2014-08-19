@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,7 @@
 package proguard.classfile.attribute.annotation.visitor;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.annotation.Annotation;
 import proguard.util.*;
 
@@ -87,6 +88,15 @@ implements   AnnotationVisitor
         if (accepted(annotation.getType(clazz)))
         {
             annotationVisitor.visitAnnotation(clazz, method, parameterIndex, annotation);
+        }
+    }
+
+
+    public void visitAnnotation(Clazz clazz, Method method, CodeAttribute codeAttribute, Annotation annotation)
+    {
+        if (accepted(annotation.getType(clazz)))
+        {
+            annotationVisitor.visitAnnotation(clazz, method, codeAttribute, annotation);
         }
     }
 

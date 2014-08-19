@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -149,7 +149,7 @@ public class TypedReferenceValue extends ReferenceValue
         // If this type is equal to the other type, or if the other type is
         // java.lang.Object, this type is always an instance.
         if (thisType.equals(otherType) ||
-            ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT.equals(otherType))
+            ClassConstants.NAME_JAVA_LANG_OBJECT.equals(otherType))
         {
             return ALWAYS;
         }
@@ -262,6 +262,7 @@ public class TypedReferenceValue extends ReferenceValue
             if (thisReferencedClass  != null &&
                 otherReferencedClass != null)
             {
+                // Is one class simply an extension of the other one?
                 if (thisReferencedClass.extendsOrImplements(otherReferencedClass))
                 {
                     return typedReferenceValue(other, mayBeNull);
@@ -272,83 +273,22 @@ public class TypedReferenceValue extends ReferenceValue
                     return typedReferenceValue(this, mayBeNull);
                 }
 
-                // Collect the superclasses and interfaces of this class.
-                Set thisSuperClasses = new HashSet();
-                thisReferencedClass.hierarchyAccept(false, true, true, false,
-                                                    new ClassCollector(thisSuperClasses));
+                // Do the classes have a non-trivial common superclass?
+                Clazz commonClass = findCommonClass(thisReferencedClass,
+                                                    otherReferencedClass,
+                                                    false);
 
-                int thisSuperClassesCount = thisSuperClasses.size();
-                if (thisSuperClassesCount == 0 &&
-                    thisReferencedClass.getSuperName() != null)
+                if (commonClass.getName().equals(ClassConstants.NAME_JAVA_LANG_OBJECT))
                 {
-                    throw new IllegalArgumentException("Can't find any super classes of ["+thisType+"] (not even immediate super class ["+thisReferencedClass.getSuperName()+"])");
-                }
-
-                // Collect the superclasses and interfaces of the other class.
-                Set otherSuperClasses = new HashSet();
-                otherReferencedClass.hierarchyAccept(false, true, true, false,
-                                                     new ClassCollector(otherSuperClasses));
-
-                int otherSuperClassesCount = otherSuperClasses.size();
-                if (otherSuperClassesCount == 0 &&
-                    otherReferencedClass.getSuperName() != null)
-                {
-                    throw new IllegalArgumentException("Can't find any super classes of ["+otherType+"] (not even immediate super class ["+otherReferencedClass.getSuperName()+"])");
-                }
-
-                if (DEBUG)
-                {
-                    System.out.println("ReferenceValue.generalize this ["+thisReferencedClass.getName()+"] with other ["+otherReferencedClass.getName()+"]");
-                    System.out.println("  This super classes:  "+thisSuperClasses);
-                    System.out.println("  Other super classes: "+otherSuperClasses);
-                }
-
-                // Find the common superclasses.
-                thisSuperClasses.retainAll(otherSuperClasses);
-
-                if (DEBUG)
-                {
-                    System.out.println("  Common super classes: "+thisSuperClasses);
-                }
-
-                // Find a class that is a subclass of all common superclasses,
-                // or that at least has the maximum number of common superclasses.
-                Clazz commonClass = null;
-
-                int maximumSuperClassCount = -1;
-
-                // Go over all common superclasses to find it. In case of
-                // multiple subclasses, keep the lowest one alphabetically,
-                // in order to ensure that the choice is deterministic.
-                Iterator commonSuperClasses = thisSuperClasses.iterator();
-                while (commonSuperClasses.hasNext())
-                {
-                    Clazz commonSuperClass = (Clazz)commonSuperClasses.next();
-
-                    int superClassCount = superClassCount(commonSuperClass, thisSuperClasses);
-                    if (maximumSuperClassCount < superClassCount ||
-                        (maximumSuperClassCount == superClassCount &&
-                         commonClass != null                       &&
-                         commonClass.getName().compareTo(commonSuperClass.getName()) > 0))
+                    // Otherwise, do the classes have a common interface?
+                    Clazz commonInterface = findCommonClass(thisReferencedClass,
+                                                            otherReferencedClass,
+                                                            true);
+                    if (commonInterface != null)
                     {
-                        commonClass            = commonSuperClass;
-                        maximumSuperClassCount = superClassCount;
+                        commonClass = commonInterface;
                     }
                 }
-
-                if (commonClass == null)
-                {
-                    throw new IllegalArgumentException("Can't find common super class of ["+
-                                                       thisType +"] (with "+thisSuperClassesCount +" known super classes) and ["+
-                                                       otherType+"] (with "+otherSuperClassesCount+" known super classes)");
-                }
-
-                if (DEBUG)
-                {
-                    System.out.println("  Best common class: ["+commonClass.getName()+"]");
-                }
-
-                // TODO: Handle more difficult cases, with multiple global subclasses.
 
                 return new TypedReferenceValue(commonDimensionCount == 0 ?
                                                    commonClass.getName() :
@@ -385,14 +325,130 @@ public class TypedReferenceValue extends ReferenceValue
         }
 
         // Fall back on a basic Object or array of Objects type.
-        return commonDimensionCount == 0 ?
+        return
+            commonDimensionCount != 0 ?
+                new TypedReferenceValue(ClassUtil.internalArrayTypeFromClassName(ClassConstants.NAME_JAVA_LANG_OBJECT, commonDimensionCount),
+                                        null,
+                                        mayBeNull) :
             mayBeNull ?
                 ValueFactory.REFERENCE_VALUE_JAVA_LANG_OBJECT_MAYBE_NULL :
-                ValueFactory.REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL   :
-            new TypedReferenceValue(ClassUtil.internalArrayTypeFromClassName(ClassConstants.INTERNAL_NAME_JAVA_LANG_OBJECT,
-                                                                        commonDimensionCount),
-                               null,
-                               mayBeNull);
+                ValueFactory.REFERENCE_VALUE_JAVA_LANG_OBJECT_NOT_NULL;
+    }
+
+
+    /**
+     * Returns the most specific common superclass or interface of the given
+     * classes.
+     * @param class1     the first class.
+     * @param class2     the second class.
+     * @param interfaces specifies whether to look for a superclass or for an
+     *                   interface.
+     * @return the common class.
+     */
+    private Clazz findCommonClass(Clazz   class1,
+                                  Clazz   class2,
+                                  boolean interfaces)
+    {
+        // Collect the superclasses or the interfaces of this class.
+        Set superClasses1 = new HashSet();
+        class1.hierarchyAccept(!interfaces,
+                               !interfaces,
+                               interfaces,
+                               false,
+                               new ClassCollector(superClasses1));
+
+        int superClasses1Count = superClasses1.size();
+        if (superClasses1Count == 0)
+        {
+            if (interfaces)
+            {
+                return null;
+            }
+            else if (class1.getSuperName() != null)
+            {
+                throw new IllegalArgumentException("Can't find any super classes of ["+class1.getName()+"] (not even immediate super class ["+class1.getSuperName()+"])");
+            }
+        }
+
+        // Collect the superclasses or the interfaces of the other class.
+        Set superClasses2 = new HashSet();
+        class2.hierarchyAccept(!interfaces,
+                               !interfaces,
+                               interfaces,
+                               false,
+                               new ClassCollector(superClasses2));
+
+        int superClasses2Count = superClasses2.size();
+        if (superClasses2Count == 0)
+        {
+            if (interfaces)
+            {
+                return null;
+            }
+            else if (class2.getSuperName() != null)
+            {
+                throw new IllegalArgumentException("Can't find any super classes of ["+class2.getName()+"] (not even immediate super class ["+class2.getSuperName()+"])");
+            }
+        }
+
+        if (DEBUG)
+        {
+            System.out.println("ReferenceValue.generalize this ["+class1.getName()+"] with other ["+class2.getName()+"] (interfaces = "+interfaces+")");
+            System.out.println("  This super classes:  "+superClasses1);
+            System.out.println("  Other super classes: "+superClasses2);
+        }
+
+        // Find the common superclasses.
+        superClasses1.retainAll(superClasses2);
+
+        if (DEBUG)
+        {
+            System.out.println("  Common super classes: "+superClasses1);
+        }
+
+        if (interfaces && superClasses1.isEmpty())
+        {
+            return null;
+        }
+
+        // Find a class that is a subclass of all common superclasses,
+        // or that at least has the maximum number of common superclasses.
+        Clazz commonClass = null;
+
+        int maximumSuperClassCount = -1;
+
+        // Go over all common superclasses to find it. In case of
+        // multiple subclasses, keep the lowest one alphabetically,
+        // in order to ensure that the choice is deterministic.
+        Iterator commonSuperClasses = superClasses1.iterator();
+        while (commonSuperClasses.hasNext())
+        {
+            Clazz commonSuperClass = (Clazz)commonSuperClasses.next();
+
+            int superClassCount = superClassCount(commonSuperClass, superClasses1);
+            if (maximumSuperClassCount < superClassCount ||
+                (maximumSuperClassCount == superClassCount &&
+                 commonClass != null                       &&
+                 commonClass.getName().compareTo(commonSuperClass.getName()) > 0))
+            {
+                commonClass            = commonSuperClass;
+                maximumSuperClassCount = superClassCount;
+            }
+        }
+
+        if (commonClass == null)
+        {
+            throw new IllegalArgumentException("Can't find common super class of ["+
+                                               class1.getName() +"] (with "+superClasses1Count +" known super classes) and ["+
+                                               class2.getName()+"] (with "+superClasses2Count+" known super classes)");
+        }
+
+        if (DEBUG)
+        {
+            System.out.println("  Best common class: ["+commonClass.getName()+"]");
+        }
+
+        return commonClass;
     }
 
 
@@ -511,11 +567,11 @@ public class TypedReferenceValue extends ReferenceValue
     public final String internalType()
     {
         return
-            type == null                        ? ClassConstants.INTERNAL_TYPE_JAVA_LANG_OBJECT :
-            ClassUtil.isInternalArrayType(type) ? type                                          :
-                                                  ClassConstants.INTERNAL_TYPE_CLASS_START +
+            type == null                        ? ClassConstants.TYPE_JAVA_LANG_OBJECT :
+            ClassUtil.isInternalArrayType(type) ? type                                 :
+                                                  ClassConstants.TYPE_CLASS_START +
                                                   type +
-                                                  ClassConstants.INTERNAL_TYPE_CLASS_END;
+                                                  ClassConstants.TYPE_CLASS_END;
     }
 
 

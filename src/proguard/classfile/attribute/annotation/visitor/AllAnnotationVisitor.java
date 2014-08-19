@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,7 +21,7 @@
 package proguard.classfile.attribute.annotation.visitor;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
@@ -101,5 +101,61 @@ implements   AttributeVisitor
     {
         // Visit the annotations.
         parameterAnnotationsAttribute.annotationsAccept(clazz, method, annotationVisitor);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeVisibleTypeAnnotationsAttribute.annotationsAccept(clazz, annotationVisitor);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Field field, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeVisibleTypeAnnotationsAttribute.annotationsAccept(clazz, field, annotationVisitor);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeVisibleTypeAnnotationsAttribute.annotationsAccept(clazz, method, annotationVisitor);
+    }
+
+
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeVisibleTypeAnnotationsAttribute.annotationsAccept(clazz, method, codeAttribute, annotationVisitor);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeInvisibleTypeAnnotationsAttribute.annotationsAccept(clazz, annotationVisitor);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Field field, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeInvisibleTypeAnnotationsAttribute.annotationsAccept(clazz, field, annotationVisitor);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeInvisibleTypeAnnotationsAttribute.annotationsAccept(clazz, method, annotationVisitor);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        // Visit the annotations.
+        runtimeInvisibleTypeAnnotationsAttribute.annotationsAccept(clazz, method, codeAttribute, annotationVisitor);
     }
 }

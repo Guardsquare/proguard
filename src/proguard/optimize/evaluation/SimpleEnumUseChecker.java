@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -91,7 +91,7 @@ implements   ClassVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        if ((programClass.getAccessFlags() & ClassConstants.INTERNAL_ACC_ANNOTATTION) != 0)
+        if ((programClass.getAccessFlags() & ClassConstants.ACC_ANNOTATTION) != 0)
         {
             // Unmark the simple enum classes in annotations.
             programClass.methodsAccept(referencedComplexEnumMarker);
@@ -181,6 +181,23 @@ implements   ClassVisitor,
 
                     markPoppedComplexEnumType(offset);
                 }
+                break;
+            }
+            case InstructionConstants.OP_MONITORENTER:
+            case InstructionConstants.OP_MONITOREXIT:
+            {
+                // Make sure the popped type is not a simple enum type.
+                if (DEBUG)
+                {
+                    if (isPoppingSimpleEnumType(offset))
+                    {
+                        System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] uses enum ["+
+                                           partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] as monitor");
+                    }
+                }
+
+                markPoppedComplexEnumType(offset);
+
                 break;
             }
         }
@@ -276,7 +293,7 @@ implements   ClassVisitor,
                     // in values() and valueOf(String), without obstructing
                     // simplification.
                     if (!isSimpleEnum(clazz)                                       ||
-                        (method.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) == 0 ||
+                        (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0 ||
                         constantInstruction.opcode != InstructionConstants.OP_CHECKCAST)
                     {
                         if (DEBUG)
@@ -399,11 +416,11 @@ implements   ClassVisitor,
     private boolean isSupportedMethod(String name, String type)
     {
         return
-            name.equals(ClassConstants.INTERNAL_METHOD_NAME_ORDINAL) &&
-            type.equals(ClassConstants.INTERNAL_METHOD_TYPE_ORDINAL) ||
+            name.equals(ClassConstants.METHOD_NAME_ORDINAL) &&
+            type.equals(ClassConstants.METHOD_TYPE_ORDINAL) ||
 
-            name.equals(ClassConstants.INTERNAL_METHOD_NAME_CLONE) &&
-            type.equals(ClassConstants.INTERNAL_METHOD_TYPE_CLONE);
+            name.equals(ClassConstants.METHOD_NAME_CLONE) &&
+            type.equals(ClassConstants.METHOD_TYPE_CLONE);
     }
 
 
@@ -413,7 +430,7 @@ implements   ClassVisitor,
     private boolean isUnsupportedMethod(String name, String type)
     {
         return
-            name.equals(ClassConstants.INTERNAL_METHOD_NAME_VALUEOF);
+            name.equals(ClassConstants.METHOD_NAME_VALUEOF);
     }
 
 

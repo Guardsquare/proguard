@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,9 +20,10 @@
  */
 package proguard;
 
-import proguard.classfile.ClassPool;
-import proguard.classfile.editor.ClassElementSorter;
-import proguard.classfile.visitor.ClassPrinter;
+import proguard.classfile.*;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.editor.*;
+import proguard.classfile.visitor.*;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.Optimizer;
 import proguard.preverify.*;
@@ -37,7 +38,7 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 4.11";
+    public static final String VERSION = "ProGuard, version 5.0";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();
@@ -68,6 +69,8 @@ public class ProGuard
             printConfiguration();
         }
 
+        new ConfigurationChecker(configuration).check();
+
         if (configuration.programJars != null     &&
             configuration.programJars.hasOutput() &&
             new UpToDateChecker(configuration).check())
@@ -76,6 +79,14 @@ public class ProGuard
         }
 
         readInput();
+
+        if (configuration.shrink    ||
+            configuration.optimize  ||
+            configuration.obfuscate ||
+            configuration.preverify)
+        {
+            clearPreverification();
+        }
 
         if (configuration.printSeeds != null ||
             configuration.shrink    ||
@@ -331,6 +342,19 @@ public class ProGuard
 
         // Perform the actual obfuscation.
         new Obfuscator(configuration).execute(programClassPool, libraryClassPool);
+    }
+
+
+    /**
+     * Clears any JSE preverification information from the program classes.
+     */
+    private void clearPreverification()
+    {
+        programClassPool.classesAccept(
+            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_6,
+            new AllMethodVisitor(
+            new AllAttributeVisitor(
+            new NamedAttributeDeleter(ClassConstants.ATTR_StackMapTable)))));
     }
 
 

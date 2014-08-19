@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,7 @@ import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import proguard.*;
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.ListUtil;
 
@@ -63,25 +63,25 @@ public class ProGuardTask extends DefaultTask
     // but package visible or protected methods are ok.
 
     @InputFiles
-    protected FileCollection getInJarFileCollection() throws ParseException
+    protected FileCollection getInJarFileCollection()
     {
         return getProject().files(inJarFiles);
     }
 
     @Optional @OutputFiles
-    protected FileCollection getOutJarFileCollection() throws ParseException
+    protected FileCollection getOutJarFileCollection()
     {
         return getProject().files(outJarFiles);
     }
 
     @InputFiles
-    protected FileCollection getLibraryJarFileCollection() throws ParseException
+    protected FileCollection getLibraryJarFileCollection()
     {
         return getProject().files(libraryJarFiles);
     }
 
     @InputFiles
-    protected FileCollection getConfigurationFileCollection() throws ParseException
+    protected FileCollection getConfigurationFileCollection()
     {
         return getProject().files(configurationFiles);
     }
@@ -199,7 +199,7 @@ public class ProGuardTask extends DefaultTask
     throws ParseException
     {
         // Just collect the arguments, so they can be resolved lazily.
-        this.outJarFiles.add(getProject().file(outJarFiles));
+        this.outJarFiles.add(outJarFiles);
         this.outJarFilters.add(filterArgs);
         this.inJarCounts.add(Integer.valueOf(inJarFiles.size()));
     }
@@ -1261,9 +1261,10 @@ public class ProGuardTask extends DefaultTask
         return
             new KeepClassSpecification(markClasses,
                                        markConditionally,
-                                       retrieveBoolean(keepArgs, "allowshrinking",    allowShrinking),
-                                       retrieveBoolean(keepArgs, "allowoptimization", false),
-                                       retrieveBoolean(keepArgs, "allowobfuscation",  false),
+                                       retrieveBoolean(keepArgs, "includedescriptorclasses", false),
+                                       retrieveBoolean(keepArgs, "allowshrinking",           allowShrinking),
+                                       retrieveBoolean(keepArgs, "allowoptimization",        false),
+                                       retrieveBoolean(keepArgs, "allowobfuscation",         false),
                                        classSpecification);
     }
 
@@ -1365,11 +1366,11 @@ public class ProGuardTask extends DefaultTask
                         token;
 
                     int accessFlag =
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_PUBLIC)     ? ClassConstants.INTERNAL_ACC_PUBLIC      :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_FINAL)      ? ClassConstants.INTERNAL_ACC_FINAL       :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_ABSTRACT)   ? ClassConstants.INTERNAL_ACC_ABSTRACT    :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_SYNTHETIC)  ? ClassConstants.INTERNAL_ACC_SYNTHETIC   :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_ANNOTATION) ? ClassConstants.INTERNAL_ACC_ANNOTATTION :
+                        strippedToken.equals(JavaConstants.ACC_PUBLIC)     ? ClassConstants.ACC_PUBLIC      :
+                        strippedToken.equals(JavaConstants.ACC_FINAL)      ? ClassConstants.ACC_FINAL       :
+                        strippedToken.equals(JavaConstants.ACC_ABSTRACT)   ? ClassConstants.ACC_ABSTRACT    :
+                        strippedToken.equals(JavaConstants.ACC_SYNTHETIC)  ? ClassConstants.ACC_SYNTHETIC   :
+                        strippedToken.equals(JavaConstants.ACC_ANNOTATION) ? ClassConstants.ACC_ANNOTATTION :
                                                                              0;
 
                     if (accessFlag == 0)
@@ -1386,10 +1387,10 @@ public class ProGuardTask extends DefaultTask
         {
             int accessFlag =
                 type.equals("class")                           ? 0                            :
-                type.equals(      ClassConstants.EXTERNAL_ACC_INTERFACE) ||
-                type.equals("!" + ClassConstants.EXTERNAL_ACC_INTERFACE) ? ClassConstants.INTERNAL_ACC_INTERFACE :
-                type.equals(      ClassConstants.EXTERNAL_ACC_ENUM)      ||
-                type.equals("!" + ClassConstants.EXTERNAL_ACC_ENUM)      ? ClassConstants.INTERNAL_ACC_ENUM      :
+                type.equals(      JavaConstants.ACC_INTERFACE) ||
+                type.equals("!" + JavaConstants.ACC_INTERFACE) ? ClassConstants.ACC_INTERFACE :
+                type.equals(      JavaConstants.ACC_ENUM)      ||
+                type.equals("!" + JavaConstants.ACC_ENUM)      ? ClassConstants.ACC_ENUM      :
                                                                  -1;
             if (accessFlag == -1)
             {
@@ -1435,10 +1436,10 @@ public class ProGuardTask extends DefaultTask
 
                 if (parameters != null)
                 {
-                    type = ClassConstants.EXTERNAL_TYPE_VOID;
+                    type = JavaConstants.TYPE_VOID;
                 }
 
-                name = ClassConstants.INTERNAL_METHOD_NAME_INIT;
+                name = ClassConstants.METHOD_NAME_INIT;
             }
             else if ((type != null) ^ (parameters != null))
             {
@@ -1492,20 +1493,20 @@ public class ProGuardTask extends DefaultTask
                         token;
 
                     int accessFlag =
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_PUBLIC)       ? ClassConstants.INTERNAL_ACC_PUBLIC       :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_PRIVATE)      ? ClassConstants.INTERNAL_ACC_PRIVATE      :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_PROTECTED)    ? ClassConstants.INTERNAL_ACC_PROTECTED    :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_STATIC)       ? ClassConstants.INTERNAL_ACC_STATIC       :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_FINAL)        ? ClassConstants.INTERNAL_ACC_FINAL        :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_SYNCHRONIZED) ? ClassConstants.INTERNAL_ACC_SYNCHRONIZED :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_VOLATILE)     ? ClassConstants.INTERNAL_ACC_VOLATILE     :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_TRANSIENT)    ? ClassConstants.INTERNAL_ACC_TRANSIENT    :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_BRIDGE)       ? ClassConstants.INTERNAL_ACC_BRIDGE       :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_VARARGS)      ? ClassConstants.INTERNAL_ACC_VARARGS      :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_NATIVE)       ? ClassConstants.INTERNAL_ACC_NATIVE       :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_ABSTRACT)     ? ClassConstants.INTERNAL_ACC_ABSTRACT     :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_STRICT)       ? ClassConstants.INTERNAL_ACC_STRICT       :
-                        strippedToken.equals(ClassConstants.EXTERNAL_ACC_SYNTHETIC)    ? ClassConstants.INTERNAL_ACC_SYNTHETIC    :
+                        strippedToken.equals(JavaConstants.ACC_PUBLIC)       ? ClassConstants.ACC_PUBLIC       :
+                        strippedToken.equals(JavaConstants.ACC_PRIVATE)      ? ClassConstants.ACC_PRIVATE      :
+                        strippedToken.equals(JavaConstants.ACC_PROTECTED)    ? ClassConstants.ACC_PROTECTED    :
+                        strippedToken.equals(JavaConstants.ACC_STATIC)       ? ClassConstants.ACC_STATIC       :
+                        strippedToken.equals(JavaConstants.ACC_FINAL)        ? ClassConstants.ACC_FINAL        :
+                        strippedToken.equals(JavaConstants.ACC_SYNCHRONIZED) ? ClassConstants.ACC_SYNCHRONIZED :
+                        strippedToken.equals(JavaConstants.ACC_VOLATILE)     ? ClassConstants.ACC_VOLATILE     :
+                        strippedToken.equals(JavaConstants.ACC_TRANSIENT)    ? ClassConstants.ACC_TRANSIENT    :
+                        strippedToken.equals(JavaConstants.ACC_BRIDGE)       ? ClassConstants.ACC_BRIDGE       :
+                        strippedToken.equals(JavaConstants.ACC_VARARGS)      ? ClassConstants.ACC_VARARGS      :
+                        strippedToken.equals(JavaConstants.ACC_NATIVE)       ? ClassConstants.ACC_NATIVE       :
+                        strippedToken.equals(JavaConstants.ACC_ABSTRACT)     ? ClassConstants.ACC_ABSTRACT     :
+                        strippedToken.equals(JavaConstants.ACC_STRICT)       ? ClassConstants.ACC_STRICT       :
+                        strippedToken.equals(JavaConstants.ACC_SYNTHETIC)    ? ClassConstants.ACC_SYNTHETIC    :
                                                                                0;
 
                     if (accessFlag == 0)

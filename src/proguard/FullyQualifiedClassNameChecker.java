@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -36,6 +36,9 @@ public class FullyQualifiedClassNameChecker
 extends      SimplifiedVisitor
 implements   ClassVisitor
 {
+    private static final String INVALID_CLASS_EXTENSION = ClassUtil.internalClassName(ClassConstants.CLASS_FILE_EXTENSION);
+
+
     private final ClassPool      programClassPool;
     private final ClassPool      libraryClassPool;
     private final WarningPrinter notePrinter;
@@ -157,10 +160,16 @@ implements   ClassVisitor
                               "Note: the configuration refers to the unknown class '" +
                               ClassUtil.externalClassName(className) + "'");
 
-            String fullyQualifiedClassName =
-                "**" + ClassConstants.INTERNAL_PACKAGE_SEPARATOR +
-                className.substring(className.lastIndexOf(ClassConstants.INTERNAL_PACKAGE_SEPARATOR)+1);
+            // Strip "/class" or replace the package name by a wildcard.
+            int lastSeparatorIndex =
+                className.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR);
 
+            String fullyQualifiedClassName =
+                className.endsWith(INVALID_CLASS_EXTENSION) ?
+                    className.substring(0, lastSeparatorIndex) :
+                    "**" + ClassConstants.PACKAGE_SEPARATOR + className.substring(lastSeparatorIndex + 1);
+
+            // Suggest matching classes.
             ClassNameFilter classNameFilter =
                 new ClassNameFilter(fullyQualifiedClassName, this);
 

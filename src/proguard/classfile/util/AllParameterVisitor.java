@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -121,8 +121,8 @@ implements   MemberVisitor
             char c = descriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.INTERNAL_TYPE_LONG:
-                case ClassConstants.INTERNAL_TYPE_DOUBLE:
+                case ClassConstants.TYPE_LONG:
+                case ClassConstants.TYPE_DOUBLE:
                 {
                     // Long and double primitive types.
                     parameterSize++;
@@ -133,27 +133,27 @@ implements   MemberVisitor
                     // All other primitive types.
                     break;
                 }
-                case ClassConstants.INTERNAL_TYPE_CLASS_START:
+                case ClassConstants.TYPE_CLASS_START:
                 {
                     // Class types.
                     // Skip the class name.
-                    index = descriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, index) + 1;
+                    index = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
                     break;
                 }
-                case ClassConstants.INTERNAL_TYPE_ARRAY:
+                case ClassConstants.TYPE_ARRAY:
                 {
                     // Array types.
                     // Skip all array characters.
-                    while ((c = descriptor.charAt(index++)) == ClassConstants.INTERNAL_TYPE_ARRAY) {}
+                    while ((c = descriptor.charAt(index++)) == ClassConstants.TYPE_ARRAY) {}
 
-                    if (c == ClassConstants.INTERNAL_TYPE_CLASS_START)
+                    if (c == ClassConstants.TYPE_CLASS_START)
                     {
                         // Skip the class type.
-                        index = descriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, index) + 1;
+                        index = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
                     }
                     break;
                 }
-                case ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE:
+                case ClassConstants.METHOD_ARGUMENTS_CLOSE:
                 {
                     break loop;
                 }
@@ -179,8 +179,8 @@ implements   MemberVisitor
             char c = descriptor.charAt(index);
             switch (c)
             {
-                case ClassConstants.INTERNAL_TYPE_LONG:
-                case ClassConstants.INTERNAL_TYPE_DOUBLE:
+                case ClassConstants.TYPE_LONG:
+                case ClassConstants.TYPE_DOUBLE:
                 {
                     // Long and double primitive types.
                     thisParameterSize = 2;
@@ -191,31 +191,31 @@ implements   MemberVisitor
                     // All other primitive types.
                     break;
                 }
-                case ClassConstants.INTERNAL_TYPE_CLASS_START:
+                case ClassConstants.TYPE_CLASS_START:
                 {
                     // Class types.
                     // Skip the class name.
-                    newIndex = descriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, newIndex) + 1;
+                    newIndex = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, newIndex) + 1;
                     referencedClass = referencedClasses == null ? null :
                         referencedClasses[referenceClassIndex++];
                     break;
                 }
-                case ClassConstants.INTERNAL_TYPE_ARRAY:
+                case ClassConstants.TYPE_ARRAY:
                 {
                     // Array types.
                     // Skip all array characters.
-                    while ((c = descriptor.charAt(newIndex++)) == ClassConstants.INTERNAL_TYPE_ARRAY) {}
+                    while ((c = descriptor.charAt(newIndex++)) == ClassConstants.TYPE_ARRAY) {}
 
-                    if (c == ClassConstants.INTERNAL_TYPE_CLASS_START)
+                    if (c == ClassConstants.TYPE_CLASS_START)
                     {
                         // Skip the class type.
-                        newIndex = descriptor.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_END, newIndex) + 1;
+                        newIndex = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, newIndex) + 1;
                         referencedClass = referencedClasses == null ? null :
                             referencedClasses[referenceClassIndex++];
                     }
                     break;
                 }
-                case ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE:
+                case ClassConstants.METHOD_ARGUMENTS_CLOSE:
                 {
                     // End of the method parameters.
                     return;

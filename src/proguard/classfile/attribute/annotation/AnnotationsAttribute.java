@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,7 +21,7 @@
 package proguard.classfile.attribute.annotation;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
 
 /**
@@ -44,7 +44,7 @@ public abstract class AnnotationsAttribute extends Attribute
 
 
     /**
-     * Creates an initialized AnnotationsAttribute. 
+     * Creates an initialized AnnotationsAttribute.
      */
     protected AnnotationsAttribute(int          u2attributeNameIndex,
                                    int          u2annotationsCount,
@@ -95,6 +95,20 @@ public abstract class AnnotationsAttribute extends Attribute
             // We don't need double dispatching here, since there is only one
             // type of Annotation.
             annotationVisitor.visitAnnotation(clazz, method, annotations[index]);
+        }
+    }
+
+
+    /**
+     * Applies the given visitor to all code attribute annotations.
+     */
+    public void annotationsAccept(Clazz clazz, Method method, CodeAttribute codeAttribute, AnnotationVisitor annotationVisitor)
+    {
+        for (int index = 0; index < u2annotationsCount; index++)
+        {
+            // We don't need double dispatching here, since there is only one
+            // type of Annotation.
+            annotationVisitor.visitAnnotation(clazz, method, codeAttribute, annotations[index]);
         }
     }
 }

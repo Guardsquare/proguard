@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.attribute.*;
+import proguard.util.ArrayUtil;
 
 /**
  * This class can add local variables to a given local variable table attribute.
@@ -30,12 +31,12 @@ import proguard.classfile.attribute.*;
  */
 public class LocalVariableTableAttributeEditor
 {
-    private LocalVariableTableAttribute targetLocalVariableTableAttribute;
+    private final LocalVariableTableAttribute targetLocalVariableTableAttribute;
 
 
     /**
-     * Creates a new LocalVariableTableAttributeEditor that will edit line numbers
-     * in the given line number table attribute.
+     * Creates a new LocalVariableTableAttributeEditor that will edit local
+     * variables in the given local variable table attribute.
      */
     public LocalVariableTableAttributeEditor(LocalVariableTableAttribute targetLocalVariableTableAttribute)
     {
@@ -48,20 +49,9 @@ public class LocalVariableTableAttributeEditor
      */
     public void addLocalVariableInfo(LocalVariableInfo localVariableInfo)
     {
-        int                 localVariableTableLength = targetLocalVariableTableAttribute.u2localVariableTableLength;
-        LocalVariableInfo[] localVariableTable       = targetLocalVariableTableAttribute.localVariableTable;
-
-        // Make sure there is enough space for the new localVariableInfo.
-        if (localVariableTable.length <= localVariableTableLength)
-        {
-            targetLocalVariableTableAttribute.localVariableTable = new LocalVariableInfo[localVariableTableLength+1];
-            System.arraycopy(localVariableTable, 0,
-                             targetLocalVariableTableAttribute.localVariableTable, 0,
-                             localVariableTableLength);
-            localVariableTable = targetLocalVariableTableAttribute.localVariableTable;
-        }
-
-        // Add the localVariableInfo.
-        localVariableTable[targetLocalVariableTableAttribute.u2localVariableTableLength++] = localVariableInfo;
+        targetLocalVariableTableAttribute.localVariableTable =
+            (LocalVariableInfo[])ArrayUtil.add(targetLocalVariableTableAttribute.localVariableTable,
+                                               targetLocalVariableTableAttribute.u2localVariableTableLength++,
+                                               localVariableInfo);
     }
 }

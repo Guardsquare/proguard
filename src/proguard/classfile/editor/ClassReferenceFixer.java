@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -173,8 +173,11 @@ implements   ClassVisitor,
         String newDescriptor = newDescriptor(descriptor,
                                              libraryMethod.referencedClasses);
 
-        // Update the descriptor.
-        libraryMethod.descriptor = newDescriptor;
+        if (!descriptor.equals(newDescriptor))
+        {
+            // Update the descriptor.
+            libraryMethod.descriptor = newDescriptor;
+        }
     }
 
 
@@ -210,6 +213,24 @@ implements   ClassVisitor,
     }
 
 
+    public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
+    {
+        // Has the descriptor changed?
+        String descriptor    = invokeDynamicConstant.getType(clazz);
+        String newDescriptor = newDescriptor(descriptor,
+                                             invokeDynamicConstant.referencedClasses);
+
+        if (!descriptor.equals(newDescriptor))
+        {
+            String name = invokeDynamicConstant.getName(clazz);
+
+            // Refer to a new NameAndType entry.
+            invokeDynamicConstant.u2nameAndTypeIndex =
+                new ConstantPoolEditor((ProgramClass)clazz).addNameAndTypeConstant(name, newDescriptor);
+        }
+    }
+
+
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
         // Do we know the referenced class?
@@ -227,6 +248,23 @@ implements   ClassVisitor,
             }
         }
     }
+
+
+    public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
+    {
+        // Has the descriptor changed?
+        String descriptor    = methodTypeConstant.getType(clazz);
+        String newDescriptor = newDescriptor(descriptor,
+                                             methodTypeConstant.referencedClasses);
+
+        if (!descriptor.equals(newDescriptor))
+        {
+            // Update the descriptor.
+            methodTypeConstant.u2descriptorIndex =
+                new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newDescriptor);
+        }
+    }
+
 
     // Implementations for AttributeVisitor.
 
@@ -263,13 +301,14 @@ implements   ClassVisitor,
 
     public void visitSignatureAttribute(Clazz clazz, SignatureAttribute signatureAttribute)
     {
-        // Compute the new signature.
-        String signature    = clazz.getString(signatureAttribute.u2signatureIndex);
+        // Has the signature changed?
+        String signature    = signatureAttribute.getSignature(clazz);
         String newSignature = newDescriptor(signature,
                                             signatureAttribute.referencedClasses);
 
         if (!signature.equals(newSignature))
         {
+            // Update the signature.
             signatureAttribute.u2signatureIndex =
                 new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newSignature);
         }
@@ -308,7 +347,7 @@ implements   ClassVisitor,
             innerNameIndex  != 0)
         {
             String newInnerName = clazz.getClassName(innerClassIndex);
-            int index = newInnerName.lastIndexOf(ClassConstants.INTERNAL_INNER_CLASS_SEPARATOR);
+            int index = newInnerName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR);
             if (index >= 0)
             {
                 innerClassesInfo.u2innerNameIndex =
@@ -323,7 +362,7 @@ implements   ClassVisitor,
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
         // Has the descriptor changed?
-        String descriptor    = clazz.getString(localVariableInfo.u2descriptorIndex);
+        String descriptor    = localVariableInfo.getDescriptor(clazz);
         String newDescriptor = newDescriptor(descriptor,
                                              localVariableInfo.referencedClass);
 
@@ -340,12 +379,13 @@ implements   ClassVisitor,
     public void visitLocalVariableTypeInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeInfo localVariableTypeInfo)
     {
         // Has the signature changed?
-        String signature    = clazz.getString(localVariableTypeInfo.u2signatureIndex);
+        String signature    = localVariableTypeInfo.getSignature(clazz);
         String newSignature = newDescriptor(signature,
                                             localVariableTypeInfo.referencedClasses);
 
         if (!signature.equals(newSignature))
         {
+            // Update the signature.
             localVariableTypeInfo.u2signatureIndex =
                 new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newSignature);
         }
@@ -355,14 +395,14 @@ implements   ClassVisitor,
 
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
-        // Compute the new type name.
-        String typeName    = clazz.getString(annotation.u2typeIndex);
+        // Has the type changed?
+        String typeName    = annotation.getType(clazz);
         String newTypeName = newDescriptor(typeName,
                                            annotation.referencedClasses);
 
         if (!typeName.equals(newTypeName))
         {
-            // Refer to a new Utf8 entry.
+            // Update the type.
             annotation.u2typeIndex =
                 new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newTypeName);
         }
@@ -381,14 +421,14 @@ implements   ClassVisitor,
 
     public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
     {
-        // Compute the new type name.
-        String typeName    = clazz.getString(enumConstantElementValue.u2typeNameIndex);
+        // Has the type name chamged?
+        String typeName    = enumConstantElementValue.getTypeName(clazz);
         String newTypeName = newDescriptor(typeName,
                                            enumConstantElementValue.referencedClasses);
 
         if (!typeName.equals(newTypeName))
         {
-            // Refer to a new Utf8 entry.
+            // Update the type name.
             enumConstantElementValue.u2typeNameIndex =
                 new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newTypeName);
         }
@@ -397,14 +437,14 @@ implements   ClassVisitor,
 
     public void visitClassElementValue(Clazz clazz, Annotation annotation, ClassElementValue classElementValue)
     {
-        // Compute the new class name.
-        String className    = clazz.getString(classElementValue.u2classInfoIndex);
+        // Has the class info changed?
+        String className    = classElementValue.getClassName(clazz);
         String newClassName = newDescriptor(className,
                                             classElementValue.referencedClasses);
 
         if (!className.equals(newClassName))
         {
-            // Refer to a new Utf8 entry.
+            // Update the class info.
             classElementValue.u2classInfoIndex =
                 new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newClassName);
         }
@@ -492,7 +532,7 @@ implements   ClassVisitor,
             if (isInnerClassName)
             {
                 newClassName =
-                    newClassName.substring(newClassName.lastIndexOf(ClassConstants.INTERNAL_INNER_CLASS_SEPARATOR)+1);
+                    newClassName.substring(newClassName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
             }
 
             newDescriptorBuffer.append(newClassName);
@@ -508,8 +548,8 @@ implements   ClassVisitor,
      */
     private String newUniqueMemberName(String name, String descriptor)
     {
-        return name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT) ?
-            ClassConstants.INTERNAL_METHOD_NAME_INIT :
+        return name.equals(ClassConstants.METHOD_NAME_INIT) ?
+            ClassConstants.METHOD_NAME_INIT :
             name + ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
     }
 
@@ -532,13 +572,13 @@ implements   ClassVisitor,
         String newClassName = referencedClass.getName();
 
         // Is it an array type?
-        if (className.charAt(0) == ClassConstants.INTERNAL_TYPE_ARRAY)
+        if (className.charAt(0) == ClassConstants.TYPE_ARRAY)
         {
             // Add the array prefixes and suffix "[L...;".
             newClassName =
-                 className.substring(0, className.indexOf(ClassConstants.INTERNAL_TYPE_CLASS_START)+1) +
+                 className.substring(0, className.indexOf(ClassConstants.TYPE_CLASS_START)+1) +
                  newClassName +
-                 ClassConstants.INTERNAL_TYPE_CLASS_END;
+                 ClassConstants.TYPE_CLASS_END;
         }
 
         return newClassName;

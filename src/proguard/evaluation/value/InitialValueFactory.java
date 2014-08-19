@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -52,24 +52,24 @@ public class InitialValueFactory
     {
         switch (type.charAt(0))
         {
-            case ClassConstants.INTERNAL_TYPE_BOOLEAN:
-            case ClassConstants.INTERNAL_TYPE_BYTE:
-            case ClassConstants.INTERNAL_TYPE_CHAR:
-            case ClassConstants.INTERNAL_TYPE_SHORT:
-            case ClassConstants.INTERNAL_TYPE_INT:
+            case ClassConstants.TYPE_BOOLEAN:
+            case ClassConstants.TYPE_BYTE:
+            case ClassConstants.TYPE_CHAR:
+            case ClassConstants.TYPE_SHORT:
+            case ClassConstants.TYPE_INT:
                 return valueFactory.createIntegerValue(0);
 
-            case ClassConstants.INTERNAL_TYPE_LONG:
+            case ClassConstants.TYPE_LONG:
                 return valueFactory.createLongValue(0L);
 
-            case ClassConstants.INTERNAL_TYPE_FLOAT:
+            case ClassConstants.TYPE_FLOAT:
                 return valueFactory.createFloatValue(0.0f);
 
-            case ClassConstants.INTERNAL_TYPE_DOUBLE:
+            case ClassConstants.TYPE_DOUBLE:
                 return valueFactory.createDoubleValue(0.0);
 
-            case ClassConstants.INTERNAL_TYPE_CLASS_START:
-            case ClassConstants.INTERNAL_TYPE_ARRAY:
+            case ClassConstants.TYPE_CLASS_START:
+            case ClassConstants.TYPE_ARRAY:
                 return valueFactory.createReferenceValueNull();
 
             default:

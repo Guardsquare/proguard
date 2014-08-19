@@ -79,7 +79,7 @@
 }
 
 # Keep names - Native method names. Keep all native class/method names.
--keepclasseswithmembernames class * {
+-keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
 }
 

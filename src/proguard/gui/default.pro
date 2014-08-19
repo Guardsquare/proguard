@@ -25,7 +25,7 @@
 }
 
 # Keep names - Native method names. Keep all native class/method names.
--keepclasseswithmembers,allowshrinking class * {
+-keepclasseswithmembers,includedescriptorclasses,allowshrinking class * {
     native <methods>;
 }
 

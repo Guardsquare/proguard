@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -87,7 +87,7 @@ implements   MemberVisitor,
             String newName = name;
 
             // Append a code, if the method isn't a class instance initializer.
-            if (!name.equals(ClassConstants.INTERNAL_METHOD_NAME_INIT))
+            if (!name.equals(ClassConstants.METHOD_NAME_INIT))
             {
                 newName += ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
             }
@@ -137,7 +137,7 @@ implements   MemberVisitor,
     public void visitSignatureAttribute(Clazz clazz, Method method, SignatureAttribute signatureAttribute)
     {
         // Compute the new signature.
-        String signature    = clazz.getString(signatureAttribute.u2signatureIndex);
+        String signature    = signatureAttribute.getSignature(clazz);
         String newSignature = shrinkDescriptor(method, signature);
 
         // Update the signature.
@@ -160,7 +160,7 @@ implements   MemberVisitor,
         // All parameters of non-static methods are shifted by one in the local
         // variable frame.
         int parameterIndex =
-            (method.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) != 0 ?
+            (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
                 0 : 1;
 
         int annotationIndex    = 0;
@@ -186,7 +186,7 @@ implements   MemberVisitor,
         }
 
         // Update the number of parameters.
-        parameterAnnotationsAttribute.u2parametersCount = newAnnotationIndex;
+        parameterAnnotationsAttribute.u1parametersCount = newAnnotationIndex;
 
         // Clear the unused entries.
         while (newAnnotationIndex < annotationIndex)
@@ -207,7 +207,7 @@ implements   MemberVisitor,
         // All parameters of non-static methods are shifted by one in the local
         // variable frame.
         int parameterIndex =
-            (method.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) != 0 ?
+            (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
                 0 : 1;
 
         // Go over the parameters.
@@ -217,7 +217,7 @@ implements   MemberVisitor,
         StringBuffer newDescriptorBuffer = new StringBuffer();
 
         newDescriptorBuffer.append(internalTypeEnumeration.formalTypeParameters());
-        newDescriptorBuffer.append(ClassConstants.INTERNAL_METHOD_ARGUMENTS_OPEN);
+        newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
 
         while (internalTypeEnumeration.hasMoreTypes())
         {
@@ -234,7 +234,7 @@ implements   MemberVisitor,
             parameterIndex += ClassUtil.isInternalCategory2Type(type) ? 2 : 1;
         }
 
-        newDescriptorBuffer.append(ClassConstants.INTERNAL_METHOD_ARGUMENTS_CLOSE);
+        newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
         newDescriptorBuffer.append(internalTypeEnumeration.returnType());
 
         return newDescriptorBuffer.toString();
@@ -253,7 +253,7 @@ implements   MemberVisitor,
             // All parameters of non-static methods are shifted by one in the local
             // variable frame.
             int parameterIndex =
-                (method.getAccessFlags() & ClassConstants.INTERNAL_ACC_STATIC) != 0 ?
+                (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
                     0 : 1;
 
             int referencedClassIndex    = 0;

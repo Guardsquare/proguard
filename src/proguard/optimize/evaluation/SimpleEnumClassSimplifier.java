@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -84,8 +84,8 @@ implements   ClassVisitor,
         new NameAndTypeConstant(UTF8_INIT, UTF8_STRING_I),
         new NameAndTypeConstant(ENUM_CONSTANT_FIELD_NAME, ENUM_TYPE_NAME),
 
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_NAME_INIT),
-        new Utf8Constant(ClassConstants.INTERNAL_METHOD_TYPE_INIT_ENUM),
+        new Utf8Constant(ClassConstants.METHOD_NAME_INIT),
+        new Utf8Constant(ClassConstants.METHOD_TYPE_INIT_ENUM),
     };
 
     private static final Instruction[] INSTRUCTIONS = new Instruction[]
@@ -112,7 +112,7 @@ implements   ClassVisitor,
         new InstructionSequenceReplacer(CONSTANTS,
                                         INSTRUCTIONS,
                                         REPLACEMENT_INSTRUCTIONS,
-                                        new BranchTargetFinder(),
+                                        null,
                                         codeAttributeEditor);
 
     private final MemberVisitor initializerSimplifier = new AllAttributeVisitor(this);
@@ -128,19 +128,19 @@ implements   ClassVisitor,
         }
 
         // Unmark the class as an enum.
-        programClass.u2accessFlags &= ~ClassConstants.INTERNAL_ACC_ENUM;
+        programClass.u2accessFlags &= ~ClassConstants.ACC_ENUM;
 
         // Remove the valueOf method, if present.
         Method valueOfMethod =
-            programClass.findMethod(ClassConstants.INTERNAL_METHOD_NAME_VALUEOF, null);
+            programClass.findMethod(ClassConstants.METHOD_NAME_VALUEOF, null);
         if (valueOfMethod != null)
         {
             new ClassEditor(programClass).removeMethod(valueOfMethod);
         }
 
         // Simplify the static initializer.
-        programClass.methodAccept(ClassConstants.INTERNAL_METHOD_NAME_CLINIT,
-                                  ClassConstants.INTERNAL_METHOD_TYPE_CLINIT,
+        programClass.methodAccept(ClassConstants.METHOD_NAME_CLINIT,
+                                  ClassConstants.METHOD_TYPE_CLINIT,
                                   initializerSimplifier);
     }
 

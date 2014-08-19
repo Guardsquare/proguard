@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -54,87 +54,6 @@ public class OutputWriter
     public void execute(ClassPool programClassPool) throws IOException
     {
         ClassPath programJars = configuration.programJars;
-
-        // Perform a check on the first jar.
-        ClassPathEntry firstEntry = programJars.get(0);
-        if (firstEntry.isOutput())
-        {
-            throw new IOException("The output jar [" + firstEntry.getName() +
-                                  "] must be specified after an input jar, or it will be empty.");
-        }
-
-        // Check if the first of two subsequent the output jars has a filter.
-        for (int index = 0; index < programJars.size() - 1; index++)
-        {
-            ClassPathEntry entry = programJars.get(index);
-            if (entry.isOutput())
-            {
-                if (entry.getFilter()    == null &&
-                    entry.getJarFilter() == null &&
-                    entry.getWarFilter() == null &&
-                    entry.getEarFilter() == null &&
-                    entry.getZipFilter() == null &&
-                    programJars.get(index + 1).isOutput())
-                {
-                    throw new IOException("The output jar [" + entry.getName() +
-                                          "] must have a filter, or all subsequent output jars will be empty.");
-                }
-            }
-        }
-
-        // Check if the output jar names are different from the input jar names.
-        for (int outIndex = 0; outIndex < programJars.size() - 1; outIndex++)
-        {
-            ClassPathEntry entry = programJars.get(outIndex);
-            if (entry.isOutput())
-            {
-                for (int inIndex = 0; inIndex < programJars.size(); inIndex++)
-                {
-                    ClassPathEntry otherEntry = programJars.get(inIndex);
-
-                    if (!otherEntry.isOutput() &&
-                        entry.getFile().equals(otherEntry.getFile()))
-                    {
-                        throw new IOException("The output jar [" + entry.getName() +
-                                              "] must be different from all input jars.");
-                    }
-                }
-            }
-        }
-
-        // Check for potential problems with mixed-case class names on
-        // case-insensitive file systems.
-        if (configuration.obfuscate                          &&
-            configuration.useMixedCaseClassNames             &&
-            configuration.classObfuscationDictionary == null &&
-            (configuration.note == null ||
-             !configuration.note.isEmpty()))
-        {
-            String os = System.getProperty("os.name").toLowerCase();
-            if (os.startsWith("windows") ||
-                os.startsWith("mac os"))
-            {
-                // Go over all program class path entries.
-                for (int index = 0; index < programJars.size(); index++)
-                {
-                    // Is it an output directory?
-                    ClassPathEntry entry = programJars.get(index);
-                    if (entry.isOutput() &&
-                        !entry.isJar() &&
-                        !entry.isWar() &&
-                        !entry.isEar() &&
-                        !entry.isZip())
-                    {
-                        System.out.println("Note: you're writing the processed class files to a directory [" + entry.getName() +"].");
-                        System.out.println("      This will likely cause problems with obfuscated mixed-case class names.");
-                        System.out.println("      You should consider writing the output to a jar file, or otherwise");
-                        System.out.println("      specify '-dontusemixedcaseclassnames'.");
-
-                        break;
-                    }
-                }
-            }
-        }
 
         int firstInputIndex = 0;
         int lastInputIndex  = 0;
@@ -200,30 +119,34 @@ public class OutputWriter
 
             DataEntryReader resourceRewriter = resourceCopier;
 
-            // Wrap the resource writer with a filter and a data entry rewriter,
-            // if required.
-            if (configuration.adaptResourceFileContents != null)
+            // Adapt resource file contents and names, if necessary.
+            if (configuration.obfuscate)
             {
-                resourceRewriter =
-                    new NameFilter(configuration.adaptResourceFileContents,
-                    new NameFilter("META-INF/MANIFEST.MF,META-INF/*.SF",
-                        new ManifestRewriter(programClassPool, writer),
-                        new DataEntryRewriter(programClassPool, writer)),
-                    resourceRewriter);
-            }
+                // Wrap the resource writer with a filter and a data entry
+                // rewriter, if required.
+                if (configuration.adaptResourceFileContents != null)
+                {
+                    resourceRewriter =
+                        new NameFilter(configuration.adaptResourceFileContents,
+                        new NameFilter("META-INF/MANIFEST.MF,META-INF/*.SF",
+                            new ManifestRewriter(programClassPool, writer),
+                            new DataEntryRewriter(programClassPool, writer)),
+                        resourceRewriter);
+                }
 
-            // Wrap the resource writer with a filter and a data entry renamer,
-            // if required.
-            if (configuration.adaptResourceFileNames != null)
-            {
-                Map packagePrefixMap = createPackagePrefixMap(programClassPool);
+                // Wrap the resource writer with a filter and a data entry
+                // renamer, if required.
+                if (configuration.adaptResourceFileNames != null)
+                {
+                    Map packagePrefixMap = createPackagePrefixMap(programClassPool);
 
-                resourceRewriter =
-                    new NameFilter(configuration.adaptResourceFileNames,
-                    new DataEntryObfuscator(programClassPool,
-                                            packagePrefixMap,
-                                            resourceRewriter),
-                    resourceRewriter);
+                    resourceRewriter =
+                        new NameFilter(configuration.adaptResourceFileNames,
+                        new DataEntryObfuscator(programClassPool,
+                                                packagePrefixMap,
+                                                resourceRewriter),
+                        resourceRewriter);
+                }
             }
 
             DataEntryReader directoryRewriter = null;

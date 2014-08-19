@@ -55,7 +55,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
 
     // Preserve all native method names and the names of their classes.
 
-    keepclasseswithmembernames 'class * { \
+    keepclasseswithmembernames includedescriptorclasses:true, 'class * { \
         native <methods>; \
     }'
 

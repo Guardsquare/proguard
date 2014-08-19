@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -34,6 +34,7 @@ final class KeepSpecificationsPanel extends ClassSpecificationsPanel
 {
     private final boolean markClasses;
     private final boolean markConditionally;
+    private final boolean markDescriptorClasses;
     private final boolean allowShrinking;
     private final boolean allowOptimization;
     private final boolean allowObfuscation;
@@ -42,17 +43,19 @@ final class KeepSpecificationsPanel extends ClassSpecificationsPanel
     public KeepSpecificationsPanel(JFrame  owner,
                                    boolean markClasses,
                                    boolean markConditionally,
+                                   boolean markDescriptorClasses,
                                    boolean allowShrinking,
                                    boolean allowOptimization,
                                    boolean allowObfuscation)
     {
         super(owner, true);
 
-        this.markClasses       = markClasses;
-        this.markConditionally = markConditionally;
-        this.allowShrinking    = allowShrinking;
-        this.allowOptimization = allowOptimization;
-        this.allowObfuscation  = allowObfuscation;
+        this.markClasses           = markClasses;
+        this.markConditionally     = markConditionally;
+        this.markDescriptorClasses = markDescriptorClasses;
+        this.allowShrinking        = allowShrinking;
+        this.allowOptimization     = allowOptimization;
+        this.allowObfuscation      = allowObfuscation;
     }
 
 
@@ -61,10 +64,11 @@ final class KeepSpecificationsPanel extends ClassSpecificationsPanel
     protected ClassSpecification createClassSpecification()
     {
         return new KeepClassSpecification(markClasses,
-                                     markConditionally,
-                                     allowShrinking,
-                                     allowOptimization,
-                                     allowObfuscation);
+                                          markConditionally,
+                                          markDescriptorClasses,
+                                          allowShrinking,
+                                          allowOptimization,
+                                          allowObfuscation);
     }
 
 

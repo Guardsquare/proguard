@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -65,8 +65,7 @@ public class BootstrapMethodsAttribute extends Attribute
 
 
     /**
-     * Applies the given constant pool visitor to all bootstrap method info
-     * entries.
+     * Applies the given visitor to all bootstrap method info entries.
      */
     public void bootstrapMethodEntriesAccept(Clazz clazz, BootstrapMethodInfoVisitor bootstrapMethodInfoVisitor)
     {
@@ -80,8 +79,8 @@ public class BootstrapMethodsAttribute extends Attribute
 
 
     /**
-     * Applies the given constant pool visitor to the specified bootstrap method
-     * info entry.
+     * Applies the given visitor to the specified bootstrap method info
+     * entry.
      */
     public void bootstrapMethodEntryAccept(Clazz                      clazz,
                                            int                        bootstrapMethodIndex,

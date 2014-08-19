@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -170,17 +170,12 @@ public class GPL
                packageName.startsWith("org.netbeans")           ||
                packageName.startsWith("com.android")            ||
                packageName.startsWith("com.sun.kvem")           ||
-               packageName.startsWith("com.intel")              ||
                packageName.startsWith("net.certiv.proguarddt")  ||
                packageName.startsWith("groovy")                 ||
                packageName.startsWith("scala")                  ||
                packageName.startsWith("sbt")                    ||
                packageName.startsWith("xsbt")                   ||
-               packageName.startsWith("eclipseme")              ||
-               packageName.startsWith("com.neomades")           ||
-               packageName.startsWith("jg.j2me")                ||
-               packageName.startsWith("jg.common")              ||
-               packageName.startsWith("jg.buildengine");
+               packageName.startsWith("eclipseme");
     }
 
 

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -86,8 +86,8 @@ implements   ClassPoolVisitor,
             // Initialize the return value.
             hasSideEffects =
                 (programMethod.getAccessFlags() &
-                 (ClassConstants.INTERNAL_ACC_NATIVE |
-                  ClassConstants.INTERNAL_ACC_SYNCHRONIZED)) != 0;
+                 (ClassConstants.ACC_NATIVE |
+                  ClassConstants.ACC_SYNCHRONIZED)) != 0;
 
             // Look further if the method hasn't been marked yet.
             if (!hasSideEffects)
@@ -132,7 +132,7 @@ implements   ClassPoolVisitor,
         int    length = codeAttribute.u4codeLength;
 
         SideEffectInstructionChecker checker =
-            method.getName(clazz).equals(ClassConstants.INTERNAL_METHOD_NAME_CLINIT) ?
+            method.getName(clazz).equals(ClassConstants.METHOD_NAME_CLINIT) ?
                 initializerSideEffectInstructionChecker :
                 sideEffectInstructionChecker;
 

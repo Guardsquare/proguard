@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -75,6 +75,27 @@ public class AttributesEditor
         this.targetMember      = targetMember;
         this.targetAttribute   = targetAttribute;
         this.replaceAttributes = replaceAttributes;
+    }
+
+
+    /**
+     * Finds the specified attribute in the target.
+     */
+    public Attribute findAttribute(String attributeName)
+    {
+        // What's the target?
+        return
+            targetAttribute != null ?
+                findAttribute(targetAttribute.u2attributesCount,
+                              targetAttribute.attributes,
+                              attributeName) :
+            targetMember != null ?
+                findAttribute(targetMember.u2attributesCount,
+                              targetMember.attributes,
+                              attributeName) :
+                findAttribute(targetClass.u2attributesCount,
+                              targetClass.attributes,
+                              attributeName);
     }
 
 
@@ -171,17 +192,17 @@ public class AttributesEditor
     // Small utility methods.
 
     /**
-     * Tries put the given attribute in place of an existing attribute of the
-     * same name, returning whether it was present.
+     * Tries to put the given attribute in place of an existing attribute of
+     * the same name, returning whether it was present.
      */
     private boolean replaceAttribute(int         attributesCount,
                                      Attribute[] attributes,
                                      Attribute   attribute)
     {
         // Find the attribute with the same name.
-        int index = findAttribute(attributesCount,
-                                  attributes,
-                                  attribute.getAttributeName(targetClass));
+        int index = findAttributeIndex(attributesCount,
+                                       attributes,
+                                       attribute.getAttributeName(targetClass));
         if (index < 0)
         {
             return false;
@@ -228,9 +249,9 @@ public class AttributesEditor
                                 String      attributeName)
     {
         // Find the attribute.
-        int index = findAttribute(attributesCount,
-                                  attributes,
-                                  attributeName);
+        int index = findAttributeIndex(attributesCount,
+                                       attributes,
+                                       attributeName);
         if (index < 0)
         {
             return attributesCount;
@@ -252,18 +273,42 @@ public class AttributesEditor
      * Finds the index of the attribute with the given name in the given
      * array of attributes.
      */
-    private int findAttribute(int         attributesCount,
-                              Attribute[] attributes,
-                              String      attributeName)
+    private int findAttributeIndex(int         attributesCount,
+                                   Attribute[] attributes,
+                                   String      attributeName)
     {
         for (int index = 0; index < attributesCount; index++)
         {
-            if (attributes[index].getAttributeName(targetClass).equals(attributeName))
+            Attribute attribute = attributes[index];
+
+            if (attribute.getAttributeName(targetClass).equals(attributeName))
             {
                 return index;
             }
         }
 
         return -1;
+    }
+
+
+    /**
+     * Finds the attribute with the given name in the given
+     * array of attributes.
+     */
+    private Attribute findAttribute(int         attributesCount,
+                                    Attribute[] attributes,
+                                    String      attributeName)
+    {
+        for (int index = 0; index < attributesCount; index++)
+        {
+            Attribute attribute = attributes[index];
+
+            if (attribute.getAttributeName(targetClass).equals(attributeName))
+            {
+                return attribute;
+            }
+        }
+
+        return null;
     }
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -42,9 +42,9 @@ implements   MemberVisitor
     // way if more of them are required at the same time. In that case, one
     // of them being set is sufficient.
     private static final int ACCESS_MASK =
-        ClassConstants.INTERNAL_ACC_PUBLIC  |
-        ClassConstants.INTERNAL_ACC_PRIVATE |
-        ClassConstants.INTERNAL_ACC_PROTECTED;
+        ClassConstants.ACC_PUBLIC  |
+        ClassConstants.ACC_PRIVATE |
+        ClassConstants.ACC_PROTECTED;
 
     private final int           requiredSetAccessFlags;
     private final int           requiredUnsetAccessFlags;

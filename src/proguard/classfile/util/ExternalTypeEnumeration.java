@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2013 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,7 +20,7 @@
  */
 package proguard.classfile.util;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 
 
 /**
@@ -61,7 +61,7 @@ public class ExternalTypeEnumeration
 
     public void reset()
     {
-        index = descriptor.indexOf(ClassConstants.EXTERNAL_METHOD_ARGUMENTS_OPEN) + 1;
+        index = descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_OPEN) + 1;
 
         if (index < 1)
         {
@@ -81,13 +81,13 @@ public class ExternalTypeEnumeration
         int startIndex = index;
 
         // Find the next separating comma.
-        index = descriptor.indexOf(ClassConstants.EXTERNAL_METHOD_ARGUMENTS_SEPARATOR,
+        index = descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_SEPARATOR,
                                    startIndex);
 
         // Otherwise find the closing parenthesis.
         if (index < 0)
         {
-            index = descriptor.indexOf(ClassConstants.EXTERNAL_METHOD_ARGUMENTS_CLOSE,
+            index = descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_CLOSE,
                                        startIndex);
             if (index < 0)
             {
@@ -101,6 +101,6 @@ public class ExternalTypeEnumeration
 
     public String methodName()
     {
-        return descriptor.substring(0, descriptor.indexOf(ClassConstants.EXTERNAL_METHOD_ARGUMENTS_OPEN)).trim();
+        return descriptor.substring(0, descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_OPEN)).trim();
     }
 }
