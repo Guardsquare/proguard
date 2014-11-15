@@ -187,8 +187,10 @@ implements Comparable, ConstantVisitor
 
         result = kind < otherKind ? -1 :
                  kind > otherKind ?  1 :
-                     compare(methodHandleConstant.getName(clazz),
+                     compare(methodHandleConstant.getClassName(clazz),
+                             methodHandleConstant.getName(clazz),
                              methodHandleConstant.getType(clazz),
+                             otherMethodHandleConstant.getClassName(clazz),
                              otherMethodHandleConstant.getName(clazz),
                              otherMethodHandleConstant.getType(clazz));
     }

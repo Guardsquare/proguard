@@ -131,14 +131,14 @@ implements   AttributeVisitor,
 
     // Implementations for ConstantVisitor.
 
-    public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
     {
         // Check the referenced constructor descriptor.
-        if (methodrefConstant.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT))
+        if (refConstant.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT))
         {
-            descriptor = methodrefConstant.getType(clazz);
+            descriptor = refConstant.getType(clazz);
 
-            methodrefConstant.referencedMemberAccept(this);
+            refConstant.referencedMemberAccept(this);
         }
     }
 

@@ -51,27 +51,30 @@ implements   ClassVisitor,
             // Sort the interfaces.
             Arrays.sort(interfaces, 0, interfacesCount);
 
+            // Update the signature.
+            programClass.attributesAccept(this);
+
             // Remove any duplicate entries.
-            int newInterfacesCount     = 0;
-            int previousInterfaceIndex = 0;
-            for (int index = 0; index < interfacesCount; index++)
+            boolean[] delete = null;
+            for (int index = 1; index < interfacesCount; index++)
             {
-                int interfaceIndex = interfaces[index];
-
-                // Isn't this a duplicate of the previous interface?
-                if (interfaceIndex != previousInterfaceIndex)
+                Clazz interfaceClass = programClass.getInterface(index);
+                if (interfaces[index] == interfaces[index - 1])
                 {
-                    interfaces[newInterfacesCount++] = interfaceIndex;
+                    // Lazily create the array.
+                    if (delete == null)
+                    {
+                        delete = new boolean[interfacesCount];
+                    }
 
-                    // Remember the interface.
-                    previousInterfaceIndex = interfaceIndex;
+                    delete[index] = true;
                 }
             }
 
-            programClass.u2interfacesCount = newInterfacesCount;
-
-            // Update the signature, if any
-            programClass.attributesAccept(this);
+            if (delete != null)
+            {
+                new InterfaceDeleter(delete).visitProgramClass(programClass);
+            }
         }
     }
 
@@ -126,13 +129,7 @@ implements   ClassVisitor,
 
         for (int index = 0; index < count; index++)
         {
-            // Is this not an interface type, or an interface type that isn't
-            // a duplicate of the previous interface type?
-            if (index < count - interfacesCount ||
-                !internalTypes[index].equals(internalTypes[index-1]))
-            {
-                newSignatureBuffer.append(internalTypes[index]);
-            }
+            newSignatureBuffer.append(internalTypes[index]);
         }
 
         String newSignature = newSignatureBuffer.toString();

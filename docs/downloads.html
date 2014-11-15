@@ -74,6 +74,17 @@ target="other">proguard-wtk-plugin</a>, and
 <a href="http://search.maven.org/#search|ga|1|a:%22proguard-retrace%22"
 target="other">proguard-retrace</a>.
 
+<h3><div>Oct 2014</div> Version 5.1</h3>
+<ul>
+<li>Fixed processing of various kinds of closures in Java 8.
+<li>Fixed shrinking of generic signatures in classes and methods.
+<li>Fixed shrinking of debug information about generic local variable types.
+<li>Fixed optimization of default implementations in interfaces.
+<li>Fixed optimization of variable initializations.
+<li>Fixed obfuscation of internal class names in strings.
+<li>Updated documentation and examples.
+</ul>
+
 <h3><div>Aug 2014</div> Version 5.0</h3>
 <ul>
 <li>Added support for Java 8.
@@ -85,6 +96,7 @@ target="other">proguard-retrace</a>.
     system property <code>optimize.conservatively</code>.
 <li>Fixed occasional preverification problem.
 <li>Fixed shrinking of generic class signatures.
+<li>Fixed shrinking of generic variable signatures.
 <li>Fixed analysis of unused parameters for bootstrap methods in library
     classes.
 <li>Fixed inlining problem of non-returning subroutines.

@@ -283,14 +283,31 @@ public class Optimizer
             new MethodrefTraveler(
             new ReferencedMemberVisitor(keepMarker))))))));
 
-        // We also keep all methods of classes that are returned by dynamic
+        // We also keep all bootstrap method arguments that point to methods.
+        // These arguments are typically the method handles for
+        // java.lang.invoke.LambdaMetafactory#metafactory, which provides the
+        // implementations for closures.
+        programClassPool.classesAccept(
+            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
+            new AllAttributeVisitor(
+            new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
+            new AllBootstrapMethodInfoVisitor(
+            new BootstrapMethodArgumentVisitor(
+            new MethodrefTraveler(
+            new ReferencedMemberVisitor(keepMarker))))))));
+
+        // We also keep all classes (and their methods) returned by dynamic
         // method invocations. They may return dynamic implementations of
         // interfaces that otherwise appear unused.
         programClassPool.classesAccept(
             new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
             new AllConstantVisitor(
             new DynamicReturnedClassVisitor(
-            new AllMemberVisitor(keepMarker)))));
+            new MultiClassVisitor(new ClassVisitor[]
+            {
+                keepMarker,
+                new AllMemberVisitor(keepMarker)
+            })))));
 
         // Attach some optimization info to all classes and class members, so
         // it can be filled out later.

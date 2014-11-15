@@ -203,7 +203,12 @@ implements   ClassVisitor,
             // Update the String entry if required.
             if (!newInternalClassName.equals(internalClassName))
             {
-                String newExternalClassName = ClassUtil.externalClassName(newInternalClassName);
+                // Only convert to an external class name if the original was
+                // an external class name too.
+                String newExternalClassName =
+                    externalClassName.indexOf(JavaConstants.PACKAGE_SEPARATOR) >= 0 ?
+                        ClassUtil.externalClassName(newInternalClassName) :
+                        newInternalClassName;
 
                 // Refer to a new Utf8 entry.
                 stringConstant.u2stringIndex =

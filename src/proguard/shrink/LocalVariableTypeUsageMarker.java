@@ -18,7 +18,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-
 package proguard.shrink;
 
 import proguard.classfile.*;
@@ -48,7 +47,7 @@ implements   AttributeVisitor,
 {
     private final UsageMarker usageMarker;
 
-    // Fields acting as a return parameters for several methods.
+    // Fields acting as return values for several visitor methods.
     private boolean tableUsed;
     private boolean variableInfoUsed;
 

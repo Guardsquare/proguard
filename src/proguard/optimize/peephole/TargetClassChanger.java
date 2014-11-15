@@ -71,18 +71,32 @@ implements   ClassVisitor,
         // Change the references of the attributes.
         programClass.attributesAccept(this);
 
-        // Remove interface classes that have ended up pointing to the class itself.
-        int newInterfacesCount = 0;
+        // Remove duplicate interfaces and interface classes that have ended
+        // up pointing to the class itself.
+        boolean[] delete = null;
         for (int index = 0; index < programClass.u2interfacesCount; index++)
         {
             Clazz interfaceClass = programClass.getInterface(index);
-            if (!programClass.equals(interfaceClass))
+            if (interfaceClass != null &&
+                (programClass.equals(interfaceClass) ||
+                 containsInterfaceClass(programClass,
+                                        index,
+                                        interfaceClass)))
             {
-                programClass.u2interfaces[newInterfacesCount++] =
-                    programClass.u2interfaces[index];
+                // Lazily create the array.
+                if (delete == null)
+                {
+                    delete = new boolean[programClass.u2interfacesCount];
+                }
+
+                delete[index] = true;
             }
         }
-        programClass.u2interfacesCount = newInterfacesCount;
+
+        if (delete != null)
+        {
+            new InterfaceDeleter(delete).visitProgramClass(programClass);
+        }
 
         // Is the class being retargeted?
         Clazz targetClass = ClassMerger.getTargetClass(programClass);
@@ -385,7 +399,27 @@ implements   ClassVisitor,
 
     // Small utility methods.
 
-    /**
+     /**
+     * Returns whether the given class contains the given interface
+     * class in its first given number of interfaces.
+     */
+    private boolean containsInterfaceClass(Clazz clazz,
+                                           int   interfaceCount,
+                                           Clazz interfaceClass)
+    {
+        for (int index = 0; index < interfaceCount; index++)
+        {
+            if (interfaceClass.equals(clazz.getInterface(index)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+   /**
      * Updates the retargeted classes in the given array of classes.
      */
     private void updateReferencedClasses(Clazz[] referencedClasses)

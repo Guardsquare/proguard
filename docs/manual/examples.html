@@ -897,6 +897,26 @@ may require special attention:
     computing the UID. A fast but sub-optimal alternative would be simply
     keeping all interfaces with "<code>-keep interface *</code>".</li>
 
+<li>In the rare event that you are serializing lambda expressions in Java 8 or
+    higher, you need to preserve some methods and adapt the hard-coded names
+    of the classes in which they occur:
+
+<pre>
+-keepclassmembers class * {
+    private static synthetic java.lang.Object $deserializeLambda$(java.lang.invoke.SerializedLambda);
+}
+
+-keepclassmembernames class * {
+    private static synthetic *** lambda$*(...);
+}
+
+-adaptclassstrings com.example.Test
+</pre>
+<p>
+
+    This should satisfy the reflection in the deserialization code of the
+    Java run-time.
+
 </ul>
 <p>
 

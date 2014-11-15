@@ -45,7 +45,7 @@ public abstract class Value
      */
     public Category1Value category1Value()
     {
-        throw new IllegalArgumentException("Value is not a Category 1 value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not a Category 1 value [" + this.getClass().getName() + "]");
     }
 
     /**
@@ -53,7 +53,7 @@ public abstract class Value
      */
     public Category2Value category2Value()
     {
-        throw new IllegalArgumentException("Value is not a Category 2 value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not a Category 2 value [" + this.getClass().getName() + "]");
     }
 
 
@@ -62,7 +62,7 @@ public abstract class Value
      */
     public IntegerValue integerValue()
     {
-        throw new IllegalArgumentException("Value is not an integer value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not an integer value [" + this.getClass().getName() + "]");
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class Value
      */
     public LongValue longValue()
     {
-        throw new IllegalArgumentException("Value is not a long value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not a long value [" + this.getClass().getName() + "]");
     }
 
     /**
@@ -78,7 +78,7 @@ public abstract class Value
      */
     public FloatValue floatValue()
     {
-        throw new IllegalArgumentException("Value is not a float value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not a float value [" + this.getClass().getName() + "]");
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class Value
      */
     public DoubleValue doubleValue()
     {
-        throw new IllegalArgumentException("Value is not a double value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not a double value [" + this.getClass().getName() + "]");
     }
 
     /**
@@ -94,7 +94,7 @@ public abstract class Value
      */
     public ReferenceValue referenceValue()
     {
-        throw new IllegalArgumentException("Value is not a reference value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not a reference value [" + this.getClass().getName() + "]");
     }
 
     /**
@@ -102,7 +102,7 @@ public abstract class Value
      */
     public InstructionOffsetValue instructionOffsetValue()
     {
-        throw new IllegalArgumentException("Value is not an instruction offset value [" + this.getClass().getName() + "]");
+        throw new IllegalArgumentException("Value \"" + this.toString() + "\" is not an instruction offset value [" + this.getClass().getName() + "]");
     }
 
 

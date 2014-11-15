@@ -38,7 +38,7 @@ public class MethodHandleConstant extends Constant
      * An extra field pointing to the java.lang.invoke.MethodHandle Clazz object.
      * This field is typically filled out by the <code>{@link
      * proguard.classfile.util.ClassReferenceInitializer
-     * ClassReferenceInitializer}</code>..
+     * ClassReferenceInitializer}</code>.
      */
     public Clazz javaLangInvokeMethodHandleClass;
 
@@ -92,6 +92,14 @@ public class MethodHandleConstant extends Constant
         return u2referenceIndex;
     }
 
+
+    /**
+     * Returns the class name.
+     */
+    public String getClassName(Clazz clazz)
+    {
+        return clazz.getRefClassName(u2referenceIndex);
+    }
 
     /**
      * Returns the method/field name.

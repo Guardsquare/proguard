@@ -29,7 +29,7 @@ import proguard.classfile.visitor.MemberVisitor;
 import proguard.optimize.info.ParameterUsageMarker;
 
 /**
- * This MemberVisitor removes unused parameters from the code of the methods
+ * This AttributeVisitor removes unused parameters from the code of the methods
  * that it visits.
  *
  * @see ParameterUsageMarker

@@ -9,10 +9,11 @@
   <property name = "classes" value = "classes"/>
   <property name = "lib"     value = "lib"/>
 
-  <property name = "gradle.jar1" value = "${gradle.home}/lib/plugins/gradle-plugins-1.8.jar"/>
-  <property name = "gradle.jar2" value = "${gradle.home}/lib/gradle-base-services-1.8.jar"/>
-  <property name = "gradle.jar3" value = "${gradle.home}/lib/gradle-core-1.8.jar"/>
-  <property name = "gradle.jar4" value = "${gradle.home}/lib/groovy-all-1.8.6.jar"/>
+  <property name = "gradle.jar1" value = "${gradle.home}/lib/plugins/gradle-plugins-2.1.jar"/>
+  <property name = "gradle.jar2" value = "${gradle.home}/lib/gradle-base-services-2.1.jar"/>
+  <property name = "gradle.jar3" value = "${gradle.home}/lib/gradle-base-services-groovy-2.1.jar"/>
+  <property name = "gradle.jar4" value = "${gradle.home}/lib/gradle-core-2.1.jar"/>
+  <property name = "gradle.jar5" value = "${gradle.home}/lib/groovy-all-2.3.6.jar"/>
   <property name = "wtk.jar"     value = "${wtk.home}/wtklib/kenv.zip"/>
 
   <target name = "all"     depends = "basic,options"/>
@@ -128,6 +129,7 @@
             <available file="${gradle.jar2}"/>
             <available file="${gradle.jar3}"/>
             <available file="${gradle.jar4}"/>
+            <available file="${gradle.jar5}"/>
           </and>
         </not>
       </condition>
@@ -145,6 +147,7 @@
         <path location="${gradle.jar2}"/>
         <path location="${gradle.jar3}"/>
         <path location="${gradle.jar4}"/>
+        <path location="${gradle.jar5}"/>
       </classpath>
     </javac>
 

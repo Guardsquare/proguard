@@ -63,7 +63,7 @@ public class ParameterInfo implements VisitorAccepter
      */
     public String getName(Clazz clazz)
     {
-        return clazz.getString(u2accessFlags);
+        return clazz.getString(u2nameIndex);
     }
 
 

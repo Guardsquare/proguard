@@ -54,36 +54,6 @@ implements   ClassVisitor,
     private static       boolean DEBUG = System.getProperty("enum") != null;
     //*/
 
-    private final InstructionVisitor extraInstructionVisitor;
-
-    private final PartialEvaluator    partialEvaluator;
-    private final CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor(false, true);
-
-
-    /**
-     * Creates a new SimpleEnumDescriptorSimplifier.
-     */
-    public SimpleEnumDescriptorSimplifier()
-    {
-        this(new PartialEvaluator(), null);
-    }
-
-
-    /**
-     * Creates a new SimpleEnumDescriptorSimplifier.
-     * @param partialEvaluator        the partial evaluator that will
-     *                                execute the code and provide
-     *                                information about the results.
-     * @param extraInstructionVisitor an optional extra visitor for all
-     *                                simplified instructions.
-     */
-    public SimpleEnumDescriptorSimplifier(PartialEvaluator   partialEvaluator,
-                                          InstructionVisitor extraInstructionVisitor)
-    {
-        this.partialEvaluator        = partialEvaluator;
-        this.extraInstructionVisitor = extraInstructionVisitor;
-    }
-
 
     // Implementations for ClassVisitor.
 
@@ -152,6 +122,10 @@ implements   ClassVisitor,
             invokeDynamicConstant.u2nameAndTypeIndex =
                 constantPoolEditor.addNameAndTypeConstant(invokeDynamicConstant.getName(clazz),
                                                           newDescriptor);
+
+            // Update the referenced classes.
+            invokeDynamicConstant.referencedClasses =
+                simplifyReferencedClasses(descriptor, invokeDynamicConstant.referencedClasses);
         }
     }
 
@@ -273,6 +247,10 @@ implements   ClassVisitor,
             // Update the descriptor itself.
             programMethod.u2descriptorIndex =
                 constantPoolEditor.addUtf8Constant(newDescriptor);
+
+            // Update the referenced classes.
+            programMethod.referencedClasses =
+                simplifyReferencedClasses(descriptor, programMethod.referencedClasses);
         }
     }
 
@@ -404,59 +382,63 @@ implements   ClassVisitor,
 
 
     /**
-     * Returns the descriptor with simplified enum types and removes any enum
-     * classes that can be simplified from the referenced classes.
+     * Returns the descriptor with simplified enum types.
      */
     private String simplifyDescriptor(String  descriptor,
                                       Clazz[] referencedClasses)
     {
         if (referencedClasses != null)
         {
-            int referencedClassIndex    = 0;
-            int newReferencedClassIndex = 0;
-
-            // Go over the parameters.
             InternalTypeEnumeration internalTypeEnumeration =
                 new InternalTypeEnumeration(descriptor);
 
-            StringBuffer newDescriptorBuffer = new StringBuffer();
+            int referencedClassIndex = 0;
 
-            newDescriptorBuffer.append(internalTypeEnumeration.formalTypeParameters());
-            newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+            StringBuffer newDescriptorBuffer =
+                new StringBuffer(descriptor.length());
 
-            // Also look at the formal type parameters.
-            String type  = internalTypeEnumeration.formalTypeParameters();
-            int    count = new DescriptorClassEnumeration(type).classCount();
-            for (int counter = 0; counter < count; counter++)
+            // Go over the formal type parameters.
             {
-                Clazz referencedClass =
-                    referencedClasses[referencedClassIndex++];
+                // Consider the classes referenced by this formal type
+                // parameter.
+                String type  = internalTypeEnumeration.formalTypeParameters();
+                int    count = new DescriptorClassEnumeration(type).classCount();
 
-                if (!isSimpleEnum(referencedClass))
-                {
-                    referencedClasses[newReferencedClassIndex++] =
-                        referencedClass;
-                }
-            }
-
-            while (internalTypeEnumeration.hasMoreTypes())
-            {
-                // Consider the classes referenced by this parameter type.
-                type  = internalTypeEnumeration.nextType();
-                count = new DescriptorClassEnumeration(type).classCount();
-
-                // Copy the referenced classes.
+                // Replace simple enum types.
                 for (int counter = 0; counter < count; counter++)
                 {
                     Clazz referencedClass =
                         referencedClasses[referencedClassIndex++];
 
-                    if (!isSimpleEnum(referencedClass))
+                    if (isSimpleEnum(referencedClass))
                     {
-                        referencedClasses[newReferencedClassIndex++] =
-                            referencedClass;
+                        // Let's replace the simple enum type by
+                        // java.lang.Integer.
+                        type =
+                            type.substring(0, ClassUtil.internalArrayTypeDimensionCount(type)) +
+                            ClassConstants.NAME_JAVA_LANG_INTEGER;
                     }
-                    else
+                }
+
+                newDescriptorBuffer.append(type);
+            }
+
+            newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+
+            // Go over the parameters.
+            while (internalTypeEnumeration.hasMoreTypes())
+            {
+                // Consider the classes referenced by this parameter type.
+                String type  = internalTypeEnumeration.nextType();
+                int    count = new DescriptorClassEnumeration(type).classCount();
+
+                // Replace simple enum types.
+                for (int counter = 0; counter < count; counter++)
+                {
+                    Clazz referencedClass =
+                        referencedClasses[referencedClassIndex++];
+
+                    if (isSimpleEnum(referencedClass))
                     {
                         type =
                             type.substring(0, ClassUtil.internalArrayTypeDimensionCount(type)) +
@@ -467,42 +449,126 @@ implements   ClassVisitor,
                 newDescriptorBuffer.append(type);
             }
 
-            // Also look at the return value.
-            type  = internalTypeEnumeration.returnType();
-            count = new DescriptorClassEnumeration(type).classCount();
-
-            for (int counter = 0; counter < count; counter++)
-            {
-                Clazz referencedClass =
-                    referencedClasses[referencedClassIndex++];
-
-                if (!isSimpleEnum(referencedClass))
-                {
-                    referencedClasses[newReferencedClassIndex++] =
-                        referencedClass;
-                }
-                else
-                {
-                    type =
-                        type.substring(0, ClassUtil.internalArrayTypeDimensionCount(
-                            type)) +
-                        ClassConstants.TYPE_INT;
-                }
-            }
-
             newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
-            newDescriptorBuffer.append(type);
 
-            // Clear the unused entries.
-            while (newReferencedClassIndex < referencedClassIndex)
+            // Go over the return value.
             {
-                referencedClasses[newReferencedClassIndex++] = null;
+                String type  = internalTypeEnumeration.returnType();
+                int    count = new DescriptorClassEnumeration(type).classCount();
+
+                // Replace simple enum types.
+                for (int counter = 0; counter < count; counter++)
+                {
+                    Clazz referencedClass =
+                        referencedClasses[referencedClassIndex++];
+
+                    if (isSimpleEnum(referencedClass))
+                    {
+                        type =
+                            type.substring(0, ClassUtil.internalArrayTypeDimensionCount(type)) +
+                            ClassConstants.TYPE_INT;
+                    }
+                }
+
+                newDescriptorBuffer.append(type);
             }
 
             descriptor = newDescriptorBuffer.toString();
         }
 
         return descriptor;
+    }
+
+
+    /**
+     * Returns the simplified and shrunk array of referenced classes for the
+     * given descriptor.
+     */
+    private Clazz[] simplifyReferencedClasses(String  descriptor,
+                                              Clazz[] referencedClasses)
+    {
+        if (referencedClasses != null)
+        {
+            InternalTypeEnumeration internalTypeEnumeration =
+                new InternalTypeEnumeration(descriptor);
+
+            int referencedClassIndex    = 0;
+            int newReferencedClassIndex = 0;
+
+            // Go over the formal type parameters.
+            {
+                String type  = internalTypeEnumeration.formalTypeParameters();
+                int    count = new DescriptorClassEnumeration(type).classCount();
+
+                // Clear all non-simple enum classes
+                // (now java.lang.Integer).
+                for (int counter = 0; counter < count; counter++)
+                {
+                    Clazz referencedClass =
+                        referencedClasses[referencedClassIndex++];
+
+                    referencedClasses[newReferencedClassIndex++] =
+                        isSimpleEnum(referencedClass) ? null : referencedClass;
+                }
+            }
+
+            // Go over the parameters.
+            while (internalTypeEnumeration.hasMoreTypes())
+            {
+                // Consider the classes referenced by this parameter type.
+                String type  = internalTypeEnumeration.nextType();
+                int    count = new DescriptorClassEnumeration(type).classCount();
+
+                // Copy all non-simple enum classes.
+                for (int counter = 0; counter < count; counter++)
+                {
+                    Clazz referencedClass =
+                        referencedClasses[referencedClassIndex++];
+
+                    if (!isSimpleEnum(referencedClass))
+                    {
+                        referencedClasses[newReferencedClassIndex++] =
+                            referencedClass;
+                    }
+                }
+            }
+
+            // Go over the return type.
+            {
+                String type  = internalTypeEnumeration.returnType();
+                int    count = new DescriptorClassEnumeration(type).classCount();
+
+                // Copy all non-simple enum classes.
+                for (int counter = 0; counter < count; counter++)
+                {
+                    Clazz referencedClass =
+                        referencedClasses[referencedClassIndex++];
+
+                    if (!isSimpleEnum(referencedClass))
+                    {
+                        referencedClasses[newReferencedClassIndex++] =
+                            referencedClass;
+                    }
+                }
+            }
+
+            // Shrink the array to the proper size.
+            if (newReferencedClassIndex == 0)
+            {
+                referencedClasses = null;
+            }
+            else if (newReferencedClassIndex < referencedClassIndex)
+            {
+                Clazz[] newReferencedClasses = new Clazz[newReferencedClassIndex];
+                System.arraycopy(referencedClasses, 0,
+                                 newReferencedClasses, 0,
+                                 newReferencedClassIndex);
+
+                referencedClasses = newReferencedClasses;
+            }
+        }
+
+        return referencedClasses;
     }
 
 

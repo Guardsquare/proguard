@@ -91,6 +91,11 @@ public interface Clazz extends VisitorAccepter
     public String getType(int constantIndex);
 
     /**
+     * Returns the class name of the RefConstant at the specified index.
+     */
+    public String getRefClassName(int constantIndex);
+
+    /**
      * Returns the name of the RefConstant at the specified index.
      */
     public String getRefName(int constantIndex);

@@ -48,6 +48,9 @@ implements   ClassVisitor,
              InnerClassesInfoVisitor,
              StackMapFrameVisitor,
              VerificationTypeVisitor,
+             ParameterInfoVisitor,
+             LocalVariableInfoVisitor,
+             LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
              TypeAnnotationVisitor,
              ElementValueVisitor
@@ -124,6 +127,14 @@ implements   ClassVisitor,
     }
 
 
+    public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
+    {
+        clean(methodParametersAttribute);
+
+        methodParametersAttribute.parametersAccept(clazz, method, this);
+    }
+
+
     public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
     {
         clean(exceptionsAttribute);
@@ -154,6 +165,22 @@ implements   ClassVisitor,
         clean(stackMapTableAttribute);
 
         stackMapTableAttribute.stackMapFramesAccept(clazz, method, codeAttribute, this);
+    }
+
+
+    public void visitLocalVariableTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTableAttribute localVariableTableAttribute)
+    {
+        clean(localVariableTableAttribute);
+
+        localVariableTableAttribute.localVariablesAccept(clazz, method, codeAttribute, this);
+    }
+
+
+    public void visitLocalVariableTypeTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeTableAttribute localVariableTypeTableAttribute)
+    {
+        clean(localVariableTypeTableAttribute);
+
+        localVariableTypeTableAttribute.localVariablesAccept(clazz, method, codeAttribute, this);
     }
 
 
@@ -257,6 +284,30 @@ implements   ClassVisitor,
     public void visitAnyVerificationType(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VerificationType verificationType)
     {
         clean(verificationType);
+    }
+
+
+    // Implementations for ParameterInfoVisitor.
+
+    public void visitParameterInfo(Clazz clazz, Method method, int parameterIndex, ParameterInfo parameterInfo)
+    {
+        clean(parameterInfo);
+    }
+
+
+    // Implementations for LocalVariableInfoVisitor.
+
+    public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
+    {
+        clean(localVariableInfo);
+    }
+
+
+    // Implementations for LocalVariableTypeInfoVisitor.
+
+    public void visitLocalVariableTypeInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeInfo localVariableTypeInfo)
+    {
+        clean(localVariableTypeInfo);
     }
 
 

@@ -77,6 +77,12 @@ implements   ConstantVisitor
      */
     private int remapConstantIndex(int constantIndex)
     {
-        return constantIndexMap[constantIndex];
+        int remappedConstantIndex = constantIndexMap[constantIndex];
+        if (remappedConstantIndex < 0)
+        {
+            throw new IllegalArgumentException("Can't remap constant index ["+constantIndex+"]");
+        }
+
+        return remappedConstantIndex;
     }
 }

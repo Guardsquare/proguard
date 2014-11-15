@@ -299,7 +299,7 @@ implements   AttributeVisitor,
                 if (isTraced(offset))
                 {
                     int initializationOffset = branchTargetFinder.initializationOffset(offset);
-                    if (initializationOffset != NONE)
+                    if (initializationOffset >= 0)
                     {
                         System.out.println("     is to be initialized at ["+initializationOffset+"]");
                     }

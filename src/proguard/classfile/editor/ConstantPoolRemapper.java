@@ -589,7 +589,7 @@ implements   ClassVisitor,
     {
         localVariableTypeInfo.u2nameIndex =
             remapConstantIndex(localVariableTypeInfo.u2nameIndex);
-        localVariableTypeInfo.u2signatureIndex       =
+        localVariableTypeInfo.u2signatureIndex =
             remapConstantIndex(localVariableTypeInfo.u2signatureIndex);
     }
 
@@ -657,8 +657,6 @@ implements   ClassVisitor,
     }
 
 
-    // Small utility methods.
-
     /**
      * Remaps all constant pool indices in the given array.
      */
@@ -670,6 +668,8 @@ implements   ClassVisitor,
         }
     }
 
+    // Small utility methods.
+
 
     /**
      * Returns the new constant pool index of the entry at the
@@ -677,6 +677,12 @@ implements   ClassVisitor,
      */
     private int remapConstantIndex(int constantIndex)
     {
-        return constantIndexMap[constantIndex];
+        int remappedConstantIndex = constantIndexMap[constantIndex];
+        if (remappedConstantIndex < 0)
+        {
+            throw new IllegalArgumentException("Can't remap constant index ["+constantIndex+"]");
+        }
+
+        return remappedConstantIndex;
     }
 }

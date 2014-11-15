@@ -88,6 +88,7 @@ public class Shrinker
         // Mark the seeds.
         programClassPool.accept(classPoolvisitor);
         libraryClassPool.accept(classPoolvisitor);
+        libraryClassPool.classesAccept(usageMarker);
 
         // Mark interfaces that have to be kept.
         programClassPool.classesAccept(new InterfaceUsageMarker(usageMarker));
@@ -100,7 +101,6 @@ public class Shrinker
             {
                 new InnerUsageMarker(usageMarker),
                 new AnnotationUsageMarker(usageMarker),
-                new SignatureUsageMarker(usageMarker),
                 new LocalVariableTypeUsageMarker(usageMarker)
             }))));
 

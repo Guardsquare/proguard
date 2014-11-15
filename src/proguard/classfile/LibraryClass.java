@@ -137,6 +137,11 @@ public class LibraryClass implements Clazz
     }
 
 
+    public String getRefClassName(int constantIndex)
+    {
+        throw new UnsupportedOperationException("Library class ["+thisClassName+"] doesn't store constant pool");
+    }
+
     public String getRefName(int constantIndex)
     {
         throw new UnsupportedOperationException("Library class ["+thisClassName+"] doesn't store constant pool");

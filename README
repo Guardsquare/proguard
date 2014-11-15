@@ -15,7 +15,7 @@ The best place to start is docs/index.html
 
 
 Example
-=======
+-------
 
 If you want to give ProGuard a spin right away, try processing the ProGuard
 jar itself:

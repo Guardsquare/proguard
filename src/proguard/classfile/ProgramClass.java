@@ -170,6 +170,18 @@ public class ProgramClass implements Clazz
     }
 
 
+    public String getRefClassName(int constantIndex)
+    {
+        try
+        {
+            return ((RefConstant)constantPool[constantIndex]).getClassName(this);
+        }
+        catch (ClassCastException ex)
+        {
+            throw ((IllegalStateException)new IllegalStateException("Expected RefConstant at index ["+constantIndex+"] in class ["+getName()+"]").initCause(ex));
+        }
+    }
+
     public String getRefName(int constantIndex)
     {
         try

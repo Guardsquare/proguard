@@ -449,6 +449,9 @@ implements ClassVisitor,
 
             markConstant(clazz, invokeDynamicConstant.u2nameAndTypeIndex);
 
+            // Mark the referenced descriptor classes.
+            invokeDynamicConstant.referencedClassesAccept(this);
+
             // Mark the bootstrap methods attribute.
             clazz.attributesAccept(new MyBootStrapMethodUsageMarker(invokeDynamicConstant.u2bootstrapMethodAttributeIndex));
         }
@@ -662,12 +665,15 @@ implements ClassVisitor,
 
     public void visitSignatureAttribute(Clazz clazz, SignatureAttribute signatureAttribute)
     {
-        // Don't mark the attribute and its contents yet. We may mark them later,
-        // in SignatureUsageMarker.
-        //markAsUsed(signatureAttribute);
-        //
-        //markConstant(clazz, signatureAttribute.u2attributeNameIndex);
-        //markConstant(clazz, signatureAttribute.u2signatureIndex);
+        markAsUsed(signatureAttribute);
+
+        markConstant(clazz, signatureAttribute.u2attributeNameIndex);
+        markConstant(clazz, signatureAttribute.u2signatureIndex);
+
+        // Don't mark the referenced classes. We'll clean them up in
+        // ClassShrinker, if they appear unused.
+        //// Mark the classes referenced in the descriptor string.
+        //signatureAttribute.referencedClassesAccept(this);
     }
 
 
@@ -802,12 +808,12 @@ implements ClassVisitor,
     {
         // Don't mark the attribute and its contents yet. We may mark them later,
         // in AnnotationUsageMarker.
-//        markAsUsed(annotationDefaultAttribute);
-//
-//        markConstant(clazz, annotationDefaultAttribute.u2attributeNameIndex);
-//
-//        // Mark the constant pool entries referenced by the element value.
-//        annotationDefaultAttribute.defaultValueAccept(clazz, this);
+        //markAsUsed(annotationDefaultAttribute);
+        //
+        //markConstant(clazz, annotationDefaultAttribute.u2attributeNameIndex);
+        //
+        //// Mark the constant pool entries referenced by the element value.
+        //annotationDefaultAttribute.defaultValueAccept(clazz, this);
     }
 
 

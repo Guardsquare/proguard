@@ -450,11 +450,10 @@ implements   ClassVisitor,
         // Shift the used constant pool entries together.
         for (int index = 1; index < length; index++)
         {
-            constantIndexMap[index] = counter;
-
             Constant constant = constantPool[index];
 
-            // Don't update the flag if this is the second half of a long entry.
+            // Is the constant being used? Don't update the flag if this is the
+            // second half of a long entry.
             if (constant != null)
             {
                 isUsed = constant.getTag() != ClassConstants.CONSTANT_Utf8 ||
@@ -463,7 +462,16 @@ implements   ClassVisitor,
 
             if (isUsed)
             {
+                // Remember the new index.
+                constantIndexMap[index] = counter;
+
+                // Shift the constant pool entry.
                 constantPool[counter++] = constant;
+            }
+            else
+            {
+                // Remember an invalid index.
+                constantIndexMap[index] = -1;
             }
         }
 
