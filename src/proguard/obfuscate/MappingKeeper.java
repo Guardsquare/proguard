@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,7 +23,6 @@ package proguard.obfuscate;
 import proguard.classfile.*;
 import proguard.classfile.util.*;
 import proguard.util.ListUtil;
-
 
 /**
  * This MappingKeeper applies the mappings that it receives to its class pool,
@@ -100,9 +99,10 @@ public class MappingKeeper implements MappingProcessor
     public void processFieldMapping(String className,
                                     String fieldType,
                                     String fieldName,
+                                    String newClassName,
                                     String newFieldName)
     {
-        if (clazz != null)
+        if (clazz != null && className.equals(newClassName))
         {
             // Find the field.
             String name       = fieldName;
@@ -141,9 +141,12 @@ public class MappingKeeper implements MappingProcessor
                                      String methodReturnType,
                                      String methodName,
                                      String methodArguments,
+                                     String newClassName,
+                                     int    newFirstLineNumber,
+                                     int    newLastLineNumber,
                                      String newMethodName)
     {
-        if (clazz != null)
+        if (clazz != null && className.equals(newClassName))
         {
             // Find the method.
             String descriptor = ClassUtil.internalMethodDescriptor(methodReturnType,

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,16 +22,22 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.LineNumberInfoVisitor;
+import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This LineNumberInfoVisitor adds all line numbers that it visits to the given
- * target line number attribute.
+ * This AttributeVisitor adds the line numbers of all line number attributes
+ * that it visits to the given target line number attribute. It ensures that
+ * the sources of the line numbers are preserved or set.
  */
 public class LineNumberInfoAdder
-implements   LineNumberInfoVisitor
+extends      SimplifiedVisitor
+implements   AttributeVisitor,
+             LineNumberInfoVisitor
 {
     private final LineNumberTableAttributeEditor lineNumberTableAttributeEditor;
+
+    private String source;
 
 
     /**
@@ -44,14 +50,40 @@ implements   LineNumberInfoVisitor
     }
 
 
+    // Implementations for AttributeVisitor.
+
+    public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+
+    public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
+    {
+        // Remember the source.
+        source =
+            clazz.getName()                                + '.' +
+            method.getName(clazz)                          +
+            method.getDescriptor(clazz)                    + ':' +
+            lineNumberTableAttribute.getLowestLineNumber() + ':' +
+            lineNumberTableAttribute.getHighestLineNumber();
+
+        // Copy all line numbers.
+        lineNumberTableAttribute.lineNumbersAccept(clazz, method, codeAttribute, this);
+    }
+
+
     // Implementations for LineNumberInfoVisitor.
 
     public void visitLineNumberInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberInfo lineNumberInfo)
     {
+        // Make sure we have a source.
+        String newSource = lineNumberInfo.getSource() != null ?
+            lineNumberInfo.getSource() :
+            source;
+
         // Create a new line number.
         LineNumberInfo newLineNumberInfo =
-            new LineNumberInfo(lineNumberInfo.u2startPC,
-                               lineNumberInfo.u2lineNumber);
+            new ExtendedLineNumberInfo(lineNumberInfo.u2startPC,
+                                       lineNumberInfo.u2lineNumber,
+                                       newSource);
 
         // Add it to the target.
         lineNumberTableAttributeEditor.addLineNumberInfo(newLineNumberInfo);

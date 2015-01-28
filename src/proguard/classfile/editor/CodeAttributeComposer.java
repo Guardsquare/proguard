@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,6 +28,7 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.visitor.ClassPrinter;
 import proguard.util.ArrayUtil;
 
 import java.util.Arrays;
@@ -67,6 +68,7 @@ implements   AttributeVisitor,
     private int maximumCodeLength;
     private int codeLength;
     private int exceptionTableLength;
+    private int lineNumberTableLength;
     private int level = -1;
 
     private byte[]  code                  = new byte[ClassConstants.TYPICAL_CODE_LENGTH];
@@ -76,7 +78,8 @@ implements   AttributeVisitor,
     private final int[]   codeFragmentLengths  = new int[MAXIMUM_LEVELS];
     private final int[][] instructionOffsetMap = new int[MAXIMUM_LEVELS][ClassConstants.TYPICAL_CODE_LENGTH + 1];
 
-    private ExceptionInfo[] exceptionTable = new ExceptionInfo[ClassConstants.TYPICAL_EXCEPTION_TABLE_LENGTH];
+    private ExceptionInfo[]  exceptionTable  = new ExceptionInfo[ClassConstants.TYPICAL_EXCEPTION_TABLE_LENGTH];
+    private LineNumberInfo[] lineNumberTable = new LineNumberInfo[ClassConstants.TYPICAL_LINE_NUMBER_TABLE_LENGTH];
 
     private int expectedStackMapFrameOffset;
 
@@ -124,10 +127,11 @@ implements   AttributeVisitor,
      */
     public void reset()
     {
-        maximumCodeLength    = 0;
-        codeLength           = 0;
-        exceptionTableLength = 0;
-        level                = -1;
+        maximumCodeLength     = 0;
+        codeLength            = 0;
+        exceptionTableLength  = 0;
+        lineNumberTableLength = 0;
+        level                 = -1;
 
         // Make sure the instruction writer has at least the same buffer size
         // as the local arrays.
@@ -340,6 +344,89 @@ implements   AttributeVisitor,
 
 
     /**
+     * Inserts the given line number at the appropriate position in the line
+     * number table.
+     * @param lineNumberInfo the line number to be inserted.
+     * @return the index where the line number was actually inserted.
+     */
+    public int insertLineNumber(LineNumberInfo lineNumberInfo)
+    {
+        return insertLineNumber(0, lineNumberInfo);
+    }
+
+
+    /**
+     * Inserts the given line number at the appropriate position in the line
+     * number table.
+     * @param minimumIndex   the minimum index where the line number may be
+     *                       inserted.
+     * @param lineNumberInfo the line number to be inserted.
+     * @return the index where the line number was inserted.
+     */
+    public int insertLineNumber(int minimumIndex, LineNumberInfo lineNumberInfo)
+    {
+        if (DEBUG)
+        {
+            print("         ", "Line number ["+lineNumberInfo.u2startPC+"]");
+        }
+
+        // Remap the line number right away.
+        visitLineNumberInfo(null, null, null, lineNumberInfo);
+
+        if (DEBUG)
+        {
+            System.out.println(" -> ["+lineNumberInfo.u2startPC+"] line "+lineNumberInfo.u2lineNumber+(lineNumberInfo.getSource()==null ? "":" ["+lineNumberInfo.getSource()+"]"));
+        }
+
+        lineNumberTable =
+            (LineNumberInfo[])ArrayUtil.extendArray(lineNumberTable,
+                                                    lineNumberTableLength + 1);
+
+        // Find the insertion index, starting from the end.
+        // Don't insert before a negative line number, in case of a tie.
+        int index = lineNumberTableLength++;
+        while (index > minimumIndex &&
+               (lineNumberTable[index - 1].u2startPC    >  lineNumberInfo.u2startPC ||
+                lineNumberTable[index - 1].u2startPC    >= lineNumberInfo.u2startPC &&
+                lineNumberTable[index - 1].u2lineNumber >= 0))
+        {
+            lineNumberTable[index] = lineNumberTable[--index];
+        }
+
+        lineNumberTable[index] = lineNumberInfo;
+
+        return index;
+    }
+
+
+    /**
+     * Appends the given line number to the line number table.
+     * @param lineNumberInfo the line number to be appended.
+     */
+    public void appendLineNumber(LineNumberInfo lineNumberInfo)
+    {
+        if (DEBUG)
+        {
+            print("         ", "Line number ["+lineNumberInfo.u2startPC+"]");
+        }
+
+        // Remap the line number right away.
+        visitLineNumberInfo(null, null, null, lineNumberInfo);
+
+        if (DEBUG)
+        {
+            System.out.println(" -> ["+lineNumberInfo.u2startPC+"] line "+lineNumberInfo.u2lineNumber+(lineNumberInfo.getSource()==null ? "":" ["+lineNumberInfo.getSource()+"]"));
+        }
+
+        // Add the line number.
+        lineNumberTable =
+            (LineNumberInfo[])ArrayUtil.add(lineNumberTable,
+                                            lineNumberTableLength++,
+                                            lineNumberInfo);
+    }
+
+
+    /**
      * Wraps up the current code fragment, continuing with the previous one on
      * the stack.
      */
@@ -458,7 +545,19 @@ implements   AttributeVisitor,
         stackSizeUpdater.visitCodeAttribute(clazz, method, codeAttribute);
         variableSizeUpdater.visitCodeAttribute(clazz, method, codeAttribute);
 
-        // Remap  the line number table and the local variable table.
+        // Add a new line number table for the line numbers, if necessary.
+        if (lineNumberTableLength > 0 &&
+            codeAttribute.getAttribute(clazz, ClassConstants.ATTR_LineNumberTable) == null)
+        {
+            int attributeNameIndex =
+                new ConstantPoolEditor((ProgramClass)clazz)
+                    .addUtf8Constant(ClassConstants.ATTR_LineNumberTable);
+
+            new AttributesEditor((ProgramClass)clazz, (ProgramMember)method, codeAttribute, false)
+                .addAttribute(new LineNumberTableAttribute(attributeNameIndex, 0, null));
+        }
+
+        // Copy the line number table and the local variable table.
         codeAttribute.attributesAccept(clazz, method, this);
 
         // Remap the exception table (done before).
@@ -473,6 +572,11 @@ implements   AttributeVisitor,
         instructionWriter.visitCodeAttribute(clazz, method, codeAttribute);
 
         level--;
+
+        if (DEBUG)
+        {
+            codeAttribute.accept(clazz, method, new ClassPrinter());
+        }
     }
 
 
@@ -494,16 +598,28 @@ implements   AttributeVisitor,
 
     public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
     {
-        // Remap all line number table entries.
-        lineNumberTableAttribute.lineNumbersAccept(clazz, method, codeAttribute, this);
+        // Didn't we get line number new definitions?
+        if (lineNumberTableLength == 0)
+        {
+            // Remap all line number table entries of the existing table.
+            lineNumberTableAttribute.lineNumbersAccept(clazz, method, codeAttribute, this);
+        }
+        else
+        {
+            // Remove line numbers with empty code blocks.
+            // Actually, we'll do this elsewhere, to allow processing the
+            // line numbers of inlined methods.
+            //lineNumberTableLength =
+            //    removeEmptyLineNumbers(lineNumberTable,
+            //                           lineNumberTableLength,
+            //                           codeAttribute.u4codeLength);
 
-        // Remove line numbers with empty code blocks.
-        lineNumberTableAttribute.u2lineNumberTableLength =
-           removeEmptyLineNumbers(lineNumberTableAttribute.lineNumberTable,
-                                  lineNumberTableAttribute.u2lineNumberTableLength,
-                                  codeAttribute.u4codeLength);
+            // Copy the line number table.
+            lineNumberTableAttribute.lineNumberTable         = new LineNumberInfo[lineNumberTableLength];
+            lineNumberTableAttribute.u2lineNumberTableLength = lineNumberTableLength;
+            System.arraycopy(lineNumberTable, 0, lineNumberTableAttribute.lineNumberTable, 0, lineNumberTableLength);
+        }
     }
-
 
     public void visitLocalVariableTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTableAttribute localVariableTableAttribute)
     {

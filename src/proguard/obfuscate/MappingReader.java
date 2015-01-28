@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -65,19 +65,22 @@ public class MappingReader
 
                 line = line.trim();
 
-                // The distinction between a class mapping and a class
-                // member mapping is the initial whitespace.
-                if (line.endsWith(":"))
+                // Is it a non-comment line?
+                if (!line.startsWith("#"))
                 {
-                    // Process the class mapping and remember the class's
-                    // old name.
-                    className = processClassMapping(line, mappingProcessor);
-                }
-                else if (className != null)
-                {
-                    // Process the class member mapping, in the context of the
-                    // current old class name.
-                    processClassMemberMapping(className, line, mappingProcessor);
+                    // Is it a class mapping or a class member mapping?
+                    if (line.endsWith(":"))
+                    {
+                        // Process the class mapping and remember the class's
+                        // old name.
+                        className = processClassMapping(line, mappingProcessor);
+                    }
+                    else if (className != null)
+                    {
+                        // Process the class member mapping, in the context of
+                        // the current old class name.
+                        processClassMemberMapping(className, line, mappingProcessor);
+                    }
                 }
             }
         }
@@ -141,16 +144,27 @@ public class MappingReader
                                            String           line,
                                            MappingProcessor mappingProcessor)
     {
-        // See if we can parse "___:___:___ ___(___) -> ___",
+        // See if we can parse one of
+        //     ___ ___ -> ___
+        //     ___:___:___ ___(___) -> ___
+        //     ___:___:___ ___(___):___ -> ___
+        //     ___:___:___ ___(___):___:___ -> ___
         // containing the optional line numbers, the return type, the original
-        // field/method name, optional arguments, and the new field/method name.
+        // field/method name, optional arguments, the optional original line
+        // numbers, and the new field/method name. The original field/method
+        // name may contain an original class name "___.___".
 
         int colonIndex1    =                           line.indexOf(':');
         int colonIndex2    = colonIndex1    < 0 ? -1 : line.indexOf(':', colonIndex1    + 1);
         int spaceIndex     =                           line.indexOf(' ', colonIndex2    + 2);
         int argumentIndex1 =                           line.indexOf('(', spaceIndex     + 1);
         int argumentIndex2 = argumentIndex1 < 0 ? -1 : line.indexOf(')', argumentIndex1 + 1);
-        int arrowIndex     =                           line.indexOf("->", Math.max(spaceIndex, argumentIndex2) + 1);
+        int colonIndex3    = argumentIndex2 < 0 ? -1 : line.indexOf(':', argumentIndex2 + 1);
+        int colonIndex4    = colonIndex3    < 0 ? -1 : line.indexOf(':', colonIndex3    + 1);
+        int arrowIndex     =                           line.indexOf("->", (colonIndex4    >= 0 ? colonIndex4    :
+                                                                           colonIndex3    >= 0 ? colonIndex3    :
+                                                                           argumentIndex2 >= 0 ? argumentIndex2 :
+                                                                                                 spaceIndex) + 1);
 
         if (spaceIndex < 0 ||
             arrowIndex < 0)
@@ -163,6 +177,15 @@ public class MappingReader
         String name    = line.substring(spaceIndex + 1, argumentIndex1 >= 0 ? argumentIndex1 : arrowIndex).trim();
         String newName = line.substring(arrowIndex + 2).trim();
 
+        // Does the method name contain an explicit original class name?
+        String newClassName = className;
+        int dotIndex = name.lastIndexOf('.');
+        if (dotIndex >= 0)
+        {
+            className = name.substring(0, dotIndex);
+            name      = name.substring(dotIndex + 1);
+        }
+
         // Process this class member mapping.
         if (type.length()    > 0 &&
             name.length()    > 0 &&
@@ -171,17 +194,30 @@ public class MappingReader
             // Is it a field or a method?
             if (argumentIndex2 < 0)
             {
-                mappingProcessor.processFieldMapping(className, type, name, newName);
+                mappingProcessor.processFieldMapping(className,
+                                                     type,
+                                                     name,
+                                                     newClassName,
+                                                     newName);
             }
             else
             {
                 int firstLineNumber = 0;
                 int lastLineNumber  = 0;
+                int newFirstLineNumber = 0;
+                int newLastLineNumber  = 0;
 
-                if (colonIndex2 > 0)
+                if (colonIndex2 >= 0)
                 {
-                    firstLineNumber = Integer.parseInt(line.substring(0, colonIndex1).trim());
-                    lastLineNumber  = Integer.parseInt(line.substring(colonIndex1 + 1, colonIndex2).trim());
+                    firstLineNumber = newFirstLineNumber = Integer.parseInt(line.substring(0, colonIndex1).trim());
+                    lastLineNumber  = newLastLineNumber  = Integer.parseInt(line.substring(colonIndex1 + 1, colonIndex2).trim());
+                }
+
+                if (colonIndex3 >= 0)
+                {
+                    firstLineNumber = Integer.parseInt(line.substring(colonIndex3 + 1, colonIndex4 > 0 ? colonIndex4 : arrowIndex).trim());
+                    lastLineNumber  = colonIndex4 < 0 ? firstLineNumber :
+                                      Integer.parseInt(line.substring(colonIndex4 + 1, arrowIndex).trim());
                 }
 
                 String arguments = line.substring(argumentIndex1 + 1, argumentIndex2).trim();
@@ -192,6 +228,9 @@ public class MappingReader
                                                       type,
                                                       name,
                                                       arguments,
+                                                      newClassName,
+                                                      newFirstLineNumber,
+                                                      newLastLineNumber,
                                                       newName);
             }
         }

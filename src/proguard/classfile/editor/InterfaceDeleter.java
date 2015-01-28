@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -116,17 +116,17 @@ implements   ClassVisitor,
             int referencedClassIndex    = 0;
             int newReferencedClassIndex = 0;
 
-            // Copy the variable type declarations and the super class type.
-            while (internalTypeEnumeration.hasMoreTypes())
+            // Copy the variable type declarations.
+            if (internalTypeEnumeration.hasFormalTypeParameters())
             {
-                String internalType = internalTypeEnumeration.nextType();
+                String type = internalTypeEnumeration.formalTypeParameters();
 
                 // Append the type.
-                newSignatureBuffer.append(internalType);
+                newSignatureBuffer.append(type);
 
                 // Copy any referenced classes.
                 int classCount =
-                    new DescriptorClassEnumeration(internalType).classCount();
+                    new DescriptorClassEnumeration(type).classCount();
 
                 for (int counter = 0; counter < classCount; counter++)
                 {
@@ -136,12 +136,31 @@ implements   ClassVisitor,
 
                 if (DEBUG)
                 {
-                    System.out.println("InterfaceDeleter:   type = " + internalType + " (" + classCount + " referenced classes)");
+                    System.out.println("InterfaceDeleter:   type parameters = " + type);
+                }
+            }
+
+            // Copy the super class type.
+            if (internalTypeEnumeration.hasMoreTypes())
+            {
+                String type = internalTypeEnumeration.nextType();
+
+                // Append the type.
+                newSignatureBuffer.append(type);
+
+                // Copy any referenced classes.
+                int classCount =
+                    new DescriptorClassEnumeration(type).classCount();
+
+                for (int counter = 0; counter < classCount; counter++)
+                {
+                    referencedClasses[newReferencedClassIndex++] =
+                        referencedClasses[referencedClassIndex++];
                 }
 
-                if (ClassUtil.isInternalClassType(internalType))
+                if (DEBUG)
                 {
-                    break;
+                    System.out.println("InterfaceDeleter:   super class type = " + type);
                 }
             }
 
@@ -149,20 +168,20 @@ implements   ClassVisitor,
             int index = 0;
             while (internalTypeEnumeration.hasMoreTypes())
             {
-                String internalType = internalTypeEnumeration.nextType();
+                String type = internalTypeEnumeration.nextType();
 
                 int classCount =
-                    new DescriptorClassEnumeration(internalType).classCount();
+                    new DescriptorClassEnumeration(type).classCount();
 
                 if (DEBUG)
                 {
-                    System.out.println("InterfaceDeleter:   type " + (delete[index] ? "- " : "+ ") + internalType + " (" + classCount + " referenced classes)");
+                    System.out.println("InterfaceDeleter:   interface type " + (delete[index] ? "- " : "+ ") + type + " (" + classCount + " referenced classes)");
                 }
 
                 if (!delete[index++])
                 {
                     // Append the type.
-                    newSignatureBuffer.append(internalType);
+                    newSignatureBuffer.append(type);
 
                     // Copy any referenced classes.
                     for (int counter = 0; counter < classCount; counter++)

@@ -11,13 +11,13 @@
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  document.write('<a class="largebutton" target="_top" href="../../index.html#manual/retrace/usage.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/">Saikoa</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+  document.write('<a class="largebutton" target="_top" href="../../index.html#manual/retrace/usage.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
 <noscript>
 <a class="largebutton" target="_top"  href="../../index.html#manual/retrace/usage.html">ProGuard index</a>
 <a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
-<a class="largebutton" target="_top"  href="http://www.saikoa.com/">Saikoa</a>
+<a class="largebutton" target="_top"  href="http://www.guardsquare.com/">GuardSquare</a>
 <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
 </noscript>
 
@@ -62,7 +62,7 @@ The following options are supported:
     de-obfuscate more general types of input than just stack traces. The
     default is suitable for stack traces produced by most JVMs:
     <pre>
-    (?:.*?\bat\s+%c\.%m\s*\(.*?(?::%l)?\)\s*)|(?:(?:.*?[:"]\s+)?%c(?::.*)?)
+(?:.*?\bat\s+%c\.%m\s*\(%s(?::%l)?\)\s*)|(?:(?:.*?[:"]\s+)?%c(?::.*)?)
     </pre>
     The regular expression is a Java regular expression (cfr. the documentation
     of <code>java.util.regex.Pattern</code>), with a few additional wildcards:
@@ -85,6 +85,9 @@ The following options are supported:
     <tr><td valign="top"><code><b>%a</b></code></td>
         <td>matches a list of method arguments (e.g.
             "<code>boolean,int</code>").</td></tr>
+    <tr><td valign="top"><code><b>%s</b></code></td>
+        <td>matches a source file name (e.g.
+            "<code>MyClass.java</code>").</td></tr>
     <tr><td valign="top"><code><b>%l</b></code></td>
         <td>matches a line number inside a method (e.g.
             "<code>123</code>").</td></tr>
@@ -92,6 +95,12 @@ The following options are supported:
     Elements that match these wildcards are de-obfuscated, when possible. Note
     that regular expressions must not contain any capturing groups. Use
     non-capturing groups instead: <code>(?:</code>...<code>)</code>
+    <p>
+    The default expression for instance matches the following lines:
+    <pre>
+Exception in thread "main" myapplication.MyException: Some message
+        at myapplication.MyClass.myMethod(SourceFile:123)
+    </pre>
     </dd>
 </dl>
 
@@ -116,13 +125,18 @@ Preserving line number tables is explained in detail in this <a
 href="../examples.html#stacktrace">example</a> in the ProGuard User Manual.
 <p>
 
+Source file names are currently restored based on the names of the outer-most
+classes. If you prefer to keep the obfuscated name, you can
+replace <code>%s</code> in the default regular expression by <code>.*</code>
+<p>
+
 Unobfuscated elements and obfuscated elements for which no mapping is available
 will be left unchanged.
 
 <hr />
 <address>
-Copyright &copy; 2002-2014
-<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.saikoa.com/">Saikoa</a>.
+Copyright &copy; 2002-2015
+<a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>
 </html>

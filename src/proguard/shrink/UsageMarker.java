@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,7 +32,6 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-
 
 /**
  * This ClassVisitor and MemberVisitor recursively marks all classes and class
@@ -67,6 +66,7 @@ implements ClassVisitor,
 
 
     private final MyInterfaceUsageMarker          interfaceUsageMarker           = new MyInterfaceUsageMarker();
+    private final MyDefaultMethodUsageMarker      defaultMethodUsageMarker       = new MyDefaultMethodUsageMarker();
     private final MyPossiblyUsedMemberUsageMarker possiblyUsedMemberUsageMarker  = new MyPossiblyUsedMemberUsageMarker();
     private final MemberVisitor                   nonEmptyMethodUsageMarker      = new AllAttributeVisitor(
                                                                                    new MyNonEmptyMethodUsageMarker());
@@ -176,6 +176,32 @@ implements ClassVisitor,
         {
             // Make sure all library interface methods are marked.
             UsageMarker.this.visitLibraryClass(libraryClass);
+        }
+    }
+
+
+    /**
+     * This MemberVisitor marks ProgramField and ProgramMethod objects that
+     * have already been marked as possibly used.
+     */
+    private class MyDefaultMethodUsageMarker
+    extends       SimplifiedVisitor
+    implements    MemberVisitor
+    {
+        // Implementations for MemberVisitor.
+
+        public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
+        {
+            if (shouldBeMarkedAsUsed(programMethod))
+            {
+                markAsUsed(programMethod);
+
+                // Mark the method body.
+                markProgramMethodBody(programClass, programMethod);
+
+                // Note that, if the method has been marked as possibly used,
+                // the method hierarchy has already been marked (cfr. below).
+            }
         }
     }
 
@@ -369,6 +395,18 @@ implements ClassVisitor,
                 ((accessFlags & ClassConstants.ACC_PUBLIC) == 0 ? 0 :
                      ClassConstants.ACC_ABSTRACT);
 
+            // Mark default implementations in interfaces down the hierarchy.
+            // TODO: This may be premature if there aren't any concrete implementing classes.
+            clazz.accept(new ClassAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                         new ClassHierarchyTraveler(false, false, false, true,
+                         new ProgramClassFilter(
+                         new ClassAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                         new NamedMethodVisitor(method.getName(clazz),
+                                                method.getDescriptor(clazz),
+                         new MemberAccessFilter(0, requiredUnsetAccessFlags,
+                         defaultMethodUsageMarker)))))));
+
+            // Mark other implementations.
             clazz.accept(new ConcreteClassDownTraveler(
                          new ClassHierarchyTraveler(true, true, false, true,
                          new NamedMethodVisitor(method.getName(clazz),

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -496,10 +496,10 @@ implements   AttributeVisitor,
         lineNumberTableAttribute.lineNumbersAccept(clazz, method, codeAttribute, this);
 
         // Remove line numbers with empty code blocks.
-        lineNumberTableAttribute.u2lineNumberTableLength =
-           removeEmptyLineNumbers(lineNumberTableAttribute.lineNumberTable,
-                                  lineNumberTableAttribute.u2lineNumberTableLength,
-                                  codeAttribute.u4codeLength);
+//        lineNumberTableAttribute.u2lineNumberTableLength =
+//           removeEmptyLineNumbers(lineNumberTableAttribute.lineNumberTable,
+//                                  lineNumberTableAttribute.u2lineNumberTableLength,
+//                                  codeAttribute.u4codeLength);
     }
 
 

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -141,7 +141,7 @@ public class ProgramClass implements Clazz
         }
         catch (ClassCastException ex)
         {
-            throw ((IllegalStateException)new IllegalStateException("Expected ClassConstant at index ["+constantIndex+"] in class ["+getName()+"]").initCause(ex));
+            throw ((IllegalStateException)new IllegalStateException("Expected ClassConstant at index ["+constantIndex+"]").initCause(ex));
         }
     }
 

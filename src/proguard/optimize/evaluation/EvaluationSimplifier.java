@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -184,7 +184,14 @@ implements   AttributeVisitor,
             case InstructionConstants.OP_I2C:
             case InstructionConstants.OP_I2S:
             case InstructionConstants.OP_ARRAYLENGTH:
-                replaceIntegerPushInstruction(clazz, offset, simpleInstruction);
+                if (!sideEffectInstructionChecker.hasSideEffects(clazz,
+                                                                 method,
+                                                                 codeAttribute,
+                                                                 offset,
+                                                                 simpleInstruction))
+                {
+                    replaceIntegerPushInstruction(clazz, offset, simpleInstruction);
+                }
                 break;
 
             case InstructionConstants.OP_LALOAD:
@@ -203,7 +210,14 @@ implements   AttributeVisitor,
             case InstructionConstants.OP_I2L:
             case InstructionConstants.OP_F2L:
             case InstructionConstants.OP_D2L:
-                replaceLongPushInstruction(clazz, offset, simpleInstruction);
+                if (!sideEffectInstructionChecker.hasSideEffects(clazz,
+                                                                 method,
+                                                                 codeAttribute,
+                                                                 offset,
+                                                                 simpleInstruction))
+                {
+                    replaceLongPushInstruction(clazz, offset, simpleInstruction);
+                }
                 break;
 
             case InstructionConstants.OP_FALOAD:
@@ -216,7 +230,14 @@ implements   AttributeVisitor,
             case InstructionConstants.OP_I2F:
             case InstructionConstants.OP_L2F:
             case InstructionConstants.OP_D2F:
-                replaceFloatPushInstruction(clazz, offset, simpleInstruction);
+                if (!sideEffectInstructionChecker.hasSideEffects(clazz,
+                                                                 method,
+                                                                 codeAttribute,
+                                                                 offset,
+                                                                 simpleInstruction))
+                {
+                    replaceFloatPushInstruction(clazz, offset, simpleInstruction);
+                }
                 break;
 
             case InstructionConstants.OP_DALOAD:
@@ -229,11 +250,25 @@ implements   AttributeVisitor,
             case InstructionConstants.OP_I2D:
             case InstructionConstants.OP_L2D:
             case InstructionConstants.OP_F2D:
-                replaceDoublePushInstruction(clazz, offset, simpleInstruction);
+                if (!sideEffectInstructionChecker.hasSideEffects(clazz,
+                                                                 method,
+                                                                 codeAttribute,
+                                                                 offset,
+                                                                 simpleInstruction))
+                {
+                    replaceDoublePushInstruction(clazz, offset, simpleInstruction);
+                }
                 break;
 
             case InstructionConstants.OP_AALOAD:
-                replaceReferencePushInstruction(clazz, offset, simpleInstruction);
+                if (!sideEffectInstructionChecker.hasSideEffects(clazz,
+                                                                 method,
+                                                                 codeAttribute,
+                                                                 offset,
+                                                                 simpleInstruction))
+                {
+                    replaceReferencePushInstruction(clazz, offset, simpleInstruction);
+                }
                 break;
         }
     }
@@ -306,9 +341,6 @@ implements   AttributeVisitor,
         {
             case InstructionConstants.OP_GETSTATIC:
             case InstructionConstants.OP_GETFIELD:
-                replaceAnyPushInstruction(clazz, offset, constantInstruction);
-                break;
-
             case InstructionConstants.OP_INVOKEVIRTUAL:
             case InstructionConstants.OP_INVOKESPECIAL:
             case InstructionConstants.OP_INVOKESTATIC:

@@ -30,10 +30,10 @@ WTK_PLUGIN=proguard/wtk/ProGuardObfuscator
 
 ANT_JAR=$ANT_HOME/lib/ant.jar
 GRADLE_PATH=\
-$GRADLE_HOME/lib/plugins/gradle-plugins-2.1.jar:\
-$GRADLE_HOME/lib/gradle-base-services-2.1.jar:\
-$GRADLE_HOME/lib/gradle-base-services-groovy-2.1.jar:\
-$GRADLE_HOME/lib/gradle-core-2.1.jar:\
+$GRADLE_HOME/lib/plugins/gradle-plugins-2.2.1.jar:\
+$GRADLE_HOME/lib/gradle-base-services-2.2.1.jar:\
+$GRADLE_HOME/lib/gradle-base-services-groovy-2.2.1.jar:\
+$GRADLE_HOME/lib/gradle-core-2.2.1.jar:\
 $GRADLE_HOME/lib/groovy-all-2.3.6.jar
 WTK_JAR=$WTK_HOME/wtklib/kenv.zip
 

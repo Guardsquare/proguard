@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,6 +26,7 @@ import proguard.classfile.editor.*;
 import proguard.classfile.visitor.*;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.Optimizer;
+import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.preverify.*;
 import proguard.shrink.Shrinker;
 
@@ -38,7 +39,7 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 5.1";
+    public static final String VERSION = "ProGuard, version 5.2";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();
@@ -141,9 +142,19 @@ public class ProGuard
             }
         }
 
+        if (configuration.optimize)
+        {
+            linearizeLineNumbers();
+        }
+
         if (configuration.obfuscate)
         {
             obfuscate();
+        }
+
+        if (configuration.optimize)
+        {
+            trimLineNumbers();
         }
 
         if (configuration.preverify)
@@ -342,6 +353,26 @@ public class ProGuard
 
         // Perform the actual obfuscation.
         new Obfuscator(configuration).execute(programClassPool, libraryClassPool);
+    }
+
+
+    /**
+     * Disambiguates the line numbers of all program classes, after
+     * optimizations like method inlining and class merging.
+     */
+    private void linearizeLineNumbers()
+    {
+        programClassPool.classesAccept(new LineNumberLinearizer());
+    }
+
+
+    /**
+     * Trims the line number table attributes of all program classes.
+     */
+    private void trimLineNumbers()
+    {
+        programClassPool.classesAccept(new AllAttributeVisitor(true,
+                                       new LineNumberTableAttributeTrimmer()));
     }
 
 

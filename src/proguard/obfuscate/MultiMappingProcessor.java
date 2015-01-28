@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,8 @@ package proguard.obfuscate;
  *
  * @author Eric Lafortune
  */
-public class MultiMappingProcessor implements MappingProcessor
+public class MultiMappingProcessor
+implements   MappingProcessor
 {
     private final MappingProcessor[] mappingProcessors;
 
@@ -62,6 +63,7 @@ public class MultiMappingProcessor implements MappingProcessor
     public void processFieldMapping(String className,
                                     String fieldType,
                                     String fieldName,
+                                    String newClassName,
                                     String newFieldName)
     {
         for (int index = 0; index < mappingProcessors.length; index++)
@@ -69,6 +71,7 @@ public class MultiMappingProcessor implements MappingProcessor
             mappingProcessors[index].processFieldMapping(className,
                                                          fieldType,
                                                          fieldName,
+                                                         newClassName,
                                                          newFieldName);
         }
     }
@@ -80,6 +83,9 @@ public class MultiMappingProcessor implements MappingProcessor
                                      String methodReturnType,
                                      String methodName,
                                      String methodArguments,
+                                     String newClassName,
+                                     int    newFirstLineNumber,
+                                     int    newLastLineNumber,
                                      String newMethodName)
     {
         for (int index = 0; index < mappingProcessors.length; index++)
@@ -90,6 +96,9 @@ public class MultiMappingProcessor implements MappingProcessor
                                                           methodReturnType,
                                                           methodName,
                                                           methodArguments,
+                                                          newClassName,
+                                                          newFirstLineNumber,
+                                                          newLastLineNumber,
                                                           newMethodName);
         }
     }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@ import java.io.*;
 
 
 /**
- * This <code>Runnable</code> runs ReTrace, sending console output to a text
+ * This <code>Runnable</code> runs ReTrace, sending the output to a text
  * area and any exceptions to message dialogs.
  *
  * @see ReTrace
@@ -43,7 +43,7 @@ final class ReTraceRunnable implements Runnable
 
 
     /**
-     * Creates a new ProGuardRunnable object.
+     * Creates a new ReTraceRunnable.
      * @param consoleTextArea the text area to send the console output to.
      * @param verbose         specifies whether the de-obfuscated stack trace
      *                        should be verbose.
@@ -68,31 +68,18 @@ final class ReTraceRunnable implements Runnable
         consoleTextArea.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         consoleTextArea.setText("");
 
-        // Redirect the stack trace string to the System's in stream, and the
-        // out and err streams to the console text area.
-        InputStream oldIn  = System.in;
-        PrintStream oldOut = System.out;
-        PrintStream oldErr = System.err;
+        LineNumberReader reader =
+            new LineNumberReader(
+            new CharArrayReader(stackTrace.toCharArray()));
 
-        ByteArrayInputStream inputStream =
-           new ByteArrayInputStream(stackTrace.getBytes());
-
-        PrintStream printStream =
-            new PrintStream(new TextAreaOutputStream(consoleTextArea), true);
-
-        System.setIn(inputStream);
-        System.setOut(printStream);
-        System.setErr(printStream);
+        PrintWriter writer =
+            new PrintWriter(new TextAreaWriter(consoleTextArea), true);
 
         try
         {
-            // Create a new ProGuard object with the GUI's configuration.
-            ReTrace reTrace = new ReTrace(ReTrace.STACK_TRACE_EXPRESSION,
-                                          verbose,
-                                          mappingFile);
-
-            // Run it.
-            reTrace.execute();
+            // Execute ReTrace with the collected settings.
+            new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, verbose, mappingFile)
+                .retrace(reader, writer);
         }
         catch (Exception ex)
         {
@@ -120,19 +107,8 @@ final class ReTraceRunnable implements Runnable
                                                     JOptionPane.ERROR_MESSAGE);
         }
 
-        // Make sure all output has been sent to the console text area.
-        printStream.flush();
-
-        // Restore the old System's in, out, and err streams.
-        System.setIn(oldIn);
-        System.setOut(oldOut);
-        System.setErr(oldErr);
-
         consoleTextArea.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         consoleTextArea.setCaretPosition(0);
-
-        // Reset the global static redirection lock.
-        ProGuardGUI.systemOutRedirected = false;
     }
 
 

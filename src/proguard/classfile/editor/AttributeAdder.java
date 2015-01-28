@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,6 @@ import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
@@ -293,6 +292,20 @@ implements   AttributeVisitor
                                        new ExceptionInfoAdder(targetClass,
                                                               codeAttributeComposer));
 
+        // Add a line number if there wasn't a line number table before,
+        // so we keep track of the source.
+        if (codeAttribute.getAttribute(clazz, ClassConstants.ATTR_LineNumberTable) == null)
+        {
+            String source =
+                clazz.getName()             + '.' +
+                method.getName(clazz)       +
+                method.getDescriptor(clazz) +
+                ":0:0";
+
+            codeAttributeComposer.insertLineNumber(
+                new ExtendedLineNumberInfo(0, 0, source));
+        }
+
         codeAttributeComposer.endCodeFragment();
 
         // Add the attributes.
@@ -334,10 +347,10 @@ implements   AttributeVisitor
                                          new LineNumberInfo[lineNumberTableAttribute.u2lineNumberTableLength]);
 
         // Add the line numbers.
-        lineNumberTableAttribute.lineNumbersAccept(clazz,
-                                                   method,
-                                                   codeAttribute,
-                                                   new LineNumberInfoAdder(newLineNumberTableAttribute));
+        lineNumberTableAttribute.accept(clazz,
+                                        method,
+                                        codeAttribute,
+                                        new LineNumberInfoAdder(newLineNumberTableAttribute));
 
         // Add it to the target.
         attributesEditor.addAttribute(newLineNumberTableAttribute);

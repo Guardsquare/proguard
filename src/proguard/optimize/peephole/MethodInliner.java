@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -46,8 +46,12 @@ extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ConstantVisitor,
-             MemberVisitor
+             MemberVisitor,
+             LineNumberInfoVisitor
 {
+    static final int    INLINED_METHOD_END_LINE_NUMBER = -1;
+    static final String INLINED_METHOD_END_SOURCE      = "end";
+
     private static final int MAXIMUM_INLINED_CODE_LENGTH       = Integer.parseInt(System.getProperty("maximum.inlined.code.length",      "8"));
     private static final int MAXIMUM_RESULTING_CODE_LENGTH_JSE = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
     private static final int MAXIMUM_RESULTING_CODE_LENGTH_JME = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "2000"));
@@ -81,6 +85,9 @@ implements   AttributeVisitor,
     private int                variableOffset;
     private boolean            inlined;
     private boolean            inlinedAny;
+    private boolean            copiedLineNumbers;
+    private String             source;
+    private int                minimumLineNumberIndex;
 
 
     /**
@@ -245,6 +252,25 @@ implements   AttributeVisitor,
     }
 
 
+    public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
+    {
+        // Remember the source if we're inlining a method.
+        source = inlining ?
+            clazz.getName()                                 + '.' +
+            method.getName(clazz)                           +
+            method.getDescriptor(clazz)                     + ':' +
+            lineNumberTableAttribute.getLowestLineNumber()  + ':' +
+            lineNumberTableAttribute.getHighestLineNumber() :
+            null;
+
+        // Insert all line numbers, possibly partly before previously inserted
+        // line numbers.
+        lineNumberTableAttribute.lineNumbersAccept(clazz, method, codeAttribute, this);
+
+        copiedLineNumbers = true;
+    }
+
+
     /**
      * Appends instructions to pop the parameters for the given method, storing
      * them in new local variables.
@@ -347,6 +373,49 @@ implements   AttributeVisitor,
 
         // Copy the exceptions.
         codeAttribute.exceptionsAccept(clazz, method, exceptionInfoAdder);
+
+        // Copy the line numbers.
+        copiedLineNumbers = false;
+
+        // The line numbers need to be inserted sequentially.
+        minimumLineNumberIndex = 0;
+
+        codeAttribute.attributesAccept(clazz, method, this);
+
+        // Make sure we at least have some entry at the start of the method.
+        if (!copiedLineNumbers)
+        {
+            String source = inlining ?
+                clazz.getName()             + '.' +
+                method.getName(clazz)       +
+                method.getDescriptor(clazz) +
+                ":0:0" :
+                null;
+
+            minimumLineNumberIndex =
+                codeAttributeComposer.insertLineNumber(minimumLineNumberIndex,
+                    new ExtendedLineNumberInfo(0,
+                                               0,
+                                               source));
+        }
+
+        // Add a marker at the end of an inlined method.
+        // The marker will be corrected in LineNumberLinearizer,
+        // so it points to the line of the enclosing method.
+        if (inlining)
+        {
+            String source =
+                clazz.getName()             + '.' +
+                method.getName(clazz)       +
+                method.getDescriptor(clazz) + ':' +
+                INLINED_METHOD_END_SOURCE;
+
+            minimumLineNumberIndex =
+                codeAttributeComposer.insertLineNumber(minimumLineNumberIndex,
+                    new ExtendedLineNumberInfo(codeAttribute.u4codeLength,
+                                               INLINED_METHOD_END_LINE_NUMBER,
+                                               source));
+        }
 
         codeAttributeComposer.endCodeFragment();
     }
@@ -581,6 +650,26 @@ implements   AttributeVisitor,
         {
             uninitializedObjectCount--;
         }
+    }
+
+
+    // Implementations for LineNumberInfoVisitor.
+
+    public void visitLineNumberInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberInfo lineNumberInfo)
+    {
+        String newSource = lineNumberInfo.getSource() != null ?
+            lineNumberInfo.getSource() :
+            source;
+
+        LineNumberInfo newLineNumberInfo = newSource != null ?
+            new ExtendedLineNumberInfo(lineNumberInfo.u2startPC,
+                                       lineNumberInfo.u2lineNumber,
+                                       newSource) :
+            new LineNumberInfo(lineNumberInfo.u2startPC,
+                               lineNumberInfo.u2lineNumber);
+
+        minimumLineNumberIndex =
+            codeAttributeComposer.insertLineNumber(minimumLineNumberIndex, newLineNumberInfo) + 1;
     }
 
 

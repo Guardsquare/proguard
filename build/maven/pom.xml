@@ -7,7 +7,7 @@
 
     <groupId>net.sf.proguard</groupId>
     <artifactId>proguard-parent</artifactId>
-    <version>5.1</version>
+    <version>5.2</version>
     <packaging>pom</packaging>
     <name>[${project.groupId}] ${project.artifactId}</name>
     <description>ProGuard is a free Java class file shrinker, optimizer, obfuscator, and preverifier.</description>
@@ -22,8 +22,8 @@
             <id>lafortune</id>
             <name>Eric Lafortune</name>
             <url>http://www.lafortune.eu/</url>
-            <organization>Saikoa</organization>
-            <organizationUrl>http://www.saikoa.com/</organizationUrl>
+            <organization>GuardSquare</organization>
+            <organizationUrl>http://www.guardsquare.com/</organizationUrl>
             <roles>
                 <role>Project Administrator</role>
                 <role>Developer</role>

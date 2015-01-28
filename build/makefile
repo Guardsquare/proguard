@@ -10,10 +10,10 @@ CLASSES = $(PROGUARD_HOME)/classes
 LIB     = $(PROGUARD_HOME)/lib
 
 ANT_JAR     = $(ANT_HOME)/lib/ant.jar
-GRADLE_JARS = $(GRADLE_HOME)/lib/plugins/gradle-plugins-2.1.jar \
-              $(GRADLE_HOME)/lib/gradle-base-services-2.1.jar \
-              $(GRADLE_HOME)/lib/gradle-base-services-groovy-2.1.jar \
-              $(GRADLE_HOME)/lib/gradle-core-2.1.jar \
+GRADLE_JARS = $(GRADLE_HOME)/lib/plugins/gradle-plugins-2.2.1.jar \
+              $(GRADLE_HOME)/lib/gradle-base-services-2.2.1.jar \
+              $(GRADLE_HOME)/lib/gradle-base-services-groovy-2.2.1.jar \
+              $(GRADLE_HOME)/lib/gradle-core-2.2.1.jar \
               $(GRADLE_HOME)/lib/groovy-all-2.3.6.jar
 WTK_JAR     = $(WTK_HOME)/wtklib/kenv.zip
 
@@ -99,10 +99,9 @@ $(CLASSES)/%.properties $(CLASSES)/%.png $(CLASSES)/%.gif $(CLASSES)/%.pro:
 	cp $(subst $(CLASSES),$(SRC),$@) $@
 
 %.jar %.zip:
-	echo "Please make sure the path to $@ is set"
-	echo "correctly in this $(strip $(MAKEFILE_LIST))."
-	echo "Alternatively, if you don't need the corresponding option,"
-	echo "you can run `make' with the option -k."
-	find $@
+	@echo "Please make sure the path to $@ is set"
+	@echo "correctly in this $(strip $(MAKEFILE_LIST))."
+	@echo "Alternatively, if you don't need the corresponding option,"
+	@echo "you can run `make' with the option -k."
 
 .PHONY: all basic options proguard proguardgui retrace anttask wtkplugin clean $(TARGETS) $(OPTIONAL_TARGETS)

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -46,5 +46,16 @@ public class LineNumberInfo
     {
         this.u2startPC    = u2startPC;
         this.u2lineNumber = u2lineNumber;
+    }
+
+
+    /**
+     * Returns a description of the source of the line, if known, or null
+     * otherwise. Standard line number entries don't contain information
+     * about their source; it is assumed to be the same source file.
+     */
+    public String getSource()
+    {
+        return null;
     }
 }

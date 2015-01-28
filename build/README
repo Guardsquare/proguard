@@ -31,10 +31,10 @@ This directory contains a number of alternative ways to build ProGuard:
     javac -sourcepath src -d classes -classpath wtklib/kenv.zip \
         src/proguard/wtk/ProGuardObfuscator.java
 
-Note that you'll have to install Ant and the JME WTK yourself.
+Note that you need to install Ant, Gradle, and the JME WTK yourself.
 
 Enjoy!
 
 http://proguard.sourceforge.net/
 
-Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare

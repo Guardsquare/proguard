@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -334,11 +334,12 @@ public class ClassConstants
     public static final char TYPE_GENERIC_BOUND          = ':';
     public static final char TYPE_GENERIC_END            = '>';
 
-    public static final int TYPICAL_CONSTANT_POOL_SIZE     = 256;
-    public static final int TYPICAL_FIELD_COUNT            = 64;
-    public static final int TYPICAL_METHOD_COUNT           = 64;
-    public static final int TYPICAL_CODE_LENGTH            = 1024;
-    public static final int TYPICAL_EXCEPTION_TABLE_LENGTH = 16;
-    public static final int TYPICAL_VARIABLES_SIZE         = 64;
-    public static final int TYPICAL_STACK_SIZE             = 16;
+    public static final int TYPICAL_CONSTANT_POOL_SIZE       = 256;
+    public static final int TYPICAL_FIELD_COUNT              = 64;
+    public static final int TYPICAL_METHOD_COUNT             = 64;
+    public static final int TYPICAL_CODE_LENGTH              = 1024;
+    public static final int TYPICAL_LINE_NUMBER_TABLE_LENGTH = 1024;
+    public static final int TYPICAL_EXCEPTION_TABLE_LENGTH   = 16;
+    public static final int TYPICAL_VARIABLES_SIZE           = 64;
+    public static final int TYPICAL_STACK_SIZE               = 16;
 }

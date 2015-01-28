@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2014 Eric Lafortune (eric@graphics.cornell.edu)
+ * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,17 +25,21 @@ import proguard.classfile.ClassConstants;
 
 /**
  * An <code>InternalTypeEnumeration</code> provides an enumeration of all
- * parameter types listed in a given internal method descriptor or signature.
- * The signature can also be a class signature. The return type of a method
- * descriptor can be retrieved separately.
+ * types listed in a given internal descriptor or signature of a class, a
+ * method, or a field.
+ *
+ * The leading formal type parameters, if any, can be retrieved separately.
+ *
+ * The return type of a method descriptor can also be retrieved separately.
  *
  * @author Eric Lafortune
  */
 public class InternalTypeEnumeration
 {
     private String descriptor;
-    private int    firstIndex;
-    private int    lastIndex;
+    private int    formalTypeParametersIndex;
+    private int    openIndex;
+    private int    closeIndex;
     private int    index;
 
 
@@ -45,33 +49,70 @@ public class InternalTypeEnumeration
     public InternalTypeEnumeration(String descriptor)
     {
         this.descriptor = descriptor;
-        this.firstIndex = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_OPEN);
-        this.lastIndex  = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
-        this.index      = firstIndex + 1;
 
-        if (lastIndex < 0)
+        // Find any formal type parameters.
+        if (descriptor.charAt(0) == ClassConstants.TYPE_GENERIC_START)
         {
-            lastIndex = descriptor.length();
+            formalTypeParametersIndex = 1;
+
+            int nestingLevel = 1;
+            do
+            {
+                char c = descriptor.charAt(formalTypeParametersIndex++);
+                switch (c)
+                {
+                    case ClassConstants.TYPE_GENERIC_START:
+                    {
+                        nestingLevel++;
+                        break;
+                    }
+                    case ClassConstants.TYPE_GENERIC_END:
+                    {
+                        nestingLevel--;
+                        break;
+                    }
+                }
+            }
+            while (nestingLevel > 0);
         }
+
+        this.openIndex  = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_OPEN,
+                                             formalTypeParametersIndex);
+
+        this.closeIndex = openIndex >= 0 ?
+            descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE, openIndex) :
+            descriptor.length();
+
+        this.index = openIndex >= 0 ?
+            openIndex + 1 :
+            formalTypeParametersIndex;
     }
 
 
     /**
-     * Returns whether the type is a method signature.
+     * Returns whether the descriptor has leading formal type parameters.
      */
-    public boolean isMethodSignature()
+    public boolean hasFormalTypeParameters()
     {
-        return firstIndex >= 0;
+        return formalTypeParametersIndex > 0;
     }
 
 
     /**
-     * Returns the formal type parameters from the descriptor, assuming it's a
-     * method descriptor.
+     * Returns the leading formal type parameters from the descriptor.
      */
     public String formalTypeParameters()
     {
-        return descriptor.substring(0, firstIndex);
+        return descriptor.substring(0, formalTypeParametersIndex);
+    }
+
+
+    /**
+     * Returns whether the descriptor is a method signature.
+     */
+    public boolean isMethodSignature()
+    {
+        return openIndex >= 0;
     }
 
 
@@ -81,7 +122,7 @@ public class InternalTypeEnumeration
      */
     public boolean hasMoreTypes()
     {
-        return index < lastIndex;
+        return index < closeIndex;
     }
 
 
@@ -120,7 +161,7 @@ public class InternalTypeEnumeration
      */
     public String returnType()
     {
-        return descriptor.substring(lastIndex + 1);
+        return descriptor.substring(closeIndex + 1);
     }
 
 
@@ -189,7 +230,7 @@ public class InternalTypeEnumeration
                 System.out.println("Descriptor ["+descriptor+"]");
                 InternalTypeEnumeration enumeration = new InternalTypeEnumeration(descriptor);
 
-                if (enumeration.firstIndex >= 0)
+                if (enumeration.hasFormalTypeParameters())
                 {
                     System.out.println("  Formal type parameters ["+enumeration.formalTypeParameters()+"]");
                 }
@@ -199,7 +240,7 @@ public class InternalTypeEnumeration
                     System.out.println("  Type ["+enumeration.nextType()+"]");
                 }
 
-                if (enumeration.lastIndex < descriptor.length())
+                if (enumeration.isMethodSignature())
                 {
                     System.out.println("  Return type ["+enumeration.returnType()+"]");
                 }
