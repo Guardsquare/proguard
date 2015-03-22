@@ -4,7 +4,7 @@ ANT_HOME    = /usr/local/java/ant
 GRADLE_HOME = /usr/local/java/gradle
 WTK_HOME    = /usr/local/java/wtk
 
-PROGUARD_HOME := $(subst ./..,..,$(subst /build/..,/,$(dir $(MAKEFILE_LIST))..))
+PROGUARD_HOME := $(subst ./..,..,$(subst /buildscripts/..,/,$(dir $(MAKEFILE_LIST))..))
 SRC     = $(PROGUARD_HOME)/src
 CLASSES = $(PROGUARD_HOME)/classes
 LIB     = $(PROGUARD_HOME)/lib

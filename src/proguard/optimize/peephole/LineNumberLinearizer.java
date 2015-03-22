@@ -177,6 +177,15 @@ implements   ClassVisitor,
                     lineNumberInfo.u2lineNumber += currentLineNumberShift;
                 }
 
+                // TODO: There appear to be cases where the stack is empty at this point, so we've added a check.
+                else if (enclosingLineNumbers.isEmpty())
+                {
+                    if (DEBUG)
+                    {
+                        System.err.println("Problem linearizing line numbers for optimized code ("+clazz.getName()+"."+method.getName(clazz)+")");
+                    }
+                }
+
                 // Are we exiting an inlined block?
                 else
                 {
@@ -197,7 +206,7 @@ implements   ClassVisitor,
                         System.out.print(" (exit to shift "+currentLineNumberShift+")");
                     }
                 }
-                }
+            }
             else
             {
                 if (DEBUG)

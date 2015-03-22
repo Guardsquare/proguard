@@ -49,8 +49,8 @@ implements   AttributeVisitor,
              MemberVisitor,
              LineNumberInfoVisitor
 {
-    static final int    INLINED_METHOD_END_LINE_NUMBER = -1;
-    static final String INLINED_METHOD_END_SOURCE      = "end";
+    static final int METHOD_DUMMY_START_LINE_NUMBER = 0;
+    static final int INLINED_METHOD_END_LINE_NUMBER = -1;
 
     private static final int MAXIMUM_INLINED_CODE_LENGTH       = Integer.parseInt(System.getProperty("maximum.inlined.code.length",      "8"));
     private static final int MAXIMUM_RESULTING_CODE_LENGTH_JSE = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
@@ -395,8 +395,8 @@ implements   AttributeVisitor,
             minimumLineNumberIndex =
                 codeAttributeComposer.insertLineNumber(minimumLineNumberIndex,
                     new ExtendedLineNumberInfo(0,
-                                               0,
-                                               source));
+                                               METHOD_DUMMY_START_LINE_NUMBER,
+                                               source)) + 1;
         }
 
         // Add a marker at the end of an inlined method.
@@ -407,14 +407,14 @@ implements   AttributeVisitor,
             String source =
                 clazz.getName()             + '.' +
                 method.getName(clazz)       +
-                method.getDescriptor(clazz) + ':' +
-                INLINED_METHOD_END_SOURCE;
+                method.getDescriptor(clazz) +
+                ":0:0";
 
             minimumLineNumberIndex =
                 codeAttributeComposer.insertLineNumber(minimumLineNumberIndex,
                     new ExtendedLineNumberInfo(codeAttribute.u4codeLength,
                                                INLINED_METHOD_END_LINE_NUMBER,
-                                               source));
+                                               source)) + 1;
         }
 
         codeAttributeComposer.endCodeFragment();

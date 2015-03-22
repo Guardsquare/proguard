@@ -3,12 +3,12 @@ ProGuard, Java class file shrinker, optimizer, obfuscator, and preverifier
 
 This distribution contains the following directories:
 
-- bin      : simple wrapper scripts to run ProGuard, its GUI, and ReTrace
-- lib      : the main jars, compiled and ready to use with "java -jar ...."
-- docs     : the complete documentation, licenses, etc. in html format
-- examples : some example configuration files
-- src      : the source code
-- build    : various alternative build scripts
+- bin          : simple wrapper scripts to run ProGuard, its GUI, and ReTrace
+- lib          : the main jars, compiled and ready to use with "java -jar ...."
+- docs         : the complete documentation, licenses, etc. in html format
+- examples     : some example configuration files
+- src          : the source code
+- buildscripts : various alternative build scripts
 
 
 The best place to start is docs/index.html

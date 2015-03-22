@@ -34,10 +34,12 @@ public class SignatureAttribute extends Attribute
     public int u2signatureIndex;
 
     /**
-     * An extra field pointing to the Clazz objects referenced in the
-     * signature string. This field is filled out by the <code>{@link
-     * proguard.classfile.util.ClassReferenceInitializer ClassReferenceInitializer}</code>.
-     * References to primitive types are ignored.
+     * An extra field containing all the classes referenced in the
+     * signature string. This field is filled out by the {@link
+     * proguard.classfile.util.ClassReferenceInitializer ClassReferenceInitializer}.
+     * The size of the array is the number of classes in the signature.
+     * Primitive types and arrays of primitive types are ignored.
+     * Unknown classes are represented as null values.
      */
     public Clazz[] referencedClasses;
 

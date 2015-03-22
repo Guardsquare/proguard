@@ -226,7 +226,8 @@ implements   ClassVisitor,
                                               enclosingLineNumbers,
                                               obfuscatedMethodName);
                 }
-                else
+                // TODO: There appear to be cases where the stack is empty at this point, so we've added a check.
+                else if (!enclosingLineNumbers.isEmpty())
                 {
                     // We're exiting an inlined block.
                     // Pop its enclosing line number.

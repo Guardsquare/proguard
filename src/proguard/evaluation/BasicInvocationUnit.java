@@ -105,10 +105,11 @@ implements   InvocationUnit,
         {
             String type = internalTypeEnumeration.nextType();
 
-            Clazz referencedClass = referencedClasses != null &&
-                                    ClassUtil.isInternalClassType(type) ?
-                referencedClasses[referencedClassIndex++] :
-                null;
+            Clazz referencedClass =
+                referencedClasses != null &&
+                ClassUtil.isInternalClassType(type) ?
+                    referencedClasses[referencedClassIndex++] :
+                    null;
 
             // Get the parameter value.
             Value value = getMethodParameterValue(clazz,
@@ -376,11 +377,14 @@ implements   InvocationUnit,
         // Try to figure out the class of the return type.
         Clazz[] referencedClasses = invokeDynamicConstant.referencedClasses;
 
-        Clazz returnTypeClass = referencedClasses == null ? null :
-            referencedClasses[referencedClasses.length - 1];
+        Clazz referencedClass =
+            referencedClasses != null &&
+            ClassUtil.isInternalClassType(type) ?
+                referencedClasses[referencedClasses.length - 1] :
+                null;
 
         return valueFactory.createValue(type,
-                                        returnTypeClass,
+                                        referencedClass,
                                         true);
     }
 
@@ -396,7 +400,8 @@ implements   InvocationUnit,
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         Clazz[] referencedClasses = programMethod.referencedClasses;
-        if (referencedClasses != null)
+        if (referencedClasses != null &&
+            ClassUtil.isInternalClassType(programMethod.getDescriptor(programClass)))
         {
             returnTypeClass = referencedClasses[referencedClasses.length - 1];
         }
@@ -409,10 +414,11 @@ implements   InvocationUnit,
     }
 
 
-    public void visitLibraryMethod(LibraryClass programClass, LibraryMethod programMethod)
+    public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
-        Clazz[] referencedClasses = programMethod.referencedClasses;
-        if (referencedClasses != null)
+        Clazz[] referencedClasses = libraryMethod.referencedClasses;
+        if (referencedClasses != null &&
+            ClassUtil.isInternalClassType(libraryMethod.getDescriptor(libraryClass)))
         {
             returnTypeClass = referencedClasses[referencedClasses.length - 1];
         }

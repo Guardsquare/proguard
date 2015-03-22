@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
     xmlns="http://maven.apache.org/POM/4.0.0"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>5.2</version>
+        <version>5.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>proguard-wtk-plugin</artifactId>
+    <artifactId>proguard-gradle</artifactId>
     <name>[${project.groupId}] ${project.artifactId}</name>
 
     <build>
@@ -20,15 +20,15 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/wtk/**</include>
+                        <include>proguard/gradle/**</include>
                     </includes>
                 </configuration>
-            </plugin>
+            </plugin>   
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/wtk/**</include>
+                        <include>proguard/gradle/**</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -45,21 +45,10 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <subpackages>proguard.wtk</subpackages>
+                    <subpackages>proguard.gradle</subpackages>
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>../../../src</directory>
-                <includes>
-                   <include>proguard/wtk/**</include>
-                </includes>
-                <excludes>
-                   <exclude>**/*.java</exclude>
-                </excludes>
-            </resource>
-        </resources>
     </build>
 
     <dependencies>
@@ -69,11 +58,34 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>wtklib</groupId>
-            <artifactId>kenv</artifactId>
-            <version>2.2</version>
-            <scope>system</scope>
-            <systemPath>${wtk.home}/wtklib/kenv.zip</systemPath>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-core</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-base-services</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-base-services-groovy</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.3.6</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>gradle</id>
+            <url>http://repo.gradle.org/gradle/libs-releases-local/</url>
+        </repository>
+    </repositories>
 </project>

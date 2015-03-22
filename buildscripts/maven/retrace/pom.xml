@@ -7,10 +7,10 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>5.2</version>
+        <version>5.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>proguard-gradle</artifactId>
+    <artifactId>proguard-retrace</artifactId>
     <name>[${project.groupId}] ${project.artifactId}</name>
 
     <build>
@@ -20,16 +20,22 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/gradle/**</include>
+                        <include>proguard/retrace/**</include>
                     </includes>
                 </configuration>
-            </plugin>   
+            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/gradle/**</include>
+                        <include>proguard/retrace/**</include>
                     </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <subpackages>proguard.retrace</subpackages>
                 </configuration>
             </plugin>
             <plugin>
@@ -38,54 +44,18 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
+                            <mainClass>proguard.retrace.ReTrace</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <subpackages>proguard.gradle</subpackages>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>proguard-base</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.gradle</groupId>
-            <artifactId>gradle-core</artifactId>
-            <version>2.2.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.gradle</groupId>
-            <artifactId>gradle-base-services</artifactId>
-            <version>2.2.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.gradle</groupId>
-            <artifactId>gradle-base-services-groovy</artifactId>
-            <version>2.2.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.3.6</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>gradle</id>
-            <url>http://repo.gradle.org/gradle/libs-releases-local/</url>
-        </repository>
-    </repositories>
 </project>

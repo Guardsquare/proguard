@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
     xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>5.2</version>
+        <version>5.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>proguard-retrace</artifactId>
+    <artifactId>proguard-wtk-plugin</artifactId>
     <name>[${project.groupId}] ${project.artifactId}</name>
 
     <build>
@@ -20,7 +20,7 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/retrace/**</include>
+                        <include>proguard/wtk/**</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -28,14 +28,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/retrace/**</include>
+                        <include>proguard/wtk/**</include>
                     </includes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <subpackages>proguard.retrace</subpackages>
                 </configuration>
             </plugin>
             <plugin>
@@ -44,18 +38,42 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>proguard.retrace.ReTrace</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <subpackages>proguard.wtk</subpackages>
+                </configuration>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>../../../src</directory>
+                <includes>
+                   <include>proguard/wtk/**</include>
+                </includes>
+                <excludes>
+                   <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>proguard-base</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>wtklib</groupId>
+            <artifactId>kenv</artifactId>
+            <version>2.2</version>
+            <scope>system</scope>
+            <systemPath>${wtk.home}/wtklib/kenv.zip</systemPath>
         </dependency>
     </dependencies>
 </project>
