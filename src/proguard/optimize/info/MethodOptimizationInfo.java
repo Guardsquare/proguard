@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,19 +32,20 @@ import proguard.evaluation.value.Value;
  */
 public class MethodOptimizationInfo
 {
-    private boolean hasNoSideEffects      = false;
-    private boolean hasSideEffects        = false;
-    private boolean canBeMadePrivate      = true;
-    private boolean catchesExceptions     = false;
-    private boolean branchesBackward      = false;
-    private boolean invokesSuperMethods   = false;
-    private boolean invokesDynamically    = false;
-    private boolean accessesPrivateCode   = false;
-    private boolean accessesPackageCode   = false;
-    private boolean accessesProtectedCode = false;
-    private int     invocationCount       = 0;
-    private int     parameterSize         = 0;
-    private long    usedParameters        = 0L;
+    private boolean hasNoSideEffects         = false;
+    private boolean hasSideEffects           = false;
+    private boolean canBeMadePrivate         = true;
+    private boolean catchesExceptions        = false;
+    private boolean branchesBackward         = false;
+    private boolean invokesSuperMethods      = false;
+    private boolean invokesDynamically       = false;
+    private boolean accessesPrivateCode      = false;
+    private boolean accessesPackageCode      = false;
+    private boolean accessesProtectedCode    = false;
+    private boolean returnsWithNonEmptyStack = false;
+    private int     invocationCount          = 0;
+    private int     parameterSize            = 0;
+    private long    usedParameters           = 0L;
     private Value[] parameters;
     private Value   returnValue;
 
@@ -188,6 +189,18 @@ public class MethodOptimizationInfo
     public boolean accessesProtectedCode()
     {
         return accessesProtectedCode;
+    }
+
+
+    public void setReturnsWithNonEmptyStack()
+    {
+        returnsWithNonEmptyStack = true;
+    }
+
+
+    public boolean returnsWithNonEmptyStack()
+    {
+        return returnsWithNonEmptyStack;
     }
 
 

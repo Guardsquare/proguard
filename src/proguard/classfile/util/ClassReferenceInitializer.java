@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -121,7 +121,7 @@ implements   ClassVisitor,
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
         programField.referencedClass =
-            findReferencedClass(programClass.getName(),
+            findReferencedClass(programClass,
                                 programField.getDescriptor(programClass));
 
         // Initialize the attributes.
@@ -132,7 +132,7 @@ implements   ClassVisitor,
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         programMethod.referencedClasses =
-            findReferencedClasses(programClass.getName(),
+            findReferencedClasses(programClass,
                                   programMethod.getDescriptor(programClass));
 
         // Initialize the attributes.
@@ -143,7 +143,7 @@ implements   ClassVisitor,
     public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
     {
         libraryField.referencedClass =
-            findReferencedClass(libraryClass.getName(),
+            findReferencedClass(libraryClass,
                                 libraryField.getDescriptor(libraryClass));
     }
 
@@ -151,7 +151,7 @@ implements   ClassVisitor,
     public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
         libraryMethod.referencedClasses =
-            findReferencedClasses(libraryClass.getName(),
+            findReferencedClasses(libraryClass,
                                   libraryMethod.getDescriptor(libraryClass));
     }
 
@@ -165,14 +165,14 @@ implements   ClassVisitor,
     {
         // Fill out the String class.
         stringConstant.javaLangStringClass =
-            findClass(clazz.getName(), ClassConstants.NAME_JAVA_LANG_STRING);
+            findClass(clazz, ClassConstants.NAME_JAVA_LANG_STRING);
     }
 
 
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         invokeDynamicConstant.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   invokeDynamicConstant.getType(clazz));
     }
 
@@ -181,7 +181,7 @@ implements   ClassVisitor,
     {
         // Fill out the MethodHandle class.
         methodHandleConstant.javaLangInvokeMethodHandleClass =
-            findClass(clazz.getName(), ClassConstants.NAME_JAVA_LANG_INVOKE_METHOD_HANDLE);
+            findClass(clazz, ClassConstants.NAME_JAVA_LANG_INVOKE_METHOD_HANDLE);
     }
 
 
@@ -198,7 +198,7 @@ implements   ClassVisitor,
         // See if we can find the referenced class.
         // Unresolved references are assumed to refer to library classes
         // that will not change anyway.
-        Clazz referencedClass = findClass(clazz.getName(), className);
+        Clazz referencedClass = findClass(clazz, className);
 
         if (referencedClass != null)
         {
@@ -246,15 +246,13 @@ implements   ClassVisitor,
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
-        String className = clazz.getName();
-
         // Fill out the referenced class.
         classConstant.referencedClass =
-            findClass(className, ClassUtil.internalClassNameFromClassType(classConstant.getName(clazz)));
+            findClass(clazz, ClassUtil.internalClassNameFromClassType(classConstant.getName(clazz)));
 
         // Fill out the Class class.
         classConstant.javaLangClassClass =
-            findClass(className, ClassConstants.NAME_JAVA_LANG_CLASS);
+            findClass(clazz, ClassConstants.NAME_JAVA_LANG_CLASS);
     }
 
 
@@ -262,10 +260,10 @@ implements   ClassVisitor,
     {
         // Fill out the MethodType class.
         methodTypeConstant.javaLangInvokeMethodTypeClass =
-            findClass(clazz.getName(), ClassConstants.NAME_JAVA_LANG_INVOKE_METHOD_TYPE);
+            findClass(clazz, ClassConstants.NAME_JAVA_LANG_INVOKE_METHOD_TYPE);
 
         methodTypeConstant.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   methodTypeConstant.getType(clazz));
     }
 
@@ -277,12 +275,11 @@ implements   ClassVisitor,
 
     public void visitEnclosingMethodAttribute(Clazz clazz, EnclosingMethodAttribute enclosingMethodAttribute)
     {
-        String className          = clazz.getName();
         String enclosingClassName = enclosingMethodAttribute.getClassName(clazz);
 
         // See if we can find the referenced class.
         enclosingMethodAttribute.referencedClass =
-            findClass(className, enclosingClassName);
+            findClass(clazz, enclosingClassName);
 
         if (enclosingMethodAttribute.referencedClass != null)
         {
@@ -300,6 +297,8 @@ implements   ClassVisitor,
                 if (enclosingMethodAttribute.referencedMethod == null)
                 {
                     // We couldn't find the enclosing method.
+                    String className = clazz.getName();
+
                     missingProgramMemberWarningPrinter.print(className,
                                                              enclosingClassName,
                                                              "Warning: " +
@@ -338,7 +337,7 @@ implements   ClassVisitor,
     public void visitSignatureAttribute(Clazz clazz, SignatureAttribute signatureAttribute)
     {
         signatureAttribute.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   signatureAttribute.getSignature(clazz));
     }
 
@@ -369,7 +368,7 @@ implements   ClassVisitor,
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
         localVariableInfo.referencedClass =
-            findReferencedClass(clazz.getName(),
+            findReferencedClass(clazz,
                                 localVariableInfo.getDescriptor(clazz));
     }
 
@@ -379,7 +378,7 @@ implements   ClassVisitor,
     public void visitLocalVariableTypeInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeInfo localVariableTypeInfo)
     {
         localVariableTypeInfo.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   localVariableTypeInfo.getSignature(clazz));
     }
 
@@ -389,7 +388,7 @@ implements   ClassVisitor,
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
         annotation.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   annotation.getType(clazz));
 
         // Initialize the element values.
@@ -410,7 +409,7 @@ implements   ClassVisitor,
         initializeElementValue(clazz, annotation, enumConstantElementValue);
 
         enumConstantElementValue.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   enumConstantElementValue.getTypeName(clazz));
     }
 
@@ -420,7 +419,7 @@ implements   ClassVisitor,
         initializeElementValue(clazz, annotation, classElementValue);
 
         classElementValue.referencedClasses =
-            findReferencedClasses(clazz.getName(),
+            findReferencedClasses(clazz,
                                   classElementValue.getClassName(clazz));
     }
 
@@ -470,7 +469,7 @@ implements   ClassVisitor,
      * Returns the single class referenced by the given descriptor, or
      * <code>null</code> if there isn't any useful reference.
      */
-    private Clazz findReferencedClass(String referencingClassName,
+    private Clazz findReferencedClass(Clazz  referencingClass,
                                       String descriptor)
     {
         DescriptorClassEnumeration enumeration =
@@ -480,7 +479,7 @@ implements   ClassVisitor,
 
         if (enumeration.hasMoreClassNames())
         {
-            return findClass(referencingClassName, enumeration.nextClassName());
+            return findClass(referencingClass, enumeration.nextClassName());
         }
 
         return null;
@@ -491,7 +490,7 @@ implements   ClassVisitor,
      * Returns an array of classes referenced by the given descriptor, or
      * <code>null</code> if there aren't any useful references.
      */
-    private Clazz[] findReferencedClasses(String referencingClassName,
+    private Clazz[] findReferencedClasses(Clazz  referencingClass,
                                           String descriptor)
     {
         DescriptorClassEnumeration enumeration =
@@ -509,7 +508,7 @@ implements   ClassVisitor,
                 String fluff = enumeration.nextFluff();
                 String name  = enumeration.nextClassName();
 
-                Clazz referencedClass = findClass(referencingClassName, name);
+                Clazz referencedClass = findClass(referencingClass, name);
 
                 if (referencedClass != null)
                 {
@@ -532,7 +531,7 @@ implements   ClassVisitor,
      * Returns the class with the given name, either for the program class pool
      * or from the library class pool, or <code>null</code> if it can't be found.
      */
-    private Clazz findClass(String referencingClassName, String name)
+    private Clazz findClass(Clazz referencingClass, String name)
     {
         // Is it an array type?
         if (ClassUtil.isInternalArrayType(name))
@@ -559,6 +558,8 @@ implements   ClassVisitor,
                 missingClassWarningPrinter != null)
             {
                 // We didn't find the superclass or interface. Print a warning.
+                String referencingClassName = referencingClass.getName();
+
                 missingClassWarningPrinter.print(referencingClassName,
                                                  name,
                                                  "Warning: " +
@@ -571,6 +572,8 @@ implements   ClassVisitor,
         {
             // The superclass or interface was found in the program class pool.
             // Print a warning.
+            String referencingClassName = referencingClass.getName();
+
             dependencyWarningPrinter.print(referencingClassName,
                                            name,
                                            "Warning: library class " +

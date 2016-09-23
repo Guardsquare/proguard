@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -67,11 +67,19 @@ public class DirectoryPump implements DataEntryPump
         if (file.isDirectory())
         {
             // Recurse into the subdirectory.
-            File[] files = file.listFiles();
+            File[] listedFiles = file.listFiles();
 
-            for (int index = 0; index < files.length; index++)
+            for (int index = 0; index < listedFiles.length; index++)
             {
-                readFiles(files[index], dataEntryReader);
+                File listedFile = listedFiles[index];
+                try
+                {
+                    readFiles(listedFile, dataEntryReader);
+                }
+                catch (IOException e)
+                {
+                    throw (IOException)new IOException("Can't read ["+listedFile.getName()+"] ("+e.getMessage()+")").initCause(e);
+                }
             }
         }
     }

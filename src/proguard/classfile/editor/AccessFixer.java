@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,7 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
+import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
@@ -35,6 +36,9 @@ public class AccessFixer
 extends      ReferencedClassVisitor
 implements   ClassVisitor
 {
+    private final ConstantVisitor referencedClassStorer = new MyReferencedClassStorer();
+
+
     /**
      * Creates a new AccessFixer.
      */
@@ -127,7 +131,23 @@ implements   ClassVisitor
 
     public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
     {
-        // Fix the access flags of the referenced class.
+        // Remember the referenced class. Note that we're interested in the
+        // class of the invocation, not in the class in which the member was
+        // actually found, unless it is an array type.
+        if (ClassUtil.isInternalArrayType(refConstant.getClassName(clazz)))
+        {
+            // For an array type, the class will be java.lang.Object.
+            ((MyAccessFixer)classVisitor).referencedClass =
+                refConstant.referencedClass;
+        }
+        else
+        {
+            // Remember the referenced class.
+            clazz.constantPoolEntryAccept(refConstant.u2classIndex,
+                                          referencedClassStorer);
+        }
+
+        // Fix the access flags of the class of the referenced class member.
         super.visitAnyRefConstant(clazz, refConstant);
 
         // Fix the access flags of the referenced class member.
@@ -136,9 +156,31 @@ implements   ClassVisitor
 
 
     /**
+     * This ConstantVisitor stores the classes referenced by the class
+     * constants that it visits.
+     */
+    private class MyReferencedClassStorer
+    extends       SimplifiedVisitor
+    implements    ConstantVisitor
+    {
+        // Implementations for ConstantVisitor.
+
+        public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
+        {
+            // Remember the referenced class.
+            ((MyAccessFixer)classVisitor).referencedClass =
+                classConstant.referencedClass;
+        }
+    }
+
+
+    /**
      * This ClassVisitor and MemberVisitor fixes the access flags of the
      * classes and class members that it visits, relative to the referencing
      * class.
+     *
+     * This class must be static so it can be passed to the super constructor
+     * of the outer class.
      */
     private static class MyAccessFixer
     extends              SimplifiedVisitor
@@ -146,6 +188,7 @@ implements   ClassVisitor
                          MemberVisitor
     {
         private Clazz referencingClass;
+        private Clazz referencedClass;
 
 
         // Implementations for ClassVisitor.
@@ -185,10 +228,13 @@ implements   ClassVisitor
             int currentAccessLevel = AccessUtil.accessLevel(currentAccessFlags);
 
             // Compute the required access level.
+            // For protected access, we're taking into account the class in the
+            // invocation and the class that actually contains the member.
             int requiredAccessLevel =
                 programClass.equals(referencingClass)         ? AccessUtil.PRIVATE         :
                 inSamePackage(programClass, referencingClass) ? AccessUtil.PACKAGE_VISIBLE :
-                programClass.extends_(referencingClass) &&
+                referencedClass != null                    &&
+                referencingClass.extends_(referencedClass) &&
                 referencingClass.extends_(programClass)       ? AccessUtil.PROTECTED       :
                                                                 AccessUtil.PUBLIC;
 

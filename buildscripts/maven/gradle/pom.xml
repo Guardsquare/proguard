@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>5.2.1</version>
+        <version>5.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>proguard-gradle</artifactId>
@@ -28,7 +28,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>proguard/gradle/**</include>
+                        <include>proguard/gradle/**.java</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -59,26 +59,32 @@
         </dependency>
         <dependency>
             <groupId>org.gradle</groupId>
+            <artifactId>gradle-logging</artifactId>
+            <version>3.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.gradle</groupId>
             <artifactId>gradle-core</artifactId>
-            <version>2.2.1</version>
+            <version>3.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.gradle</groupId>
             <artifactId>gradle-base-services</artifactId>
-            <version>2.2.1</version>
+            <version>3.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.gradle</groupId>
             <artifactId>gradle-base-services-groovy</artifactId>
-            <version>2.2.1</version>
+            <version>3.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.3.6</version>
+            <version>2.4.7</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

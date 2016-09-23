@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@ import proguard.classfile.editor.*;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.MethodLinker;
 import proguard.classfile.visitor.*;
-import proguard.evaluation.InvocationUnit;
+import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.evaluation.*;
 import proguard.optimize.info.*;
@@ -644,6 +644,8 @@ public class Optimizer
         // Mark all exception catches of methods.
         // Count all method invocations.
         // Mark super invocations and other access of methods.
+        StackSizeComputer stackSizeComputer = new StackSizeComputer();
+
         programClassPool.classesAccept(
             new MultiClassVisitor(
             new ClassVisitor[]
@@ -659,6 +661,7 @@ public class Optimizer
                     new MultiAttributeVisitor(
                     new AttributeVisitor[]
                     {
+                        stackSizeComputer,
                         new CatchExceptionMarker(),
                         new AllInstructionVisitor(
                         new MultiInstructionVisitor(
@@ -672,6 +675,7 @@ public class Optimizer
                             new DynamicInvocationMarker(),
                             new BackwardBranchMarker(),
                             new AccessMethodMarker(),
+                            new NonEmptyStackReturnMarker(stackSizeComputer),
                         })),
                         new AllExceptionInfoVisitor(
                         new ExceptionHandlerConstantVisitor(
@@ -816,10 +820,12 @@ public class Optimizer
                 new AccessFixer());
         }
 
-        if (methodRemovalParameterCounter .getCount() > 0 ||
-            classMergingVerticalCounter   .getCount() > 0 ||
-            classMergingHorizontalCounter .getCount() > 0 ||
-            methodMarkingPrivateCounter   .getCount() > 0 )
+        if (methodRemovalParameterCounter.getCount() > 0 ||
+            classMergingVerticalCounter  .getCount() > 0 ||
+            classMergingHorizontalCounter.getCount() > 0 ||
+            methodMarkingPrivateCounter  .getCount() > 0 ||
+            methodInliningUniqueCounter  .getCount() > 0 ||
+            methodInliningShortCounter   .getCount() > 0)
         {
             // Fix invocations of interface methods, of methods that have become
             // non-abstract or private, and of methods that have moved to a
@@ -841,16 +847,20 @@ public class Optimizer
 
         // Create a branch target marker and a code attribute editor that can
         // be reused for all code attributes.
-        BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
+        BranchTargetFinder branchTargetFinder   = new BranchTargetFinder();
         CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
+
+        InstructionSequenceConstants sequences =
+            new InstructionSequenceConstants(programClassPool,
+                                             libraryClassPool);
 
         List peepholeOptimizations = new ArrayList();
         if (codeSimplificationVariable)
         {
             // Peephole optimizations involving local variables.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(InstructionSequenceConstants.CONSTANTS,
-                                                 InstructionSequenceConstants.VARIABLE,
+                new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                 sequences.VARIABLE,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationVariableCounter));
         }
 
@@ -858,8 +868,8 @@ public class Optimizer
         {
             // Peephole optimizations involving arithmetic operations.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(InstructionSequenceConstants.CONSTANTS,
-                                                 InstructionSequenceConstants.ARITHMETIC,
+                new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                 sequences.ARITHMETIC,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationArithmeticCounter));
         }
 
@@ -867,8 +877,8 @@ public class Optimizer
         {
             // Peephole optimizations involving cast operations.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(InstructionSequenceConstants.CONSTANTS,
-                                                 InstructionSequenceConstants.CAST,
+                new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                 sequences.CAST,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationCastCounter));
         }
 
@@ -876,8 +886,8 @@ public class Optimizer
         {
             // Peephole optimizations involving fields.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(InstructionSequenceConstants.CONSTANTS,
-                                                 InstructionSequenceConstants.FIELD,
+                new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                 sequences.FIELD,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationFieldCounter));
         }
 
@@ -885,8 +895,8 @@ public class Optimizer
         {
             // Peephole optimizations involving branches.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(InstructionSequenceConstants.CONSTANTS,
-                                                 InstructionSequenceConstants.BRANCH,
+                new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                 sequences.BRANCH,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationBranchCounter));
 
             // Include optimization of branches to branches and returns.
@@ -900,8 +910,8 @@ public class Optimizer
         {
             // Peephole optimizations involving branches.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(InstructionSequenceConstants.CONSTANTS,
-                                                 InstructionSequenceConstants.STRING,
+                new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                 sequences.STRING,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationStringCounter));
         }
 

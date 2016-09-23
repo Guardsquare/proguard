@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -915,9 +915,9 @@ implements   ClassVisitor,
 
     public void visitParameterInfo(Clazz clazz, Method method, int parameterIndex, ParameterInfo parameterInfo)
     {
-        println("p" + parameterIndex + ":  Access flags: 0x" + Integer.toHexString(parameterInfo.u2accessFlags) + " = " +
-                ClassUtil.externalParameterAccessFlags(parameterInfo.u2accessFlags) + " [" +
-                (parameterInfo.u2nameIndex == 0 ? "" : parameterInfo.getName(clazz)) + "]");
+        println("p" + parameterIndex + ": access flags: 0x" + Integer.toHexString(parameterInfo.u2accessFlags) + " = " +
+                ClassUtil.externalParameterAccessFlags(parameterInfo.u2accessFlags) +
+                (parameterInfo.u2nameIndex == 0 ? "" : " [" + parameterInfo.getName(clazz) + "]"));
     }
 
 

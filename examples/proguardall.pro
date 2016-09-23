@@ -18,10 +18,10 @@
 
 -libraryjars <java.home>/lib/rt.jar
 -libraryjars /usr/local/java/ant/lib/ant.jar
--libraryjars /usr/local/java/gradle-1.3/lib/plugins/gradle-plugins-1.3.jar
--libraryjars /usr/local/java/gradle-1.3/lib/gradle-base-services-1.3.jar
--libraryjars /usr/local/java/gradle-1.3/lib/gradle-core-1.3.jar
--libraryjars /usr/local/java/gradle-1.3/lib/groovy-all-1.8.6.jar
+-libraryjars /usr/local/java/gradle-2.12/lib/plugins/gradle-plugins-2.12.jar
+-libraryjars /usr/local/java/gradle-2.12/lib/gradle-base-services-2.12.jar
+-libraryjars /usr/local/java/gradle-2.12/lib/gradle-core-2.12.jar
+-libraryjars /usr/local/java/gradle-2.12/lib/groovy-all-2.4.4.jar
 -libraryjars /usr/local/java/wtk2.5.2/wtklib/kenv.zip
 
 # Allow methods with the same signature, except for the return type,

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -37,7 +37,7 @@ public class ReTrace
     private static final String REGEX_OPTION   = "-regex";
     private static final String VERBOSE_OPTION = "-verbose";
 
-    public static final String STACK_TRACE_EXPRESSION = "(?:.*?\\bat\\s+%c\\.%m\\s*\\(%s(?::%l)?\\)\\s*)|(?:(?:.*?[:\"]\\s+)?%c(?::.*)?)";
+    public static final String STACK_TRACE_EXPRESSION = "(?:.*?\\bat\\s+%c\\.%m\\s*\\(%s(?::%l)?\\)\\s*(?:~\\[.*\\])?)|(?:(?:.*?[:\"]\\s+)?%c(?::.*)?)";
 
 
     // The settings.
@@ -99,7 +99,7 @@ public class ReTrace
             {
                 // Transform the obfuscated frame back to one or more
                 // original frames.
-                Iterator retracedFrames =
+                Iterator<FrameInfo> retracedFrames =
                     mapper.transform(obfuscatedFrame).iterator();
 
                 String previousLine = null;
@@ -107,8 +107,7 @@ public class ReTrace
                 while (retracedFrames.hasNext())
                 {
                     // Retrieve the next retraced frame.
-                    FrameInfo retracedFrame =
-                        (FrameInfo)retracedFrames.next();
+                    FrameInfo retracedFrame = retracedFrames.next();
 
                     // Format the retraced line.
                     String retracedLine =
@@ -149,7 +148,7 @@ public class ReTrace
      */
     private String trim(String string1, String string2)
     {
-        StringBuffer line = new StringBuffer(string1);
+        StringBuilder line = new StringBuilder(string1);
 
         // Find the common part.
         int trimEnd = firstNonCommonIndex(string1, string2);

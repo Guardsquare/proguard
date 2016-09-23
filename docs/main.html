@@ -14,12 +14,12 @@
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  document.write('<a class="largebutton" target="_top" href="index.html#main.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+  document.write('<a class="largebutton" target="_top" href="index.html#main.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
 <noscript>
 <a class="largebutton" target="_top"  href="index.html#main.html">ProGuard index</a>
-<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.guardsquare.com/dexguard">DexGuard</a>
 <a class="largebutton" target="_top"  href="http://www.guardsquare.com/">GuardSquare</a>
 <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
 </noscript>
@@ -31,21 +31,19 @@ if (window.self==window.top)
 preverifier. It detects and removes unused classes, fields, methods, and
 attributes. It optimizes bytecode and removes unused instructions. It renames
 the remaining classes, fields, and methods using short meaningless names.
-Finally, it preverifies the processed code for Java 6 or higher, or for Java
-Micro Edition.
+The resulting applications and libraries are smaller, faster, and a bit better
+hardened against reverse engineering.
 </p>
-Some uses of <b>ProGuard</b> are:
+Typical applications:
 <ul>
 
-<li>Creating more compact code, for smaller code archives, faster transfer
-    across networks, faster loading, and smaller memory footprints.</li>
+<li>Reducing the size of Android apps for faster downloads from Google Play,
+    shorter startup times, and smaller memory footprints.</li>
 
-<li>Making programs and libraries harder to reverse-engineer.</li>
+<li>Optimizing code for better performance on mobile devices.</li>
 
-<li>Listing dead code, so it can be removed from the source code.</li>
-
-<li>Retargeting and preverifying existing class files for Java 6 or higher, to
-    take full advantage of their faster class loading.</li>
+<li>Protecting applications and libraries against reverse-engineering and
+    tampering.</li>
 
 </ul>
 <p>
@@ -61,16 +59,20 @@ for a number of applications.
 <p>
 <b>ProGuard</b> is a command-line tool with an optional graphical user
 interface. It also comes with plugins for Ant, for Gradle, and for the JME
-Wireless Toolkit.
+Wireless Toolkit. It is already part of Google's Android SDK, where it can be
+enabled with a simple flag.
 <p>
 <p class="intro">
-<a href="http://www.saikoa.com/dexguard" target="_top">
+<a href="http://www.guardsquare.com/dexguard" target="_top">
 <img align="left" src="android_shades.png" width="64" height="64" /></a>
-<b>ProGuard</b> now has a sibling optimizer and obfuscator for Android:
-<a href="http://www.saikoa.com/dexguard" target="_top"><b>DexGuard</b></a>. It
-focuses on code protection, with additional features like string encryption,
-class encryption, and dex splitting. It directly targets Dalvik bytecode and
-streamlines the Android build process.
+<b>ProGuard</b> provides basic protection against reverse engineering and
+tampering, with basic name obfuscation.
+<a href="http://www.guardsquare.com/dexguard"
+target="_top"><b>DexGuard</b></a>, its specialized commercial extension for
+Android, focuses further on the protection of apps, additionally optimizing,
+obfuscating and encrypting strings, classes, resources, resource files, asset
+files, and native libraries. Professional developers should definitely
+consider it for security-sensitive apps.
 </p>
 The following sections provide more detailed information:
 <ul>
@@ -99,7 +101,7 @@ The following sections provide more detailed information:
 
 <hr />
 <address>
-Copyright &copy; 2002-2015
+Copyright &copy; 2002-2016
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

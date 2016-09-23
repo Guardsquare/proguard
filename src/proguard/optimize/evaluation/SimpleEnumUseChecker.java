@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -288,13 +288,12 @@ implements   ClassVisitor,
                     markPoppedComplexEnumType(offset);
 
                     // Make sure the checked type is not a simple enum type.
-                    // We're somewhat arbitrarily skipping casts in static
-                    // methods of simple enum classes, because they do occur
-                    // in values() and valueOf(String), without obstructing
-                    // simplification.
-                    if (!isSimpleEnum(clazz)                                       ||
-                        (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0 ||
-                        constantInstruction.opcode != InstructionConstants.OP_CHECKCAST)
+                    // Casts in values() and valueOf(String) are ok.
+                    if (constantInstruction.opcode != InstructionConstants.OP_CHECKCAST ||
+                        !isSimpleEnum(clazz)                                            ||
+                        (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0      ||
+                        !isMethodSkippedForCheckcast(method.getName(clazz),
+                                                     method.getDescriptor(clazz)))
                     {
                         if (DEBUG)
                         {
@@ -415,12 +414,11 @@ implements   ClassVisitor,
      */
     private boolean isSupportedMethod(String name, String type)
     {
-        return
-            name.equals(ClassConstants.METHOD_NAME_ORDINAL) &&
-            type.equals(ClassConstants.METHOD_TYPE_ORDINAL) ||
+        return name.equals(ClassConstants.METHOD_NAME_ORDINAL) &&
+               type.equals(ClassConstants.METHOD_TYPE_ORDINAL) ||
 
-            name.equals(ClassConstants.METHOD_NAME_CLONE) &&
-            type.equals(ClassConstants.METHOD_TYPE_CLONE);
+               name.equals(ClassConstants.METHOD_NAME_CLONE) &&
+               type.equals(ClassConstants.METHOD_TYPE_CLONE);
     }
 
 
@@ -429,8 +427,18 @@ implements   ClassVisitor,
      */
     private boolean isUnsupportedMethod(String name, String type)
     {
-        return
-            name.equals(ClassConstants.METHOD_NAME_VALUEOF);
+        return name.equals(ClassConstants.METHOD_NAME_VALUEOF);
+    }
+
+
+    /**
+     * Returns whether the specified enum method shall be skipped when
+     * analyzing checkcast instructions.
+     */
+    private boolean isMethodSkippedForCheckcast(String name, String type)
+    {
+        return name.equals(ClassConstants.METHOD_NAME_VALUEOF) ||
+               name.equals(ClassConstants.METHOD_NAME_VALUES);
     }
 
 

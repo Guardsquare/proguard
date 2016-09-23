@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -504,7 +504,7 @@ implements   AttributeVisitor,
                 emptyInvokingStack =
                     !inlining &&
                     stackSizeComputer.isReachable(offset) &&
-                    stackSizeComputer.getStackSize(offset) == 0;
+                    stackSizeComputer.getStackSizeAfter(offset) == 0;
 
                 variableOffset += codeAttribute.u2maxLocals;
 
@@ -622,7 +622,10 @@ implements   AttributeVisitor,
             (!CatchExceptionMarker.catchesExceptions(programMethod) ||
              emptyInvokingStack)                                                                  &&
 
-            // Only inline the method if it comes from the a class with at most
+            // Only inline the method if it always returns with an empty
+            // stack.
+            !NonEmptyStackReturnMarker.returnsWithNonEmptyStack(programMethod)                    &&
+
             // a subset of the initialized superclasses.
             ((accessFlags & ClassConstants.ACC_STATIC) == 0 ||
              programClass.equals(targetClass)                        ||
@@ -657,19 +660,37 @@ implements   AttributeVisitor,
 
     public void visitLineNumberInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberInfo lineNumberInfo)
     {
-        String newSource = lineNumberInfo.getSource() != null ?
-            lineNumberInfo.getSource() :
-            source;
+        try
+        {
+            String newSource = lineNumberInfo.getSource() != null ?
+                lineNumberInfo.getSource() :
+                source;
 
-        LineNumberInfo newLineNumberInfo = newSource != null ?
-            new ExtendedLineNumberInfo(lineNumberInfo.u2startPC,
-                                       lineNumberInfo.u2lineNumber,
-                                       newSource) :
-            new LineNumberInfo(lineNumberInfo.u2startPC,
-                               lineNumberInfo.u2lineNumber);
+            LineNumberInfo newLineNumberInfo = newSource != null ?
+                new ExtendedLineNumberInfo(lineNumberInfo.u2startPC,
+                                           lineNumberInfo.u2lineNumber,
+                                           newSource) :
+                new LineNumberInfo(lineNumberInfo.u2startPC,
+                                   lineNumberInfo.u2lineNumber);
 
-        minimumLineNumberIndex =
-            codeAttributeComposer.insertLineNumber(minimumLineNumberIndex, newLineNumberInfo) + 1;
+            minimumLineNumberIndex =
+                codeAttributeComposer.insertLineNumber(minimumLineNumberIndex, newLineNumberInfo) + 1;
+        }
+        catch (IllegalArgumentException e)
+        {
+            if (DEBUG)
+            {
+                System.err.println("Invalid line number while inlining method:");
+                System.err.println("  Target class   = ["+targetClass.getName()+"]");
+                System.err.println("  Target method  = ["+targetMethod.getName(targetClass)+targetMethod.getDescriptor(targetClass)+"]");
+                if (inlining)
+                {
+                    System.err.println("  Inlined class  = ["+clazz.getName()+"]");
+                    System.err.println("  Inlined method = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
+                }
+                System.err.println("  Exception      = ["+e.getClass().getName()+"] ("+e.getMessage()+")");
+            }
+        }
     }
 
 

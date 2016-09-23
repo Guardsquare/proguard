@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -64,10 +64,13 @@ public class MethodTypeConstant extends Constant
      * Creates a new MethodTypeConstant with the given descriptor index.
      * @param u2descriptorIndex the index of the descriptor in the constant
      *                          pool.
+     * @param referencedClasses the classes referenced by the descriptor.
      */
-    public MethodTypeConstant(int u2descriptorIndex)
+    public MethodTypeConstant(int     u2descriptorIndex,
+                              Clazz[] referencedClasses)
     {
         this.u2descriptorIndex = u2descriptorIndex;
+        this.referencedClasses = referencedClasses;
     }
 
 

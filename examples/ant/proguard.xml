@@ -24,11 +24,11 @@
 
     <libraryjar file="${java.home}/lib/rt.jar" />
     <libraryjar file="/usr/local/java/ant/lib/ant.jar" />
-    <libraryjar file="/usr/local/java/gradle-2.1/lib/plugins/gradle-plugins-2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-2.1/lib/gradle-base-services-2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-2.1/lib/gradle-base-services-groovy-2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-2.1/lib/gradle-core-2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-2.1/lib/groovy-all-2.3.6.jar" />
+    <libraryjar file="/usr/local/java/gradle-2.12/lib/plugins/gradle-plugins-2.12.jar" />
+    <libraryjar file="/usr/local/java/gradle-2.12/lib/gradle-base-services-2.12.jar" />
+    <libraryjar file="/usr/local/java/gradle-2.12/lib/gradle-base-services-groovy-2.12.jar" />
+    <libraryjar file="/usr/local/java/gradle-2.12/lib/gradle-core-2.12.jar" />
+    <libraryjar file="/usr/local/java/gradle-2.12/lib/groovy-all-2.4.4.jar" />
     <libraryjar file="/usr/local/java/wtk2.5.2/wtklib/kenv.zip" />
 
     <!-- Adapt the resource file names, based on the corresponding obfuscated

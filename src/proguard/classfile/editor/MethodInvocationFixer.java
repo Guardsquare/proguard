@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -162,11 +162,15 @@ implements   AttributeVisitor,
             // an interface method.
             else
             {
-                // But is it not a virtual invocation (or a special invocation,
-                // but not a super call)?
+                // But is it not a virtual invocation?
                 if (opcode != InstructionConstants.OP_INVOKEVIRTUAL &&
-                    (opcode != InstructionConstants.OP_INVOKESPECIAL ||
-                     clazz.equals(referencedClass) ||
+                    (// Replace any non-invokespecial.
+                     opcode != InstructionConstants.OP_INVOKESPECIAL            ||
+                     // For invokespecial, replace invocations from static
+                     // methods, invocations from the same class, and
+                     // invocations to non-superclasses.
+                     (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ||
+                     clazz.equals(referencedClass)                              ||
                      !clazz.extends_(referencedClass)))
                 {
                     // Replace the invocation by an invokevirtual instruction.
@@ -196,7 +200,6 @@ implements   AttributeVisitor,
         // Remember the referenced class. Note that we're interested in the
         // class of the method reference, not in the class in which the
         // method was actually found, unless it is an array type.
-        //
         if (ClassUtil.isInternalArrayType(refConstant.getClassName(clazz)))
         {
             // For an array type, the class will be java.lang.Object.
@@ -228,16 +231,9 @@ implements   AttributeVisitor,
                        ConstantInstruction constantInstruction,
                        Instruction         replacementInstruction)
     {
-        System.out.println("MethodInvocationFixer:");
-        System.out.println("  Class       = "+clazz.getName());
-        System.out.println("  Method      = "+method.getName(clazz)+method.getDescriptor(clazz));
-        System.out.println("  Instruction = "+constantInstruction.toString(offset));
-        System.out.println("  -> Class    = "+referencedClass);
-        System.out.println("     Method   = "+referencedMethod);
-        if ((referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0)
-        {
-            System.out.println("     Parameter size   = "+(ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)));
-        }
-        System.out.println("  Replacement instruction = "+replacementInstruction.toString(offset));
+        System.out.println("MethodInvocationFixer ["+clazz.getName()+"."+
+                           method.getName(clazz)+method.getDescriptor(clazz)+"] "+
+                           constantInstruction.toString(offset)+" -> "+
+                           replacementInstruction.toString(offset));
     }
 }

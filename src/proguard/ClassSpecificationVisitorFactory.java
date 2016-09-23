@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,8 +20,9 @@
  */
 package proguard;
 
+import proguard.classfile.ClassConstants;
 import proguard.classfile.attribute.annotation.visitor.*;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.visitor.*;
 
 import java.util.List;
@@ -136,7 +137,7 @@ public class ClassSpecificationVisitorFactory
                                                           MemberVisitor          memberVisitor)
     {
         // If specified, let the class visitor also visit the descriptor
-        // classes.
+        // classes and the signature classes.
         if (keepClassSpecification.markDescriptorClasses &&
             classVisitor != null)
         {
@@ -145,7 +146,12 @@ public class ClassSpecificationVisitorFactory
                 new MultiMemberVisitor(new MemberVisitor[]
                 {
                     memberVisitor,
-                    new MemberDescriptorReferencedClassVisitor(classVisitor)
+
+                    new MemberDescriptorReferencedClassVisitor(classVisitor),
+
+                    new AllAttributeVisitor(
+                    new AttributeNameFilter(ClassConstants.ATTR_Signature,
+                    new ReferencedClassVisitor(classVisitor)))
                 });
         }
 

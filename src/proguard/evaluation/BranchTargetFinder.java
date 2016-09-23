@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,7 +18,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.optimize.peephole;
+package proguard.evaluation;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
@@ -28,12 +28,14 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.optimize.evaluation.PartialEvaluator;
 
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor finds all instruction offsets, branch targets, and
- * exception targets in the CodeAttribute objects that it visits.
+ * This AttributeVisitor finds all instruction offsets, branch targets,
+ * exception offsets, and subroutine offsets in the CodeAttribute instances
+ * that it visits.
  *
  * @author Eric Lafortune
  */
@@ -50,7 +52,7 @@ implements   AttributeVisitor,
     private static       boolean DEBUG = System.getProperty("btf") != null;
     //*/
 
-    public static final int NONE = -1;
+    public static final int NONE = PartialEvaluator.NONE;
 
     // We'll explicitly mark instructions that are not part of a subroutine,
     // with NO_SUBROUTINE. Subroutines may just branch back into normal code

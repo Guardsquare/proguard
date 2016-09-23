@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -259,20 +259,27 @@ public class TypedReferenceValue extends ReferenceValue
             Clazz thisReferencedClass  = this.referencedClass;
             Clazz otherReferencedClass = other.referencedClass;
 
+            // Is one class simply an extension of the other one?
+            // We're checking the class name instead of the referenced class,
+            // in case the referenced class is not set, e.g. for a caught
+            // java.lang.Throwable.
+            if (thisReferencedClass != null &&
+                thisReferencedClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(otherType)))
+            {
+                return typedReferenceValue(other, mayBeNull);
+            }
+
+            if (otherReferencedClass != null &&
+                otherReferencedClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(thisType)))
+            {
+                return typedReferenceValue(this, mayBeNull);
+            }
+
+            // Otherwise, we really need both referenced classes,
+            // so we can investigate their hierarchies.
             if (thisReferencedClass  != null &&
                 otherReferencedClass != null)
             {
-                // Is one class simply an extension of the other one?
-                if (thisReferencedClass.extendsOrImplements(otherReferencedClass))
-                {
-                    return typedReferenceValue(other, mayBeNull);
-                }
-
-                if (otherReferencedClass.extendsOrImplements(thisReferencedClass))
-                {
-                    return typedReferenceValue(this, mayBeNull);
-                }
-
                 // Do the classes have a non-trivial common superclass?
                 Clazz commonClass = findCommonClass(thisReferencedClass,
                                                     otherReferencedClass,

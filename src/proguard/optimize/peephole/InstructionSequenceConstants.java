@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,6 +23,7 @@ package proguard.optimize.peephole;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.instruction.*;
+import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.visitor.ClassPrinter;
 
 /**
@@ -222,8 +223,12 @@ public class InstructionSequenceConstants
 
     private static final int SENTINEL                                  = 146;
 
+    // The arrays with constants and instructions used to be static,
+    // but now they are initialized with references to classes and
+    // class members, inside an instance of this class. As an added
+    // benefit, they can be garbage collected after they have been used.
 
-    public static final Constant[] CONSTANTS = new Constant[]
+    public final Constant[] CONSTANTS = new Constant[]
     {
         new IntegerConstant(32768),
         new IntegerConstant(65536),
@@ -303,7 +308,7 @@ public class InstructionSequenceConstants
         new MethodrefConstant(CLASS_STRINGBUILDER, NAME_AND_TYPE_LENGTH, null, null),
         new MethodrefConstant(CLASS_STRINGBUILDER, NAME_AND_TYPE_TOSTRING, null, null),
 
-        new ClassConstant(UTF8_STRING,  null),
+        new ClassConstant(UTF8_STRING,        null),
         new ClassConstant(UTF8_STRINGBUFFER,  null),
         new ClassConstant(UTF8_STRINGBUILDER, null),
 
@@ -384,7 +389,7 @@ public class InstructionSequenceConstants
         new Utf8Constant(ClassConstants.METHOD_TYPE_OBJECT_STRING_BUILDER),
     };
 
-    public static final Instruction[][][] VARIABLE = new Instruction[][][]
+    public final Instruction[][][] VARIABLE = new Instruction[][][]
     {
         {   // nop = nothing
             {
@@ -5031,10 +5036,43 @@ public class InstructionSequenceConstants
 
 
     /**
+     * Creates a new instance of InstructionSequenceConstants, with constants
+     * that reference the given class pools.
+     */
+    public InstructionSequenceConstants(ClassPool programClassPool,
+                                        ClassPool libraryClassPool)
+    {
+        // Initialize the references in the constants.
+        ClassReferenceInitializer initializer =
+            new ClassReferenceInitializer(programClassPool,
+                                          libraryClassPool,
+                                          null, null, null, null);
+
+        // We'll have to create a dummy class for the initializer.
+        ProgramClass dummyClass = new ProgramClass();
+        dummyClass.constantPool        = CONSTANTS;
+        dummyClass.u2constantPoolCount = CONSTANTS.length;
+
+        // We'll have to go over the method reference constants and class
+        // constants that don't contain wildcard indices.
+        for (int index = METHOD_STRING_EQUALS; index < NAME_AND_TYPE_I; index++)
+        {
+            dummyClass.constantPoolEntryAccept(index, initializer);
+        }
+    }
+
+
+    /**
      * Prints out the constants and the instruction sequences.
      */
     public static void main(String[] args)
     {
+        InstructionSequenceConstants constants =
+            new InstructionSequenceConstants(new ClassPool(),
+                                             new ClassPool());
+
+        Constant[] CONSTANTS = constants.CONSTANTS;
+
         ProgramClass clazz = new ProgramClass();
         clazz.constantPool = CONSTANTS;
 

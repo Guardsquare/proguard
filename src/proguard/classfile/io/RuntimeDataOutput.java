@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,6 +25,9 @@ import java.io.*;
 /**
  * This class delegates its method calls to the corresponding DataOutput methods,
  * converting its IOExceptions to RuntimeExceptions.
+ *
+ * The class provides two convenience methods that additionally check whether the
+ * written values are unsigned resp. signed short values before writing them.
  *
  * @author Eric Lafortune
  */
@@ -194,6 +197,40 @@ final class RuntimeDataOutput
         {
             throw new RuntimeException(ex.getMessage());
         }
+    }
+
+
+    /**
+     * Checks if the given value is an unsigned short value before writing it.
+     *
+     * @throws IllegalArgumentException if the value is not an unsigned short value.
+     * @see #writeShort(int)
+     */
+    public void writeUnsignedShort(int v)
+    {
+        if ((v & 0xffff) != v)
+        {
+            throw new IllegalArgumentException("Overflow of unsigned short value ["+v+"]");
+        }
+
+        writeShort(v);
+    }
+
+
+    /**
+     * Checks if the given value is a signed short value before writing it.
+     *
+     * @throws IllegalArgumentException if the value is not a signed short value.
+     * @see #writeShort(int)
+     */
+    public void writeSignedShort(int v)
+    {
+        if ((short)v != v)
+        {
+            throw new IllegalArgumentException("Overflow of signed short value ["+v+"]");
+        }
+
+        writeShort(v);
     }
 
 

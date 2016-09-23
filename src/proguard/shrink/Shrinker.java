@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -166,16 +166,25 @@ public class Shrinker
 
         // Check if we have at least some output classes.
         int newProgramClassPoolSize = newProgramClassPool.size();
-        if (newProgramClassPoolSize == 0)
-        {
-            throw new IOException("The output jar is empty. Did you specify the proper '-keep' options?");
-        }
 
         if (configuration.verbose)
         {
             System.out.println("Removing unused program classes and class elements...");
             System.out.println("  Original number of program classes: " + originalProgramClassPoolSize);
             System.out.println("  Final number of program classes:    " + newProgramClassPoolSize);
+        }
+
+        if (newProgramClassPoolSize == 0 &&
+            (configuration.warn == null || !configuration.warn.isEmpty()))
+        {
+            if (configuration.ignoreWarnings)
+            {
+                System.err.println("Warning: the output jar is empty. Did you specify the proper '-keep' options?");
+            }
+            else
+            {
+                throw new IOException("The output jar is empty. Did you specify the proper '-keep' options?");
+            }
         }
 
         return newProgramClassPool;

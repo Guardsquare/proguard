@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -248,6 +248,12 @@ implements   ClassVisitor,
         // Change the referenced class.
         classConstant.referencedClass =
             updateReferencedClass(classConstant.referencedClass);
+    }
+
+
+    public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
+    {
+        updateReferencedClasses(methodTypeConstant.referencedClasses);
     }
 
 

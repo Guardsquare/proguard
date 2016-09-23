@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,6 +27,7 @@ import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.evaluation.BranchTargetFinder;
 
 /**
  * This AttributeVisitor redirects unconditional branches so any common code
@@ -114,7 +115,7 @@ implements   AttributeVisitor,
             {
                 if (DEBUG)
                 {
-                    System.out.println("GotoCommonCodeReplacer: "+clazz.getName()+"."+method.getName(clazz)+" (["+(offset-commonCount)+"] - "+branchInstruction.toString(offset)+" -> "+targetOffset+")");
+                    System.out.println("GotoCommonCodeReplacer: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+" (["+(offset-commonCount)+"] - "+branchInstruction.toString(offset)+" -> "+targetOffset+")");
                 }
 
                 // Delete the common instructions.

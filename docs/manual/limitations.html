@@ -11,12 +11,12 @@
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  document.write('<a class="largebutton" target="_top" href="../index.html#manual/limitations.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+  document.write('<a class="largebutton" target="_top" href="../index.html#manual/limitations.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
 <noscript>
 <a class="largebutton" target="_top"  href="../index.html#manual/limitations.html">ProGuard index</a>
-<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.guardsquare.com/dexguard">DexGuard</a>
 <a class="largebutton" target="_top"  href="http://www.guardsquare.com/">GuardSquare</a>
 <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
 </noscript>
@@ -45,13 +45,6 @@ which are easily avoided or resolved:
     assumption be false, you'll have to switch off optimization using
     the <code>-dontoptimize</code> option.</li>
 
-<li>If an input jar and a library jar contain classes in the <b>same
-    package</b>, the obfuscated output jar may contain class names that
-    overlap with class names in the library jar. This is most likely if the
-    library jar has been obfuscated before, as it will then probably contain
-    classes named 'a', 'b', etc. Packages should therefore never be split
-    across input jars and library jars.</li>
-
 <li>When obfuscating, ProGuard writes out class files named
     "<code>a.class</code>", "<code>b.class</code>", etc. If a package contains
     a large number of classes, ProGuard may also write out
@@ -63,7 +56,7 @@ which are easily avoided or resolved:
 
 <hr />
 <address>
-Copyright &copy; 2002-2015
+Copyright &copy; 2002-2016
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

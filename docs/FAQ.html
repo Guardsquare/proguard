@@ -11,12 +11,12 @@
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  document.write('<a class="largebutton" target="_top" href="index.html#FAQ.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+  document.write('<a class="largebutton" target="_top" href="index.html#FAQ.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
 <noscript>
 <a class="largebutton" target="_top"  href="index.html#FAQ.html">ProGuard index</a>
-<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.guardsquare.com/dexguard">DexGuard</a>
 <a class="largebutton" target="_top"  href="http://www.guardsquare.com/">GuardSquare</a>
 <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
 </noscript>
@@ -35,8 +35,7 @@ if (window.self==window.top)
     application?</a></li>
 <li><a href="#jdk1.4">Does <b>ProGuard</b> work with Java 2, 5, ..., 8?</a></li>
 <li><a href="#jme">Does <b>ProGuard</b> work with Java Micro Edition?</a></li>
-<li><a href="#android">Does <b>ProGuard</b> work for Google Android
-    code?</a></li>
+<li><a href="#android">Does <b>ProGuard</b> work for Android apps?</a></li>
 <li><a href="#blackberry">Does <b>ProGuard</b> work for Blackberry
     code?</a></li>
 <li><a href="#ant">Does <b>ProGuard</b> have support for Ant?</a></li>
@@ -55,6 +54,8 @@ if (window.self==window.top)
     keywords?</a></li>
 <li><a href="#stacktrace">Can <b>ProGuard</b> reconstruct obfuscated stack
     traces?</a></li>
+<li><a href="#dexguard">How is <b>DexGuard</b> different from
+    <b>ProGuard</b>?</a></li>
 </ol>
 
 <h3><a name="shrinking">What is shrinking?</a></h3>
@@ -128,7 +129,7 @@ Some notable optimizations that aren't supported yet:
 <ul>
 <li>Moving constant expressions out of loops.</li>
 <li>Optimizations that require escape analysis
-    (<a href="http://www.saikoa.com/dexguard" target="_top">DexGuard</a>
+    (<a href="http://www.guardsquare.com/dexguard" target="_top">DexGuard</a>
     does).</li>
 </ul>
 
@@ -158,15 +159,15 @@ preverifier.
 <b>ProGuard</b> also comes with an obfuscator plug-in for the JME Wireless
 Toolkit.
 
-<h3><a name="android">Does <b>ProGuard</b> work for Google Android code?</a></h3>
+<h3><a name="android">Does <b>ProGuard</b> work for Android apps?</a></h3>
 
-Yes. Google's <code>dx</code> compiler converts ordinary jar files into files
-that run on Android devices. By preprocessing the original jar files,
-<b>ProGuard</b> can significantly reduce the file sizes and boost the run-time
-performance of the code. It is distributed as part of the Android SDK.
-<a href="http://www.saikoa.com/dexguard" target="_top"><b>DexGuard</b></a>,
-<b>ProGuard</b>'s closed-source sibling for Android, offers additional
-optimizations and more application protection.
+Yes. Google's <code>dx</code> compiler converts Java bytecode into the Dalvik
+bytecode that runs on Android devices. By preprocessing the original
+bytecode, <b>ProGuard</b> can significantly reduce the file sizes and boost
+the run-time performance of the code. It is distributed as part of the Android
+SDK. <a href="http://www.guardsquare.com/dexguard"
+target="_top"><b>DexGuard</b></a>, <b>ProGuard</b>'s closed-source sibling for
+Android, offers additional optimizations and more application protection.
 
 <h3><a name="blackberry">Does <b>ProGuard</b> work for Blackberry code?</a></h3>
 
@@ -201,7 +202,7 @@ plugins that support <b>ProGuard</b>, such as the
 target="other">android-maven-plugin</a> and the
 <a href="http://mavenproguard.sourceforge.net/" target="other">IDFC Maven
 ProGuard Plug-in</a>.
-<a href="http://www.saikoa.com/dexguard" target="_top"><b>DexGuard</b></a>
+<a href="http://www.guardsquare.com/dexguard" target="_top"><b>DexGuard</b></a>
 also comes with a Maven plugin.
 
 <h3><a name="gui">Does <b>ProGuard</b> come with a GUI?</a></h3>
@@ -236,17 +237,18 @@ their names and their contents to the obfuscation that has been applied.
 No. String encryption in program code has to be perfectly reversible by
 definition, so it only improves the obfuscation level. It increases the
 footprint of the code. However, by popular demand, <b>ProGuard</b>'s
-closed-source sibling for Android, <a href="http://www.saikoa.com/dexguard"
+closed-source sibling for Android, <a href="http://www.guardsquare.com/dexguard"
 target="_top"><b>DexGuard</b></a>, does provide string encryption, along with
 more protection techniques against static and dynamic analysis.
 
-<h3><a name="flow">Does <b>ProGuard</b> perform flow obfuscation?</a></h3>
+<h3><a name="flow">Does <b>ProGuard</b> perform control flow obfuscation?</a></h3>
 
 Not explicitly. Control flow obfuscation injects additional branches into the
 bytecode, in an attempt to fool decompilers. <b>ProGuard</b> does not do this,
-in order to avoid any negative effects on performance and size. However, the
-optimization step often already restructures the code to the point where most
-decompilers get confused.
+except to some extent in its optimization techniques. <b>ProGuard</b>'s
+closed-source sibling for Android, <a href="http://www.guardsquare.com/dexguard"
+target="_top"><b>DexGuard</b></a>, does offer control flow obfuscation, as one
+of the many additional techniques to harden Android apps.
 
 <h3><a name="incremental">Does <b>ProGuard</b> support incremental obfuscation?</a></h3>
 
@@ -276,9 +278,26 @@ Erik Andr&eacute; at Badoo has written a
 <a href="https://techblog.badoo.com/blog/2014/10/08/deobfuscating-hprof-memory-dumps/"
 target="other">tool to de-obfuscate HPROF memory dumps</a>.
 
+<h3><a name="dexguard">How is <b>DexGuard</b> different from <b>ProGuard</b>?</a></h3>
+
+<a href="http://www.guardsquare.com/dexguard"><b>DexGuard</b></a> is a
+commercial extension of <b>ProGuard</b>:
+<ul>
+<li><b>DexGuard</b> is specialized for Android applications and libraries: it
+    optimizes and obfuscates not just the bytecode, but also the manifest file,
+    resources, resource files, asset files, and native libraries.</li>
+<li><b>DexGuard</b> focuses on making apps self-defending against reverse
+    engineering and tampering. <b>DexGuard</b>'s techniques for obfuscation,
+    encryption, and detection are a lot stronger than <b>ProGuard</b>'s basic
+    name obfuscation.</li>
+<li><b>DexGuard</b> is backward compatible with <b>ProGuard</b>: it reads the
+    same configuration. It already comes with tuned configuration for the
+    Android runtime and for common Android libraries.</li>
+</ul>
+
 <hr />
 <address>
-Copyright &copy; 2002-2015
+Copyright &copy; 2002-2016
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

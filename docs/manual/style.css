@@ -1,10 +1,55 @@
 @charset "iso-8859-1";
 
+/* Fonts. */
+
+@font-face
+{
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/OpenSans-Regular.eot');
+  src: local('Open Sans'),
+       local('OpenSans'),
+       url('fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'),
+       url('fonts/OpenSans-Regular.woff') format('woff'),
+       url('fonts/OpenSans-Regular.ttf') format('truetype'),
+       url('fonts/OpenSans-Regular.svg#OpenSansRegular') format('svg');
+}
+
+@font-face
+{
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('fonts/OpenSans-Bold.eot');
+  src: local('Open Sans Bold'),
+       local('OpenSans-Bold'),
+       url('fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'),
+       url('fonts/OpenSans-Bold.woff') format('woff'),
+       url('fonts/OpenSans-Bold.ttf') format('truetype'),
+       url('fonts/OpenSans-Bold.svg#OpenSansBold') format('svg');
+}
+
+@font-face
+{
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 400;
+  src: url('fonts/OpenSans-Italic.eot');
+  src: local('Open Sans Italic'),
+       local('OpenSans-Italic'),
+       url('fonts/OpenSans-Italic.eot?#iefix') format('embedded-opentype'),
+       url('fonts/OpenSans-Italic.woff') format('woff'),
+       url('fonts/OpenSans-Italic.ttf') format('truetype'),
+       url('fonts/OpenSans-Italic.svg#OpenSansItalic') format('svg');
+}
+
 /* Global settings. */
 
 body
 {
   background: #FFFFFF;
+  font-family: "Open Sans",Verdana,sans-serif;
 }
 
 h1

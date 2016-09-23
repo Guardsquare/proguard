@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -313,6 +313,13 @@ implements   ClassVisitor,
                         className = ClassConstants.NAME_JAVA_LANG_OBJECT;
 
                         referencedClasses[referencedClassIndex] = null;
+                    }
+
+                    // Use a short name if it's an inner class after a '.'
+                    // separator.
+                    else if (classEnumeration.isInnerClassName())
+                    {
+                        className = className.substring(className.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
                     }
 
                     referencedClassIndex++;

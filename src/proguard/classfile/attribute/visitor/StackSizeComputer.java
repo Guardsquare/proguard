@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,8 +26,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassPrinter;
-
-import java.util.Arrays;
+import proguard.util.ArrayUtil;
 
 /**
  * This AttributeVisitor computes the stack sizes at all instruction offsets
@@ -48,8 +47,9 @@ implements   AttributeVisitor,
     //*/
 
 
-    private boolean[] evaluated  = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private int[]     stackSizes = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private boolean[] evaluated        = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
+    private int[]     stackSizesBefore = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private int[]     stackSizesAfter  = new int[ClassConstants.TYPICAL_CODE_LENGTH];
 
     private boolean exitInstructionBlock;
 
@@ -68,17 +68,32 @@ implements   AttributeVisitor,
 
 
     /**
-     * Returns the stack size at the given instruction offset of the most
+     * Returns the stack size before the given instruction offset of the most
      * recently visited code attribute.
      */
-    public int getStackSize(int instructionOffset)
+    public int getStackSizeBefore(int instructionOffset)
     {
         if (!evaluated[instructionOffset])
         {
-            throw new IllegalArgumentException("Unknown stack size at unreachable instruction offset ["+instructionOffset+"]");
+            throw new IllegalArgumentException("Unknown stack size before unreachable instruction offset ["+instructionOffset+"]");
         }
 
-        return stackSizes[instructionOffset];
+        return stackSizesBefore[instructionOffset];
+    }
+
+
+    /**
+     * Returns the stack size after the given instruction offset of the most
+     * recently visited code attribute.
+     */
+    public int getStackSizeAfter(int instructionOffset)
+    {
+        if (!evaluated[instructionOffset])
+        {
+            throw new IllegalArgumentException("Unknown stack size after unreachable instruction offset ["+instructionOffset+"]");
+        }
+
+        return stackSizesAfter[instructionOffset];
     }
 
 
@@ -133,17 +148,12 @@ implements   AttributeVisitor,
             System.out.println("StackSizeComputer: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
         }
 
-        // Try to reuse the previous array.
         int codeLength = codeAttribute.u4codeLength;
-        if (evaluated.length < codeLength)
-        {
-            evaluated  = new boolean[codeLength];
-            stackSizes = new int[codeLength];
-        }
-        else
-        {
-            Arrays.fill(evaluated, 0, codeLength, false);
-        }
+
+        // Make sure the global arrays are sufficiently large.
+        evaluated        = ArrayUtil.ensureArraySize(evaluated, codeLength, false);
+        stackSizesBefore = ArrayUtil.ensureArraySize(stackSizesBefore, codeLength, 0);
+        stackSizesAfter  = ArrayUtil.ensureArraySize(stackSizesAfter,  codeLength, 0);
 
         // The initial stack is always empty.
         stackSize    = 0;
@@ -309,7 +319,8 @@ implements   AttributeVisitor,
         while (!evaluated[instructionOffset])
         {
             // Mark the instruction as evaluated.
-            evaluated[instructionOffset] = true;
+            evaluated[instructionOffset]        = true;
+            stackSizesBefore[instructionOffset] = stackSize;
 
             Instruction instruction = InstructionFactory.create(codeAttribute.code,
                                                                 instructionOffset);
@@ -338,8 +349,8 @@ implements   AttributeVisitor,
                                                    method.getDescriptor(clazz)+"]");
             }
 
-            stackSizes[instructionOffset] =
             stackSize += instruction.stackPushCount(clazz);
+            stackSizesAfter[instructionOffset] = stackSize;
 
             // Remember the maximum stack size.
             if (maxStackSize < stackSize)

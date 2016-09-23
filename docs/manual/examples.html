@@ -11,12 +11,12 @@
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  document.write('<a class="largebutton" target="_top" href="../index.html#manual/examples.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+  document.write('<a class="largebutton" target="_top" href="../index.html#manual/examples.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
 <noscript>
 <a class="largebutton" target="_top"  href="../index.html#manual/examples.html">ProGuard index</a>
-<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.guardsquare.com/dexguard">DexGuard</a>
 <a class="largebutton" target="_top"  href="http://www.guardsquare.com/">GuardSquare</a>
 <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
 </noscript>
@@ -49,7 +49,9 @@ Some typical useful configurations:
 <li><a href="#database">Processing database drivers</a></li>
 <li><a href="#componentui">Processing ComponentUI classes</a></li>
 <li><a href="#rmi">Processing RMI code</a></li>
-<li><a href="#injection">Processing resource injection</a></li>
+<li><a href="#injection">Processing dependency injection</a></li>
+<li><a href="#dagger">Processing Dagger code</a></li>
+<li><a href="#butterknife">Processing Butterknife code</a></li>
 <li><a href="#resourcefiles">Processing resource files</a></li>
 <li><a href="#manifestfiles">Processing manifest files</a></li>
 <li><a href="#stacktrace">Producing useful obfuscated stack traces</a></li>
@@ -1045,9 +1047,9 @@ The <code>Exceptions</code> attribute has to be kept too, because the RMI
 handling code performs introspection to check whether the method signatures
 are compatible.
 
-<h3><a name="injection">Processing resource injection</a></h3>
+<h3><a name="injection">Processing dependency injection</a></h3>
 
-If your application is using JEE-style resource injection, the application
+If your application is using JEE-style dependency injection, the application
 container will automatically assign instances of resource classes to fields and
 methods that are annotated with <code>@Resource</code>. The container applies
 introspection, even accessing private class members directly. It typically
@@ -1065,6 +1067,74 @@ The Spring framework has another similar annotation <code>@Autowired</code>:
     @org.springframework.beans.factory.annotation.Autowired *;
 }
 </pre>
+
+<h3><a name="dagger">Processing Dagger code</a></h3>
+
+If your Android application includes Dagger for dependency injection, you need
+a few lines of configuration, since Dagger heavily relies on reflection to tie
+together the code at runtime. You need to preserve the annotated class
+members, the generated classes, and a utility class:
+<pre>
+-keepclassmembers,allowobfuscation class * {
+    @dagger.** *;
+}
+
+-keep class **$$ModuleAdapter
+-keep class **$$InjectAdapter
+-keep class **$$StaticInjection
+
+-keepnames class dagger.Lazy
+</pre>
+<p>
+Unfortunately, you still need to explicitly preserve the corresponding base
+classes from your project. For example, for a generated class like
+<code>com.example.SomeClass$$ModuleAdapter</code>, you still need to specify:
+<pre>
+-keep class com.example.SomeClass
+</pre>
+<p>
+Dagger can then still combine the corresponding pairs of classes, based on
+their names. You can figure out the base classes by listing the generated
+classes in the <code>gen</code> directory of your project (e.g.
+<code>com/examples/SomeClass$$ModuleAdapter.class</code>).
+<p>
+Dagger 2 no longer relies on reflection with these naming conventions, which
+makes life a lot easier.
+
+<h3><a name="butterknife">Processing Butterknife code</a></h3>
+
+If your Android application includes Butterknife to inject views, you also
+need a few lines of configuration, since Butterknife relies on reflection to
+tie together the code at runtime:
+<pre>
+-keep @interface butterknife.*
+
+-keepclasseswithmembers class * {
+    @butterknife.* &lt;fields&gt;;
+}
+
+-keepclasseswithmembers class * {
+    @butterknife.* &lt;methods&gt;;
+}
+
+-keepclasseswithmembers class * {
+    @butterknife.On* &lt;methods&gt;;
+}
+
+-keep class **$$ViewInjector {
+    public static void inject(...);
+    public static void reset(...);
+}
+
+-keep class **$$ViewBinder {
+    public static void bind(...);
+    public static void unbind(...);
+}
+</pre>
+<p>
+These settings preserve the Butterknife annotations, the annotated fields and
+methods, and the generated classes and methods that Butterknife accesses by
+reflection.
 
 <h3><a name="resourcefiles">Processing resource files</a></h3>
 
@@ -1263,7 +1333,10 @@ methods:
 }
 </pre>
 <p>
-The wildcards are a shortcut to match all versions of the methods.
+The wildcards are a shortcut to match all versions of the methods. Be careful
+not to use a <code>*</code> wildcard to match all methods, because it would
+also match methods like <code>wait()</code>, higher up the hierarchy. Removing
+those invocations will generally break your code.
 <p>
 Note that you generally can't remove logging code that uses
 <code>System.out.println</code>, since you would be removing all invocations
@@ -1613,7 +1686,7 @@ illustrate some of the possibilities.
 
 <hr />
 <address>
-Copyright &copy; 2002-2015
+Copyright &copy; 2002-2016
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

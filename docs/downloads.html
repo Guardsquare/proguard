@@ -12,12 +12,12 @@
 <script type="text/javascript" language="JavaScript">
 <!--
 if (window.self==window.top)
-  document.write('<a class="largebutton" target="_top" href="index.html#downloads.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.saikoa.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
+  document.write('<a class="largebutton" target="_top" href="index.html#downloads.html">ProGuard index</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/dexguard">DexGuard</a> <a class="largebutton" target="_top" href="http://www.guardsquare.com/">GuardSquare</a> <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>')
 //-->
 </script>
 <noscript>
 <a class="largebutton" target="_top"  href="index.html#downloads.html">ProGuard index</a>
-<a class="largebutton" target="_top"  href="http://www.saikoa.com/dexguard">DexGuard</a>
+<a class="largebutton" target="_top"  href="http://www.guardsquare.com/dexguard">DexGuard</a>
 <a class="largebutton" target="_top"  href="http://www.guardsquare.com/">GuardSquare</a>
 <a class="largebutton" target="other" href="http://sourceforge.net/projects/proguard/">Sourceforge</a>
 </noscript>
@@ -29,7 +29,7 @@ License. Please consult the <a href="license.html">license page</a> for more
 details.
 <p>
 <b>ProGuard</b> is written in Java, so it requires a Java Runtime Environment
-   (JRE 1.5 or higher).
+   (JRE 1.6 or higher).
 <p>
 You can download the latest release (containing the program jars, the
 documentation that you're reading now, examples, and the source code) from this
@@ -74,15 +74,38 @@ target="other">proguard-wtk-plugin</a>, and
 <a href="http://search.maven.org/#search|ga|1|a:%22proguard-retrace%22"
 target="other">proguard-retrace</a>.
 
-<h3><div>In beta</div> Version 5.3</h3>
+<h3><div>Sep 2016</div> Version 5.3</h3>
 <ul>
+<li>Avoiding obfuscated name clashes with library classes.
+<li>Fixed processing of generic signatures with inner classes.
+<li>Fixed processing of generic signatures with array types as bounds.
 <li>Fixed processing of wide branch instructions.
+<li>Fixed shrinking of nameless parameters attribute.
+<li>Fixed optimization of code with unreachable exception handlers.
+<li>Fixed optimization of enum types with custom fields.
+<li>Fixed optimization of enum types with custom static methods.
+<li>Fixed optimization of lambda method types.
+<li>Fixed optimization of parameter annotations.
+<li>Fixed optimization of swap/pop constructs.
+<li>Fixed adapting class access for referenced class members.
+<li>Fixed adapting invocations for referenced class members.
+<li>Preserving class member signature classes if
+    <code>includedescriptorclasses</code> is specified.
+<li>Allowing empty output jars if <code>-ignorewarnings</code> is specified.
+<li>Avoiding exceptions when inlining invalid line number instruction offsets.
+<lI>Fixed preverification of wildcard exceptions.
+<li>Fixed ReTrace for field names.
+<li>Fixed ReTrace for negative line numbers.
+<li>Improved ReTrace regular expression for Logback and Log4j.
+<li>Added Gradle build file.
+<li>Updated documentation and examples.
 </ul>
 
 <h3><div>Jan 2015</div> Version 5.2</h3>
 <ul>
 <li>Added encoding of optimized line numbers in ProGuard.
 <li>Added decoding of optimized stack frames in ReTrace.
+<li>Added overflow checks when writing out class files.
 <li>Fixed shrinking of default methods in subinterfaces.
 <li>Fixed optimization of closures with signatures containing merged classes.
 <li>Fixed conservative optimization of instructions that may throw exceptions.
@@ -762,7 +785,7 @@ Upgrade considerations:
 
 <hr />
 <address>
-Copyright &copy; 2002-2015
+Copyright &copy; 2002-2016
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 

@@ -4,16 +4,21 @@
          default = "all"
          basedir = "..">
 
-  <property file = "build/build.properties"/>
+  <property file = "buildscripts/build.properties"/>
   <property name = "src"     value = "src"/>
   <property name = "classes" value = "classes"/>
   <property name = "lib"     value = "lib"/>
 
-  <property name = "gradle.jar1" value = "${gradle.home}/lib/plugins/gradle-plugins-2.2.1.jar"/>
-  <property name = "gradle.jar2" value = "${gradle.home}/lib/gradle-base-services-2.2.1.jar"/>
-  <property name = "gradle.jar3" value = "${gradle.home}/lib/gradle-base-services-groovy-2.2.1.jar"/>
-  <property name = "gradle.jar4" value = "${gradle.home}/lib/gradle-core-2.2.1.jar"/>
-  <property name = "gradle.jar5" value = "${gradle.home}/lib/groovy-all-2.3.6.jar"/>
+  <path id="gradle.path">
+    <fileset dir="${gradle.home}/lib">
+      <include name="plugins/gradle-plugins-*.jar"/>
+      <include name="gradle-logging-*.jar"/>
+      <include name="gradle-base-services-*.jar"/>
+      <include name="gradle-base-services-groovy-*.jar"/>
+      <include name="gradle-core-*.jar"/>
+      <include name="groovy-all-*.jar"/>
+    </fileset>
+  </path>
   <property name = "wtk.jar"     value = "${wtk.home}/wtklib/kenv.zip"/>
 
   <target name = "all"     depends = "basic,options"/>
@@ -124,13 +129,7 @@
     <fail message="Please set the value of the property gradle.home in the file build.properties, if you want to build the optional ProGuard Gradle task.">
       <condition>
         <not>
-          <and>
-            <available file="${gradle.jar1}"/>
-            <available file="${gradle.jar2}"/>
-            <available file="${gradle.jar3}"/>
-            <available file="${gradle.jar4}"/>
-            <available file="${gradle.jar5}"/>
-          </and>
+          <available classname="org.gradle.api.DefaultTask" classpathref="gradle.path"/>
         </not>
       </condition>
     </fail>
@@ -142,13 +141,7 @@
            destdir           = "${classes}"
            includes          = "proguard/gradle/ProGuardTask.java">
       <compilerarg value = "-Xlint:none"/>
-      <classpath>
-        <path location="${gradle.jar1}"/>
-        <path location="${gradle.jar2}"/>
-        <path location="${gradle.jar3}"/>
-        <path location="${gradle.jar4}"/>
-        <path location="${gradle.jar5}"/>
-      </classpath>
+      <classpath refid="gradle.path"/>
     </javac>
 
     <copy todir = "${classes}">

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -36,8 +36,8 @@ public class FramePattern
     // characters, so we're no longer using \\b for classes and class members.
     private static final String REGEX_CLASS       = "(?:[^\\s\":./()]+\\.)*[^\\s\":./()]+";
     private static final String REGEX_CLASS_SLASH = "(?:[^\\s\":./()]+/)*[^\\s\":./()]+";
-    private static final String REGEX_SOURCE_FILE = "(?:[^:()]+)*";
-    private static final String REGEX_LINE_NUMBER = "\\b\\d+\\b";
+    private static final String REGEX_SOURCE_FILE = "[^:()]*";
+    private static final String REGEX_LINE_NUMBER = "-?\\b\\d+\\b";
     private static final String REGEX_TYPE        = REGEX_CLASS + "(?:\\[\\])*";
     private static final String REGEX_MEMBER      = "<?[^\\s\":./()]+>?";
     private static final String REGEX_ARGUMENTS   = "(?:" + REGEX_TYPE + "(?:\\s*,\\s*" + REGEX_TYPE + ")*)?";

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -34,11 +34,12 @@ import java.util.Arrays;
 
 /**
  * This MemberVisitor removes unused parameters in the descriptors of the
- * methods that it visits.
+ * methods that it visits. It also updates the signatures and parameter
+ * annotations.
  *
  * @see ParameterUsageMarker
  * @see VariableUsageMarker
- * @see VariableShrinker
+ * @see ParameterShrinker
  * @author Eric Lafortune
  */
 public class MethodDescriptorShrinker
@@ -87,6 +88,10 @@ implements   MemberVisitor,
 
         if (!newDescriptor.equals(descriptor))
         {
+            // Shrink the signature and parameter annotations,
+            // before shrinking the descriptor itself.
+            programMethod.attributesAccept(programClass, this);
+
             String name    = programMethod.getName(programClass);
             String newName = name;
 
@@ -120,9 +125,6 @@ implements   MemberVisitor,
             {
                 System.out.println("    -> ["+newName+newDescriptor+"]");
             }
-
-            // Shrink the signature and parameter annotations.
-            programMethod.attributesAccept(programClass, this);
 
             // Visit the method, if required.
             if (extraMemberVisitor != null)

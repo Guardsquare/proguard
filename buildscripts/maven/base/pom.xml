@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>5.2.1</version>
+        <version>5.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>proguard-base</artifactId>
@@ -31,6 +31,9 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <includes>
+                        <include>proguard/**.java</include>
+                    </includes>
                     <excludes>
                         <exclude>proguard/gui/**</exclude>
                         <exclude>proguard/ant/**</exclude>

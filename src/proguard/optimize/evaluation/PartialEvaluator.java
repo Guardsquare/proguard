@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,7 +29,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.peephole.BranchTargetFinder;
+import proguard.evaluation.BranchTargetFinder;
 
 import java.util.Arrays;
 
@@ -48,8 +48,8 @@ implements   AttributeVisitor,
     private static final boolean DEBUG         = false;
     private static final boolean DEBUG_RESULTS = false;
     /*/
-    private static boolean DEBUG         = true;
-    private static boolean DEBUG_RESULTS = true;
+    private static boolean DEBUG         = System.getProperty("pe") != null;
+    private static boolean DEBUG_RESULTS = DEBUG;
     //*/
 
     private static final int MAXIMUM_EVALUATION_COUNT = 5;

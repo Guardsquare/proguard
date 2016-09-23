@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -79,6 +79,8 @@ implements   ClassVisitor,
      * Creates a new ClassObfuscator.
      * @param programClassPool        the class pool in which class names
      *                                have to be unique.
+     * @param libraryClassPool        the class pool from which class names
+     *                                have to be avoided.
      * @param classNameFactory        the optional class obfuscation dictionary.
      * @param packageNameFactory      the optional package obfuscation
      *                                dictionary.
@@ -94,6 +96,7 @@ implements   ClassVisitor,
      *                                be freely moved between packages.
      */
     public ClassObfuscator(ClassPool             programClassPool,
+                           ClassPool             libraryClassPool,
                            DictionaryNameFactory classNameFactory,
                            DictionaryNameFactory packageNameFactory,
                            boolean               useMixedCaseClassNames,
@@ -129,8 +132,9 @@ implements   ClassVisitor,
         // Map the root package onto the root package.
         packagePrefixMap.put("", "");
 
-        // Collect all names that have been taken already.
+        // Collect all names that have already been taken.
         programClassPool.classesAccept(new MyKeepCollector());
+        libraryClassPool.classesAccept(new MyKeepCollector());
     }
 
 
@@ -264,7 +268,7 @@ implements   ClassVisitor,
     {
         public void visitProgramClass(ProgramClass programClass)
         {
-            // Does the class already have a new name?
+            // Does the program class already have a new name?
             String newClassName = newClassName(programClass);
             if (newClassName != null)
             {
@@ -291,6 +295,30 @@ implements   ClassVisitor,
 
         public void visitLibraryClass(LibraryClass libraryClass)
         {
+            // Get the new name or the original name of the library class.
+            String newClassName = newClassName(libraryClass);
+            if (newClassName == null)
+            {
+                newClassName = libraryClass.getName();
+            }
+
+            // Remember not to use this name.
+            classNamesToAvoid.add(mixedCaseClassName(newClassName));
+
+            // Are we not aggressively repackaging all obfuscated classes?
+            if (repackageClasses == null ||
+                !allowAccessModification)
+            {
+                String className = libraryClass.getName();
+
+                // Keep the package name for all other classes in the same
+                // package. Do this recursively if we're not doing any
+                // repackaging.
+                mapPackageName(className,
+                               newClassName,
+                               repackageClasses        == null &&
+                               flattenPackageHierarchy == null);
+            }
         }
 
 

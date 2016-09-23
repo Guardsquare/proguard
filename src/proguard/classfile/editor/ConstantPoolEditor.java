@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -654,7 +654,8 @@ public class ConstantPoolEditor
      * type.
      * @return the constant pool index of the MethodTypeConstant.
      */
-    public int addMethodTypeConstant(String type)
+    public int addMethodTypeConstant(String  type,
+                                     Clazz[] referencedClasses)
     {
         int        constantPoolCount = targetClass.u2constantPoolCount;
         Constant[] constantPool      = targetClass.constantPool;
@@ -675,7 +676,8 @@ public class ConstantPoolEditor
             }
         }
 
-        return addConstant(new MethodTypeConstant(addUtf8Constant(type)));
+        return addConstant(new MethodTypeConstant(addUtf8Constant(type),
+                                                  referencedClasses));
     }
 
 

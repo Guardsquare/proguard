@@ -54,10 +54,10 @@
 # If you want to preserve the Gradle task, you'll have to specify the Gradle
 # jars.
 
-#-libraryjars /usr/local/java/gradle-1.3/lib/plugins/gradle-plugins-1.3.jar
-#-libraryjars /usr/local/java/gradle-1.3/lib/gradle-base-services-1.3.jar
-#-libraryjars /usr/local/java/gradle-1.3/lib/gradle-core-1.3.jar
-#-libraryjars /usr/local/java/gradle-1.3/lib/groovy-all-1.8.6.jar
+#-libraryjars /usr/local/java/gradle-2.12/lib/plugins/gradle-plugins-2.12.jar
+#-libraryjars /usr/local/java/gradle-2.12/lib/gradle-base-services-2.12.jar
+#-libraryjars /usr/local/java/gradle-2.12/lib/gradle-core-2.12.jar
+#-libraryjars /usr/local/java/gradle-2.12/lib/groovy-all-2.4.4.jar
 
 #-keep public class proguard.gradle.* {
 #    public *;

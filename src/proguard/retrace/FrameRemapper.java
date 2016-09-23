@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2015 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,15 +32,18 @@ import java.util.*;
  */
 public class FrameRemapper implements MappingProcessor
 {
-    private final Map classMap       = new HashMap();
-    private final Map classFieldMap  = new HashMap();
-    private final Map classMethodMap = new HashMap();
+    // Obfuscated class name -> original class name.
+    private final Map<String,String>                      classMap       = new HashMap<String,String>();
+
+    // Original class name -> obfuscated member name -> member info set.
+    private final Map<String,Map<String,Set<FieldInfo>>>  classFieldMap  = new HashMap<String,Map<String,Set<FieldInfo>>>();
+    private final Map<String,Map<String,Set<MethodInfo>>> classMethodMap = new HashMap<String,Map<String,Set<MethodInfo>>>();
 
 
     /**
      * Transforms the given obfuscated frame back to one or more original frames.
      */
-    public List transform(FrameInfo obfuscatedFrame)
+    public List<FrameInfo> transform(FrameInfo obfuscatedFrame)
     {
         // First remap the class name.
         String originalClassName = originalClassName(obfuscatedFrame.getClassName());
@@ -49,7 +52,7 @@ public class FrameRemapper implements MappingProcessor
             return null;
         }
 
-        List originalFrames = new ArrayList();
+        List<FrameInfo> originalFrames = new ArrayList<FrameInfo>();
 
         // Create any transformed frames with remapped field names.
         transformFieldInfo(obfuscatedFrame,
@@ -84,28 +87,28 @@ public class FrameRemapper implements MappingProcessor
      * @param originalFieldFrames the list in which remapped frames can be
      *                            collected.
      */
-    private void transformFieldInfo(FrameInfo obfuscatedFrame,
-                                    String    originalClassName,
-                                    List      originalFieldFrames)
+    private void transformFieldInfo(FrameInfo       obfuscatedFrame,
+                                    String          originalClassName,
+                                    List<FrameInfo> originalFieldFrames)
     {
         // Class name -> obfuscated field names.
-        Map fieldMap = (Map)classFieldMap.get(originalClassName);
+        Map<String,Set<FieldInfo>> fieldMap = classFieldMap.get(originalClassName);
         if (fieldMap != null)
         {
             // Obfuscated field names -> fields.
             String obfuscatedFieldName = obfuscatedFrame.getFieldName();
-            List fieldList = (List)fieldMap.get(obfuscatedFieldName);
-            if (fieldList != null)
+            Set<FieldInfo> fieldSet = fieldMap.get(obfuscatedFieldName);
+            if (fieldSet != null)
             {
                 String obfuscatedType = obfuscatedFrame.getType();
                 String originalType   = obfuscatedType == null ? null :
                     originalType(obfuscatedType);
 
                 // Find all matching fields.
-                Iterator fieldInfoIterator = fieldList.iterator();
+                Iterator<FieldInfo> fieldInfoIterator = fieldSet.iterator();
                 while (fieldInfoIterator.hasNext())
                 {
-                    FieldInfo fieldInfo = (FieldInfo)fieldInfoIterator.next();
+                    FieldInfo fieldInfo = fieldInfoIterator.next();
                     if (fieldInfo.matches(originalType))
                     {
                         originalFieldFrames.add(new FrameInfo(fieldInfo.originalClassName,
@@ -129,18 +132,18 @@ public class FrameRemapper implements MappingProcessor
      * @param originalMethodFrames the list in which remapped frames can be
      *                             collected.
      */
-    private void transformMethodInfo(FrameInfo obfuscatedFrame,
-                                     String    originalClassName,
-                                     List      originalMethodFrames)
+    private void transformMethodInfo(FrameInfo       obfuscatedFrame,
+                                     String          originalClassName,
+                                     List<FrameInfo> originalMethodFrames)
     {
         // Class name -> obfuscated method names.
-        Map methodMap = (Map)classMethodMap.get(originalClassName);
+        Map<String,Set<MethodInfo>> methodMap = classMethodMap.get(originalClassName);
         if (methodMap != null)
         {
             // Obfuscated method names -> methods.
             String obfuscatedMethodName = obfuscatedFrame.getMethodName();
-            Set methodList = (Set)methodMap.get(obfuscatedMethodName);
-            if (methodList != null)
+            Set<MethodInfo> methodSet = methodMap.get(obfuscatedMethodName);
+            if (methodSet != null)
             {
                 int obfuscatedLineNumber = obfuscatedFrame.getLineNumber();
 
@@ -153,10 +156,10 @@ public class FrameRemapper implements MappingProcessor
                     originalArguments(obfuscatedArguments);
 
                 // Find all matching methods.
-                Iterator methodInfoIterator = methodList.iterator();
+                Iterator<MethodInfo> methodInfoIterator = methodSet.iterator();
                 while (methodInfoIterator.hasNext())
                 {
-                    MethodInfo methodInfo = (MethodInfo)methodInfoIterator.next();
+                    MethodInfo methodInfo = methodInfoIterator.next();
                     if (methodInfo.matches(obfuscatedLineNumber,
                                            originalType,
                                            originalArguments))
@@ -195,7 +198,7 @@ public class FrameRemapper implements MappingProcessor
      */
     private String originalArguments(String obfuscatedArguments)
     {
-        StringBuffer originalArguments = new StringBuffer();
+        StringBuilder originalArguments = new StringBuilder();
 
         int startIndex = 0;
         while (true)
@@ -235,7 +238,7 @@ public class FrameRemapper implements MappingProcessor
      */
     private String originalClassName(String obfuscatedClassName)
     {
-        String originalClassName = (String)classMap.get(obfuscatedClassName);
+        String originalClassName = classMap.get(obfuscatedClassName);
 
         return originalClassName != null ?
             originalClassName :
@@ -278,25 +281,25 @@ public class FrameRemapper implements MappingProcessor
                                     String newFieldName)
     {
         // Obfuscated class name -> obfuscated field names.
-        Map fieldMap = (Map)classFieldMap.get(newClassName);
+        Map<String,Set<FieldInfo>> fieldMap = classFieldMap.get(newClassName);
         if (fieldMap == null)
         {
-            fieldMap = new HashMap();
+            fieldMap = new HashMap<String,Set<FieldInfo>>();
             classFieldMap.put(newClassName, fieldMap);
         }
 
         // Obfuscated field name -> fields.
-        Set fieldList = (Set)fieldMap.get(newFieldName);
-        if (fieldList == null)
+        Set<FieldInfo> fieldSet = fieldMap.get(newFieldName);
+        if (fieldSet == null)
         {
-            fieldList = new LinkedHashSet();
-            fieldMap.put(newFieldName, fieldList);
+            fieldSet = new LinkedHashSet<FieldInfo>();
+            fieldMap.put(newFieldName, fieldSet);
         }
 
         // Add the field information.
-        fieldList.add(new FieldInfo(className,
-                                    fieldType,
-                                    fieldName));
+        fieldSet.add(new FieldInfo(className,
+                                   fieldType,
+                                   fieldName));
     }
 
 
@@ -312,30 +315,30 @@ public class FrameRemapper implements MappingProcessor
                                      String newMethodName)
     {
         // Original class name -> obfuscated method names.
-        Map methodMap = (Map)classMethodMap.get(newClassName);
+        Map<String,Set<MethodInfo>> methodMap = classMethodMap.get(newClassName);
         if (methodMap == null)
         {
-            methodMap = new HashMap();
+            methodMap = new HashMap<String,Set<MethodInfo>>();
             classMethodMap.put(newClassName, methodMap);
         }
 
         // Obfuscated method name -> methods.
-        Set methodList = (Set)methodMap.get(newMethodName);
-        if (methodList == null)
+        Set<MethodInfo> methodSet = methodMap.get(newMethodName);
+        if (methodSet == null)
         {
-            methodList = new LinkedHashSet();
-            methodMap.put(newMethodName, methodList);
+            methodSet = new LinkedHashSet<MethodInfo>();
+            methodMap.put(newMethodName, methodSet);
         }
 
         // Add the method information.
-        methodList.add(new MethodInfo(newFirstLineNumber,
-                                      newLastLineNumber,
-                                      className,
-                                      firstLineNumber,
-                                      lastLineNumber,
-                                      methodReturnType,
-                                      methodName,
-                                      methodArguments));
+        methodSet.add(new MethodInfo(newFirstLineNumber,
+                                     newLastLineNumber,
+                                     className,
+                                     firstLineNumber,
+                                     lastLineNumber,
+                                     methodReturnType,
+                                     methodName,
+                                     methodArguments));
     }
 
 
