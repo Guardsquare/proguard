@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>5.3</version>
+        <version>5.3.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>proguard-gradle</artifactId>

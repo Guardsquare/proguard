@@ -26,7 +26,7 @@ package proguard.util;
  *
  * @author Eric Lafortune
  */
-public class FixedStringMatcher implements StringMatcher
+public class FixedStringMatcher extends StringMatcher
 {
     private final String        fixedString;
     private final StringMatcher nextMatcher;
@@ -47,10 +47,14 @@ public class FixedStringMatcher implements StringMatcher
 
     // Implementations for StringMatcher.
 
-    public boolean matches(String string)
+    protected boolean matches(String string, int offset, int length)
     {
-        return string.startsWith(fixedString) &&
+        int fixedStringLength = fixedString.length();
+        return length >= fixedStringLength &&
+               string.startsWith(fixedString, offset) &&
                (nextMatcher == null ||
-                nextMatcher.matches(string.substring(fixedString.length())));
+                nextMatcher.matches(string,
+                                    offset + fixedStringLength,
+                                    length - fixedStringLength));
     }
 }

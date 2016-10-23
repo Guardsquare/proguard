@@ -26,7 +26,7 @@ package proguard.util;
  *
  * @author Eric Lafortune
  */
-public class AndMatcher implements StringMatcher
+public class AndMatcher extends StringMatcher
 {
     private final StringMatcher matcher1;
     private final StringMatcher matcher2;
@@ -41,9 +41,9 @@ public class AndMatcher implements StringMatcher
 
     // Implementations for StringMatcher.
 
-    public boolean matches(String string)
+    protected boolean matches(String string, int offset, int length)
     {
-        return matcher1.matches(string) &&
-               matcher2.matches(string);
+        return matcher1.matches(string, offset, length) &&
+               matcher2.matches(string, offset, length);
     }
 }

@@ -26,7 +26,7 @@ package proguard.util;
  *
  * @author Eric Lafortune
  */
-public class ExtensionMatcher implements StringMatcher
+public class ExtensionMatcher extends StringMatcher
 {
     private final String extension;
 
@@ -43,9 +43,9 @@ public class ExtensionMatcher implements StringMatcher
 
     // Implementations for StringMatcher.
 
-    public boolean matches(String string)
+    protected boolean matches(String string, int offset, int length)
     {
-        return endsWithIgnoreCase(string, extension);
+        return endsWithIgnoreCase(string, offset, length, extension);
     }
 
 
@@ -53,11 +53,10 @@ public class ExtensionMatcher implements StringMatcher
      * Returns whether the given string ends with the given suffix, ignoring its
      * case.
      */
-    private static boolean endsWithIgnoreCase(String string, String suffix)
+    private static boolean endsWithIgnoreCase(String string, int offset, int length, String suffix)
     {
-        int stringLength = string.length();
         int suffixLength = suffix.length();
 
-        return string.regionMatches(true, stringLength - suffixLength, suffix, 0, suffixLength);
+        return string.regionMatches(true, offset + length - suffixLength, suffix, 0, suffixLength);
     }
 }

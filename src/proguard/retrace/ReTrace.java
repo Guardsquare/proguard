@@ -33,7 +33,7 @@ import java.util.*;
  */
 public class ReTrace
 {
-    private static final String USAGE          = "Usage: java proguard.ReTrace [-regex <regex>] [-verbose] <mapping_file> [<stacktrace_file>]";
+    private static final String USAGE          = "Usage: java proguard.retrace.ReTrace [-regex <regex>] [-verbose] <mapping_file> [<stacktrace_file>]";
     private static final String REGEX_OPTION   = "-regex";
     private static final String VERBOSE_OPTION = "-verbose";
 

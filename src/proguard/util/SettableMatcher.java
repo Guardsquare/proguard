@@ -26,7 +26,7 @@ package proguard.util;
  *
  * @author Eric Lafortune
  */
-public class SettableMatcher implements StringMatcher
+public class SettableMatcher extends StringMatcher
 {
     private StringMatcher matcher;
 
@@ -39,8 +39,8 @@ public class SettableMatcher implements StringMatcher
 
     // Implementations for StringMatcher.
 
-    public boolean matches(String string)
+    protected boolean matches(String string, int offset, int length)
     {
-        return matcher.matches(string);
+        return matcher.matches(string, offset, length);
     }
 }
