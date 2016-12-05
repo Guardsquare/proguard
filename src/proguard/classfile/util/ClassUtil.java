@@ -439,7 +439,7 @@ public class ClassUtil
      * Returns whether the given method name refers to a class initializer or
      * an instance initializer.
      * @param internalMethodName the internal method name,
-     *                           e.g. "<code>&ltclinit&gt;</code>".
+     *                           e.g. "<code>&lt;clinit&gt;</code>".
      * @return whether the method name refers to an initializer,
      *                           e.g. <code>true</code>.
      */

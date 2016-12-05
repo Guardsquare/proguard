@@ -138,10 +138,15 @@ implements   AttributeVisitor,
                 int invokeinterfaceConstant =
                     (ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)) << 8;
 
+                if (opcode == InstructionConstants.OP_INVOKESPECIAL &&
+                    (referencedMethod.getAccessFlags() & ClassConstants.ACC_ABSTRACT) == 0)
+                {
+                    // Explicit calls to default interface methods *must* be preserved.
+                }
                 // But is it not an interface invocation, or is the parameter
                 // size incorrect?
-                if (opcode != InstructionConstants.OP_INVOKEINTERFACE ||
-                    constantInstruction.constant != invokeinterfaceConstant)
+                else if (opcode != InstructionConstants.OP_INVOKEINTERFACE ||
+                         constantInstruction.constant != invokeinterfaceConstant)
                 {
                     // Fix the parameter size of the interface invocation.
                     Instruction replacementInstruction =
@@ -165,12 +170,10 @@ implements   AttributeVisitor,
                 // But is it not a virtual invocation?
                 if (opcode != InstructionConstants.OP_INVOKEVIRTUAL &&
                     (// Replace any non-invokespecial.
-                     opcode != InstructionConstants.OP_INVOKESPECIAL            ||
-                     // For invokespecial, replace invocations from static
-                     // methods, invocations from the same class, and
-                     // invocations to non-superclasses.
-                     (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ||
-                     clazz.equals(referencedClass)                              ||
+                     opcode != InstructionConstants.OP_INVOKESPECIAL ||
+                     // For invokespecial, replace invocations from the same
+                     // class, and invocations to non-superclasses.
+                     clazz.equals(referencedClass)                   ||
                      !clazz.extends_(referencedClass)))
                 {
                     // Replace the invocation by an invokevirtual instruction.
