@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -376,7 +376,8 @@ public class Optimizer
             programClassPool.classesAccept(
                 new ClassAccessFilter(ClassConstants.ACC_FINAL |
                                       ClassConstants.ACC_ENUM, 0,
-                new SimpleEnumClassChecker()));
+                new OptimizationInfoClassFilter(
+                new SimpleEnumClassChecker())));
 
             // Count the preliminary number of simple enums.
             programClassPool.classesAccept(
@@ -388,6 +389,17 @@ public class Optimizer
                 // Unmark all simple enums that are explicitly used as objects.
                 programClassPool.classesAccept(
                     new SimpleEnumUseChecker());
+
+                // Unmark all simple enums that are used in descriptors of
+                // kept class members. Changing their names could upset
+                // the name parameters of invokedynamic instructions.
+                programClassPool.classesAccept(
+                    new SimpleEnumFilter(null,
+                    new AllMemberVisitor(
+                    new KeptMemberFilter(
+                    new MemberDescriptorReferencedClassVisitor(
+                    new OptimizationInfoClassFilter(
+                    new SimpleEnumMarker(false)))))));
 
                 // Count the definitive number of simple enums.
                 programClassPool.classesAccept(
@@ -650,39 +662,53 @@ public class Optimizer
             new MultiClassVisitor(
             new ClassVisitor[]
             {
+                // Mark classes.
                 new PackageVisibleMemberContainingClassMarker(),
                 new AllConstantVisitor(
                 new PackageVisibleMemberInvokingClassMarker()),
+
+                // Mark methods.
                 new AllMethodVisitor(
-                new MultiMemberVisitor(
-                new MemberVisitor[]
+                new OptimizationInfoMemberFilter(
+                new AllAttributeVisitor(
+                new MultiAttributeVisitor(
+                new AttributeVisitor[]
                 {
-                    new AllAttributeVisitor(
-                    new MultiAttributeVisitor(
-                    new AttributeVisitor[]
+                    stackSizeComputer,
+                    new CatchExceptionMarker(),
+                    new AllInstructionVisitor(
+                    new MultiInstructionVisitor(
+                    new InstructionVisitor[]
                     {
-                        stackSizeComputer,
-                        new CatchExceptionMarker(),
-                        new AllInstructionVisitor(
-                        new MultiInstructionVisitor(
-                        new InstructionVisitor[]
-                        {
-                            new InstantiationClassMarker(),
-                            new InstanceofClassMarker(),
-                            new DotClassMarker(),
-                            new MethodInvocationMarker(),
-                            new SuperInvocationMarker(),
-                            new DynamicInvocationMarker(),
-                            new BackwardBranchMarker(),
-                            new AccessMethodMarker(),
-                            new NonEmptyStackReturnMarker(stackSizeComputer),
-                        })),
-                        new AllExceptionInfoVisitor(
-                        new ExceptionHandlerConstantVisitor(
-                        new ReferencedClassVisitor(
-                        new CaughtClassMarker()))),
+                        new SuperInvocationMarker(),
+                        new DynamicInvocationMarker(),
+                        new BackwardBranchMarker(),
+                        new AccessMethodMarker(),
+                        new NonEmptyStackReturnMarker(stackSizeComputer),
                     })),
-                })),
+                })))),
+
+                // Mark referenced classes and methods.
+                new AllMethodVisitor(
+                new AllAttributeVisitor(
+                new MultiAttributeVisitor(
+                new AttributeVisitor[]
+                {
+                    new AllExceptionInfoVisitor(
+                    new ExceptionHandlerConstantVisitor(
+                    new ReferencedClassVisitor(
+                    new CaughtClassMarker()))),
+
+                    new AllInstructionVisitor(
+                    new MultiInstructionVisitor(
+                    new InstructionVisitor[]
+                    {
+                        new InstantiationClassMarker(),
+                        new InstanceofClassMarker(),
+                        new DotClassMarker(),
+                        new MethodInvocationMarker()
+                    })),
+                })))
             }));
 
         if (classMergingVertical)
@@ -710,10 +736,13 @@ public class Optimizer
             // Clean up inner class attributes to avoid loops.
             programClassPool.classesAccept(new RetargetedInnerClassAttributeRemover());
 
-            // Update references to merged classes.
-            programClassPool.classesAccept(new TargetClassChanger());
-            programClassPool.classesAccept(new ClassReferenceFixer(true));
-            programClassPool.classesAccept(new MemberReferenceFixer());
+            // Update references to merged classes: first the referenced
+            // classes, then the various actual descriptors.
+            // Leave retargeted classes themselves unchanged and valid,
+            // in case they aren't shrunk later on.
+            programClassPool.classesAccept(new RetargetedClassFilter(null, new TargetClassChanger()));
+            programClassPool.classesAccept(new RetargetedClassFilter(null, new ClassReferenceFixer(true)));
+            programClassPool.classesAccept(new RetargetedClassFilter(null, new MemberReferenceFixer()));
 
             if (configuration.allowAccessModification)
             {

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,26 +24,42 @@ import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 
 /**
- * This <code>MemberVisitor</code> delegates its visits to another given
- * <code>MemberVisitor</code>, but only to static initializers and instance
- * initializers.
+ * This MemberVisitor delegates its visits to one of two other given
+ * MemberVisitor instances, depending on whether the visited method
+ * is a static initializer or instance initializer, or not.
  *
  * @author Eric Lafortune
  */
 public class InitializerMethodFilter
 implements   MemberVisitor
 {
-    private final MemberVisitor memberVisitor;
+    private final MemberVisitor initializerMemberVisitor;
+    private final MemberVisitor otherMemberVisitor;
 
 
     /**
      * Creates a new InitializerMethodFilter.
-     * @param memberVisitor the <code>MemberVisitor</code> to which visits
-     *                      will be delegated.
+     * @param initializerMemberVisitor the member visitor to which visits to
+     *                                 initializers will be delegated.
      */
-    public InitializerMethodFilter(MemberVisitor memberVisitor)
+    public InitializerMethodFilter(MemberVisitor initializerMemberVisitor)
     {
-        this.memberVisitor = memberVisitor;
+        this(initializerMemberVisitor, null);
+    }
+
+
+    /**
+     * Creates a new InitializerMethodFilter.
+     * @param initializerMemberVisitor the member visitor to which visits to
+     *                                 initializers will be delegated.
+     * @param otherMemberVisitor       the member visitor to which visits to
+     *                                 non-initializer methods will be delegated.
+     */
+    public InitializerMethodFilter(MemberVisitor initializerMemberVisitor,
+                                   MemberVisitor otherMemberVisitor)
+    {
+        this.initializerMemberVisitor = initializerMemberVisitor;
+        this.otherMemberVisitor       = otherMemberVisitor;
     }
 
 
@@ -55,7 +71,10 @@ implements   MemberVisitor
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        if (ClassUtil.isInitializer(programMethod.getName(programClass)))
+        MemberVisitor memberVisitor =
+            applicableMemberVisitor(programClass, programMethod);
+
+        if (memberVisitor != null)
         {
             memberVisitor.visitProgramMethod(programClass, programMethod);
         }
@@ -64,9 +83,26 @@ implements   MemberVisitor
 
     public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
-        if (ClassUtil.isInitializer(libraryMethod.getName(libraryClass)))
+        MemberVisitor memberVisitor =
+            applicableMemberVisitor(libraryClass, libraryMethod);
+
+        if (memberVisitor != null)
         {
             memberVisitor.visitLibraryMethod(libraryClass, libraryMethod);
         }
+    }
+
+
+    // Small utility methods.
+
+    /**
+     * Returns the appropriate member visitor, depending on whether the
+     * given method is an initializer or not.
+     */
+    private MemberVisitor applicableMemberVisitor(Clazz clazz, Member method)
+    {
+        return ClassUtil.isInitializer(method.getName(clazz)) ?
+            initializerMemberVisitor :
+            otherMemberVisitor;
     }
 }

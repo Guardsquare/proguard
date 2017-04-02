@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -99,12 +99,17 @@ implements   InstructionVisitor
 
     private static void setReturnsWithNonEmptyStack(Method method)
     {
-        MethodOptimizationInfo.getMethodOptimizationInfo(method).setReturnsWithNonEmptyStack();
+        MethodOptimizationInfo info = MethodOptimizationInfo.getMethodOptimizationInfo(method);
+        if (info != null)
+        {
+            info.setReturnsWithNonEmptyStack();
+        }
     }
 
 
     public static boolean returnsWithNonEmptyStack(Method method)
     {
-        return MethodOptimizationInfo.getMethodOptimizationInfo(method).returnsWithNonEmptyStack();
+        MethodOptimizationInfo info = MethodOptimizationInfo.getMethodOptimizationInfo(method);
+        return info == null || info.returnsWithNonEmptyStack();
     }
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -621,11 +621,10 @@ implements   ClassVisitor,
         // Visit all non-private non-static methods, counting the ones that are
         // being overridden in the class hierarchy of the target class.
         clazz.methodsAccept(new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE | ClassConstants.ACC_STATIC | ClassConstants.ACC_ABSTRACT,
-                            new MemberNameFilter(new NotMatcher(new FixedStringMatcher(ClassConstants.METHOD_NAME_CLINIT)),
-                            new MemberNameFilter(new NotMatcher(new FixedStringMatcher(ClassConstants.METHOD_NAME_INIT)),
+                            new InitializerMethodFilter(null,
                             new SimilarMemberVisitor(targetClass, true, true, false, false,
                             new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE | ClassConstants.ACC_STATIC | ClassConstants.ACC_ABSTRACT,
-                            counter))))));
+                            counter)))));
 
         return counter.getCount() > 0;
     }
@@ -639,6 +638,20 @@ implements   ClassVisitor,
     {
         MemberCounter counter = new MemberCounter();
 
+        // Visit all methods, counting the ones that are shadowing
+        // final methods in the class hierarchy of the target class.
+        clazz.hierarchyAccept(true, false, false, true,
+                              new AllMethodVisitor(
+                              new InitializerMethodFilter(null,
+                              new SimilarMemberVisitor(targetClass, true, true, false, false,
+                              new MemberAccessFilter(ClassConstants.ACC_FINAL, 0,
+                              counter)))));
+
+        if (counter.getCount() > 0)
+        {
+            return true;
+        }
+
         // Visit all private methods, counting the ones that are shadowing
         // non-private methods in the class hierarchy of the target class.
         clazz.hierarchyAccept(true, false, false, true,
@@ -648,6 +661,11 @@ implements   ClassVisitor,
                               new SimilarMemberVisitor(targetClass, true, true, true, false,
                               new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
                               counter))))));
+
+        if (counter.getCount() > 0)
+        {
+            return true;
+        }
 
         // Visit all static methods, counting the ones that are shadowing
         // non-private methods in the class hierarchy of the target class.

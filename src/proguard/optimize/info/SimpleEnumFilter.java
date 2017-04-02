@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,21 +24,49 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor delegates all its method calls to another ClassVisitor,
- * but only for Clazz objects that are simple enums.
+ * This ClassVisitor delegates its visits to one of two other given
+ * ClassVisitor instances, depending on whether the classes are marked
+ * as simple enums or not.
  *
  * @see SimpleEnumMarker
+ *
  * @author Eric Lafortune
  */
 public class SimpleEnumFilter
 implements   ClassVisitor
 {
-    private final ClassVisitor classVisitor;
+    private final ClassVisitor simpleEnumClassVisitor;
+    private final ClassVisitor otherClassVisitor;
 
 
-    public SimpleEnumFilter(ClassVisitor classVisitor)
+    /**
+     * Creates a new SimpleEnumClassFilter.
+     *
+     * @param simpleEnumClassVisitor the class visitor to which visits to
+     *                               classes that are marked to be simpleEnum
+     *                               will be delegated.
+     */
+    public SimpleEnumFilter(ClassVisitor simpleEnumClassVisitor)
     {
-        this.classVisitor = classVisitor;
+        this(simpleEnumClassVisitor, null);
+    }
+
+
+    /**
+     * Creates a new SimpleEnumClassFilter.
+     *
+     * @param simpleEnumClassVisitor the class visitor to which visits to
+     *                               classes that are marked as simple enums
+     *                               will be delegated.
+     * @param otherClassVisitor      the class visitor to which visits to
+     *                               classes that are not marked as simple
+     *                               enums will be delegated.
+     */
+    public SimpleEnumFilter(ClassVisitor simpleEnumClassVisitor,
+                            ClassVisitor otherClassVisitor)
+    {
+        this.simpleEnumClassVisitor = simpleEnumClassVisitor;
+        this.otherClassVisitor      = otherClassVisitor;
     }
 
 
@@ -46,7 +74,11 @@ implements   ClassVisitor
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (SimpleEnumMarker.isSimpleEnum(programClass))
+        // Is the class marked as a simple enum?
+        ClassVisitor classVisitor = SimpleEnumMarker.isSimpleEnum(programClass) ?
+            simpleEnumClassVisitor : otherClassVisitor;
+
+        if (classVisitor != null)
         {
             classVisitor.visitProgramClass(programClass);
         }
@@ -55,9 +87,10 @@ implements   ClassVisitor
 
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        if (SimpleEnumMarker.isSimpleEnum(libraryClass))
+        // A library class can't be marked as a simple enum.
+        if (otherClassVisitor != null)
         {
-            classVisitor.visitLibraryClass(libraryClass);
+            otherClassVisitor.visitLibraryClass(libraryClass);
         }
     }
 }

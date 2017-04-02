@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -158,6 +158,29 @@ implements   ClassVisitor,
     }
 
 
+    public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
+    {
+        // Update the descriptor if it has any simple enum classes.
+        String descriptor    = methodTypeConstant.getType(clazz);
+        String newDescriptor = simplifyDescriptor(descriptor, methodTypeConstant.referencedClasses);
+
+        if (!descriptor.equals(newDescriptor))
+        {
+            // Update the descriptor.
+            ConstantPoolEditor constantPoolEditor =
+                new ConstantPoolEditor((ProgramClass)clazz);
+
+            methodTypeConstant.u2descriptorIndex =
+                constantPoolEditor.addUtf8Constant(newDescriptor);
+
+            // Update the referenced classes.
+            methodTypeConstant.referencedClasses =
+                simplifyReferencedClasses(descriptor, methodTypeConstant.referencedClasses);
+        }
+    }
+
+
+
     // Implementations for MemberVisitor.
 
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
@@ -189,6 +212,9 @@ implements   ClassVisitor,
 
             // Clear the referenced class.
             programField.referencedClass = null;
+
+            // Clear the enum flag.
+            programField.u2accessFlags &= ~ClassConstants.ACC_ENUM;
 
             // Clear the field value.
             FieldOptimizationInfo fieldOptimizationInfo =

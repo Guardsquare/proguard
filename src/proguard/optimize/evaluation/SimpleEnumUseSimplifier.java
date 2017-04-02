@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -434,9 +434,9 @@ implements   AttributeVisitor,
 
     public void visitParameter(Clazz clazz, Member member, int parameterIndex, int parameterCount, int parameterOffset, int parameterSize, String parameterType, Clazz referencedClass)
     {
-        // Check if the parameter is passing a simple enum as a more general
-        // type.
+        // Check if the parameter is passing a simple enum as a more general type.
         if (!ClassUtil.isInternalPrimitiveType(parameterType.charAt(0)) &&
+            !ClassUtil.isInternalArrayType(parameterType)               &&
             isSimpleEnum(referencedClass))
         {
             // Replace any producers of null constants for this parameter.

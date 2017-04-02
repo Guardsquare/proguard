@@ -18,24 +18,32 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.optimize.info;
+package proguard.optimize;
 
 import proguard.classfile.*;
-import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.*;
+import proguard.optimize.info.ClassOptimizationInfo;
 
 /**
- * This ClassVisitor delegates all its method calls to another ClassVisitor,
- * but only for Clazz objects that are instantiated.
+ * This <code>ClassVisitor</code> delegates its visits to another given
+ * <code>ClassVisitor</code>, but only when the visited class has optimization
+ * info.
  *
+ * @see ClassOptimizationInfo
  * @author Eric Lafortune
  */
-public class StaticInitializerContainingClassFilter
+public class OptimizationInfoClassFilter
 implements   ClassVisitor
 {
     private final ClassVisitor classVisitor;
 
 
-    public StaticInitializerContainingClassFilter(ClassVisitor classVisitor)
+    /**
+     * Creates a new OptimizationInfoClassFilter.
+     * @param classVisitor the <code>ClassVisitor</code> to which visits
+     *                     will be delegated.
+     */
+    public OptimizationInfoClassFilter(ClassVisitor classVisitor)
     {
         this.classVisitor = classVisitor;
     }
@@ -45,7 +53,8 @@ implements   ClassVisitor
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (StaticInitializerContainingClassMarker.containsStaticInitializer(programClass))
+        // Does the class have optimization info?
+        if (ClassOptimizationInfo.getClassOptimizationInfo(programClass) != null)
         {
             classVisitor.visitProgramClass(programClass);
         }
@@ -54,7 +63,8 @@ implements   ClassVisitor
 
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        if (StaticInitializerContainingClassMarker.containsStaticInitializer(libraryClass))
+        // Does the class have optimization info?
+        if (ClassOptimizationInfo.getClassOptimizationInfo(libraryClass) != null)
         {
             classVisitor.visitLibraryClass(libraryClass);
         }

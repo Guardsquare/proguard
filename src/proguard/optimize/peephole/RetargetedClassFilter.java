@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2016 Eric Lafortune @ GuardSquare
+ * Copyright (c) 2002-2017 Eric Lafortune @ GuardSquare
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,39 +24,73 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code> for classes that are retargeted to be
- * merged with other classes.
+ * This ClassVisitor delegates its visits to one of two other given
+ * ClassVisitor instances, depending on whether the classes are marked to be
+ * retargeted or not.
  *
  * @see ClassMerger
+ *
  * @author Eric Lafortune
  */
-public class RetargetedClassFilter implements ClassVisitor
+public class RetargetedClassFilter
+implements   ClassVisitor
 {
-    private final ClassVisitor classVisitor;
+    private final ClassVisitor retargetedClassVisitor;
+    private final ClassVisitor otherClassVisitor;
 
 
     /**
      * Creates a new RetargetedClassFilter.
-     * @param classVisitor the <code>ClassVisitor</code> to which visits will
-     *                     be delegated.
+     *
+     * @param retargetedClassVisitor the class visitor to which visits to
+     *                               classes that are marked to be retargeted
+     *                               will be delegated.
      */
-    public RetargetedClassFilter(ClassVisitor classVisitor)
+    public RetargetedClassFilter(ClassVisitor retargetedClassVisitor)
     {
-        this.classVisitor = classVisitor;
+        this(retargetedClassVisitor, null);
+    }
+
+
+    /**
+     * Creates a new RetargetedClassFilter.
+     *
+     * @param retargetedClassVisitor the class visitor to which visits to
+     *                               classes that are marked to be retargeted
+     *                               will be delegated.
+     * @param otherClassVisitor      the class visitor to which visits to
+     *                               classes that are not marked to be
+     *                               retargeted will be delegated.
+     */
+    public RetargetedClassFilter(ClassVisitor retargetedClassVisitor,
+                                 ClassVisitor otherClassVisitor)
+    {
+        this.retargetedClassVisitor = retargetedClassVisitor;
+        this.otherClassVisitor      = otherClassVisitor;
     }
 
 
     // Implementations for ClassVisitor.
 
-    public void visitLibraryClass(LibraryClass libraryClass) {}
-
-
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (ClassMerger.getTargetClass(programClass) != null)
+        // Is the class marked to be retargeted?
+        ClassVisitor classVisitor = ClassMerger.getTargetClass(programClass) != null ?
+            retargetedClassVisitor : otherClassVisitor;
+
+        if (classVisitor != null)
         {
             classVisitor.visitProgramClass(programClass);
+        }
+    }
+
+
+    public void visitLibraryClass(LibraryClass libraryClass)
+    {
+        // A library class can't be retargeted.
+        if (otherClassVisitor != null)
+        {
+            otherClassVisitor.visitLibraryClass(libraryClass);
         }
     }
 }

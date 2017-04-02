@@ -74,6 +74,16 @@ target="other">proguard-wtk-plugin</a>, and
 <a href="http://search.maven.org/#search|ga|1|a:%22proguard-retrace%22"
 target="other">proguard-retrace</a>.
 
+<h3><div>In progress</div> Version 5.3.x</h3>
+<ul>
+<li>[PGD-630] Fixed possible NullPointerException in optimization step.
+<li>[PGD-637] Fixed simplification of enum types in invokedynamic calls.
+<li>Fixed merging of classes sometimes resulting in final methods being
+    overridden.
+<li>Fixed simplification of enum types that are stored in arrays.
+<li>Fixed VerifyError triggered by merging classes with shrinking disabled.
+</ul>
+
 <h3><div>Sep 2016</div> Version 5.3</h3>
 <ul>
 <li>Avoiding obfuscated name clashes with library classes.
@@ -785,7 +795,7 @@ Upgrade considerations:
 
 <hr />
 <address>
-Copyright &copy; 2002-2016
+Copyright &copy; 2002-2017
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 
