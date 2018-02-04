@@ -187,6 +187,24 @@ The ProGuard task supports the following settings in its closure:
     optimizing. <i>Only use this option if you know what you're
     doing!</i></dd>
 
+<dt><a href="usage.html#assumenoexternalsideeffects"><code><b>assumenoexternalsideeffects</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+<dd>Assume that the specified methods don't have any external side effects,
+    while optimizing.  <i>Only use this option if you know what you're
+    doing!</i></dd>
+
+<dt><a href="usage.html#assumenoescapingparameters"><code><b>assumenoescapingparameters</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+<dd>Assume that the specified methods don't let any reference parameters
+    escape to the heap, while optimizing.  <i>Only use this option if you know
+    what you're doing!</i></dd>
+
+<dt><a href="usage.html#assumenoexternalreturnvalues"><code><b>assumenoexternalreturnvalues</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+<dd>Assume that the specified methods don't return any external reference
+    values, while optimizing.  <i>Only use this option if you know what you're
+    doing!</i></dd>
+
 <dt><a href="usage.html#allowaccessmodification"><code><b>allowaccessmodification</b></code></a></dt>
 <dd>Allow the access modifiers of classes and class members to be modified,
     while optimizing.</dd>
@@ -276,6 +294,9 @@ The ProGuard task supports the following settings in its closure:
 
 <dt><a href="usage.html#microedition"><code><b>microedition</b></code></a></dt>
 <dd>Target the processed class files at Java Micro Edition.</dd>
+
+<dt><a href="usage.html#android"><code><b>android</b></code></a></dt>
+<dd>Target the processed class files at Android.</dd>
 
 <dt><a href="usage.html#verbose"><code><b>verbose</b></code></a></dt>
 <dd>Write out some more information during processing.</dd>
@@ -368,6 +389,11 @@ behaviors:
 
 <dl>
 
+<dt><a href="usage.html#if"><code><b>if:</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+<dd>Specifies classes and class members that must be present to activate the
+    keep option.</dd>
+
 <dt><a href="usage.html#includedescriptorclasses"><code><b>includedescriptorclasses:</b></code></a>
     <i>boolean</i>
     (default = false)</dt>
@@ -405,7 +431,7 @@ A class specification is a template of classes and class members (fields and met
     most compact and most readable way. The specification looks like a Java
     declaration of a class with fields and methods. For example:
 <pre>
-keep 'public class mypackage.MyMainClass {  \
+keep 'public class com.example.MyMainClass {  \
     public static void main(java.lang.String[]);  \
 }'
 </pre></li>
@@ -414,7 +440,7 @@ keep 'public class mypackage.MyMainClass {  \
     specifications. For example:
 <pre>
 keep access: 'public',
-     name:   'mypackage.MyMainClass', {
+     name:   'com.example.MyMainClass', {
     method access:     'public static',
            type:       'void',
            name:       'main',
@@ -554,7 +580,7 @@ task proguard << {
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

@@ -154,6 +154,13 @@ if (window.self==window.top)
 </tr>
 
 <tr>
+<td valign="top"><a href="usage.html#if"><code><b>-if</b></code></a>
+                 <a href="usage.html#classspecification"><i>class_specification</i></a></td>
+<td>Specify classes and class members that must be present to activate the
+    subsequent <code>keep</code> option.</td>
+</tr>
+
+<tr>
 <td valign="top"><a href="usage.html#printseeds"><code><b>-printseeds</b></code></a>
                  [<a href="usage.html#filename"><i>filename</i></a>]</td>
 <td>List classes and class members matched by the various <code>-keep</code>
@@ -201,6 +208,27 @@ if (window.self==window.top)
                  <a href="usage.html#classspecification"><i>class_specification</i></a></td>
 <td>Assume that the specified methods don't have any side effects, while
     optimizing.</td>
+</tr>
+
+<tr>
+<td valign="top"><a href="usage.html#assumenoexternalsideeffects"><code><b>-assumenoexternalsideeffects</b></code></a>
+                 <a href="usage.html#classspecification"><i>class_specification</i></a></td>
+<td>Assume that the specified methods don't have any external side effects,
+    while optimizing.</td>
+</tr>
+
+<tr>
+<td valign="top"><a href="usage.html#assumenoescapingparameters"><code><b>-assumenoescapingparameters</b></code></a>
+                 <a href="usage.html#classspecification"><i>class_specification</i></a></td>
+<td>Assume that the specified methods don't let any reference parameters
+    escape to the heap, while optimizing.</td>
+</tr>
+
+<tr>
+<td valign="top"><a href="usage.html#assumenoexternalreturnvalues"><code><b>-assumenoexternalreturnvalues</b></code></a>
+                 <a href="usage.html#classspecification"><i>class_specification</i></a></td>
+<td>Assume that the specified methods don't return any external reference
+    values, while optimizing.</td>
 </tr>
 
 <tr>
@@ -342,6 +370,11 @@ if (window.self==window.top)
 </tr>
 
 <tr>
+<td valign="top"><a href="usage.html#android"><code><b>-android</b></code></a></td>
+<td>Target the processed class files at Android.</td>
+</tr>
+
+<tr>
 <td valign="top"><a href="usage.html#verbose"><code><b>-verbose</b></code></a></td>
 <td>Write out some more information during processing.</td>
 </tr>
@@ -377,6 +410,12 @@ if (window.self==window.top)
                  [<a href="usage.html#filename"><i>filename</i></a>]</td>
 <td>Write out the internal structure of the processed class files, to the
     standard output or to the given file.</td>
+</tr>
+
+<tr>
+<td valign="top"><a href="usage.html#addconfigurationdebugging"><code><b>-addconfigurationdebugging</b></code></a></td>
+<td>Instrument the processed code with debugging statements that print out
+    suggestions for missing ProGuard configuration.</td>
 </tr>
 
 </table>
@@ -430,7 +469,13 @@ Notes:
 
 <tr>
 <td valign="top"><a href="usage.html#includedescriptorclasses"><code><b>includedescriptorclasses</b></code></a></td>
-<td>Also keep any classes in the descriptors of specified fields and methods.
+<td>Also keep any classes in the descriptors of specified fields and
+    methods.</td>
+</tr>
+
+<tr>
+<td valign="top"><a href="usage.html#includecode"><code><b>includecode</b></code></a></td>
+<td>Also keep the code of the specified methods unchanged.</td>
 </tr>
 
 <tr>
@@ -478,7 +523,9 @@ Notes:
     single character, '<code><b>*</b></code>' for any number of characters
     (but not the package separator), '<code><b>**</b></code>' for any number
     of (any) characters, '<code><b>%</b></code>' for any primitive type,
-    '<code><b>***</b></code>' for any type, and '<code><b>...</b></code>' for       any number of arguments.</li>
+    '<code><b>***</b></code>' for any type, '<code><b>...</b></code>' for
+    any number of arguments, and '<code><b>&lt;</b><i>n</i><b>&gt;</b></code>'
+    for the <i>n</i>'th matched wildcard in the same option.</li>
 <li><i>fieldname</i> and <i>methodname</i> can contain wildcards as well:
     '<code><b>?</b></code>' for a single character and '<code><b>*</b></code>'
     for any number of characters.</li>
@@ -486,7 +533,7 @@ Notes:
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

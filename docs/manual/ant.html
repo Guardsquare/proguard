@@ -281,6 +281,11 @@ elements:
     (default = false)</dt>
 <dd>Target the processed class files at Java Micro Edition.</dd>
 
+<dt><a href="usage.html#android"><code><b>android</b></code></a>
+    = "<i>boolean</i>"
+    (default = false)</dt>
+<dd>Target the processed class files at Android.</dd>
+
 <dt><a href="usage.html#verbose"><code><b>verbose</b></code></a>
     = "<i>boolean</i>"
     (default = false)</dt>
@@ -410,6 +415,33 @@ elements:
     <code><b>&lt;/assumenosideeffects&gt;</b></code></dt>
 <dd>Assume that the specified methods don't have any side effects, while
     optimizing. <i>Only use this option if you know what you're
+    doing!</i></dd>
+
+<dt><a href="usage.html#assumenoexternalsideeffects"><code><b>&lt;assumenoexternalsideeffects</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a>
+    <code><b>&gt;</b></code>
+    <a href="#classmemberspecification"><i>class_member_specifications</i></a>
+    <code><b>&lt;/assumenoexternalsideeffects&gt;</b></code></dt>
+<dd>Assume that the specified methods don't have any external side effects,
+    while optimizing. <i>Only use this option if you know what you're
+    doing!</i></dd>
+
+<dt><a href="usage.html#assumenoescapingparameters"><code><b>&lt;assumenoescapingparameters</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a>
+    <code><b>&gt;</b></code>
+    <a href="#classmemberspecification"><i>class_member_specifications</i></a>
+    <code><b>&lt;assumenoescapingparameters&gt;</b></code></dt>
+<dd>Assume that the specified methods don't let any reference parameters
+    escape to the heap, while optimizing. <i>Only use this option if you know
+    what you're doing!</i></dd>
+
+<dt><a href="usage.html#assumenoexternalreturnvalues"><code><b>&lt;assumenoexternalreturnvalues</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a>
+    <code><b>&gt;</b></code>
+    <a href="#classmemberspecification"><i>class_member_specifications</i></a>
+    <code><b>&lt;assumenoexternalreturnvalues&gt;</b></code></dt>
+<dd>Assume that the specified methods don't return any external reference
+    values, while optimizing. <i>Only use this option if you know what you're
     doing!</i></dd>
 
 <dt><a href="usage.html#optimizations"><code><b>&lt;optimization name = </b></code></a>"<a href="optimizations.html"><i>optimization_name</i></a>"
@@ -654,7 +686,7 @@ attributes:
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

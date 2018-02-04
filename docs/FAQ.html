@@ -33,7 +33,7 @@ if (window.self==window.top)
     support?</a></li>
 <li><a href="#commercial">Can I use <b>ProGuard</b> to process my commercial
     application?</a></li>
-<li><a href="#jdk1.4">Does <b>ProGuard</b> work with Java 2, 5, ..., 8?</a></li>
+<li><a href="#jdk1.4">Does <b>ProGuard</b> work with Java 2, 5, ..., 9?</a></li>
 <li><a href="#jme">Does <b>ProGuard</b> work with Java Micro Edition?</a></li>
 <li><a href="#android">Does <b>ProGuard</b> work for Android apps?</a></li>
 <li><a href="#blackberry">Does <b>ProGuard</b> work for Blackberry
@@ -139,14 +139,15 @@ Yes, you can. <b>ProGuard</b> itself is distributed under the GPL, but this
 doesn't affect the programs that you process. Your code remains yours, and
 its license can remain the same.
 
-<h3><a name="jdk1.4">Does <b>ProGuard</b> work with Java 2, 5, ..., 8?</a></h3>
+<h3><a name="jdk1.4">Does <b>ProGuard</b> work with Java 2, 5, ..., 9?</a></h3>
 
-Yes, <b>ProGuard</b> supports all JDKs from 1.1 up to and including 8.0. Java
+Yes, <b>ProGuard</b> supports all JDKs from 1.1 up to and including 9.0. Java
 2 introduced some small differences in the class file format. Java 5 added
 attributes for generics and for annotations. Java 6 introduced optional
 preverification attributes. Java 7 made preverification obligatory and
 introduced support for dynamic languages. Java 8 added more attributes and
-default methods. <b>ProGuard</b> handles all versions correctly.
+default methods. Java 9 added support for modules. <b>ProGuard</b> handles
+all versions correctly.
 
 <h3><a name="jme">Does <b>ProGuard</b> work with Java Micro Edition?</a></h3>
 
@@ -297,7 +298,7 @@ commercial extension of <b>ProGuard</b>:
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

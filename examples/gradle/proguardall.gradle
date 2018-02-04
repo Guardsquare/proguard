@@ -20,7 +20,7 @@ buildscript {
 
 // Define a ProGuard task.
 
-task proguard(type: proguard.gradle.ProGuardTask) {
+task ('proguard', type: proguard.gradle.ProGuardTask) {
 
     // You should probably import a more compact ProGuard-style configuration
     // file for all static settings, but we're specifying them all here, for
@@ -36,14 +36,28 @@ task proguard(type: proguard.gradle.ProGuardTask) {
 
     // You may have to adapt the paths below.
 
-    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod   ", jarfilter: '!**.jar', filter: '!module-info.class'
+        libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    }
+
     libraryjars '/usr/local/java/ant/lib/ant.jar'
-    libraryjars '/usr/local/java/gradle-2.1/lib/plugins/gradle-plugins-2.1.jar'
-    libraryjars '/usr/local/java/gradle-2.1/lib/gradle-base-services-2.1.jar'
-    libraryjars '/usr/local/java/gradle-2.1/lib/gradle-base-services-groovy-2.1.jar'
-    libraryjars '/usr/local/java/gradle-2.1/lib/gradle-core-2.1.jar'
-    libraryjars '/usr/local/java/gradle-2.1/lib/groovy-all-2.3.6.jar'
+    libraryjars '/usr/local/java/gradle-4.2.1/lib/plugins/gradle-plugins-4.2.1.jar'
+    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-base-services-4.2.1.jar'
+    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-logging-4.2.1.jar'
+    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-core-api-4.2.1.jar'
+    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-core-4.2.1.jar'
+    libraryjars '/usr/local/java/gradle-4.2.1/lib/groovy-all-2.4.12.jar'
     libraryjars '/usr/local/java/wtk2.5.2/wtklib/kenv.zip'
+
+    // Don't print notes about reflection in injected code.
+
+    dontnote 'proguard.configuration.ConfigurationLogger'
 
     // Allow methods with the same signature, except for the return type,
     // to get the same obfuscation name.

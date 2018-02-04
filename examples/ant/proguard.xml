@@ -31,6 +31,10 @@
     <libraryjar file="/usr/local/java/gradle-2.12/lib/groovy-all-2.4.4.jar" />
     <libraryjar file="/usr/local/java/wtk2.5.2/wtklib/kenv.zip" />
 
+    <!-- Don't print notes about reflection in injected code. -->
+
+    <dontnote filter="proguard.configuration.ConfigurationLogger" />
+
     <!-- Adapt the resource file names, based on the corresponding obfuscated
          class names. -->
 

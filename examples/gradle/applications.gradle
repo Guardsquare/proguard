@@ -17,7 +17,7 @@ buildscript {
 
 // Define a ProGuard task.
 
-task proguard(type: proguard.gradle.ProGuardTask) {
+task ('proguard', type: proguard.gradle.ProGuardTask) {
 
     // You should probably import a more compact ProGuard-style configuration
     // file for all static settings, but we're specifying them all here, for
@@ -29,7 +29,16 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     injars  'in.jar'
     outjars 'out.jar'
 
-    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        //libraryjars "${System.getProperty('java.home')}/jmods/....."
+    }
+
     //libraryjars 'junit.jar'
     //libraryjars 'servlet.jar'
     //libraryjars 'jai_core.jar'
@@ -60,14 +69,14 @@ task proguard(type: proguard.gradle.ProGuardTask) {
 
     // Preserve all native method names and the names of their classes.
 
-    keepclasseswithmembernames includedescriptorclasses:true, 'class * { \
+    keepclasseswithmembernames,includedescriptorclasses 'class * { \
         native <methods>; \
     }'
 
     // Preserve the special static methods that are required in all enumeration
     // classes.
 
-    keepclassmembers allowshrinking:true, 'enum * { \
+    keepclassmembers allowoptimization: true, 'enum * { \
         public static **[] values(); \
         public static ** valueOf(java.lang.String); \
     }'
@@ -90,7 +99,7 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     // Your application may contain more items that need to be preserved; 
     // typically classes that are dynamically created using Class.forName:
 
-    // keep 'public class mypackage.MyClass'
-    // keep 'public interface mypackage.MyInterface'
-    // keep 'public class * implements mypackage.MyInterface'
+    // keep 'public class com.example.MyClass'
+    // keep 'public interface com.example.MyInterface'
+    // keep 'public class * implements com.example.MyInterface'
 }

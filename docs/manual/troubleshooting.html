@@ -382,7 +382,7 @@ some more serious warnings:
     <a href="usage.html#ignorewarnings"><code>-ignorewarnings</code></a> or
     even
     <a href="usage.html#dontwarn"><code>-dontwarn</code></a>. For instance, you
-    can specify "<code>-dontwarn mypackage.MyInconsistentClass</code>".
+    can specify "<code>-dontwarn com.example.MyInconsistentClass</code>".
     <p>
     Finally, should your program classes reside in the same packages as
     library classes and should they refer to their package visible class
@@ -716,12 +716,16 @@ might be several reasons:
 
 <dd>Your code is probably calling <code>Class.forName</code>, trying to create
     the missing class dynamically. ProGuard can only detect constant name
-    arguments, like <code>Class.forName("mypackage.MyClass")</code>. For
+    arguments, like <code>Class.forName("com.example.MyClass")</code>. For
     variable name arguments like <code>Class.forName(someClass)</code>, you
-    have to keep all possible classes using the appropriate <a
-    href="usage.html#keep"><code>-keep</code></a> option, e.g. "<code>-keep
-    class mypackage.MyClass</code>" or "<code>-keep class * implements
-    mypackage.MyInterface</code>".</dd>
+    have to keep all possible classes using the appropriate
+    <a href="usage.html#keep"><code>-keep</code></a> option, e.g. "<code>-keep
+    class com.example.MyClass</code>" or "<code>-keep class * implements
+    com.example.MyInterface</code>". While setting up your configuration, you
+    can specify the option
+    <a href="usage.html#addconfigurationdebugging"><code>-addconfigurationdebugging</code></a>
+    to help track down these cases at run-time and let the instrumented code
+    suggest settings for them.</dd>
 
 <dt><a name="nosuchfieldexception"><b>NoSuchFieldException</b></a></dt>
 
@@ -730,8 +734,11 @@ might be several reasons:
     Since ProGuard can't always detect this automatically, you have to keep
     the missing field in using the
     appropriate <a href="usage.html#keep"><code>-keep</code></a> option, e.g.
-    "<code>-keepclassmembers class mypackage.MyClass { int myField;
-    }</code>".</dd>
+    "<code>-keepclassmembers class com.example.MyClass { int myField;
+    }</code>". While setting up your configuration, you can specify the option
+    <a href="usage.html#addconfigurationdebugging"><code>-addconfigurationdebugging</code></a>
+    to help track down these cases at run-time and let the instrumented code
+    suggest settings for them.</dd>
 
 <dt><a name="nosuchmethodexception"><b>NoSuchMethodException</b></a></dt>
 
@@ -740,8 +747,11 @@ might be several reasons:
     Since ProGuard can't always detect this automatically, you have to keep
     the missing method in using the
     appropriate <a href="usage.html#keep"><code>-keep</code></a> option, e.g.
-    "<code>-keepclassmembers class mypackage.MyClass { void myMethod();
-    }</code>".
+    "<code>-keepclassmembers class com.example.MyClass { void myMethod();
+    }</code>". While setting up your configuration, you can specify the option
+    <a href="usage.html#addconfigurationdebugging"><code>-addconfigurationdebugging</code></a>
+    to help track down these cases at run-time and let the instrumented code
+    suggest settings for them.
     <p>
     More specifically, if the method reported as missing is
     <code>values</code> or <code>valueOf</code>, you probably have to keep
@@ -926,7 +936,7 @@ might be several reasons:
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

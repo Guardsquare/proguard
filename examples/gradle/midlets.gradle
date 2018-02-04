@@ -17,7 +17,7 @@ buildscript {
 
 // Define a ProGuard task.
 
-task proguard(type: proguard.gradle.ProGuardTask) {
+task ('proguard', type: proguard.gradle.ProGuardTask) {
 
     // You should probably import a more compact ProGuard-style configuration
     // file for all static settings, but we're specifying them all here, for
@@ -75,14 +75,14 @@ task proguard(type: proguard.gradle.ProGuardTask) {
 
     // Preserve all native method names and the names of their classes.
 
-    keepclasseswithmembernames includedescriptorclasses:true, 'class * { \
+    keepclasseswithmembernames,includedescriptorclasses 'class * { \
         native <methods>; \
     }'
 
     // Your midlet may contain more items that need to be preserved; 
     // typically classes that are dynamically created using Class.forName:
 
-    // keep 'public class mypackage.MyClass'
-    // keep 'public interface mypackage.MyInterface'
-    // keep 'public class * implements mypackage.MyInterface'
+    // keep 'public class com.example.MyClass'
+    // keep 'public interface com.example.MyInterface'
+    // keep 'public class * implements com.example.MyInterface'
 }

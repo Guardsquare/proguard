@@ -1,0 +1,20 @@
+// Gradle build script for ProGuard.
+
+apply plugin: 'java'
+
+sourceSets.main {
+    java {
+        srcDirs = ['src']
+    }
+    resources {
+        srcDirs = ['src']
+        include '**/*.properties'
+        include '**/*.gif'
+        include '**/*.png'
+        include '**/*.pro'
+    }
+}
+
+jar {
+    manifest.from 'src/META-INF/MANIFEST.MF'
+}

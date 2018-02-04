@@ -11,7 +11,12 @@
 -injars  examples(*.class)
 -outjars out
 
--libraryjars <java.home>/lib/rt.jar
+# Before Java 9, the runtime classes were packaged in a single jar file.
+#-libraryjars <java.home>/lib/rt.jar
+
+# As of Java 9, the runtime classes are packaged in modular jmod files.
+-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)
+#-libraryjars <java.home>/jmods/.....
 
 # Some important configuration is based on the annotations in the code.
 # We have to specify what the annotations mean to ProGuard.

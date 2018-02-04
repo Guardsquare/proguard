@@ -183,9 +183,9 @@ The sections below provide more details:
     ears, zips, apks, or directories). By default, directory entries are
     removed. This reduces the jar size, but it may break your program if the
     code tries to find them with constructs like
-    "<code>mypackage.MyClass.class.getResource("")</code>". You'll then want
+    "<code>com.example.MyClass.class.getResource("")</code>". You'll then want
     to keep the directory corresponding to the package,
-    "<code>-keepdirectories mypackage</code>". If the option is specified
+    "<code>-keepdirectories com.example</code>". If the option is specified
     without a filter, all directories are kept. With a filter, only matching
     directories are kept. For instance,
     "<code>-keepdirectories mydirectory</code>" matches the specified
@@ -293,6 +293,18 @@ The sections below provide more details:
     removed. If a class file is used, but none of its native methods are, its
     name will still be obfuscated. Only applicable when obfuscating.</dd>
 
+<dt><a name="if"><code><b>-if</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+
+<dd>Specifies classes and class members that must be present to activate the
+    subsequent <code>keep</code> option (<code>-keep</code>,
+    <code>-keepclassmembers</code>,...). The condition and the
+    subsequent <code>keep</code> option can share wildcards and references to
+    wildcards. For example, you can keep classes on the condition that classes
+    with related names exist in your project, with frameworks like
+    <a href="examples.html#dagger">Dagger</a> and
+    <a href="examples.html#butterknife">Butterknife</a>.</dd>
+
 <dt><a name="printseeds"><code><b>-printseeds</b></code></a>
     [<a href="#filename"><i>filename</i></a>]</dt>
 
@@ -383,6 +395,43 @@ The sections below provide more details:
     methods. Only applicable when optimizing. In general, making assumptions
     can be dangerous; you can easily break the processed code. <i>Only use
     this option if you know what you're doing!</i></dd>
+
+<dt><a name="assumenoexternalsideeffects"><code><b>-assumenoexternalsideeffects</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+
+<dd>Specifies methods that don't have any side effects, except possibly on the
+    instances on which they are called. This statement is weaker than
+    <a href="#assumenosideeffects"><code>-assumenosideeffects</code></a>,
+    because it allows side effects on the parameters or the heap. For example,
+    the `StringBuffer#append` methods have side effects, but no external side
+    effects. This is useful when <a href="examples.html#logging">removing
+    logging code</a>, to also remove any related string concatenation code.
+    Only applicable when optimizing. Making assumptions can be dangerous; you
+    can easily break the processed code. <i>Only use this option if you know
+    what you're doing!</i></dd>
+
+<dt><a name="assumenoescapingparameters"><code><b>-assumenoescapingparameters</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+
+<dd>Specifies methods that don't let their reference parameters escape to the
+    heap. Such methods can use, modify, or return the parameters, but not store
+    them in any fields, either directly or indirectly. For example, the method
+    <code>System.arrayCopy</code> does not let its reference parameters escape,
+    but method <code>System.setSecurityManager</code> does. Only applicable
+    when optimizing. Making assumptions can be dangerous; you can easily break
+    the processed code. <i>Only use this option if you know what you're
+    doing!</i></dd>
+
+<dt><a name="assumenoexternalreturnvalues"><code><b>-assumenoexternalreturnvalues</b></code></a>
+    <a href="#classspecification"><i>class_specification</i></a></dt>
+
+<dd>Specifies methods that don't return reference values that were already on
+    the heap when they are called. For example, the
+    <code>ProcessBuilder#start</code> returns a <code>Process</code> reference
+    value, but it is a new instance that wasn't on the heap yet. Only
+    applicable when optimizing. Making assumptions can be dangerous; you can
+    easily break the processed code.<i>Only use this option if you know what
+    you're doing!</i></dd>
 
 <dt><a name="allowaccessmodification"><code><b>-allowaccessmodification</b></code></a></dt>
 
@@ -726,6 +775,14 @@ The sections below provide more details:
     for Java Standard Edition. For example, you will need this option if you
     are <a href="examples.html#midlets">processing midlets</a>.</dd>
 
+<dt><a name="android"><code><b>-android</b></code></a></dt>
+
+<dd>Specifies that the processed class files are targeted at the Android
+    platform. ProGuard then makes sure some features are compatible with
+    Android. For example, you should specify this option if you are <a
+    href="examples.html#androidapplication">processing an Android
+   application</a>.</dd>
+
 </dl>
 <p>
 
@@ -783,6 +840,20 @@ The sections below provide more details:
     given file. For example, you may want to <a
     href="examples.html#structure">write out the contents of a given jar
     file</a>, without processing it at all.</dd>
+
+<dt><a name="addconfigurationdebugging"><code><b>-addconfigurationdebugging</b></code></a></dt>
+
+<dd>Specifies to instrument the processed code with debugging statements that
+    print out suggestions for missing ProGuard configuration. This can be very
+    useful to get practical hints <i>at run-time</i>, if your processed code
+    crashes because it still lacks some configuration for reflection. For
+    example, the code may be <a href="examples.html#gson">serializing classes
+    with the GSON library</a> and you may need some configuration for it. You
+    can generally just copy/paste the suggestions from the console into your
+    configuration file.
+    <p>
+    <i>Counter-indication:</i> do not use this option in release versions, as
+    it adds obfuscation information to the processed code.</dd>
 
 </dl>
 <p>
@@ -1050,6 +1121,14 @@ are not removed in the shrinking step, and not renamed in the obfuscation step.
     methods aren't renamed either. Their signatures then remain completely
     unchanged and compatible with the native libraries.</dd>
 
+<dt><a name="includecode"><code><b>includecode</b></code></a></dt>
+
+<dd>Specifies that code attributes of the methods that the fields that
+    the <a href="#keep">-keep</a> option keeps should be kept as well, i.e.
+    may not be optimized or obfuscated. This is typically useful for already
+    optimized or obfuscated classes, to make sure that their code is not
+    modified during optimization.</dd>
+
 <dt><a name="allowshrinking"><code><b>allowshrinking</b></code></a></dt>
 
 <dd>Specifies that the entry points specified in the <a href="#keep">-keep</a>
@@ -1132,27 +1211,33 @@ files.
 <tr><td valign="top"><code><b>?</b></code></td>
 
 <td>matches any single character in a class name, but not the package
-    separator. For example, "<code>mypackage.Test?</code>" matches
-    "<code>mypackage.Test1</code>" and "<code>mypackage.Test2</code>", but not
-    "<code>mypackage.Test12</code>".</td></tr>
+    separator. For example, "<code>com.example.Test?</code>" matches
+    "<code>com.example.Test1</code>" and "<code>com.example.Test2</code>", but not
+    "<code>com.example.Test12</code>".</td></tr>
 
 <tr><td valign="top"><code><b>*</b></code></td>
 
 <td>matches any part of a class name not containing the package separator. For
-    example, "<code>mypackage.*Test*</code>" matches
-    "<code>mypackage.Test</code>" and
-    "<code>mypackage.YourTestApplication</code>", but not
-    "<code>mypackage.mysubpackage.MyTest</code>". Or, more generally,
-    "<code>mypackage.*</code>" matches all classes in
-    "<code>mypackage</code>", but not in its subpackages.</td></tr>
+    example, "<code>com.example.*Test*</code>" matches
+    "<code>com.example.Test</code>" and
+    "<code>com.example.YourTestApplication</code>", but not
+    "<code>com.example.mysubpackage.MyTest</code>". Or, more generally,
+    "<code>com.example.*</code>" matches all classes in
+    "<code>com.example</code>", but not in its subpackages.</td></tr>
 
 <tr><td valign="top"><code><b>**</b></code></td>
 
 <td>matches any part of a class name, possibly containing any number of
     package separators. For example, "<code>**.Test</code>" matches all
     <code>Test</code> classes in all packages except the root package. Or,
-    "<code>mypackage.**</code>" matches all classes in
-    "<code>mypackage</code>" and in its subpackages.</td></tr>
+    "<code>com.example.**</code>" matches all classes in
+    "<code>com.example</code>" and in its subpackages.</td></tr>
+
+<tr><td valign="top"><code><b>&lt;</b><i>n</i><b>&gt;</b></code></td>
+
+<td>matches the <i>n</i>'th matched wildcard in the same option. For example,
+    "<code>com.example.*Foo&lt;1&gt;</code>" matches
+    "<code>com.example.BarFooBar</code>".</td></tr>
 
 </table>
 
@@ -1166,10 +1251,10 @@ files.
 
 <li>The <code><b>extends</b></code> and <code><b>implements</b></code>
     specifications are typically used to restrict classes with wildcards. They
-    are currently equivalent, specifying that only classes extending or
-    implementing the given class qualify. Note that the given class itself is
-    not included in this set. If required, it should be specified in a
-    separate option.</li>
+    are currently equivalent. They specify that only classes extending or
+    implementing the given class (directly or indirectly) qualify. The given
+    class itself is not included in this set. If required, it should be
+    specified in a separate option.</li>
 
 <li>The <code><b>@</b></code> specifications can be used to restrict classes
     and class members to the ones that are annotated with the specified
@@ -1209,6 +1294,8 @@ files.
     <td>matches any single character in a method name.</td></tr>
 <tr><td valign="top"><code><b>*</b></code></td>
     <td>matches any part of a method name.</td></tr>
+<tr><td valign="top"><code><b>&lt;</b><i>n</i><b>&gt;</b></code></td>
+    <td>matches the <i>n</i>'th matched wildcard in the same option.</td></tr>
 </table>
 
     Types in descriptors can contain the following wildcards:
@@ -1229,6 +1316,8 @@ files.
         non-array).</td></tr>
 <tr><td valign="top"><code><b>...</b></code></td>
     <td>matches any number of arguments of any type.</td></tr>
+<tr><td valign="top"><code><b>&lt;</b><i>n</i><b>&gt;</b></code></td>
+    <td>matches the <i>n</i>'th matched wildcard in the same option.</td></tr>
 
 </table>
 
@@ -1264,7 +1353,7 @@ files.
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>

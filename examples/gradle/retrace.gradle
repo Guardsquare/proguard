@@ -18,7 +18,7 @@ buildscript {
 
 // Define a ProGuard task.
 
-task proguard(type: proguard.gradle.ProGuardTask) {
+task ('proguard', type: proguard.gradle.ProGuardTask) {
 
     // You should probably import a more compact ProGuard-style configuration
     // file for all static settings, but we're specifying them all here, for
@@ -30,11 +30,18 @@ task proguard(type: proguard.gradle.ProGuardTask) {
     // We'll filter out the Ant and WTK classes.
 
     injars  '../../lib/retrace.jar'
-    injars  '../../lib/proguard.jar(!META-INF/MANIFEST.MF,'
-                                 !proguard/ant/**,!proguard/wtk/**)
+    injars  '../../lib/proguard.jar', filter: '!META-INF/MANIFEST.MF,!proguard/gui/**,!proguard/gradle/**,!proguard/ant/**,!proguard/wtk/**'
     outjars 'retrace_out.jar'
 
-    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        //libraryjars "${System.getProperty('java.home')}/jmods/....."
+    }
 
     // If we wanted to reuse the previously obfuscated proguard_out.jar, we could
     // perform incremental obfuscation based on its mapping file, and only keep the
@@ -42,6 +49,10 @@ task proguard(type: proguard.gradle.ProGuardTask) {
 
     //applymapping 'proguard.map'
     //outjars      'retrace_out.jar', filter: 'proguard/retrace/**'
+
+    // Don't print notes about reflection in injected code.
+
+    dontnote 'proguard.configuration.ConfigurationLogger'
 
     // Allow methods with the same signature, except for the return type,
     // to get the same obfuscation name.

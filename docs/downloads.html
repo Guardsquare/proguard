@@ -74,8 +74,34 @@ target="other">proguard-wtk-plugin</a>, and
 <a href="http://search.maven.org/#search|ga|1|a:%22proguard-retrace%22"
 target="other">proguard-retrace</a>.
 
-<h3><div>In progress</div> Version 5.3.x</h3>
+<h3><div>Feb 2018</div> Version 6.0</h3>
 <ul>
+<li>Added new option <code>-if</code>, to specify conditions for
+    <code>-keep</code> options.
+<li>Added new option <code>-addconfigurationdebugging</code>, to instrument the
+    code to get feedback about missing configuration at runtime.
+<li>Added new option <code>-android</code> to tune processing for Android.
+<li>Added support for references to matched wildcards in regular expressions
+    in <code>-keep</code> options.
+<li>Added new options <code>-assumenoexternalsideeffects</code>,
+    <code>-assumenoescapingparameters</code>, and
+    <code>-assumenoexternalreturnvalues</code>, too express fine-grained
+    assumptions for better code optimization.
+<li>Added backporting of Java 8 code.
+<li>Added backporting and support for Java 9 code.
+<li>Improved vertical class merging.
+<li>[PGD-654] Fixed processing of MethodParameters attributes with nameless
+    parameters.
+<li>[PGD-662] Fixed obfuscation causing clashing private and default method
+    names.
+<li>[PGD-684] Fixed obfuscation of extensions of functional interfaces that
+    are implemented with closures.
+<li>[PGD-681] Fixed potential IllegalArgumentException in simplification of
+    tail recursion.
+<li>[PGD-672] Fixed memory leak writing compressed zip entries.
+<li>[PGD-652] Fixed possible NullPointerException due to missing variable
+    initialization.
+<li>[PGD-641] Fixed possible NullPointerException due to optimized enum types.
 <li>[PGD-630] Fixed possible NullPointerException in optimization step.
 <li>[PGD-637] Fixed simplification of enum types in invokedynamic calls.
 <li>Fixed merging of classes sometimes resulting in final methods being
@@ -795,7 +821,7 @@ Upgrade considerations:
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 

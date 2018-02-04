@@ -44,6 +44,7 @@ Some typical useful configurations:
 <li><a href="#callback">Processing callback methods</a></li>
 <li><a href="#enumerations">Processing enumeration classes</a></li>
 <li><a href="#serializable">Processing serializable classes</a></li>
+<li><a href="#gson">Processing serialization with the GSON library</a></li>
 <li><a href="#beans">Processing bean classes</a></li>
 <li><a href="#annotations">Processing annotations</a></li>
 <li><a href="#database">Processing database drivers</a></li>
@@ -88,7 +89,7 @@ of the application:
 -libraryjars  &lt;java.home&gt;/lib/rt.jar
 -printmapping myapplication.map
 
--keep public class mypackage.MyMain {
+-keep public class com.example.MyMain {
     public static void main(java.lang.String[]);
 }
 </pre>
@@ -103,7 +104,7 @@ really required in this case, since we know a priori that the specified class
 and method have the proper access flags. It just looks more familiar this way.
 <p>
 Note that all type names are fully specified:
-<code>mypackage.MyMain</code> and <code>java.lang.String[]</code>.
+<code>com.example.MyMain</code> and <code>java.lang.String[]</code>.
 <p>
 We're writing out an obfuscation mapping file with <a
 href="usage.html#printmapping"><code>-printmapping</code></a>, for
@@ -131,17 +132,17 @@ files</a>.
 <h3><a name="applet">A typical applet</a></h3>
 
 These options shrink, optimize, and obfuscate the applet
-<code>mypackage.MyApplet</code>:
+<code>com.example.MyApplet</code>:
 <pre>
 -injars      in.jar
 -outjars     out.jar
 -libraryjars &lt;java.home&gt;/lib/rt.jar
 
--keep public class mypackage.MyApplet
+-keep public class com.example.MyApplet
 </pre>
 <p>
 The typical applet methods will be preserved automatically, since
-<code>mypackage.MyApplet</code> is an extension of the <code>Applet</code>
+<code>com.example.MyApplet</code> is an extension of the <code>Applet</code>
 class in the library <code>rt.jar</code>.
 <p>
 If applicable, you should add options for processing <a href="#native">native
@@ -154,7 +155,7 @@ files</a>.
 <h3><a name="midlet">A typical midlet</a></h3>
 
 These options shrink, optimize, obfuscate, and preverify the midlet
-<code>mypackage.MyMIDlet</code>:
+<code>com.example.MyMIDlet</code>:
 <pre>
 -injars      in.jar
 -outjars     out.jar
@@ -165,7 +166,7 @@ These options shrink, optimize, obfuscate, and preverify the midlet
 -allowaccessmodification
 -microedition
 
--keep public class mypackage.MyMIDlet
+-keep public class com.example.MyMIDlet
 </pre>
 <p>
 Note how we're now targeting the Java Micro Edition run-time environment of
@@ -174,7 +175,7 @@ Standard Edition run-time environment <code>rt.jar</code>. You can target
 other JME environments by picking the appropriate jars.
 <p>
 The typical midlet methods will be preserved automatically, since
-<code>mypackage.MyMIDlet</code> is an extension of the <code>MIDlet</code>
+<code>com.example.MyMIDlet</code> is an extension of the <code>MIDlet</code>
 class in the library <code>midpapi20.jar</code>.
 <p>
 The <a href="usage.html#microedition"><code>-microedition</code></a> option
@@ -197,7 +198,7 @@ corresponding jad file; ProGuard doesn't do that for you.
 <h3><a name="jcapplet">A typical Java Card applet</a></h3>
 
 These options shrink, optimize, and obfuscate the Java Card applet
-<code>mypackage.MyApplet</code>:
+<code>com.example.MyApplet</code>:
 <pre>
 -injars      in.jar
 -outjars     out.jar
@@ -207,7 +208,7 @@ These options shrink, optimize, and obfuscate the Java Card applet
 -repackageclasses ''
 -allowaccessmodification
 
--keep public class mypackage.MyApplet
+-keep public class com.example.MyApplet
 </pre>
 <p>
 The configuration is very similar to the configuration for midlets, except that
@@ -217,7 +218,7 @@ have java.lang.Class, so we're telling ProGuard not to worry about it.
 <h3><a name="xlet">A typical xlet</a></h3>
 
 These options shrink, optimize, and obfuscate the xlet
-<code>mypackage.MyXlet</code>:
+<code>com.example.MyXlet</code>:
 <pre>
 -injars      in.jar
 -outjars     out.jar
@@ -228,7 +229,7 @@ These options shrink, optimize, and obfuscate the xlet
 -repackageclasses ''
 -allowaccessmodification
 
--keep public class mypackage.MyXlet
+-keep public class com.example.MyXlet
 </pre>
 <p>
 The configuration is very similar to the configuration for midlets, except that
@@ -237,18 +238,19 @@ it now targets the CDC run-time environment with the Java TV API.
 <h3><a name="androidactivity">A simple Android activity</a></h3>
 
 These options shrink, optimize, and obfuscate the single Android
-activity <code>mypackage.MyActivity</code>:
+activity <code>com.example.MyActivity</code>:
 <pre>
 -injars      bin/classes
 -outjars     bin/classes-processed.jar
 -libraryjars /usr/local/java/android-sdk/platforms/android-9/android.jar
 
+-android
 -dontpreverify
 -repackageclasses ''
 -allowaccessmodification
 -optimizations !code/simplification/arithmetic
 
--keep public class mypackage.MyActivity
+-keep public class com.example.MyActivity
 </pre>
 <p>
 We're targeting the Android run-time and keeping the activity as an entry
@@ -313,6 +315,7 @@ libraries:
 -outjars     bin/classes-processed.jar
 -libraryjars /usr/local/java/android-sdk/platforms/android-9/android.jar
 
+-android
 -dontpreverify
 -repackageclasses ''
 -allowaccessmodification
@@ -390,7 +393,8 @@ still need to be preserved manually.
 If you're using additional Google APIs, you'll have to specify
 those as well, for instance:
 <pre>
--libraryjars /usr/local/android-sdk/add-ons/google_apis-7_r01/libs/maps.jar
+-libraryjars /usr/local/java/android-sdk/extras/android/support/v4/android-support-v4.jar
+-libraryjars /usr/local/java/android-sdk/add-ons/addon-google_apis-google-21/libs/maps.jar
 </pre>
 <p>
 If you're using Google's optional License Verification Library, you can
@@ -781,7 +785,7 @@ entry points to your code, much like, say, the main method of an application.
 If they aren't preserved by other <code>-keep</code> options, something like
 the following option will keep the callback class and method:
 <pre>
--keep class mypackage.MyCallbackClass {
+-keep class com.example.MyCallbackClass {
     void myCallbackMethod(java.lang.String);
 }
 </pre>
@@ -928,6 +932,36 @@ the <code>Serialization</code> interface, yet only a small number may actually
 ever be serialized. Knowing your application and tuning the configuration
 often produces more compact results.
 
+<h3><a name="gson">Processing serialization with the GSON library</a></h3>
+
+Google's GSON library provides convenient serialization to and from the JSON
+format. It relies on reflection on the fields of the classes that it
+serializes. In order for this to work, you need to preserve the parameterless
+constructor and the serialized fields from being removed, optimized, or
+obfuscated. For example:
+<pre>
+-keepclassmembers class com.example.SerializedClass1,
+                        com.example.SerializedClass2 {
+    &lt;fields&gt;;
+    &lt;init&gt;();
+}
+</pre>
+<p>
+While creating the configuration, you can specify the option
+<a href="usage.html#addconfigurationdebugging">-addconfigurationdebugging</a>,
+to get feedback on the necessary settings at run-time.
+<p>
+Alternatively, you can make sure the fields are explicitly annotated with
+<code>@SerializedName</code>, so the names of the fields can be obfuscated.
+You can then preserve all annotated fields with:
+<pre>
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName &lt;fields&gt;;
+}
+
+-keep,allowobfuscation @interface com.google.gson.annotations.**
+</pre>
+
 <h3><a name="beans">Processing bean classes</a></h3>
 
 If your application, applet, servlet, library, etc., makes extensive use of
@@ -936,12 +970,12 @@ setter methods, then configuration may become painful. There's not much else
 you can do than making sure the bean class names, or the getter and setter
 names don't change. For instance:
 <pre>
--keep public class mypackage.MyBean {
+-keep public class com.example.MyBean {
     public void setMyProperty(int);
     public int getMyProperty();
 }
 
--keep public class mypackage.MyBeanEditor
+-keep public class com.example.MyBeanEditor
 </pre>
 <p>
 If there are too many elements to list explicitly, wildcards in class names
@@ -1083,23 +1117,22 @@ members, the generated classes, and a utility class:
 -keep class **$$InjectAdapter
 -keep class **$$StaticInjection
 
+-if   class **$$ModuleAdapter
+-keep class &lt;1&gt;
+
+-if   class **$$InjectAdapter
+-keep class &lt;1&gt;
+
+-if   class **$$StaticInjection
+-keep class &lt;1&gt;
+
 -keepnames class dagger.Lazy
 </pre>
 <p>
-Unfortunately, you still need to explicitly preserve the corresponding base
-classes from your project. For example, for a generated class like
-<code>com.example.SomeClass$$ModuleAdapter</code>, you still need to specify:
-<pre>
--keep class com.example.SomeClass
-</pre>
-<p>
 Dagger can then still combine the corresponding pairs of classes, based on
-their names. You can figure out the base classes by listing the generated
-classes in the <code>gen</code> directory of your project (e.g.
-<code>com/examples/SomeClass$$ModuleAdapter.class</code>).
+their names.
 <p>
-Dagger 2 no longer relies on reflection with these naming conventions, which
-makes life a lot easier.
+Dagger 2 no longer relies on reflection with these naming conventions.
 
 <h3><a name="butterknife">Processing Butterknife code</a></h3>
 
@@ -1130,6 +1163,16 @@ tie together the code at runtime:
     public static void bind(...);
     public static void unbind(...);
 }
+
+-if   class **$$ViewBinder
+-keep class &lt;1&gt;
+
+-keep class **_ViewBinding {
+    &lt;init&gt;(&lt;1&gt;, android.view.View);
+}
+
+-if   class **_ViewBinding
+-keep class &lt;1&gt;
 </pre>
 <p>
 These settings preserve the Butterknife annotations, the annotated fields and
@@ -1343,6 +1386,47 @@ Note that you generally can't remove logging code that uses
 of <code>java.io.PrintStream#println</code>, which could break your
 application. You can work around it by creating your own logging methods and
 let ProGuard remove those.
+<p>
+Logging statements often contain implicit calls that perform string
+concatenation. They no longer serve a purpose after the logging calls have
+been removed. You can let ProGuard clean up such constructs as well by
+providing additional hints:
+<pre>
+-assumenoexternalsideeffects class java.lang.StringBuilder {
+    public java.lang.StringBuilder();
+    public java.lang.StringBuilder(int);
+    public java.lang.StringBuilder(java.lang.String);
+    public java.lang.StringBuilder append(java.lang.Object);
+    public java.lang.StringBuilder append(java.lang.String);
+    public java.lang.StringBuilder append(java.lang.StringBuffer);
+    public java.lang.StringBuilder append(char[]);
+    public java.lang.StringBuilder append(char[], int, int);
+    public java.lang.StringBuilder append(boolean);
+    public java.lang.StringBuilder append(char);
+    public java.lang.StringBuilder append(int);
+    public java.lang.StringBuilder append(long);
+    public java.lang.StringBuilder append(float);
+    public java.lang.StringBuilder append(double);
+    public java.lang.String toString();
+}
+
+-assumenoexternalreturnvalues public final class java.lang.StringBuilder {
+    public java.lang.StringBuilder append(java.lang.Object);
+    public java.lang.StringBuilder append(java.lang.String);
+    public java.lang.StringBuilder append(java.lang.StringBuffer);
+    public java.lang.StringBuilder append(char[]);
+    public java.lang.StringBuilder append(char[], int, int);
+    public java.lang.StringBuilder append(boolean);
+    public java.lang.StringBuilder append(char);
+    public java.lang.StringBuilder append(int);
+    public java.lang.StringBuilder append(long);
+    public java.lang.StringBuilder append(float);
+    public java.lang.StringBuilder append(double);
+}
+</pre>
+<p>
+Be careful specifying your own assumptions, since they can easily break your
+code.
 
 <h3><a name="restructuring">Restructuring the output archives</a></h3>
 
@@ -1594,7 +1678,7 @@ simply updated and preverified.
 <h3><a name="deadcode">Finding dead code</a></h3>
 
 These options list unused classes, fields, and methods in the application
-<code>mypackage.MyApplication</code>:
+<code>com.example.MyApplication</code>:
 <pre>
 -injars      in.jar
 -libraryjars &lt;java.home&gt;/lib/rt.jar
@@ -1604,7 +1688,7 @@ These options list unused classes, fields, and methods in the application
 -dontpreverify
 -printusage
 
--keep public class mypackage.MyApplication {
+-keep public class com.example.MyApplication {
     public static void main(java.lang.String[]);
 }
 </pre>
@@ -1650,12 +1734,11 @@ between the code and the configuration for shrinking, optimization, and
 obfuscation. However, it is also possible to define specific annotations,
 and then annotate the code to configure the processing.
 <p>
-You can find a set of such predefined annotations in the directory
-<code>examples/annotations/lib</code> in the ProGuard distribution.
-The annotation classes are defined in <code>annotations.jar</code>. The
+You can find a set of such predefined annotations in
+<code>lib/annotations.jar</code> in the ProGuard distribution. The
 corresponding ProGuard configuration (or meta-configuration, if you prefer)
-is specified in <code>annotations.pro</code>. With these files, you can start
-annotating your code. For instance, a java source file
+is specified in <code>annotations/annotations.pro</code>. With these files,
+you can start annotating your code. For instance, a java source file
 <code>Application.java</code> can be annotated as follows:
 <pre>
 @KeepApplication
@@ -1686,7 +1769,7 @@ illustrate some of the possibilities.
 
 <hr />
 <address>
-Copyright &copy; 2002-2017
+Copyright &copy; 2002-2018
 <a target="other" href="http://www.lafortune.eu/">Eric Lafortune</a> @ <a target="top" href="http://www.guardsquare.com/">GuardSquare</a>.
 </address>
 </body>
