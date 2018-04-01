@@ -55,8 +55,8 @@ public class OffsetTargetInfo extends TargetInfo
     /**
      * Creates an initialized OffsetTargetInfo.
      */
-    protected OffsetTargetInfo(byte u1targetType,
-                               int  u2offset)
+    public OffsetTargetInfo(byte u1targetType,
+                            int  u2offset)
     {
         super(u1targetType);
 

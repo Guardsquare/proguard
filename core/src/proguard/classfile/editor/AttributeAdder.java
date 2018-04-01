@@ -481,6 +481,42 @@ implements   AttributeVisitor
     }
 
 
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        // Create a new type annotations attribute.
+        RuntimeVisibleTypeAnnotationsAttribute newTypeAnnotationsAttribute =
+            new RuntimeVisibleTypeAnnotationsAttribute(constantAdder.addConstant(clazz, runtimeVisibleTypeAnnotationsAttribute.u2attributeNameIndex),
+                                                       0,
+                                                       new TypeAnnotation[runtimeVisibleTypeAnnotationsAttribute.u2annotationsCount]);
+
+        // Add the annotations.
+        runtimeVisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz,
+                                                                     new TypeAnnotationAdder(targetClass,
+                                                                                             newTypeAnnotationsAttribute));
+
+        // Add it to the target.
+        attributesEditor.addAttribute(newTypeAnnotationsAttribute);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        // Create a new type annotations attribute.
+        RuntimeInvisibleTypeAnnotationsAttribute newTypeAnnotationsAttribute =
+            new RuntimeInvisibleTypeAnnotationsAttribute(constantAdder.addConstant(clazz, runtimeInvisibleTypeAnnotationsAttribute.u2attributeNameIndex),
+                                                         0,
+                                                         new TypeAnnotation[runtimeInvisibleTypeAnnotationsAttribute.u2annotationsCount]);
+
+        // Add the annotations.
+        runtimeInvisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz,
+                                                                       new TypeAnnotationAdder(targetClass,
+                                                                                               newTypeAnnotationsAttribute));
+
+        // Add it to the target.
+        attributesEditor.addAttribute(newTypeAnnotationsAttribute);
+    }
+
+
     public void visitAnnotationDefaultAttribute(Clazz clazz, Method method, AnnotationDefaultAttribute annotationDefaultAttribute)
     {
         // Create a new annotation default attribute.

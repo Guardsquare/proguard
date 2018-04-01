@@ -75,13 +75,22 @@ public class FunctionalInterfaceFilter implements ClassVisitor
             return false;
         }
 
-        // Count the methods in the interface hierarchy.
-        MemberCounter methodCounter  = new MemberCounter();
+        // Count the abstract methods in the interface hierarchy.
+        // Subtract any corresponding default methods, since only abstract
+        // methods that don't have a default implementation count.
+        // TODO: Find a better way to count default methods, since there may be more of them for a single abstract method, or we can find one via different paths.
+        MemberCounter abstractMethodCounter  = new MemberCounter();
+        MemberCounter defaultMethodCounter   = new MemberCounter();
         clazz.hierarchyAccept(true, false, true, false,
                               new AllMethodVisitor(
                               new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
-                              methodCounter)));
+                              new MultiMemberVisitor(
+                                  abstractMethodCounter,
+                                  new SimilarMemberVisitor(clazz, true, false, true, false,
+                                  new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
+                                  defaultMethodCounter))
+                              ))));
 
-        return methodCounter.getCount() == 1;
+        return abstractMethodCounter.getCount() - defaultMethodCounter.getCount() == 1;
     }
 }

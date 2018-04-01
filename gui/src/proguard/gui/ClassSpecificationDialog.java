@@ -31,7 +31,7 @@ import java.awt.event.*;
 import java.util.List;
 
 /**
- * This <code>JDialog</code> allows the user to enter a String.
+ * This <code>JDialog</code> enables the user to specify a class specification.
  *
  * @author Eric Lafortune
  */
@@ -56,11 +56,14 @@ final class ClassSpecificationDialog extends JDialog
     private final JRadioButton keepClassesWithMembersRadioButton = new JRadioButton(msg("keepClassesWithMembers"));
 
     private final JCheckBox keepDescriptorClassesCheckBox = new JCheckBox(msg("keepDescriptorClasses"));
+    private final JCheckBox keepCodeCheckBox              = new JCheckBox(msg("keepCode"));
 
     private final JCheckBox allowShrinkingCheckBox    = new JCheckBox(msg("allowShrinking"));
     private final JCheckBox allowOptimizationCheckBox = new JCheckBox(msg("allowOptimization"));
     private final JCheckBox allowObfuscationCheckBox  = new JCheckBox(msg("allowObfuscation"));
 
+    private final JTextField               conditionCommentsField = new JTextField(20);
+    private final ClassSpecificationDialog conditionDialog;
 
     private final JRadioButton[] publicRadioButtons;
     private final JRadioButton[] finalRadioButtons;
@@ -79,12 +82,13 @@ final class ClassSpecificationDialog extends JDialog
 
     private int returnValue;
 
-    private ClassSpecification condition;
 
-    public ClassSpecificationDialog(final JFrame owner, boolean fullKeepOptions)
+    public ClassSpecificationDialog(final JFrame owner,
+                                    boolean      includeKeepSettings,
+                                    boolean      includeFieldButton)
     {
-
         super(owner, msg("specifyClasses"), true);
+
         setResizable(true);
 
         // Create some constraints that can be reused.
@@ -180,14 +184,14 @@ final class ClassSpecificationDialog extends JDialog
         keepOptionPanel.add(tip(keepClassesAndMembersRadioButton,  "keepTip"),                   constraintsLastStretch);
         keepOptionPanel.add(tip(keepClassMembersRadioButton,       "keepClassMembersTip"),       constraintsLastStretch);
         keepOptionPanel.add(tip(keepClassesWithMembersRadioButton, "keepClassesWithMembersTip"), constraintsLastStretch);
-        keepOptionPanel.add(tip(keepDescriptorClassesCheckBox,     "keepDescriptorClassesTip"),  constraintsLastStretch);
 
         // Create the also keep panel.
         final JPanel alsoKeepOptionPanel = new JPanel(layout);
         alsoKeepOptionPanel.setBorder(BorderFactory.createTitledBorder(etchedBorder,
                                                                        msg("alsoKeepTitle")));
 
-        alsoKeepOptionPanel.add(tip(keepDescriptorClassesCheckBox, "keepDescriptorClassesTip"),    constraintsLastStretch);
+        alsoKeepOptionPanel.add(tip(keepDescriptorClassesCheckBox, "keepDescriptorClassesTip"), constraintsLastStretch);
+        alsoKeepOptionPanel.add(tip(keepCodeCheckBox,              "keepCodeTip"),              constraintsLastStretch);
 
         // Create the allow option panel.
         final JPanel allowOptionPanel = new JPanel(layout);
@@ -197,6 +201,46 @@ final class ClassSpecificationDialog extends JDialog
         allowOptionPanel.add(tip(allowShrinkingCheckBox,    "allowShrinkingTip"),    constraintsLastStretch);
         allowOptionPanel.add(tip(allowOptimizationCheckBox, "allowOptimizationTip"), constraintsLastStretch);
         allowOptionPanel.add(tip(allowObfuscationCheckBox,  "allowObfuscationTip"),  constraintsLastStretch);
+
+        conditionDialog = includeKeepSettings ?
+            new ClassSpecificationDialog(owner, false, true) :
+            null;
+
+        // Create the condition panel.
+        final JPanel conditionPanel = new JPanel(layout);
+        conditionPanel.setBorder(BorderFactory.createTitledBorder(etchedBorder,
+                                                                  msg("conditionTitle")));
+
+        final JButton conditionButton = new JButton(msg("edit"));
+        conditionButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent actionEvent)
+            {
+                final ClassSpecification originalCondition =
+                    conditionDialog.getClassSpecification();
+
+                int returnValue = conditionDialog.showDialog();
+                if (returnValue == APPROVE_OPTION)
+                {
+                    // Update the condition label.
+                    ClassSpecification condition =
+                        conditionDialog.getClassSpecification();
+
+                    conditionCommentsField.setText(label(condition.equals(new ClassSpecification()) ? null : condition));
+                }
+                else
+                {
+                    // Reset to the original condition.
+                    conditionDialog.setClassSpecification(originalCondition);
+                }
+            }
+        });
+
+        // The comments can only be edited in the dialog.
+        conditionCommentsField.setEditable(false);
+
+        conditionPanel.add(tip(conditionCommentsField, "commentsTip"),      constraintsStretch);
+        conditionPanel.add(tip(conditionButton,        "editConditionTip"), constraintsLast);
 
         // Create the access panel.
         JPanel accessPanel = new JPanel(layout);
@@ -247,26 +291,9 @@ final class ClassSpecificationDialog extends JDialog
 
 
         // Create the class member list panel.
-        memberSpecificationsPanel = new MemberSpecificationsPanel(this, fullKeepOptions);
+        memberSpecificationsPanel = new MemberSpecificationsPanel(this, includeFieldButton);
         memberSpecificationsPanel.setBorder(BorderFactory.createTitledBorder(etchedBorder,
                                                                              msg("classMembers")));
-
-        // Create the Condition button.
-        final JButton conditionButton = new JButton(msg("condition"));
-        conditionButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent actionEvent)
-            {
-                ClassSpecificationDialog classSpecificationDialog = new ClassSpecificationDialog(owner, false);
-                setClassSpecification(new ClassSpecification());
-
-                int returnValue = classSpecificationDialog.showDialog();
-                if (returnValue == ClassSpecificationDialog.APPROVE_OPTION)
-                {
-                    condition = classSpecificationDialog.getClassSpecification();
-                }
-            }
-        });
 
         // Create the Advanced button.
         final JButton advancedButton = new JButton(msg("basic"));
@@ -280,7 +307,7 @@ final class ClassSpecificationDialog extends JDialog
                 allowOptionPanel          .setVisible(visible);
                 annotationTypePanel       .setVisible(visible);
                 extendsAnnotationTypePanel.setVisible(visible);
-                conditionButton           .setVisible(visible);
+                conditionPanel            .setVisible(visible);
 
                 advancedButton.setText(msg(visible ? "basic" : "advanced"));
 
@@ -313,11 +340,12 @@ final class ClassSpecificationDialog extends JDialog
         // Add all panels to the main panel.
         JPanel mainPanel = new JPanel(layout);
         mainPanel.add(tip(commentsPanel,              "commentsTip"),                    panelConstraints);
-        if (fullKeepOptions)
+        if (includeKeepSettings)
         {
             mainPanel.add(tip(keepOptionPanel,        "keepTitleTip"),                   panelConstraints);
             mainPanel.add(tip(alsoKeepOptionPanel,    "alsoKeepTitleTip"),               panelConstraints);
             mainPanel.add(tip(allowOptionPanel,       "allowTitleTip"),                  panelConstraints);
+            mainPanel.add(tip(conditionPanel,         "conditionTip"),                   panelConstraints);
         }
         mainPanel.add(tip(accessPanel,                "accessTip"),                      panelConstraints);
         mainPanel.add(tip(annotationTypePanel,        "annotationTip"),                  panelConstraints);
@@ -325,11 +353,6 @@ final class ClassSpecificationDialog extends JDialog
         mainPanel.add(tip(extendsAnnotationTypePanel, "extendsImplementsAnnotationTip"), panelConstraints);
         mainPanel.add(tip(extendsClassNamePanel,      "extendsImplementsClassTip"),      panelConstraints);
         mainPanel.add(tip(memberSpecificationsPanel,  "classMembersTip"),                stretchPanelConstraints);
-
-        if (fullKeepOptions)
-        {
-            mainPanel.add(tip(conditionButton,        "conditionTip"),                   panelConstraints);
-        }
 
         mainPanel.add(tip(advancedButton,             "advancedTip"),                    advancedButtonConstraints);
         mainPanel.add(okButton,                                                          okButtonConstraints);
@@ -389,13 +412,14 @@ final class ClassSpecificationDialog extends JDialog
      */
     public void setKeepSpecification(KeepClassSpecification keepClassSpecification)
     {
-        boolean markClasses           = keepClassSpecification.markClasses;
-        boolean markConditionally     = keepClassSpecification.markConditionally;
-        boolean markDescriptorClasses = keepClassSpecification.markDescriptorClasses;
-        boolean allowShrinking        = keepClassSpecification.allowShrinking;
-        boolean allowOptimization     = keepClassSpecification.allowOptimization;
-        boolean allowObfuscation      = keepClassSpecification.allowObfuscation;
-        condition                     = keepClassSpecification.condition;
+        boolean            markClasses           = keepClassSpecification.markClasses;
+        boolean            markConditionally     = keepClassSpecification.markConditionally;
+        boolean            markDescriptorClasses = keepClassSpecification.markDescriptorClasses;
+        boolean            markCodeAttributes    = keepClassSpecification.markCodeAttributes;
+        boolean            allowShrinking        = keepClassSpecification.allowShrinking;
+        boolean            allowOptimization     = keepClassSpecification.allowOptimization;
+        boolean            allowObfuscation      = keepClassSpecification.allowObfuscation;
+        ClassSpecification condition             = keepClassSpecification.condition;
 
         // Figure out the proper keep radio button and set it.
         JRadioButton keepOptionRadioButton =
@@ -407,10 +431,18 @@ final class ClassSpecificationDialog extends JDialog
 
         // Set the other check boxes.
         keepDescriptorClassesCheckBox.setSelected(markDescriptorClasses);
+        keepCodeCheckBox             .setSelected(markCodeAttributes);
         allowShrinkingCheckBox       .setSelected(allowShrinking);
         allowOptimizationCheckBox    .setSelected(allowOptimization);
         allowObfuscationCheckBox     .setSelected(allowObfuscation);
 
+        // Set the condition comment and dialog.
+        conditionCommentsField.setText(label(condition));
+        conditionDialog.setClassSpecification(condition != null ?
+                                                  condition :
+                                                  new ClassSpecification());
+
+        // Set the rest of the class specification.
         setClassSpecification(keepClassSpecification);
     }
 
@@ -456,22 +488,23 @@ final class ClassSpecificationDialog extends JDialog
      */
     public KeepClassSpecification getKeepSpecification()
     {
-        boolean markClasses           = !keepClassMembersRadioButton     .isSelected();
-        boolean markConditionally     = keepClassesWithMembersRadioButton.isSelected();
-        boolean markDescriptorClasses = keepDescriptorClassesCheckBox    .isSelected();
-        boolean allowShrinking        = allowShrinkingCheckBox           .isSelected();
-        boolean allowOptimization     = allowOptimizationCheckBox        .isSelected();
-        boolean allowObfuscation      = allowObfuscationCheckBox         .isSelected();
-        ClassSpecification keepCondition  = this.condition;
+        boolean            markClasses           = !keepClassMembersRadioButton     .isSelected();
+        boolean            markConditionally     = keepClassesWithMembersRadioButton.isSelected();
+        boolean            markDescriptorClasses = keepDescriptorClassesCheckBox    .isSelected();
+        boolean            markCodeAttributes    = keepCodeCheckBox                 .isSelected();
+        boolean            allowShrinking        = allowShrinkingCheckBox           .isSelected();
+        boolean            allowOptimization     = allowOptimizationCheckBox        .isSelected();
+        boolean            allowObfuscation      = allowObfuscationCheckBox         .isSelected();
+        ClassSpecification condition             = conditionDialog                  .getClassSpecification();
 
         return new KeepClassSpecification(markClasses,
                                           markConditionally,
                                           markDescriptorClasses,
-                                          false,
+                                          markCodeAttributes,
                                           allowShrinking,
                                           allowOptimization,
                                           allowObfuscation,
-                                          keepCondition,
+                                          condition.equals(new ClassSpecification()) ? null : condition,
                                           getClassSpecification());
     }
 
@@ -531,6 +564,33 @@ final class ClassSpecificationDialog extends JDialog
         show();
 
         return returnValue;
+    }
+
+
+    /**
+     * Returns a suitable label summarizing the given class specification.
+     */
+    public String label(ClassSpecification classSpecification)
+    {
+        return label(classSpecification, -1);
+    }
+
+
+    /**
+     * Returns a suitable label summarizing the given class specification at
+     * some given index.
+     */
+    public String label(ClassSpecification classSpecification, int index)
+    {
+        return
+            classSpecification                       == null ? msg("none")                                                                                                        :
+            classSpecification.comments              != null ? classSpecification.comments.trim()                                                                                 :
+            classSpecification.className             != null ? (msg("class") + ' ' + ClassUtil.externalClassName(classSpecification.className))                                   :
+            classSpecification.annotationType        != null ? (msg("classesAnnotatedWith") + ' ' + ClassUtil.externalType(classSpecification.annotationType))                    :
+            classSpecification.extendsClassName      != null ? (msg("extensionsOf") + ' ' + ClassUtil.externalClassName(classSpecification.extendsClassName))                     :
+            classSpecification.extendsAnnotationType != null ? (msg("extensionsOfClassesAnnotatedWith") + ' ' + ClassUtil.externalType(classSpecification.extendsAnnotationType)) :
+            index                                    >= 0    ? (msg("specificationNumber") + index)                                                                               :
+                                                               msg("specification");
     }
 
 

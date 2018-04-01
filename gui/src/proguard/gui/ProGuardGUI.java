@@ -81,9 +81,9 @@ public class ProGuardGUI extends JFrame
     private       ClassSpecification[] boilerplateNoSideEffectMethods;
     private final JCheckBox[]          boilerplateNoSideEffectMethodCheckBoxes;
 
-    private final ClassSpecificationsPanel additionalNoSideEffectsPanel = new ClassSpecificationsPanel(this, false);
+    private final ClassSpecificationsPanel additionalNoSideEffectsPanel = new ClassSpecificationsPanel(this, false, false);
 
-    private final ClassSpecificationsPanel whyAreYouKeepingPanel = new ClassSpecificationsPanel(this, false);
+    private final ClassSpecificationsPanel whyAreYouKeepingPanel = new ClassSpecificationsPanel(this, false, true);
 
     private final JCheckBox shrinkCheckBox     = new JCheckBox(msg("shrink"));
     private final JCheckBox printUsageCheckBox = new JCheckBox(msg("printUsage"));
@@ -696,7 +696,7 @@ public class ProGuardGUI extends JFrame
                 // We're interested in the keep options.
                 boilerplateKeep =
                     extractKeepSpecifications(configuration.keep, false, false);
- 
+
                 // We're interested in the keep options.
                 boilerplateKeepNames =
                     extractKeepSpecifications(configuration.keep, true, false);

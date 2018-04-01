@@ -31,7 +31,7 @@ import java.util.List;
 
 
 /**
- * This <code>ListPanel</code> allows the user to add, edit, move, and remove
+ * This <code>ListPanel</code> enables the user to add, edit, move, and remove
  * ClassSpecification entries in a list.
  *
  * @author Eric Lafortune
@@ -41,13 +41,17 @@ class ClassSpecificationsPanel extends ListPanel
     protected final ClassSpecificationDialog classSpecificationDialog;
 
 
-    public ClassSpecificationsPanel(JFrame owner, boolean fullKeepOptions)
+    public ClassSpecificationsPanel(JFrame  owner,
+                                    boolean includeKeepSettings,
+                                    boolean includeFieldButton)
     {
         super();
 
         list.setCellRenderer(new MyListCellRenderer());
 
-        classSpecificationDialog = new ClassSpecificationDialog(owner, fullKeepOptions);
+        classSpecificationDialog = new ClassSpecificationDialog(owner,
+                                                                includeKeepSettings,
+                                                                includeFieldButton);
 
         addAddButton();
         addEditButton();
@@ -191,7 +195,7 @@ class ClassSpecificationsPanel extends ListPanel
     /**
      * This ListCellRenderer renders ClassSpecification objects.
      */
-    private static class MyListCellRenderer implements ListCellRenderer
+    private class MyListCellRenderer implements ListCellRenderer
     {
         private final JLabel label = new JLabel();
 
@@ -206,12 +210,7 @@ class ClassSpecificationsPanel extends ListPanel
         {
             ClassSpecification classSpecification = (ClassSpecification)value;
 
-            String comments = classSpecification.comments;
-
-            label.setText(comments                            != null ? comments.trim()                                                                                        :
-                          classSpecification.className        != null ? (msg("class") + ' ' + ClassUtil.externalClassName(classSpecification.className))               :
-                          classSpecification.extendsClassName != null ? (msg("extensionsOf") + ' ' + ClassUtil.externalClassName(classSpecification.extendsClassName)) :
-                                                                        (msg("specificationNumber") + index));
+            label.setText(classSpecificationDialog.label(classSpecification, index));
 
             if (isSelected)
             {

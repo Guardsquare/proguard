@@ -1143,8 +1143,20 @@ implements   AttributeVisitor
                 if (!isStackEntryUnwantedBefore(offset, stackIndex) &&
                     isStackEntryPresentBefore(offset, stackIndex))
                 {
-                    // Mark that we'll need an extra pop instruction.
-                    markExtraPushPopInstruction(offset);
+                    // Is it already a pop instruction?
+                    if (isPop(instruction))
+                    {
+                        // Just mark it as necessary, along with the stack
+                        // entries at the producer offsets. This might happen
+                        // in Kotlin code [DGD-481], with getstatic/pop.
+                        markInstruction(offset);
+                        markStackEntryProducers(offset, stackIndex, false);
+                    }
+                    else
+                    {
+                        // Mark that we'll need an extra pop instruction.
+                        markExtraPushPopInstruction(offset);
+                    }
                 }
             }
         }
@@ -1152,6 +1164,16 @@ implements   AttributeVisitor
 
 
     // Small utility methods.
+
+    /**
+     * Returns whether the given instruction is a pop instruction.
+     */
+    private boolean isPop(Instruction instruction)
+    {
+        return instruction.opcode == InstructionConstants.OP_POP  ||
+               instruction.opcode == InstructionConstants.OP_POP2;
+    }
+
 
     /**
      * Marks the producing instructions of the variable consumer at the given
@@ -1366,10 +1388,13 @@ implements   AttributeVisitor
 
                     if (markInstructions)
                     {
+                        // We can mark the producer.
                         markInstruction(offset);
                     }
                     else
                     {
+                        // We'll need to push a stack entry at that point
+                        // instead.
                         markExtraPushPopInstruction(offset);
                     }
                 }
@@ -1565,7 +1590,6 @@ implements   AttributeVisitor
     }
 
 
-
     /**
      * Marks the specified stack entry as unwanted, typically because it is
      * an unused parameter of a method invocation.
@@ -1580,6 +1604,10 @@ implements   AttributeVisitor
     }
 
 
+    /**
+     * Marks the specified instructions as used.
+     * @param instructionOffsets the offsets of the instructions.
+     */
     private void markInstructions(InstructionOffsetValue instructionOffsets)
     {
         int count = instructionOffsets.instructionOffsetCount();
@@ -1591,6 +1619,10 @@ implements   AttributeVisitor
     }
 
 
+    /**
+     * Marks the specified instruction as used.
+     * @param instructionOffset the offset of the instruction.
+     */
     private void markInstruction(int instructionOffset)
     {
         if (!isInstructionNecessary(instructionOffset))
@@ -1607,6 +1639,11 @@ implements   AttributeVisitor
     }
 
 
+    /**
+     * Marks that an extra push/pop instruction is required at the given
+     * offset, if the current instruction at that offset is unused.
+     * @param instructionOffset the offset of the instruction.
+     */
     private void markExtraPushPopInstruction(int instructionOffset)
     {
         if (!isInstructionNecessary(instructionOffset) &&
@@ -1624,11 +1661,20 @@ implements   AttributeVisitor
     }
 
 
-    private boolean isAnyInstructionNecessary(int instructionOffset1,
-                                              int instructionOffset2)
+    /**
+     * Returns whether any instruction in the specified sequence of
+     * instructions is necessary.
+     * @param startInstructionOffset the start offset of the instruction
+     *                               sequence (inclusive).
+     * @param endInstructionOffset   the end offset of the instruction
+     *                               sequence (exclusive).
+     * @return whether any instruction is necessary.
+     */
+    private boolean isAnyInstructionNecessary(int startInstructionOffset,
+                                              int endInstructionOffset)
     {
-        for (int instructionOffset = instructionOffset1;
-             instructionOffset < instructionOffset2;
+        for (int instructionOffset = startInstructionOffset;
+             instructionOffset < endInstructionOffset;
              instructionOffset++)
         {
             if (isInstructionNecessary(instructionOffset) ||

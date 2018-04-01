@@ -56,9 +56,9 @@ public class TypeArgumentTargetInfo extends TargetInfo
     /**
      * Creates an initialized TypeArgumentTargetInfo.
      */
-    protected TypeArgumentTargetInfo(byte u1targetType,
-                                     int  u2offset,
-                                     int  u1typeArgumentIndex)
+    public TypeArgumentTargetInfo(byte u1targetType,
+                                  int  u2offset,
+                                  int  u1typeArgumentIndex)
     {
         super(u1targetType);
 

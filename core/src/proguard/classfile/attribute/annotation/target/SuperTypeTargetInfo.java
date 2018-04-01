@@ -31,6 +31,9 @@ import proguard.classfile.attribute.annotation.target.visitor.TargetInfoVisitor;
  */
 public class SuperTypeTargetInfo extends TargetInfo
 {
+    public final int EXTENDS_INDEX = 65535;
+
+
     public int u2superTypeIndex;
 
 

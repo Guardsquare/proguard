@@ -56,9 +56,9 @@ public class LocalVariableTargetInfo extends TargetInfo
     /**
      * Creates an initialized LocalVariableTargetInfo.
      */
-    protected LocalVariableTargetInfo(byte                         u1targetType,
-                                      int                          u2tableLength,
-                                      LocalVariableTargetElement[] table)
+    public LocalVariableTargetInfo(byte                         u1targetType,
+                                   int                          u2tableLength,
+                                   LocalVariableTargetElement[] table)
     {
         super(u1targetType);
 

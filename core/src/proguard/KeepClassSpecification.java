@@ -37,6 +37,48 @@ public class KeepClassSpecification extends ClassSpecification
     public final ClassSpecification condition;
 
 
+
+    /**
+     * Creates a new KeepClassSpecification.
+     * This older constructor is still present for the sake of
+     * com/android/build/gradle/internal/transforms/BaseProguardAction.java
+     * @param markClasses           specifies whether to mark the classes.
+     *                              If false, only class members are marked.
+     *                              If true, the classes are marked as well.
+     * @param markConditionally     specifies whether to mark the classes and
+     *                              class members conditionally. If true,
+     *                              classes and class members are marked, on
+     *                              the condition that all specified class
+     *                              members are present.
+     * @param markDescriptorClasses specifies whether to mark the classes in
+     *                              the descriptors of the marked class members.
+     * @param allowShrinking        specifies whether shrinking is allowed.
+     * @param allowOptimization     specifies whether optimization is allowed.
+     * @param allowObfuscation      specifies whether obfuscation is allowed.
+     * @param classSpecification    the specification of classes and class
+     *                              members.
+     * @deprecated
+     */
+    public KeepClassSpecification(boolean            markClasses,
+                                  boolean            markConditionally,
+                                  boolean            markDescriptorClasses,
+                                  boolean            allowShrinking,
+                                  boolean            allowOptimization,
+                                  boolean            allowObfuscation,
+                                  ClassSpecification classSpecification)
+    {
+        this(markClasses,
+             markConditionally,
+             markDescriptorClasses,
+             false,
+             allowShrinking,
+             allowOptimization,
+             allowObfuscation,
+             null,
+             classSpecification);
+    }
+
+
     /**
      * Creates a new KeepClassSpecification.
      * @param markClasses           specifies whether to mark the classes.

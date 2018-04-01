@@ -76,6 +76,8 @@ target="other">proguard-retrace</a>.
 
 <h3><div>Feb 2018</div> Version 6.0</h3>
 <ul>
+<li>[PGD-693] Fixed obfuscation of closures for functional interfaces with
+    default methods.
 <li>Added new option <code>-if</code>, to specify conditions for
     <code>-keep</code> options.
 <li>Added new option <code>-addconfigurationdebugging</code>, to instrument the
@@ -85,11 +87,17 @@ target="other">proguard-retrace</a>.
     in <code>-keep</code> options.
 <li>Added new options <code>-assumenoexternalsideeffects</code>,
     <code>-assumenoescapingparameters</code>, and
-    <code>-assumenoexternalreturnvalues</code>, too express fine-grained
+    <code>-assumenoexternalreturnvalues</code>, to express fine-grained
     assumptions for better code optimization.
 <li>Added backporting of Java 8 code.
 <li>Added backporting and support for Java 9 code.
 <li>Improved vertical class merging.
+<li>[PGD-689] Fixed optimization potentially causing unexpected error while
+    processing Kotlin bytecode.
+<li>[PGD-690] Fixed NullPointerException when editing keep specifications
+    in GUI.
+<li>[PGD-688] Fixed UnsupportedOperationException while optimizing type
+    annotations.
 <li>[PGD-654] Fixed processing of MethodParameters attributes with nameless
     parameters.
 <li>[PGD-662] Fixed obfuscation causing clashing private and default method

@@ -55,8 +55,8 @@ public class CatchTargetInfo extends TargetInfo
     /**
      * Creates an initialized CatchTargetInfo.
      */
-    protected CatchTargetInfo(byte u1targetType,
-                              int  u2exceptionTableIndex)
+    public CatchTargetInfo(byte u1targetType,
+                           int  u2exceptionTableIndex)
     {
         super(u1targetType);
 

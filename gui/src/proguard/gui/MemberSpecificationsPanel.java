@@ -43,18 +43,19 @@ final class MemberSpecificationsPanel extends ListPanel
     private final MemberSpecificationDialog methodSpecificationDialog;
 
 
-    public MemberSpecificationsPanel(JDialog owner, boolean fullKeepOptions)
+    public MemberSpecificationsPanel(JDialog owner,
+                                     boolean includeFieldButton)
     {
         super();
 
-        super.firstSelectionButton = fullKeepOptions ? 3 : 2;
+        super.firstSelectionButton = includeFieldButton ? 3 : 2;
 
         list.setCellRenderer(new MyListCellRenderer());
 
         fieldSpecificationDialog  = new MemberSpecificationDialog(owner, true);
         methodSpecificationDialog = new MemberSpecificationDialog(owner, false);
 
-        if (fullKeepOptions)
+        if (includeFieldButton)
         {
             addAddFieldButton();
         }
@@ -103,7 +104,7 @@ final class MemberSpecificationsPanel extends ListPanel
                 {
                     // Add the new element.
                     addElement(new MyMemberSpecificationWrapper(methodSpecificationDialog.getMemberSpecification(),
-                                                                  false));
+                                                                false));
                 }
             }
         });

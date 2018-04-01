@@ -48,7 +48,7 @@ final class KeepSpecificationsPanel extends ClassSpecificationsPanel
                                    boolean allowOptimization,
                                    boolean allowObfuscation)
     {
-        super(owner, true);
+        super(owner, true, true);
 
         this.markClasses           = markClasses;
         this.markConditionally     = markConditionally;
@@ -71,7 +71,7 @@ final class KeepSpecificationsPanel extends ClassSpecificationsPanel
                                           allowOptimization,
                                           allowObfuscation,
                                           null,
-                                          null);
+                                          super.createClassSpecification());
     }
 
 
