@@ -38,7 +38,7 @@ extends      SimplifiedVisitor
 implements   ConstantVisitor,
              ElementValueVisitor
 {
-    private final MemberVisitor memberVisitor;
+    protected final MemberVisitor memberVisitor;
 
 
     public ReferencedMemberVisitor(MemberVisitor memberVisitor)

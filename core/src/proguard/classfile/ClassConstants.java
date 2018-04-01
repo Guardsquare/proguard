@@ -51,6 +51,8 @@ public class ClassConstants
     public static final int CLASS_VERSION_1_8_MINOR = 0;
     public static final int CLASS_VERSION_1_9_MAJOR = 53;
     public static final int CLASS_VERSION_1_9_MINOR = 0;
+    public static final int CLASS_VERSION_10_MAJOR  = 54;
+    public static final int CLASS_VERSION_10_MINOR  = 0;
 
     public static final int CLASS_VERSION_1_0 = (CLASS_VERSION_1_0_MAJOR << 16) | CLASS_VERSION_1_0_MINOR;
     public static final int CLASS_VERSION_1_2 = (CLASS_VERSION_1_2_MAJOR << 16) | CLASS_VERSION_1_2_MINOR;
@@ -61,6 +63,7 @@ public class ClassConstants
     public static final int CLASS_VERSION_1_7 = (CLASS_VERSION_1_7_MAJOR << 16) | CLASS_VERSION_1_7_MINOR;
     public static final int CLASS_VERSION_1_8 = (CLASS_VERSION_1_8_MAJOR << 16) | CLASS_VERSION_1_8_MINOR;
     public static final int CLASS_VERSION_1_9 = (CLASS_VERSION_1_9_MAJOR << 16) | CLASS_VERSION_1_9_MINOR;
+    public static final int CLASS_VERSION_10  = (CLASS_VERSION_10_MAJOR  << 16) | CLASS_VERSION_10_MINOR;
 
     public static final int ACC_PUBLIC       = 0x0001;
     public static final int ACC_PRIVATE      = 0x0002;

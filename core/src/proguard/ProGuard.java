@@ -43,7 +43,7 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 6.0.1";
+    public static final String VERSION = "ProGuard, version 6.0.2";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();

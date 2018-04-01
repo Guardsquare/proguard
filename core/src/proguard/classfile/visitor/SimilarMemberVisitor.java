@@ -25,7 +25,7 @@ import proguard.classfile.*;
 /**
  * This <code>MemberVisitor</code> lets a given <code>MemberVisitor</code>
  * visit all members that have the same name and type as the visited methods
- * in the class hierarchy of a given target class.
+ * in the class hierarchy of the members' classes or of a given target class.
  *
  * @author Eric Lafortune
  */
@@ -38,6 +38,37 @@ implements   MemberVisitor
     private final boolean       visitInterfaceMembers;
     private final boolean       visitOverridingMembers;
     private final MemberVisitor memberVisitor;
+
+
+    /**
+     * Creates a new SimilarMemberVisitor.
+     * @param visitThisMember        specifies whether to visit the class
+     *                               members in the members' classes themselves.
+     * @param visitSuperMembers      specifies whether to visit the class
+     *                               members in the super classes of the
+     *                               members' classes.
+     * @param visitInterfaceMembers  specifies whether to visit the class
+     *                               members in the interface classes of the
+     *                               members' classes.
+     * @param visitOverridingMembers specifies whether to visit the class
+     *                               members in the subclasses of the members'
+     *                               classes.
+     * @param memberVisitor          the <code>MemberVisitor</code> to which
+     *                               visits will be delegated.
+     */
+    public SimilarMemberVisitor(boolean       visitThisMember,
+                                boolean       visitSuperMembers,
+                                boolean       visitInterfaceMembers,
+                                boolean       visitOverridingMembers,
+                                MemberVisitor memberVisitor)
+    {
+        this(null,
+             visitThisMember,
+             visitSuperMembers,
+             visitInterfaceMembers,
+             visitOverridingMembers,
+             memberVisitor);
+    }
 
 
     /**
@@ -78,6 +109,8 @@ implements   MemberVisitor
 
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
+        Clazz targetClass = targetClass(programClass);
+
         targetClass.hierarchyAccept(visitThisMember,
                                     visitSuperMembers,
                                     visitInterfaceMembers,
@@ -90,6 +123,8 @@ implements   MemberVisitor
 
     public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
     {
+        Clazz targetClass = targetClass(libraryClass);
+
         targetClass.hierarchyAccept(visitThisMember,
                                     visitSuperMembers,
                                     visitInterfaceMembers,
@@ -102,6 +137,8 @@ implements   MemberVisitor
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
+        Clazz targetClass = targetClass(programClass);
+
         targetClass.hierarchyAccept(visitThisMember,
                                     visitSuperMembers,
                                     visitInterfaceMembers,
@@ -114,6 +151,8 @@ implements   MemberVisitor
 
     public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
+        Clazz targetClass = targetClass(libraryClass);
+
         targetClass.hierarchyAccept(visitThisMember,
                                     visitSuperMembers,
                                     visitInterfaceMembers,
@@ -121,5 +160,15 @@ implements   MemberVisitor
                                     new NamedMethodVisitor(libraryMethod.getName(libraryClass),
                                                            libraryMethod.getDescriptor(libraryClass),
                                                            memberVisitor));
+    }
+
+
+    /**
+     * Returns the target class, or the given class if the target class is
+     * null.
+     */
+    private Clazz targetClass(Clazz clazz)
+    {
+        return targetClass != null ? targetClass : clazz;
     }
 }

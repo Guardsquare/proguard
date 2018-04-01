@@ -44,6 +44,7 @@ public interface JavaConstants
     public static final String CLASS_VERSION_1_7_ALIAS = "7";
     public static final String CLASS_VERSION_1_8_ALIAS = "8";
     public static final String CLASS_VERSION_1_9_ALIAS = "9";
+    public static final String CLASS_VERSION_10        = "10";
 
     public static final String ACC_PUBLIC       = "public";
     public static final String ACC_PRIVATE      = "private";

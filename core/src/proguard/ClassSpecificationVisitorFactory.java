@@ -545,7 +545,7 @@ public class ClassSpecificationVisitorFactory
         StringMatcher nameMatcher = name == null ? null :
             new ListParser(new NameParser(variableStringMatchers)).parse(name);
 
-        StringMatcher descriptorMatcher = name == null ? null :
+        StringMatcher descriptorMatcher = descriptor == null ? null :
             new ListParser(new ClassNameParser(variableStringMatchers)).parse(descriptor);
 
         StringMatcher attributesMatcher = attributeNames == null ? null :
