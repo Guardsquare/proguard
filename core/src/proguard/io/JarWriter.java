@@ -26,7 +26,8 @@ import java.io.*;
 import java.util.Date;
 
 /**
- * This DataEntryWriter sends data entries to a given jar/zip file.
+ * This DataEntryWriter sends data entries to a the jar/zip files specified by
+ * their parents.
  *
  * @author Eric Lafortune
  */

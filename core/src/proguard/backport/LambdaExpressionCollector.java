@@ -185,7 +185,8 @@ implements ClassVisitor,
                     for (int i = 0; i < bridgeMethodCount; i++)
                     {
                         MethodTypeConstant methodTypeConstant =
-                            (MethodTypeConstant) programClass.getConstant(argumentIndex++);
+                            getMethodTypeConstant(programClass,
+                                                  bootstrapMethodInfo.u2methodArguments[argumentIndex++]);
 
                         lambdaExpression.bridgeMethodDescriptors =
                             ArrayUtil.add(lambdaExpression.bridgeMethodDescriptors,

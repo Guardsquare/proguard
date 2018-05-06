@@ -27,9 +27,12 @@ package proguard.classfile;
  */
 public class ClassConstants
 {
-    public static final byte[] JMOD_HEADER = new byte[] { 'J', 'M', 1, 0 };
+    public static final String WAR_CLASS_FILE_PREFIX  = "classes/";
 
-    public static final String CLASS_FILE_EXTENSION = ".class";
+    public static final byte[] JMOD_HEADER            = new byte[] { 'J', 'M', 1, 0 };
+    public static final String JMOD_CLASS_FILE_PREFIX = "classes/";
+
+    public static final String CLASS_FILE_EXTENSION   = ".class";
 
     public static final int MAGIC = 0xCAFEBABE;
 

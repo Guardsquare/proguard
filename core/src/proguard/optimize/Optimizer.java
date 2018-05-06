@@ -347,18 +347,33 @@ public class Optimizer
             new MethodrefTraveler(
             new ReferencedMemberVisitor(keepMarker))))))));
 
-        // We also keep all bootstrap method arguments that point to methods.
-        // These arguments are typically the method handles for
-        // java.lang.invoke.LambdaMetafactory#metafactory, which provides the
-        // implementations for closures.
+        // We also keep classes and methods referenced from bootstrap
+        // method arguments.
         programClassPool.classesAccept(
             new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
             new AllAttributeVisitor(
             new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
             new AllBootstrapMethodInfoVisitor(
-            new BootstrapMethodArgumentVisitor(
-            new MethodrefTraveler(
-            new ReferencedMemberVisitor(keepMarker))))))));
+            new AllBootstrapMethodArgumentVisitor(
+            new MultiConstantVisitor(
+                // Class constants refer to additional functional
+                // interfaces (with LambdaMetafactory.altMetafactory).
+                new ConstantTagFilter(ClassConstants.CONSTANT_Class,
+                new ReferencedClassVisitor(
+                new FunctionalInterfaceFilter(
+                new ClassHierarchyTraveler(true, false, true, false,
+                new MultiClassVisitor(
+                    keepMarker,
+                    new AllMethodVisitor(
+                    new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                    keepMarker))
+                ))))),
+
+                // Method handle constants refer to synthetic lambda
+                // methods (with LambdaMetafactory.metafactory and
+                // altMetafactory).
+                new MethodrefTraveler(
+                new ReferencedMemberVisitor(keepMarker)))))))));
 
         // We also keep the classes and abstract methods of functional
         // interfaces that are returned by dynamic method invocations.

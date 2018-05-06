@@ -76,6 +76,11 @@ target="other">proguard-retrace</a>.
 
 <h3><div>Feb 2018</div> Version 6.0</h3>
 <ul>
+<li>[PGD-701] Fixed potential VerifyError in the presence of branches to
+    instruction offset 0.
+<li>Fixed backporting of lambda functions using the alternative factory method.
+<li>[PGD-699] Fixed obfuscation of closures that implement multiple interfaces.
+<li>[PGD-694] Fixed classes prefix when writing output to directories.
 <li>[PGD-186] Added support for Java 10.
 <li>[PGD-698] Fixed possible NullPointerException when parsing configuration.
 <li>[PGD-655] Fixed access from static methods to protected methods in

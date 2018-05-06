@@ -23,7 +23,6 @@ package proguard.classfile.attribute.visitor;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.BootstrapMethodInfo;
 
-
 /**
  * This interface specifies the methods for a visitor of
  * <code>BootstrapMethodInfo</code> objects. Note that there is only a single

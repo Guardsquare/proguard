@@ -129,19 +129,30 @@ public class DataEntryWriterFactory
                                                      isJmod ||
                                                      isZip);
 
+        // If the output is an archive, we'll flatten (unpack the contents of)
+        // higher level input archives, e.g. when writing into a jar file, we
+        // flatten zip files.
+        boolean flattenApks  = false;
+        boolean flattenJars  = flattenApks  || isApk;
+        boolean flattenAars  = flattenJars  || isJar;
+        boolean flattenWars  = flattenAars  || isAar;
+        boolean flattenEars  = flattenWars  || isWar;
+        boolean flattenJmods = flattenEars  || isEar;
+        boolean flattenZips  = flattenJmods || isJmod;
+
         // Set up the filtered jar writers.
-        writer = wrapInJarWriter(writer, false, null,                       isZip,  zipFilter,  ".zip",  isApk || isJar || isAar || isWar || isEar || isJmod);
-        writer = wrapInJarWriter(writer, true,  ClassConstants.JMOD_HEADER, isJmod, jmodFilter, ".jmod", isApk || isJar || isAar || isWar || isEar);
-        writer = wrapInJarWriter(writer, false, null,                       isEar,  earFilter,  ".ear",  isApk || isJar || isAar || isWar);
-        writer = wrapInJarWriter(writer, true,  null,                       isWar,  warFilter,  ".war",  isApk || isJar || isAar);
-        writer = wrapInJarWriter(writer, false, null,                       isAar,  aarFilter,  ".aar",  isApk || isJar);
-        writer = wrapInJarWriter(writer, false, null,                       isJar,  jarFilter,  ".jar",  isApk);
-        writer = wrapInJarWriter(writer, false, null,                       isApk,  apkFilter,  ".apk",  false);
+        writer = wrapInJarWriter(writer, flattenZips,  isZip,  ".zip",  zipFilter,  null,                       null);
+        writer = wrapInJarWriter(writer, flattenJmods, isJmod, ".jmod", jmodFilter, ClassConstants.JMOD_HEADER, ClassConstants.JMOD_CLASS_FILE_PREFIX);
+        writer = wrapInJarWriter(writer, flattenEars,  isEar,  ".ear",  earFilter,  null,                       null);
+        writer = wrapInJarWriter(writer, flattenWars,  isWar,  ".war",  warFilter,  null,                       ClassConstants.WAR_CLASS_FILE_PREFIX);
+        writer = wrapInJarWriter(writer, flattenAars,  isAar,  ".aar",  aarFilter,  null,                       null);
+        writer = wrapInJarWriter(writer, flattenJars,  isJar,  ".jar",  jarFilter,  null,                       null);
+        writer = wrapInJarWriter(writer, flattenApks,  isApk,  ".apk",  apkFilter,  null,                       null);
 
         // Set up for writing out the program classes.
         writer = new ClassDataEntryWriter(programClassPool, writer);
 
-        // Add a filter, if specified.
+        // Add a data entry filter, if specified.
         writer = filter != null ?
             new FilteredDataEntryWriter(
                 new DataEntryNameFilter(
@@ -166,46 +177,61 @@ public class DataEntryWriterFactory
      * Wraps the given DataEntryWriter in a JarWriter, filtering if necessary.
      */
     private DataEntryWriter wrapInJarWriter(DataEntryWriter writer,
-                                            boolean         addClassesPrefix,
-                                            byte[]          header,
-                                            boolean         isJar,
+                                            boolean         flatten,
+                                            boolean         isOutputJar,
+                                            String          jarFilterExtension,
                                             List            jarFilter,
-                                            String          jarExtension,
-                                            boolean         dontWrap)
+                                            byte[]          jarHeader,
+                                            String          classFilePrefix)
     {
-        // Zip up jars, if necessary.
-        DataEntryWriter jarWriter =
-            dontWrap ?
-                new ParentDataEntryWriter(writer) :
-                new JarWriter(header, writer);
-
-        // Add a "classes/" prefix for class files, if specified.
-        if (addClassesPrefix)
+        // Flatten jars or zip them up.
+        DataEntryWriter jarWriter;
+        if (flatten)
         {
-            writer = new FilteredDataEntryWriter(
-                new DataEntryNameFilter(
-                new ExtensionMatcher(".class")),
-                new PrefixAddingDataEntryWriter("classes/",
-                                                writer),
-                writer);
+            // Unpack the jar.
+            jarWriter = new ParentDataEntryWriter(writer);
+        }
+        else
+        {
+            // Pack the jar.
+            jarWriter = new JarWriter(jarHeader, writer);
+
+            // Add a prefix for class files inside the jar, if specified.
+            if (classFilePrefix != null)
+            {
+                jarWriter =
+                    new FilteredDataEntryWriter(
+                    new DataEntryNameFilter(
+                    new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION)),
+                    new PrefixAddingDataEntryWriter(classFilePrefix,
+                                                    jarWriter),
+                    jarWriter);
+            }
         }
 
-        // Add a filter, if specified.
-        DataEntryWriter filteredJarWriter = jarFilter != null ?
+        // Either zip up the jar or delegate to the original writer.
+        return
             new FilteredDataEntryWriter(
             new DataEntryParentFilter(
             new DataEntryNameFilter(
-            new ListParser(new FileNameParser()).parse(jarFilter))),
-            jarWriter) :
+            new ExtensionMatcher(jarFilterExtension))),
 
-            jarWriter;
+                // The parent of the data entry is a jar.
+                // Write the data entry to the jar.
+                // Apply the jar filter, if specified, to the parent.
+                jarFilter != null ?
+                    new FilteredDataEntryWriter(
+                    new DataEntryParentFilter(
+                    new DataEntryNameFilter(
+                    new ListParser(new FileNameParser()).parse(jarFilter))),
+                    jarWriter) :
+                    jarWriter,
 
-        // Only zip up jars, unless the output is a jar file itself.
-        return new FilteredDataEntryWriter(
-               new DataEntryParentFilter(
-               new DataEntryNameFilter(
-               new ExtensionMatcher(jarExtension))),
-                   filteredJarWriter,
-                   isJar ? jarWriter : writer);
+                // The parent of the data entry is not a jar.
+                // Write the entry to a jar anyway if the output is a jar.
+                // Otherwise just delegate to the original writer.
+                isOutputJar ?
+                    jarWriter :
+                    writer);
     }
 }

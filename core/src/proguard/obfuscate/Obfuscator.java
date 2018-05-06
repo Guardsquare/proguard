@@ -23,7 +23,7 @@ package proguard.obfuscate;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.visitor.AllConstantVisitor;
+import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
@@ -99,9 +99,28 @@ public class Obfuscator
         libraryClassPool.classesAccept(new AllMemberVisitor(nameMarker));
 
         // We also keep the names of the abstract methods of functional
+        // interfaces referenced from bootstrap method arguments (additional
+        // interfaces with LambdaMetafactory.altMetafactory).
+        // The functional method names have to match the names in the
+        // dynamic method invocations with LambdaMetafactory.
+        programClassPool.classesAccept(
+            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
+            new AllAttributeVisitor(
+            new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
+            new AllBootstrapMethodInfoVisitor(
+            new AllBootstrapMethodArgumentVisitor(
+            new ConstantTagFilter(ClassConstants.CONSTANT_Class,
+            new ReferencedClassVisitor(
+            new FunctionalInterfaceFilter(
+            new ClassHierarchyTraveler(true, false, true, false,
+            new AllMethodVisitor(
+            new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+            nameMarker))))))))))));
+
+        // We also keep the names of the abstract methods of functional
         // interfaces that are returned by dynamic method invocations.
-        // The functional method names then have to match the names
-        // in the dynamic method invocations with LambdaMetafactory.
+        // The functional method names have to match the names in the
+        // dynamic method invocations with LambdaMetafactory.
         programClassPool.classesAccept(
             new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
             new AllConstantVisitor(

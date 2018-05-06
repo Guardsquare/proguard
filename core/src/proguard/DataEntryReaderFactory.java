@@ -95,31 +95,31 @@ public class DataEntryReaderFactory
         }
 
         // Unzip any apks, if necessary.
-        reader = wrapInJarReader(reader, false, isApk, apkFilter, ".apk");
+        reader = wrapInJarReader(reader, false, false, isApk, apkFilter, ".apk");
         if (!isApk)
         {
             // Unzip any jars, if necessary.
-            reader = wrapInJarReader(reader, false, isJar, jarFilter, ".jar");
+            reader = wrapInJarReader(reader, false, false, isJar, jarFilter, ".jar");
             if (!isJar)
             {
                 // Unzip any aars, if necessary.
-                reader = wrapInJarReader(reader, false, isAar, aarFilter, ".aar");
+                reader = wrapInJarReader(reader, false, false, isAar, aarFilter, ".aar");
                 if (!isAar)
                 {
                     // Unzip any wars, if necessary.
-                    reader = wrapInJarReader(reader, false, isWar, warFilter, ".war");
+                    reader = wrapInJarReader(reader, true, false, isWar, warFilter, ".war");
                     if (!isWar)
                     {
                         // Unzip any ears, if necessary.
-                        reader = wrapInJarReader(reader, false, isEar, earFilter, ".ear");
+                        reader = wrapInJarReader(reader, false, false, isEar, earFilter, ".ear");
                         if (!isEar)
                         {
                             // Unzip any jmods, if necessary.
-                            reader = wrapInJarReader(reader, true, isJmod, jmodFilter, ".jmod");
+                            reader = wrapInJarReader(reader, true, true, isJmod, jmodFilter, ".jmod");
                             if (!isJmod)
                             {
                                 // Unzip any zips, if necessary.
-                                reader = wrapInJarReader(reader, false, isZip, zipFilter, ".zip");
+                                reader = wrapInJarReader(reader, false, false, isZip, zipFilter, ".zip");
                             }
                         }
                     }
@@ -132,12 +132,14 @@ public class DataEntryReaderFactory
 
 
     /**
-     * Wraps the given DataEntryReader in a JarReader, filtering it if necessary.
+     * Wraps the given DataEntryReader in a JarReader, filtering it if
+     * necessary.
      * @param reader             the data entry reader that can read the
      *                           entries contained in the jar file.
-     * @param isJmod             specifies whether to strip the "classes/"
-     *                           prefix from contained .class data entries
-     *                           and the jmod magic bytes from the zip.
+     * @param stripClassesPrefix specifies whether to strip the ""classes/"
+     *                           prefix from contained .class data entries.
+     *@param stripJmodHeader     specifies whether to strip the jmod magic
+     *                           bytes from the zip.
      * @param isJar              specifies whether the data entries should
      *                           always be unzipped.
      * @param jarFilter          otherwise, an optional filter on the data
@@ -148,21 +150,22 @@ public class DataEntryReaderFactory
      *         entries.
      */
     private static DataEntryReader wrapInJarReader(DataEntryReader reader,
-                                                   boolean         isJmod,
+                                                   boolean         stripClassesPrefix,
+                                                   boolean         stripJmodHeader,
                                                    boolean         isJar,
                                                    List            jarFilter,
                                                    String          jarExtension)
     {
-        if (isJmod)
+        if (stripClassesPrefix)
         {
             reader = new FilteredDataEntryReader(
-                new DataEntryNameFilter(new ExtensionMatcher(".class")),
-                new PrefixStrippingDataEntryReader("classes/", reader),
+                new DataEntryNameFilter(new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION)),
+                new PrefixStrippingDataEntryReader(ClassConstants.JMOD_CLASS_FILE_PREFIX, reader),
                 reader);
         }
 
         // Unzip any jars, if necessary.
-        DataEntryReader jarReader = new JarReader(reader, isJmod);
+        DataEntryReader jarReader = new JarReader(reader, stripJmodHeader);
 
         if (isJar)
         {

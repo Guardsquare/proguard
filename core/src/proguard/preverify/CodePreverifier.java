@@ -26,7 +26,7 @@ import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.InstructionConstants;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
@@ -271,29 +271,41 @@ implements   AttributeVisitor
                                                               int             offset,
                                                               TracedVariables variables)
     {
-        int maximumVariablesSize = variables.size();
         int typeCount = 0;
-        int typeIndex = 0;
-
-        // Count the the number of verification types, ignoring any nulls at
-        // the end.
-        for (int index = 0; index < maximumVariablesSize; index++)
+        if (offset == AT_METHOD_ENTRY)
         {
-            Value value = variables.getValue(index);
+            // Count the number of parameters, including any parameters
+            // that are unused and overwritten right away.
+            typeCount = ClassUtil.internalMethodParameterCount(
+                programMethod.getDescriptor(programClass),
+                programMethod.getAccessFlags());
+        }
+        else
+        {
+            typeCount = 0;
 
-            typeIndex++;
+            int maximumVariablesSize = variables.size();
+            int typeIndex = 0;
 
-            // Remember the maximum live type index.
-            if (value != null &&
-                (offset == AT_METHOD_ENTRY ||
-                 livenessAnalyzer.isAliveBefore(offset, index)))
+            // Count the the number of verification types, ignoring any nulls at
+            // the end.
+            for (int index = 0; index < maximumVariablesSize; index++)
             {
-                typeCount = typeIndex;
+                Value value = variables.getValue(index);
 
-                // Category 2 types that are alive are stored as single entries.
-                if (value.isCategory2())
+                typeIndex++;
+
+                // Remember the maximum live type index.
+                if (value != null &&
+                    livenessAnalyzer.isAliveBefore(offset, index))
                 {
-                    index++;
+                    typeCount = typeIndex;
+
+                    // Category 2 types that are alive are stored as single entries.
+                    if (value.isCategory2())
+                    {
+                        index++;
+                    }
                 }
             }
         }
@@ -301,7 +313,7 @@ implements   AttributeVisitor
         // Create and fill out the verification types.
         VerificationType[] types = new VerificationType[typeCount];
 
-        typeIndex = 0;
+        int typeIndex = 0;
 
         // Note the slightly different terminating condition, because the
         // types may have been truncated.
@@ -332,7 +344,12 @@ implements   AttributeVisitor
             }
             else
             {
-                type = VerificationTypeFactory.createTopType();
+                // A null value at method entry means that there was a branch to
+                // offset 0 that has cleared the value. Then pick a dummy value so
+                // it never matches the next frame at offset 0.
+                type = offset == AT_METHOD_ENTRY ?
+                    VerificationTypeFactory.createUninitializedThisType() :
+                    VerificationTypeFactory.createTopType();
             }
 
             types[typeIndex++] = type;

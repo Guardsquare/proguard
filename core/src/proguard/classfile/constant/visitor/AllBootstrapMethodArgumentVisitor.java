@@ -28,19 +28,18 @@ import proguard.classfile.attribute.visitor.BootstrapMethodInfoVisitor;
  * This BootstrapMethodInfoVisitor lets a given ConstantVisitor visit all
  * constant pool entries of the bootstrap methods it visits.
  *
- *
  * @author Eric Lafortune
  */
-public class BootstrapMethodArgumentVisitor
+public class AllBootstrapMethodArgumentVisitor
 implements   BootstrapMethodInfoVisitor
 {
     private ConstantVisitor constantVisitor;
 
     /**
-     * Creates a new BootstrapMethodArgumentVisitor that will delegate to the
-     * given constant visitor.
+     * Creates a new AllBootstrapMethodArgumentVisitor that will delegate to
+     * the given constant visitor.
      */
-    public BootstrapMethodArgumentVisitor(ConstantVisitor constantVisitor)
+    public AllBootstrapMethodArgumentVisitor(ConstantVisitor constantVisitor)
     {
         this.constantVisitor = constantVisitor;
     }
@@ -50,7 +49,6 @@ implements   BootstrapMethodInfoVisitor
 
     public void visitBootstrapMethodInfo(Clazz clazz, BootstrapMethodInfo bootstrapMethodInfo)
     {
-        // Check bootstrap method.
         bootstrapMethodInfo.methodArgumentsAccept(clazz, constantVisitor);
     }
 }
