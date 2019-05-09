@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,7 @@
 package proguard.classfile;
 
 import proguard.classfile.visitor.*;
+import proguard.util.*;
 
 import java.util.*;
 
@@ -141,6 +142,49 @@ public class ClassPool
         {
             Clazz clazz = (Clazz)iterator.next();
             clazz.accept(classVisitor);
+        }
+    }
+
+
+    /**
+     * Applies the given ClassVisitor to all matching classes in the class pool.
+     */
+    public void classesAccept(String        classNameFilter,
+                              ClassVisitor  classVisitor)
+    {
+        classesAccept(new ListParser(new ClassNameParser()).parse(classNameFilter),
+                      classVisitor);
+    }
+
+
+    /**
+     * Applies the given ClassVisitor to all matching classes in the class pool.
+     */
+    public void classesAccept(List          classNameFilter,
+                              ClassVisitor  classVisitor)
+    {
+        classesAccept(new ListParser(new ClassNameParser()).parse(classNameFilter),
+                      classVisitor);
+    }
+
+
+    /**
+     * Applies the given ClassVisitor to all matching classes in the class pool.
+     */
+    public void classesAccept(StringMatcher classNameFilter,
+                              ClassVisitor  classVisitor)
+    {
+        Iterator iterator = classes.entrySet().iterator();
+        while (iterator.hasNext())
+        {
+            Map.Entry entry     = (Map.Entry)iterator.next();
+            String    className = (String   )entry.getKey();
+
+            if (classNameFilter.matches(className))
+            {
+                Clazz clazz = (Clazz)entry.getValue();
+                clazz.accept(classVisitor);
+            }
         }
     }
 

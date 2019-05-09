@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -36,11 +36,12 @@ import proguard.classfile.ClassConstants;
  */
 public class InternalTypeEnumeration
 {
-    private String descriptor;
-    private int    formalTypeParametersIndex;
-    private int    openIndex;
-    private int    closeIndex;
-    private int    index;
+    private final String descriptor;
+    private final int    formalTypeParametersIndex;
+    private final int    openIndex;
+    private final int    closeIndex;
+
+    private int index;
 
 
     /**
@@ -51,6 +52,7 @@ public class InternalTypeEnumeration
         this.descriptor = descriptor;
 
         // Find any formal type parameters.
+        int formalTypeParametersIndex = 0;
         if (descriptor.charAt(0) == ClassConstants.TYPE_GENERIC_START)
         {
             formalTypeParametersIndex = 1;
@@ -76,6 +78,8 @@ public class InternalTypeEnumeration
             while (nestingLevel > 0);
         }
 
+        this.formalTypeParametersIndex = formalTypeParametersIndex;;
+
         this.openIndex  = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_OPEN,
                                              formalTypeParametersIndex);
 
@@ -83,6 +87,61 @@ public class InternalTypeEnumeration
             descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE, openIndex) :
             descriptor.length();
 
+        reset();
+    }
+
+
+    /**
+     * Returns the number of types contained in the descriptor. This
+     * is the number of types that the enumeration will return.
+     */
+    public int typeCount()
+    {
+        reset();
+
+        int count = 0;
+
+        while (hasMoreTypes())
+        {
+            nextType();
+
+            count++;
+        }
+
+        reset();
+
+        return count;
+    }
+
+
+    /**
+     * Returns the total size of the types contained in the descriptor.
+     * This accounts for long and double parameters taking up two entries.
+     */
+    public int typesSize()
+    {
+        reset();
+
+        int size = 0;
+
+        while (hasMoreTypes())
+        {
+            String type = nextType();
+
+            size += ClassUtil.internalTypeSize(type);
+        }
+
+        reset();
+
+        return size;
+    }
+
+
+    /**
+     * Resets the enumeration.
+     */
+    private void reset()
+    {
         this.index = openIndex >= 0 ?
             openIndex + 1 :
             formalTypeParametersIndex;

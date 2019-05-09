@@ -3,7 +3,8 @@
 <project name    = "ant"
          default = "dist">
 
-  <property file = "build.properties"/>
+  <property file = "../buildscripts/ant.properties"/>
+  <property file = "ant.properties"/>
 
   <target name = "clean">
     <delete quiet = "true">
@@ -25,6 +26,8 @@
     <javac nowarn            = "true"
            deprecation       = "false"
            includeantruntime = "true"
+           source            = "${target}"
+           target            = "${target}"
            classpath         = "../core/out"
            srcdir            = "src"
            destdir           = "out"

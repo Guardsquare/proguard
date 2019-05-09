@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -127,12 +127,7 @@ implements   ClassVisitor,
 
         // Read the interfaces.
         programClass.u2interfacesCount = dataInput.readUnsignedShort();
-
-        programClass.u2interfaces = new int[programClass.u2interfacesCount];
-        for (int index = 0; index < programClass.u2interfacesCount; index++)
-        {
-            programClass.u2interfaces[index] = dataInput.readUnsignedShort();
-        }
+        programClass.u2interfaces      = readUnsignedShorts(programClass.u2interfacesCount);
 
         // Read the fields.
         programClass.u2fieldsCount = dataInput.readUnsignedShort();
@@ -367,6 +362,13 @@ implements   ClassVisitor,
     }
 
 
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        dynamicConstant.u2bootstrapMethodAttributeIndex = dataInput.readUnsignedShort();
+        dynamicConstant.u2nameAndTypeIndex              = dataInput.readUnsignedShort();
+    }
+
+
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         invokeDynamicConstant.u2bootstrapMethodAttributeIndex = dataInput.readUnsignedShort();
@@ -479,6 +481,20 @@ implements   ClassVisitor,
     }
 
 
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        nestHostAttribute.u2hostClassIndex = dataInput.readUnsignedShort();
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        // Read the nest host classes.
+        nestMembersAttribute.u2classesCount = dataInput.readUnsignedShort();
+        nestMembersAttribute.u2classes      = readUnsignedShorts(nestMembersAttribute.u2classesCount);
+    }
+
+
     public void visitModuleAttribute(Clazz clazz, ModuleAttribute moduleAttribute)
     {
         moduleAttribute.u2moduleNameIndex    = dataInput.readUnsignedShort();
@@ -519,13 +535,8 @@ implements   ClassVisitor,
         }
 
         // Read the uses.
-        moduleAttribute.u2usesCount          = dataInput.readUnsignedShort();
-
-        moduleAttribute.u2uses               = new int[moduleAttribute.u2usesCount];
-        for (int index = 0; index < moduleAttribute.u2usesCount; index++)
-        {
-            moduleAttribute.u2uses[index] = dataInput.readUnsignedShort();
-        }
+        moduleAttribute.u2usesCount = dataInput.readUnsignedShort();
+        moduleAttribute.u2uses      = readUnsignedShorts(moduleAttribute.u2usesCount);
 
         // Read the provides.
         moduleAttribute.u2providesCount      = dataInput.readUnsignedShort();
@@ -550,11 +561,7 @@ implements   ClassVisitor,
     {
         // Read the packages.
         modulePackagesAttribute.u2packagesCount = dataInput.readUnsignedShort();
-
-        modulePackagesAttribute.u2packages      = new int[modulePackagesAttribute.u2packagesCount];
-        for (int index = 0; index < modulePackagesAttribute.u2packagesCount; index++) {
-            modulePackagesAttribute.u2packages[index] = dataInput.readUnsignedShort();
-        }
+        modulePackagesAttribute.u2packages      = readUnsignedShorts(modulePackagesAttribute.u2packagesCount);
     }
 
 
@@ -601,12 +608,7 @@ implements   ClassVisitor,
     {
         // Read the exceptions.
         exceptionsAttribute.u2exceptionIndexTableLength = dataInput.readUnsignedShort();
-
-        exceptionsAttribute.u2exceptionIndexTable = new int[exceptionsAttribute.u2exceptionIndexTableLength];
-        for (int index = 0; index < exceptionsAttribute.u2exceptionIndexTableLength; index++)
-        {
-            exceptionsAttribute.u2exceptionIndexTable[index] = dataInput.readUnsignedShort();
-        }
+        exceptionsAttribute.u2exceptionIndexTable       = readUnsignedShorts(exceptionsAttribute.u2exceptionIndexTableLength);
     }
 
 
@@ -741,22 +743,10 @@ implements   ClassVisitor,
     {
         // Read the parameter annotations.
         parameterAnnotationsAttribute.u1parametersCount           = dataInput.readUnsignedByte();
-
-        // The java compilers of JDK 1.5, JDK 1.6, and Eclipse all count the
-        // number of parameters of constructors of non-static inner classes
-        // incorrectly. Fix it right here.
-        int parameterStart = 0;
-        if (method.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT))
-        {
-            int realParametersCount = ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz));
-            parameterStart = realParametersCount - parameterAnnotationsAttribute.u1parametersCount;
-            parameterAnnotationsAttribute.u1parametersCount = realParametersCount;
-        }
-
         parameterAnnotationsAttribute.u2parameterAnnotationsCount = new int[parameterAnnotationsAttribute.u1parametersCount];
         parameterAnnotationsAttribute.parameterAnnotations        = new Annotation[parameterAnnotationsAttribute.u1parametersCount][];
 
-        for (int parameterIndex = parameterStart; parameterIndex < parameterAnnotationsAttribute.u1parametersCount; parameterIndex++)
+        for (int parameterIndex = 0; parameterIndex < parameterAnnotationsAttribute.u1parametersCount; parameterIndex++)
         {
             // Read the parameter annotations of the given parameter.
             int u2annotationsCount = dataInput.readUnsignedShort();
@@ -808,11 +798,7 @@ implements   ClassVisitor,
 
         // Read the bootstrap method arguments.
         bootstrapMethodInfo.u2methodArgumentCount = dataInput.readUnsignedShort();
-        bootstrapMethodInfo.u2methodArguments = new int[bootstrapMethodInfo.u2methodArgumentCount];
-        for (int index = 0; index < bootstrapMethodInfo.u2methodArgumentCount; index++)
-        {
-            bootstrapMethodInfo.u2methodArguments[index] = dataInput.readUnsignedShort();
-        }
+        bootstrapMethodInfo.u2methodArguments     = readUnsignedShorts(bootstrapMethodInfo.u2methodArgumentCount);
     }
 
 
@@ -991,12 +977,7 @@ implements   ClassVisitor,
 
         // Read the targets.
         exportsInfo.u2exportsToCount = dataInput.readUnsignedShort();
-
-        exportsInfo.u2exportsToIndex = new int[exportsInfo.u2exportsToCount];
-        for (int index = 0; index < exportsInfo.u2exportsToCount; index++)
-        {
-            exportsInfo.u2exportsToIndex[index] = dataInput.readUnsignedShort();
-        }
+        exportsInfo.u2exportsToIndex = readUnsignedShorts(exportsInfo.u2exportsToCount);
     }
 
 
@@ -1009,12 +990,7 @@ implements   ClassVisitor,
 
         // Read the targets.
         opensInfo.u2opensToCount = dataInput.readUnsignedShort();
-
-        opensInfo.u2opensToIndex = new int[opensInfo.u2opensToCount];
-        for (int index = 0; index < opensInfo.u2opensToCount; index++)
-        {
-            opensInfo.u2opensToIndex[index] = dataInput.readUnsignedShort();
-        }
+        opensInfo.u2opensToIndex = readUnsignedShorts(opensInfo.u2opensToCount);
     }
 
 
@@ -1024,14 +1000,9 @@ implements   ClassVisitor,
     {
         providesInfo.u2providesIndex     = dataInput.readUnsignedShort();
 
-        // Read the withs.
+        // Read the provides withs.
         providesInfo.u2providesWithCount = dataInput.readUnsignedShort();
-
-        providesInfo.u2providesWithIndex = new int[providesInfo.u2providesWithCount];
-        for (int index = 0; index < providesInfo.u2providesWithCount; index++)
-        {
-            providesInfo.u2providesWithIndex[index] = dataInput.readUnsignedShort();
-        }
+        providesInfo.u2providesWithIndex = readUnsignedShorts(providesInfo.u2providesWithCount);
     }
 
 
@@ -1233,6 +1204,7 @@ implements   ClassVisitor,
             case ClassConstants.CONSTANT_PrimitiveArray:     return new PrimitiveArrayConstant();
             case ClassConstants.CONSTANT_String:             return new StringConstant();
             case ClassConstants.CONSTANT_Utf8:               return new Utf8Constant();
+            case ClassConstants.CONSTANT_Dynamic:            return new DynamicConstant();
             case ClassConstants.CONSTANT_InvokeDynamic:      return new InvokeDynamicConstant();
             case ClassConstants.CONSTANT_MethodHandle:       return new MethodHandleConstant();
             case ClassConstants.CONSTANT_Fieldref:           return new FieldrefConstant();
@@ -1256,33 +1228,35 @@ implements   ClassVisitor,
         String attributeName     = clazz.getString(u2attributeNameIndex);
 
         Attribute attribute =
-            attributeName.equals(ClassConstants.ATTR_BootstrapMethods)                           ? (Attribute)new BootstrapMethodsAttribute():
-            attributeName.equals(ClassConstants.ATTR_SourceFile)                                 ? (Attribute)new SourceFileAttribute():
-            attributeName.equals(ClassConstants.ATTR_SourceDir)                                  ? (Attribute)new SourceDirAttribute():
-            attributeName.equals(ClassConstants.ATTR_InnerClasses)                               ? (Attribute)new InnerClassesAttribute():
-            attributeName.equals(ClassConstants.ATTR_EnclosingMethod)                            ? (Attribute)new EnclosingMethodAttribute():
-            attributeName.equals(ClassConstants.ATTR_Deprecated)                                 ? (Attribute)new DeprecatedAttribute():
-            attributeName.equals(ClassConstants.ATTR_Synthetic)                                  ? (Attribute)new SyntheticAttribute():
-            attributeName.equals(ClassConstants.ATTR_Signature)                                  ? (Attribute)new SignatureAttribute():
-            attributeName.equals(ClassConstants.ATTR_ConstantValue)                              ? (Attribute)new ConstantValueAttribute():
-            attributeName.equals(ClassConstants.ATTR_MethodParameters)                           ? (Attribute)new MethodParametersAttribute():
-            attributeName.equals(ClassConstants.ATTR_Exceptions)                                 ? (Attribute)new ExceptionsAttribute():
-            attributeName.equals(ClassConstants.ATTR_Code)                                       ? (Attribute)new CodeAttribute():
-            attributeName.equals(ClassConstants.ATTR_StackMap)                                   ? (Attribute)new StackMapAttribute():
-            attributeName.equals(ClassConstants.ATTR_StackMapTable)                              ? (Attribute)new StackMapTableAttribute():
-            attributeName.equals(ClassConstants.ATTR_LineNumberTable)                            ? (Attribute)new LineNumberTableAttribute():
-            attributeName.equals(ClassConstants.ATTR_LocalVariableTable)                         ? (Attribute)new LocalVariableTableAttribute():
-            attributeName.equals(ClassConstants.ATTR_LocalVariableTypeTable)                     ? (Attribute)new LocalVariableTypeTableAttribute():
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleAnnotations)                  ? (Attribute)new RuntimeVisibleAnnotationsAttribute():
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleAnnotations)                ? (Attribute)new RuntimeInvisibleAnnotationsAttribute():
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)         ? (Attribute)new RuntimeVisibleParameterAnnotationsAttribute():
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations)       ? (Attribute)new RuntimeInvisibleParameterAnnotationsAttribute():
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleTypeAnnotations)              ? (Attribute)new RuntimeVisibleTypeAnnotationsAttribute():
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations)            ? (Attribute)new RuntimeInvisibleTypeAnnotationsAttribute():
-            attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                          ? (Attribute)new AnnotationDefaultAttribute():
-            attributeName.equals(ClassConstants.ATTR_Module)                                     ? (Attribute)new ModuleAttribute():
-            attributeName.equals(ClassConstants.ATTR_ModuleMainClass)                            ? (Attribute)new ModuleMainClassAttribute():
-            attributeName.equals(ClassConstants.ATTR_ModulePackages)                             ? (Attribute)new ModulePackagesAttribute():
+            attributeName.equals(ClassConstants.ATTR_BootstrapMethods)                           ? (Attribute)new BootstrapMethodsAttribute()                     :
+            attributeName.equals(ClassConstants.ATTR_SourceFile)                                 ? (Attribute)new SourceFileAttribute()                           :
+            attributeName.equals(ClassConstants.ATTR_SourceDir)                                  ? (Attribute)new SourceDirAttribute()                            :
+            attributeName.equals(ClassConstants.ATTR_InnerClasses)                               ? (Attribute)new InnerClassesAttribute()                         :
+            attributeName.equals(ClassConstants.ATTR_EnclosingMethod)                            ? (Attribute)new EnclosingMethodAttribute()                      :
+            attributeName.equals(ClassConstants.ATTR_NestHost)                                   ? (Attribute)new NestHostAttribute()                             :
+            attributeName.equals(ClassConstants.ATTR_NestMembers)                                ? (Attribute)new NestMembersAttribute()                          :
+            attributeName.equals(ClassConstants.ATTR_Deprecated)                                 ? (Attribute)new DeprecatedAttribute()                           :
+            attributeName.equals(ClassConstants.ATTR_Synthetic)                                  ? (Attribute)new SyntheticAttribute()                            :
+            attributeName.equals(ClassConstants.ATTR_Signature)                                  ? (Attribute)new SignatureAttribute()                            :
+            attributeName.equals(ClassConstants.ATTR_ConstantValue)                              ? (Attribute)new ConstantValueAttribute()                        :
+            attributeName.equals(ClassConstants.ATTR_MethodParameters)                           ? (Attribute)new MethodParametersAttribute()                     :
+            attributeName.equals(ClassConstants.ATTR_Exceptions)                                 ? (Attribute)new ExceptionsAttribute()                           :
+            attributeName.equals(ClassConstants.ATTR_Code)                                       ? (Attribute)new CodeAttribute()                                 :
+            attributeName.equals(ClassConstants.ATTR_StackMap)                                   ? (Attribute)new StackMapAttribute()                             :
+            attributeName.equals(ClassConstants.ATTR_StackMapTable)                              ? (Attribute)new StackMapTableAttribute()                        :
+            attributeName.equals(ClassConstants.ATTR_LineNumberTable)                            ? (Attribute)new LineNumberTableAttribute()                      :
+            attributeName.equals(ClassConstants.ATTR_LocalVariableTable)                         ? (Attribute)new LocalVariableTableAttribute()                   :
+            attributeName.equals(ClassConstants.ATTR_LocalVariableTypeTable)                     ? (Attribute)new LocalVariableTypeTableAttribute()               :
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleAnnotations)                  ? (Attribute)new RuntimeVisibleAnnotationsAttribute()            :
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleAnnotations)                ? (Attribute)new RuntimeInvisibleAnnotationsAttribute()          :
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)         ? (Attribute)new RuntimeVisibleParameterAnnotationsAttribute()   :
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations)       ? (Attribute)new RuntimeInvisibleParameterAnnotationsAttribute() :
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleTypeAnnotations)              ? (Attribute)new RuntimeVisibleTypeAnnotationsAttribute()        :
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations)            ? (Attribute)new RuntimeInvisibleTypeAnnotationsAttribute()      :
+            attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                          ? (Attribute)new AnnotationDefaultAttribute()                    :
+            attributeName.equals(ClassConstants.ATTR_Module)                                     ? (Attribute)new ModuleAttribute()                               :
+            attributeName.equals(ClassConstants.ATTR_ModuleMainClass)                            ? (Attribute)new ModuleMainClassAttribute()                      :
+            attributeName.equals(ClassConstants.ATTR_ModulePackages)                             ? (Attribute)new ModulePackagesAttribute()                       :
                                                                                                    (Attribute)new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
         attribute.u2attributeNameIndex = u2attributeNameIndex;
 
@@ -1383,5 +1357,21 @@ implements   ClassVisitor,
 
             default: throw new IllegalArgumentException("Unknown element value tag ["+u1tag+"]");
         }
+    }
+
+
+    /**
+     * Reads a list of unsigned shorts of the given size.
+     */
+    private int[] readUnsignedShorts(int size)
+    {
+        int[] values = new int[size];
+
+        for (int index = 0; index < size; index++)
+        {
+            values[index] = dataInput.readUnsignedShort();
+        }
+
+        return values;
     }
 }

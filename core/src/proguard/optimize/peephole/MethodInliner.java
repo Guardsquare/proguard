@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -303,7 +303,6 @@ implements   AttributeVisitor,
             (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
 
         // Count the number of parameters, taking into account their categories.
-        int parameterCount  = ClassUtil.internalMethodParameterCount(descriptor);
         int parameterSize   = ClassUtil.internalMethodParameterSize(descriptor);
         int parameterOffset = isStatic ? 0 : 1;
 

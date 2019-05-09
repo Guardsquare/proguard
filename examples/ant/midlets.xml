@@ -7,7 +7,8 @@
   <taskdef resource="proguard/ant/task.properties"
            classpath="lib/proguard.jar" />
 
-  <proguard microedition="on"
+  <proguard verbose="true"
+            microedition="on"
             printseeds="on"
             printmapping="out.map"
             overloadaggressively="on"
@@ -42,7 +43,7 @@
     <keepclasseswithmembernames includedescriptorclasses="true">
       <method access="native" />
     </keepclasseswithmembernames>
-    
+
     <!-- Your application may contain more items that need to be preserved;
          typically classes that are dynamically created using Class.forName -->
 

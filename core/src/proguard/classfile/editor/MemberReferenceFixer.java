@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -48,6 +48,8 @@ implements   ClassVisitor,
     private static final boolean DEBUG = false;
 
 
+    private final boolean android;
+
     private final StackSizeUpdater stackSizeUpdater = new StackSizeUpdater();
 
     // Parameter for the visitor methods.
@@ -56,6 +58,18 @@ implements   ClassVisitor,
     // Return values for the visitor methods.
     private boolean isInterfaceMethod;
     private boolean stackSizesMayHaveChanged;
+
+
+    /**
+     * Creates a new MemberReferenceFixer.
+     *
+     * @param android specifies whether the target is Android. This has subtle
+     *                implications when fixing enum annotations.
+     */
+    public MemberReferenceFixer(boolean android)
+    {
+        this.android = android;
+    }
 
 
     // Implementations for ClassVisitor.
@@ -368,6 +382,30 @@ implements   ClassVisitor,
     public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
     {
         fixElementValue(clazz, annotation, enumConstantElementValue);
+
+        // The Java VM expects the original enum constant name, i.e. the
+        // name string stored in the enum constant.
+        // The Android tools (dx, D8,...) expect the updated enum constant
+        // name, i.e. the name of the static field in the enum class.
+        if (android)
+        {
+            // Do we know the referenced enum field?
+            Member referencedField = enumConstantElementValue.referencedField;
+            if (referencedField != null)
+            {
+                Clazz referencedClass = enumConstantElementValue.referencedClasses[0];
+
+                // Does it have a new name?
+                String newName = referencedField.getName(referencedClass);
+
+                if (!enumConstantElementValue.getConstantName(clazz).equals(newName))
+                {
+                    // Update the name index.
+                    enumConstantElementValue.u2constantNameIndex =
+                        new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newName);
+                }
+            }
+        }
     }
 
 

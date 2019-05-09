@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -49,8 +49,44 @@ public class ParameterAnnotationsAttributeEditor
      */
     public void addAnnotation(int parameterIndex, Annotation annotation)
     {
-        ArrayUtil.add(targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex],
-                      targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex]++,
-                      annotation);
+        targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex] =
+            ArrayUtil.add(targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex],
+                          targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex]++,
+                          annotation);
+    }
+
+    /**
+     * Deletes a given annotation from the annotations attribute.
+     */
+    public void deleteAnnotation(int parameterIndex, Annotation annotation)
+    {
+        int index = findAnnotationIndex(annotation,
+                                        targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex],
+                                        targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex]);
+        deleteAnnotation(parameterIndex, index);
+    }
+
+    /**
+     * Deletes the annotation at the given index from the annotations attribute.
+     */
+    public void deleteAnnotation(int parameterIndex, int annotationIndex)
+    {
+        ArrayUtil.remove(targetParameterAnnotationsAttribute.parameterAnnotations[parameterIndex],
+                         targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex],
+                         annotationIndex);
+        targetParameterAnnotationsAttribute.u2parameterAnnotationsCount[parameterIndex]--;
+    }
+
+    private int findAnnotationIndex(Annotation annotation, Annotation[] annotations, int annotationCount)
+    {
+        for (int index = 0; index < annotationCount; index++)
+        {
+            if (annotation == annotations[index])
+            {
+                return index;
+            }
+
+        }
+        return -1;
     }
 }

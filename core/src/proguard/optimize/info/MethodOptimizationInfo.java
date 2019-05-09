@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -36,6 +36,7 @@ public class MethodOptimizationInfo
     protected boolean hasNoExternalSideEffects  = false;
     protected boolean hasNoEscapingParameters   = false;
     protected boolean hasNoExternalReturnValues = false;
+    protected Value   returnValue               = null;
 
 
     public boolean isKept()
@@ -92,6 +93,18 @@ public class MethodOptimizationInfo
     public boolean hasNoExternalReturnValues()
     {
         return hasNoExternalReturnValues;
+    }
+
+
+    public void setReturnValue(Value returnValue)
+    {
+        this.returnValue = returnValue;
+    }
+
+
+    public Value getReturnValue()
+    {
+        return returnValue;
     }
 
 
@@ -269,12 +282,6 @@ public class MethodOptimizationInfo
     public boolean returnsExternalValues()
     {
         return !hasNoExternalReturnValues;
-    }
-
-
-    public Value getReturnValue()
-    {
-        return null;
     }
 
 

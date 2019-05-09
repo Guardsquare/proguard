@@ -8,7 +8,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
         <relativePath>../buildscripts/pom.xml</relativePath>
     </parent>
     <artifactId>proguard-wtk-plugin</artifactId>

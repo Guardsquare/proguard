@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,6 +31,12 @@ import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
  */
 public abstract class ParameterAnnotationsAttribute extends Attribute
 {
+    // Note that the java compilers of JDK 1.5+ and of Eclipse count the
+    // number of parameters of constructors of non-static inner classes and
+    // of enum classes, based on the Signature attribute (if any), which
+    // lacks the first one or two synthetic parameters. Unresolved issues:
+    // https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8024694
+    // https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8024694
     public int            u1parametersCount;
     public int[]          u2parameterAnnotationsCount;
     public Annotation[][] parameterAnnotations;

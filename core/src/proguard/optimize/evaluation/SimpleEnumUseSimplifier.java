@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -152,8 +152,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        simpleInstruction,
-                                       new SimpleInstruction(
-                                           InstructionConstants.OP_IALOAD));
+                                       new SimpleInstruction(InstructionConstants.OP_IALOAD));
                 }
                 break;
             }
@@ -360,6 +359,10 @@ implements   AttributeVisitor,
                                        branchInstruction,
                                        new BranchInstruction(InstructionConstants.OP_IFICMPEQ,
                                                              branchInstruction.branchOffset));
+
+                    // Replace any producers of null constants.
+                    replaceNullStackEntryProducers(clazz, method, codeAttribute, offset, 0);
+                    replaceNullStackEntryProducers(clazz, method, codeAttribute, offset, 1);
                 }
                 break;
             }
@@ -373,6 +376,10 @@ implements   AttributeVisitor,
                                        branchInstruction,
                                        new BranchInstruction(InstructionConstants.OP_IFICMPNE,
                                                              branchInstruction.branchOffset));
+
+                    // Replace any producers of null constants.
+                    replaceNullStackEntryProducers(clazz, method, codeAttribute, offset, 0);
+                    replaceNullStackEntryProducers(clazz, method, codeAttribute, offset, 1);
                 }
                 break;
             }
@@ -444,10 +451,10 @@ implements   AttributeVisitor,
             int stackEntryIndex = parameterSize - parameterOffset - 1;
 
             replaceNullStackEntryProducers(invocationClazz,
-                                 invocationMethod,
-                                 invocationCodeAttribute,
-                                 invocationOffset,
-                                 stackEntryIndex);
+                                           invocationMethod,
+                                           invocationCodeAttribute,
+                                           invocationOffset,
+                                           stackEntryIndex);
         }
     }
 
@@ -755,8 +762,9 @@ implements   AttributeVisitor,
 
 
     /**
-     * Replaces aconst_null producers of the specified stack entry by
-     * iconst_0.
+     * Turn null reference producers of the specified stack entry into 0 int
+     * producers. The partial evaluator generally can't identify them as
+     * simple enums.
      */
     private void replaceNullStackEntryProducers(Clazz         clazz,
                                                 Method        method,
@@ -769,25 +777,55 @@ implements   AttributeVisitor,
 
         for (int index = 0; index < producerOffsets.instructionOffsetCount(); index++)
         {
+            // Is the producer always pushing null?
             int producerOffset = producerOffsets.instructionOffset(index);
-
-            // TODO: A method might be pushing the null constant.
             if (producerOffset >= 0 &&
-                codeAttribute.code[producerOffset] == InstructionConstants.OP_ACONST_NULL)
+                partialEvaluator.getStackAfter(producerOffset).getTop(0).referenceValue().isNull() == Value.ALWAYS)
             {
-                // Replace pushing null by pushing 0.
-                replaceInstruction(clazz,
-                                   producerOffset,
-                                   new SimpleInstruction(InstructionConstants.OP_ACONST_NULL),
-                                   new SimpleInstruction(InstructionConstants.OP_ICONST_0));
+                Instruction producerInstruction =
+                    InstructionFactory.create(codeAttribute.code[producerOffset]);
+
+                // Is it a simple case?
+                switch (producerInstruction.opcode)
+                {
+                    case InstructionConstants.OP_ACONST_NULL:
+                    case InstructionConstants.OP_ALOAD:
+                    case InstructionConstants.OP_ALOAD_0:
+                    case InstructionConstants.OP_ALOAD_1:
+                    case InstructionConstants.OP_ALOAD_2:
+                    case InstructionConstants.OP_ALOAD_3:
+                    {
+                        // Replace pushing null by pushing 0.
+                        replaceInstruction(clazz,
+                                           producerOffset,
+                                           producerInstruction,
+                                           new SimpleInstruction(InstructionConstants.OP_ICONST_0));
+                        break;
+                    }
+                    default:
+                    {
+                        // Otherwise pop the null and then push 0.
+                        replaceInstructions(clazz,
+                                            producerOffset,
+                                            producerInstruction,
+                                            new Instruction[]
+                                            {
+                                                producerInstruction,
+                                                new SimpleInstruction(InstructionConstants.OP_POP),
+                                                new SimpleInstruction(InstructionConstants.OP_ICONST_0)
+                                            });
+                        break;
+                    }
+                }
             }
         }
     }
 
 
     /**
-     * Replaces aconst_null/astore producers of the specified reference variable by
-     * iconst_0/istore.
+     * Turn null reference producers of the specified reference variable into
+     * 0 int producers. The partial evaluator generally can't identify them
+     * as simple enums.
      */
     private void replaceNullVariableProducers(Clazz         clazz,
                                               Method        method,
@@ -803,11 +841,12 @@ implements   AttributeVisitor,
             if (!producerOffsets.isMethodParameter(index) &&
                 !producerOffsets.isExceptionHandler(index))
             {
+                // Is the producer always storing null?
                 int producerOffset = producerOffsets.instructionOffset(index);
-
                 if (partialEvaluator.getVariablesAfter(producerOffset).getValue(variableIndex).referenceValue().isNull() == Value.ALWAYS)
                 {
-                    // Replace loading null by loading 0.
+                    // Replace storing the null reference value by storing an
+                    // int value.
                     replaceInstruction(clazz,
                                        producerOffset,
                                        new VariableInstruction(InstructionConstants.OP_ASTORE, variableIndex),

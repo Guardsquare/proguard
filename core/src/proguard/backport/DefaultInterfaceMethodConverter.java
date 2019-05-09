@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -30,10 +30,11 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.optimize.peephole.*;
 import proguard.util.StringTransformer;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 /**
  * This ClassVisitor moves all default interface methods in the visited
@@ -42,11 +43,11 @@ import java.util.*;
  * @author Thomas Neidhart
  */
 public class DefaultInterfaceMethodConverter
-extends      SimplifiedVisitor
-implements   ClassVisitor,
+extends    SimplifiedVisitor
+implements ClassVisitor,
 
-             // Implementation interfaces.
-             AttributeVisitor
+           // Implementation interfaces.
+           AttributeVisitor
 {
     private final ClassVisitor  modifiedClassVisitor;
     private final MemberVisitor extraMemberVisitor;
@@ -67,9 +68,11 @@ implements   ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass) {}
 
 
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         hasDefaultMethods = false;
@@ -78,7 +81,9 @@ implements   ClassVisitor,
         // Collect all implementations of the interface.
         programClass.hierarchyAccept(false, false, false, true,
             new ProgramClassFilter(
-            new ClassCollector(implClasses)));
+            // Ignore other interfaces that extend this one.
+            new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
+            new ClassCollector(implClasses))));
 
         programClass.accept(
             new AllMethodVisitor(
@@ -95,9 +100,11 @@ implements   ClassVisitor,
 
     // Implementations for AttributeVisitor.
 
+    @Override
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
 
+    @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
         hasDefaultMethods = true;
@@ -176,17 +183,27 @@ implements   ClassVisitor,
                                                  Clazz  interfaceClass,
                                                  Method defaultMethod)
     {
-        ConstantCounter counter = new ConstantCounter();
+        final AtomicBoolean foundInvocation = new AtomicBoolean(false);
 
         clazz.accept(
             new AllMethodVisitor(
             new AllAttributeVisitor(
             new AllInstructionVisitor(
-            new InvocationInstructionMatcher(interfaceClass,
-                                             defaultMethod,
-                                             counter)))));
+            new SuperInvocationInstructionMatcher(interfaceClass,
+                                                  defaultMethod)
+            {
+                @Override
+                public void superInvocation(Clazz               clazz,
+                                            Method              method,
+                                            CodeAttribute       codeAttribute,
+                                            int                 offset,
+                                            CodeAttributeEditor codeAttributeEditor)
+                {
+                    foundInvocation.set(true);
+                }
+            }))));
 
-        return counter.getCount() > 0;
+        return foundInvocation.get();
     }
 
 
@@ -218,70 +235,96 @@ implements   ClassVisitor,
         String descriptor   = interfaceMethod.getDescriptor(interfaceClass);
         Method targetMethod = targetClass.findMethod(targetMethodName, descriptor);
 
-        InstructionSequenceBuilder ____ =
-            new InstructionSequenceBuilder();
-
-        Instruction[] patternInstructions =
-            ____.invokespecial_interface(interfaceClass,
-                                         interfaceMethod).__();
-
-        Instruction[] replacementInstructions =
-            ____.invokevirtual(targetClass,
-                               targetMethod).__();
-
-        CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
-
-        Constant[] constants = ____.constants();
+        ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor(targetClass);
+        final int          constantIndex      = constantPoolEditor.addMethodrefConstant(targetClass, targetMethod);
 
         targetClass.accept(
             new AllMethodVisitor(
             new AllAttributeVisitor(
-            new PeepholeOptimizer(null, codeAttributeEditor,
-            new InstructionSequenceReplacer(constants,
-                                            patternInstructions,
-                                            constants,
-                                            replacementInstructions,
-                                            null,
-                                            codeAttributeEditor)))));
+            new SuperInvocationInstructionMatcher(interfaceClass,
+                                                  interfaceMethod)
+            {
+                @Override
+                public void superInvocation(Clazz               clazz,
+                                            Method              method,
+                                            CodeAttribute       codeAttribute,
+                                            int                 offset,
+                                            CodeAttributeEditor codeAttributeEditor)
+                {
+                    Instruction instruction =
+                        new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL,
+                                                constantIndex);
+
+                    codeAttributeEditor.replaceInstruction(offset, instruction);
+                }
+            })));
     }
 
 
     /**
-     * This InstructionVisitor will call the specified ConstantVisitor
+     * This InstructionVisitor will call the {@code superInvocation(...)} method
      * for any encountered INVOKESPECIAL instruction whose associated
      * constant is an InterfaceMethodRefConstant and matches the given
      * referenced class and method.
      */
-    private static class InvocationInstructionMatcher
-    extends    SimplifiedVisitor
-    implements InstructionVisitor,
-               ConstantVisitor
+    private static class SuperInvocationInstructionMatcher
+    extends              SimplifiedVisitor
+    implements           AttributeVisitor,
+                         InstructionVisitor,
+                         ConstantVisitor
     {
-        private final Clazz           referencedClass;
-        private final Method          referencedMethod;
-        private final ConstantVisitor constantVisitor;
+        private final Clazz               referencedClass;
+        private final Method              referencedMethod;
+        private final CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
 
-        public InvocationInstructionMatcher(Clazz           referencedClass,
-                                            Method          referencedMethod,
-                                            ConstantVisitor constantVisitor)
+        private boolean matchingInvocation;
+
+
+        public SuperInvocationInstructionMatcher(Clazz  referencedClass,
+                                                 Method referencedMethod)
         {
             this.referencedClass  = referencedClass;
             this.referencedMethod = referencedMethod;
-            this.constantVisitor  = constantVisitor;
+        }
+
+
+        // Implementations for AttributeVisitor.
+
+        public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+
+        public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
+        {
+            // Set up the code attribute editor.
+            codeAttributeEditor.reset(codeAttribute.u4codeLength);
+
+            // Find the peephole optimizations.
+            codeAttribute.instructionsAccept(clazz, method, this);
+
+            // Apply the peephole optimizations.
+            codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
         }
 
 
         // Implementations for InstructionVisitor.
 
+        @Override
         public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {}
 
 
+        @Override
         public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
         {
             switch (constantInstruction.opcode)
             {
                 case InstructionConstants.OP_INVOKESPECIAL:
+                    matchingInvocation = false;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
+
+                    if (matchingInvocation)
+                    {
+                        superInvocation(clazz, method, codeAttribute, offset, codeAttributeEditor);
+                    }
                     break;
             }
         }
@@ -289,16 +332,31 @@ implements   ClassVisitor,
 
         // Implementations for ConstantVisitor.
 
+        @Override
         public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
+        @Override
         public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant)
         {
             if (interfaceMethodrefConstant.referencedClass  == referencedClass &&
                 interfaceMethodrefConstant.referencedMember == referencedMethod)
             {
-                constantVisitor.visitInterfaceMethodrefConstant(clazz, interfaceMethodrefConstant);
+                matchingInvocation = true;
             }
         }
+
+
+        /**
+         * The callback method which will be called for each detected super invocation
+         * of the specified interface method.
+         */
+        public void superInvocation(Clazz               clazz,
+                                    Method              method,
+                                    CodeAttribute       codeAttribute,
+                                    int                 offset,
+                                    CodeAttributeEditor codeAttributeEditor) {}
     }
 }
+
+

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,30 +23,48 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, except for classes that extend or implement
- * a given class.
+ * This <code>ClassVisitor</code> delegates its visits to one of two given
+ * <code>ClassVisitor</code>s, depending on whether the visited classes
+ * extend/implement a given class or not.
+ *
+ * Filter:
+ * - accepted: the visited class extends/implements the given class.
+ * - rejected: the visited class does not extend/implement the given class.
  *
  * @author Eric Lafortune
  */
 public class ImplementedClassFilter implements ClassVisitor
 {
     private final Clazz        implementedClass;
-    private final ClassVisitor classVisitor;
+    private final boolean      includeImplementedClass;
+    private final ClassVisitor acceptedClassVisitor;
+    private final ClassVisitor rejectedClassVisitor;
 
 
     /**
      * Creates a new ImplementedClassFilter.
-     * @param implementedClass the class whose implementations will not be
-     *                         visited.
-     * @param classVisitor     the <code>ClassVisitor</code> to which visits will
-     *                         be delegated.
+     *
+     * @param implementedClass        the class whose implementations will
+     *                                be accepted.
+     * @param includeImplementedClass if true, the implemented class itself
+     *                                will also be accepted, otherwise it
+     *                                will be rejected.
+     * @param acceptedClassVisitor    the <code>ClassVisitor</code> to which
+     *                                visits of classes implementing the given
+     *                                class will be delegated.
+     * @param rejectedClassVisistor   the <code>ClassVisitor</code> to which
+     *                                visits of classes not implementing the
+     *                                given class will be delegated.
      */
     public ImplementedClassFilter(Clazz        implementedClass,
-                                  ClassVisitor classVisitor)
+                                  boolean      includeImplementedClass,
+                                  ClassVisitor acceptedClassVisitor,
+                                  ClassVisitor rejectedClassVisistor)
     {
         this.implementedClass = implementedClass;
-        this.classVisitor     = classVisitor;
+        this.includeImplementedClass = includeImplementedClass;
+        this.acceptedClassVisitor = acceptedClassVisitor;
+        this.rejectedClassVisitor = rejectedClassVisistor;
     }
 
 
@@ -54,18 +72,29 @@ public class ImplementedClassFilter implements ClassVisitor
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (!programClass.extendsOrImplements(implementedClass))
+        ClassVisitor visitor = delegateVisitor(programClass);
+        if (visitor != null)
         {
-            classVisitor.visitProgramClass(programClass);
+            visitor.visitProgramClass(programClass);
+        }
+    }
+
+    public void visitLibraryClass(LibraryClass libraryClass)
+    {
+        ClassVisitor visitor = delegateVisitor(libraryClass);
+        if (visitor != null)
+        {
+            visitor.visitLibraryClass(libraryClass);
         }
     }
 
 
-    public void visitLibraryClass(LibraryClass libraryClass)
+    // Small utility methods.
+
+    private ClassVisitor delegateVisitor(Clazz clazz)
     {
-        if (!libraryClass.extendsOrImplements(implementedClass))
-        {
-            classVisitor.visitLibraryClass(libraryClass);
-        }
+        return clazz.extendsOrImplements(implementedClass) &&
+               (clazz != implementedClass || includeImplementedClass) ?
+            acceptedClassVisitor : rejectedClassVisitor;
     }
 }

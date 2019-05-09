@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,18 @@ package proguard.evaluation.value;
 
 /**
  * This IntegerValue represents a particular integer value.
+ *
+ * This class handles interactions with:
+ * - ParticularIntegerValue
+ *
+ * It reverses and delegates interactions with:
+ * - RangeIntegerValue
+ * - IntegerValue (in general)
+ *
+ * It notably doesn't handle interactions with:
+ * - UnknownInteger
+ * - RangeIntegerValue
+ * - SpecificInteger (in general)
  *
  * @author Eric Lafortune
  */
@@ -349,6 +361,118 @@ final class ParticularIntegerValue extends SpecificIntegerValue
     public int lessThanOrEqual(ParticularIntegerValue other)
     {
         return this.value <= other.value ? ALWAYS : NEVER;
+    }
+
+
+    // Implementations of binary methods of RangeIntegerValue.
+
+    public IntegerValue generalize(RangeIntegerValue other)
+    {
+        return other.generalize(this);
+    }
+
+    public IntegerValue add(RangeIntegerValue other)
+    {
+        return other.add(this);
+    }
+
+    public IntegerValue subtract(RangeIntegerValue other)
+    {
+        return other.subtractFrom(this);
+    }
+
+    public IntegerValue subtractFrom(RangeIntegerValue other)
+    {
+        return other.subtract(this);
+    }
+
+    public IntegerValue multiply(RangeIntegerValue other)
+    {
+        return other.multiply(this);
+    }
+
+    public IntegerValue divide(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return other.divideOf(this);
+    }
+
+    public IntegerValue divideOf(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return other.divide(this);
+    }
+
+    public IntegerValue remainder(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return other.remainderOf(this);
+    }
+
+    public IntegerValue remainderOf(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return other.remainder(this);
+    }
+
+    public IntegerValue shiftLeft(RangeIntegerValue other)
+    {
+        return other.shiftLeftOf(this);
+    }
+
+    public IntegerValue shiftLeftOf(RangeIntegerValue other)
+    {
+        return other.shiftLeft(this);
+    }
+
+    public IntegerValue shiftRight(RangeIntegerValue other)
+    {
+        return other.shiftRightOf(this);
+    }
+
+    public IntegerValue shiftRightOf(RangeIntegerValue other)
+    {
+        return other.shiftRight(this);
+    }
+
+    public IntegerValue unsignedShiftRight(RangeIntegerValue other)
+    {
+        return other.unsignedShiftRightOf(this);
+    }
+
+    public IntegerValue unsignedShiftRightOf(RangeIntegerValue other)
+    {
+        return other.unsignedShiftRight(this);
+    }
+
+    public IntegerValue and(RangeIntegerValue other)
+    {
+        return other.and(this);
+    }
+
+    public IntegerValue or(RangeIntegerValue other)
+    {
+        return other.or(this);
+    }
+
+    public IntegerValue xor(RangeIntegerValue other)
+    {
+        return other.xor(this);
+    }
+
+    public int equal(RangeIntegerValue other)
+    {
+        return other.equal(this);
+    }
+
+    public int lessThan(RangeIntegerValue other)
+    {
+        return other.greaterThan(this);
+    }
+
+    public int lessThanOrEqual(RangeIntegerValue other)
+    {
+        return other.greaterThanOrEqual(this);
     }
 
 

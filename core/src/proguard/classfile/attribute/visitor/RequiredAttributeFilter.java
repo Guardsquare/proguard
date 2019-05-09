@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -124,6 +124,24 @@ implements   AttributeVisitor
         if (optionalAttributeVisitor != null)
         {
             optionalAttributeVisitor.visitEnclosingMethodAttribute(clazz, enclosingMethodAttribute);
+        }
+    }
+
+
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        if (requiredAttributeVisitor != null)
+        {
+            requiredAttributeVisitor.visitNestHostAttribute(clazz, nestHostAttribute);
+        }
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        if (requiredAttributeVisitor != null)
+        {
+            requiredAttributeVisitor.visitNestMembersAttribute(clazz, nestMembersAttribute);
         }
     }
 

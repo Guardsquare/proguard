@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -245,6 +245,16 @@ implements   ClassVisitor,
     }
 
 
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        println(visitorInfo(dynamicConstant) + " Dynamic [bootstrap method index = " + dynamicConstant.u2bootstrapMethodAttributeIndex + "]:");
+
+        indent();
+        clazz.constantPoolEntryAccept(dynamicConstant.u2nameAndTypeIndex, this);
+        outdent();
+    }
+
+
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         println(visitorInfo(invokeDynamicConstant) + " InvokeDynamic [bootstrap method index = " + invokeDynamicConstant.u2bootstrapMethodAttributeIndex + "]:");
@@ -480,6 +490,28 @@ implements   ClassVisitor,
         {
             clazz.constantPoolEntryAccept(enclosingMethodAttribute.u2nameAndTypeIndex, this);
         }
+        outdent();
+    }
+
+
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        println(visitorInfo(nestHostAttribute) +
+                " Nest host attribute:");
+
+        indent();
+        clazz.constantPoolEntryAccept(nestHostAttribute.u2hostClassIndex, this);
+        outdent();
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        println(visitorInfo(nestMembersAttribute) +
+                " Nest members attribute:");
+
+        indent();
+        nestMembersAttribute.memberClassConstantsAccept(clazz, this);
         outdent();
     }
 
@@ -1165,7 +1197,7 @@ implements   ClassVisitor,
     public void visitSuperTypeTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, SuperTypeTargetInfo superTypeTargetInfo)
     {
         println("Target (type = 0x" + Integer.toHexString(superTypeTargetInfo.u1targetType) + "): " +
-                (superTypeTargetInfo.u2superTypeIndex == 0xffff ?
+                (superTypeTargetInfo.u2superTypeIndex == SuperTypeTargetInfo.EXTENDS_INDEX ?
                      "super class" :
                      "interface #" + superTypeTargetInfo.u2superTypeIndex));
     }

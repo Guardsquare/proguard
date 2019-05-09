@@ -3,6 +3,8 @@
 <project name    = "gui"
          default = "dist">
 
+  <property file = "../buildscripts/ant.properties"/>
+
   <target name = "clean">
     <delete quiet = "true">
       <fileset dir = "out"/>
@@ -29,6 +31,8 @@
     <javac nowarn            = "true"
            deprecation       = "false"
            includeantruntime = "false"
+           source            = "${target}"
+           target            = "${target}"
            classpath         = "../core/out:../retrace/out"
            srcdir            = "src"
            destdir           = "out"

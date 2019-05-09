@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,7 +23,7 @@ package proguard.evaluation;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.util.*;
 import proguard.evaluation.value.*;
 
 /**
@@ -96,6 +96,25 @@ implements   ConstantVisitor
                                                   stringConstant.javaLangStringClass,
                                                   false,
                                                   false);
+    }
+
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        String type = ClassUtil.internalMethodReturnType(dynamicConstant.getType(clazz));
+
+        // Is the method returning a class type?
+        Clazz[] referencedClasses = dynamicConstant.referencedClasses;
+        Clazz   referencedClass =
+            referencedClasses != null    &&
+            referencedClasses.length > 0 &&
+            ClassUtil.isInternalClassType(type) ?
+                referencedClasses[referencedClasses.length - 1] :
+                null;
+
+        value = valueFactory.createValue(type,
+                                         referencedClass,
+                                         true,
+                                         true);
     }
 
     public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)

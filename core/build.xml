@@ -3,6 +3,9 @@
 <project name    = "core"
          default = "dist">
 
+  <property file = "../buildscripts/ant.properties"/>
+  <property file = "ant.properties"/>
+
   <target name = "clean">
     <delete quiet = "true">
       <fileset dir   = "out"/>
@@ -13,12 +16,21 @@
     <mkdir dir = "out"/>
   </target>
 
-  <target name = "compile" depends = "out">
+  <target name = "download">
+    <get src          = "https://jcenter.bintray.com/com/google/code/gson/gson/2.8.5/gson-${gson.version}.jar"
+         dest         = "../lib/gson-${gson.version}.jar"
+         skipexisting = "true"/>
+  </target>
+
+  <target name = "compile" depends = "out,download">
     <javac nowarn            = "true"
            deprecation       = "false"
            includeantruntime = "false"
+           source            = "${target}"
+           target            = "${target}"
            srcdir            = "src"
            destdir           = "out"
+           classpath         = "../lib/gson-${gson.version}.jar"
            includes          = "proguard/ProGuard.java">
       <compilerarg value = "-Xlint:none"/>
     </javac>

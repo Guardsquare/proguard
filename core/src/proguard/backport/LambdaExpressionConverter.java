@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,7 +29,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.util.*;
+import proguard.util.MultiValueMap;
 
 import java.util.*;
 
@@ -177,8 +177,8 @@ implements ClassVisitor,
                 if (lambdaExpression.isStateless())
                 {
                     builder.getstatic(lambdaClassName,
-                                       LAMBDA_SINGLETON_FIELD_NAME,
-                                       ClassUtil.internalTypeFromClassName(lambdaClassName));
+                                      LAMBDA_SINGLETON_FIELD_NAME,
+                                      ClassUtil.internalTypeFromClassName(lambdaClassName));
                 }
                 else
                 {
@@ -199,11 +199,11 @@ implements ClassVisitor,
                         // and it is a Category 1 value, we can avoid storing the
                         // current stack to variables.
                         builder.new_(lambdaClassName)
-                                .dup_x1()
-                                .swap()
-                                .invokespecial(lambdaClassName,
-                                               ClassConstants.METHOD_NAME_INIT,
-                                               methodDescriptor);
+                               .dup_x1()
+                               .swap()
+                               .invokespecial(lambdaClassName,
+                                              ClassConstants.METHOD_NAME_INIT,
+                                              methodDescriptor);
                     }
                     else
                     {
@@ -251,8 +251,8 @@ implements ClassVisitor,
                         }
 
                         builder.invokespecial(lambdaClassName,
-                                               ClassConstants.METHOD_NAME_INIT,
-                                               methodDescriptor);
+                                              ClassConstants.METHOD_NAME_INIT,
+                                              methodDescriptor);
                     }
                 }
 
@@ -265,8 +265,11 @@ implements ClassVisitor,
 
     // Implementations for MemberVisitor.
 
+    @Override
     public void visitAnyMember(Clazz clazz, Member member) {}
 
+
+    @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         if (isDeserializationHook(programClass, programMethod))
@@ -328,14 +331,22 @@ implements ClassVisitor,
         // data structure for later use.
         lambdaExpression.lambdaClass = lambdaClass;
 
-        // Apply some optimizations to the lambda expression to
-        // avoid creating accessor methods all the time.
-        //fixAccessFlags(lambdaExpression);
-
-        // In case the invoked method can not be accessed directly
-        // by the lambda class, add a synthetic accessor method.
-        if (lambdaExpression.needsAccessorMethod())
+        // [DGD-968] When a lambda expression is called from a `default`
+        // interface method, ensure that it is stateless and visible to the
+        // lambda class instead of generating an accessor method. The method
+        // will be properly backported by the {@link StaticInterfaceMethodConverter}.
+        if (lambdaExpression.referencesPrivateSyntheticInterfaceMethod())
         {
+            fixInterfaceLambdaMethod(lambdaExpression.referencedClass,
+                                     (ProgramMethod) lambdaExpression.referencedInvokedMethod,
+                                     lambdaExpression);
+        }
+        else if (lambdaExpression.referencesPrivateConstructor() ||
+                 lambdaExpression.needsAccessorMethod())
+        {
+            // In case the invoked method can not be accessed directly
+            // by the lambda class, add a synthetic accessor method.
+
             addAccessorMethod(lambdaExpression.referencedClass,
                               lambdaExpression);
         }
@@ -358,31 +369,31 @@ implements ClassVisitor,
     }
 
 
-    private void fixAccessFlags(LambdaExpression lambdaExpression)
+    private void fixInterfaceLambdaMethod(ProgramClass     programClass,
+                                          ProgramMethod    programMethod,
+                                          LambdaExpression lambdaExpression)
     {
-        // If the invoked method is private, we can make it package-private
-        // to be able to access it from the lambda class. Otherwise we would
-        // need to add an additional accessor method.
-        if (lambdaExpression.referencedInvokedMethod instanceof ProgramMethod)
+        // Change the access flags to package private to make the method
+        // accessible from the lambda class.
+        programMethod.accept(programClass, new MemberAccessSetter(0));
+
+        // If the method is not yet static, make it static
+        // by updating its access flags / descriptor.
+        if ((programMethod.getAccessFlags() & (ClassConstants.ACC_STATIC)) == 0)
         {
-            ProgramMethod invokedProgramMethod =
-                (ProgramMethod) lambdaExpression.referencedInvokedMethod;
+            programMethod.accept(programClass,
+                new MemberAccessFlagSetter(ClassConstants.ACC_STATIC));
 
-            int currentAccessFlags = invokedProgramMethod.getAccessFlags();
-            if ((currentAccessFlags & ClassConstants.ACC_PRIVATE) != 0)
-            {
-                invokedProgramMethod.u2accessFlags =
-                    AccessUtil.replaceAccessFlags(currentAccessFlags,
-                                                  AccessUtil.accessFlags(AccessUtil.PACKAGE_VISIBLE));
+            String newDescriptor =
+                prependParameterToMethodDescriptor(lambdaExpression.invokedMethodDesc,
+                                                   ClassUtil.internalTypeFromClassType(programClass.getName()));
 
-                // In case of instance-capturing lambdas or method references to private
-                // methods the reference kind is invokeSpecial. After fixing the
-                // access flags we need to update the reference kind as well.
-                if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeSpecial)
-                {
-                    lambdaExpression.invokedReferenceKind = ClassConstants.REF_invokeVirtual;
-                }
-            }
+            programMethod.u2descriptorIndex =
+                (new ConstantPoolEditor(programClass).addUtf8Constant(newDescriptor));
+
+            // Update the lambda expression accordingly.
+            lambdaExpression.invokedMethodDesc    = newDescriptor;
+            lambdaExpression.invokedReferenceKind = ClassConstants.REF_invokeStatic;
         }
     }
 
@@ -409,7 +420,31 @@ implements ClassVisitor,
         int accessFlags =
             lambdaExpression.referencedInvokedMethod.getAccessFlags();
 
-        if ((accessFlags & ClassConstants.ACC_STATIC) == 0)
+        // Method reference to a constructor.
+        if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+        {
+            // Replace the return type of the accessor method -> change to created type.
+
+            // Collect first all parameters.
+            List<String> invokedParameterTypes = new ArrayList<String>();
+            int methodParameterSize =
+                ClassUtil.internalMethodParameterSize(accessorMethodDescriptor);
+            for (int i = 0; i < methodParameterSize; i++)
+            {
+                String invokedParameterType =
+                    ClassUtil.internalMethodParameterType(accessorMethodDescriptor, i);
+                invokedParameterTypes.add(invokedParameterType);
+            }
+
+            String invokedClassType =
+                ClassUtil.internalTypeFromClassName(lambdaExpression.invokedClassName);
+
+            // Build new method descriptor with the updated return type.
+            accessorMethodDescriptor =
+                ClassUtil.internalMethodDescriptorFromInternalTypes(invokedClassType,
+                                                                    invokedParameterTypes);
+        }
+        else if ((accessFlags & ClassConstants.ACC_STATIC) == 0)
         {
             accessorMethodDescriptor =
                 prependParameterToMethodDescriptor(accessorMethodDescriptor,
@@ -423,7 +458,15 @@ implements ClassVisitor,
                                   accessorMethodDescriptor,
                                   50);
 
-        // Load the parameters first.
+        // If the lambda expression is a method reference to a constructor,
+        // we need to create the object first.
+        if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+        {
+            composer.new_(lambdaExpression.invokedClassName)
+                .dup();
+        }
+
+        // Load the parameters next.
         InternalTypeEnumeration typeEnumeration =
             new InternalTypeEnumeration(accessorMethodDescriptor);
 

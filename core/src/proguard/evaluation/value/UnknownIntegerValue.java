@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,9 @@ package proguard.evaluation.value;
 
 /**
  * This class represents a partially evaluated integer value.
+ *
+ * This class handles interactions with:
+ * - IntegerValue (in general)
  *
  * @author Eric Lafortune
  */

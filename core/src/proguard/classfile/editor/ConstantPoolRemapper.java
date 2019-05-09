@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -150,6 +150,13 @@ implements   ClassVisitor,
     public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant)
     {
         // Nothing to do.
+    }
+
+
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        dynamicConstant.u2nameAndTypeIndex =
+            remapConstantIndex(dynamicConstant.u2nameAndTypeIndex);
     }
 
 
@@ -328,6 +335,25 @@ implements   ClassVisitor,
     }
 
 
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        nestHostAttribute.u2attributeNameIndex =
+            remapConstantIndex(nestHostAttribute.u2attributeNameIndex);
+        nestHostAttribute.u2hostClassIndex =
+            remapConstantIndex(nestHostAttribute.u2hostClassIndex);
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        nestMembersAttribute.u2attributeNameIndex =
+            remapConstantIndex(nestMembersAttribute.u2attributeNameIndex);
+
+        remapConstantIndexArray(nestMembersAttribute.u2classes,
+                                nestMembersAttribute.u2classesCount);
+    }
+
+
     public void visitModuleAttribute(Clazz clazz, ModuleAttribute moduleAttribute)
     {
         moduleAttribute.u2attributeNameIndex =
@@ -343,7 +369,8 @@ implements   ClassVisitor,
         moduleAttribute.requiresAccept(clazz, this);
         moduleAttribute.exportsAccept(clazz, this);
         moduleAttribute.opensAccept(clazz, this);
-        remapConstantIndexArray(moduleAttribute.u2uses, moduleAttribute.u2usesCount);
+        remapConstantIndexArray(moduleAttribute.u2uses,
+                                moduleAttribute.u2usesCount);
         moduleAttribute.providesAccept(clazz, this);
     }
 
@@ -361,7 +388,9 @@ implements   ClassVisitor,
     {
         modulePackagesAttribute.u2attributeNameIndex =
             remapConstantIndex(modulePackagesAttribute.u2attributeNameIndex);
-        remapConstantIndexArray(modulePackagesAttribute.u2packages, modulePackagesAttribute.u2packagesCount);
+
+        remapConstantIndexArray(modulePackagesAttribute.u2packages,
+                                modulePackagesAttribute.u2packagesCount);
     }
 
 
@@ -674,7 +703,8 @@ implements   ClassVisitor,
     {
         exportsInfo.u2exportsIndex =
             remapConstantIndex(exportsInfo.u2exportsIndex);
-        remapConstantIndexArray(exportsInfo.u2exportsToIndex, exportsInfo.u2exportsToCount);
+        remapConstantIndexArray(exportsInfo.u2exportsToIndex,
+                                exportsInfo.u2exportsToCount);
     }
 
 
@@ -684,7 +714,8 @@ implements   ClassVisitor,
     {
         opensInfo.u2opensIndex =
             remapConstantIndex(opensInfo.u2opensIndex);
-        remapConstantIndexArray(opensInfo.u2opensToIndex, opensInfo.u2opensToCount);
+        remapConstantIndexArray(opensInfo.u2opensToIndex,
+                                opensInfo.u2opensToCount);
     }
 
 
@@ -694,7 +725,8 @@ implements   ClassVisitor,
     {
         providesInfo.u2providesIndex =
             remapConstantIndex(providesInfo.u2providesIndex);
-        remapConstantIndexArray(providesInfo.u2providesWithIndex, providesInfo.u2providesWithCount);
+        remapConstantIndexArray(providesInfo.u2providesWithIndex,
+                                providesInfo.u2providesWithCount);
     }
 
     // Implementations for AnnotationVisitor.
@@ -735,7 +767,7 @@ implements   ClassVisitor,
     {
         classElementValue.u2elementNameIndex =
             remapConstantIndex(classElementValue.u2elementNameIndex);
-        classElementValue.u2classInfoIndex       =
+        classElementValue.u2classInfoIndex =
             remapConstantIndex(classElementValue.u2classInfoIndex);
     }
 
@@ -771,8 +803,8 @@ implements   ClassVisitor,
         }
     }
 
-    // Small utility methods.
 
+    // Small utility methods.
 
     /**
      * Returns the new constant pool index of the entry at the

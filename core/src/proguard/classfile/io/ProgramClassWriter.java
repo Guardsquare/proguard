@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -93,12 +93,8 @@ implements   ClassVisitor,
         dataOutput.writeUnsignedShort(programClass.u2superClass);
 
         // Write the interfaces.
-        dataOutput.writeUnsignedShort(programClass.u2interfacesCount);
-
-        for (int index = 0; index < programClass.u2interfacesCount; index++)
-        {
-            dataOutput.writeUnsignedShort(programClass.u2interfaces[index]);
-        }
+        writeUnsignedShorts(programClass.u2interfaces,
+                            programClass.u2interfacesCount);
 
         // Write the fields.
         dataOutput.writeUnsignedShort(programClass.u2fieldsCount);
@@ -229,6 +225,13 @@ implements   ClassVisitor,
 
             dataOutput.writeUnsignedShort(bytes.length);
             dataOutput.write(bytes);
+        }
+
+
+        public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+        {
+            dataOutput.writeUnsignedShort(dynamicConstant.u2bootstrapMethodAttributeIndex);
+            dataOutput.writeUnsignedShort(dynamicConstant.u2nameAndTypeIndex);
         }
 
 
@@ -435,6 +438,20 @@ implements   ClassVisitor,
         }
 
 
+        public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+        {
+            dataOutput.writeUnsignedShort(nestHostAttribute.u2hostClassIndex);
+        }
+
+
+        public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+        {
+            // Write the nest host classes.
+            writeUnsignedShorts(nestMembersAttribute.u2classes,
+                                nestMembersAttribute.u2classesCount);
+        }
+
+
         public void visitModuleAttribute(Clazz clazz, ModuleAttribute moduleAttribute)
         {
             dataOutput.writeUnsignedShort(moduleAttribute.u2moduleNameIndex);
@@ -457,12 +474,7 @@ implements   ClassVisitor,
             moduleAttribute.opensAccept(clazz, this);
 
             // Write the uses.
-            dataOutput.writeUnsignedShort(moduleAttribute.u2usesCount);
-
-            for (int index = 0; index < moduleAttribute.u2usesCount; index++)
-            {
-                dataOutput.writeUnsignedShort(moduleAttribute.u2uses[index]);
-            }
+            writeUnsignedShorts(moduleAttribute.u2uses, moduleAttribute.u2usesCount);
 
             // Write the provides.
             dataOutput.writeUnsignedShort(moduleAttribute.u2providesCount);
@@ -480,12 +492,8 @@ implements   ClassVisitor,
         public void visitModulePackagesAttribute(Clazz clazz, ModulePackagesAttribute modulePackagesAttribute)
         {
             // Write the packages.
-            dataOutput.writeUnsignedShort(modulePackagesAttribute.u2packagesCount);
-
-            for (int index = 0; index < modulePackagesAttribute.u2packagesCount; index++)
-            {
-                dataOutput.writeUnsignedShort(modulePackagesAttribute.u2packages[index]);
-            }
+            writeUnsignedShorts(modulePackagesAttribute.u2packages,
+                                modulePackagesAttribute.u2packagesCount);
         }
 
 
@@ -525,12 +533,8 @@ implements   ClassVisitor,
         public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
         {
             // Write the exceptions.
-            dataOutput.writeUnsignedShort(exceptionsAttribute.u2exceptionIndexTableLength);
-
-            for (int index = 0; index < exceptionsAttribute.u2exceptionIndexTableLength; index++)
-            {
-                dataOutput.writeUnsignedShort(exceptionsAttribute.u2exceptionIndexTable[index]);
-            }
+            writeUnsignedShorts(exceptionsAttribute.u2exceptionIndexTable,
+                                exceptionsAttribute.u2exceptionIndexTableLength);
         }
 
 
@@ -616,12 +620,8 @@ implements   ClassVisitor,
             dataOutput.writeUnsignedShort(exportsInfo.u2exportsFlags);
 
             // Write tthe argets.
-            dataOutput.writeUnsignedShort(exportsInfo.u2exportsToCount);
-
-            for (int index = 0; index < exportsInfo.u2exportsToCount; index++)
-            {
-                dataOutput.writeUnsignedShort(exportsInfo.u2exportsToIndex[index]);
-            }
+            writeUnsignedShorts(exportsInfo.u2exportsToIndex,
+                                exportsInfo.u2exportsToCount);
         }
 
 
@@ -631,12 +631,8 @@ implements   ClassVisitor,
             dataOutput.writeUnsignedShort(opensInfo.u2opensFlags);
 
             // Write the targets.
-            dataOutput.writeUnsignedShort(opensInfo.u2opensToCount);
-
-            for (int index = 0; index < opensInfo.u2opensToCount; index++)
-            {
-                dataOutput.writeUnsignedShort(opensInfo.u2opensToIndex[index]);
-            }
+            writeUnsignedShorts(opensInfo.u2opensToIndex,
+                                opensInfo.u2opensToCount);
         }
 
 
@@ -644,13 +640,9 @@ implements   ClassVisitor,
         {
             dataOutput.writeUnsignedShort(providesInfo.u2providesIndex);
 
-            // Write the with.
-            dataOutput.writeUnsignedShort(providesInfo.u2providesWithCount);
-
-            for (int index = 0; index < providesInfo.u2providesWithCount; index++)
-            {
-                dataOutput.writeUnsignedShort(providesInfo.u2providesWithIndex[index]);
-            }
+            // Write the provides.
+            writeUnsignedShorts(providesInfo.u2providesWithIndex,
+                                providesInfo.u2providesWithCount);
         }
 
 
@@ -708,12 +700,8 @@ implements   ClassVisitor,
             dataOutput.writeUnsignedShort(bootstrapMethodInfo.u2methodHandleIndex);
 
             // Write the bootstrap method arguments.
-            dataOutput.writeUnsignedShort(bootstrapMethodInfo.u2methodArgumentCount);
-
-            for (int index = 0; index < bootstrapMethodInfo.u2methodArgumentCount; index++)
-            {
-                dataOutput.writeUnsignedShort(bootstrapMethodInfo.u2methodArguments[index]);
-            }
+            writeUnsignedShorts(bootstrapMethodInfo.u2methodArguments,
+                                bootstrapMethodInfo.u2methodArgumentCount);
         }
 
 
@@ -1064,6 +1052,22 @@ implements   ClassVisitor,
             dataOutput.writeUnsignedShort(arrayElementValue.u2elementValuesCount);
 
             arrayElementValue.elementValuesAccept(clazz, annotation, attributeBodyWriter);
+        }
+    }
+
+
+    // Small utility methods.
+
+    /**
+     * Writes the length and the contents of the given list of unsigned shorts.
+     */
+    private void writeUnsignedShorts(int[] array, int size)
+    {
+        dataOutput.writeUnsignedShort(size);
+
+        for (int index = 0; index < size; index++)
+        {
+            dataOutput.writeUnsignedShort(array[index]);
         }
     }
 }

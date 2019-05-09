@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,16 @@ package proguard.evaluation.value;
 
 /**
  * This IntegerValue represents a specific integer value.
+ *
+ * This class handles interactions with:
+ * - RangeIntegerValue
+ * - SpecificInteger (in general)
+ *
+ * It reverses and delegates interactions with:
+ * - IntegerValue (in general)
+ *
+ * It notably doesn't handle interactions with:
+ * - UnknownInteger
  *
  * @author Eric Lafortune
  */
@@ -327,6 +337,119 @@ abstract class SpecificIntegerValue extends IntegerValue
     public int lessThanOrEqual(SpecificIntegerValue other)
     {
         return this.equals(other) ? ALWAYS : MAYBE;
+    }
+
+
+    // Implementations of binary IntegerValue methods with RangeIntegerValue
+    // arguments.
+
+    public IntegerValue generalize(RangeIntegerValue other)
+    {
+        return BasicValueFactory.INTEGER_VALUE;
+    }
+
+    public IntegerValue add(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.ADD, other);
+    }
+
+    public IntegerValue subtract(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.SUBTRACT, other);
+    }
+
+    public IntegerValue subtractFrom(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.SUBTRACT, this);
+    }
+
+    public IntegerValue multiply(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.MULTIPLY, other);
+    }
+
+    public IntegerValue divide(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.DIVIDE, other);
+    }
+
+    public IntegerValue divideOf(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.DIVIDE, this);
+    }
+
+    public IntegerValue remainder(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.REMAINDER, other);
+    }
+
+    public IntegerValue remainderOf(RangeIntegerValue other)
+    throws ArithmeticException
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.REMAINDER, this);
+    }
+
+    public IntegerValue shiftLeft(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.SHIFT_LEFT, other);
+    }
+
+    public IntegerValue shiftRight(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.SHIFT_RIGHT, other);
+    }
+
+    public IntegerValue unsignedShiftRight(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(this, CompositeIntegerValue.UNSIGNED_SHIFT_RIGHT, other);
+    }
+
+    public IntegerValue shiftLeftOf(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.SHIFT_LEFT, this);
+    }
+
+    public IntegerValue shiftRightOf(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.SHIFT_RIGHT, this);
+    }
+
+    public IntegerValue unsignedShiftRightOf(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.UNSIGNED_SHIFT_RIGHT, this);
+    }
+
+    public IntegerValue and(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.AND, this);
+    }
+
+    public IntegerValue or(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.OR, this);
+    }
+
+    public IntegerValue xor(RangeIntegerValue other)
+    {
+        return new CompositeIntegerValue(other, CompositeIntegerValue.XOR, this);
+    }
+
+    public int equal(RangeIntegerValue other)
+    {
+        return MAYBE;
+    }
+
+    public int lessThan(RangeIntegerValue other)
+    {
+        return MAYBE;
+    }
+
+    public int lessThanOrEqual(RangeIntegerValue other)
+    {
+        return MAYBE;
     }
 
 

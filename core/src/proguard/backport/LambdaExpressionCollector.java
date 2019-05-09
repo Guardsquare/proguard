@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -62,9 +62,11 @@ implements ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass) {}
 
 
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Visit any InvokeDynamic constant.
@@ -76,9 +78,11 @@ implements ClassVisitor,
 
     // Implementations for ConstantVisitor.
 
+    @Override
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
+    @Override
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         referencedInvokeDynamicConstant = invokeDynamicConstant;
@@ -87,6 +91,7 @@ implements ClassVisitor,
     }
 
 
+    @Override
     public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
     {
         referencedInvokedClass  = refConstant.referencedClass;
@@ -96,9 +101,11 @@ implements ClassVisitor,
 
     // Implementations for AttributeVisitor.
 
+    @Override
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
 
+    @Override
     public void visitBootstrapMethodsAttribute(Clazz                     clazz,
                                                BootstrapMethodsAttribute bootstrapMethodsAttribute)
     {
@@ -108,6 +115,7 @@ implements ClassVisitor,
 
     // Implementations for BootstrapMethodInfoVisitor.
 
+    @Override
     public void visitBootstrapMethodInfo(Clazz clazz, BootstrapMethodInfo bootstrapMethodInfo)
     {
         ProgramClass programClass = (ProgramClass) clazz;

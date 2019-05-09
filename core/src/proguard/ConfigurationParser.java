@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -175,15 +175,16 @@ public class ConfigurationParser
 
             else if (ConfigurationConstants.DONT_SHRINK_OPTION                               .startsWith(nextWord)) configuration.shrink                                = parseNoArgument(false);
             else if (ConfigurationConstants.PRINT_USAGE_OPTION                               .startsWith(nextWord)) configuration.printUsage                            = parseOptionalFile();
-            else if (ConfigurationConstants.WHY_ARE_YOU_KEEPING_OPTION                       .startsWith(nextWord)) configuration.whyAreYouKeeping                      = parseClassSpecificationArguments(true, configuration.whyAreYouKeeping);
+            else if (ConfigurationConstants.WHY_ARE_YOU_KEEPING_OPTION                       .startsWith(nextWord)) configuration.whyAreYouKeeping                      = parseKeepClassSpecificationArguments(configuration.whyAreYouKeeping, false, false, false, null);
 
             else if (ConfigurationConstants.DONT_OPTIMIZE_OPTION                             .startsWith(nextWord)) configuration.optimize                              = parseNoArgument(false);
             else if (ConfigurationConstants.OPTIMIZATION_PASSES                              .startsWith(nextWord)) configuration.optimizationPasses                    = parseIntegerArgument();
             else if (ConfigurationConstants.OPTIMIZATIONS                                    .startsWith(nextWord)) configuration.optimizations                         = parseCommaSeparatedList("optimization name", true, false, false, false, false, true, false, false, false, configuration.optimizations);
-            else if (ConfigurationConstants.ASSUME_NO_SIDE_EFFECTS_OPTION                    .startsWith(nextWord)) configuration.assumeNoSideEffects                   = parseClassSpecificationArguments(true, configuration.assumeNoSideEffects);
-            else if (ConfigurationConstants.ASSUME_NO_EXTERNAL_SIDE_EFFECTS_OPTION           .startsWith(nextWord)) configuration.assumeNoExternalSideEffects           = parseClassSpecificationArguments(true, configuration.assumeNoExternalSideEffects);
-            else if (ConfigurationConstants.ASSUME_NO_ESCAPING_PARAMETERS_OPTION             .startsWith(nextWord)) configuration.assumeNoEscapingParameters            = parseClassSpecificationArguments(true, configuration.assumeNoEscapingParameters);
-            else if (ConfigurationConstants.ASSUME_NO_EXTERNAL_RETURN_VALUES_OPTION          .startsWith(nextWord)) configuration.assumeNoExternalReturnValues          = parseClassSpecificationArguments(true, configuration.assumeNoExternalReturnValues);
+            else if (ConfigurationConstants.ASSUME_NO_SIDE_EFFECTS_OPTION                    .startsWith(nextWord)) configuration.assumeNoSideEffects                   = parseAssumeClassSpecificationArguments(configuration.assumeNoSideEffects);
+            else if (ConfigurationConstants.ASSUME_NO_EXTERNAL_SIDE_EFFECTS_OPTION           .startsWith(nextWord)) configuration.assumeNoExternalSideEffects           = parseAssumeClassSpecificationArguments(configuration.assumeNoExternalSideEffects);
+            else if (ConfigurationConstants.ASSUME_NO_ESCAPING_PARAMETERS_OPTION             .startsWith(nextWord)) configuration.assumeNoEscapingParameters            = parseAssumeClassSpecificationArguments(configuration.assumeNoEscapingParameters);
+            else if (ConfigurationConstants.ASSUME_NO_EXTERNAL_RETURN_VALUES_OPTION          .startsWith(nextWord)) configuration.assumeNoExternalReturnValues          = parseAssumeClassSpecificationArguments(configuration.assumeNoExternalReturnValues);
+            else if (ConfigurationConstants.ASSUME_VALUES_OPTION                             .startsWith(nextWord)) configuration.assumeValues                          = parseAssumeClassSpecificationArguments(configuration.assumeValues);
             else if (ConfigurationConstants.ALLOW_ACCESS_MODIFICATION_OPTION                 .startsWith(nextWord)) configuration.allowAccessModification               = parseNoArgument(true);
             else if (ConfigurationConstants.MERGE_INTERFACES_AGGRESSIVELY_OPTION             .startsWith(nextWord)) configuration.mergeInterfacesAggressively           = parseNoArgument(true);
 
@@ -536,6 +537,13 @@ public class ConfigurationParser
     }
 
 
+    /**
+     * Parses and adds a conditional class specification to keep other classes
+     * and class members.
+     * @throws ParseException if the class specification contains a syntax error.
+     * @throws IOException    if an IO error occurs while reading the class
+     *                        specification.
+     */
     private List parseIfCondition(List keepClassSpecifications)
     throws ParseException, IOException
     {
@@ -548,7 +556,7 @@ public class ConfigurationParser
                      true);
 
         ClassSpecification condition =
-            parseClassSpecificationArguments();
+            parseClassSpecificationArguments(false);
 
         // Read the corresponding keep option.
         if (nextWord == null)
@@ -571,6 +579,12 @@ public class ConfigurationParser
     }
 
 
+    /**
+     * Parses and adds a class specification to keep classes and class members.
+     * @throws ParseException if the class specification contains a syntax error.
+     * @throws IOException    if an IO error occurs while reading the class
+     *                        specification.
+     */
     private List parseKeepClassSpecificationArguments(List               keepClassSpecifications,
                                                       boolean            markClasses,
                                                       boolean            markConditionally,
@@ -593,6 +607,13 @@ public class ConfigurationParser
     }
 
 
+    /**
+     * Parses and returns a class specification to keep classes and class
+     * members.
+     * @throws ParseException if the class specification contains a syntax error.
+     * @throws IOException    if an IO error occurs while reading the class
+     *                        specification.
+     */
     private KeepClassSpecification parseKeepClassSpecificationArguments(boolean            markClasses,
                                                                         boolean            markConditionally,
                                                                         boolean            allowShrinking,
@@ -656,7 +677,7 @@ public class ConfigurationParser
 
         // Read the class configuration.
         ClassSpecification classSpecification =
-            parseClassSpecificationArguments();
+            parseClassSpecificationArguments(false);
 
         // Create and return the keep configuration.
         return new KeepClassSpecification(markClasses,
@@ -671,8 +692,13 @@ public class ConfigurationParser
     }
 
 
-    private List parseClassSpecificationArguments(boolean readFirstWord,
-                                                  List    classSpecifications)
+    /**
+     * Parses and adds a class specification for optimization assumptions.
+     * @throws ParseException if the class specification contains a syntax error.
+     * @throws IOException    if an IO error occurs while reading the class
+     *                        specification.
+     */
+    private List parseAssumeClassSpecificationArguments(List classSpecifications)
     throws ParseException, IOException
     {
         // Create a new List if necessary.
@@ -681,16 +707,13 @@ public class ConfigurationParser
             classSpecifications = new ArrayList();
         }
 
-        if (readFirstWord)
-        {
-            readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
-                         "', '"      + JavaConstants.ACC_INTERFACE +
-                         "', or '"   + JavaConstants.ACC_ENUM + "'",
-                         false, false, true);
-        }
+        readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
+                     "', '"      + JavaConstants.ACC_INTERFACE +
+                     "', or '"   + JavaConstants.ACC_ENUM + "'",
+                     false, false, true);
 
         // Read and add the class configuration.
-        classSpecifications.add(parseClassSpecificationArguments());
+        classSpecifications.add(parseClassSpecificationArguments(true));
 
         return classSpecifications;
     }
@@ -702,7 +725,7 @@ public class ConfigurationParser
      * @throws IOException    if an IO error occurs while reading the class
      *                        specification.
      */
-    public ClassSpecification parseClassSpecificationArguments()
+    public ClassSpecification parseClassSpecificationArguments(boolean allowValues)
     throws ParseException, IOException
     {
         // Clear the annotation type.
@@ -874,6 +897,7 @@ public class ConfigurationParser
                 }
 
                 parseMemberSpecificationArguments(externalClassName,
+                                                  allowValues,
                                                   classSpecification);
             }
         }
@@ -882,7 +906,14 @@ public class ConfigurationParser
     }
 
 
+    /**
+     * Parses and adds a class member specification.
+     * @throws ParseException if the class specification contains a syntax error.
+     * @throws IOException    if an IO error occurs while reading the class
+     *                        specification.
+     */
     private void parseMemberSpecificationArguments(String             externalClassName,
+                                                   boolean            allowValues,
                                                    ClassSpecification classSpecification)
     throws ParseException, IOException
     {
@@ -1072,6 +1103,38 @@ public class ConfigurationParser
                                             name,
                                             descriptor));
             }
+            else if (allowValues &&
+                     (ConfigurationConstants.EQUAL_KEYWORD.equals(nextWord) ||
+                      ConfigurationConstants.RETURN_KEYWORD.equals(nextWord)))
+            {
+                // It's a field with a value.
+                checkFieldAccessFlags(requiredSetMemberAccessFlags,
+                                      requiredUnsetMemberAccessFlags);
+
+                // We already have a field descriptor.
+                String descriptor = ClassUtil.internalType(type);
+
+                // Read the constant.
+                Number[] values = parseValues(type, descriptor);
+
+                // Read the separator after the constant.
+                readNextWord("separator '" + ConfigurationConstants.SEPARATOR_KEYWORD + "'");
+
+                if (!ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
+                {
+                    throw new ParseException("Expecting separator '" + ConfigurationConstants.SEPARATOR_KEYWORD +
+                                             "' before " + reader.locationDescription());
+                }
+
+                // Add the field.
+                classSpecification.addField(
+                    new MemberValueSpecification(requiredSetMemberAccessFlags,
+                                                 requiredUnsetMemberAccessFlags,
+                                                 annotationType,
+                                                 name,
+                                                 descriptor,
+                                                 values));
+            }
             else if (ConfigurationConstants.OPEN_ARGUMENTS_KEYWORD.equals(nextWord))
             {
                 // It's a method.
@@ -1093,19 +1156,51 @@ public class ConfigurationParser
                 // Read the separator after the closing parenthesis.
                 readNextWord("separator '" + ConfigurationConstants.SEPARATOR_KEYWORD + "'");
 
-                if (!ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
+                if (ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
+                {
+                    // Add the plain method.
+                    classSpecification.addMethod(
+                        new MemberSpecification(requiredSetMemberAccessFlags,
+                                                requiredUnsetMemberAccessFlags,
+                                                annotationType,
+                                                name,
+                                                descriptor));
+                }
+                else if (allowValues &&
+                         (ConfigurationConstants.EQUAL_KEYWORD.equals(nextWord) ||
+                          ConfigurationConstants.RETURN_KEYWORD.equals(nextWord)))
+                {
+                    // It's a method with a value.
+                    checkFieldAccessFlags(requiredSetMemberAccessFlags,
+                                          requiredUnsetMemberAccessFlags);
+
+                    // Read the constant.
+                    Number[] values = parseValues(type, ClassUtil.internalType(type));
+
+                    // Read the separator after the constant.
+                    readNextWord("separator '" + ConfigurationConstants.SEPARATOR_KEYWORD + "'");
+
+                    if (!ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
+                    {
+                        throw new ParseException("Expecting separator '" + ConfigurationConstants.SEPARATOR_KEYWORD +
+                                                 "' before " + reader.locationDescription());
+                    }
+
+                    // Add the method.
+                    classSpecification.addMethod(
+                        new MemberValueSpecification(requiredSetMemberAccessFlags,
+                                                     requiredUnsetMemberAccessFlags,
+                                                     annotationType,
+                                                     name,
+                                                     descriptor,
+                                                     values));
+                }
+                else
                 {
                     throw new ParseException("Expecting separator '" + ConfigurationConstants.SEPARATOR_KEYWORD +
                                              "' before " + reader.locationDescription());
-                }
 
-                // Add the method.
-                classSpecification.addMethod(
-                    new MemberSpecification(requiredSetMemberAccessFlags,
-                                            requiredUnsetMemberAccessFlags,
-                                            annotationType,
-                                            name,
-                                            descriptor));
+                }
             }
             else
             {
@@ -1114,6 +1209,105 @@ public class ConfigurationParser
                                          "' or separator '" + ConfigurationConstants.SEPARATOR_KEYWORD +
                                          "' before " + reader.locationDescription());
             }
+        }
+    }
+
+
+    /**
+     * Reads a value or value range of the given primitive type.
+     * For example, values "123" or "100..199" of type "int" ("I").
+     */
+    private Number[] parseValues(String externalType,
+                                 String internalType)
+    throws ParseException, IOException
+    {
+        readNextWord(externalType + " constant");
+
+        int rangeIndex = nextWord.indexOf(ConfigurationConstants.RANGE_KEYWORD);
+        return rangeIndex >= 0 ?
+            new Number[]
+            {
+                parseValue(externalType, internalType, nextWord.substring(0, rangeIndex)),
+                parseValue(externalType, internalType, nextWord.substring(rangeIndex + ConfigurationConstants.RANGE_KEYWORD.length()))
+            } :
+            new Number[]
+            {
+                parseValue(externalType, internalType, nextWord)
+            };
+    }
+
+
+    /**
+     * Parses the given string as a value of the given primitive type.
+     * For example, value "123" of type "int" ("I").
+     * For example, value "true" of type "boolean" ("Z"), returned as 1.
+     */
+    private Number parseValue(String externalType,
+                              String internalType,
+                              String string)
+    throws ParseException
+    {
+        try
+        {
+            string = replaceSystemProperties(string);
+
+            switch (internalType.charAt(0))
+            {
+                case ClassConstants.TYPE_BOOLEAN:
+                {
+                    return parseBoolean(string);
+                }
+                case ClassConstants.TYPE_BYTE:
+                case ClassConstants.TYPE_CHAR:
+                case ClassConstants.TYPE_SHORT:
+                case ClassConstants.TYPE_INT:
+                {
+                    return Integer.decode(string);
+                }
+                //case ClassConstants.TYPE_LONG:
+                //{
+                //    return Long.decode(string);
+                //}
+                //case ClassConstants.TYPE_FLOAT:
+                //{
+                //    return Float.valueOf(string);
+                //}
+                //case ClassConstants.TYPE_DOUBLE:
+                //{
+                //    return Double.valueOf(string);
+                //}
+                default:
+                {
+                    throw new ParseException("Can't handle '" + externalType +
+                                             "' constant " + reader.locationDescription());
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ParseException("Can't parse " + externalType +
+                                     " constant " + reader.locationDescription());
+        }
+    }
+
+
+    /**
+     * Parses the given boolean string as an integer (0 or 1).
+     */
+    private Integer parseBoolean(String string)
+    throws ParseException
+    {
+        if      (ConfigurationConstants.FALSE_KEYWORD.equals(nextWord))
+        {
+            return Integer.valueOf(0);
+        }
+        else if (ConfigurationConstants.TRUE_KEYWORD.equals(nextWord))
+        {
+            return Integer.valueOf(1);
+        }
+        else
+        {
+            throw new ParseException("Unknown boolean constant " + reader.locationDescription());
         }
     }
 
@@ -1488,9 +1682,8 @@ public class ConfigurationParser
 
         if (!allowGenerics && containsGenerics(nextWord))
         {
-            throw new ParseException("Use of generics not allowed for " +
-                                     expectedDescription +
-                                     " at " + reader.locationDescription());
+            throw new ParseException("Generics are not allowed (erased) in " + expectedDescription +
+                                     " " + reader.locationDescription());
         }
     }
 
@@ -1499,16 +1692,16 @@ public class ConfigurationParser
      * Returns whether the given word is a valid Java identifier.
      * Wildcard characters are accepted.
      */
-    private boolean isJavaIdentifier(String aWord)
+    private boolean isJavaIdentifier(String word)
     {
-        if (aWord.length() == 0)
+        if (word.length() == 0)
         {
             return false;
         }
 
-        for (int index = 0; index < aWord.length(); index++)
+        for (int index = 0; index < word.length(); index++)
         {
-            char c = aWord.charAt(index);
+            char c = word.charAt(index);
             if (!(Character.isJavaIdentifierPart(c) ||
                   c == '.' ||
                   c == '[' ||
@@ -1529,40 +1722,43 @@ public class ConfigurationParser
     }
 
 
-    private boolean containsGenerics(String aWord)
-    {
-        return containsGenerics(aWord, 0);
-    }
-
-
     /**
      * Returns whether the given word contains angle brackets around
      * a non-digit string.
      */
-    private boolean containsGenerics(String aWord, int startIndex)
+    private boolean containsGenerics(String word)
     {
-        int openIndex = aWord.indexOf('<', startIndex);
-        if (openIndex < 0)
-        {
-            return false;
-        }
+        int index = 0;
 
-        int closeIndex = aWord.indexOf('>', startIndex + openIndex + 1);
-        if (closeIndex < 0)
+        while (true)
         {
-            return false;
-        }
+            // Can we find an opening angular bracket?
+            int openIndex = word.indexOf(ClassConstants.TYPE_GENERIC_START, index);
+            if (openIndex < 0)
+            {
+                return false;
+            }
 
-        try
-        {
-            Integer.parseInt(aWord.substring(openIndex + 1, closeIndex));
-        }
-        catch (NumberFormatException e)
-        {
-            return true;
-        }
+            // Can we find a corresponding closing angular bracket?
+            int closeIndex = word.indexOf(ClassConstants.TYPE_GENERIC_END, openIndex + 1);
+            if (closeIndex < 0)
+            {
+                return false;
+            }
 
-        return containsGenerics(aWord,closeIndex);
+            try
+            {
+                // Is it just a reference to a wildcard?
+                Integer.parseInt(word.substring(openIndex + 1, closeIndex));
+            }
+            catch (NumberFormatException e)
+            {
+                // It's not; it's really a generic type.
+                return true;
+            }
+
+            index = closeIndex + 1;
+        }
     }
 
 

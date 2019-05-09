@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -170,6 +170,12 @@ public class Configuration
      * instances).
      */
     public List      assumeNoExternalReturnValues;
+
+    /**
+     * A list of {@link ClassSpecification} instances, with fields and methods
+     * that have specified fixed primitive values.
+     */
+    public List      assumeValues;
 
     /**
      * Specifies whether the access of class members can be modified.

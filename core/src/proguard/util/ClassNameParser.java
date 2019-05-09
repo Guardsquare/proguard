@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -309,13 +309,12 @@ public class ClassNameParser implements StringParser
         int closingBracketIndex = string.indexOf('>', index);
         if (closingBracketIndex < 0)
         {
-            throw new IllegalArgumentException("Missing closing angular bracket");
+            throw new IllegalArgumentException("Missing closing angular bracket after opening bracket at index "+index+" in ["+string+"]");
         }
 
         if (variableStringMatchers == null)
         {
-            System.err.println(string);
-            throw new IllegalArgumentException("References to wildcards are not supported in this argument");
+            throw new IllegalArgumentException("References to wildcards are not supported in this argument ["+string+"]");
         }
 
         String argumentBetweenBrackets = string.substring(index+1, closingBracketIndex);
@@ -326,14 +325,14 @@ public class ClassNameParser implements StringParser
             if (wildcardIndex < 1 ||
                 wildcardIndex > variableStringMatchers.size())
             {
-                throw new IllegalArgumentException("Invalid reference to wildcard ("+wildcardIndex+", must lie between 1 and "+variableStringMatchers.size()+")");
+                throw new IllegalArgumentException("Invalid reference to wildcard ("+wildcardIndex+", must lie between 1 and "+variableStringMatchers.size()+" in ["+string+"])");
             }
 
             return wildcardIndex;
         }
         catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException("Reference to wildcard must be a number ("+argumentBetweenBrackets+")");
+            throw new IllegalArgumentException("Reference to wildcard must be a number ["+argumentBetweenBrackets+"] in ["+string+"]");
         }
     }
 

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -59,7 +59,6 @@ extends      MethodOptimizationInfo
     private volatile long    returnedParameters       = 0L;
     private volatile boolean returnsNewInstances      = false;
     private volatile boolean returnsExternalValues    = false;
-    private volatile Value   returnValue;
 
 
     /**
@@ -68,14 +67,10 @@ extends      MethodOptimizationInfo
     public ProgramMethodOptimizationInfo(Clazz clazz, Method method)
     {
         // Set up an array of the right size for storing information about the
-        // passed parameters.
+        // passed parameters (including 'this', for non-static methods).
         int parameterCount =
-            ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz));
-
-        if ((method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0)
-        {
-            parameterCount++;
-        }
+            ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz),
+                                                   method.getAccessFlags());
 
         parameters = parameterCount == 0 ?
             EMPTY_PARAMETERS :
@@ -487,19 +482,6 @@ extends      MethodOptimizationInfo
         this.returnValue = this.returnValue != null ?
             this.returnValue.generalize(returnValue) :
             returnValue;
-    }
-
-
-    public Value getReturnValue()
-    {
-        return returnValue;
-    }
-
-
-    // For setting enum return values.
-    public synchronized void setReturnValue(Value returnValue)
-    {
-        this.returnValue = returnValue;
     }
 
 

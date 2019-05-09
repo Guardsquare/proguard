@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,6 +29,7 @@ import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.Optimizer;
+import proguard.optimize.gson.GsonOptimizer;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.preverify.*;
 import proguard.shrink.Shrinker;
@@ -43,7 +44,7 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 6.0.3";
+    public static final String VERSION = "ProGuard, version 6.1.0";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();
@@ -143,6 +144,16 @@ public class ProGuard
         if (configuration.shrink)
         {
             shrink();
+        }
+
+        StringMatcher filter = configuration.optimizations != null ?
+            new ListParser(new NameParser()).parse(configuration.optimizations) :
+            new ConstantMatcher(true);
+
+        if (configuration.optimize &&
+            filter.matches(Optimizer.LIBRARY_GSON))
+        {
+            optimizeGson();
         }
 
         if (configuration.optimize)
@@ -399,6 +410,26 @@ public class ProGuard
 
 
     /**
+     * Optimizes usages of the Gson library.
+     */
+    private void optimizeGson() throws IOException
+    {
+        if (programClassPool.getClass("com/google/gson/Gson") != null)
+        {
+            if (configuration.verbose)
+            {
+                System.out.println("Optimizing usages of Gson library...");
+            }
+
+            new GsonOptimizer().execute(programClassPool,
+                                        libraryClassPool,
+                                        injectedClassNameMap,
+                                        configuration);
+        }
+    }
+
+
+    /**
      * Performs the optimization step.
      */
     private boolean optimize(int currentPass,
@@ -424,18 +455,6 @@ public class ProGuard
         if (configuration.verbose)
         {
             System.out.println("Obfuscating...");
-
-            // We'll apply a mapping, if requested.
-            if (configuration.applyMapping != null)
-            {
-                System.out.println("Applying mapping [" + PrintWriterUtil.fileName(configuration.applyMapping) + "]");
-            }
-
-            // We'll print out the mapping, if requested.
-            if (configuration.printMapping != null)
-            {
-                System.out.println("Printing mapping to [" + PrintWriterUtil.fileName(configuration.printMapping) + "]...");
-            }
         }
 
         // Perform the actual obfuscation.

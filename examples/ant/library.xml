@@ -8,7 +8,8 @@
   <taskdef resource="proguard/ant/task.properties"
            classpath="lib/proguard.jar" />
 
-  <proguard printmapping="out.map"
+  <proguard verbose="true"
+            printmapping="out.map"
             renamesourcefileattribute="SourceFile">
 
     <!-- Specify the input jars, output jars, and library jars. -->
@@ -50,9 +51,9 @@
     <keepclasseswithmembernames includedescriptorclasses="true">
       <method access="native" />
     </keepclasseswithmembernames>
-    
+
     <!-- Preserve the methods that are required in all enumeration classes. -->
-    
+
     <keepclassmembers allowoptimization="true" type="enum">
       <method access="public static"
               type="**[]"

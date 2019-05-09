@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -114,6 +114,24 @@ public class MultiAttributeVisitor implements AttributeVisitor
         for (int index = 0; index < attributeVisitorCount; index++)
         {
             attributeVisitors[index].visitEnclosingMethodAttribute(clazz, enclosingMethodAttribute);
+        }
+    }
+
+
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        for (int index = 0; index < attributeVisitorCount; index++)
+        {
+            attributeVisitors[index].visitNestHostAttribute(clazz, nestHostAttribute);
+        }
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        for (int index = 0; index < attributeVisitorCount; index++)
+        {
+            attributeVisitors[index].visitNestMembersAttribute(clazz, nestMembersAttribute);
         }
     }
 

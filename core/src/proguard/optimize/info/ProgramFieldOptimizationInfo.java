@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -45,7 +45,6 @@ implements   AttributeVisitor
     private volatile boolean        isRead;
     private volatile boolean        canBeMadePrivate = true;
     private volatile ReferenceValue referencedClass;
-    private volatile Value          value;
 
 
     public ProgramFieldOptimizationInfo(Clazz clazz, Field field)
@@ -61,11 +60,11 @@ implements   AttributeVisitor
 
     public ProgramFieldOptimizationInfo(ProgramFieldOptimizationInfo programFieldOptimizationInfo)
     {
+        this.value            = programFieldOptimizationInfo.value;
         this.isWritten        = programFieldOptimizationInfo.isWritten;
         this.isRead           = programFieldOptimizationInfo.isRead;
         this.canBeMadePrivate = programFieldOptimizationInfo.canBeMadePrivate;
         this.referencedClass  = programFieldOptimizationInfo.referencedClass;
-        this.value            = programFieldOptimizationInfo.value;
     }
 
 
@@ -155,12 +154,6 @@ implements   AttributeVisitor
         this.value = this.value != null ?
             this.value.generalize(value) :
             value;
-    }
-
-
-    public Value getValue()
-    {
-        return value;
     }
 
 

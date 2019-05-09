@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -30,7 +30,9 @@ import proguard.optimize.peephole.InstructionSequenceReplacer;
 import static proguard.optimize.peephole.InstructionSequenceReplacer.catch_;
 
 /**
- * This class contains a set of instruction sequences for accessing class information via reflection, and replacement instructions that add logging information on the reflection that is used.
+ * This class contains a set of instruction sequences for accessing class
+ * information via reflection, and replacement instructions that add logging
+ * information on the reflection that is used.
  *
  * @author Johan Leys
  */
@@ -38,7 +40,7 @@ public class ConfigurationLoggingInstructionSequenceConstants
 {
     private static String LOGGER_CLASS_NAME = ClassUtil.internalClassName(ConfigurationLogger.class.getName());
 
-    // Exceptions classes.
+    // Exception classes.
     public static final String NAME_CLASS_NOT_FOUND_EXCEPTION     = "java/lang/ClassNotFoundException";
     public static final String NAME_NO_SUCH_FIELD_EXCEPTION       = "java/lang/NoSuchFieldException";
     public static final String NAME_NO_SUCH_METHOD_EXCEPTION      = "java/lang/NoSuchMethodException";
@@ -68,7 +70,6 @@ public class ConfigurationLoggingInstructionSequenceConstants
     private final InstructionSequenceReplacer.Label NO_SUCH_FIELD_EXCEPTION;
     private final InstructionSequenceReplacer.Label IO_EXCEPTION;
     private final InstructionSequenceReplacer.Label RUNTIME_EXCEPTION;
-    private final InstructionSequenceReplacer.Label UNSATISFIED_LINK_ERROR;
 
     /**
      * Creates a new instance of ResourceIdInstructionSequenceConstants,
@@ -102,10 +103,6 @@ public class ConfigurationLoggingInstructionSequenceConstants
             catch_(TRY_START.offset(),
                    TRY_END.offset(),
                    constantPoolEditor.addClassConstant(NAME_RUNTIME_EXCEPTION, null));
-        UNSATISFIED_LINK_ERROR =
-            catch_(TRY_START.offset(),
-                   TRY_END.offset(),
-                   constantPoolEditor.addClassConstant(NAME_UNSATISFIED_LINK_ERROR, null));
 
         RESOURCE = new Instruction[][][]
             {
@@ -343,134 +340,6 @@ public class ConfigurationLoggingInstructionSequenceConstants
                         .swap()
                         .invokestatic(LOGGER_CLASS_NAME, "logGetFields", "(Ljava/lang/String;Ljava/lang/Class;)V")
                         .invokevirtual("java/lang/Class", "getFields", "()[Ljava/lang/reflect/Field;").__()
-                },
-
-                // Resource files.
-
-                // System.loadLibrary(String)
-                {
-                    ____.ldc_(CONSTANT_INDEX)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY).__(),
-
-                    ____.ldc_(CONSTANT_INDEX)
-                        .label(TRY_START)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY)
-                        .label(TRY_END)
-                        .goto_(CATCH_END.offset())
-                        .catch_(UNSATISFIED_LINK_ERROR)
-                        .ldc_(CLASS_NAME)
-                        .ldc_(CONSTANT_INDEX)
-                        .invokestatic(LOGGER_CLASS_NAME, "logLoadLibrary", "(Ljava/lang/String;Ljava/lang/String;)V")
-                        .athrow()
-                        .label(CATCH_END).__()
-                },
-                {
-                    ____.invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY).__(),
-
-                    ____.dup()
-                        .astore(LOCAL_VARIABLE_INDEX_1)
-                        .label(TRY_START)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY)
-                        .label(TRY_END)
-                        .goto_(CATCH_END.offset())
-                        .catch_(UNSATISFIED_LINK_ERROR)
-                        .ldc_(CLASS_NAME)
-                        .aload(LOCAL_VARIABLE_INDEX_1)
-                        .invokestatic(LOGGER_CLASS_NAME, "logLoadLibrary", "(Ljava/lang/String;Ljava/lang/String;)V")
-                        .athrow()
-                        .label(CATCH_END).__()
-                },
-
-                // System.load(String)
-                {
-                    ____.ldc_(CONSTANT_INDEX)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD,
-                                      ClassConstants.METHOD_TYPE_LOAD).__(),
-
-                    ____.ldc_(CONSTANT_INDEX)
-                        .label(TRY_START)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD,
-                                      ClassConstants.METHOD_TYPE_LOAD)
-                        .label(TRY_END)
-                        .goto_(CATCH_END.offset())
-                        .catch_(UNSATISFIED_LINK_ERROR)
-                        .ldc_(CLASS_NAME)
-                        .ldc_(CONSTANT_INDEX)
-                        .invokestatic(LOGGER_CLASS_NAME, "logLoad", "(Ljava/lang/String;Ljava/lang/String;)V")
-                        .athrow()
-                        .label(CATCH_END).__()
-                },
-                {
-                    ____.invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD,
-                                      ClassConstants.METHOD_TYPE_LOAD).__(),
-
-                    ____.dup()
-                        .astore(LOCAL_VARIABLE_INDEX_1)
-                        .label(TRY_START)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_SYSTEM,
-                                      ClassConstants.METHOD_NAME_LOAD,
-                                      ClassConstants.METHOD_TYPE_LOAD)
-                        .label(TRY_END)
-                        .goto_(CATCH_END.offset())
-                        .catch_(UNSATISFIED_LINK_ERROR)
-                        .ldc_(CLASS_NAME)
-                        .aload(LOCAL_VARIABLE_INDEX_1)
-                        .invokestatic(LOGGER_CLASS_NAME, "logLoad", "(Ljava/lang/String;Ljava/lang/String;)V")
-                        .athrow()
-                        .label(CATCH_END).__()
-                },
-
-                // Runtime.loadLibrary(String)
-                {
-                    ____.ldc_(CONSTANT_INDEX)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_RUNTIME,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY).__(),
-
-                    ____.ldc_(CONSTANT_INDEX)
-                        .label(TRY_START)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_RUNTIME,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY)
-                        .label(TRY_END)
-                        .goto_(CATCH_END.offset())
-                        .catch_(UNSATISFIED_LINK_ERROR)
-                        .ldc_(CLASS_NAME)
-                        .ldc_(CONSTANT_INDEX)
-                        .invokestatic(LOGGER_CLASS_NAME, "logLoadLibrary", "(Ljava/lang/String;Ljava/lang/String;)V")
-                        .athrow()
-                        .label(CATCH_END).__()
-                },
-                {
-                    ____.invokestatic(ClassConstants.NAME_JAVA_LANG_RUNTIME,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY).__(),
-
-                    ____.dup()
-                        .astore(LOCAL_VARIABLE_INDEX_1)
-                        .label(TRY_START)
-                        .invokestatic(ClassConstants.NAME_JAVA_LANG_RUNTIME,
-                                      ClassConstants.METHOD_NAME_LOAD_LIBRARY,
-                                      ClassConstants.METHOD_TYPE_LOAD_LIBRARY)
-                        .label(TRY_END)
-                        .goto_(CATCH_END.offset())
-                        .catch_(UNSATISFIED_LINK_ERROR)
-                        .ldc_(CLASS_NAME)
-                        .aload(LOCAL_VARIABLE_INDEX_1)
-                        .invokestatic(LOGGER_CLASS_NAME, "logLoadLibrary", "(Ljava/lang/String;Ljava/lang/String;)V")
-                        .athrow()
-                        .label(CATCH_END).__()
                 },
             };
 

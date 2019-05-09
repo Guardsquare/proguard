@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,7 +22,7 @@ package proguard.ant;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.DataType;
-import proguard.MemberSpecification;
+import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.ListUtil;
@@ -41,6 +41,7 @@ public class MemberSpecificationElement extends DataType
     private String type;
     private String name;
     private String parameters;
+    private String values;
 
 
     /**
@@ -69,6 +70,7 @@ public class MemberSpecificationElement extends DataType
         String annotation = memberSpecificationElement.annotation;
         String name       = memberSpecificationElement.name;
         String parameters = memberSpecificationElement.parameters;
+        String values     = memberSpecificationElement.values;
 
         // Perform some basic conversions and checks on the attributes.
         if (annotation != null)
@@ -90,6 +92,11 @@ public class MemberSpecificationElement extends DataType
                     type = JavaConstants.TYPE_VOID;
                 }
 
+                if (values != null)
+                {
+                    throw new BuildException("Values attribute not allowed in constructor specification ["+values+"]");
+                }
+
                 name = ClassConstants.METHOD_NAME_INIT;
             }
             else if ((type != null) ^ (parameters != null))
@@ -105,6 +112,14 @@ public class MemberSpecificationElement extends DataType
             }
         }
 
+        if (values != null)
+        {
+            if (type == null)
+            {
+                throw new BuildException("Values attribute must be specified in combination with type attribute in class member specification ["+values+"]");
+            }
+        }
+
         List parameterList = ListUtil.commaSeparatedList(parameters);
 
         String descriptor =
@@ -112,7 +127,15 @@ public class MemberSpecificationElement extends DataType
             type       != null ? ClassUtil.internalType(type)                            :
                                  null;
 
-        MemberSpecification memberSpecification =
+        MemberSpecification memberSpecification = values != null ?
+            new MemberValueSpecification(requiredAccessFlags(true, access),
+                                         requiredAccessFlags(false, access),
+                                         annotation,
+                                         name,
+                                         descriptor,
+                                         parseValues(type,
+                                                     ClassUtil.internalType(type),
+                                                     values)) :
             new MemberSpecification(requiredAccessFlags(true,  access),
                                     requiredAccessFlags(false, access),
                                     annotation,
@@ -165,6 +188,12 @@ public class MemberSpecificationElement extends DataType
     }
 
 
+    public void setValues(String values)
+    {
+        this.values = values;
+    }
+
+
     // Small utility methods.
 
     private int requiredAccessFlags(boolean set,
@@ -214,5 +243,99 @@ public class MemberSpecificationElement extends DataType
         }
 
         return accessFlags;
+    }
+
+
+    /**
+     * Parses the given string as a value or value range of the given primitive
+     * type. For example, values "123" or "100..199" of type "int" ("I").
+     */
+    private Number[] parseValues(String externalType,
+                                 String internalType,
+                                 String string)
+    throws BuildException
+    {
+        int rangeIndex = string.lastIndexOf("..");
+        return rangeIndex >= 0 ?
+            new Number[]
+            {
+                parseValue(externalType, internalType, string.substring(0, rangeIndex)),
+                parseValue(externalType, internalType, string.substring(rangeIndex + 2))
+            } :
+            new Number[]
+            {
+                parseValue(externalType, internalType, string)
+            };
+    }
+
+
+    /**
+     * Parses the given string as a value of the given primitive type.
+     * For example, value "123" of type "int" ("I").
+     * For example, value "true" of type "boolean" ("Z"), returned as 1.
+     */
+    private Number parseValue(String externalType,
+                              String internalType,
+                              String string)
+    throws BuildException
+    {
+        try
+        {
+            switch (internalType.charAt(0))
+            {
+                case ClassConstants.TYPE_BOOLEAN:
+                {
+                    return parseBoolean(string);
+                }
+                case ClassConstants.TYPE_BYTE:
+                case ClassConstants.TYPE_CHAR:
+                case ClassConstants.TYPE_SHORT:
+                case ClassConstants.TYPE_INT:
+                {
+                    return Integer.decode(string);
+                }
+                //case ClassConstants.TYPE_LONG:
+                //{
+                //    return Long.decode(string);
+                //}
+                //case ClassConstants.TYPE_FLOAT:
+                //{
+                //    return Float.valueOf(string);
+                //}
+                //case ClassConstants.TYPE_DOUBLE:
+                //{
+                //    return Double.valueOf(string);
+                //}
+                default:
+                {
+                    throw new BuildException("Can't handle '"+externalType+"' constant ["+string+"]");
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            throw new BuildException("Can't parse "+externalType+" constant ["+string+"]");
+        }
+    }
+
+
+    /**
+     * Parses the given boolean string as an integer (0 or 1).
+     */
+    private Integer parseBoolean(String string)
+    throws BuildException
+    {
+        if      ("false".equals(string))
+        {
+            return Integer.valueOf(0);
+        }
+        else if ("true".equals(string))
+        {
+            return Integer.valueOf(1);
+        }
+        else
+        {
+            throw new BuildException("Unknown boolean constant ["+string+"]");
+        }
     }
 }

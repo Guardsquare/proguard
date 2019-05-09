@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -286,6 +286,12 @@ implements   ClassVisitor,
     }
 
 
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        dataInput.skipBytes(4);
+    }
+
+
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         dataInput.skipBytes(4);
@@ -369,6 +375,7 @@ implements   ClassVisitor,
             case ClassConstants.CONSTANT_Double:             return new DoubleConstant();
             case ClassConstants.CONSTANT_String:             return new StringConstant();
             case ClassConstants.CONSTANT_Utf8:               return new Utf8Constant();
+            case ClassConstants.CONSTANT_Dynamic:            return new DynamicConstant();
             case ClassConstants.CONSTANT_InvokeDynamic:      return new InvokeDynamicConstant();
             case ClassConstants.CONSTANT_MethodHandle:       return new MethodHandleConstant();
             case ClassConstants.CONSTANT_Fieldref:           return new FieldrefConstant();

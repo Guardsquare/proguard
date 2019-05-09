@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,7 +25,7 @@ import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
 import proguard.io.*;
 
-import java.io.IOException;
+import java.io.*;
 
 /**
  * This class reads the input class files.
@@ -60,8 +60,13 @@ public class InputReader
     public void execute(ClassPool programClassPool,
                         ClassPool libraryClassPool) throws IOException
     {
-        WarningPrinter warningPrinter = new WarningPrinter(System.err, configuration.warn);
-        WarningPrinter notePrinter    = new WarningPrinter(System.out, configuration.note);
+        // We're using the system's default character encoding for writing to
+        // the standard output and error output.
+        PrintWriter out = new PrintWriter(System.out, true);
+        PrintWriter err = new PrintWriter(System.err, true);
+
+        WarningPrinter notePrinter    = new WarningPrinter(out, configuration.note);
+        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
 
         DuplicateClassPrinter duplicateClassPrinter = new DuplicateClassPrinter(notePrinter);
 
@@ -127,25 +132,25 @@ public class InputReader
         int noteCount = notePrinter.getWarningCount();
         if (noteCount > 0)
         {
-            System.err.println("Note: there were " + noteCount +
-                               " duplicate class definitions.");
-            System.err.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#duplicateclass)");
+            err.println("Note: there were " + noteCount +
+                        " duplicate class definitions.");
+            err.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#duplicateclass)");
         }
 
         // Print out a summary of the warnings, if necessary.
         int warningCount = warningPrinter.getWarningCount();
         if (warningCount > 0)
         {
-            System.err.println("Warning: there were " + warningCount +
-                               " classes in incorrectly named files.");
-            System.err.println("         You should make sure all file names correspond to their class names.");
-            System.err.println("         The directory hierarchies must correspond to the package hierarchies.");
-            System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unexpectedclass)");
+            err.println("Warning: there were " + warningCount +
+                        " classes in incorrectly named files.");
+            err.println("         You should make sure all file names correspond to their class names.");
+            err.println("         The directory hierarchies must correspond to the package hierarchies.");
+            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unexpectedclass)");
 
             if (!configuration.ignoreWarnings)
             {
-                System.err.println("         If you don't mind the mentioned classes not being written out,");
-                System.err.println("         you could try your luck using the '-ignorewarnings' option.");
+                err.println("         If you don't mind the mentioned classes not being written out,");
+                err.println("         you could try your luck using the '-ignorewarnings' option.");
                 throw new IOException("Please correct the above warnings first.");
             }
         }

@@ -4,6 +4,8 @@
 #     java -jar proguard.jar @applications.pro
 #
 
+-verbose
+
 # Specify the input jars, output jars, and library jars.
 
 -injars  in.jar

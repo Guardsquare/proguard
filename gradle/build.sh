@@ -15,9 +15,11 @@ $(echo $GRADLE_HOME/lib/plugins/gradle-plugins-*.jar):\
 $(echo $GRADLE_HOME/lib/gradle-logging-*.jar):\
 $(echo $GRADLE_HOME/lib/gradle-base-services-?.*.jar):\
 $(echo $GRADLE_HOME/lib/gradle-base-services-groovy-*.jar):\
+$(echo $GRADLE_HOME/lib/gradle-model-core-*.jar):\
 $(echo $GRADLE_HOME/lib/gradle-core-[0-9]*.jar):\
 $(echo $GRADLE_HOME/lib/gradle-core-api-*.jar):\
-$(echo $GRADLE_HOME/lib/groovy-all-*.jar)
+$(echo $GRADLE_HOME/lib/groovy-all-*.jar):\
+$(echo $GRADLE_HOME/lib/slf4j-api-*.jar)
 
 # Make sure the Gradle jars are present.
 if [ ! -f "${GRADLE_PATH%%:*}" ]; then

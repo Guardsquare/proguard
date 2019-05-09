@@ -5,6 +5,8 @@
 #     java -jar proguard.jar @proguard.pro
 #
 
+-verbose
+
 # Specify the input jars, output jars, and library jars.
 # We'll filter out the Ant classes, Gradle classes, and WTK classes, keeping
 # everything else.
@@ -26,6 +28,21 @@
 # Don't print notes about reflection in injected code.
 
 -dontnote proguard.configuration.ConfigurationLogger
+
+# Don't print warnings about GSON dependencies.
+
+-dontwarn com.google.gson.**
+
+# Preserve injected GSON utility classes and their members.
+
+-keep,allowobfuscation class proguard.optimize.gson._*
+-keepclassmembers class proguard.optimize.gson._* {
+    *;
+}
+
+# Obfuscate class strings of injected GSON utility classes.
+
+-adaptclassstrings proguard.optimize.gson.**
 
 # Allow methods with the same signature, except for the return type,
 # to get the same obfuscation name.

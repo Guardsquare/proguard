@@ -2,6 +2,13 @@
 
 apply plugin: 'java'
 
+repositories {
+    jcenter()
+}
+
+sourceCompatibility = "${target}"
+targetCompatibility = "${target}"
+
 sourceSets.main {
     java {
         srcDirs = ['src']
@@ -17,4 +24,9 @@ sourceSets.main {
 
 jar {
     manifest.from 'src/META-INF/MANIFEST.MF'
+}
+
+
+dependencies {
+    compile "com.google.code.gson:gson:${gsonVersion}"
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,8 +24,8 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.*;
 
 /**
- * This class provides methods to find class members in a given class or in its
- * hierarchy.
+ * This utility class provides methods to find class members in a given class
+ * or in its hierarchy.
  *
  * @author Eric Lafortune
  */
@@ -135,17 +135,31 @@ implements   MemberVisitor
                              String  descriptor,
                              boolean isField)
     {
-        // Organize a search in the hierarchy of superclasses and interfaces.
-        // The class member may be in a different class, if the code was
-        // compiled with "-target 1.2" or higher (the default in JDK 1.4).
-        try
-        {
-            boolean containsWildcards =
-                (name       != null && (name.indexOf('*')       >= 0 || name.indexOf('?')       >= 0)) ||
-                (descriptor != null && (descriptor.indexOf('*') >= 0 || descriptor.indexOf('?') >= 0));
+        // The class member may be in a different class, as of Java 1.2.
+        // The class member may be private in a nest member, as of Java 11.
+        boolean containsWildcards =
+            (name       != null && (name.indexOf('*')       >= 0 || name.indexOf('?')       >= 0)) ||
+            (descriptor != null && (descriptor.indexOf('*') >= 0 || descriptor.indexOf('?') >= 0));
 
-            this.clazz  = null;
-            this.member = null;
+        // First look for the class member in the class itself, ignoring any
+        // access constraints.
+        member =
+            containsWildcards ? null :
+            isField           ? clazz.findField(name, descriptor) :
+                                clazz.findMethod(name, descriptor);
+
+        if (member != null)
+        {
+            // We've found the class member.
+            // Also remember the corresponding class.
+            this.clazz = clazz;
+        }
+        else if (searchHierarchy || containsWildcards)
+        {
+            // Otherwise look for the class member in the hierarchy of
+            // superclasses and interfaces. with access constraints and
+            // possible wildcards.
+            this.clazz = null;
 
             // Check the accessibility from the referencing class, if any
             // (non-dummy).
@@ -155,31 +169,34 @@ implements   MemberVisitor
                     new MemberClassAccessFilter(referencingClass, this) :
                     this;
 
-            clazz.hierarchyAccept(true,
-                                  searchHierarchy,
-                                  searchHierarchy,
-                                  false,
-                                  containsWildcards ?
-                    isField ?
-                        new AllFieldVisitor(
-                        new MemberNameFilter(name,
-                        new MemberDescriptorFilter(descriptor,
-                        memberVisitor))) :
+            try
+            {
+                clazz.hierarchyAccept(containsWildcards,
+                                      searchHierarchy,
+                                      searchHierarchy,
+                                      false,
+                                      containsWildcards ?
+                        isField ?
+                            new AllFieldVisitor(
+                            new MemberNameFilter(name,
+                            new MemberDescriptorFilter(descriptor,
+                            memberVisitor))) :
 
-                        new AllMethodVisitor(
-                        new MemberNameFilter(name,
-                        new MemberDescriptorFilter(descriptor,
-                        memberVisitor))) :
-                   isField ?
-                        new NamedFieldVisitor(name, descriptor,
-                        memberVisitor) :
+                            new AllMethodVisitor(
+                            new MemberNameFilter(name,
+                            new MemberDescriptorFilter(descriptor,
+                            memberVisitor))) :
+                       isField ?
+                            new NamedFieldVisitor(name, descriptor,
+                            memberVisitor) :
 
-                        new NamedMethodVisitor(name, descriptor,
-                        memberVisitor));
-        }
-        catch (MemberFoundException ex)
-        {
-            // We've found the member we were looking for.
+                            new NamedMethodVisitor(name, descriptor,
+                            memberVisitor));
+            }
+            catch (MemberFoundException ex)
+            {
+                // We've found the member we were looking for.
+            }
         }
 
         return member;

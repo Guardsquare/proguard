@@ -5,6 +5,8 @@
 #     java -jar proguard.jar @proguardgui.pro
 #
 
+-verbose
+
 # Specify the input jars, output jars, and library jars.
 # The input jars will be merged in a single output jar.
 # We'll filter out the Ant classes, Gradle classes, and WTK classes, keeping
@@ -33,7 +35,6 @@
 #-libraryjars ../../lib/retrace.jar
 #-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)
 #-libraryjars <java.home>/jmods/java.desktop.jmod(!**.jar;!module-info.class)
-
 
 # Don't print notes about reflection in injected code.
 

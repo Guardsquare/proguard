@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -45,6 +45,9 @@ public interface JavaConstants
     public static final String CLASS_VERSION_1_8_ALIAS = "8";
     public static final String CLASS_VERSION_1_9_ALIAS = "9";
     public static final String CLASS_VERSION_10        = "10";
+    public static final String CLASS_VERSION_11        = "11";
+    public static final String CLASS_VERSION_12        = "12";
+    public static final String CLASS_VERSION_13        = "13";
 
     public static final String ACC_PUBLIC       = "public";
     public static final String ACC_PRIVATE      = "private";

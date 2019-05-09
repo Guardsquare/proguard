@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -115,6 +115,16 @@ public class MethodHandleConstant extends Constant
     public String getType(Clazz clazz)
     {
         return clazz.getRefType(u2referenceIndex);
+    }
+
+
+    /**
+     * Applies the given constant pool visitor to the reference.
+     */
+    public void referenceAccept(Clazz clazz, ConstantVisitor constantVisitor)
+    {
+        clazz.constantPoolEntryAccept(u2referenceIndex,
+                                      constantVisitor);
     }
 
 

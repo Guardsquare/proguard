@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,13 +20,9 @@
  */
 package proguard.backport;
 
-import proguard.classfile.ClassConstants;
-import proguard.classfile.Clazz;
-import proguard.classfile.Method;
-import proguard.classfile.ProgramClass;
+import proguard.classfile.*;
 import proguard.classfile.attribute.BootstrapMethodInfo;
-import proguard.classfile.util.ClassUtil;
-import proguard.classfile.util.MemberFinder;
+import proguard.classfile.util.*;
 
 /**
  * A small helper class that captures useful information
@@ -63,7 +59,7 @@ public class LambdaExpression
     public String invokedMethodName;
     public String invokedMethodDesc;
 
-    public Clazz referencedInvokedClass;
+    public Clazz  referencedInvokedClass;
     public Method referencedInvokedMethod;
 
     // The created lambda class.
@@ -181,6 +177,18 @@ public class LambdaExpression
 
 
     /**
+     * Returns whether the invoked method is a non-static, private synthetic
+     * method in an interface.
+     */
+     boolean referencesPrivateSyntheticInterfaceMethod()
+     {
+         return (referencedInvokedClass .getAccessFlags() &  ClassConstants.ACC_INTERFACE)  != 0 &&
+                (referencedInvokedMethod.getAccessFlags() & (ClassConstants.ACC_PRIVATE |
+                                                             ClassConstants.ACC_SYNTHETIC)) != 0 ;
+     }
+
+
+    /**
      * Returns whether an accessor method is needed to access
      * the invoked method from the lambda class.
      */
@@ -195,6 +203,18 @@ public class LambdaExpression
     }
 
 
+    /**
+     * Returns whether the lambda expression is a method reference
+     * to a private constructor.
+     */
+    public boolean referencesPrivateConstructor()
+    {
+        return invokedReferenceKind == ClassConstants.REF_newInvokeSpecial &&
+               ClassConstants.METHOD_NAME_INIT.equals(invokedMethodName)   &&
+               (referencedInvokedMethod.getAccessFlags() & ClassConstants.ACC_PRIVATE) != 0;
+    }
+
+
     // Small Utility methods.
 
     private static final String LAMBDA_METHOD_PREFIX = "lambda$";
@@ -204,3 +224,5 @@ public class LambdaExpression
         return methodName.startsWith(LAMBDA_METHOD_PREFIX);
     }
 }
+
+

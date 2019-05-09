@@ -25,6 +25,8 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
     // the sake of the example.
     //configuration 'configuration.pro'
 
+    verbose
+
     // Specify the input jars, output jars, and library jars.
     // The input jars will be merged in a single output jar.
     // We'll filter out the Ant classes, Gradle classes, and WTK classes, keeping

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,11 +29,12 @@ import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
+import proguard.classfile.visitor.*;
 
 import java.util.*;
 
 /**
- * This InstructionVistor converts all indy String Concatenations in the visited
+ * This InstructionVisitor converts all indy String Concatenations in the visited
  * classes to StringBuilder-append chains.
  *
  * @author Tim Van Den Broecke
@@ -48,8 +49,8 @@ implements InstructionVisitor,
            ConstantVisitor
 {
     // Constants as per specification
-    private static final char   C_VARIABLE_ARGUMENT = '\u0001';
-    private static final char   C_CONSTANT_ARGUMENT = '\u0002';
+    private static final char C_VARIABLE_ARGUMENT = '\u0001';
+    private static final char C_CONSTANT_ARGUMENT = '\u0002';
 
     private final InstructionVisitor  extraInstructionVisitor;
     private final CodeAttributeEditor codeAttributeEditor;
@@ -81,7 +82,7 @@ implements InstructionVisitor,
             ProgramClass programClass = (ProgramClass) clazz;
 
             InvokeDynamicConstant invokeDynamicConstant =
-                    (InvokeDynamicConstant) programClass.getConstant(constantInstruction.constantIndex);
+                (InvokeDynamicConstant) programClass.getConstant(constantInstruction.constantIndex);
 
             // Remember the referenced bootstrap method index and extract the recipe from it.
             referencedBootstrapMethodIndex = invokeDynamicConstant.getBootstrapMethodAttributeIndex();
@@ -121,7 +122,7 @@ implements InstructionVisitor,
 
                 // Loop over the recipe.
                 // Push the local variables one by one, insert
-                // constants where necessary and create an append
+                // constants where necessary and create and append
                 // instruction chain.
                 typeIterator = types.listIterator();
                 for (int argIndex = 0, constantCounter = 0; argIndex < concatenationRecipe.length(); argIndex++)
@@ -230,7 +231,6 @@ implements InstructionVisitor,
                 Arrays.copyOfRange(bootstrapMethodInfo.u2methodArguments, 1, bootstrapMethodInfo.u2methodArgumentCount) :
                 new int[0];
         }
-
     }
 
 
@@ -277,25 +277,29 @@ implements InstructionVisitor,
 
     private static int typicalStringLengthFromType(String internalTypeName)
     {
-        return internalTypeName.equals(ClassConstants.TYPE_BOOLEAN) ? ClassConstants.MAXIMUM_BOOLEAN_AS_STRING_LENGTH :
-               internalTypeName.equals(ClassConstants.TYPE_CHAR)    ? ClassConstants.MAXIMUM_CHAR_AS_STRING_LENGTH    :
-               internalTypeName.equals(ClassConstants.TYPE_INT)     ? ClassConstants.MAXIMUM_INT_AS_STRING_LENGTH     :
-               internalTypeName.equals(ClassConstants.TYPE_LONG)    ? ClassConstants.MAXIMUM_LONG_AS_STRING_LENGTH    :
-               internalTypeName.equals(ClassConstants.TYPE_FLOAT)   ? ClassConstants.MAXIMUM_FLOAT_AS_STRING_LENGTH   :
-               internalTypeName.equals(ClassConstants.TYPE_DOUBLE)  ? ClassConstants.MAXIMUM_DOUBLE_AS_STRING_LENGTH  :
-                                                                      ClassConstants.DEFAULT_STRINGBUILDER_INIT_SIZE  ;
+        return internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BOOLEAN)) ? ClassConstants.MAXIMUM_BOOLEAN_AS_STRING_LENGTH :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_CHAR))    ? ClassConstants.MAXIMUM_CHAR_AS_STRING_LENGTH    :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BYTE))    ? ClassConstants.MAXIMUM_BYTE_AS_STRING_LENGTH    :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_SHORT))   ? ClassConstants.MAXIMUM_SHORT_AS_STRING_LENGTH   :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_INT))     ? ClassConstants.MAXIMUM_INT_AS_STRING_LENGTH     :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_LONG))    ? ClassConstants.MAXIMUM_LONG_AS_STRING_LENGTH    :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_FLOAT))   ? ClassConstants.MAXIMUM_FLOAT_AS_STRING_LENGTH   :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_DOUBLE))  ? ClassConstants.MAXIMUM_DOUBLE_AS_STRING_LENGTH  :
+                                                                                      ClassConstants.DEFAULT_STRINGBUILDER_INIT_SIZE  ;
     }
 
     private static String appendDescriptorFromInternalType(String internalTypeName)
     {
-        return internalTypeName.equals(ClassConstants.TYPE_BOOLEAN)          ? ClassConstants.METHOD_TYPE_BOOLEAN_STRING_BUILDER :
-               internalTypeName.equals(ClassConstants.TYPE_CHAR)             ? ClassConstants.METHOD_TYPE_CHAR_STRING_BUILDER    :
-               internalTypeName.equals(ClassConstants.TYPE_INT)              ? ClassConstants.METHOD_TYPE_INT_STRING_BUILDER     :
-               internalTypeName.equals(ClassConstants.TYPE_LONG)             ? ClassConstants.METHOD_TYPE_LONG_STRING_BUILDER    :
-               internalTypeName.equals(ClassConstants.TYPE_FLOAT)            ? ClassConstants.METHOD_TYPE_FLOAT_STRING_BUILDER   :
-               internalTypeName.equals(ClassConstants.TYPE_DOUBLE)           ? ClassConstants.METHOD_TYPE_DOUBLE_STRING_BUILDER  :
-               internalTypeName.equals(ClassConstants.TYPE_JAVA_LANG_STRING) ? ClassConstants.METHOD_TYPE_STRING_STRING_BUILDER  :
-                                                                               ClassConstants.METHOD_TYPE_OBJECT_STRING_BUILDER  ;
+        return internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BOOLEAN)) ? ClassConstants.METHOD_TYPE_BOOLEAN_STRING_BUILDER :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_CHAR))    ? ClassConstants.METHOD_TYPE_CHAR_STRING_BUILDER    :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BYTE))  ||
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_SHORT)) ||
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_INT))     ? ClassConstants.METHOD_TYPE_INT_STRING_BUILDER     :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_LONG))    ? ClassConstants.METHOD_TYPE_LONG_STRING_BUILDER    :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_FLOAT))   ? ClassConstants.METHOD_TYPE_FLOAT_STRING_BUILDER   :
+               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_DOUBLE))  ? ClassConstants.METHOD_TYPE_DOUBLE_STRING_BUILDER  :
+               internalTypeName.equals(ClassConstants.TYPE_JAVA_LANG_STRING)        ? ClassConstants.METHOD_TYPE_STRING_STRING_BUILDER  :
+                                                                                      ClassConstants.METHOD_TYPE_OBJECT_STRING_BUILDER  ;
     }
 
     private static int nextArgIndex(String recipe, int fromIndex)

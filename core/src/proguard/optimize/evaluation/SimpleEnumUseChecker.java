@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -23,7 +23,7 @@ package proguard.optimize.evaluation;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
@@ -46,8 +46,9 @@ extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor,
-             InstructionVisitor,
+             BootstrapMethodInfoVisitor,
              ConstantVisitor,
+             InstructionVisitor,
              ParameterVisitor
 {
     //*
@@ -92,6 +93,9 @@ implements   ClassVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
+        // Unmark the simple enum classes in bootstrap methods attributes.
+        programClass.attributesAccept(this);
+
         if ((programClass.getAccessFlags() & ClassConstants.ACC_ANNOTATION) != 0)
         {
             // Unmark the simple enum classes in annotations.
@@ -108,6 +112,13 @@ implements   ClassVisitor,
     // Implementations for AttributeVisitor.
 
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+
+    public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute)
+    {
+        // Unmark the simple enum classes in all bootstrap methods.
+        bootstrapMethodsAttribute.bootstrapMethodEntriesAccept(clazz, this);
+    }
 
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
@@ -136,6 +147,42 @@ implements   ClassVisitor,
                 }
             }
         }
+    }
+
+
+    // Implementations for BootstrapMethodInfoVisitor.
+
+    public void visitBootstrapMethodInfo(Clazz clazz, BootstrapMethodInfo bootstrapMethodInfo)
+    {
+        // Unmark the simple enum classes referenced in the method handle.
+        bootstrapMethodInfo.methodHandleAccept(clazz, this);
+
+        // Unmark the simple enum classes referenced in the method arguments.
+        bootstrapMethodInfo.methodArgumentsAccept(clazz, this);
+    }
+
+
+    // Implementations for ConstantVisitor.
+
+    public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)
+    {
+        // Unmark the simple enum classes referenced in the method handle
+        // (through a reference constant).
+        methodHandleConstant.referenceAccept(clazz, this);
+    }
+
+
+    public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
+    {
+        // Unmark the simple enum classes referenced in the method type constant.
+        methodTypeConstant.referencedClassesAccept(referencedComplexEnumMarker);
+    }
+
+
+    public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
+    {
+        // Unmark the simple enum classes referenced in the reference.
+        refConstant.referencedClassAccept(referencedComplexEnumMarker);
     }
 
 

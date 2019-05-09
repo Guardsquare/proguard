@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -58,14 +58,15 @@ implements   MemberVisitor
     {
         // All parameters of non-static methods are shifted by one in the local
         // variable frame.
-        int firstParameterIndex =
-            (programMethod.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
-                0 : 1;
+        boolean isStatic =
+            (programMethod.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
 
+        int parameterStart = isStatic ? 0 : 1;
         int parameterCount =
-            ClassUtil.internalMethodParameterCount(programMethod.getDescriptor(programClass));
+            ClassUtil.internalMethodParameterCount(programMethod.getDescriptor(programClass),
+                                                   isStatic);
 
-        for (int index = firstParameterIndex; index < parameterCount; index++)
+        for (int index = parameterStart; index < parameterCount; index++)
         {
             Value value = StoringInvocationUnit.getMethodParameterValue(programMethod, index);
             if (value != null &&

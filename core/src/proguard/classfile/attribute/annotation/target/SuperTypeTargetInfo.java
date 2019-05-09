@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,7 +31,7 @@ import proguard.classfile.attribute.annotation.target.visitor.TargetInfoVisitor;
  */
 public class SuperTypeTargetInfo extends TargetInfo
 {
-    public final int EXTENDS_INDEX = 65535;
+    public static final int EXTENDS_INDEX = 65535;
 
 
     public int u2superTypeIndex;

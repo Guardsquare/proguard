@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,9 +22,13 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
+import proguard.classfile.constant.*;
+import proguard.classfile.io.*;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.classfile.visitor.MemberVisitor;
+import proguard.classfile.visitor.*;
 import proguard.util.*;
+
+import java.io.*;
 
 /**
  * This MemberVisitor copies all class members that it visits to the given
@@ -314,5 +318,84 @@ implements   MemberVisitor
         return name.equals(ClassConstants.METHOD_NAME_INIT) ?
             ClassConstants.METHOD_NAME_INIT :
             name + ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
+    }
+
+
+    /**
+     * This main method illustrates and tests the class, by reading an input
+     * class file and copying its class members into a new class that it
+     * writes to an output class file.
+     */
+    public static void main(String[] args)
+    {
+        String inputClassFileName  = args[0];
+        String outputClassFileName = args[1];
+
+        try
+        {
+            DataInputStream dataInputStream =
+                new DataInputStream(
+                new FileInputStream(inputClassFileName));
+
+            try
+            {
+                // Read the input class.
+                ProgramClass inputProgramClass =
+                    new ProgramClass();
+
+                inputProgramClass.accept(
+                    new ProgramClassReader(dataInputStream));
+
+                // Create an empty output class.
+                ProgramClass outputProgramClass =
+                    new ProgramClass(inputProgramClass.u4version,
+                                     1,
+                                     new Constant[1],
+                                     inputProgramClass.u2accessFlags,
+                                     0,
+                                     0);
+
+                ConstantPoolEditor constantPoolEditor =
+                    new ConstantPoolEditor(outputProgramClass);
+
+                outputProgramClass.u2thisClass =
+                    constantPoolEditor.addClassConstant(inputProgramClass.getName()+"Copy", null);
+
+                outputProgramClass.u2superClass =
+                    constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_OBJECT, null);
+
+                // Copy over the class members.
+                MemberAdder memberAdder =
+                    new MemberAdder(outputProgramClass);
+
+                inputProgramClass.fieldsAccept(memberAdder);
+                inputProgramClass.methodsAccept(memberAdder);
+
+                //outputProgramClass.accept(new ClassPrinter());
+
+                // Write out the output class.
+                DataOutputStream dataOutputStream =
+                    new DataOutputStream(
+                    new FileOutputStream(outputClassFileName));
+
+                try
+                {
+                    outputProgramClass.accept(
+                        new ProgramClassWriter(dataOutputStream));
+                }
+                finally
+                {
+                    dataOutputStream.close();
+                }
+            }
+            finally
+            {
+                dataInputStream.close();
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

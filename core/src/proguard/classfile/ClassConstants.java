@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -56,6 +56,12 @@ public class ClassConstants
     public static final int CLASS_VERSION_1_9_MINOR = 0;
     public static final int CLASS_VERSION_10_MAJOR  = 54;
     public static final int CLASS_VERSION_10_MINOR  = 0;
+    public static final int CLASS_VERSION_11_MAJOR  = 55;
+    public static final int CLASS_VERSION_11_MINOR  = 0;
+    public static final int CLASS_VERSION_12_MAJOR  = 56;
+    public static final int CLASS_VERSION_12_MINOR  = 0;
+    public static final int CLASS_VERSION_13_MAJOR  = 57;
+    public static final int CLASS_VERSION_13_MINOR  = 0;
 
     public static final int CLASS_VERSION_1_0 = (CLASS_VERSION_1_0_MAJOR << 16) | CLASS_VERSION_1_0_MINOR;
     public static final int CLASS_VERSION_1_2 = (CLASS_VERSION_1_2_MAJOR << 16) | CLASS_VERSION_1_2_MINOR;
@@ -67,6 +73,9 @@ public class ClassConstants
     public static final int CLASS_VERSION_1_8 = (CLASS_VERSION_1_8_MAJOR << 16) | CLASS_VERSION_1_8_MINOR;
     public static final int CLASS_VERSION_1_9 = (CLASS_VERSION_1_9_MAJOR << 16) | CLASS_VERSION_1_9_MINOR;
     public static final int CLASS_VERSION_10  = (CLASS_VERSION_10_MAJOR  << 16) | CLASS_VERSION_10_MINOR;
+    public static final int CLASS_VERSION_11  = (CLASS_VERSION_11_MAJOR  << 16) | CLASS_VERSION_11_MINOR;
+    public static final int CLASS_VERSION_12  = (CLASS_VERSION_12_MAJOR  << 16) | CLASS_VERSION_12_MINOR;
+    public static final int CLASS_VERSION_13  = (CLASS_VERSION_13_MAJOR  << 16) | CLASS_VERSION_13_MINOR;
 
     public static final int ACC_PUBLIC       = 0x0001;
     public static final int ACC_PRIVATE      = 0x0002;
@@ -155,6 +164,7 @@ public class ClassConstants
     public static final int CONSTANT_NameAndType        = 12;
     public static final int CONSTANT_MethodHandle       = 15;
     public static final int CONSTANT_MethodType         = 16;
+    public static final int CONSTANT_Dynamic            = 17;
     public static final int CONSTANT_InvokeDynamic      = 18;
     public static final int CONSTANT_Module             = 19;
     public static final int CONSTANT_Package            = 20;
@@ -180,6 +190,8 @@ public class ClassConstants
     public static final String ATTR_SourceDir                            = "SourceDir";
     public static final String ATTR_InnerClasses                         = "InnerClasses";
     public static final String ATTR_EnclosingMethod                      = "EnclosingMethod";
+    public static final String ATTR_NestHost                             = "NestHost";
+    public static final String ATTR_NestMembers                          = "NestMembers";
     public static final String ATTR_Deprecated                           = "Deprecated";
     public static final String ATTR_Synthetic                            = "Synthetic";
     public static final String ATTR_Signature                            = "Signature";
@@ -255,6 +267,7 @@ public class ClassConstants
     public static final String NAME_JAVA_LANG_CLONEABLE                    = "java/lang/Cloneable";
     public static final String NAME_JAVA_LANG_THROWABLE                    = "java/lang/Throwable";
     public static final String NAME_JAVA_LANG_EXCEPTION                    = "java/lang/Exception";
+    public static final String NAME_JAVA_LANG_NUMBER_FORMAT_EXCEPTION      = "java/lang/NumberFormatException";
     public static final String NAME_JAVA_LANG_CLASS                        = "java/lang/Class";
     public static final String TYPE_JAVA_LANG_CLASS                        = "Ljava/lang/Class;";
     public static final String NAME_JAVA_LANG_CLASS_LOADER                 = "java/lang/ClassLoader";
@@ -267,6 +280,7 @@ public class ClassConstants
     public static final String NAME_JAVA_LANG_INVOKE_STRING_CONCAT_FACTORY = "java/lang/invoke/StringConcatFactory";
     public static final String NAME_JAVA_LANG_VOID                         = "java/lang/Void";
     public static final String NAME_JAVA_LANG_BOOLEAN                      = "java/lang/Boolean";
+    public static final String TYPE_JAVA_LANG_BOOLEAN                      = "Ljava/lang/Boolean;";
     public static final String NAME_JAVA_LANG_BYTE                         = "java/lang/Byte";
     public static final String NAME_JAVA_LANG_SHORT                        = "java/lang/Short";
     public static final String NAME_JAVA_LANG_CHARACTER                    = "java/lang/Character";
@@ -289,6 +303,9 @@ public class ClassConstants
     public static final String NAME_JAVA_UTIL_MAP                          = "java/util/Map";
     public static final String TYPE_JAVA_UTIL_MAP                          = "Ljava/util/Map;";
     public static final String NAME_JAVA_UTIL_HASH_MAP                     = "java/util/HashMap";
+    public static final String NAME_JAVA_UTIL_LIST                          = "java/util/List";
+    public static final String TYPE_JAVA_UTIL_LIST                          = "Ljava/util/List;";
+    public static final String NAME_JAVA_UTIL_ARRAY_LIST                    = "java/util/ArrayList";
 
     public static final String NAME_ANDROID_UTIL_FLOAT_MATH                = "android/util/FloatMath";
 
@@ -381,8 +398,38 @@ public class ClassConstants
     public static final String METHOD_TYPE_ACCESSIBLE_OBJECT_SET_ACCESSIBLE = "(Z)V";
     public static final String METHOD_NAME_GET_CAUSE                        = "getCause";
     public static final String METHOD_TYPE_GET_CAUSE                        = "()Ljava/lang/Throwable;";
+    public static final String METHOD_TYPE_INIT_THROWABLE                   = "(Ljava/lang/Throwable;)V";
     public static final String METHOD_NAME_MAKE_CONCAT                      = "makeConcat";
     public static final String METHOD_NAME_MAKE_CONCAT_WITH_CONSTANTS       = "makeConcatWithConstants";
+
+    public static final String METHOD_TYPE_INIT_COLLECTION                  = "(Ljava/util/Collection;)V";
+    public static final String METHOD_NAME_ADD                              = "add";
+    public static final String METHOD_TYPE_ADD                              = "(Ljava/lang/Object;)Z";
+    public static final String METHOD_NAME_ADD_ALL                          = "addAll";
+    public static final String METHOD_TYPE_ADD_ALL                          = "(Ljava/util/Collection;)Z";
+    public static final String METHOD_NAME_IS_EMPTY                         = "isEmpty";
+    public static final String METHOD_TYPE_IS_EMPTY                         = "()Z";
+    public static final String METHOD_NAME_MAP_PUT                          = "put";
+    public static final String METHOD_TYPE_MAP_PUT                          = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
+    public static final String METHOD_NAME_MAP_GET                          = "get";
+    public static final String METHOD_TYPE_MAP_GET                          = "(Ljava/lang/Object;)Ljava/lang/Object;";
+
+    public static final String METHOD_NAME_BOOLEAN_VALUE    = "booleanValue";
+    public static final String METHOD_TYPE_BOOLEAN_VALUE    = "()Z";
+    public static final String METHOD_NAME_CHAR_VALUE       = "charValue";
+    public static final String METHOD_TYPE_CHAR_VALUE       = "()C";
+    public static final String METHOD_NAME_SHORT_VALUE      = "shortValue";
+    public static final String METHOD_TYPE_SHORT_VALUE      = "()S";
+    public static final String METHOD_NAME_INT_VALUE        = "intValue";
+    public static final String METHOD_TYPE_INT_VALUE        = "()I";
+    public static final String METHOD_NAME_BYTE_VALUE       = "byteValue";
+    public static final String METHOD_TYPE_BYTE_VALUE       = "()B";
+    public static final String METHOD_NAME_LONG_VALUE       = "longValue";
+    public static final String METHOD_TYPE_LONG_VALUE       = "()J";
+    public static final String METHOD_NAME_FLOAT_VALUE      = "floatValue";
+    public static final String METHOD_TYPE_FLOAT_VALUE      = "()F";
+    public static final String METHOD_NAME_DOUBLE_VALUE     = "doubleValue";
+    public static final String METHOD_TYPE_DOUBLE_VALUE     = "()D";
 
     // Serialization methods.
     public static final String METHOD_NAME_READ_OBJECT   = "readObject";
@@ -404,8 +451,15 @@ public class ClassConstants
     public static final String METHOD_NAME_NEW_INSTANCE = "newInstance";
     public static final String METHOD_TYPE_NEW_INSTANCE = "()Ljava/lang/Object;";
 
-    public static final String METHOD_NAME_VALUE_OF = "valueOf";
-    public static final String METHOD_TYPE_VALUE_OF = "(I)Ljava/lang/Integer;";
+    public static final String METHOD_NAME_VALUE_OF         = "valueOf";
+    public static final String METHOD_TYPE_VALUE_OF_BOOLEAN = "(Z)Ljava/lang/Boolean;";
+    public static final String METHOD_TYPE_VALUE_OF_CHAR    = "(C)Ljava/lang/Character;";
+    public static final String METHOD_TYPE_VALUE_OF_BYTE    = "(B)Ljava/lang/Byte;";
+    public static final String METHOD_TYPE_VALUE_OF_SHORT   = "(S)Ljava/lang/Short;";
+    public static final String METHOD_TYPE_VALUE_OF_INT     = "(I)Ljava/lang/Integer;";
+    public static final String METHOD_TYPE_VALUE_OF_LONG    = "(J)Ljava/lang/Long;";
+    public static final String METHOD_TYPE_VALUE_OF_FLOAT   = "(F)Ljava/lang/Float;";
+    public static final String METHOD_TYPE_VALUE_OF_DOUBLE  = "(D)Ljava/lang/Double;";
 
     public static final String FIELD_NAME_TYPE = "TYPE";
     public static final String FIELD_TYPE_TYPE = "Ljava/lang/Class;";
@@ -415,6 +469,7 @@ public class ClassConstants
     public static final String METHOD_TYPE_LENGTH                 = "()I";
     public static final String METHOD_NAME_VALUEOF                = "valueOf";
     public static final String METHOD_TYPE_VALUEOF_BOOLEAN        = "(Z)Ljava/lang/String;";
+    public static final String METHOD_TYPE_TOSTRING_BOOLEAN       = "(Z)Ljava/lang/String;";
     public static final String METHOD_TYPE_VALUEOF_CHAR           = "(C)Ljava/lang/String;";
     public static final String METHOD_TYPE_VALUEOF_INT            = "(I)Ljava/lang/String;";
     public static final String METHOD_TYPE_VALUEOF_LONG           = "(J)Ljava/lang/String;";
@@ -485,6 +540,8 @@ public class ClassConstants
 
     public static final int MAXIMUM_BOOLEAN_AS_STRING_LENGTH = 5; // false
     public static final int MAXIMUM_CHAR_AS_STRING_LENGTH    = 1; // any char
+    public static final int MAXIMUM_BYTE_AS_STRING_LENGTH    = 3;  // 255
+    public static final int MAXIMUM_SHORT_AS_STRING_LENGTH   = 6;  // -32768
     public static final int MAXIMUM_INT_AS_STRING_LENGTH     = 11; //-2147483648
     public static final int MAXIMUM_LONG_AS_STRING_LENGTH    = 20; //-9223372036854775808
     public static final int MAXIMUM_FLOAT_AS_STRING_LENGTH   = 13; //-3.4028235E38

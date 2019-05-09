@@ -6,6 +6,9 @@ repositories {
     jcenter()
 }
 
+sourceCompatibility = "${target}"
+targetCompatibility = "${target}"
+
 sourceSets.main {
     java {
         srcDirs = ['src']

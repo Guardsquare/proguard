@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,7 @@ import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.visitor.*;
+import proguard.util.PrintWriterUtil;
 
 import java.io.*;
 
@@ -58,6 +59,10 @@ public class Shrinker
             throw new IOException("You have to specify '-keep' options for the shrinking step.");
         }
 
+        // We're using the system's default character encoding for writing to
+        // the standard output.
+        PrintWriter out = new PrintWriter(System.out, true);
+
         // Clean up any old visitor info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
@@ -70,13 +75,12 @@ public class Shrinker
         // Automatically mark the parameterless constructors of seed classes,
         // mainly for convenience and for backward compatibility.
         ClassVisitor classUsageMarker =
-            new MultiClassVisitor(new ClassVisitor[]
-            {
+            new MultiClassVisitor(
                 usageMarker,
                 new NamedMethodVisitor(ClassConstants.METHOD_NAME_INIT,
                                        ClassConstants.METHOD_TYPE_INIT,
                                        usageMarker)
-            });
+            );
 
         ClassPoolVisitor classPoolvisitor =
             new KeepClassSpecificationVisitorFactory(true, false, false)
@@ -91,29 +95,30 @@ public class Shrinker
         libraryClassPool.accept(classPoolvisitor);
         libraryClassPool.classesAccept(usageMarker);
 
-        // Mark interfaces that have to be kept.
-        programClassPool.classesAccept(new InterfaceUsageMarker(usageMarker));
-
         // Mark the inner class and annotation information that has to be kept.
         programClassPool.classesAccept(
             new UsedClassFilter(usageMarker,
             new AllAttributeVisitor(true,
-            new MultiAttributeVisitor(new AttributeVisitor[]
-            {
+            new MultiAttributeVisitor(
                 new InnerUsageMarker(usageMarker),
+                new NestUsageMarker(usageMarker),
                 new AnnotationUsageMarker(usageMarker),
                 new LocalVariableTypeUsageMarker(usageMarker)
-            }))));
+            ))));
+
+        // Mark interfaces that have to be kept.
+        programClassPool.classesAccept(new InterfaceUsageMarker(usageMarker));
 
         // Should we explain ourselves?
         if (configuration.whyAreYouKeeping != null)
         {
-            System.out.println();
+            out.println();
 
             // Create a visitor for explaining classes and class members.
             ShortestUsagePrinter shortestUsagePrinter =
                 new ShortestUsagePrinter((ShortestUsageMarker)usageMarker,
-                                         configuration.verbose);
+                                         configuration.verbose,
+                                         out);
 
             ClassPoolVisitor whyClassPoolvisitor =
                 new ClassSpecificationVisitorFactory()
@@ -130,23 +135,19 @@ public class Shrinker
 
         if (configuration.printUsage != null)
         {
-            PrintStream ps =
-                configuration.printUsage == Configuration.STD_OUT ? System.out :
-                    new PrintStream(
-                    new BufferedOutputStream(
-                    new FileOutputStream(configuration.printUsage)));
+            PrintWriter usageWriter =
+                PrintWriterUtil.createPrintWriterOut(configuration.printUsage);
 
-            // Print out items that will be removed.
-            programClassPool.classesAcceptAlphabetically(
-                new UsagePrinter(usageMarker, true, ps));
-
-            if (ps == System.out)
+            try
             {
-                ps.flush();
+                // Print out items that will be removed.
+                programClassPool.classesAcceptAlphabetically(
+                    new UsagePrinter(usageMarker, true, usageWriter));
             }
-            else
+            finally
             {
-                ps.close();
+                PrintWriterUtil.closePrintWriter(configuration.printUsage,
+                                                 usageWriter);
             }
         }
 
@@ -172,9 +173,9 @@ public class Shrinker
 
         if (configuration.verbose)
         {
-            System.out.println("Removing unused program classes and class elements...");
-            System.out.println("  Original number of program classes: " + originalProgramClassPoolSize);
-            System.out.println("  Final number of program classes:    " + newProgramClassPoolSize);
+            out.println("Removing unused program classes and class elements...");
+            out.println("  Original number of program classes: " + originalProgramClassPoolSize);
+            out.println("  Final number of program classes:    " + newProgramClassPoolSize);
         }
 
         if (newProgramClassPoolSize == 0 &&

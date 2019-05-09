@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 
 /**
@@ -45,43 +45,28 @@ implements   ClassVisitor,
 {
     private final UsageMarker usageMarker;
     private final boolean     printUnusedItems;
-    private final PrintStream ps;
+    private final PrintWriter pw;
 
     // A field to remember the class name, if a header is needed for class members.
     private String      className;
 
 
     /**
-     * Creates a new UsagePrinter that prints to <code>System.out</code>.
+     * Creates a new UsagePrinter that prints to the given writer.
      * @param usageMarker      the usage marker that was used to mark the
      *                         classes and class members.
      * @param printUnusedItems a flag that indicates whether only unused items
      *                         should be printed, or alternatively, only used
      *                         items.
-     */
-    public UsagePrinter(UsageMarker usageMarker,
-                        boolean     printUnusedItems)
-    {
-        this(usageMarker, printUnusedItems, System.out);
-    }
-
-
-    /**
-     * Creates a new UsagePrinter that prints to the given stream.
-     * @param usageMarker      the usage marker that was used to mark the
-     *                         classes and class members.
-     * @param printUnusedItems a flag that indicates whether only unused items
-     *                         should be printed, or alternatively, only used
-     *                         items.
-     * @param printStream      the stream to which to print.
+     * @param printWriter      the writer to which to print.
      */
     public UsagePrinter(UsageMarker usageMarker,
                         boolean     printUnusedItems,
-                        PrintStream printStream)
+                        PrintWriter printWriter)
     {
         this.usageMarker      = usageMarker;
         this.printUnusedItems = printUnusedItems;
-        this.ps               = printStream;
+        this.pw               = printWriter;
     }
 
 
@@ -102,14 +87,14 @@ implements   ClassVisitor,
             }
             else
             {
-                ps.println(ClassUtil.externalClassName(programClass.getName()));
+                pw.println(ClassUtil.externalClassName(programClass.getName()));
             }
         }
         else
         {
             if (printUnusedItems)
             {
-                ps.println(ClassUtil.externalClassName(programClass.getName()));
+                pw.println(ClassUtil.externalClassName(programClass.getName()));
             }
         }
     }
@@ -123,7 +108,7 @@ implements   ClassVisitor,
         {
             printClassNameHeader();
 
-            ps.println("    " +
+            pw.println("    " +
                        ClassUtil.externalFullFieldDescription(
                            programField.getAccessFlags(),
                            programField.getName(programClass),
@@ -138,9 +123,9 @@ implements   ClassVisitor,
         {
             printClassNameHeader();
 
-            ps.print("    ");
+            pw.print("    ");
             programMethod.attributesAccept(programClass, this);
-            ps.println(ClassUtil.externalFullMethodDescription(
+            pw.println(ClassUtil.externalFullMethodDescription(
                            programClass.getName(),
                            programMethod.getAccessFlags(),
                            programMethod.getName(programClass),
@@ -162,7 +147,7 @@ implements   ClassVisitor,
 
     public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
     {
-        ps.print(lineNumberTableAttribute.getLowestLineNumber() + ":" +
+        pw.print(lineNumberTableAttribute.getLowestLineNumber() + ":" +
                  lineNumberTableAttribute.getHighestLineNumber() + ":");
     }
 
@@ -177,7 +162,7 @@ implements   ClassVisitor,
     {
         if (className != null)
         {
-            ps.println(ClassUtil.externalClassName(className) + ":");
+            pw.println(ClassUtil.externalClassName(className) + ":");
             className = null;
         }
     }

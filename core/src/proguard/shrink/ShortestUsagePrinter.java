@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 
 /**
@@ -45,18 +45,7 @@ implements   ClassVisitor,
 {
     private final ShortestUsageMarker shortestUsageMarker;
     private final boolean             verbose;
-    private final PrintStream         ps;
-
-
-    /**
-     * Creates a new UsagePrinter that prints verbosely to <code>System.out</code>.
-     * @param shortestUsageMarker the usage marker that was used to mark the
-     *                            classes and class members.
-     */
-    public ShortestUsagePrinter(ShortestUsageMarker shortestUsageMarker)
-    {
-        this(shortestUsageMarker, true);
-    }
+    private final PrintWriter         pw;
 
 
     /**
@@ -64,27 +53,15 @@ implements   ClassVisitor,
      * @param shortestUsageMarker the usage marker that was used to mark the
      *                            classes and class members.
      * @param verbose             specifies whether the output should be verbose.
-     */
-    public ShortestUsagePrinter(ShortestUsageMarker shortestUsageMarker,
-                                boolean             verbose)
-    {
-        this(shortestUsageMarker, verbose, System.out);
-    }
-
-    /**
-     * Creates a new UsagePrinter that prints to the given stream.
-     * @param shortestUsageMarker the usage marker that was used to mark the
-     *                            classes and class members.
-     * @param verbose             specifies whether the output should be verbose.
-     * @param printStream         the stream to which to print.
+     * @param printWriter         the writer to which to print.
      */
     public ShortestUsagePrinter(ShortestUsageMarker shortestUsageMarker,
                                 boolean             verbose,
-                                PrintStream         printStream)
+                                PrintWriter         printWriter)
     {
         this.shortestUsageMarker = shortestUsageMarker;
         this.verbose             = verbose;
-        this.ps                  = printStream;
+        this.pw                  = printWriter;
     }
 
 
@@ -93,7 +70,7 @@ implements   ClassVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         // Print the name of this class.
-        ps.println(ClassUtil.externalClassName(programClass.getName()));
+        pw.println(ClassUtil.externalClassName(programClass.getName()));
 
         // Print the reason for keeping this class.
         printReason(programClass);
@@ -103,10 +80,10 @@ implements   ClassVisitor,
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         // Print the name of this class.
-        ps.println(ClassUtil.externalClassName(libraryClass.getName()));
+        pw.println(ClassUtil.externalClassName(libraryClass.getName()));
 
         // Print the reason for keeping this class.
-        ps.println("  is a library class.\n");
+        pw.println("  is a library class.\n");
     }
 
 
@@ -118,7 +95,7 @@ implements   ClassVisitor,
         String name = programField.getName(programClass);
         String type = programField.getDescriptor(programClass);
 
-        ps.println(ClassUtil.externalClassName(programClass.getName()) +
+        pw.println(ClassUtil.externalClassName(programClass.getName()) +
                    (verbose ?
                         ": " + ClassUtil.externalFullFieldDescription(0, name, type):
                         "."  + name));
@@ -134,12 +111,12 @@ implements   ClassVisitor,
         String name = programMethod.getName(programClass);
         String type = programMethod.getDescriptor(programClass);
 
-        ps.print(ClassUtil.externalClassName(programClass.getName()) +
+        pw.print(ClassUtil.externalClassName(programClass.getName()) +
                  (verbose ?
                       ": " + ClassUtil.externalFullMethodDescription(programClass.getName(), 0, name, type):
                       "."  + name));
         programMethod.attributesAccept(programClass, this);
-        ps.println();
+        pw.println();
 
         // Print the reason for keeping this method.
         printReason(programMethod);
@@ -152,13 +129,13 @@ implements   ClassVisitor,
         String name = libraryField.getName(libraryClass);
         String type = libraryField.getDescriptor(libraryClass);
 
-        ps.println(ClassUtil.externalClassName(libraryClass.getName()) +
+        pw.println(ClassUtil.externalClassName(libraryClass.getName()) +
                    (verbose ?
                         ": " + ClassUtil.externalFullFieldDescription(0, name, type):
                         "."  + name));
 
         // Print the reason for keeping this field.
-        ps.println("  is a library field.\n");
+        pw.println("  is a library field.\n");
     }
 
 
@@ -168,13 +145,13 @@ implements   ClassVisitor,
         String name = libraryMethod.getName(libraryClass);
         String type = libraryMethod.getDescriptor(libraryClass);
 
-        ps.println(ClassUtil.externalClassName(libraryClass.getName()) +
+        pw.println(ClassUtil.externalClassName(libraryClass.getName()) +
                    (verbose ?
                         ": " + ClassUtil.externalFullMethodDescription(libraryClass.getName(), 0, name, type):
                         "."  + name));
 
         // Print the reason for keeping this method.
-        ps.println("  is a library method.\n");
+        pw.println("  is a library method.\n");
     }
 
 
@@ -191,7 +168,7 @@ implements   ClassVisitor,
 
     public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
     {
-        ps.print(" (" +
+        pw.print(" (" +
                  lineNumberTableAttribute.getLowestLineNumber() + ":" +
                  lineNumberTableAttribute.getHighestLineNumber() + ")");
     }
@@ -206,7 +183,7 @@ implements   ClassVisitor,
             ShortestUsageMark shortestUsageMark = shortestUsageMarker.getShortestUsageMark(visitorAccepter);
 
             // Print the reason for keeping this class.
-            ps.print("  " + shortestUsageMark.getReason());
+            pw.print("  " + shortestUsageMark.getReason());
 
             // Print the class or method that is responsible, with its reasons.
             shortestUsageMark.acceptClassVisitor(this);
@@ -214,7 +191,7 @@ implements   ClassVisitor,
         }
         else
         {
-            ps.println("  is not being kept.\n");
+            pw.println("  is not being kept.\n");
         }
     }
 }

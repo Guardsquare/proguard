@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -102,10 +102,7 @@ implements ClassVisitor,
         markConstant(programClass, programClass.u2thisClass);
 
         // Mark the superclass.
-        if (programClass.u2superClass != 0)
-        {
-            markConstant(programClass, programClass.u2superClass);
-        }
+        markOptionalConstant(programClass, programClass.u2superClass);
 
         // Give the interfaces preliminary marks.
         programClass.hierarchyAccept(false, false, true, false,
@@ -497,6 +494,23 @@ implements ClassVisitor,
     }
 
 
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        if (shouldBeMarkedAsUsed(dynamicConstant))
+        {
+            markAsUsed(dynamicConstant);
+
+            markConstant(clazz, dynamicConstant.u2nameAndTypeIndex);
+
+            // Mark the referenced descriptor classes.
+            dynamicConstant.referencedClassesAccept(this);
+
+            // Mark the bootstrap methods attribute.
+            clazz.attributesAccept(new MyBootStrapMethodUsageMarker(dynamicConstant.u2bootstrapMethodAttributeIndex));
+        }
+    }
+
+
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         if (shouldBeMarkedAsUsed(invokeDynamicConstant))
@@ -715,13 +729,33 @@ implements ClassVisitor,
     {
         markAsUsed(enclosingMethodAttribute);
 
-        markConstant(clazz, enclosingMethodAttribute.u2attributeNameIndex);
-        markConstant(clazz, enclosingMethodAttribute.u2classIndex);
+        markConstant(        clazz, enclosingMethodAttribute.u2attributeNameIndex);
+        markConstant(        clazz, enclosingMethodAttribute.u2classIndex);
+        markOptionalConstant(clazz, enclosingMethodAttribute.u2nameAndTypeIndex);
+    }
 
-        if (enclosingMethodAttribute.u2nameAndTypeIndex != 0)
-        {
-            markConstant(clazz, enclosingMethodAttribute.u2nameAndTypeIndex);
-        }
+
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        // Don't mark the attribute and its contents yet. We may mark it later,
+        // in NestUsageMarker.
+        //markAsUsed(nestHostAttribute);
+
+        //markConstant(clazz, nestHostAttribute.u2attributeNameIndex);
+        //markConstant(clazz, nestHostAttribute.u2hostClassIndex);
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        // Don't mark the attribute and its contents yet. We may mark it later,
+        // in NestUsageMarker.
+        //markAsUsed(nestMembersAttribute);
+
+        //markConstant(clazz, nestMembersAttribute.u2attributeNameIndex);
+
+        // Mark the nest member entries.
+        //nestMembersAttribute.memberClassConstantsAccept(clazz, this);
     }
 
 
@@ -729,22 +763,18 @@ implements ClassVisitor,
     {
         markAsUsed(moduleAttribute);
 
-        markConstant(clazz, moduleAttribute.u2attributeNameIndex);
-        markConstant(clazz, moduleAttribute.u2moduleNameIndex);
+        markConstant(        clazz, moduleAttribute.u2attributeNameIndex);
+        markConstant(        clazz, moduleAttribute.u2moduleNameIndex);
+        markOptionalConstant(clazz, moduleAttribute.u2moduleVersionIndex);
 
-        if (moduleAttribute.u2moduleVersionIndex != 0)
-        {
-            markConstant(clazz, moduleAttribute.u2moduleVersionIndex);
-        }
+        // Mark the constant pool entries referenced by the contained info.
         moduleAttribute.requiresAccept(clazz, this);
         moduleAttribute.exportsAccept(clazz, this);
         moduleAttribute.opensAccept(clazz, this);
 
-        for (int index = 0; index < moduleAttribute.u2usesCount; index++)
-        {
-            markConstant(clazz, moduleAttribute.u2uses[index]);
-        }
+        markConstants(clazz, moduleAttribute.u2uses, moduleAttribute.u2usesCount);
 
+        // Mark the constant pool entries referenced by the provides info.
         moduleAttribute.providesAccept(clazz, this);
     }
 
@@ -763,6 +793,8 @@ implements ClassVisitor,
         markAsUsed(modulePackagesAttribute);
 
         markConstant(clazz, modulePackagesAttribute.u2attributeNameIndex);
+
+        // Mark the constant pool entries referenced by the packages info.
         modulePackagesAttribute.packagesAccept(clazz, this);
     }
 
@@ -943,10 +975,7 @@ implements ClassVisitor,
     {
         markAsUsed(exceptionInfo);
 
-        if (exceptionInfo.u2catchType != 0)
-        {
-            markConstant(clazz, exceptionInfo.u2catchType);
-        }
+        markOptionalConstant(clazz, exceptionInfo.u2catchType);
     }
 
 
@@ -961,6 +990,7 @@ implements ClassVisitor,
         {
             markAsUsed(innerClassesInfo);
 
+            // Mark the constant pool entries referenced by the contained info.
             innerClassesInfo.innerClassConstantAccept(clazz, this);
             innerClassesInfo.outerClassConstantAccept(clazz, this);
             innerClassesInfo.innerNameConstantAccept(clazz, this);
@@ -1036,8 +1066,8 @@ implements ClassVisitor,
 
     public void visitRequiresInfo(Clazz clazz, RequiresInfo requiresInfo)
     {
-        markConstant(clazz, requiresInfo.u2requiresIndex);
-        markConstant(clazz, requiresInfo.u2requiresVersionIndex);
+        markConstant(        clazz, requiresInfo.u2requiresIndex);
+        markOptionalConstant(clazz, requiresInfo.u2requiresVersionIndex);
     }
 
 
@@ -1045,12 +1075,8 @@ implements ClassVisitor,
 
     public void visitExportsInfo(Clazz clazz, ExportsInfo exportsInfo)
     {
-        markConstant(clazz, exportsInfo.u2exportsIndex);
-
-        for (int index = 0; index < exportsInfo.u2exportsToCount; index++)
-        {
-            markConstant(clazz, exportsInfo.u2exportsToIndex[index]);
-        }
+        markConstant( clazz,  exportsInfo.u2exportsIndex);
+        markConstants(clazz, exportsInfo.u2exportsToIndex, exportsInfo.u2exportsToCount);
     }
 
 
@@ -1058,12 +1084,8 @@ implements ClassVisitor,
 
     public void visitOpensInfo(Clazz clazz, OpensInfo opensInfo)
     {
-        markConstant(clazz, opensInfo.u2opensIndex);
-
-        for (int index = 0; index < opensInfo.u2opensToCount; index++)
-        {
-            markConstant(clazz, opensInfo.u2opensToIndex[index]);
-        }
+        markConstant( clazz, opensInfo.u2opensIndex);
+        markConstants(clazz, opensInfo.u2opensToIndex, opensInfo.u2opensToCount);
     }
 
 
@@ -1071,12 +1093,8 @@ implements ClassVisitor,
 
     public void visitProvidesInfo(Clazz clazz, ProvidesInfo providesInfo)
     {
-        markConstant(clazz, providesInfo.u2providesIndex);
-
-        for (int index = 0; index < providesInfo.u2providesWithCount; index++)
-        {
-            markConstant(clazz, providesInfo.u2providesWithIndex[index]);
-        }
+        markConstant( clazz, providesInfo.u2providesIndex);
+        markConstants(clazz, providesInfo.u2providesWithIndex, providesInfo.u2providesWithCount);
     }
 
 //    // Implementations for AnnotationVisitor.
@@ -1094,33 +1112,22 @@ implements ClassVisitor,
 //
 //    public void visitConstantElementValue(Clazz clazz, Annotation annotation, ConstantElementValue constantElementValue)
 //    {
-//        if (constantElementValue.u2elementNameIndex != 0)
-//        {
-//            markConstant(clazz, constantElementValue.u2elementNameIndex);
-//        }
-//
-//        markConstant(clazz, constantElementValue.u2constantValueIndex);
+//        markOptionalConstant(clazz, constantElementValue.u2elementNameIndex);
+//        markConstant(        clazz, constantElementValue.u2constantValueIndex);
 //    }
 //
 //
 //    public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
 //    {
-//        if (enumConstantElementValue.u2elementNameIndex != 0)
-//        {
-//            markConstant(clazz, enumConstantElementValue.u2elementNameIndex);
-//        }
-//
-//        markConstant(clazz, enumConstantElementValue.u2typeNameIndex);
-//        markConstant(clazz, enumConstantElementValue.u2constantNameIndex);
+//        markOptionalConstant(clazz, enumConstantElementValue.u2elementNameIndex);
+//        markConstant(        clazz, enumConstantElementValue.u2typeNameIndex);
+//        markConstant(        clazz, enumConstantElementValue.u2constantNameIndex);
 //    }
 //
 //
 //    public void visitClassElementValue(Clazz clazz, Annotation annotation, ClassElementValue classElementValue)
 //    {
-//        if (classElementValue.u2elementNameIndex != 0)
-//        {
-//            markConstant(clazz, classElementValue.u2elementNameIndex);
-//        }
+//        markOptionalConstant(clazz, classElementValue.u2elementNameIndex);
 //
 //        // Mark the referenced class constant pool entry.
 //        markConstant(clazz, classElementValue.u2classInfoIndex);
@@ -1129,10 +1136,7 @@ implements ClassVisitor,
 //
 //    public void visitAnnotationElementValue(Clazz clazz, Annotation annotation, AnnotationElementValue annotationElementValue)
 //    {
-//        if (annotationElementValue.u2elementNameIndex != 0)
-//        {
-//            markConstant(clazz, annotationElementValue.u2elementNameIndex);
-//        }
+//        markOptionalConstant(clazz, annotationElementValue.u2elementNameIndex);
 //
 //        // Mark the constant pool entries referenced by the annotation.
 //        annotationElementValue.annotationAccept(clazz, this);
@@ -1141,10 +1145,7 @@ implements ClassVisitor,
 //
 //    public void visitArrayElementValue(Clazz clazz, Annotation annotation, ArrayElementValue arrayElementValue)
 //    {
-//        if (arrayElementValue.u2elementNameIndex != 0)
-//        {
-//            markConstant(clazz, arrayElementValue.u2elementNameIndex);
-//        }
+//        markOptionalConstant(clazz, arrayElementValue.u2elementNameIndex);
 //
 //        // Mark the constant pool entries referenced by the element values.
 //        arrayElementValue.elementValuesAccept(clazz, annotation, this);
@@ -1238,11 +1239,39 @@ implements ClassVisitor,
 
 
     /**
-     * Marks the given constant pool entry of the given class. This includes
-     * visiting any referenced objects.
+     * Marks the specified constant pool entries of the given class.
+     * This includes visiting any referenced objects.
      */
-    private void markConstant(Clazz clazz, int index)
+    private void markConstants(Clazz clazz,
+                               int[] constantIndices,
+                               int   constantIndicesCount)
     {
-        clazz.constantPoolEntryAccept(index, this);
+        for (int index = 0; index < constantIndicesCount; index++)
+        {
+            markConstant(clazz, constantIndices[index]);
+        }
+    }
+
+
+    /**
+     * Marks the specified constant pool entry of the given class, if the index
+     * is not 0. This includes visiting any referenced objects.
+     */
+    private void markOptionalConstant(Clazz clazz, int constantIndex)
+    {
+        if (constantIndex != 0)
+        {
+            markConstant(clazz, constantIndex);
+        }
+    }
+
+
+    /**
+     * Marks the specified constant pool entry of the given class.
+     * This includes visiting any referenced objects.
+     */
+    private void markConstant(Clazz clazz, int constantIndex)
+    {
+        clazz.constantPoolEntryAccept(constantIndex, this);
     }
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,7 +22,7 @@ package proguard.classfile.util;
 
 import proguard.util.*;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -32,26 +32,17 @@ import java.util.List;
  */
 public class WarningPrinter
 {
-    private final PrintStream   printStream;
+    private final PrintWriter   printWriter;
     private final StringMatcher classFilter;
     private int                 warningCount;
 
 
     /**
-     * Creates a new WarningPrinter that prints to the System.err print stream.
+     * Creates a new WarningPrinter that prints to the given print writer.
      */
-    public WarningPrinter()
+    public WarningPrinter(PrintWriter printWriter)
     {
-        this(System.err);
-    }
-
-
-    /**
-     * Creates a new WarningPrinter that prints to the given print stream.
-     */
-    public WarningPrinter(PrintStream printStream)
-    {
-        this.printStream = printStream;
+        this.printWriter = printWriter;
         this.classFilter = null;
     }
 
@@ -60,9 +51,9 @@ public class WarningPrinter
      * Creates a new WarningPrinter that prints to the given print stream,
      * except if the names of any involved classes matches the given filter.
      */
-    public WarningPrinter(PrintStream printStream, List classFilter)
+    public WarningPrinter(PrintWriter printWriter, List classFilter)
     {
-        this.printStream = printStream;
+        this.printWriter = printWriter;
         this.classFilter = classFilter == null ? null :
             new ListParser(new ClassNameParser()).parse(classFilter);
     }
@@ -120,7 +111,7 @@ public class WarningPrinter
      */
     private void print(String warning)
     {
-        printStream.println(warning);
+        printWriter.println(warning);
 
         warningCount++;
     }

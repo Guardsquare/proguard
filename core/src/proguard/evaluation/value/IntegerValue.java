@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -973,6 +973,225 @@ public abstract class IntegerValue extends Category1Value
      * <code>ALWAYS</code>.
      */
     public final int greaterThanOrEqual(ParticularIntegerValue other)
+    {
+        return -lessThan(other);
+    }
+
+
+    // Similar binary methods, but this time with range arguments.
+
+    /**
+     * Returns the generalization of this IntegerValue and the given other
+     * RangeIntegerValue.
+     */
+    public IntegerValue generalize(RangeIntegerValue other)
+    {
+        return generalize((IntegerValue)other);
+    }
+
+
+    /**
+     * Returns the sum of this IntegerValue and the given RangeIntegerValue.
+     */
+    public IntegerValue add(RangeIntegerValue other)
+    {
+        return add((IntegerValue)other);
+    }
+
+    /**
+     * Returns the difference of this IntegerValue and the given RangeIntegerValue.
+     */
+    public IntegerValue subtract(RangeIntegerValue other)
+    {
+        return subtract((IntegerValue)other);
+    }
+
+    /**
+     * Returns the difference of the given RangeIntegerValue and this IntegerValue.
+     */
+    public IntegerValue subtractFrom(RangeIntegerValue other)
+    {
+        return subtractFrom((IntegerValue)other);
+    }
+
+    /**
+     * Returns the product of this IntegerValue and the given RangeIntegerValue.
+     */
+    public IntegerValue multiply(RangeIntegerValue other)
+    {
+        return multiply((IntegerValue)other);
+    }
+
+    /**
+     * Returns the quotient of this IntegerValue and the given
+     * RangeIntegerValue.
+     */
+    public IntegerValue divide(RangeIntegerValue other)
+    {
+        return divide((IntegerValue)other);
+    }
+
+    /**
+     * Returns the quotient of the given RangeIntegerValue and this
+     * IntegerValue.
+     */
+    public IntegerValue divideOf(RangeIntegerValue other)
+    {
+        return divideOf((IntegerValue)other);
+    }
+
+    /**
+     * Returns the remainder of this IntegerValue divided by the given
+     * RangeIntegerValue.
+     */
+    public IntegerValue remainder(RangeIntegerValue other)
+    {
+        return remainder((IntegerValue)other);
+    }
+
+    /**
+     * Returns the remainder of the given RangeIntegerValue divided by this
+     * IntegerValue.
+     */
+    public IntegerValue remainderOf(RangeIntegerValue other)
+    {
+        return remainderOf((IntegerValue)other);
+    }
+
+    /**
+     * Returns this IntegerValue, shifted left by the given RangeIntegerValue.
+     */
+    public IntegerValue shiftLeft(RangeIntegerValue other)
+    {
+        return shiftLeft((IntegerValue)other);
+    }
+
+    /**
+     * Returns this IntegerValue, shifted right by the given RangeIntegerValue.
+     */
+    public IntegerValue shiftRight(RangeIntegerValue other)
+    {
+        return shiftRight((IntegerValue)other);
+    }
+
+    /**
+     * Returns this unsigned IntegerValue, shifted right by the given
+     * RangeIntegerValue.
+     */
+    public IntegerValue unsignedShiftRight(RangeIntegerValue other)
+    {
+        return unsignedShiftRight((IntegerValue)other);
+    }
+
+    /**
+     * Returns the given RangeIntegerValue, shifted left by this IntegerValue.
+     */
+    public IntegerValue shiftLeftOf(RangeIntegerValue other)
+    {
+        return shiftLeftOf((IntegerValue)other);
+    }
+
+    /**
+     * Returns the given RangeIntegerValue, shifted right by this IntegerValue.
+     */
+    public IntegerValue shiftRightOf(RangeIntegerValue other)
+    {
+        return shiftRightOf((IntegerValue)other);
+    }
+
+    /**
+     * Returns the given unsigned RangeIntegerValue, shifted right by this
+     * IntegerValue.
+     */
+    public IntegerValue unsignedShiftRightOf(RangeIntegerValue other)
+    {
+        return unsignedShiftRightOf((IntegerValue)other);
+    }
+
+    /**
+     * Returns the logical <i>and</i> of this IntegerValue and the given
+     * RangeIntegerValue.
+     */
+    public IntegerValue and(RangeIntegerValue other)
+    {
+        return and((IntegerValue)other);
+    }
+
+    /**
+     * Returns the logical <i>or</i> of this IntegerValue and the given
+     * RangeIntegerValue.
+     */
+    public IntegerValue or(RangeIntegerValue other)
+    {
+        return or((IntegerValue)other);
+    }
+
+    /**
+     * Returns the logical <i>xor</i> of this IntegerValue and the given
+     * RangeIntegerValue.
+     */
+    public IntegerValue xor(RangeIntegerValue other)
+    {
+        return xor((IntegerValue)other);
+    }
+
+    /**
+     * Returns whether this IntegerValue and the given RangeIntegerValue are
+     * equal: <code>NEVER</code>, <code>MAYBE</code>, or <code>ALWAYS</code>.
+     */
+    public int equal(RangeIntegerValue other)
+    {
+        return equal((IntegerValue)other);
+    }
+
+    /**
+     * Returns whether this IntegerValue is less than the given
+     * RangeIntegerValue: <code>NEVER</code>, <code>MAYBE</code>, or
+     * <code>ALWAYS</code>.
+     */
+    public int lessThan(RangeIntegerValue other)
+    {
+        return lessThan((IntegerValue)other);
+    }
+
+    /**
+     * Returns whether this IntegerValue is less than or equal to the given
+     * RangeIntegerValue: <code>NEVER</code>, <code>MAYBE</code>, or
+     * <code>ALWAYS</code>.
+     */
+    public int lessThanOrEqual(RangeIntegerValue other)
+    {
+        return lessThanOrEqual((IntegerValue)other);
+    }
+
+
+    // Derived binary methods.
+
+    /**
+     * Returns whether this IntegerValue and the given RangeIntegerValue are
+     * different: <code>NEVER</code>, <code>MAYBE</code>, or <code>ALWAYS</code>.
+     */
+    public final int notEqual(RangeIntegerValue other)
+    {
+        return -equal(other);
+    }
+
+    /**
+     * Returns whether this IntegerValue is greater than the given
+     * RangeIntegerValue: <code>NEVER</code>, <code>MAYBE</code>, or
+     * <code>ALWAYS</code>.
+     */
+    public final int greaterThan(RangeIntegerValue other)
+    {
+        return -lessThanOrEqual(other);
+    }
+
+    /**
+     * Returns whether this IntegerValue is greater than or equal to the given
+     * RangeIntegerValue: <code>NEVER</code>, <code>MAYBE</code>, or
+     * <code>ALWAYS</code>.
+     */
+    public final int greaterThanOrEqual(RangeIntegerValue other)
     {
         return -lessThan(other);
     }

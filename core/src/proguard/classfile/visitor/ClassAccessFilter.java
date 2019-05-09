@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,7 +24,7 @@ import proguard.classfile.*;
 
 
 /**
- * This <code>ClassVisitor</code>     delegates its visits to another given
+ * This <code>ClassVisitor</code> delegates its visits to another given
  * <code>ClassVisitor</code>, but only when the visited class
  * has the proper access flags.
  *

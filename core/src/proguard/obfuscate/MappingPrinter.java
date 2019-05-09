@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.optimize.peephole.LineNumberLinearizer;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Stack;
 
 
@@ -45,28 +45,19 @@ implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor
 {
-    private final PrintStream ps;
+    private final PrintWriter pw;
 
     // A field serving as a return value for the visitor methods.
     private boolean printed;
 
 
     /**
-     * Creates a new MappingPrinter that prints to <code>System.out</code>.
+     * Creates a new MappingPrinter that prints to the given writer.
+     * @param printWriter the writer to which to print.
      */
-    public MappingPrinter()
+    public MappingPrinter(PrintWriter printWriter)
     {
-        this(System.out);
-    }
-
-
-    /**
-     * Creates a new MappingPrinter that prints to the given stream.
-     * @param printStream the stream to which to print
-     */
-    public MappingPrinter(PrintStream printStream)
-    {
-        this.ps = printStream;
+        this.pw = printWriter;
     }
 
 
@@ -78,7 +69,7 @@ implements   ClassVisitor,
         String newName = ClassObfuscator.newClassName(programClass);
 
         // Print out the class mapping.
-        ps.println(ClassUtil.externalClassName(name) +
+        pw.println(ClassUtil.externalClassName(name) +
                    " -> " +
                    ClassUtil.externalClassName(newName) +
                    ":");
@@ -101,7 +92,7 @@ implements   ClassVisitor,
         }
 
         // Print out the field mapping.
-        ps.println("    " +
+        pw.println("    " +
                    ClassUtil.externalType(programField.getDescriptor(programClass)) + " " +
                    fieldName +
                    " -> " +
@@ -125,7 +116,7 @@ implements   ClassVisitor,
         // Otherwise print out the method mapping without line numbers.
         if (!printed)
         {
-            ps.println("    " +
+            pw.println("    " +
                        ClassUtil.externalMethodReturnType(programMethod.getDescriptor(programClass)) + " " +
                        methodName                                                                    + JavaConstants.METHOD_ARGUMENTS_OPEN  +
                        ClassUtil.externalMethodArguments(programMethod.getDescriptor(programClass))  + JavaConstants.METHOD_ARGUMENTS_CLOSE +
@@ -169,7 +160,7 @@ implements   ClassVisitor,
             {
                 // Print out the line number range of the method,
                 // ignoring line numbers of any inlined methods.
-                ps.println("    " +
+                pw.println("    " +
                            lowestLineNumber                                                + ":" +
                            highestLineNumber                                               + ":" +
                            ClassUtil.externalMethodReturnType(method.getDescriptor(clazz)) + " " +
@@ -181,7 +172,7 @@ implements   ClassVisitor,
             else
             {
                 // Print out the method mapping without line numbers.
-                ps.println("    " +
+                pw.println("    " +
                            ClassUtil.externalMethodReturnType(method.getDescriptor(clazz)) + " " +
                            methodName                                                      + JavaConstants.METHOD_ARGUMENTS_OPEN  +
                            ClassUtil.externalMethodArguments(method.getDescriptor(clazz))  + JavaConstants.METHOD_ARGUMENTS_CLOSE +
@@ -204,7 +195,8 @@ implements   ClassVisitor,
             // We're testing on the identities out of convenience.
             String previousSource = previousInfo.getSource();
             String source         = info.getSource();
-            if (source != previousSource)
+            // Source can be null for injected code.
+            if (source != null && source != previousSource)
             {
                 // Are we entering or exiting the block?
                 int previousLineNumber = previousInfo.u2lineNumber;
@@ -233,6 +225,12 @@ implements   ClassVisitor,
                     // Pop its enclosing line number.
                     enclosingLineNumbers.pop();
                 }
+            }
+            else if (source == null && previousSource != null)
+            {
+                // When exiting a top-level inlined block, the source might be null.
+                // See LineNumberLinearizer, line 185, exiting an inlined block.
+                enclosingLineNumbers.pop();
             }
 
             previousInfo = info;
@@ -277,7 +275,7 @@ implements   ClassVisitor,
         int shiftedEndLineNumber   = shiftedStartLineNumber + endLineNumber - startLineNumber;
 
         // Print out the line number range of the inlined method.
-        ps.println("    " +
+        pw.println("    " +
                    shiftedStartLineNumber                                      + ":" +
                    shiftedEndLineNumber                                        + ":" +
                    ClassUtil.externalMethodReturnType(inlinedMethodDescriptor) + " " +
@@ -302,8 +300,6 @@ implements   ClassVisitor,
                                         shiftedEndLineNumber,
                                         enclosingInfo,
                                         obfuscatedMethodName);
-
-
         }
     }
 
@@ -352,7 +348,7 @@ implements   ClassVisitor,
         }
 
         // Print out the line number of the enclosing method.
-        ps.println("    " +
+        pw.println("    " +
                    shiftedRange                                                  + ":" +
                    ClassUtil.externalMethodReturnType(enclosingMethodDescriptor) + " " +
                    (enclosingClassName.equals(className) ? "" :

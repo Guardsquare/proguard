@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -85,7 +85,7 @@ implements   MemberVisitor,
 
         // Update the descriptor if it has any unused parameters.
         String descriptor    = programMethod.getDescriptor(programClass);
-        String newDescriptor = shrinkDescriptor(programMethod, descriptor);
+        String newDescriptor = shrinkDescriptor(programMethod, descriptor, 0);
 
         if (!newDescriptor.equals(descriptor))
         {
@@ -149,8 +149,18 @@ implements   MemberVisitor,
         }
 
         // Compute the new signature.
-        String signature    = signatureAttribute.getSignature(clazz);
-        String newSignature = shrinkDescriptor(method, signature);
+        String signature = signatureAttribute.getSignature(clazz);
+
+        // Constructors of enum classes and of non-static inner classes may
+        // start with one or two synthetic parameters, which are not part
+        // of the signature.
+        int syntheticParametersSize =
+            new InternalTypeEnumeration(method.getDescriptor(clazz)).typesSize() -
+            new InternalTypeEnumeration(signature).typesSize();
+
+        String newSignature = shrinkDescriptor(method,
+                                               signature,
+                                               syntheticParametersSize);
 
         if (!newSignature.equals(signature))
         {
@@ -177,20 +187,41 @@ implements   MemberVisitor,
         int[]          annotationsCounts = parameterAnnotationsAttribute.u2parameterAnnotationsCount;
         Annotation[][] annotations       = parameterAnnotationsAttribute.parameterAnnotations;
 
+        String descriptor = method.getDescriptor(clazz);
+
+        // Constructors of enum classes and of non-static inner classes may
+        // start with one or two synthetic parameters, which are not part
+        // of the signature and not counted for parameter annotations.
+        int syntheticParameterCount =
+            new InternalTypeEnumeration(descriptor).typeCount() -
+            parameterAnnotationsAttribute.u1parametersCount;
+
+        int syntheticParametersSize =
+            ClassUtil.internalMethodVariableIndex(descriptor,
+                                                  true,
+                                                  syntheticParameterCount);
+
         // All parameters of non-static methods are shifted by one in the local
         // variable frame.
         int parameterIndex =
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
-                0 : 1;
+            syntheticParametersSize +
+            ((method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
+                 0 : 1);
 
         int annotationIndex    = 0;
         int newAnnotationIndex = 0;
 
         // Go over the parameters.
-        String descriptor = method.getDescriptor(clazz);
         InternalTypeEnumeration internalTypeEnumeration =
             new InternalTypeEnumeration(descriptor);
 
+        // Skip synthetic parameters that don't have annotations.
+        for (int counter = 0; counter < syntheticParameterCount; counter++)
+        {
+            internalTypeEnumeration.nextType();
+        }
+
+        // Shrink the annotations of the actual parameters.
         while (internalTypeEnumeration.hasMoreTypes())
         {
             String type = internalTypeEnumeration.nextType();
@@ -222,13 +253,17 @@ implements   MemberVisitor,
     /**
      * Returns a shrunk descriptor or signature of the given method.
      */
-    private String shrinkDescriptor(Method method, String descriptor)
+    private String shrinkDescriptor(Method method,
+                                    String descriptor,
+                                    int    syntheticParametersSize)
     {
+        // Signatures only start after any synthetic parameters.
         // All parameters of non-static methods are shifted by one in the local
         // variable frame.
         int parameterIndex =
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
-                0 : 1;
+            syntheticParametersSize +
+            ((method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
+                 0 : 1);
 
         InternalTypeEnumeration internalTypeEnumeration =
             new InternalTypeEnumeration(descriptor);

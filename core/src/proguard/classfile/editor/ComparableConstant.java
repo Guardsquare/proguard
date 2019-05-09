@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,8 +29,8 @@ import proguard.util.ArrayUtil;
 
 /**
  * This class is a <code>Comparable</code> wrapper of <code>Constant</code>
- * objects. It can store an index, in order to identify the constant   pool
- * entry after it has been sorted. The comparison is primarily based   on the
+ * objects. It can store an index, in order to identify the constant pool
+ * entry after it has been sorted. The comparison is primarily based on the
  * types of the constant pool entries, and secondarily on the contents of
  * the constant pool entries.
  *
@@ -43,23 +43,24 @@ implements Comparable, ConstantVisitor
     private static final int[] PRIORITIES = new int[22];
     static
     {
-        PRIORITIES[ClassConstants.CONSTANT_Integer]            = 0; // Possibly byte index (ldc).
-        PRIORITIES[ClassConstants.CONSTANT_Float]              = 1;
-        PRIORITIES[ClassConstants.CONSTANT_String]             = 2;
-        PRIORITIES[ClassConstants.CONSTANT_Class]              = 3;
-        PRIORITIES[ClassConstants.CONSTANT_Long]               = 4; // Always wide index (ldc2_w).
-        PRIORITIES[ClassConstants.CONSTANT_Double]             = 5; // Always wide index (ldc2_w).
-        PRIORITIES[ClassConstants.CONSTANT_Fieldref]           = 6; // Always wide index (getfield,...).
-        PRIORITIES[ClassConstants.CONSTANT_Methodref]          = 7; // Always wide index (invokespecial,...).
-        PRIORITIES[ClassConstants.CONSTANT_InterfaceMethodref] = 8; // Always wide index (invokeinterface).
-        PRIORITIES[ClassConstants.CONSTANT_InvokeDynamic]      = 9; // Always wide index (invokedynamic).
-        PRIORITIES[ClassConstants.CONSTANT_MethodHandle]       = 10;
-        PRIORITIES[ClassConstants.CONSTANT_NameAndType]        = 11;
-        PRIORITIES[ClassConstants.CONSTANT_MethodType]         = 12;
-        PRIORITIES[ClassConstants.CONSTANT_Module]             = 13;
-        PRIORITIES[ClassConstants.CONSTANT_Package]            = 14;
-        PRIORITIES[ClassConstants.CONSTANT_Utf8]               = 15;
-        PRIORITIES[ClassConstants.CONSTANT_PrimitiveArray]     = 16;
+        PRIORITIES[ClassConstants.CONSTANT_Integer]            =  0; // Possibly byte index (ldc).
+        PRIORITIES[ClassConstants.CONSTANT_Float]              =  1;
+        PRIORITIES[ClassConstants.CONSTANT_String]             =  2;
+        PRIORITIES[ClassConstants.CONSTANT_Class]              =  3;
+        PRIORITIES[ClassConstants.CONSTANT_Long]               =  4; // Always wide index (ldc2_w).
+        PRIORITIES[ClassConstants.CONSTANT_Double]             =  5; // Always wide index (ldc2_w).
+        PRIORITIES[ClassConstants.CONSTANT_Fieldref]           =  6; // Always wide index (getfield,...).
+        PRIORITIES[ClassConstants.CONSTANT_Methodref]          =  7; // Always wide index (invokespecial,...).
+        PRIORITIES[ClassConstants.CONSTANT_InterfaceMethodref] =  8; // Always wide index (invokeinterface).
+        PRIORITIES[ClassConstants.CONSTANT_Dynamic]            =  9; // Always wide index (invokedynamic).
+        PRIORITIES[ClassConstants.CONSTANT_InvokeDynamic]      = 10; // Always wide index (invokedynamic).
+        PRIORITIES[ClassConstants.CONSTANT_MethodHandle]       = 11;
+        PRIORITIES[ClassConstants.CONSTANT_NameAndType]        = 12;
+        PRIORITIES[ClassConstants.CONSTANT_MethodType]         = 13;
+        PRIORITIES[ClassConstants.CONSTANT_Module]             = 14;
+        PRIORITIES[ClassConstants.CONSTANT_Package]            = 15;
+        PRIORITIES[ClassConstants.CONSTANT_Utf8]               = 16;
+        PRIORITIES[ClassConstants.CONSTANT_PrimitiveArray]     = 17;
     }
 
     private final Clazz    clazz;
@@ -104,9 +105,7 @@ implements Comparable, ConstantVisitor
         {
             int otherIndex = otherComparableConstant.thisIndex;
 
-            return thisIndex <  otherIndex ? -1 :
-                   thisIndex == otherIndex ?  0 :
-                                              1;
+            return Integer.compare(thisIndex, otherIndex);
         }
 
         // Compare based on the tags, if they are different.
@@ -115,7 +114,7 @@ implements Comparable, ConstantVisitor
 
         if (thisTag != otherTag)
         {
-            return PRIORITIES[thisTag] < PRIORITIES[otherTag] ? -1 : 1;
+            return Integer.compare(PRIORITIES[thisTag], PRIORITIES[otherTag]);
         }
 
         // Otherwise compare based on the contents of the Constant objects.
@@ -129,20 +128,14 @@ implements Comparable, ConstantVisitor
 
     public void visitIntegerConstant(Clazz clazz, IntegerConstant integerConstant)
     {
-        int value      = integerConstant.getValue();
-        int otherValue = ((IntegerConstant)otherConstant).getValue();
-        result = value <  otherValue ? -1 :
-                 value == otherValue ?  0 :
-                                        1;
+        result = Integer.compare(integerConstant.getValue(),
+                                 ((IntegerConstant)otherConstant).getValue());
     }
 
     public void visitLongConstant(Clazz clazz, LongConstant longConstant)
     {
-        long value      = longConstant.getValue();
-        long otherValue = ((LongConstant)otherConstant).getValue();
-        result = value <  otherValue ? -1 :
-                 value == otherValue ?  0 :
-                                        1;
+        result = Long.compare(longConstant.getValue(),
+                              ((LongConstant)otherConstant).getValue());
     }
 
     public void visitFloatConstant(Clazz clazz, FloatConstant floatConstant)
@@ -167,7 +160,7 @@ implements Comparable, ConstantVisitor
 
         if (primitiveType != otherPrimitiveType)
         {
-            result = primitiveType < otherPrimitiveType ? -1 : 1;
+            result = Integer.compare(primitiveType, otherPrimitiveType);
         }
         else
         {
@@ -194,6 +187,21 @@ implements Comparable, ConstantVisitor
     public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant)
     {
         result = utf8Constant.getString().compareTo(((Utf8Constant)otherConstant).getString());
+    }
+
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        DynamicConstant otherDynamicConstant = (DynamicConstant)otherConstant;
+
+        int index      = dynamicConstant.getBootstrapMethodAttributeIndex();
+        int otherIndex = otherDynamicConstant.getBootstrapMethodAttributeIndex();
+
+        result = index < otherIndex ? -1 :
+                 index > otherIndex ?  1 :
+                     compare(dynamicConstant.getName(clazz),
+                             dynamicConstant.getType(clazz),
+                             otherDynamicConstant.getName(clazz),
+                             otherDynamicConstant.getType(clazz));
     }
 
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,7 +22,7 @@ package proguard;
 
 import proguard.classfile.util.WarningPrinter;
 
-import java.io.IOException;
+import java.io.*;
 
 /**
  * This class performs sanity checks on a given configurations.
@@ -48,6 +48,10 @@ public class ConfigurationChecker
      */
     public void check() throws IOException
     {
+        // We're using the system's default character encoding for writing to
+        // the standard output.
+        PrintWriter out = new PrintWriter(System.out, true);
+
         ClassPath programJars = configuration.programJars;
         ClassPath libraryJars = configuration.libraryJars;
 
@@ -111,10 +115,10 @@ public class ConfigurationChecker
                             !entry.isJmod()  &&
                             !entry.isZip())
                         {
-                            System.out.println("Note: you're writing the processed class files to a directory [" + entry.getName() + "].");
-                            System.out.println("      This will likely cause problems with obfuscated mixed-case class names.");
-                            System.out.println("      You should consider writing the output to a jar file, or otherwise");
-                            System.out.println("      specify '-dontusemixedcaseclassnames'.");
+                            out.println("Note: you're writing the processed class files to a directory [" + entry.getName() +"].");
+                            out.println("      This will likely cause problems with obfuscated mixed-case class names.");
+                            out.println("      You should consider writing the output to a jar file, or otherwise");
+                            out.println("      specify '-dontusemixedcaseclassnames'.");
 
                             break;
                         }
@@ -127,17 +131,17 @@ public class ConfigurationChecker
                 (configuration.adaptResourceFileContents.isEmpty() ||
                  configuration.adaptResourceFileContents.get(0).equals(ConfigurationConstants.ANY_FILE_KEYWORD)))
             {
-                System.out.println("Note: you're specifying '-adaptresourcefilecontents' for all resource files.");
-                System.out.println("      This will most likely cause problems with binary files.");
+                out.println("Note: you're specifying '-adaptresourcefilecontents' for all resource files.");
+                out.println("      This will most likely cause problems with binary files.");
             }
 
             // Check if all -keepclassmembers options indeed have class members.
-            WarningPrinter keepClassMemberNotePrinter = new WarningPrinter(System.out, configuration.note);
+            WarningPrinter keepClassMemberNotePrinter = new WarningPrinter(out, configuration.note);
 
             new KeepClassMemberChecker(keepClassMemberNotePrinter).checkClassSpecifications(configuration.keep);
 
             // Check if -assumenosideffects options don't specify all methods.
-            WarningPrinter assumeNoSideEffectsNotePrinter = new WarningPrinter(System.out, configuration.note);
+            WarningPrinter assumeNoSideEffectsNotePrinter = new WarningPrinter(out, configuration.note);
 
             new AssumeNoSideEffectsChecker(assumeNoSideEffectsNotePrinter).checkClassSpecifications(configuration.assumeNoSideEffects);
 
@@ -145,21 +149,21 @@ public class ConfigurationChecker
             int keepClassMemberNoteCount = keepClassMemberNotePrinter.getWarningCount();
             if (keepClassMemberNoteCount > 0)
             {
-                System.out.println("Note: there were " + keepClassMemberNoteCount +
-                                   " '-keepclassmembers' options that didn't specify class");
-                System.out.println("      members. You should specify at least some class members or consider");
-                System.out.println("      if you just need '-keep'.");
-                System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#classmembers)");
+                out.println("Note: there were " + keepClassMemberNoteCount +
+                            " '-keepclassmembers' options that didn't specify class");
+                out.println("      members. You should specify at least some class members or consider");
+                out.println("      if you just need '-keep'.");
+                out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#classmembers)");
             }
 
             int assumeNoSideEffectsNoteCount = assumeNoSideEffectsNotePrinter.getWarningCount();
             if (assumeNoSideEffectsNoteCount > 0)
             {
-                System.out.println("Note: there were " + assumeNoSideEffectsNoteCount +
+                out.println("Note: there were " + assumeNoSideEffectsNoteCount +
                                    " '-assumenosideeffects' options that try to match all");
-                System.out.println("      methods with wildcards. This will likely cause problems with methods like");
-                System.out.println("      'wait()' and 'notify()'. You should specify the methods more precisely.");
-                System.out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#nosideeffects)");
+                out.println("      methods with wildcards. This will likely cause problems with methods like");
+                out.println("      'wait()' and 'notify()'. You should specify the methods more precisely.");
+                out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#nosideeffects)");
             }
         }
     }

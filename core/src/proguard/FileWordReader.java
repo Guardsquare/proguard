@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -36,10 +36,12 @@ public class FileWordReader extends LineWordReader
      */
     public FileWordReader(File file) throws IOException
     {
-        super(new LineNumberReader(new BufferedReader(new FileReader(file))),
+        super(new LineNumberReader(
+              new BufferedReader(
+              new InputStreamReader(
+              new FileInputStream(file), "UTF-8"))),
               "file '" + file.getPath() + "'",
-              file.getParentFile()
-        );
+              file.getParentFile());
     }
 
 
@@ -48,8 +50,10 @@ public class FileWordReader extends LineWordReader
      */
     public FileWordReader(URL url) throws IOException
     {
-        super(new LineNumberReader(new BufferedReader(new InputStreamReader(url.openStream()))),
+        super(new LineNumberReader(
+              new BufferedReader(
+              new InputStreamReader(url.openStream(), "UTF-8"))),
               "file '" + url.toString() + "'",
-              null);
+              url);
     }
 }

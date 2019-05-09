@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -519,7 +519,7 @@ implements   AttributeVisitor,
             {
                 // Check all stack entries that are popped.
                 // Unusual case: an exception handler with an exception that is
-                // no longer consumed directly by a method.
+                // no longer consumed as a method parameter.
                 // Typical case: a freshly marked variable initialization that
                 // requires some value on the stack.
                 int popCount = instruction.stackPopCount(clazz);
@@ -535,16 +535,36 @@ implements   AttributeVisitor,
                     for (int stackIndex = stackSize - popCount; stackIndex < stackSize; stackIndex++)
                     {
                         boolean stackEntryUnwantedBefore =
-                            instructionUsageMarker.isStackEntryUnwantedBefore( offset, stackIndex);
+                            instructionUsageMarker.isStackEntryUnwantedBefore(offset, stackIndex);
                         boolean stackEntryPresentBefore =
-                            instructionUsageMarker.isStackEntryPresentBefore( offset, stackIndex);
+                            instructionUsageMarker.isStackEntryPresentBefore(offset, stackIndex);
 
                         if (stackEntryUnwantedBefore)
                         {
                             if (stackEntryPresentBefore)
                             {
-                                // Remember to pop it.
-                                requiredPopCount++;
+                                // Check if it is an exception pushed by a
+                                // handler (should be) that is not at the
+                                // top of the stack ([PGD-748], test2162).
+                                InstructionOffsetValue producers =
+                                    tracedStack.getBottomProducerValue(stackIndex).instructionOffsetValue();
+                                if (producers.instructionOffsetCount() == 1 &&
+                                    producers.isExceptionHandler(0)         &&
+                                    stackIndex < stackSize - 1)
+                                {
+                                    // Try to handle it.
+                                    // This only works if the exception isn't
+                                    // consumed elsewhere (should be ok, since
+                                    // it's an unused parameter).
+                                    if (DEBUG) System.out.println("  Popping exception at handler "+instruction.toString(offset));
+
+                                    insertPopInstructions(producers.instructionOffset(0), false, true, 1);
+                                }
+                                else
+                                {
+                                    // Remember to pop it.
+                                    requiredPopCount++;
+                                }
                             }
                         }
                         else
@@ -558,19 +578,21 @@ implements   AttributeVisitor,
                     }
 
                     // Pop some unnecessary stack entries.
+                    // This only works if the entries are at the top of the stack.
                     if (requiredPopCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Inserting before marked consumer "+instruction.toString(offset));
+                        if (DEBUG) System.out.println("  Popping "+requiredPopCount+" entries before marked consumer "+instruction.toString(offset));
 
-                        insertPopInstructions(offset, false, true, popCount);
+                        insertPopInstructions(offset, false, true, requiredPopCount);
                     }
 
                     // Push some necessary stack entries.
+                    // This only works if the entries are at the top of the stack.
                     if (requiredPushCount > 0)
                     {
                         Value value = tracedStack.getTop(0);
 
-                        if (DEBUG) System.out.println("  Inserting before marked consumer "+instruction.toString(offset));
+                        if (DEBUG) System.out.println("  Pushing type "+value.computationalType()+" entry before marked consumer "+instruction.toString(offset));
 
                         if (requiredPushCount > (value.isCategory2() ? 2 : 1))
                         {
@@ -606,7 +628,7 @@ implements   AttributeVisitor,
                     // Pop the unnecessary stack entries.
                     if (requiredPopCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Inserting after marked producer "+instruction.toString(offset));
+                        if (DEBUG) System.out.println("  Popping "+requiredPopCount+" entries after marked producer "+instruction.toString(offset));
 
                         insertPopInstructions(offset, false, false, requiredPopCount);
                     }
@@ -640,7 +662,7 @@ implements   AttributeVisitor,
                     // Pop the unnecessary stack entries.
                     if (expectedPopCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Replacing unmarked consumer "+instruction.toString(offset));
+                        if (DEBUG) System.out.println("  Popping "+expectedPopCount+" entries instead of unmarked consumer "+instruction.toString(offset));
 
                         insertPopInstructions(offset, true, false, expectedPopCount);
                     }
@@ -671,7 +693,7 @@ implements   AttributeVisitor,
                     // Push some necessary stack entries.
                     if (expectedPushCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Replacing unmarked producer "+instruction.toString(offset));
+                        if (DEBUG) System.out.println("  Pushing type "+tracedStack.getTop(0).computationalType()+" entry instead of unmarked producer "+instruction.toString(offset));
 
                         insertPushInstructions(offset, true, false, tracedStack.getTop(0).computationalType());
                     }

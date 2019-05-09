@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,12 +29,10 @@ public class InstructionFactory
 {
     /**
      * Creates a new Instruction from the data in the byte array, starting
-     * at the given index.
+     * at the given offset.
      */
     public static Instruction create(byte[] code, int offset)
     {
-        Instruction instruction;
-
         int  index  = offset;
         byte opcode = code[index++];
 
@@ -45,6 +43,34 @@ public class InstructionFactory
             wide   = true;
         }
 
+        Instruction instruction = create(opcode, wide);
+
+        instruction.opcode = opcode;
+
+        instruction.readInfo(code, index);
+
+        return instruction;
+    }
+
+
+    /**
+     * Creates a new Instruction corresponding to the given opcode.
+     */
+    public static Instruction create(byte opcode)
+    {
+        Instruction instruction = create(opcode, false);
+
+        instruction.opcode = opcode;
+
+        return instruction;
+    }
+
+
+    /**
+     * Creates a new Instruction corresponding to the given opcode.
+     */
+    private static Instruction create(byte opcode, boolean wide)
+    {
         switch (opcode)
         {
             // Simple instructions.
@@ -165,8 +191,7 @@ public class InstructionFactory
 
             case InstructionConstants.OP_MONITORENTER:
             case InstructionConstants.OP_MONITOREXIT:
-                instruction = new SimpleInstruction();
-                break;
+                return new SimpleInstruction();
 
             // Instructions with a contant pool index.
             case InstructionConstants.OP_LDC:
@@ -189,8 +214,7 @@ public class InstructionFactory
             case InstructionConstants.OP_CHECKCAST:
             case InstructionConstants.OP_INSTANCEOF:
             case InstructionConstants.OP_MULTIANEWARRAY:
-                instruction = new ConstantInstruction();
-                break;
+                return new ConstantInstruction();
 
             // Instructions with a local variable index.
             case InstructionConstants.OP_ILOAD:
@@ -248,8 +272,7 @@ public class InstructionFactory
             case InstructionConstants.OP_IINC:
 
             case InstructionConstants.OP_RET:
-                instruction = new VariableInstruction(wide);
-                break;
+                return new VariableInstruction(wide);
 
             // Instructions with a branch offset operand.
             case InstructionConstants.OP_IFEQ:
@@ -274,27 +297,18 @@ public class InstructionFactory
 
             case InstructionConstants.OP_GOTO_W:
             case InstructionConstants.OP_JSR_W:
-                instruction = new BranchInstruction();
-                break;
+                return new BranchInstruction();
 
             //  The tableswitch instruction.
             case InstructionConstants.OP_TABLESWITCH:
-                instruction = new TableSwitchInstruction();
-                break;
+                return new TableSwitchInstruction();
 
             //  The lookupswitch instruction.
             case InstructionConstants.OP_LOOKUPSWITCH:
-                instruction = new LookUpSwitchInstruction();
-                break;
+                return new LookUpSwitchInstruction();
 
             default:
-                throw new IllegalArgumentException("Unknown instruction opcode ["+opcode+"] at offset "+offset);
+                throw new IllegalArgumentException("Unknown instruction opcode ["+opcode+"]");
         }
-
-        instruction.opcode = opcode;
-
-        instruction.readInfo(code, index);
-
-        return instruction;
     }
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -56,8 +56,12 @@ public class ProGuardTask extends DefaultTask
     // Accumulated configuration.
     protected final Configuration configuration      = new Configuration();
 
-    // Field acting as a parameter for the class member specification methods.
+    // Fields acting as parameters for the class member specification methods.
+    private boolean            allowValues;
     private ClassSpecification classSpecification;
+
+    private static final String CONFIGURATION_FILE_NAME_PREFIX      = "/proguard/gradle/proguard-";
+    private              String resolvedConfigurationFileNamePrefix = getProject().file(CONFIGURATION_FILE_NAME_PREFIX).toString();
 
 
     // Gradle task inputs and outputs, because annotations on the List fields
@@ -174,7 +178,15 @@ public class ProGuardTask extends DefaultTask
     throws ParseException, IOException
     {
         // Just collect the arguments, so they can be resolved lazily.
-        this.configurationFiles.add(configurationFiles);
+        // Flatten collections, so they are easier to analyze later on.
+        if (configurationFiles instanceof Collection)
+        {
+            this.configurationFiles.addAll((Collection)configurationFiles);
+        }
+        else
+        {
+            this.configurationFiles.add(configurationFiles);
+        }
     }
 
     public void injars(Object inJarFiles)
@@ -561,7 +573,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.whyAreYouKeeping =
             extendClassSpecifications(configuration.whyAreYouKeeping,
-                                      createClassSpecification(classSpecificationString));
+                                      createClassSpecification(false,
+                                                               classSpecificationString));
     }
 
     public void whyareyoukeeping(Map classSpecificationArgs)
@@ -576,7 +589,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.whyAreYouKeeping =
             extendClassSpecifications(configuration.whyAreYouKeeping,
-                                      createClassSpecification(classSpecificationArgs,
+                                      createClassSpecification(false,
+                                                               classSpecificationArgs,
                                                                classMembersClosure));
     }
 
@@ -609,7 +623,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoSideEffects =
             extendClassSpecifications(configuration.assumeNoSideEffects,
-            createClassSpecification(classSpecificationString));
+            createClassSpecification(true,
+                                     classSpecificationString));
     }
 
     public void assumenosideeffects(Map     classSpecificationArgs,
@@ -618,7 +633,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoSideEffects =
             extendClassSpecifications(configuration.assumeNoSideEffects,
-            createClassSpecification(classSpecificationArgs,
+            createClassSpecification(true,
+                                     classSpecificationArgs,
                                      classMembersClosure));
     }
 
@@ -627,7 +643,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoExternalSideEffects =
             extendClassSpecifications(configuration.assumeNoExternalSideEffects,
-            createClassSpecification(classSpecificationString));
+            createClassSpecification(true,
+                                     classSpecificationString));
     }
 
     public void assumenoexternalsideeffects(Map     classSpecificationArgs,
@@ -636,7 +653,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoExternalSideEffects =
             extendClassSpecifications(configuration.assumeNoExternalSideEffects,
-            createClassSpecification(classSpecificationArgs,
+            createClassSpecification(true,
+                                     classSpecificationArgs,
                                      classMembersClosure));
     }
 
@@ -645,7 +663,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoEscapingParameters =
             extendClassSpecifications(configuration.assumeNoEscapingParameters,
-            createClassSpecification(classSpecificationString));
+            createClassSpecification(true,
+                                     classSpecificationString));
     }
 
     public void assumenoescapingparameters(Map     classSpecificationArgs,
@@ -654,7 +673,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoEscapingParameters =
             extendClassSpecifications(configuration.assumeNoEscapingParameters,
-            createClassSpecification(classSpecificationArgs,
+            createClassSpecification(true,
+                                     classSpecificationArgs,
                                      classMembersClosure));
     }
 
@@ -663,7 +683,8 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoExternalReturnValues =
             extendClassSpecifications(configuration.assumeNoExternalReturnValues,
-            createClassSpecification(classSpecificationString));
+            createClassSpecification(true,
+                                     classSpecificationString));
     }
 
     public void assumenoexternalreturnvalues(Map     classSpecificationArgs,
@@ -672,7 +693,28 @@ public class ProGuardTask extends DefaultTask
     {
         configuration.assumeNoExternalReturnValues =
             extendClassSpecifications(configuration.assumeNoExternalReturnValues,
-            createClassSpecification(classSpecificationArgs,
+            createClassSpecification(true,
+                                     classSpecificationArgs,
+                                     classMembersClosure));
+    }
+
+    public void assumevalues(String classSpecificationString)
+    throws ParseException
+    {
+        configuration.assumeValues =
+            extendClassSpecifications(configuration.assumeValues,
+            createClassSpecification(true,
+                                     classSpecificationString));
+    }
+
+    public void assumevalues(Map     classSpecificationArgs,
+                             Closure classMembersClosure)
+    throws ParseException
+    {
+        configuration.assumeValues =
+            extendClassSpecifications(configuration.assumeValues,
+            createClassSpecification(true,
+                                     classSpecificationArgs,
                                      classMembersClosure));
     }
 
@@ -1107,6 +1149,7 @@ public class ProGuardTask extends DefaultTask
 
         classSpecification.addField(createMemberSpecification(false,
                                                               false,
+                                                              allowValues,
                                                               memberSpecificationArgs));
     }
 
@@ -1121,6 +1164,7 @@ public class ProGuardTask extends DefaultTask
 
         classSpecification.addMethod(createMemberSpecification(true,
                                                                true,
+                                                               allowValues,
                                                                memberSpecificationArgs));
     }
 
@@ -1135,6 +1179,7 @@ public class ProGuardTask extends DefaultTask
 
         classSpecification.addMethod(createMemberSpecification(true,
                                                                false,
+                                                               allowValues,
                                                                memberSpecificationArgs));
     }
 
@@ -1209,23 +1254,69 @@ public class ProGuardTask extends DefaultTask
         }
 
         // Lazily apply the external configuration files.
-        ConfigurableFileCollection fileCollection =
-            getProject().files(configurationFiles);
-
-        Iterator<File> files = fileCollection.iterator();
-        while (files.hasNext())
+        for (int index = 0; index < configurationFiles.size(); index++)
         {
-            ConfigurationParser parser =
-                new ConfigurationParser(files.next(),
-                                        System.getProperties());
+            Object fileObject = configurationFiles.get(index);
 
-            try
+            ConfigurableFileCollection fileCollection =
+                getProject().files(fileObject);
+
+            // Parse the configuration as a collection of files.
+            Iterator<File> files = fileCollection.iterator();
+
+            while (files.hasNext())
             {
-                parser.parse(configuration);
-            }
-            finally
-            {
-                parser.close();
+                File file = files.next();
+
+                // Check if this is the name of an internal configuration file.
+                if (isInternalConfigurationFile(file))
+                {
+                    getLogger().debug("Loading default configuration file " +
+                                      file.getAbsolutePath());
+
+                    String internalConfigFileName =
+                        internalConfigurationFileName(file);
+
+                    URL configurationURL =
+                        ProGuardTask.class.getResource(internalConfigFileName);
+
+                    if (configurationURL == null)
+                    {
+                        throw new FileNotFoundException("'" + file.getAbsolutePath() + "'");
+                    }
+
+                    // Parse the configuration as a URL.
+                    ConfigurationParser parser =
+                        new ConfigurationParser(configurationURL,
+                                                System.getProperties());
+
+                    try
+                    {
+                        parser.parse(configuration);
+                    }
+                    finally
+                    {
+                        parser.close();
+                    }
+                }
+                else
+                {
+                    getLogger().debug("Loading configuration file " +
+                                      file.getAbsolutePath());
+
+                    ConfigurationParser parser =
+                        new ConfigurationParser(file,
+                                                System.getProperties());
+
+                    try
+                    {
+                        parser.parse(configuration);
+                    }
+                    finally
+                    {
+                        parser.close();
+                    }
+                }
             }
         }
 
@@ -1238,6 +1329,33 @@ public class ProGuardTask extends DefaultTask
 
 
     // Small utility methods.
+
+
+    /**
+     * Returns whether the given file object is an internal configuration
+     * file that is packaged in a jar, for instance
+     *  "/proguard/gradle/proguard-android-debug.pro".
+     */
+    private boolean isInternalConfigurationFile(Object fileObject)
+    {
+        return fileObject.toString().startsWith(resolvedConfigurationFileNamePrefix);
+    }
+
+
+    /**
+     * Returns the name of the internal configuration file that is packaged in
+     * a jar, for instance "/lib/dexguard-debug.pro".
+     */
+    private String internalConfigurationFileName(Object fileObject)
+    {
+        // Trim any added file prefix (like "C:").
+        // Make sure we have forward slashes.
+        return fileObject.toString()
+            .substring(resolvedConfigurationFileNamePrefix.length() -
+                       CONFIGURATION_FILE_NAME_PREFIX.length())
+            .replace('\\', '/');
+    }
+
 
     /**
      * Extends the given class path with the given filtered input or output
@@ -1299,7 +1417,7 @@ public class ProGuardTask extends DefaultTask
             createIfClassSpecification(keepArgs);
 
         ClassSpecification classSpecification =
-            createClassSpecification(classSpecificationString);
+            createClassSpecification(false, classSpecificationString);
 
         return
             createKeepClassSpecification(allowShrinking,
@@ -1326,7 +1444,8 @@ public class ProGuardTask extends DefaultTask
             createIfClassSpecification(classSpecificationArgs);
 
         ClassSpecification classSpecification =
-            createClassSpecification(classSpecificationArgs,
+            createClassSpecification(false,
+                                     classSpecificationArgs,
                                      classMembersClosure);
 
         return
@@ -1357,7 +1476,7 @@ public class ProGuardTask extends DefaultTask
             return null;
         }
 
-        return createClassSpecification(conditionString);
+        return createClassSpecification(false, conditionString);
     }
 
 
@@ -1389,7 +1508,8 @@ public class ProGuardTask extends DefaultTask
      * Creates specifications to keep classes and class members, based on the
      * given ProGuard-style class specification.
      */
-    private ClassSpecification createClassSpecification(String classSpecificationString)
+    private ClassSpecification createClassSpecification(boolean allowValues,
+                                                        String  classSpecificationString)
     throws ParseException
     {
         try
@@ -1399,7 +1519,7 @@ public class ProGuardTask extends DefaultTask
 
             try
             {
-                return parser.parseClassSpecificationArguments();
+                return parser.parseClassSpecificationArguments(allowValues);
             }
             finally
             {
@@ -1417,7 +1537,8 @@ public class ProGuardTask extends DefaultTask
      * Creates a specification of classes and class members, based on the
      * given parameters.
      */
-    private ClassSpecification createClassSpecification(Map     classSpecificationArgs,
+    private ClassSpecification createClassSpecification(boolean allowValues,
+                                                        Map     classSpecificationArgs,
                                                         Closure classMembersClosure)
     throws ParseException
     {
@@ -1448,8 +1569,10 @@ public class ProGuardTask extends DefaultTask
         {
             // Temporarily remember the class specification, so we can add
             // class member specifications.
+            this.allowValues        = allowValues;
             this.classSpecification = classSpecification;
             classMembersClosure.call(classSpecification);
+            this.allowValues        = false;
             this.classSpecification = null;
         }
 
@@ -1525,6 +1648,7 @@ public class ProGuardTask extends DefaultTask
      */
     private MemberSpecification createMemberSpecification(boolean isMethod,
                                                           boolean isConstructor,
+                                                          boolean allowValues,
                                                           Map     classSpecificationArgs)
     throws ParseException
     {
@@ -1534,6 +1658,7 @@ public class ProGuardTask extends DefaultTask
         String annotation        = (String)classSpecificationArgs.get("annotation");
         String name              = (String)classSpecificationArgs.get("name");
         String parameters        = (String)classSpecificationArgs.get("parameters");
+        String values            = (String)classSpecificationArgs.get("value");
 
         // Perform some basic conversions and checks on the attributes.
         if (annotation != null)
@@ -1555,6 +1680,11 @@ public class ProGuardTask extends DefaultTask
                     type = JavaConstants.TYPE_VOID;
                 }
 
+                if (values != null)
+                {
+                    throw new ParseException("Values attribute not allowed in constructor specification ["+values+"]");
+                }
+
                 name = ClassConstants.METHOD_NAME_INIT;
             }
             else if ((type != null) ^ (parameters != null))
@@ -1570,6 +1700,19 @@ public class ProGuardTask extends DefaultTask
             }
         }
 
+        if (values != null)
+        {
+            if (!allowValues)
+            {
+                throw new ParseException("Values attribute not allowed in this class specification ["+values+"]");
+            }
+
+            if (type == null)
+            {
+                throw new ParseException("Values attribute must be specified in combination with type attribute in class member specification ["+values+"]");
+            }
+        }
+
         List parameterList = ListUtil.commaSeparatedList(parameters);
 
         String descriptor =
@@ -1577,11 +1720,20 @@ public class ProGuardTask extends DefaultTask
             type       != null ? ClassUtil.internalType(type)                            :
                                  null;
 
-        return new MemberSpecification(requiredMemberAccessFlags(true,  access),
-                                       requiredMemberAccessFlags(false, access),
-                                       annotation,
-                                       name,
-                                       descriptor);
+        return values != null ?
+            new MemberValueSpecification(requiredMemberAccessFlags(true,  access),
+                                         requiredMemberAccessFlags(false, access),
+                                         annotation,
+                                         name,
+                                         descriptor,
+                                         parseValues(type,
+                                                     ClassUtil.internalType(type),
+                                                     values)) :
+            new MemberSpecification(requiredMemberAccessFlags(true,  access),
+                                    requiredMemberAccessFlags(false, access),
+                                    annotation,
+                                    name,
+                                    descriptor);
     }
 
 
@@ -1652,6 +1804,100 @@ public class ProGuardTask extends DefaultTask
         Object arg = args.get(name);
 
         return arg == null ? defaultValue : ((Boolean)arg).booleanValue();
+    }
+
+
+    /**
+     * Parses the given string as a value or value range of the given primitive
+     * type. For example, values "123" or "100..199" of type "int" ("I").
+     */
+    private Number[] parseValues(String externalType,
+                                 String internalType,
+                                 String string)
+    throws ParseException
+    {
+        int rangeIndex = string.lastIndexOf("..");
+        return rangeIndex >= 0 ?
+            new Number[]
+            {
+                parseValue(externalType, internalType, string.substring(0, rangeIndex)),
+                parseValue(externalType, internalType, string.substring(rangeIndex + 2))
+            } :
+            new Number[]
+            {
+                parseValue(externalType, internalType, string)
+            };
+    }
+
+
+    /**
+     * Parses the given string as a value of the given primitive type.
+     * For example, value "123" of type "int" ("I").
+     * For example, value "true" of type "boolean" ("Z"), returned as 1.
+     */
+    private Number parseValue(String externalType,
+                              String internalType,
+                              String string)
+    throws ParseException
+    {
+        try
+        {
+            switch (internalType.charAt(0))
+            {
+                case ClassConstants.TYPE_BOOLEAN:
+                {
+                    return parseBoolean(string);
+                }
+                case ClassConstants.TYPE_BYTE:
+                case ClassConstants.TYPE_CHAR:
+                case ClassConstants.TYPE_SHORT:
+                case ClassConstants.TYPE_INT:
+                {
+                    return Integer.decode(string);
+                }
+                //case ClassConstants.TYPE_LONG:
+                //{
+                //    return Long.decode(string);
+                //}
+                //case ClassConstants.TYPE_FLOAT:
+                //{
+                //    return Float.valueOf(string);
+                //}
+                //case ClassConstants.TYPE_DOUBLE:
+                //{
+                //    return Double.valueOf(string);
+                //}
+                default:
+                {
+                    throw new ParseException("Can't handle '"+externalType+"' constant ["+string+"]");
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ParseException("Can't parse "+externalType+" constant ["+string+"]");
+        }
+    }
+
+
+    /**
+     * Parses the given boolean string as an integer (0 or 1).
+     */
+    private Integer parseBoolean(String string)
+    throws ParseException
+    {
+        if      ("false".equals(string))
+        {
+            return Integer.valueOf(0);
+        }
+        else if ("true".equals(string))
+        {
+            return Integer.valueOf(1);
+        }
+        else
+        {
+            throw new ParseException("Unknown boolean constant ["+string+"]");
+        }
     }
 
 

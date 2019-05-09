@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -57,7 +57,7 @@ public class SeedPrinter
         // Check if we have at least some keep commands.
         if (configuration.keep == null)
         {
-            throw new IOException("You have to specify '-keep' options for the shrinking step.");
+            throw new IOException("You have to specify '-keep' options if you want to write out kept elements with '-printseeds'.");
         }
 
         // Clean up any old visitor info.

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -50,8 +50,11 @@ implements   ClassVisitor,
 
     private       int[]                   constantIndexMap        = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
     private       int[]                   bootstrapMethodIndexMap = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private final MyNestmemberShrinker    nestMemberShrinker      = new MyNestmemberShrinker();
     private final ConstantPoolRemapper    constantPoolRemapper    = new ConstantPoolRemapper();
     private final BootstrapMethodRemapper bootstrapMethodRemapper = new BootstrapMethodRemapper();
+    private final MySignatureCleaner      signatureCleaner        = new MySignatureCleaner();
+
 
 
     /**
@@ -79,7 +82,10 @@ implements   ClassVisitor,
                 .visitProgramClass(programClass);
         }
 
-        // Shrinking the constant pool also sets up an index map.
+        // Shrink the arrays for nest members.
+        programClass.attributesAccept(nestMemberShrinker);
+
+        // Shrink the constant pool, also setting up an index map.
         int newConstantPoolCount =
             shrinkConstantPool(programClass.constantPool,
                                programClass.u2constantPoolCount);
@@ -123,7 +129,6 @@ implements   ClassVisitor,
         }
 
         // Replace any unused classes in the signatures.
-        MySignatureCleaner signatureCleaner = new MySignatureCleaner();
         programClass.fieldsAccept(new AllAttributeVisitor(signatureCleaner));
         programClass.methodsAccept(new AllAttributeVisitor(signatureCleaner));
         programClass.attributesAccept(signatureCleaner);
@@ -277,6 +282,29 @@ implements   ClassVisitor,
 
         // Shrink the element values themselves.
         annotation.elementValuesAccept(clazz, this);
+    }
+
+
+    /**
+     * This AttributeVisitor shrinks the nest members in the nest member
+     * attributes that it visits.
+     */
+    private class MyNestmemberShrinker
+    extends       SimplifiedVisitor
+    implements    AttributeVisitor
+    {
+        public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+
+        public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+        {
+            // Shrink the array of nest member indices.
+            // We must do this before the corresponding constants are remapped.
+            nestMembersAttribute.u2classesCount =
+                shrinkConstantIndexArray(((ProgramClass)clazz).constantPool,
+                                         nestMembersAttribute.u2classes,
+                                         nestMembersAttribute.u2classesCount);
+        }
     }
 
 

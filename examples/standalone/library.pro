@@ -5,6 +5,8 @@
 #     java -jar proguard.jar @library.pro
 #
 
+-verbose
+
 # Specify the input jars, output jars, and library jars.
 # In this case, the input jar is the program library that we want to process.
 

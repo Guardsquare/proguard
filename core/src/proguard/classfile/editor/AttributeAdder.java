@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,6 +26,7 @@ import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.visitor.ReferencedClassVisitor;
 
 import java.util.Arrays;
 
@@ -166,6 +167,38 @@ implements   AttributeVisitor
 
         // Add it to the target class.
         attributesEditor.addAttribute(newEnclosingMethodAttribute);
+    }
+
+
+    public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
+    {
+        // Create a copy of the attribute.
+        NestHostAttribute newNestHostAttribute =
+            new NestHostAttribute(constantAdder.addConstant(clazz, nestHostAttribute.u2attributeNameIndex),
+                                  constantAdder.addConstant(clazz, nestHostAttribute.u2hostClassIndex));
+
+        // Add it to the target class.
+        attributesEditor.addAttribute(newNestHostAttribute);
+    }
+
+
+    public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
+    {
+        // Create a copy of the attribute.
+        NestMembersAttribute newNestMembersAttribute =
+            new NestMembersAttribute(constantAdder.addConstant(clazz, nestMembersAttribute.u2attributeNameIndex),
+                                     0,
+                                     nestMembersAttribute.u2classesCount > 0 ?
+                                         new int[nestMembersAttribute.u2classesCount] :
+                                         EMPTY_INTS);
+
+        // Add the nest members.
+        nestMembersAttribute.memberClassConstantsAccept(targetClass,
+                                                        new NestMemberAdder(targetClass,
+                                                                            newNestMembersAttribute));
+
+        // Add it to the target class.
+        attributesEditor.addAttribute(newNestMembersAttribute);
     }
 
 

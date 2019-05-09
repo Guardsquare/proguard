@@ -8,7 +8,8 @@
   <taskdef resource="proguard/ant/task.properties"
            classpath="lib/proguard.jar" />
 
-  <proguard printseeds="on"
+  <proguard verbose="true"
+            printseeds="on"
             printmapping="out.map"
             renamesourcefileattribute="SourceFile">
 

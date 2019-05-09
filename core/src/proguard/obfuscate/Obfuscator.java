@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -66,20 +66,29 @@ public class Obfuscator
             throw new IOException("You have to specify '-keep' options for the obfuscation step.");
         }
 
+        // We're using the system's default character encoding for writing to
+        // the standard output and error output.
+        PrintWriter out = new PrintWriter(System.out, true);
+        PrintWriter err = new PrintWriter(System.err, true);
+
         // Clean up any old visitor info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
 
-        // If the class member names have to correspond globally,
-        // link all class members in all classes, otherwise
-        // link all non-private methods in all class hierarchies.
+        // Link all non-private, non-static methods in all class hierarchies.
         ClassVisitor memberInfoLinker =
-            configuration.useUniqueClassMemberNames ?
-                (ClassVisitor)new AllMemberVisitor(new MethodLinker()) :
-                (ClassVisitor)new BottomClassFilter(new MethodLinker());
+            new BottomClassFilter(new MethodLinker());
 
         programClassPool.classesAccept(memberInfoLinker);
         libraryClassPool.classesAccept(memberInfoLinker);
+
+        // If the class member names have to correspond globally,
+        // additionally link all class members in all program classes.
+        if (configuration.useUniqueClassMemberNames)
+        {
+            programClassPool.classesAccept(new AllMemberVisitor(
+                                           new MethodLinker()));
+        }
 
         // Create a visitor for marking the seeds.
         NameMarker nameMarker = new NameMarker();
@@ -165,7 +174,14 @@ public class Obfuscator
         // override the names of library classes and of library class members.
         if (configuration.applyMapping != null)
         {
-            WarningPrinter warningPrinter = new WarningPrinter(System.err, configuration.warn);
+            if (configuration.verbose)
+            {
+                out.println("Applying mapping from [" +
+                            PrintWriterUtil.fileName(configuration.applyMapping) +
+                            "]...");
+            }
+
+            WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
 
             MappingReader reader = new MappingReader(configuration.applyMapping);
 
@@ -182,17 +198,17 @@ public class Obfuscator
             int warningCount = warningPrinter.getWarningCount();
             if (warningCount > 0)
             {
-                System.err.println("Warning: there were " + warningCount +
-                                   " kept classes and class members that were remapped anyway.");
-                System.err.println("         You should adapt your configuration or edit the mapping file.");
+                err.println("Warning: there were " + warningCount +
+                            " kept classes and class members that were remapped anyway.");
+                err.println("         You should adapt your configuration or edit the mapping file.");
 
                 if (!configuration.ignoreWarnings)
                 {
-                    System.err.println("         If you are sure this remapping won't hurt, you could try your luck");
-                    System.err.println("         using the '-ignorewarnings' option.");
+                    err.println("         If you are sure this remapping won't hurt,");
+                    err.println("         you could try your luck using the '-ignorewarnings' option.");
                 }
 
-                System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict1)");
+                err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict1)");
 
                 if (!configuration.ignoreWarnings)
                 {
@@ -230,7 +246,7 @@ public class Obfuscator
                                           nameFactory);
         }
 
-        WarningPrinter warningPrinter = new WarningPrinter(System.err, configuration.warn);
+        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
 
         // Maintain a map of names to avoid [descriptor - new name - old name].
         Map descriptorMap = new HashMap();
@@ -426,17 +442,17 @@ public class Obfuscator
         int warningCount = warningPrinter.getWarningCount();
         if (warningCount > 0)
         {
-            System.err.println("Warning: there were " + warningCount +
+            err.println("Warning: there were " + warningCount +
                                " conflicting class member name mappings.");
-            System.err.println("         Your configuration may be inconsistent.");
+            err.println("         Your configuration may be inconsistent.");
 
             if (!configuration.ignoreWarnings)
             {
-                System.err.println("         If you are sure the conflicts are harmless,");
-                System.err.println("         you could try your luck using the '-ignorewarnings' option.");
+                err.println("         If you are sure the conflicts are harmless,");
+                err.println("         you could try your luck using the '-ignorewarnings' option.");
             }
 
-            System.err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict2)");
+            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict2)");
 
             if (!configuration.ignoreWarnings)
             {
@@ -447,22 +463,26 @@ public class Obfuscator
         // Print out the mapping, if requested.
         if (configuration.printMapping != null)
         {
-            PrintStream ps =
-                configuration.printMapping == Configuration.STD_OUT ? System.out :
-                    new PrintStream(
-                    new BufferedOutputStream(
-                    new FileOutputStream(configuration.printMapping)));
-
-            // Print out items that will be removed.
-            programClassPool.classesAcceptAlphabetically(new MappingPrinter(ps));
-
-            if (ps == System.out)
+            if (configuration.verbose)
             {
-                ps.flush();
+                out.println("Printing mapping to [" +
+                            PrintWriterUtil.fileName(configuration.printMapping) +
+                            "]...");
             }
-            else
+
+            PrintWriter mappingWriter =
+                PrintWriterUtil.createPrintWriter(configuration.printMapping, out);
+
+            try
             {
-                ps.close();
+                // Print out items that will be renamed.
+                programClassPool.classesAcceptAlphabetically(
+                    new MappingPrinter(mappingWriter));
+            }
+            finally
+            {
+                PrintWriterUtil.closePrintWriter(configuration.printMapping,
+                                                 mappingWriter);
             }
         }
 
@@ -478,7 +498,7 @@ public class Obfuscator
         // Update all references to these new names.
         programClassPool.classesAccept(new ClassReferenceFixer(false));
         libraryClassPool.classesAccept(new ClassReferenceFixer(false));
-        programClassPool.classesAccept(new MemberReferenceFixer());
+        programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
 
         // Make package visible elements public or protected, if obfuscated
         // classes are being repackaged aggressively.

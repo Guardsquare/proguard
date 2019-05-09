@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -160,6 +160,28 @@ public class StringUtil
         }
 
         return new String(chars, 0, charIndex);
+    }
+
+
+    /**
+     * Joins the given strings using the provided separator.
+     *
+     * @param separator    The separator to use.
+     * @param strings      The strings to join.
+     * @return The input strings, concatenated together using the separator
+     */
+    public static String join(String separator, String... strings)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strings.length; i++)
+        {
+            sb.append(strings[i]);
+            if (i + 1 < strings.length)
+            {
+                sb.append(separator);
+            }
+        }
+        return sb.toString();
     }
 
 

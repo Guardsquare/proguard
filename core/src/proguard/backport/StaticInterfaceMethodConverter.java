@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,25 +21,18 @@
 package proguard.backport;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.attribute.visitor.AttributeToClassVisitor;
-import proguard.classfile.attribute.visitor.InstructionToAttributeVisitor;
-import proguard.classfile.constant.Constant;
-import proguard.classfile.constant.RefConstant;
-import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.constant.*;
+import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.ClassReferenceInitializer;
-import proguard.classfile.util.ClassSuperHierarchyInitializer;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.instruction.visitor.*;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.optimize.peephole.InstructionSequencesReplacer;
-import proguard.optimize.peephole.PeepholeOptimizer;
+import proguard.optimize.peephole.*;
 import proguard.util.MultiValueMap;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This ClassVisitor moves all static interface methods in the visited
@@ -59,11 +52,11 @@ implements   ClassVisitor
     private final MemberVisitor                 extraMemberVisitor;
 
 
-    public StaticInterfaceMethodConverter(ClassPool     programClassPool,
-                                          ClassPool     libraryClassPool,
-                                          MultiValueMap injectedClassNameMap,
-                                          ClassVisitor  modifiedClassVisitor,
-                                          MemberVisitor extraMemberVisitor)
+    public StaticInterfaceMethodConverter(ClassPool                     programClassPool,
+                                          ClassPool                     libraryClassPool,
+                                          MultiValueMap<String, String> injectedClassNameMap,
+                                          ClassVisitor                  modifiedClassVisitor,
+                                          MemberVisitor                 extraMemberVisitor)
     {
         this.programClassPool     = programClassPool;
         this.libraryClassPool     = libraryClassPool;
@@ -75,9 +68,11 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass) {}
 
 
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Collect all static methods of the interface class.
@@ -117,7 +112,7 @@ implements   ClassVisitor
                     // interface class.
                     memberRemover
                 )
-            ))));
+                ))));
 
             // Add the utility class to the program class pool
             // and the injected class name map.
@@ -155,7 +150,7 @@ implements   ClassVisitor
             new ProgramClass(ClassConstants.CLASS_VERSION_1_2,
                              1,
                              new Constant[10],
-                             0,
+                             ClassConstants.ACC_PUBLIC | ClassConstants.ACC_SYNTHETIC,
                              0,
                              0);
 
@@ -175,9 +170,9 @@ implements   ClassVisitor
 
         // Add a private constructor.
         classEditor.addMethod(ClassConstants.ACC_PRIVATE,
-                                  ClassConstants.METHOD_NAME_INIT,
-                                  ClassConstants.METHOD_TYPE_INIT,
-                                  10)
+                              ClassConstants.METHOD_NAME_INIT,
+                              ClassConstants.METHOD_TYPE_INIT,
+                              10)
             .aload_0()
             .invokespecial(ClassConstants.NAME_JAVA_LANG_OBJECT,
                            ClassConstants.METHOD_NAME_INIT,
@@ -251,16 +246,16 @@ implements   ClassVisitor
      * reference a given class via any RefConstant.
      */
     private static class MyReferencedClassFilter
-    extends SimplifiedVisitor
+    extends    SimplifiedVisitor
     implements ClassVisitor,
-            ConstantVisitor
+               ConstantVisitor
     {
-        private final Clazz referencedClass;
+        private final Clazz        referencedClass;
         private final ClassVisitor classVisitor;
 
         private boolean referenceClassFound;
 
-        public MyReferencedClassFilter(Clazz referencedClass,
+        public MyReferencedClassFilter(Clazz        referencedClass,
                                        ClassVisitor classVisitor)
         {
             this.referencedClass = referencedClass;

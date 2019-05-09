@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,6 +21,8 @@
 package proguard.classfile.visitor;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.*;
 
 /**
@@ -33,8 +35,11 @@ import proguard.classfile.util.*;
 public class MemberClassAccessFilter
 implements   MemberVisitor
 {
-    private final Clazz         referencingClass;
-    private final MemberVisitor memberVisitor;
+    private final NestHostFinder nestHostFinder = new NestHostFinder();
+    private final Clazz          referencingClass;
+    private final String         referencingNestHostClassName;
+    private final MemberVisitor  memberVisitor;
+
 
 
     /**
@@ -46,8 +51,9 @@ implements   MemberVisitor
     public MemberClassAccessFilter(Clazz         referencingClass,
                                    MemberVisitor memberVisitor)
     {
-        this.referencingClass = referencingClass;
-        this.memberVisitor    = memberVisitor;
+        this.referencingClass             = referencingClass;
+        this.referencingNestHostClassName = nestHostFinder.findNestHostClassName(referencingClass);
+        this.memberVisitor                = memberVisitor;
     }
 
 
@@ -96,11 +102,11 @@ implements   MemberVisitor
         int accessLevel = AccessUtil.accessLevel(memberAccessFlags);
 
         return
-            (accessLevel >= AccessUtil.PUBLIC                                                              ) ||
-            (accessLevel >= AccessUtil.PRIVATE         && referencingClass.equals(clazz)                   ) ||
+            (accessLevel >= AccessUtil.PUBLIC                                                               ) ||
+            (accessLevel >= AccessUtil.PRIVATE         && nestHostFinder.inSameNest(referencingClass, clazz)) ||
             (accessLevel >= AccessUtil.PACKAGE_VISIBLE && (ClassUtil.internalPackageName(referencingClass.getName()).equals(
-                                                           ClassUtil.internalPackageName(clazz.getName())))) ||
-            (accessLevel >= AccessUtil.PROTECTED       && (referencingClass.extends_(clazz)                  ||
-                                                           referencingClass.extendsOrImplements(clazz))            );
+                                                           ClassUtil.internalPackageName(clazz.getName()))) ) ||
+            (accessLevel >= AccessUtil.PROTECTED       && (referencingClass.extends_(clazz) ||
+                                                           referencingClass.extendsOrImplements(clazz))     );
     }
 }

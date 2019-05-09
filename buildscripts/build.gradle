@@ -1,5 +1,12 @@
 // Gradle build script for all ProGuard jars.
 
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
 task clean {
     delete fileTree('../lib')
 }

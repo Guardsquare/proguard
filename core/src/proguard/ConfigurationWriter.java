@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,7 +22,7 @@ package proguard;
 
 import proguard.classfile.ClassConstants;
 import proguard.classfile.util.ClassUtil;
-import proguard.util.ListUtil;
+import proguard.util.*;
 
 import java.io.*;
 import java.net.*;
@@ -52,20 +52,9 @@ public class ConfigurationWriter
      */
     public ConfigurationWriter(File configurationFile) throws IOException
     {
-        this(new PrintWriter(
-             new OutputStreamWriter(
-             new FileOutputStream(configurationFile), "UTF-8")));
+        this(PrintWriterUtil.createPrintWriterOut(configurationFile));
 
         baseDir = configurationFile.getParentFile();
-    }
-
-
-    /**
-     * Creates a new ConfigurationWriter for the given OutputStream.
-     */
-    public ConfigurationWriter(OutputStream outputStream) throws IOException
-    {
-        this(new PrintWriter(outputStream));
     }
 
 
@@ -168,6 +157,7 @@ public class ConfigurationWriter
         writeOptions(ConfigurationConstants.ASSUME_NO_EXTERNAL_SIDE_EFFECTS_OPTION,  configuration.assumeNoExternalSideEffects);
         writeOptions(ConfigurationConstants.ASSUME_NO_ESCAPING_PARAMETERS_OPTION,    configuration.assumeNoEscapingParameters);
         writeOptions(ConfigurationConstants.ASSUME_NO_EXTERNAL_RETURN_VALUES_OPTION, configuration.assumeNoExternalReturnValues);
+        writeOptions(ConfigurationConstants.ASSUME_VALUES_OPTION,                    configuration.assumeValues);
 
 
         if (writer.checkError())
@@ -589,6 +579,9 @@ public class ConfigurationWriter
                                                            name == null ? ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD : name,
                                                            descriptor));
 
+                writeValueAssignment(ConfigurationConstants.EQUAL_KEYWORD,
+                                     memberSpecification);
+
                 writer.println(ConfigurationConstants.SEPARATOR_KEYWORD);
             }
         }
@@ -632,7 +625,51 @@ public class ConfigurationWriter
                                                             name == null ? ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD : name,
                                                             descriptor));
 
+                writeValueAssignment(ConfigurationConstants.RETURN_KEYWORD,
+                                     memberSpecification);
+
                 writer.println(ConfigurationConstants.SEPARATOR_KEYWORD);
+            }
+        }
+    }
+
+
+    private void writeValueAssignment(String              assignmentKeyword,
+                                      MemberSpecification memberSpecification)
+    {
+        if (memberSpecification instanceof MemberValueSpecification)
+        {
+            MemberValueSpecification memberValueSpecification =
+                (MemberValueSpecification)memberSpecification;
+
+            Number[] values = memberValueSpecification.values;
+            if (values != null)
+            {
+                writer.print(' ');
+                writer.print(assignmentKeyword);
+                writer.print(' ');
+
+                // Write the first value.
+                // Is it a boolean?
+                String descriptor = memberSpecification.descriptor;
+                if (descriptor != null &&
+                    ClassUtil.internalMethodReturnType(descriptor).equals("" + ClassConstants.TYPE_BOOLEAN))
+                {
+                    // It's a boolean (represented as an integer).
+                    writer.print(values[0].intValue() != 0);
+                }
+                else
+                {
+                    // It's a number.
+                    writer.print(values[0]);
+                }
+
+                // Write the second value of the range, if any.
+                if (values.length > 1)
+                {
+                    writer.print(ConfigurationConstants.RANGE_KEYWORD);
+                    writer.print(values[1]);
+                }
             }
         }
     }
@@ -699,7 +736,8 @@ public class ConfigurationWriter
     /**
      * A main method for testing configuration writing.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         try
         {
             ConfigurationWriter writer = new ConfigurationWriter(new File(args[0]));

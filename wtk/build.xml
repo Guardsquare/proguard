@@ -3,6 +3,7 @@
 <project name    = "wtk"
          default = "dist">
 
+  <property file = "../buildscripts/ant.properties"/>
   <property file = "ant.properties"/>
   <property name = "wtk.jar" value = "${wtk.home}/wtklib/kenv.zip"/>
 
@@ -34,6 +35,8 @@
     <javac nowarn            = "true"
            deprecation       = "false"
            includeantruntime = "false"
+           source            = "${target}"
+           target            = "${target}"
            classpath         = "../lib/proguard.jar:${wtk.jar}"
            srcdir            = "src"
            destdir           = "out"

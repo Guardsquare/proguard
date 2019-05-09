@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -62,6 +62,7 @@ class ConfigurationConstants
     public static final String ASSUME_NO_EXTERNAL_SIDE_EFFECTS_OPTION  = "-assumenoexternalsideeffects";
     public static final String ASSUME_NO_ESCAPING_PARAMETERS_OPTION    = "-assumenoescapingparameters";
     public static final String ASSUME_NO_EXTERNAL_RETURN_VALUES_OPTION = "-assumenoexternalreturnvalues";
+    public static final String ASSUME_VALUES_OPTION                    = "-assumevalues";
     public static final String ALLOW_ACCESS_MODIFICATION_OPTION        = "-allowaccessmodification";
     public static final String MERGE_INTERFACES_AGGRESSIVELY_OPTION    = "-mergeinterfacesaggressively";
 
@@ -129,6 +130,11 @@ class ConfigurationConstants
     public static final String ARGUMENT_SEPARATOR_KEYWORD = ",";
     public static final String ANY_ARGUMENTS_KEYWORD      = "...";
     public static final String CLOSE_ARGUMENTS_KEYWORD    = ")";
+    public static final String EQUAL_KEYWORD              = "=";
+    public static final String RETURN_KEYWORD             = "return";
+    public static final String FALSE_KEYWORD              = "false";
+    public static final String TRUE_KEYWORD               = "true";
+    public static final String RANGE_KEYWORD              = "..";
     public static final String SEPARATOR_KEYWORD          = ";";
     public static final String CLOSE_KEYWORD              = "}";
 }

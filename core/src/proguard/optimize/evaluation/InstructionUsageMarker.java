@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -55,16 +55,16 @@ implements   AttributeVisitor
     private static boolean DEBUG_RESULTS  = DEBUG;
     //*/
 
-    private final PartialEvaluator               partialEvaluator;
-    private final boolean                        runPartialEvaluator;
-    private final PartialEvaluator               simplePartialEvaluator       = new PartialEvaluator(new TypedReferenceValueFactory());
-    private final SideEffectInstructionChecker   sideEffectInstructionChecker = new SideEffectInstructionChecker(true, true);
-    private final MyParameterUsageMarker         parameterUsageMarker         = new MyParameterUsageMarker();
-    private final MyInitialUsageMarker           initialUsageMarker           = new MyInitialUsageMarker();
-    private final MyProducerMarker               producerMarker               = new MyProducerMarker();
-    private final MyVariableInitializationMarker variableInitializationMarker = new MyVariableInitializationMarker();
-    private final MyStackConsistencyMarker       stackConsistencyMarker       = new MyStackConsistencyMarker();
-    private final MyExtraPopInstructionMarker    extraPopInstructionMarker    = new MyExtraPopInstructionMarker();
+    private final PartialEvaluator                partialEvaluator;
+    private final boolean                         runPartialEvaluator;
+    private final PartialEvaluator                simplePartialEvaluator        = new PartialEvaluator(new TypedReferenceValueFactory());
+    private final SideEffectInstructionChecker    sideEffectInstructionChecker  = new SideEffectInstructionChecker(true, true);
+    private final MyParameterUsageMarker          parameterUsageMarker          = new MyParameterUsageMarker();
+    private final MyInitialUsageMarker            initialUsageMarker            = new MyInitialUsageMarker();
+    private final MyProducerMarker                producerMarker                = new MyProducerMarker();
+    private final MyVariableInitializationMarker  variableInitializationMarker  = new MyVariableInitializationMarker();
+    private final MyStackConsistencyMarker        stackConsistencyMarker        = new MyStackConsistencyMarker();
+    private final MyExtraPushPopInstructionMarker extraPushPopInstructionMarker = new MyExtraPushPopInstructionMarker();
 
     private InstructionOffsetValue[] reverseDependencies = new InstructionOffsetValue[ClassConstants.TYPICAL_CODE_LENGTH];
 
@@ -505,7 +505,7 @@ implements   AttributeVisitor
                 Instruction instruction = InstructionFactory.create(codeAttribute.code,
                                                                     offset);
 
-                instruction.accept(clazz, method, codeAttribute, offset, extraPopInstructionMarker);
+                instruction.accept(clazz, method, codeAttribute, offset, extraPushPopInstructionMarker);
 
                 // Check if this instruction is a branch origin from a branch
                 // that straddles some marked code.
@@ -1116,10 +1116,10 @@ implements   AttributeVisitor
 
 
     /**
-     * This InstructionVisitor marks unnecessary popping instructions that
-     * should still pop some values to keep the stack consistent.
+     * This InstructionVisitor marks instructions that should still push or
+     * pop some values to keep the stack consistent.
      */
-    private class MyExtraPopInstructionMarker
+    private class MyExtraPushPopInstructionMarker
     extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
@@ -1143,20 +1143,14 @@ implements   AttributeVisitor
                 if (!isStackEntryUnwantedBefore(offset, stackIndex) &&
                     isStackEntryPresentBefore(offset, stackIndex))
                 {
-                    // Is it already a pop instruction?
-                    if (isPop(instruction))
-                    {
-                        // Just mark it as necessary, along with the stack
-                        // entries at the producer offsets. This might happen
-                        // in Kotlin code [DGD-481], with getstatic/pop.
-                        markInstruction(offset);
-                        markStackEntryProducers(offset, stackIndex, false);
-                    }
-                    else
-                    {
-                        // Mark that we'll need an extra pop instruction.
-                        markExtraPushPopInstruction(offset);
-                    }
+                    // Mark that we'll need an extra pop instruction.
+                    markExtraPushPopInstruction(offset);
+
+                    // [DGD-481][DGD-504] Mark the stack entries and
+                    // their producers again for a push/pop. In Kotlin
+                    // code, it can happen that we have missed a producer
+                    // during stack consistency marking.
+                    markStackEntryProducers(offset, stackIndex, false);
                 }
             }
         }
@@ -1164,16 +1158,6 @@ implements   AttributeVisitor
 
 
     // Small utility methods.
-
-    /**
-     * Returns whether the given instruction is a pop instruction.
-     */
-    private boolean isPop(Instruction instruction)
-    {
-        return instruction.opcode == InstructionConstants.OP_POP  ||
-               instruction.opcode == InstructionConstants.OP_POP2;
-    }
-
 
     /**
      * Marks the producing instructions of the variable consumer at the given
@@ -1214,40 +1198,45 @@ implements   AttributeVisitor
      * @param variableIndex  the index of the variable.
      * @param visitedOffsets the already visited consumer offsets, needed to
      *                       prevent infinite loops.
+     * @return the updated visited consumer offsets.
      */
-    private void markVariableInitializersBefore(int                    consumerOffset,
-                                                int                    variableIndex,
-                                                InstructionOffsetValue visitedOffsets)
+    private InstructionOffsetValue markVariableInitializersBefore(int                    consumerOffset,
+                                                                  int                    variableIndex,
+                                                                  InstructionOffsetValue visitedOffsets)
     {
         // Avoid infinite loops by stopping recursion if we encounter
         // an already visited offset.
-        if (visitedOffsets != null &&
-            visitedOffsets.contains(consumerOffset))
+        if (visitedOffsets == null ||
+            !visitedOffsets.contains(consumerOffset))
         {
-            return;
-        }
+            visitedOffsets = visitedOffsets == null ?
+                new InstructionOffsetValue(consumerOffset) :
+                visitedOffsets.add(consumerOffset);
 
-        visitedOffsets = visitedOffsets == null ?
-            new InstructionOffsetValue(consumerOffset) :
-            visitedOffsets.add(consumerOffset);
+            // Make sure the variable is initialized after all producers.
+            // Use the simple evaluator, to get the JVM's view of what is
+            // initialized.
+            InstructionOffsetValue producerOffsets =
+                simplePartialEvaluator.getVariablesBefore(consumerOffset).getProducerValue(variableIndex).instructionOffsetValue();
 
-        // Make sure the variable is initialized after all producers.
-        // Use the simple evaluator, to get the JVM's view of what is
-        // initialized.
-        InstructionOffsetValue producerOffsets =
-            simplePartialEvaluator.getVariablesBefore(consumerOffset).getProducerValue(variableIndex).instructionOffsetValue();
-
-        int offsetCount = producerOffsets.instructionOffsetCount();
-        for (int offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++)
-        {
-            if (!producerOffsets.isMethodParameter(offsetIndex) &&
-                !producerOffsets.isExceptionHandler(offsetIndex))
+            int offsetCount = producerOffsets.instructionOffsetCount();
+            for (int offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++)
             {
-                int producerOffset =
-                    producerOffsets.instructionOffset(offsetIndex);
-                markVariableInitializersAfter(producerOffset, variableIndex, visitedOffsets);
+                if (!producerOffsets.isMethodParameter(offsetIndex) &&
+                    !producerOffsets.isExceptionHandler(offsetIndex))
+                {
+                    int producerOffset =
+                        producerOffsets.instructionOffset(offsetIndex);
+
+                    visitedOffsets =
+                        markVariableInitializersAfter(producerOffset,
+                                                      variableIndex,
+                                                      visitedOffsets);
+                }
             }
         }
+
+        return visitedOffsets;
     }
 
 
@@ -1259,10 +1248,11 @@ implements   AttributeVisitor
      * @param variableIndex  the index of the variable.
      * @param visitedOffsets the already visited consumer offsets, needed to
      *                       prevent infinite loops.
+     * @return the updated visited consumer offsets.
      */
-    private void markVariableInitializersAfter(int                    producerOffset,
-                                               int                    variableIndex,
-                                               InstructionOffsetValue visitedOffsets)
+    private InstructionOffsetValue markVariableInitializersAfter(int                    producerOffset,
+                                                                 int                    variableIndex,
+                                                                 InstructionOffsetValue visitedOffsets)
     {
         // No problem if the producer has already been marked.
         if (!isInstructionNecessary(producerOffset))
@@ -1282,9 +1272,14 @@ implements   AttributeVisitor
                 // Don't mark the producer, but recursively look at the
                 // preceding producers of the same variable. Their values
                 // will fall through, replacing this producer.
-                markVariableInitializersBefore(producerOffset, variableIndex, visitedOffsets);
+                visitedOffsets =
+                    markVariableInitializersBefore(producerOffset,
+                                                   variableIndex,
+                                                   visitedOffsets);
             }
         }
+
+        return visitedOffsets;
     }
 
 

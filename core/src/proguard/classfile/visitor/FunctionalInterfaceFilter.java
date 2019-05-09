@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -86,7 +86,7 @@ public class FunctionalInterfaceFilter implements ClassVisitor
                               new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
                               new MultiMemberVisitor(
                                   abstractMethodCounter,
-                                  new SimilarMemberVisitor(clazz, true, false, true, false,
+                                  new SimilarMemberVisitor(clazz, true, true, true, false,
                                   new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
                                   defaultMethodCounter))
                               ))));

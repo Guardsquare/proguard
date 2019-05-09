@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -493,9 +493,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(boolean[] array1, int size1,
                               boolean[] array2, int size2)
@@ -504,19 +504,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (!array1[index] && array2[index])
+            int comparison = Boolean.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] && !array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -527,9 +522,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(byte[] array1, int size1,
                               byte[] array2, int size2)
@@ -538,19 +533,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Byte.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -572,19 +562,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Character.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -595,9 +580,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(short[] array1, int size1,
                               short[] array2, int size2)
@@ -606,19 +591,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Short.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -629,9 +609,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(int[] array1, int size1,
                               int[] array2, int size2)
@@ -640,19 +620,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Integer.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -663,9 +638,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(long[] array1, int size1,
                               long[] array2, int size2)
@@ -674,19 +649,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Long.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -697,9 +667,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(float[] array1, int size1,
                               float[] array2, int size2)
@@ -708,19 +678,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Float.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -731,9 +696,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(double[] array1, int size1,
                               double[] array2, int size2)
@@ -742,19 +707,14 @@ public class ArrayUtil
 
         for (int index = 0; index < minSize; index++)
         {
-            if (array1[index] < array2[index])
+            int comparison = Double.compare(array1[index], array2[index]);
+            if (comparison != 0)
             {
-                return -1;
-            }
-            else if (array1[index] > array2[index])
-            {
-                return 1;
+                return comparison;
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 
@@ -765,9 +725,9 @@ public class ArrayUtil
      * @param array2 the second array.
      * @param size2  the size of the second array.
      * @return 0 if all elements are the same,
-     *          -1 if the first different element in the first array is smaller
-     *          than the corresponding element in the second array,
-     *          or 1 if it is larger.
+     *         -1 if the first different element in the first array is smaller
+     *         than the corresponding element in the second array,
+     *         or 1 if it is larger.
      */
     public static int compare(Comparable[] array1, int size1,
                               Comparable[] array2, int size2)
@@ -783,9 +743,7 @@ public class ArrayUtil
             }
         }
 
-        return size1 <  size2 ? -1 :
-               size1 == size2 ?  0 :
-                                 1;
+        return Integer.compare(size1,  size2);
     }
 
 

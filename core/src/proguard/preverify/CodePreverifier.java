@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -325,9 +325,16 @@ implements   AttributeVisitor
             // Fill out the type.
             VerificationType type;
 
+            // Is the value not null and alive, or an uninitialized "this"?
+            // A dead uninitialzed "this" is not possible in Java, but it is
+            // possible in other languages like Kotlin (in exception handlers).
+            // It has to be marked too ("flagThisUninit" in the JVM specs).
             if (value != null &&
-                (offset == AT_METHOD_ENTRY ||
-                 livenessAnalyzer.isAliveBefore(offset, index)))
+                (offset == AT_METHOD_ENTRY                      ||
+                 livenessAnalyzer.isAliveBefore(offset, index)) ||
+                 (initializationFinder.isInitializer() &&
+                  index == 0                           &&
+                  offset <= initializationFinder.superInitializationOffset()))
             {
                 type = correspondingVerificationType(programClass,
                                                      programMethod,

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -107,6 +107,9 @@ public class ClassUtil
             externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_9_ALIAS) ||
             externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_9) ? ClassConstants.CLASS_VERSION_1_9 :
             externalClassVersion.equals(JavaConstants.CLASS_VERSION_10)  ? ClassConstants.CLASS_VERSION_10  :
+            externalClassVersion.equals(JavaConstants.CLASS_VERSION_11)  ? ClassConstants.CLASS_VERSION_11  :
+            externalClassVersion.equals(JavaConstants.CLASS_VERSION_12)  ? ClassConstants.CLASS_VERSION_12  :
+            externalClassVersion.equals(JavaConstants.CLASS_VERSION_13)  ? ClassConstants.CLASS_VERSION_13  :
                                                                            0;
     }
 
@@ -130,6 +133,9 @@ public class ClassUtil
             case ClassConstants.CLASS_VERSION_1_8: return JavaConstants.CLASS_VERSION_1_8;
             case ClassConstants.CLASS_VERSION_1_9: return JavaConstants.CLASS_VERSION_1_9;
             case ClassConstants.CLASS_VERSION_10:  return JavaConstants.CLASS_VERSION_10;
+            case ClassConstants.CLASS_VERSION_11:  return JavaConstants.CLASS_VERSION_11;
+            case ClassConstants.CLASS_VERSION_12:  return JavaConstants.CLASS_VERSION_12;
+            case ClassConstants.CLASS_VERSION_13:  return JavaConstants.CLASS_VERSION_13;
             default:                               return null;
         }
     }
@@ -143,14 +149,14 @@ public class ClassUtil
     public static void checkVersionNumbers(int internalClassVersion) throws UnsupportedOperationException
     {
         if (internalClassVersion < ClassConstants.CLASS_VERSION_1_0 ||
-            internalClassVersion > ClassConstants.CLASS_VERSION_10)
+            internalClassVersion > ClassConstants.CLASS_VERSION_13)
         {
             throw new UnsupportedOperationException("Unsupported version number ["+
                                                     internalMajorClassVersion(internalClassVersion)+"."+
                                                     internalMinorClassVersion(internalClassVersion)+"] (maximum "+
-                                                    ClassConstants.CLASS_VERSION_10_MAJOR+"."+
-                                                    ClassConstants.CLASS_VERSION_10_MINOR+", Java "+
-                                                    JavaConstants.CLASS_VERSION_10+")");
+                                                    ClassConstants.CLASS_VERSION_13_MAJOR+"."+
+                                                    ClassConstants.CLASS_VERSION_13_MINOR+", Java "+
+                                                    JavaConstants.CLASS_VERSION_13+")");
         }
     }
 
@@ -779,6 +785,174 @@ public class ClassUtil
                 }
             }
         }
+    }
+
+
+    /**
+     * Returns the parameter number in the given internal method descriptor,
+     * corresponding to the given variable index. This accounts for long and
+     * double parameters taking up two spaces, and a non-static method taking
+     * up an additional entry. The method returns 0 if the index corresponds
+     * to the 'this' parameter and -1 if the index does not correspond to a
+     * parameter.
+     * @param internalMethodDescriptor the internal method descriptor,
+     *                                 e.g. "<code>(IDI)Z</code>".
+     * @param accessFlags              the access flags of the method,
+     *                                 e.g. 0.
+     * @param variableIndex            the variable index of the parameter,
+     *                                 e.g. 4.
+     * @return the parameter number in the descriptor,
+     *                                 e.g. 3.
+     */
+    public static int internalMethodParameterNumber(String internalMethodDescriptor,
+                                                    int    accessFlags,
+                                                    int    variableIndex)
+    {
+        return internalMethodParameterNumber(internalMethodDescriptor,
+                                             (accessFlags & ClassConstants.ACC_STATIC) != 0,
+                                             variableIndex);
+    }
+
+
+    /**
+     * Returns the parameter number in the given internal method descriptor,
+     * corresponding to the given variable index. This accounts for long and
+     * double parameters taking up two spaces, and a non-static method taking
+     * up an additional entry. The method returns 0 if the index corresponds
+     * to the 'this' parameter and -1 if the index does not correspond to a
+     * parameter.
+     * @param internalMethodDescriptor the internal method descriptor,
+     *                                 e.g. "<code>(IDI)Z</code>".
+     * @param isStatic                 specifies whether the method is static,
+     *                                 e.g. false.
+     * @param variableIndex            the variable index of the parameter,
+     *                                 e.g. 4.
+     * @return the parameter number in the descriptor,
+     *                                 e.g. 3.
+     */
+    public static int internalMethodParameterNumber(String  internalMethodDescriptor,
+                                                    boolean isStatic,
+                                                    int     variableIndex)
+    {
+        int parameterIndex  = 0;
+        int parameterNumber = 0;
+
+        // Is it a non-static method?
+        if (!isStatic)
+        {
+            if (variableIndex == 0)
+            {
+                return 0;
+            }
+
+            variableIndex--;
+            parameterNumber++;
+        }
+
+        // Loop over all variables until we've found the right index.
+        InternalTypeEnumeration internalTypeEnumeration =
+            new InternalTypeEnumeration(internalMethodDescriptor);
+
+        while (internalTypeEnumeration.hasMoreTypes())
+        {
+            if (variableIndex == parameterIndex)
+            {
+                return parameterNumber;
+            }
+
+            String internalType = internalTypeEnumeration.nextType();
+
+            parameterIndex += internalTypeSize(internalType);
+            parameterNumber++;
+        }
+
+        return -1;
+    }
+
+
+    /**
+     * Returns the variable index corresponding to the given parameter number
+     * in the given internal method descriptor. This accounts for long and
+     * double parameters taking up two spaces, and a non-static method taking
+     * up an additional entry. The method returns 0 if the number corresponds
+     * to the 'this' parameter and -1 if the number does not correspond to a
+     * parameter.
+     * @param internalMethodDescriptor the internal method descriptor,
+     *                                 e.g. "<code>(IDI)Z</code>".
+     * @param accessFlags              the access flags of the method,
+     *                                 e.g. 0.
+     * @param parameterNumber          the parameter number,
+     *                                 e.g. 3.
+     * @return the corresponding variable index,
+     *                                 e.g. 4.
+     */
+    public static int internalMethodVariableIndex(String internalMethodDescriptor,
+                                                  int    accessFlags,
+                                                  int    parameterNumber)
+    {
+        return internalMethodVariableIndex(internalMethodDescriptor,
+                                           (accessFlags & ClassConstants.ACC_STATIC) != 0,
+                                           parameterNumber);
+    }
+
+
+    /**
+     * Returns the parameter index in the given internal method descriptor,
+     * corresponding to the given variable number. This accounts for long and
+     * double parameters taking up two spaces, and a non-static method taking
+     * up an additional entry. The method returns 0 if the number corresponds
+     * to the 'this' parameter and -1 if the number does not correspond to a
+     * parameter.
+     * @param internalMethodDescriptor the internal method descriptor,
+     *                                 e.g. "<code>(IDI)Z</code>".
+     * @param isStatic                 specifies whether the method is static,
+     *                                 e.g. false.
+     * @param parameterNumber          the parameter number,
+     *                                 e.g. 3.
+     * @return the corresponding variable index,
+     *                                 e.g. 4.
+     */
+    public static int internalMethodVariableIndex(String  internalMethodDescriptor,
+                                                  boolean isStatic,
+                                                  int     parameterNumber)
+    {
+        int variableNumber = 0;
+        int variableIndex  = isStatic ? 0 : 1;
+
+        // Loop over the given number of parameters.
+        InternalTypeEnumeration internalTypeEnumeration =
+            new InternalTypeEnumeration(internalMethodDescriptor);
+
+        for (int counter = 0; counter < parameterNumber; counter++)
+        {
+            String internalType = internalTypeEnumeration.nextType();
+
+            variableIndex += internalTypeSize(internalType);
+        }
+
+        return variableIndex;
+    }
+
+
+    /**
+     * Returns the internal type of the parameter in the given method descriptor,
+     * at the given index.
+     *
+     * @param internalMethodDescriptor the internal method descriptor
+     *                                 e.g. "<code>(IDI)Z</code>".
+     * @param parameterIndex           the parameter index, e.g. 1.
+     * @return the parameter's type, e.g. "<code>D</code>".
+     */
+    public static String internalMethodParameterType(String  internalMethodDescriptor,
+                                                     int     parameterIndex)
+    {
+        InternalTypeEnumeration typeEnum = new InternalTypeEnumeration(internalMethodDescriptor);
+        String                  type     = null;
+        for (int i = 0; i <= parameterIndex; i++)
+        {
+            type = typeEnum.nextType();
+        }
+        return type;
     }
 
 

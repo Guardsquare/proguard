@@ -4,13 +4,13 @@ buildscript {
         jcenter() // For anything else.
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.4.0'
     }
     configurations.all {
         resolutionStrategy {
             // Override the default version of ProGuard
             // with the most recent one.
-            force 'net.sf.proguard:proguard-gradle:6.0.3'
+            force 'net.sf.proguard:proguard-gradle:6.1.0'
         }
     }
 }
@@ -18,8 +18,7 @@ buildscript {
 apply plugin: 'com.android.application'
 
 android {
-    buildToolsVersion '27.0.0'
-    compileSdkVersion 25
+    compileSdkVersion 28
 
     signingConfigs {
         debug {
@@ -44,8 +43,6 @@ android {
             res.srcDirs          = ['res']
             assets.srcDirs       = ['assets']
         }
-
-        instrumentTest.setRoot('tests')
     }
 
     buildTypes {
@@ -60,4 +57,9 @@ android {
             proguardFile 'proguard-project.txt'
         }
     }
+}
+
+repositories {
+    google()  // For the Android plugin.
+    jcenter() // For anything else.
 }

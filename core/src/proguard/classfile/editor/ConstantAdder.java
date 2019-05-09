@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -138,6 +138,41 @@ implements   ConstantVisitor
     {
         constantIndex =
             constantPoolEditor.addUtf8Constant(utf8Constant.getString());
+    }
+
+
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        // Find the bootstrap methods attribute.
+        AttributesEditor attributesEditor =
+            new AttributesEditor((ProgramClass)clazz, false);
+
+        BootstrapMethodsAttribute bootstrapMethodsAttribute =
+            (BootstrapMethodsAttribute)attributesEditor.findAttribute(ClassConstants.ATTR_BootstrapMethods);
+
+        // Add the name and type constant.
+        clazz.constantPoolEntryAccept(dynamicConstant.u2nameAndTypeIndex, this);
+
+        // Copy the referenced classes.
+        Clazz[] referencedClasses     = dynamicConstant.referencedClasses;
+        Clazz[] referencedClassesCopy = null;
+        if (referencedClasses != null)
+        {
+            referencedClassesCopy = new Clazz[referencedClasses.length];
+            System.arraycopy(referencedClasses, 0,
+                             referencedClassesCopy, 0,
+                             referencedClasses.length);
+        }
+
+        bootstrapMethodsAttribute.bootstrapMethodEntryAccept(clazz,
+                                                             dynamicConstant.getBootstrapMethodAttributeIndex(),
+                                                             bootstrapMethodsAttributeAdder);
+
+        // Then add the actual invoke dynamic constant.
+        constantIndex =
+            constantPoolEditor.addDynamicConstant(bootstrapMethodsAttributeAdder.getBootstrapMethodIndex(),
+                                                  constantIndex,
+                                                  referencedClassesCopy);
     }
 
 

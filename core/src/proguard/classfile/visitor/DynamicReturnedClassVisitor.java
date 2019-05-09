@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,7 +27,8 @@ import proguard.classfile.util.*;
 
 /**
  * This ConstantVisitor lets a given ClassVisitor visit all the referenced
- * classes that are returned by the invoke dynamic constants that it visits.
+ * classes that are returned by the dynamic constants and invoke dynamic
+ * constants that it visits.
  *
  * @author Eric Lafortune
  */
@@ -47,6 +48,24 @@ implements   ConstantVisitor
     // Implementations for ConstantVisitor.
 
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
+
+
+    public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
+    {
+        // Is the method returning a class type?
+        Clazz[] referencedClasses = dynamicConstant.referencedClasses;
+        if (referencedClasses != null    &&
+            referencedClasses.length > 0 &&
+            ClassUtil.isInternalClassType(ClassUtil.internalMethodReturnType(dynamicConstant.getType(clazz))))
+        {
+            // Let the visitor visit the return type class, if any.
+            Clazz referencedClass = referencedClasses[referencedClasses.length - 1];
+            if (referencedClass != null)
+            {
+                referencedClass.accept(classVisitor);
+            }
+        }
+    }
 
 
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)

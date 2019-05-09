@@ -8,7 +8,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
         <relativePath>../buildscripts/pom.xml</relativePath>
     </parent>
     <artifactId>proguard-gradle</artifactId>
@@ -19,7 +19,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-            </plugin>   
+            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
@@ -44,6 +44,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>proguard-base</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.android.tools.build</groupId>
+            <artifactId>gradle</artifactId>
+            <version>3.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.gradle</groupId>
@@ -78,8 +84,12 @@
     </dependencies>
     <repositories>
         <repository>
-            <id>gradle</id>
-            <url>http://repo.gradle.org/gradle/libs-releases-local/</url>
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
+        <repository>
+            <id>google</id>
+            <url>https://maven.google.com</url>
         </repository>
     </repositories>
 </project>

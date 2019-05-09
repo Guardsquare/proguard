@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -349,6 +349,11 @@ public class InstructionSequenceBuilder
     public InstructionSequenceBuilder ldc(String string, Clazz referencedClass, Method referencedMember)
     {
         return ldc_(constantPoolEditor.addStringConstant(string, referencedClass, referencedMember));
+    }
+
+    public InstructionSequenceBuilder ldc(Clazz clazz)
+    {
+        return ldc(clazz.getName(), clazz);
     }
 
     public InstructionSequenceBuilder ldc(String className, Clazz referencedClass)

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2018 GuardSquare NV
+ * Copyright (c) 2002-2019 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -47,6 +47,7 @@ public class Optimizer
 {
     public  static final boolean DETAILS = System.getProperty("optd") != null;
 
+    public  static final String LIBRARY_GSON                         = "library/gson";
     private static final String CLASS_MARKING_FINAL                  = "class/marking/final";
     private static final String CLASS_UNBOXING_ENUM                  = "class/unboxing/enum";
     private static final String CLASS_MERGING_VERTICAL               = "class/merging/vertical";
@@ -84,6 +85,7 @@ public class Optimizer
 
     public static final String[] OPTIMIZATION_NAMES = new String[]
     {
+        LIBRARY_GSON,
         CLASS_MARKING_FINAL,
         CLASS_MERGING_VERTICAL,
         CLASS_MERGING_HORIZONTAL,
@@ -119,6 +121,7 @@ public class Optimizer
 
     private final Configuration configuration;
 
+    private final boolean libraryGson;
     private final boolean classMarkingFinal;
     private final boolean classUnboxingEnum;
     private final boolean classMergingVertical;
@@ -167,6 +170,7 @@ public class Optimizer
             new ListParser(new NameParser()).parse(configuration.optimizations) :
             new ConstantMatcher(true);
 
+        libraryGson                       = filter.matches(LIBRARY_GSON);
         classMarkingFinal                 = filter.matches(CLASS_MARKING_FINAL);
         classUnboxingEnum                 = filter.matches(CLASS_UNBOXING_ENUM);
         classMergingVertical              = filter.matches(CLASS_MERGING_VERTICAL);
@@ -685,7 +689,7 @@ public class Optimizer
                         new SimpleEnumDescriptorSimplifier());
 
                     // Update references to class members with simple enum classes.
-                    programClassPool.classesAccept(new MemberReferenceFixer());
+                    programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
                 }
             }
         }
@@ -747,7 +751,7 @@ public class Optimizer
         {
             // We'll create values to be stored with fields, method parameters,
             // and return values.
-            ValueFactory valueFactory         = new ParticularValueFactory();
+            ValueFactory valueFactory         = new RangeValueFactory();
             ValueFactory detailedValueFactory = new DetailedArrayValueFactory();
 
             InvocationUnit storingInvocationUnit =
@@ -795,6 +799,20 @@ public class Optimizer
                 new TimedClassPoolVisitor("Filling out values in non-synthetic classes",
                 new ParallelAllClassVisitor(
                 fillingOutValuesClassVisitor)));
+
+            if (configuration.assumeValues != null)
+            {
+                // Create a visitor for setting assumed values.
+                ClassPoolVisitor classPoolVisitor =
+                    new AssumeClassSpecificationVisitorFactory(valueFactory)
+                        .createClassPoolVisitor(configuration.assumeValues,
+                                                null,
+                                                new MultiMemberVisitor());
+
+                // Set the assumed values.
+                programClassPool.accept(classPoolVisitor);
+                libraryClassPool.accept(classPoolVisitor);
+            }
 
             if (fieldPropagationValue)
             {
@@ -953,7 +971,7 @@ public class Optimizer
         {
             // Fix all references to class members.
             // This operation also updates the stack sizes.
-            programClassPool.classesAccept(new MemberReferenceFixer());
+            programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
 
             // Remove unused bootstrap method arguments.
             programClassPool.classesAccept(
@@ -1012,7 +1030,7 @@ public class Optimizer
                     new DuplicateInitializerInvocationFixer(addedCounter))));
 
                 // Fix all references to tweaked initializers.
-                programClassPool.classesAccept(new MemberReferenceFixer());
+                programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
             }
         }
 
@@ -1135,7 +1153,7 @@ public class Optimizer
             // in case they aren't shrunk later on.
             programClassPool.classesAccept(new RetargetedClassFilter(null, new TargetClassChanger()));
             programClassPool.classesAccept(new RetargetedClassFilter(null, new ClassReferenceFixer(true)));
-            programClassPool.classesAccept(new RetargetedClassFilter(null, new MemberReferenceFixer()));
+            programClassPool.classesAccept(new RetargetedClassFilter(null, new MemberReferenceFixer(configuration.android)));
 
             if (configuration.allowAccessModification)
             {
@@ -1168,7 +1186,7 @@ public class Optimizer
                     new DuplicateInitializerInvocationFixer(addedCounter))));
 
                 // Fix all references to tweaked initializers.
-                programClassPool.classesAccept(new MemberReferenceFixer());
+                programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
             }
         }
 

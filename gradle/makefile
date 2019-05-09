@@ -11,7 +11,8 @@ GRADLE_JARS = $(wildcard \
               $(GRADLE_HOME)/lib/gradle-base-services-*.jar \
               $(GRADLE_HOME)/lib/gradle-base-services-groovy-*.jar \
               $(GRADLE_HOME)/lib/gradle-core-*.jar \
-              $(GRADLE_HOME)/lib/groovy-all-*.jar)
+              $(GRADLE_HOME)/lib/groovy-all-*.jar \
+              $(GRADLE_HOME)/lib/slf4j-api-*.jar)
 NOTHING    :=
 SPACE      := $(NOTHING) $(NOTHING)
 CLASSPATH   = ../core/$(OUT):$(subst $(SPACE),:,$(GRADLE_JARS))

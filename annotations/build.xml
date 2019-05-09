@@ -3,6 +3,8 @@
 <project name    = "annotations"
          default = "dist">
 
+  <property file = "../buildscripts/ant.properties"/>
+
   <target name = "clean">
     <delete quiet = "true">
       <fileset dir   = "out"/>
@@ -17,6 +19,8 @@
     <javac nowarn            = "true"
            deprecation       = "false"
            includeantruntime = "false"
+           source            = "${target}"
+           target            = "${target}"
            srcdir            = "src"
            destdir           = "out"
            includes          = "proguard/annotation/*.java">
