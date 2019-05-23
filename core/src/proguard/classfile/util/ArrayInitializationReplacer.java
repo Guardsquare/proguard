@@ -27,9 +27,8 @@ import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.ClassVisitor;
-import proguard.evaluation.BasicInvocationUnit;
+import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.evaluation.PartialEvaluator;
 
 /**
  * This ClassVisitor replaces array initialization instructions with optimized

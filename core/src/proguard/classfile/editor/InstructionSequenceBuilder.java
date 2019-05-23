@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.instruction.*;
 import proguard.classfile.util.ClassUtil;
-import proguard.optimize.peephole.InstructionSequenceReplacer;
 
 import java.util.*;
 

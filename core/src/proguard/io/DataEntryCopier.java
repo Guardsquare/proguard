@@ -143,14 +143,16 @@ public class DataEntryCopier implements DataEntryReader
             boolean outputIsJmod = output.endsWith(".jmod");
             boolean outputIsZip  = output.endsWith(".zip");
 
-            DataEntryWriter writer = new DirectoryWriter(new File(output),
-                                                         outputIsApk  ||
-                                                         outputIsJar  ||
-                                                         outputIsAar  ||
-                                                         outputIsWar  ||
-                                                         outputIsEar  ||
-                                                         outputIsJmod ||
-                                                         outputIsZip);
+            DataEntryWriter writer =
+                outputIsApk  ||
+                outputIsJar  ||
+                outputIsAar  ||
+                outputIsWar  ||
+                outputIsEar  ||
+                outputIsJmod ||
+                outputIsZip ?
+                    new FixedFileWriter(new File(output)) :
+                    new DirectoryWriter(new File(output));
 
             // Zip up any zips, if necessary.
             DataEntryWriter zipWriter = new JarWriter(writer);

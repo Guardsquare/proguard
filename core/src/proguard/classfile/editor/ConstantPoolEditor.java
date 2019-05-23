@@ -23,8 +23,7 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.ClassReferenceInitializer;
-import proguard.optimize.peephole.WildcardConstantFilter;
+import proguard.classfile.util.*;
 
 /**
  * This class can add constant pool entries to a given class.

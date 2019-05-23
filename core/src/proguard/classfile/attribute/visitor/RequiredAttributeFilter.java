@@ -25,7 +25,6 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.module.*;
 import proguard.classfile.attribute.preverification.*;
-import proguard.obfuscate.AttributeShrinker;
 
 /**
  * This AttributeVisitor delegates its visits to one of two other
@@ -33,8 +32,6 @@ import proguard.obfuscate.AttributeShrinker;
  * is strictly required or not.
  *
  * Stack map attributes and stack map table attributes are treated as optional.
- *
- * @see AttributeShrinker
  *
  * @author Eric Lafortune
  */

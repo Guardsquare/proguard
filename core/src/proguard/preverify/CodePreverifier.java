@@ -30,13 +30,12 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.evaluation.*;
 
 import java.util.*;
 
 /**
- * This class can preverify methods in program class pools, according to a given
- * specification.
+ * This AttributeVisitor adds preverification information (for Java Micro
+ * Edition or for Java 6 or higher) ot the code attributes that it visits.
  *
  * @author Eric Lafortune
  */

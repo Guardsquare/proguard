@@ -23,11 +23,10 @@ package proguard.classfile.util;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.constant.Constant;
+import proguard.classfile.editor.InstructionSequenceReplacer;
 import proguard.classfile.instruction.*;
-import proguard.evaluation.TracedStack;
+import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.evaluation.PartialEvaluator;
-import proguard.optimize.peephole.InstructionSequenceReplacer;
 
 /**
  * This class finds sequences of instructions that correspond to primitive

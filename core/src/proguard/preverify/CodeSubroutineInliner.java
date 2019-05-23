@@ -26,9 +26,8 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.editor.CodeAttributeComposer;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.optimize.peephole.BranchTargetFinder;
 
 /**
  * This AttributeVisitor inlines local subroutines (jsr/ret) in the code

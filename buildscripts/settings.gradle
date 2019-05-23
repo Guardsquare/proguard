@@ -1,4 +1,5 @@
 includeFlat 'core'
+includeFlat 'base'
 includeFlat 'retrace'
 includeFlat 'gui'
 includeFlat 'gradle'

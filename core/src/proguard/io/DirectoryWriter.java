@@ -32,19 +32,16 @@ import java.io.*;
  */
 public class DirectoryWriter implements DataEntryWriter
 {
-    private final File    baseFile;
-    private final boolean isFile;
+    private final File baseDirectory;
 
 
     /**
      * Creates a new DirectoryWriter.
-     * @param baseFile the base directory to which all files will be written.
+     * @param baseDirectory the base directory to which all files will be written.
      */
-    public DirectoryWriter(File    baseFile,
-                           boolean isFile)
+    public DirectoryWriter(File baseDirectory)
     {
-        this.baseFile = baseFile;
-        this.isFile   = isFile;
+        this.baseDirectory = baseDirectory;
     }
 
 
@@ -97,7 +94,7 @@ public class DirectoryWriter implements DataEntryWriter
 
     public void println(PrintWriter pw, String prefix)
     {
-        pw.println(prefix + "DirectoryWriter (base " + (isFile?"file ":"directory") + " ["+baseFile+"])");
+        pw.println(prefix + "DirectoryWriter (base directory ["+baseDirectory+"])");
     }
 
 
@@ -109,10 +106,8 @@ public class DirectoryWriter implements DataEntryWriter
     private File getFile(DataEntry dataEntry)
     {
         // Use the specified file, or construct a new file.
-        return isFile ?
-            baseFile :
-            new File(baseFile,
-                     dataEntry.getName().replace(ClassConstants.PACKAGE_SEPARATOR,
-                                                 File.separatorChar));
+        return new File(baseDirectory,
+                        dataEntry.getName().replace(ClassConstants.PACKAGE_SEPARATOR,
+                                                    File.separatorChar));
     }
 }

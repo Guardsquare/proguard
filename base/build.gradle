@@ -21,3 +21,13 @@ sourceSets.main {
         include '**/*.pro'
     }
 }
+
+jar {
+    manifest.from 'src/META-INF/MANIFEST.MF'
+}
+
+
+dependencies {
+    compile project(':core')
+    compile "com.google.code.gson:gson:${gsonVersion}"
+}

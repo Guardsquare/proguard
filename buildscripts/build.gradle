@@ -21,7 +21,7 @@ task assembleProguardJar(type: Jar) {
 }
 
 def proguardSubprojects =
-    [':core', ':gradle', ':ant', ':wtk'].collect{ project(it) }
+    [':core', ':base', ':gradle', ':ant', ':wtk'].collect{ project(it) }
 
 proguardSubprojects.each { subproject ->
     subproject.afterEvaluate {

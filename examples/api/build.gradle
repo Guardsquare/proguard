@@ -1,4 +1,4 @@
-// Gradle build script for ProGuard.
+// Gradle build script for the ProGuard API examples.
 
 apply plugin: 'java'
 
@@ -20,4 +20,9 @@ sourceSets.main {
         include '**/*.png'
         include '**/*.pro'
     }
+}
+
+dependencies {
+    //compile project(':core')
+    compile files("../../core/build/classes/java/main")
 }

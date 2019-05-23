@@ -21,7 +21,7 @@
 package proguard.evaluation.value;
 
 import proguard.classfile.Clazz;
-import proguard.optimize.evaluation.ReferenceTracingValueFactory;
+import proguard.evaluation.ReferenceTracingValueFactory;
 
 /**
  * This ReferenceValue represents a reference value that is tagged with a trace
