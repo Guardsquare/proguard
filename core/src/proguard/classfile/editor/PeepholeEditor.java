@@ -18,23 +18,23 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.optimize.peephole;
+package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.util.*;
 
 /**
- * This AttributeVisitor sets up and applies the peephole optimizations of its
- * instruction visitor. The instruction visitor should be using the same
- * (optional) branch target finder and code attribute editor.
+ * This AttributeVisitor lets a given instruction visitor edit the code
+ * attributes that it visits. The instruction visitor can use a given
+ * (optional) branch target finder and code attribute editor, which this
+ * class sets up and applies, for convenience.
  *
  * @author Eric Lafortune
  */
-public class PeepholeOptimizer
+public class PeepholeEditor
 extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
@@ -44,22 +44,22 @@ implements   AttributeVisitor
 
 
     /**
-     * Creates a new PeepholeOptimizer.
+     * Creates a new PeepholeEditor.
      * @param codeAttributeEditor the code attribute editor that will be reset
      *                            and then executed.
      * @param instructionVisitor  the instruction visitor that performs
      *                            peephole optimizations using the above code
      *                            attribute editor.
      */
-    public PeepholeOptimizer(CodeAttributeEditor codeAttributeEditor,
-                             InstructionVisitor  instructionVisitor)
+    public PeepholeEditor(CodeAttributeEditor codeAttributeEditor,
+                          InstructionVisitor  instructionVisitor)
     {
         this(null, codeAttributeEditor, instructionVisitor);
     }
 
 
     /**
-     * Creates a new PeepholeOptimizer.
+     * Creates a new PeepholeEditor.
      * @param branchTargetFinder  branch target finder that will be initialized
      *                            to indicate branch targets in the visited code.
      * @param codeAttributeEditor the code attribute editor that will be reset
@@ -68,9 +68,9 @@ implements   AttributeVisitor
      *                            peephole optimizations using the above code
      *                            attribute editor.
      */
-    public PeepholeOptimizer(BranchTargetFinder  branchTargetFinder,
-                             CodeAttributeEditor codeAttributeEditor,
-                             InstructionVisitor  instructionVisitor)
+    public PeepholeEditor(BranchTargetFinder  branchTargetFinder,
+                          CodeAttributeEditor codeAttributeEditor,
+                          InstructionVisitor  instructionVisitor)
     {
         this.branchTargetFinder  = branchTargetFinder;
         this.codeAttributeEditor = codeAttributeEditor;

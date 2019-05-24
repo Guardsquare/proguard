@@ -18,7 +18,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.optimize.peephole;
+package proguard.classfile.util;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
@@ -27,8 +27,6 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
-import proguard.optimize.evaluation.InitializationFinder;
 
 import java.util.Arrays;
 
@@ -36,7 +34,6 @@ import java.util.Arrays;
  * This AttributeVisitor finds all instruction offsets, branch targets, and
  * exception targets in the CodeAttribute objects that it visits.
  *
- * @see InitializationFinder
  * @author Eric Lafortune
  */
 public class BranchTargetFinder

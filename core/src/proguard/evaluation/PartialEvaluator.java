@@ -18,7 +18,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.optimize.evaluation;
+package proguard.evaluation;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
@@ -27,9 +27,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.peephole.BranchTargetFinder;
 
 import java.util.Arrays;
 

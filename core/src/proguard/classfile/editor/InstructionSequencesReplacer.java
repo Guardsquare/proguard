@@ -18,12 +18,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.optimize.peephole;
+package proguard.classfile.editor;
 
 import proguard.classfile.constant.Constant;
-import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.*;
+import proguard.classfile.util.BranchTargetFinder;
 
 /**
  * This InstructionVisitor replaces multiple instruction sequences at once.
@@ -60,7 +60,7 @@ implements   InstructionVisitor
      */
     public InstructionSequencesReplacer(Constant[]          constants,
                                         Instruction[][][]   instructionSequences,
-                                        BranchTargetFinder  branchTargetFinder,
+                                        BranchTargetFinder branchTargetFinder,
                                         CodeAttributeEditor codeAttributeEditor)
     {
         this(constants,
