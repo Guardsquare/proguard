@@ -287,15 +287,21 @@ implements   ClassVisitor
             if (currentAccessLevel < AccessUtil.PUBLIC)
             {
                 // Compute the required access level.
-                // For protected access, the referencing method may not be
-                // static. We're also taking into account the class in the
-                // invocation and the class that actually contains the member.
+                // For protected access:
+                // - The referencing method may not be static.
+                // - The invoked class must be the referencing class (or a
+                //   subclass, which may be counter-intuitive), to avoid
+                //   invoking protected super methods on instances that are
+                //   not of the referencing type, which the verifier doesn't
+                //   allow. (test2172) [DGD-1258]
+                // - The class that actually contains the member must be a
+                //   super class.
                 int requiredAccessLevel =
                     programClass.equals(referencingClass)         ? AccessUtil.PRIVATE         :
                     inSamePackage(programClass, referencingClass) ? AccessUtil.PACKAGE_VISIBLE :
                     (referencingMethodAccessFlags & ClassConstants.ACC_STATIC) == 0 &&
                     (referencedClass == null ||
-                     referencingClass.extends_(referencedClass))                    &&
+                     referencedClass.extends_(referencingClass))                    &&
                     referencingClass.extends_(programClass)       ? AccessUtil.PROTECTED       :
                                                                     AccessUtil.PUBLIC;
 

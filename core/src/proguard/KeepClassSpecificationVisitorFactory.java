@@ -173,10 +173,14 @@ extends      ClassSpecificationVisitorFactory
             classVisitor = null;
         }
 
-        // Don't visit the code attributes if not specified.
-        attributeVisitor = keepClassSpecification.markCodeAttributes ?
-            new AttributeNameFilter(ClassConstants.ATTR_Code, attributeVisitor) :
-            null;
+        // Do we have an attribute visitor?
+        if (attributeVisitor != null)
+        {
+            // Don't visit the code attributes if not specified.
+            attributeVisitor = keepClassSpecification.markCodeAttributes ?
+                new AttributeNameFilter(ClassConstants.ATTR_Code, attributeVisitor) :
+                null;
+        }
 
         ClassSpecification condition = keepClassSpecification.condition;
         if (condition != null)

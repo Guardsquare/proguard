@@ -39,6 +39,10 @@ import java.util.Stack;
  * This AttributeVisitor inlines short methods or methods that are only invoked
  * once, in the code attributes that it visits.
  *
+ * @see SuperInvocationMarker
+ * @see BackwardBranchMarker
+ * @see AccessMethodMarker
+ * @see SideEffectClassMarker
  * @author Eric Lafortune
  */
 public class MethodInliner
@@ -59,9 +63,11 @@ implements   AttributeVisitor,
     static final int INLINED_METHOD_END_LINE_NUMBER = -1;
 
     //*
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG         = false;
+    private static final boolean DEBUG_DETAILS = false;
     /*/
-    public  static       boolean DEBUG = System.getProperty("mi") != null;
+    public  static       boolean DEBUG         = System.getProperty("mi")  != null;
+    public  static       boolean DEBUG_DETAILS = System.getProperty("mid") != null;
     //*/
 
 
@@ -107,7 +113,7 @@ implements   AttributeVisitor,
      * @param microEdition            indicates whether the resulting code is
      *                                targeted at Java Micro Edition.
      * @param android                 indicates whether the resulting code is
-     *                                targeted at the androidVM.
+     *                                targeted at the Dalvik VM.
      * @param allowAccessModification indicates whether the access modifiers of
      *                                classes and class members can be changed
      *                                in order to inline methods.
@@ -583,8 +589,17 @@ implements   AttributeVisitor,
     {
         int accessFlags = programMethod.getAccessFlags();
 
+        if (DEBUG_DETAILS)
+        {
+            System.out.println("MethodInliner: checking ["+
+                               programClass.getName()+"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"] in ["+
+                               targetClass.getName()+"."+targetMethod.getName(targetClass)+targetMethod.getDescriptor(targetClass)+"]");
+        }
+
         if (// Don't inline methods that must be preserved.
             !KeepMarker.isKept(programMethod)                                                     &&
+
+            DEBUG("Access?")                                                                      &&
 
             // Only inline the method if it is private, static, or final.
             // This currently precludes default interface methods, because
@@ -593,10 +608,14 @@ implements   AttributeVisitor,
                             ClassConstants.ACC_STATIC  |
                             ClassConstants.ACC_FINAL)) != 0                                       &&
 
+            DEBUG("Synchronized?")                                                                &&
+
             // Only inline the method if it is not synchronized, etc.
             (accessFlags & (ClassConstants.ACC_SYNCHRONIZED  |
                             ClassConstants.ACC_NATIVE        |
                             ClassConstants.ACC_ABSTRACT)) == 0                                    &&
+
+            DEBUG("Init?")                                                                        &&
 
             // Don't inline an <init> method, except in an <init> method in the
             // same class.
@@ -605,17 +624,25 @@ implements   AttributeVisitor,
 //              targetMethod.getName(targetClass).equals(ClassConstants.METHOD_NAME_INIT))) &&
             !programMethod.getName(programClass).equals(ClassConstants.METHOD_NAME_INIT)          &&
 
+            DEBUG("Self?")                                                                        &&
+
             // Don't inline a method into itself.
             (!programMethod.equals(targetMethod) ||
              !programClass.equals(targetClass))                                                   &&
 
+            DEBUG("Recurse?")                                                                     &&
+
             // Only inline the method if it isn't recursing.
             !inliningMethods.contains(programMethod)                                              &&
+
+            DEBUG("Version?")                                                                     &&
 
             // Only inline the method if its target class has at least the
             // same version number as the source class, in order to avoid
             // introducing incompatible constructs.
             targetClass.u4version >= programClass.u4version                                       &&
+
+            DEBUG("Super?")                                                                       &&
 
             // Only inline the method if it doesn't invoke a super method or a
             // dynamic method, or if it is in the same class.
@@ -623,10 +650,14 @@ implements   AttributeVisitor,
              !DynamicInvocationMarker.invokesDynamically(programMethod) ||
              programClass.equals(targetClass))                                                    &&
 
+            DEBUG("Branch?")                                                                      &&
+
             // Only inline the method if it doesn't branch backward while there
             // are uninitialized objects.
             (!BackwardBranchMarker.branchesBackward(programMethod) ||
              uninitializedObjectCount == 0)                                                       &&
+
+            DEBUG("Access private?")                                                              &&
 
             // Only inline if the code access of the inlined method allows it.
             (allowAccessModification ||
@@ -637,11 +668,23 @@ implements   AttributeVisitor,
                ClassUtil.internalPackageName(programClass.getName()).equals(
                ClassUtil.internalPackageName(targetClass.getName())))))                           &&
 
-//               (!AccessMethodMarker.accessesProtectedCode(programMethod) ||
-//                targetClass.extends_(programClass) ||
-//                targetClass.implements_(programClass)) ||
+            DEBUG("Access private in subclass?")                                                  &&
+
+            // Only inline a method from a superclass if it doesn't access
+            // private code (with invokespecial), because we can't fix the
+            // invocation. (test2172) [DGD-1258]
+            (!AccessMethodMarker.accessesPrivateCode(programMethod) ||
+             programClass.equals(targetClass)                       ||
+             !targetClass.extendsOrImplements(programClass))                                      &&
+
+            DEBUG("Access protected?")                                                            &&
+
+            // Only inline code that accesses protected code into the same
+            // class.
             (!AccessMethodMarker.accessesProtectedCode(programMethod) ||
              programClass.equals(targetClass))                                                    &&
+
+            DEBUG("Synchronization?")                                                             &&
 
             // if the method to be inlined has a synchronized block only inline it into
             // the target method if its invocation is covered by a catchall handler or
@@ -650,14 +693,20 @@ implements   AttributeVisitor,
             (!SynchronizedBlockMethodMarker.hasSynchronizedBlock(programMethod) ||
              coveredByCatchAllHandler)                                                            &&
 
+            DEBUG("Catch?")                                                                       &&
+
             // Only inline the method if it doesn't catch exceptions, or if it
             // is invoked with an empty stack.
             (!CatchExceptionMarker.catchesExceptions(programMethod) ||
              emptyInvokingStack)                                                                  &&
 
+            DEBUG("Stack?")                                                                       &&
+
             // Only inline the method if it always returns with an empty
             // stack.
             !NonEmptyStackReturnMarker.returnsWithNonEmptyStack(programMethod)                    &&
+
+            DEBUG("Side effects?")                                                                &&
 
             // Only inline the method if its related static initializers don't
             // have any side effects.
@@ -729,6 +778,19 @@ implements   AttributeVisitor,
                 System.err.println("  Exception      = ["+e.getClass().getName()+"] ("+e.getMessage()+")");
             }
         }
+    }
+
+    /**
+     * Returns true, while printing out the given debug message.
+     */
+    private boolean DEBUG(String string)
+    {
+        if (DEBUG_DETAILS)
+        {
+            System.out.println("  "+string);
+        }
+
+        return true;
     }
 
 

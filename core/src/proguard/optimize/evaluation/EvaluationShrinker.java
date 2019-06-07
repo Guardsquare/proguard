@@ -53,38 +53,48 @@ implements   AttributeVisitor,
     private static boolean DEBUG_RESULTS  = DEBUG;
     //*/
 
-    private static final int UNSUPPORTED      = -1;
-    private static final int NOP              = InstructionConstants.OP_NOP     & 0xff;
-    private static final int POP              = InstructionConstants.OP_POP     & 0xff;
-    private static final int POP2             = InstructionConstants.OP_POP2    & 0xff;
-    private static final int DUP              = InstructionConstants.OP_DUP     & 0xff;
-    private static final int DUP_X1           = InstructionConstants.OP_DUP_X1  & 0xff;
-    private static final int DUP_X2           = InstructionConstants.OP_DUP_X2  & 0xff;
-    private static final int DUP2             = InstructionConstants.OP_DUP2    & 0xff;
-    private static final int DUP2_X1          = InstructionConstants.OP_DUP2_X1 & 0xff;
-    private static final int DUP2_X2          = InstructionConstants.OP_DUP2_X2 & 0xff;
-    private static final int SWAP             = InstructionConstants.OP_SWAP    & 0xff;
-    private static final int MOV_X2           = DUP_X2  | (POP    << 8);
-    private static final int MOV2_X1          = DUP2_X1 | (POP2   << 8);
-    private static final int MOV2_X2          = DUP2_X2 | (POP2   << 8);
-    private static final int POP_X1           = SWAP    | (POP    << 8);
-    private static final int POP_X2           = DUP2_X1 | (POP2   << 8) | (POP    << 16);
-    private static final int POP_X3           = UNSUPPORTED;
-    private static final int POP2_X1          = DUP_X2  | (POP    << 8) | (POP2   << 16);
-    private static final int POP2_X2          = DUP2_X2 | (POP2   << 8) | (POP2   << 16);
-    private static final int POP3             = POP2    | (POP    << 8);
-    private static final int POP4             = POP2    | (POP2   << 8);
-    private static final int POP_DUP          = POP     | (DUP    << 8);
-    private static final int POP_SWAP_POP     = POP     | (SWAP   << 8) | (POP    << 16);
-    private static final int POP2_SWAP_POP    = POP2    | (SWAP   << 8) | (POP    << 16);
-    private static final int SWAP_DUP_X1      = SWAP    | (DUP_X1 << 8);
-    private static final int SWAP_DUP_X1_SWAP = SWAP    | (DUP_X1 << 8) | (SWAP   << 16);
-    private static final int SWAP_POP_DUP     = SWAP    | (POP    << 8) | (DUP    << 16);
-    private static final int SWAP_POP_DUP_X1  = SWAP    | (POP    << 8) | (DUP_X1 << 16);
-    private static final int DUP_X2_POP2      = DUP_X2  | (POP2   << 8);
-    private static final int DUP2_X1_POP3     = DUP2_X1 | (POP2   << 8) | (POP    << 16);
-    private static final int DUP2_X2_POP3     = DUP2_X2 | (POP2   << 8) | (POP    << 16);
-    private static final int DUP2_X2_SWAP_POP = DUP2_X2 | (SWAP   << 8) | (POP    << 16);
+    private static final int UNSUPPORTED         = -1;
+    private static final int NOP                 = InstructionConstants.OP_NOP     & 0xff;
+    private static final int POP                 = InstructionConstants.OP_POP     & 0xff;
+    private static final int POP2                = InstructionConstants.OP_POP2    & 0xff;
+    private static final int DUP                 = InstructionConstants.OP_DUP     & 0xff;
+    private static final int DUP_X1              = InstructionConstants.OP_DUP_X1  & 0xff;
+    private static final int DUP_X2              = InstructionConstants.OP_DUP_X2  & 0xff;
+    private static final int DUP2                = InstructionConstants.OP_DUP2    & 0xff;
+    private static final int DUP2_X1             = InstructionConstants.OP_DUP2_X1 & 0xff;
+    private static final int DUP2_X2             = InstructionConstants.OP_DUP2_X2 & 0xff;
+    private static final int SWAP                = InstructionConstants.OP_SWAP    & 0xff;
+    private static final int MOV_X2              = DUP_X2  | (POP     << 8);
+    private static final int MOV2_X1             = DUP2_X1 | (POP2    << 8);
+    private static final int MOV2_X2             = DUP2_X2 | (POP2    << 8);
+    private static final int POP_X1              = SWAP    | (POP     << 8);
+    private static final int POP_X2              = DUP2_X1 | (POP2    << 8) | (POP    << 16);
+    private static final int POP_X3              = UNSUPPORTED;
+    private static final int POP2_X1             = DUP_X2  | (POP     << 8) | (POP2   << 16);
+    private static final int POP2_X2             = DUP2_X2 | (POP2    << 8) | (POP2   << 16);
+    private static final int POP3                = POP2    | (POP     << 8);
+    private static final int POP4                = POP2    | (POP2    << 8);
+    private static final int POP_DUP             = POP     | (DUP     << 8);
+    private static final int POP_DUP_X1          = POP     | (DUP_X1  << 8);
+    private static final int POP_SWAP            = POP     | (SWAP    << 8);
+    private static final int POP_SWAP_POP        = POP     | (SWAP    << 8) | (POP    << 16);
+    private static final int POP_SWAP_POP_DUP    = POP     | (SWAP    << 8) | (POP    << 16) | (DUP    << 24);
+    private static final int POP2_SWAP_POP       = POP2    | (SWAP    << 8) | (POP    << 16);
+    private static final int SWAP_DUP_X1         = SWAP    | (DUP_X1  << 8);
+    private static final int SWAP_DUP_X1_POP3    = SWAP    | (DUP_X1  << 8) | (POP2   << 16) | (POP    << 24);
+    private static final int SWAP_DUP2_X1_POP3   = SWAP    | (DUP2_X1 << 8) | (POP2   << 16) | (POP    << 24);
+    private static final int SWAP_DUP_X1_SWAP    = SWAP    | (DUP_X1  << 8) | (SWAP   << 16);
+    private static final int SWAP_POP_DUP        = SWAP    | (POP     << 8) | (DUP    << 16);
+    private static final int SWAP_POP_DUP_X1     = SWAP    | (POP     << 8) | (DUP_X1 << 16);
+    private static final int DUP_X2_POP          = DUP_X2  | (POP     << 8);
+    private static final int DUP_X2_POP2         = DUP_X2  | (POP2    << 8);
+    private static final int DUP_X2_POP3_DUP     = DUP_X2  | (POP     << 8) | (POP2   << 16) | (DUP    << 24);
+    private static final int DUP2_X1_POP         = DUP2_X1 | (POP     << 8);
+    private static final int DUP2_X1_POP3_DUP    = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP    << 24);
+    private static final int DUP2_X1_POP3_DUP_X1 = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP_X1 << 24);
+    private static final int DUP2_X1_POP3_DUP2   = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP2    << 24);
+    private static final int DUP2_X2_POP3        = DUP2_X2 | (POP2    << 8) | (POP    << 16);
+    private static final int DUP2_X2_SWAP_POP    = DUP2_X2 | (SWAP    << 8) | (POP    << 16);
 
 
     private final InstructionUsageMarker instructionUsageMarker;
@@ -218,7 +228,7 @@ implements   AttributeVisitor,
         // Reset the code changes.
         codeAttributeEditor.reset(codeLength);
 
-        // Replace virtual invocations by static invocations, where neceesary.
+        // Replace virtual invocations by static invocations, where necessary.
         if (DEBUG) System.out.println("Static invocation fixing:");
 
         codeAttribute.instructionsAccept(clazz, method,
@@ -955,93 +965,93 @@ implements   AttributeVisitor,
                 stackEntryNecessary1 ?
                     stackEntryNecessary2 ?
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? DUP_X2          : // ...XYO -> ...OXYO
-                                                   MOV_X2          : // ...XYO -> ...OXY
+                            stackEntryNecessary0 ? DUP_X2              : // ...XYO -> ...OXYO
+                                                   MOV_X2              : // ...XYO -> ...OXY
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? NOP             : // ...XYO -> ...XYO
-                            stackEntryPresent0   ? POP             : // ...XYO -> ...XY
-                                                   NOP             : // ...XY  -> ...XY
+                            stackEntryNecessary0 ? NOP                 : // ...XYO -> ...XYO
+                            stackEntryPresent0   ? POP                 : // ...XYO -> ...XY
+                                                   NOP                 : // ...XY  -> ...XY
                     stackEntryPresent2 ?
                         stackEntryNecessary3 ?
-                        //  stackEntryNecessary0 ? UNSUPPORTED     : // ...XYO -> ...OYO
-                                                   UNSUPPORTED     : // ...XYO -> ...OY
+                            stackEntryNecessary0 ? DUP2_X1_POP3_DUP_X1 : // ...XYO -> ...OYO
+                                                   SWAP_DUP2_X1_POP3   : // ...XYO -> ...OY
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? POP_X2          : // ...XYO -> ...YO
-                            stackEntryPresent0   ? POP_SWAP_POP    : // ...XYO -> ...Y
-                                                   POP_X1          : // ...XY  -> ...Y
+                            stackEntryNecessary0 ? POP_X2              : // ...XYO -> ...YO
+                            stackEntryPresent0   ? POP_SWAP_POP        : // ...XYO -> ...Y
+                                                   POP_X1              : // ...XY  -> ...Y
                     // !stackEntryPresent2
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? DUP_X1          : // ...YO -> ...OYO
-                                                   SWAP            : // ...YO -> ...OY
+                            stackEntryNecessary0 ? DUP_X1              : // ...YO -> ...OYO
+                                                   SWAP                : // ...YO -> ...OY
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? NOP             : // ...YO -> ...YO
-                            stackEntryPresent0   ? POP             : // ...YO -> ...Y
-                                                   NOP             : // ...Y  -> ...Y
+                            stackEntryNecessary0 ? NOP                 : // ...YO -> ...YO
+                            stackEntryPresent0   ? POP                 : // ...YO -> ...Y
+                                                   NOP                 : // ...Y  -> ...Y
                 stackEntryPresent1 ?
                     stackEntryNecessary2 ?
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? SWAP_POP_DUP_X1 : // ...XYO -> ...OXO
-                                                   DUP_X2_POP2     : // ...XYO -> ...OX
+                            stackEntryNecessary0 ? SWAP_POP_DUP_X1     : // ...XYO -> ...OXO
+                                                   DUP_X2_POP2         : // ...XYO -> ...OX
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? POP_X1          : // ...XYO -> ...XO
-                            stackEntryPresent0   ? POP2            : // ...XYO -> ...X
-                                                   POP             : // ...XY  -> ...X
+                            stackEntryNecessary0 ? POP_X1              : // ...XYO -> ...XO
+                            stackEntryPresent0   ? POP2                : // ...XYO -> ...X
+                                                   POP                 : // ...XY  -> ...X
                     stackEntryPresent2 ?
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? UNSUPPORTED     : // ...XYO -> ...OO
-                                                   POP2_X1         : // ...XYO -> ...O
+                            stackEntryNecessary0 ? DUP_X2_POP3_DUP     : // ...XYO -> ...OO
+                                                   POP2_X1             : // ...XYO -> ...O
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? POP2_X1         : // ...XYO -> ...O
-                            stackEntryPresent0   ? POP3            : // ...XYO -> ...
-                                                   POP2            : // ...XY  -> ...
+                            stackEntryNecessary0 ? POP2_X1             : // ...XYO -> ...O
+                            stackEntryPresent0   ? POP3                : // ...XYO -> ...
+                                                   POP2                : // ...XY  -> ...
                     // !stackEntryPresent2
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? SWAP_POP_DUP    : // ...YO -> ...OO
-                                                   POP_X1          : // ...YO -> ...O
+                            stackEntryNecessary0 ? SWAP_POP_DUP        : // ...YO -> ...OO
+                                                   POP_X1              : // ...YO -> ...O
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? POP_X1          : // ...YO -> ...O
-                            stackEntryPresent0   ? POP2            : // ...YO -> ...
-                                                   POP             : // ...Y  -> ...
+                            stackEntryNecessary0 ? POP_X1              : // ...YO -> ...O
+                            stackEntryPresent0   ? POP2                : // ...YO -> ...
+                                                   POP                 : // ...Y  -> ...
                 // !stackEntryPresent1
                     stackEntryNecessary2 ?
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? DUP_X1          : // ...XO -> ...OXO
-                                                   SWAP            : // ...XO -> ...OX
+                            stackEntryNecessary0 ? DUP_X1              : // ...XO -> ...OXO
+                                                   SWAP                : // ...XO -> ...OX
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? NOP             : // ...XO -> ...XO
-                            stackEntryPresent0   ? POP             : // ...XO -> ...X
-                                                   NOP             : // ...X  -> ...X
+                            stackEntryNecessary0 ? NOP                 : // ...XO -> ...XO
+                            stackEntryPresent0   ? POP                 : // ...XO -> ...X
+                                                   NOP                 : // ...X  -> ...X
                     stackEntryPresent2 ?
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? SWAP_POP_DUP    : // ...XO -> ...OO
-                                                   POP_X1          : // ...XO -> ...O
+                            stackEntryNecessary0 ? SWAP_POP_DUP        : // ...XO -> ...OO
+                                                   POP_X1              : // ...XO -> ...O
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? POP_X1          : // ...XO -> ...O
-                            stackEntryPresent0   ? POP2            : // ...XO -> ...
-                                                   POP             : // ...X  -> ...
+                            stackEntryNecessary0 ? POP_X1              : // ...XO -> ...O
+                            stackEntryPresent0   ? POP2                : // ...XO -> ...
+                                                   POP                 : // ...X  -> ...
                     // !stackEntryPresent2
                         stackEntryNecessary3 ?
-                            stackEntryNecessary0 ? DUP             : // ...O -> ...OO
-                                                   NOP             : // ...O -> ...O
+                            stackEntryNecessary0 ? DUP                 : // ...O -> ...OO
+                                                   NOP                 : // ...O -> ...O
                         // !stackEntryNecessary3
-                            stackEntryNecessary0 ? NOP             : // ...O -> ...O
-                            stackEntryPresent0   ? POP             : // ...O -> ...
-                                                   NOP;              // ...  -> ...
+                            stackEntryNecessary0 ? NOP                 : // ...O -> ...O
+                            stackEntryPresent0   ? POP                 : // ...O -> ...
+                                                   NOP;                  // ...  -> ...
         }
 
 
         private int fixedDup2(int instructionOffset, int topBefore, int topAfter)
         {
             boolean stackEntryPresent0 = instructionUsageMarker.isStackEntryPresentBefore(instructionOffset, topBefore);
-            boolean stackEntryPresent1 = instructionUsageMarker.isStackEntryPresentBefore(instructionOffset,
-                                                                                          topBefore -
-                                                                                          1);
+            boolean stackEntryPresent1 = instructionUsageMarker.isStackEntryPresentBefore(instructionOffset, topBefore - 1);
 
             boolean stackEntryNecessary0 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter);
             boolean stackEntryNecessary1 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 1);
             boolean stackEntryNecessary2 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 2);
             boolean stackEntryNecessary3 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 3);
 
+            // Figure out which stack entries should be moved,
+            // copied, or removed.
             return
                 stackEntryNecessary3 ?
                     stackEntryNecessary2 ?
@@ -1089,43 +1099,142 @@ implements   AttributeVisitor,
 
         private int fixedDup2_x1(int instructionOffset, int topBefore, int topAfter)
         {
-            // We're currently assuming the value to be duplicated
-            // is a long or a double, taking up two slots, or at
-            // least consistent.
-            boolean stackEntriesPresent01 = instructionUsageMarker.isStackEntriesPresentBefore(instructionOffset, topBefore, topBefore - 1);
-            boolean stackEntryPresent2    = instructionUsageMarker.isStackEntryPresentBefore(  instructionOffset, topBefore - 2);
+            boolean stackEntryPresent0 = instructionUsageMarker.isStackEntryPresentBefore(instructionOffset, topBefore);
+            boolean stackEntryPresent1 = instructionUsageMarker.isStackEntryPresentBefore(instructionOffset, topBefore - 1);
+            boolean stackEntryPresent2 = instructionUsageMarker.isStackEntryPresentBefore(instructionOffset, topBefore - 2);
 
-            boolean stackEntriesNecessary01 = instructionUsageMarker.isStackEntriesNecessaryAfter(instructionOffset, topAfter, topAfter - 1);
-            boolean stackEntryNecessary2    = instructionUsageMarker.isStackEntryNecessaryAfter(  instructionOffset, topAfter - 2);
-            boolean stackEntriesNecessary34 = instructionUsageMarker.isStackEntriesNecessaryAfter(instructionOffset, topAfter - 3, topAfter - 4);
+            boolean stackEntryNecessary0 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter);
+            boolean stackEntryNecessary1 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 1);
+            boolean stackEntryNecessary2 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 2);
+            boolean stackEntryNecessary3 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 3);
+            boolean stackEntryNecessary4 = instructionUsageMarker.isStackEntryNecessaryAfter(instructionOffset, topAfter - 4);
 
             // Figure out which stack entries should be moved,
             // copied, or removed.
             return
-                stackEntryNecessary2 ?
-                    stackEntriesNecessary34 ?
-                        stackEntriesNecessary01 ? DUP2_X1      : // ...XAB -> ...ABXAB
-                                                  MOV2_X1      : // ...XAB -> ...ABX
-                    // !stackEntriesNecessary34
-                        stackEntriesNecessary01 ? NOP          : // ...XAB -> ...XAB
-                        stackEntriesPresent01   ? POP2         : // ...XAB -> ...X
-                                                  NOP          : // ...X   -> ...X
-                stackEntryPresent2 ?
-                    stackEntriesNecessary34 ?
-                        stackEntriesNecessary01 ? UNSUPPORTED  : // ...XAB -> ...ABAB
-                                                  POP_X2       : // ...XAB -> ...AB
-                    // !stackEntriesNecessary34
-                        stackEntriesNecessary01 ? DUP2_X1_POP3 : // ...XAB -> ...AB
-                        stackEntriesPresent01   ? POP3         : // ...XAB -> ...
-                                                  POP          : // ...X   -> ...
-                // !stackEntryPresent2
-                    stackEntriesNecessary34 ?
-                        stackEntriesNecessary01 ? DUP2         : // ...AB -> ...ABAB
-                                                  NOP          : // ...AB -> ...AB
-                    // !stackEntriesNecessary34
-                        stackEntriesNecessary01 ? NOP          : // ...AB -> ...AB
-                        stackEntriesPresent01   ? POP2         : // ...AB -> ...
-                                                  NOP;           // ...   -> ...
+                stackEntryNecessary4 ?
+                    stackEntryNecessary3 ?
+                        stackEntryNecessary2 ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? DUP2_X1             : // ...XAB -> ...ABXAB
+                                                       DUP2_X1_POP         : // ...XAB -> ...ABXA
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? UNSUPPORTED         : // ...XAB -> ...ABXB
+                                                       MOV2_X1             : // ...XAB -> ...ABX
+                        stackEntryPresent2   ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? DUP2_X1_POP3_DUP2   : // ...XAB -> ...ABAB
+                                                       UNSUPPORTED         : // ...XAB -> ...ABA
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? DUP2_X1_POP3_DUP    : // ...XAB -> ...ABB
+                                                       POP_X2              : // ...XAB -> ...AB
+                        // !stackEntryNecessary2
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? DUP2                : // ...AB  -> ...ABAB
+                                                       SWAP_DUP_X1         : // ...AB  -> ...ABA
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? DUP                 : // ...AB  -> ...ABB
+                                                       NOP                 : // ...AB  -> ...AB
+                    // !stackEntryNecessary3
+                        stackEntryNecessary2 ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? UNSUPPORTED         : // ...XAB -> ...AXAB
+                                stackEntryPresent0   ? POP_DUP_X1          : // ...XAB -> ...AXA
+                                                       DUP_X1              : // ...XA  -> ...AXA
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? UNSUPPORTED         : // ...XAB -> ...AXB
+                                stackEntryPresent0   ? POP_SWAP            : // ...XAB -> ...AX
+                                                       SWAP                : // ...XA  -> ...AX
+                        stackEntryPresent2   ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? UNSUPPORTED         : // ...XAB -> ...AAB
+                                stackEntryPresent0   ? POP_SWAP_POP_DUP    : // ...XAB -> ...AA
+                                                       SWAP_POP_DUP        : // ...XA  -> ...AA
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? POP_X2              : // ...XAB -> ...AB
+                                stackEntryPresent0   ? POP_SWAP_POP        : // ...XAB -> ...A
+                                                       POP_X1              : // ...XA  -> ...A
+                        // !stackEntryNecessary2
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? SWAP_DUP_X1_SWAP    : // ...AB  -> ...AAB
+                                stackEntryPresent0   ? POP_DUP             : // ...AB  -> ...AA
+                                                       DUP                 : // ...A   -> ...AA
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? NOP                 : // ...AB  -> ...AB
+                                stackEntryPresent0   ? POP                 : // ...AB  -> ...A
+                                                       NOP                 : // ...A   -> ...A
+                // !stackEntryNecessary4
+                    stackEntryNecessary3 ?
+                        stackEntryNecessary2 ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? DUP_X2              : // ...XAB -> ...BXAB
+                                                       DUP_X2_POP          : // ...XAB -> ...BXA
+                            stackEntryPresent1   ?
+                                stackEntryNecessary0 ? SWAP_POP_DUP_X1     : // ...XAB -> ...BXB
+                                                       DUP_X2_POP2         : // ...XAB -> ...BX
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? POP_X2              : // ...XB  -> ...BXB
+                                                       SWAP                : // ...XB  -> ...BX
+                        stackEntryPresent2   ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? DUP2_X1_POP3_DUP_X1 : // ...XAB -> ...BAB
+                                                       SWAP_DUP_X1_POP3    : // ...XAB -> ...BA
+                            stackEntryPresent1   ?
+                                stackEntryNecessary0 ? DUP_X2_POP3_DUP     : // ...XAB -> ...BB
+                                                       POP2_X1             : // ...XAB -> ...B
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? SWAP_POP_DUP        : // ...XB  -> ...BB
+                                                       POP_X1              : // ...XB  -> ...B
+                        // !stackEntryNecessary2
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? DUP_X1              : // ...AB  -> ...BAB
+                                                       SWAP                : // ...AB  -> ...BA
+                            stackEntryPresent1   ?
+                                stackEntryNecessary0 ? SWAP_POP_DUP        : // ...AB  -> ...BB
+                                                       POP_X1              : // ...AB  -> ...B
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? DUP                 : // ...B   -> ...BB
+                                                       NOP                 : // ...B   -> ...B
+                    // !stackEntryNecessary3
+                        stackEntryNecessary2 ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? NOP                 : // ...XAB -> ...XAB
+                                stackEntryPresent0   ? POP                 : // ...XAB -> ...XA
+                                                       NOP                 : // ...XA  -> ...XA
+                            stackEntryPresent1   ?
+                                stackEntryNecessary0 ? POP_X1              : // ...XAB -> ...XB
+                                stackEntryPresent0   ? POP2                : // ...XAB -> ...X
+                                                       POP                 : // ...XA  -> ...X
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? NOP                 : // ...XB  -> ...XB
+                                stackEntryPresent0   ? POP                 : // ...XB  -> ...X
+                                                       NOP                 : // ...X   -> ...X
+                        stackEntryPresent2   ?
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? POP_X2              : // ...XAB -> ...AB
+                                stackEntryPresent0   ? POP_SWAP_POP        : // ...XAB -> ...A
+                                                       POP_X1              : // ...XA  -> ...A
+                            stackEntryPresent1   ?
+                                stackEntryNecessary0 ? POP2_X1             : // ...XAB -> ...B
+                                stackEntryPresent0   ? POP3                : // ...XAB -> ...
+                                                       POP2                : // ...XA  -> ...
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? POP_X1              : // ...XB  -> ...B
+                                stackEntryPresent0   ? POP2                : // ...XB  -> ...
+                                                       POP                 : // ...X   -> ...
+                        // !stackEntryNecessary2
+                            stackEntryNecessary1 ?
+                                stackEntryNecessary0 ? NOP                 : // ...AB  -> ...AB
+                                stackEntryPresent0   ? POP                 : // ...AB  -> ...A
+                                                       NOP                 : // ...A   -> ...A
+                            stackEntryPresent1   ?
+                                stackEntryNecessary0 ? POP_X1              : // ...AB  -> ...B
+                                stackEntryPresent0   ? POP2                : // ...AB  -> ...
+                                                       POP                 : // ...A   -> ...
+                            // !stackEntryNecessary1
+                                stackEntryNecessary0 ? NOP                 : // ...B   -> ...B
+                                stackEntryPresent0   ? POP                 : // ...B   -> ...
+                                                       NOP;                  // ...    -> ...
         }
 
 
@@ -1149,77 +1258,77 @@ implements   AttributeVisitor,
                 stackEntryNecessary2 ?
                     stackEntryNecessary3 ?
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? DUP2_X2          : // ...XYAB -> ...ABXYAB
-                                                      MOV2_X2          : // ...XYAB -> ...ABXY
+                            stackEntriesNecessary01 ? DUP2_X2           : // ...XYAB -> ...ABXYAB
+                                                      MOV2_X2           : // ...XYAB -> ...ABXY
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? NOP              : // ...XYAB -> ...XYAB
-                            stackEntriesPresent01   ? POP2             : // ...XYAB -> ...XY
-                                                      NOP              : // ...XY   -> ...XY
+                            stackEntriesNecessary01 ? NOP               : // ...XYAB -> ...XYAB
+                            stackEntriesPresent01   ? POP2              : // ...XYAB -> ...XY
+                                                      NOP               : // ...XY   -> ...XY
                     stackEntryPresent3 ?
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? UNSUPPORTED      : // ...XYAB -> ...ABYAB
-                                                      DUP2_X2_SWAP_POP : // ...XYAB -> ...ABY
+                            stackEntriesNecessary01 ? UNSUPPORTED       : // ...XYAB -> ...ABYAB
+                                                      DUP2_X2_SWAP_POP  : // ...XYAB -> ...ABY
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? POP_X3           : // ...XYAB -> ...YAB
-                            stackEntriesPresent01   ? POP2_SWAP_POP    : // ...XYAB -> ...Y
-                                                      POP_X1           : // ...XY   -> ...Y
+                            stackEntriesNecessary01 ? POP_X3            : // ...XYAB -> ...YAB
+                            stackEntriesPresent01   ? POP2_SWAP_POP     : // ...XYAB -> ...Y
+                                                      POP_X1            : // ...XY   -> ...Y
                     // !stackEntryPresent3
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? DUP2_X1          : // ...YAB -> ...ABYAB
-                                                      MOV2_X1          : // ...YAB -> ...ABY
+                            stackEntriesNecessary01 ? DUP2_X1           : // ...YAB -> ...ABYAB
+                                                      MOV2_X1           : // ...YAB -> ...ABY
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? NOP              : // ...YAB -> ...YAB
-                            stackEntriesPresent01   ? POP2             : // ...YAB -> ...Y
-                                                      NOP              : // ...Y   -> ...Y
+                            stackEntriesNecessary01 ? NOP               : // ...YAB -> ...YAB
+                            stackEntriesPresent01   ? POP2              : // ...YAB -> ...Y
+                                                      NOP               : // ...Y   -> ...Y
                 stackEntryPresent2 ?
                     stackEntryNecessary3 ?
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? UNSUPPORTED      : // ...XYAB -> ...ABXAB
-                                                      DUP2_X2_POP3     : // ...XYAB -> ...ABX
+                            stackEntriesNecessary01 ? UNSUPPORTED       : // ...XYAB -> ...ABXAB
+                                                      DUP2_X2_POP3      : // ...XYAB -> ...ABX
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? POP_X2           : // ...XYAB -> ...XAB
-                            stackEntriesPresent01   ? POP3             : // ...XYAB -> ...X
-                                                      POP              : // ...XY   -> ...X
+                            stackEntriesNecessary01 ? POP_X2            : // ...XYAB -> ...XAB
+                            stackEntriesPresent01   ? POP3              : // ...XYAB -> ...X
+                                                      POP               : // ...XY   -> ...X
                     stackEntryPresent3 ?
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? UNSUPPORTED      : // ...XYAB -> ...ABAB
-                                                      POP2_X2          : // ...XYAB -> ...AB
+                            stackEntriesNecessary01 ? UNSUPPORTED       : // ...XYAB -> ...ABAB
+                                                      POP2_X2           : // ...XYAB -> ...AB
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? POP2_X2          : // ...XYAB -> ...AB
-                            stackEntriesPresent01   ? POP4             : // ...XYAB -> ...
-                                                      POP2             : // ...XY   -> ...
+                            stackEntriesNecessary01 ? POP2_X2           : // ...XYAB -> ...AB
+                            stackEntriesPresent01   ? POP4              : // ...XYAB -> ...
+                                                      POP2              : // ...XY   -> ...
                     // !stackEntryPresent3
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? UNSUPPORTED      : // ...YAB -> ...ABAB
-                                                      POP_X2           : // ...YAB -> ...AB
+                            stackEntriesNecessary01 ? DUP2_X1_POP3_DUP2 : // ...YAB -> ...ABAB
+                                                      POP_X2            : // ...YAB -> ...AB
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? POP_X2           : // ...YAB -> ...AB
-                            stackEntriesPresent01   ? POP3             : // ...YAB -> ...
-                                                      POP              : // ...Y   -> ...
+                            stackEntriesNecessary01 ? POP_X2            : // ...YAB -> ...AB
+                            stackEntriesPresent01   ? POP3              : // ...YAB -> ...
+                                                      POP               : // ...Y   -> ...
                 // !stackEntryPresent2
                     stackEntryNecessary3 ?
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? DUP2_X1          : // ...XAB -> ...ABXAB
-                                                      MOV2_X1          : // ...XAB -> ...ABX
+                            stackEntriesNecessary01 ? DUP2_X1           : // ...XAB -> ...ABXAB
+                                                      MOV2_X1           : // ...XAB -> ...ABX
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? NOP              : // ...XAB -> ...XAB
-                            stackEntriesPresent01   ? POP2             : // ...XAB -> ...X
-                                                      NOP              : // ...X   -> ...X
+                            stackEntriesNecessary01 ? NOP               : // ...XAB -> ...XAB
+                            stackEntriesPresent01   ? POP2              : // ...XAB -> ...X
+                                                      NOP               : // ...X   -> ...X
                     stackEntryPresent3 ?
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? UNSUPPORTED      : // ...XAB -> ...ABAB
-                                                      POP_X2           : // ...XAB -> ...AB
+                            stackEntriesNecessary01 ? DUP2_X1_POP3_DUP2 : // ...XAB -> ...ABAB
+                                                      POP_X2            : // ...XAB -> ...AB
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? POP_X2           : // ...XAB -> ...AB
-                            stackEntriesPresent01   ? POP3             : // ...XAB -> ...
-                                                      POP              : // ...X   -> ...
+                            stackEntriesNecessary01 ? POP_X2            : // ...XAB -> ...AB
+                            stackEntriesPresent01   ? POP3              : // ...XAB -> ...
+                                                      POP               : // ...X   -> ...
                     // !stackEntryPresent3
                         stackEntriesNecessary45 ?
-                            stackEntriesNecessary01 ? DUP2             : // ...AB -> ...ABAB
-                                                      NOP              : // ...AB -> ...AB
+                            stackEntriesNecessary01 ? DUP2              : // ...AB -> ...ABAB
+                                                      NOP               : // ...AB -> ...AB
                         // !stackEntriesNecessary45
-                            stackEntriesNecessary01 ? NOP              : // ...AB -> ...AB
-                            stackEntriesPresent01   ? POP2             : // ...AB -> ...
+                            stackEntriesNecessary01 ? NOP               : // ...AB -> ...AB
+                            stackEntriesPresent01   ? POP2              : // ...AB -> ...
                                                       NOP;               // ...   -> ...
         }
 

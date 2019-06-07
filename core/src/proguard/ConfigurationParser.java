@@ -719,6 +719,14 @@ public class ConfigurationParser
     }
 
 
+    // Added for compatibility with older versions of ProGuard (see PGD-755).
+    public ClassSpecification parseClassSpecificationArguments()
+    throws ParseException, IOException
+    {
+        return parseClassSpecificationArguments(false);
+    }
+
+
     /**
      * Parses and returns a class specification.
      * @throws ParseException if the class specification contains a syntax error.

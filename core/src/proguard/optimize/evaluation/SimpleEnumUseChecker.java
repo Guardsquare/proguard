@@ -164,6 +164,16 @@ implements   ClassVisitor,
 
     // Implementations for ConstantVisitor.
 
+    public void visitAnyConstant(Clazz clazz, Constant constant) {}
+
+
+    public void visitStringConstant(Clazz clazz, StringConstant stringConstant)
+    {
+        // Unmark any simple enum class referenced in the string constant.
+        stringConstant.referencedClassAccept(complexEnumMarker);
+    }
+
+
     public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)
     {
         // Unmark the simple enum classes referenced in the method handle
@@ -183,6 +193,13 @@ implements   ClassVisitor,
     {
         // Unmark the simple enum classes referenced in the reference.
         refConstant.referencedClassAccept(referencedComplexEnumMarker);
+    }
+
+
+    public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
+    {
+        // Unmark any simple enum class referenced in the class constant.
+        classConstant.referencedClassAccept(complexEnumMarker);
     }
 
 

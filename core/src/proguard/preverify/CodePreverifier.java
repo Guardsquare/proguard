@@ -287,21 +287,27 @@ implements   AttributeVisitor
             int maximumVariablesSize = variables.size();
             int typeIndex = 0;
 
-            // Count the the number of verification types, ignoring any nulls at
-            // the end.
+            // Count the the number of verification types, ignoring any nulls
+            // at the end.
             for (int index = 0; index < maximumVariablesSize; index++)
             {
                 Value value = variables.getValue(index);
 
                 typeIndex++;
 
-                // Remember the maximum live type index.
+                // Remember the maximum live type (or uninitialized "this"
+                // type) index. A dead uninitialized "this" is not possible in
+                // plain Java code, but it is possible in optimized code and
+                // in other languages like Kotlin (in exception handlers).
+                // It has to be marked too ("flagThisUninit" in the JVM specs).
                 if (value != null &&
-                    livenessAnalyzer.isAliveBefore(offset, index))
+                    (livenessAnalyzer.isAliveBefore(offset, index) ||
+                     isUninitalizedThis(offset, index)))
                 {
                     typeCount = typeIndex;
 
-                    // Category 2 types that are alive are stored as single entries.
+                    // Category 2 types that are alive are stored as single
+                    // entries.
                     if (value.isCategory2())
                     {
                         index++;
@@ -325,16 +331,11 @@ implements   AttributeVisitor
             // Fill out the type.
             VerificationType type;
 
-            // Is the value not null and alive, or an uninitialized "this"?
-            // A dead uninitialzed "this" is not possible in Java, but it is
-            // possible in other languages like Kotlin (in exception handlers).
-            // It has to be marked too ("flagThisUninit" in the JVM specs).
+            // Is the value not null and alive (or uninitialized "this")?
             if (value != null &&
-                (offset == AT_METHOD_ENTRY                      ||
-                 livenessAnalyzer.isAliveBefore(offset, index)) ||
-                 (initializationFinder.isInitializer() &&
-                  index == 0                           &&
-                  offset <= initializationFinder.superInitializationOffset()))
+                (offset == AT_METHOD_ENTRY ||
+                 livenessAnalyzer.isAliveBefore(offset, index) ||
+                 isUninitalizedThis(offset, index)))
             {
                 type = correspondingVerificationType(programClass,
                                                      programMethod,
@@ -473,24 +474,23 @@ implements   AttributeVisitor
 
                     if (instructionOffsetValue.instructionOffsetCount() == 1)
                     {
+                        // Is it a method parameter?
                         if (instructionOffsetValue.isMethodParameter(0))
                         {
-                            // Are we in an instance initialization method,
-                            // before the super initialization, loading "this"?
-                            if (instructionOffsetValue.methodParameter(0) == 0 &&
-                                initializationFinder.isInitializer()           &&
-                                offset <= initializationFinder.superInitializationOffset())
+                            // Is the parameter an uninitialized "this"?
+                            if (isUninitalizedThis(offset,
+                                                   instructionOffsetValue.methodParameter(0)))
                             {
                                 // It's an UninitializedThis type.
                                 return VerificationTypeFactory.createUninitializedThisType();
                             }
                         }
+                        // Is it a newly created instance?
                         else if (instructionOffsetValue.isNewinstance(0))
                         {
                             int producerOffset = instructionOffsetValue.instructionOffset(0);
 
-                            // Is the reference type newly created and still
-                            // uninitialized?
+                            // Is it still uninitialized?
                             if (!initializationFinder.isInitializedBefore(offset, instructionOffsetValue))
                             {
                                 // It's an Uninitialized type.
@@ -637,6 +637,19 @@ implements   AttributeVisitor
         }
 
         return true;
+    }
+
+
+    /**
+     * Returns wheter the specified variable is an uninitialized "this" at the
+     * given instruction offset.
+     */
+    private boolean isUninitalizedThis(int offset, int variableIndex)
+    {
+        return
+            variableIndex == 0                   &&
+            initializationFinder.isInitializer() &&
+            offset <= initializationFinder.superInitializationOffset();
     }
 
 
