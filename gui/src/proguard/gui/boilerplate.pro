@@ -107,7 +107,7 @@
 -keep public class * extends android.content.ContentProvider
 
 
-# More Android - View classes. Keep all Android views and their constructors and setters.
+# More Android... - View classes. Keep all Android views and their constructors and setters.
 -keep public class * extends android.view.View {
       public <init>(android.content.Context);
       public <init>(android.content.Context, android.util.AttributeSet);
@@ -115,7 +115,7 @@
       public void set*(...);
 }
 
-# More Android - Layout classes. Keep classes with constructors that may be referenced from Android layout
+# More Android... - Layout classes. Keep classes with constructors that may be referenced from Android layout
 # files.
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
@@ -124,30 +124,30 @@
      public <init>(android.content.Context, android.util.AttributeSet, int);
 }
 
-# More Android - Contexts. Keep all extensions of Android Context.
+# More Android... - Contexts. Keep all extensions of Android Context.
 -keepclassmembers class * extends android.content.Context {
     public void *(android.view.View);
     public void *(android.view.MenuItem);
 }
 
-# More Android - Parcelables. Keep all extensions of Android Parcelables.
+# More Android... - Parcelables. Keep all extensions of Android Parcelables.
 -keepclassmembers class * implements android.os.Parcelable {
     static ** CREATOR;
 }
 
-# More Android - R classes. Keep all fields of Android R classes.
+# More Android... - R classes. Keep all fields of Android R classes.
 -keepclassmembers class **.R$* {
     public static <fields>;
 }
 
 
-# Android annotations - Support annotations. Support annotations for Android.
+# Android annotations... - Support annotations. Support annotations for Android.
 -keep @android.support.annotation.Keep class *
 -keepclassmembers class * {
     @android.support.annotation.Keep *;
 }
 
-# Android annotations - Facebook keep annotations. Keep annotations for Facebook.
+# Android annotations... - Facebook keep annotations. Keep annotations for Facebook.
 -keep @com.facebook.proguard.annotations.DoNotStrip class *
 -keepclassmembers class * {
     @com.facebook.proguard.annotations.DoNotStrip *;
@@ -157,7 +157,7 @@
     @com.facebook.proguard.annotations.KeepGettersAndSetters *;
 }
 
-# Android annotations - ProGuard annotations. Keep annotations for ProGuard.
+# Android annotations... - ProGuard annotations. Keep annotations for ProGuard.
 -keep @proguard.annotation.Keep class *
 -keepclassmembers class * {
     @proguard.annotation.Keep *;
@@ -207,7 +207,7 @@
 }
 -keepnames @proguard.annotation.KeepName class *
 
-# Android annotations - Google keep annotations. Keep annotations for Google.
+# Android annotations... - Google keep annotations. Keep annotations for Google.
 -keepclassmembernames class * {
     @com.google.android.gms.common.annotation.KeepName *;
 }
@@ -215,20 +215,20 @@
 
 
 
-# Android libraries - Design support libraries. Keep setters for design support libraries.
+# Android libraries... - Design support libraries. Keep setters for design support libraries.
 -keep !abstract class android.support.design.widget.* implements
 android.support.design.widget.CoordinatorLayout$Behavior {
     <init>(android.content.Context, android.util.AttributeSet);
 }
 -keepnames class android.support.design.widget.CoordinatorLayout
 
-# Android libraries - Kotlin. Keep some methods for Kotlin for Android Development.
+# Android libraries... - Kotlin. Keep some methods for Kotlin for Android Development.
 -keepclassmembers,allowshrinking,allowobfuscation class
 kotlin.jvm.internal.Intrinsics {
     void throwNpe();
 }
 
-# Android libraries - Google Play Services. Keep classes for Google Play Services.
+# Android libraries... - Google Play Services. Keep classes for Google Play Services.
 -keep class com.google.android.gms.tagmanager.TagManagerService
 -keep class com.google.android.gms.measurement.AppMeasurement
 -keep class com.google.android.gms.measurement.AppMeasurementReceiver
@@ -257,7 +257,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable {
     public static final java.lang.String NULL;
 }
 
-# Android libraries - Firebase. Keep classes for Firebase for Android.
+# Android libraries... - Firebase. Keep classes for Firebase for Android.
 -keep class com.google.firebase.FirebaseApp
 -keep class com.google.firebase.auth.FirebaseAuth
 -keep class com.google.firebase.crash.FirebaseCrash
@@ -265,16 +265,16 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable {
 com.google.firebase.database.connection.idl.IPersistentConnectionImpl
 -keep class com.google.firebase.iid.FirebaseInstanceId
 
-# Android libraries - Google Cloud Messaging. Keep classes for Google Cloud Messaging.
+# Android libraries... - Google Cloud Messaging. Keep classes for Google Cloud Messaging.
 -keep,allowshrinking class **.GCMIntentService
 
-# Android libraries - Guava. Keep classes for the Guava libraries.
+# Android libraries... - Guava. Keep classes for the Guava libraries.
 -keepclassmembers class com.google.common.primitives.UnsignedBytes$LexicographicalComparatorHolder$UnsafeComparator
 {
     sun.misc.Unsafe theUnsafe;
 }
 
-# Android libraries - RxJava. Keep classes for RxJava.
+# Android libraries... - RxJava. Keep classes for RxJava.
 -keepclassmembers class rx.internal.util.unsafe.*Queue {
     long producerIndex;
     long consumerIndex;
@@ -283,13 +283,13 @@ com.google.firebase.database.connection.idl.IPersistentConnectionImpl
     rx.internal.util.atomic.LinkedQueueNode consumerNode;
 }
 
-# Android libraries - ActionBarSherlock. Keep classes for ActionBarSherlock.
+# Android libraries... - ActionBarSherlock. Keep classes for ActionBarSherlock.
 -keepclassmembers !abstract class * extends
 com.actionbarsherlock.ActionBarSherlock {
     <init>(android.app.Activity, int);
 }
 
-# Android libraries - GSON. Keep classes for the GSON library.
+# Android libraries... - GSON. Keep classes for the GSON library.
 -keepclassmembers class * {
     @com.google.gson.annotations.Expose <fields>;
 }
@@ -304,7 +304,7 @@ com.actionbarsherlock.ActionBarSherlock {
 }
 
 
-# Android libraries - Dagger code. Keep the classes that Dagger accesses
+# Android libraries... - Dagger code. Keep the classes that Dagger accesses
 # by reflection.
 -keep class **$$ModuleAdapter
 -keep class **$$InjectAdapter
@@ -325,7 +325,7 @@ com.actionbarsherlock.ActionBarSherlock {
     @dagger.** *;
 }
 
-# Android libraries - Butterknife code. Keep the classes that Butterknife accesses
+# Android libraries... - Butterknife code. Keep the classes that Butterknife accesses
 # by reflection.
 -keepclasseswithmembers class * {
     @butterknife.* <fields>;
@@ -358,7 +358,7 @@ com.actionbarsherlock.ActionBarSherlock {
 -keep,allowobfuscation @interface butterknife.*
 -dontwarn butterknife.internal.ButterKnifeProcessor
 
-# Android libraries - Roboguice. Keep classes for RoboGuice.
+# Android libraries... - Roboguice. Keep classes for RoboGuice.
 -keepclassmembers class * implements com.google.inject.Module {
     <init>(android.content.Context);
     <init>();
@@ -375,17 +375,17 @@ findFragmentByTag(java.lang.String);
 -keep,allowobfuscation class roboguice.inject.SharedPreferencesProvider$PreferencesNameHolder
 -dontnote com.google.inject.Module
 
-# Android libraries - Otto. Keep classes for Otto.
+# Android libraries... - Otto. Keep classes for Otto.
 -keepclassmembers,allowobfuscation class * {
     @com.squareup.otto.* <methods>;
 }
 
-# Android libraries - Greenrobot EventBus V2.
+# Android libraries... - Greenrobot EventBus V2.
 -keepclassmembers class * {
     public void onEvent*(***);
 }
 
-# Android libraries - Greenrobot EventBus V3.
+# Android libraries... - Greenrobot EventBus V3.
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
 -keepclassmembers class * extends
 org.greenrobot.eventbus.util.ThrowableFailureEvent {
@@ -395,7 +395,7 @@ org.greenrobot.eventbus.util.ThrowableFailureEvent {
 -keepclassmembers,allowobfuscation class ** {
     @org.greenrobot.eventbus.Subscribe <methods>;
 }
-# Android libraries - Google API. Keep classes and field for Google API.
+# Android libraries... - Google API. Keep classes and field for Google API.
 -keepclassmembers class * {
     @com.google.api.client.util.Key       <fields>;
     @com.google.api.client.util.Value     <fields>;
@@ -406,17 +406,17 @@ org.greenrobot.eventbus.util.ThrowableFailureEvent {
 handleExceptionForNewInstance(java.lang.Exception, java.lang.Class);
 }
 
-# Android libraries - Facebook API. Keep methods for the Facebook API.
+# Android libraries... - Facebook API. Keep methods for the Facebook API.
 -keepclassmembers interface com.facebook.model.GraphObject {
     <methods>;
 }
 
-# Android libraries - Javascript interfaces. Keep all methods from Android Javascripts.
+# Android libraries... - Javascript interfaces. Keep all methods from Android Javascripts.
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
 
-# Android libraries - Compatibility classes. Avoid merging and inlining compatibility classes.
+# Android libraries... - Compatibility classes. Avoid merging and inlining compatibility classes.
 -keep,allowshrinking,allowobfuscation class
     android.support.**Compat*,
     android.support.**Honeycomb*,
@@ -439,7 +439,7 @@ handleExceptionForNewInstance(java.lang.Exception, java.lang.Class);
 -keep,allowobfuscation,allowshrinking @android.annotation.TargetApi
 class android.support.** { *; }
 
-# Android libraries - Signatures. Keep setters for signature optimized with class from API level 19 or
+# Android libraries... - Signatures. Keep setters for signature optimized with class from API level 19 or
 # higher.
 -keep,allowshrinking,allowobfuscation class
 android.support.v4.app.FragmentState$InstantiationException {
@@ -450,18 +450,18 @@ android.support.v4.app.Fragment$InstantiationException {
     <init>(...);
 }
 
-# Android libraries - Fields accessed before initialization. Keep fields that are accessed before
+# Android libraries... - Fields accessed before initialization. Keep fields that are accessed before
 # initialization.
 -keepclassmembers,allowshrinking,allowobfuscation class
 android.support.**,com.google.android.gms.**.internal.** {
     !static final <fields>;
 }
 
-# Android libraries - Sensitive classes. Keep sensitive classes.
+# Android libraries... - Sensitive classes. Keep sensitive classes.
 -keep,allowshrinking,allowobfuscation class
 com.google.android.gms.**.z* { *; }
 
-# Android libraries - Injection. Keep classes for injection in Guice/RoboGuice/Dagger/ActionBarSherlock.
+# Android libraries... - Injection. Keep classes for injection in Guice/RoboGuice/Dagger/ActionBarSherlock.
 -keep,allowobfuscation class * implements com.google.inject.Provider
 -keep,allowobfuscation @interface javax.inject.**          { *; }
 -keep,allowobfuscation @interface com.google.inject.**     { *; }
@@ -478,7 +478,7 @@ com.google.android.gms.**.z* { *; }
     @com.google.inject.Inject <init>(...);
 }
 
-# Android libraries - Retrofit. Keep classes for Retrofit.
+# Android libraries... - Retrofit. Keep classes for Retrofit.
 -keepclassmembers @retrofit.http.RestMethod @interface * {
     <methods>;
 }
@@ -488,7 +488,7 @@ com.google.android.gms.**.z* { *; }
 -keep,allowobfuscation @retrofit.http.RestMethod @interface *
 -keep,allowobfuscation @interface retrofit2.http.**
 
-# Android libraries - Google inject. Keep classes for Google inject.
+# Android libraries... - Google inject. Keep classes for Google inject.
 -keepclassmembers class * {
     void finalizeReferent();
 }
@@ -499,7 +499,7 @@ startFinalizer(java.lang.Class,java.lang.Object);
 -keepnames class com.google.inject.internal.util.$FinalizableReference
 
 
-# Android libraries - Jackson. Keep classes for Jackson.
+# Android libraries... - Jackson. Keep classes for Jackson.
 -keepclassmembers class * {
     @org.codehaus.jackson.annotate.* <methods>;
 }
@@ -509,7 +509,7 @@ startFinalizer(java.lang.Class,java.lang.Object);
     boolean is*();
 }
 
-# Android libraries - Crashlytics. Keep classes for Crashlytics.
+# Android libraries... - Crashlytics. Keep classes for Crashlytics.
 -keep class * extends io.fabric.sdk.android.Kit
 
 

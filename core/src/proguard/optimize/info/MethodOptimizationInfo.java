@@ -170,6 +170,12 @@ public class MethodOptimizationInfo
     }
 
 
+    public boolean assignsFinalField()
+    {
+        return true;
+    }
+
+
     public boolean returnsWithNonEmptyStack()
     {
         return false;

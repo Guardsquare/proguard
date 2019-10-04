@@ -154,7 +154,7 @@ implements   ClassVisitor,
 
             // Don't merge classes that must be preserved.
             !KeepMarker.isKept(programClass) &&
-            !KeepMarker.isKept(targetClass)  &&
+            !KeepMarker.isKept(targetClass) &&
 
             // Only merge classes that haven't been retargeted yet.
             getTargetClass(programClass) == null &&
@@ -282,6 +282,13 @@ implements   ClassVisitor,
             // The classes must not shadow each others non-private methods.
             !shadowsAnyMethods(programClass, targetClass) &&
             !shadowsAnyMethods(targetClass, programClass) &&
+
+            (!DETAILS || print(programClass, "No type variables/parameterized types?")) &&
+
+            // The two classes must not have a signature attribute as type variables
+            // and/or parameterized types can not always be merged.
+            !hasSignatureAttribute(programClass) &&
+            !hasSignatureAttribute(targetClass)  &&
 
             (!DETAILS || print(programClass, "No non-copiable attributes?")) &&
 
@@ -517,6 +524,22 @@ implements   ClassVisitor,
         return set;
     }
 
+
+    /**
+     * Returns whether the given class has a Signature attributes containing
+     * type variables or parameterized types.
+     */
+    private boolean hasSignatureAttribute(Clazz clazz)
+    {
+        AttributeCounter counter = new AttributeCounter();
+
+        clazz.attributesAccept(
+            new AttributeNameFilter(
+            new FixedStringMatcher(ClassConstants.ATTR_Signature),
+                counter));
+
+        return counter.getCount() > 0;
+    }
 
     /**
      * Returns whether the two given classes have fields with the same

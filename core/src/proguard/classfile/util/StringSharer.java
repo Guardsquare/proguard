@@ -69,7 +69,7 @@ implements   ClassVisitor,
         if (libraryClass.interfaceNames != null)
         {
             String[] interfaceNames   = libraryClass.interfaceNames;
-            Clazz[]  interfaceClasses = new Clazz[interfaceNames.length];
+            Clazz[]  interfaceClasses = libraryClass.interfaceClasses;
 
             for (int index = 0; index < interfaceNames.length; index++)
             {

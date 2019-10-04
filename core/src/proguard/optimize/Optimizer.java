@@ -485,81 +485,83 @@ public class Optimizer
                 new MethodFinalizer(methodMarkingFinalCounter))));
         }
 
-        // We'll repeatedly loop over all classes to mark read/write fields.
-        // side-effect methods, and escaping parameters.
-        final MutableBoolean repeatTrigger = new MutableBoolean();
+        // Give initial marks to read/written fields. side-effect methods, and
+        // escaping parameters.
+        final MutableBoolean mutableBoolean = new MutableBoolean();
 
-        // Create the various markers.
-        ReadWriteFieldMarker readWriteFieldMarker =
-            new ReadWriteFieldMarker(repeatTrigger);
-
-        if (!fieldRemovalWriteonly)
+        if (fieldRemovalWriteonly)
         {
-            // Mark all fields as read/write.
+            // Mark fields that are read or written. The written flag is
+            // currently only needed for the write-only counter later on.
+            programClassPool.classesAccept(
+                new AllMethodVisitor(
+                new AllAttributeVisitor(
+                new AllInstructionVisitor(
+                new ReadWriteFieldMarker(mutableBoolean)))));
+        }
+        else
+        {
+            // Mark all fields as read and written.
             programClassPool.classesAccept(
                 new AllFieldVisitor(
-                readWriteFieldMarker));
+                new ReadWriteFieldMarker(mutableBoolean)));
         }
-
-        SideEffectMethodMarker sideEffectMethodMarker =
-            new SideEffectMethodMarker(repeatTrigger);
-
-        ParameterEscapeMarker parameterEscapeMarker =
-            new ParameterEscapeMarker(repeatTrigger);
 
         // Mark methods based on their headers.
         programClassPool.classesAccept(
             new AllMethodVisitor(
             new OptimizationInfoMemberFilter(
             new MultiMemberVisitor(
-                sideEffectMethodMarker,
-                parameterEscapeMarker
+                new SideEffectMethodMarker(mutableBoolean),
+                new ParameterEscapeMarker(mutableBoolean)
             ))));
 
-        {
-            // Mark fields based on the method instructions in methods
-            // without editable optimization info.
-            programClassPool.accept(
-                new TimedClassPoolVisitor("Marking field usage in kept methods",
-                new AllMethodVisitor(
-                new OptimizationInfoMemberFilter(
-                    null,
+        // Now repeatedly loop over all classes to mark read/written fields.
+        // side-effect methods, and escaping parameters. Marked elements like
+        // write-only fields or side-effect methods can each time affect the
+        // subsequent analysis, such as instructions that are used. We'll loop
+        // until the markers no longer trigger the repeat flag, meaning that
+        // all marks have converged.
+        //
+        // We'll mark classes in parallel threads, but with a shared repeat
+        // trigger.
+        final MutableBoolean repeatTrigger = new MutableBoolean();
 
-                    // member has no editable optimization info
-                    new AllAttributeVisitor(
-                    new AllInstructionVisitor(
-                    readWriteFieldMarker))))));
-
-            ParallelAllClassVisitor.ClassVisitorFactory markingClassVisitor =
-                new ParallelAllClassVisitor.ClassVisitorFactory()
+        programClassPool.accept(
+            new RepeatedClassPoolVisitor(repeatTrigger,
+            new TimedClassPoolVisitor("Marking fields, methods, and parameters",
+            new ParallelAllClassVisitor(
+            new ParallelAllClassVisitor.ClassVisitorFactory()
+            {
+                public ClassVisitor createClassVisitor()
                 {
-                    public ClassVisitor createClassVisitor()
-                    {
-                        ReferenceTracingValueFactory referenceTracingValueFactory1 =
-                            new ReferenceTracingValueFactory(new TypedReferenceValueFactory());
+                    ReferenceTracingValueFactory referenceTracingValueFactory1 =
+                        new ReferenceTracingValueFactory(new TypedReferenceValueFactory());
+                    PartialEvaluator partialEvaluator =
+                        new PartialEvaluator(referenceTracingValueFactory1,
+                                             new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory1)),
+                                             false,
+                                             referenceTracingValueFactory1);
+                    InstructionUsageMarker instructionUsageMarker =
+                        new InstructionUsageMarker(partialEvaluator, false);
 
-                        PartialEvaluator partialEvaluator =
-                            new PartialEvaluator(referenceTracingValueFactory1,
-                                                 new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory1)),
-                                                 false,
-                                                 referenceTracingValueFactory1);
+                    // Create the various markers.
+                    // They will be used as code attribute visitors and
+                    // instruction visitors this time.
+                    // We're currently marking read and written fields once,
+                    // outside of these iterations, for better performance,
+                    // at the cost of some effectiveness (test2209).
+                    //ReadWriteFieldMarker readWriteFieldMarker =
+                    //    new ReadWriteFieldMarker(repeatTrigger);
+                    SideEffectMethodMarker sideEffectMethodMarker =
+                        new SideEffectMethodMarker(repeatTrigger);
+                    ParameterEscapeMarker parameterEscapeMarker =
+                        new ParameterEscapeMarker(repeatTrigger, partialEvaluator, false);
 
-                        InstructionUsageMarker instructionUsageMarker =
-                            new InstructionUsageMarker(partialEvaluator, false);
-
-                        // Create the various markers.
-                        ReadWriteFieldMarker readWriteFieldMarker =
-                            new ReadWriteFieldMarker(repeatTrigger);
-
-                        SideEffectMethodMarker sideEffectMethodMarker =
-                            new SideEffectMethodMarker(repeatTrigger);
-
-                        ParameterEscapeMarker parameterEscapeMarker =
-                            new ParameterEscapeMarker(repeatTrigger, partialEvaluator, false);
-
-                        return
-                            new AllMethodVisitor(
-                            new OptimizationInfoMemberFilter(
+                    return
+                        new AllMethodVisitor(
+                        new OptimizationInfoMemberFilter(
+                            // Methods with editable optimization info.
                             new AllAttributeVisitor(
                             new DebugAttributeVisitor("Marking fields, methods, and parameters",
                             new MultiAttributeVisitor(
@@ -569,22 +571,33 @@ public class Optimizer
                                 new AllInstructionVisitor(
                                 instructionUsageMarker.necessaryInstructionFilter(
                                 new MultiInstructionVisitor(
-                                    readWriteFieldMarker,
+                                    // All read / write field instruction are already marked
+                                    // for all code (see above), there is no need to mark them again.
+                                    // If unused code is removed that accesses fields, the
+                                    // respective field will be removed in the next iteration.
+                                    // This is a trade-off between performance and correctness.
+                                    // TODO: improve the marking for read / write fields after
+                                    //       performance improvements have been implemented.
+                                    //readWriteFieldMarker,
                                     sideEffectMethodMarker,
                                     parameterEscapeMarker
-                                )))
-                            )))));
-                    }
-                };
+                                ))))))
 
-            // Mark fields, methods and parameters based on the method instructions
-            // for methods that have editable optimization info.
-            programClassPool.accept(
-                new RepeatedClassPoolVisitor(repeatTrigger,
-                new TimedClassPoolVisitor("Marking fields, methods and parameters",
-                new ParallelAllClassVisitor(
-                markingClassVisitor))));
-        }
+                            // TODO: disabled for now, see comment above.
+                            // Methods without editable optimization info, for
+                            // which we can't mark side-effects or escaping
+                            // parameters, so we can save some effort.
+                            //new AllAttributeVisitor(
+                            //new DebugAttributeVisitor("Marking fields",
+                            //new MultiAttributeVisitor(
+                            //    partialEvaluator,
+                            //    instructionUsageMarker,
+                            //    new AllInstructionVisitor(
+                            //    instructionUsageMarker.necessaryInstructionFilter(
+                            //    readWriteFieldMarker)))))
+                            ));
+                }
+            }))));
 
         if (methodMarkingSynchronized)
         {
@@ -1069,6 +1082,7 @@ public class Optimizer
                         new BackwardBranchMarker(),
                         new AccessMethodMarker(),
                         new SynchronizedBlockMethodMarker(),
+                        new FinalFieldAssignmentMarker(),
                         new NonEmptyStackReturnMarker(stackSizeComputer)
                     ))
                 ))))),

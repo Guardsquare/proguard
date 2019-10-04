@@ -502,6 +502,9 @@ implements   ClassVisitor,
             Label fromJsonFieldCaseLabel = caseLabelByJavaFieldName.get(programField.getName(programClass));
             if (fromJsonFieldCaseLabel != null)
             {
+                // Make sure the field is not final anymore so we can safely write it from the injected method.
+                programField.accept(programClass, new MemberAccessFlagCleaner(ClassConstants.ACC_FINAL));
+
                 // Check if value is null
                 CodeAttributeEditor.Label isNull = codeAttributeEditor.label();
                 ____.label(fromJsonFieldCaseLabel)

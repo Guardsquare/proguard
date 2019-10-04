@@ -48,6 +48,8 @@ implements   InstructionVisitor,
 
 
     private final MutableBoolean repeatTrigger;
+    private final boolean        markReading;
+    private final boolean        markWriting;
 
 
     // Parameters for the visitor methods.
@@ -58,11 +60,32 @@ implements   InstructionVisitor,
 
 
     /**
-     * Creates a new ReadWriteFieldMarker.
+     * Creates a new ReadWriteFieldMarker that marks fields that are read and
+     * fields that are written.
+     * @param repeatTrigger a mutable boolean flag that is set whenever a field
+     *                      gets a mark that it didn't have before.
      */
     public ReadWriteFieldMarker(MutableBoolean repeatTrigger)
     {
+        this(repeatTrigger, true, true);
+    }
+
+
+    /**
+     * Creates a new ReadWriteFieldMarker that marks fields that are read and
+     * fields that are written, as specified.
+     * @param repeatTrigger a mutable boolean flag that is set whenever a field
+     *                      gets a mark that it didn't have before.
+     * @param markReading   specifies whether fields may be marked as read.
+     * @param markWriting   specifies whether fields may be marked as written.
+     */
+    public ReadWriteFieldMarker(MutableBoolean repeatTrigger,
+                                boolean        markReading,
+                                boolean        markWriting)
+    {
         this.repeatTrigger = repeatTrigger;
+        this.markReading   = markReading;
+        this.markWriting   = markWriting;
     }
 
 
@@ -132,22 +155,22 @@ implements   InstructionVisitor,
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
         // Mark the field if it is being read from.
-        if (reading)
+        if (markReading && reading)
         {
-            markAsRead(programField);
+            markAsRead(programClass, programField);
         }
 
         // Mark the field if it is being written to.
-        if (writing)
+        if (markWriting && writing)
         {
-            markAsWritten(programField);
+            markAsWritten(programClass, programField);
         }
     }
 
 
     // Small utility methods.
 
-    private void markAsRead(Field field)
+    private void markAsRead(Clazz clazz, Field field)
     {
         FieldOptimizationInfo fieldOptimizationInfo =
             FieldOptimizationInfo.getFieldOptimizationInfo(field);
@@ -155,6 +178,11 @@ implements   InstructionVisitor,
         if (!fieldOptimizationInfo.isRead() &&
             fieldOptimizationInfo instanceof ProgramFieldOptimizationInfo)
         {
+            if (DEBUG)
+            {
+                System.out.println("ReadWriteFieldMarker: marking as read: "+clazz.getName()+"."+field.getName(clazz));
+            }
+
             ((ProgramFieldOptimizationInfo)fieldOptimizationInfo).setRead();
 
             repeatTrigger.set();
@@ -168,7 +196,7 @@ implements   InstructionVisitor,
     }
 
 
-    private void markAsWritten(Field field)
+    private void markAsWritten(Clazz clazz, Field field)
     {
         FieldOptimizationInfo fieldOptimizationInfo =
             FieldOptimizationInfo.getFieldOptimizationInfo(field);
@@ -176,6 +204,11 @@ implements   InstructionVisitor,
         if (!fieldOptimizationInfo.isWritten() &&
             fieldOptimizationInfo instanceof ProgramFieldOptimizationInfo)
         {
+            if (DEBUG)
+            {
+                System.out.println("ReadWriteFieldMarker: marking as written: "+clazz.getName()+"."+field.getName(clazz));
+            }
+
             ((ProgramFieldOptimizationInfo)fieldOptimizationInfo).setWritten();
 
             repeatTrigger.set();

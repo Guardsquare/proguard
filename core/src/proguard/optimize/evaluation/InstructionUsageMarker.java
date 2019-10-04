@@ -41,6 +41,14 @@ import java.util.*;
  * This AttributeVisitor marks necessary instructions in the code attributes
  * that it visits, based on partial evaluation.
  *
+ * @see NoSideEffectClassMarker
+ * @see SideEffectClassMarker
+ * @see ReadWriteFieldMarker
+ * @see NoSideEffectMethodMarker
+ * @see NoExternalSideEffectMethodMarker
+ * @see SideEffectMethodMarker
+ * @see ParameterEscapeMarker
+ *
  * @author Eric Lafortune
  */
 public class InstructionUsageMarker
@@ -705,7 +713,17 @@ implements   AttributeVisitor
                     break;
 
                 case InstructionConstants.OP_PUTFIELD:
-                    createReverseDependencies(clazz, offset, constantInstruction);
+                    // We generally have to mark the putfield instruction,
+                    // unless it's never read. We can reverse the dependencies
+                    // if it's a field of a recently created instance.
+                    if (sideEffectInstructionChecker.hasSideEffects(clazz,
+                                                                    method,
+                                                                    codeAttribute,
+                                                                    offset,
+                                                                    constantInstruction))
+                    {
+                        createReverseDependencies(clazz, offset, constantInstruction);
+                    }
                     break;
 
                 case InstructionConstants.OP_INVOKEVIRTUAL:

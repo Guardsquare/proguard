@@ -368,6 +368,7 @@ implements ClassVisitor,
         switch (constantInstruction.opcode)
         {
             case InstructionConstants.OP_INVOKEVIRTUAL:
+            case InstructionConstants.OP_INVOKESPECIAL:
             case InstructionConstants.OP_INVOKEINTERFACE:
             case InstructionConstants.OP_INVOKESTATIC:
                 this.referencingOffset   = offset;

@@ -22,6 +22,10 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.attribute.annotation.target.*;
+import proguard.classfile.attribute.annotation.target.visitor.*;
+import proguard.classfile.attribute.annotation.visitor.TypeAnnotationVisitor;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.preverification.visitor.*;
 import proguard.classfile.attribute.visitor.*;
@@ -48,7 +52,10 @@ implements   AttributeVisitor,
              VerificationTypeVisitor,
              LineNumberInfoVisitor,
              LocalVariableInfoVisitor,
-             LocalVariableTypeInfoVisitor
+             LocalVariableTypeInfoVisitor,
+             TypeAnnotationVisitor,
+             TargetInfoVisitor,
+             LocalVariableTargetElementVisitor
 {
     //*
     private static final boolean DEBUG = false;
@@ -647,6 +654,12 @@ implements   AttributeVisitor,
     }
 
 
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        typeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
+    }
+
+
     // Implementations for InstructionVisitor.
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {}
@@ -821,6 +834,44 @@ implements   AttributeVisitor,
         localVariableTypeInfo.u2length  = endPC - startPC;
     }
 
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        // Update all local variable targets.
+        typeAnnotation.targetInfoAccept(clazz, this);
+    }
+
+
+    // Implementations for TargetInfoVisitor.
+
+    public void visitAnyTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TargetInfo targetInfo) {}
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        // Update the offsets of the variables.
+        localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
+    }
+
+
+    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
+    {
+        // Update the offset.
+        offsetTargetInfo.u2offset = newInstructionOffset(offsetTargetInfo.u2offset);
+    }
+
+
+    // Implementations for LocalVariableTargetElementVisitor.
+
+    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
+    {
+        // Update the variable start offset and length.
+        // Be careful to update the length first.
+        localVariableTargetElement.u2length  = newBranchOffset(localVariableTargetElement.u2startPC, localVariableTargetElement.u2length);
+        localVariableTargetElement.u2startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
+    }
 
     // Small utility methods.
 

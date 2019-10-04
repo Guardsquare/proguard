@@ -283,6 +283,12 @@ implements   MemberVisitor,
                 markEscapingParameters(method, offset, 0);
                 break;
 
+            case InstructionConstants.OP_GETFIELD:
+                // Mark the owner of the field. The owner sort of escapes when
+                // the field is retrieved. [DGD-1279] (test2181)
+                markEscapingParameters(method, offset, 0);
+                break;
+
             case InstructionConstants.OP_PUTFIELD:
                 // Mark reference parameters whose field is modified.
                 markModifiedParameters(method,

@@ -47,6 +47,7 @@ extends      MethodOptimizationInfo
     private volatile boolean accessesPackageCode      = false;
     private volatile boolean accessesProtectedCode    = false;
     private volatile boolean hasSynchronizedBlock     = false;
+    private volatile boolean assignsFinalField        = false;
     private volatile boolean returnsWithNonEmptyStack = false;
     private volatile int     invocationCount          = 0;
     private volatile int     parameterSize            = 0;
@@ -204,6 +205,18 @@ extends      MethodOptimizationInfo
     }
 
 
+    public void setAssignsFinalField()
+    {
+        assignsFinalField = true;
+    }
+
+
+    public boolean assignsFinalField()
+    {
+        return assignsFinalField;
+    }
+
+
     public void setReturnsWithNonEmptyStack()
     {
         returnsWithNonEmptyStack = true;
@@ -254,7 +267,9 @@ extends      MethodOptimizationInfo
 
     public boolean hasUnusedParameters()
     {
-        return (usedParameters | -1L << parameterSize) != -1L;
+        return parameterSize < 64 ?
+                  (usedParameters | -1L << parameterSize) != -1L :
+                   usedParameters                         != -1L ;
     }
 
 
@@ -495,6 +510,7 @@ extends      MethodOptimizationInfo
         this.accessesPackageCode   |= other.accessesPackageCode();
         this.accessesProtectedCode |= other.accessesProtectedCode();
         this.hasSynchronizedBlock  |= other.hasSynchronizedBlock();
+        this.assignsFinalField     |= other.assignsFinalField();
 
         // Some of these should actually be recomputed, since these are
         // relative to the method:

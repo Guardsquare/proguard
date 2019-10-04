@@ -116,6 +116,7 @@ implements   MemberVisitor,
             programMethod.referencedClasses =
                 shrinkReferencedClasses(programMethod,
                                         descriptor,
+                                        0,
                                         programMethod.referencedClasses);
 
             // Finally, update the descriptor itself.
@@ -172,6 +173,7 @@ implements   MemberVisitor,
             signatureAttribute.referencedClasses =
                 shrinkReferencedClasses(method,
                                         signature,
+                                        syntheticParametersSize,
                                         signatureAttribute.referencedClasses);
 
             if (DEBUG)
@@ -304,15 +306,18 @@ implements   MemberVisitor,
      */
     private Clazz[] shrinkReferencedClasses(Method  method,
                                             String  descriptor,
+                                            int     syntheticParametersSize,
                                             Clazz[] referencedClasses)
     {
         if (referencedClasses != null)
         {
+            // Signatures only start after any synthetic parameters.
             // All parameters of non-static methods are shifted by one in the local
             // variable frame.
             int parameterIndex =
-                (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
-                    0 : 1;
+                syntheticParametersSize +
+                ((method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
+                     0 : 1);
 
             InternalTypeEnumeration internalTypeEnumeration =
                 new InternalTypeEnumeration(descriptor);

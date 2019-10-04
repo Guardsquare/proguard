@@ -135,68 +135,52 @@ implements   MemberVisitor
                              String  descriptor,
                              boolean isField)
     {
-        // The class member may be in a different class, as of Java 1.2.
-        // The class member may be private in a nest member, as of Java 11.
-        boolean containsWildcards =
-            (name       != null && (name.indexOf('*')       >= 0 || name.indexOf('?')       >= 0)) ||
-            (descriptor != null && (descriptor.indexOf('*') >= 0 || descriptor.indexOf('?') >= 0));
-
-        // First look for the class member in the class itself, ignoring any
-        // access constraints.
-        member =
-            containsWildcards ? null :
-            isField           ? clazz.findField(name, descriptor) :
-                                clazz.findMethod(name, descriptor);
-
-        if (member != null)
+        try
         {
-            // We've found the class member.
-            // Also remember the corresponding class.
-            this.clazz = clazz;
-        }
-        else if (searchHierarchy || containsWildcards)
-        {
-            // Otherwise look for the class member in the hierarchy of
-            // superclasses and interfaces. with access constraints and
-            // possible wildcards.
-            this.clazz = null;
+            boolean containsWildcards =
+                (name       != null && (name.indexOf('*')       >= 0 || name.indexOf('?')       >= 0)) ||
+                (descriptor != null && (descriptor.indexOf('*') >= 0 || descriptor.indexOf('?') >= 0));
 
+            this.clazz  = null;
+            this.member = null;
+
+            // The class member may be in a different class, as of Java 1.2.
+            // The class member may be private in a nest member, as of Java 11.
             // Check the accessibility from the referencing class, if any
-            // (non-dummy).
+            // (non-dummy), taking into account access flags and nests.
             MemberVisitor memberVisitor =
                 referencingClass           != null &&
                 referencingClass.getName() != null ?
                     new MemberClassAccessFilter(referencingClass, this) :
                     this;
 
-            try
-            {
-                clazz.hierarchyAccept(containsWildcards,
-                                      searchHierarchy,
-                                      searchHierarchy,
-                                      false,
-                                      containsWildcards ?
-                        isField ?
-                            new AllFieldVisitor(
-                            new MemberNameFilter(name,
-                            new MemberDescriptorFilter(descriptor,
-                            memberVisitor))) :
+            // We'll return with a MemberFoundException as soon as we've found
+            // the class member.
+            clazz.hierarchyAccept(true,
+                                  searchHierarchy,
+                                  searchHierarchy,
+                                  false,
+                                  containsWildcards ?
+                    isField ?
+                        new AllFieldVisitor(
+                        new MemberNameFilter(name,
+                        new MemberDescriptorFilter(descriptor,
+                        memberVisitor))) :
 
-                            new AllMethodVisitor(
-                            new MemberNameFilter(name,
-                            new MemberDescriptorFilter(descriptor,
-                            memberVisitor))) :
-                       isField ?
-                            new NamedFieldVisitor(name, descriptor,
-                            memberVisitor) :
+                        new AllMethodVisitor(
+                        new MemberNameFilter(name,
+                        new MemberDescriptorFilter(descriptor,
+                        memberVisitor))) :
+                   isField ?
+                        new NamedFieldVisitor(name, descriptor,
+                        memberVisitor) :
 
-                            new NamedMethodVisitor(name, descriptor,
-                            memberVisitor));
-            }
-            catch (MemberFoundException ex)
-            {
-                // We've found the member we were looking for.
-            }
+                        new NamedMethodVisitor(name, descriptor,
+                        memberVisitor));
+        }
+        catch (MemberFoundException ex)
+        {
+            // We've found the member we were looking for.
         }
 
         return member;

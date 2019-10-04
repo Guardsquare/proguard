@@ -65,9 +65,11 @@ implements AttributeVisitor
 
     @Override
     public void visitRuntimeVisibleAnnotationsAttribute(Clazz clazz,
+                                                        Member member,
                                                         RuntimeVisibleAnnotationsAttribute runtimeVisibleAnnotationsAttribute)
     {
         cleanAnnotationsAttribute(clazz,
+                                  member,
                                   runtimeVisibleAnnotationsAttribute,
                                   ClassConstants.ATTR_RuntimeVisibleAnnotations);
     }
@@ -75,9 +77,11 @@ implements AttributeVisitor
 
     @Override
     public void visitRuntimeInvisibleAnnotationsAttribute(Clazz clazz,
+                                                          Member member,
                                                           RuntimeInvisibleAnnotationsAttribute runtimeInvisibleAnnotationsAttribute)
     {
         cleanAnnotationsAttribute(clazz,
+                                  member,
                                   runtimeInvisibleAnnotationsAttribute,
                                   ClassConstants.ATTR_RuntimeInvisibleAnnotations);
     }
@@ -89,6 +93,7 @@ implements AttributeVisitor
                                                                  RuntimeVisibleParameterAnnotationsAttribute runtimeVisibleParameterAnnotationsAttribute)
     {
         cleanParameterAnnotationsAttribute(clazz,
+                                           method,
                                            runtimeVisibleParameterAnnotationsAttribute,
                                            ClassConstants.ATTR_RuntimeVisibleParameterAnnotations);
     }
@@ -100,6 +105,7 @@ implements AttributeVisitor
                                                                    RuntimeInvisibleParameterAnnotationsAttribute runtimeInvisibleParameterAnnotationsAttribute)
     {
         cleanParameterAnnotationsAttribute(clazz,
+                                           method,
                                            runtimeInvisibleParameterAnnotationsAttribute,
                                            ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations);
     }
@@ -107,21 +113,25 @@ implements AttributeVisitor
 
     @Override
     public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz,
+                                                            Member member,
                                                             RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
     {
         cleanAnnotationsAttribute(clazz,
+                                  member,
                                   runtimeVisibleTypeAnnotationsAttribute,
-                                  ClassConstants.ATTR_RuntimeVisibleParameterAnnotations);
+                                  ClassConstants.ATTR_RuntimeVisibleTypeAnnotations);
     }
 
 
     @Override
     public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz,
+                                                              Member member,
                                                               RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
     {
         cleanAnnotationsAttribute(clazz,
+                                  member,
                                   runtimeInvisibleTypeAnnotationsAttribute,
-                                  ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations);
+                                  ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations);
     }
 
 
@@ -129,8 +139,9 @@ implements AttributeVisitor
 
 
     private void cleanAnnotationsAttribute(Clazz                clazz,
+                                           Member               member,
                                            AnnotationsAttribute attribute,
-                                           String               classConstant)
+                                           String               attributeName)
     {
         // Delete marked annotations.
         AnnotationsAttributeEditor annotationsAttributeEditor = new AnnotationsAttributeEditor(attribute);
@@ -147,15 +158,18 @@ implements AttributeVisitor
         // Delete attribute if no annotations are left.
         if (attribute.u2annotationsCount == 0)
         {
-            AttributesEditor attributesEditor = new AttributesEditor((ProgramClass)clazz, false);
-            attributesEditor.deleteAttribute(classConstant);
+            AttributesEditor attributesEditor = new AttributesEditor((ProgramClass) clazz,
+                                                                     (ProgramMember)member,
+                                                                     false);
+            attributesEditor.deleteAttribute(attributeName);
         }
     }
 
 
     private void cleanParameterAnnotationsAttribute(Clazz                         clazz,
+                                                    Member                        member,
                                                     ParameterAnnotationsAttribute attribute,
-                                                    String                        classConstant)
+                                                    String                        attributeName)
     {
         // Delete marked annotations.
         ParameterAnnotationsAttributeEditor annotationsAttributeEditor =
@@ -182,8 +196,10 @@ implements AttributeVisitor
         // Delete attribute if all parameters have no annotations left.
         if (allEmpty)
         {
-            AttributesEditor attributesEditor = new AttributesEditor((ProgramClass)clazz, false);
-            attributesEditor.deleteAttribute(classConstant);
+            AttributesEditor attributesEditor = new AttributesEditor((ProgramClass) clazz,
+                                                                     (ProgramMember)member,
+                                                                     false);
+            attributesEditor.deleteAttribute(attributeName);
         }
     }
 }

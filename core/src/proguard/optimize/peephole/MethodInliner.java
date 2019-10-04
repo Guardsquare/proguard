@@ -693,6 +693,14 @@ implements   AttributeVisitor,
             (!SynchronizedBlockMethodMarker.hasSynchronizedBlock(programMethod) ||
              coveredByCatchAllHandler)                                                            &&
 
+            DEBUG("Final fields?")                                                                &&
+
+            // Methods assigning final fields cannot be inlined, at least on Android
+            // this leads to VerifyErrors at runtime.
+            // This should normally not happen anyways, but some tools modify/generate
+            // bytecode that would lead to such situations, e.g. jacoco, see DGD-561.
+            !FinalFieldAssignmentMarker.assignsFinalField(programMethod)                          &&
+
             DEBUG("Catch?")                                                                       &&
 
             // Only inline the method if it doesn't catch exceptions, or if it

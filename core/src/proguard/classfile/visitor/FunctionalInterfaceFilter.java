@@ -22,6 +22,8 @@ package proguard.classfile.visitor;
 
 import proguard.classfile.*;
 
+import java.util.*;
+
 /**
  * This <code>ClassVisitor</code> delegates its visits to another given
  * <code>ClassVisitor</code>, but only for functional interfaces, that
@@ -75,22 +77,34 @@ public class FunctionalInterfaceFilter implements ClassVisitor
             return false;
         }
 
-        // Count the abstract methods in the interface hierarchy.
-        // Subtract any corresponding default methods, since only abstract
-        // methods that don't have a default implementation count.
-        // TODO: Find a better way to count default methods, since there may be more of them for a single abstract method, or we can find one via different paths.
-        MemberCounter abstractMethodCounter  = new MemberCounter();
-        MemberCounter defaultMethodCounter   = new MemberCounter();
+        // Count the abstract methods and the default methods in the
+        // interface hierarchy.
+        Set abstractMethods = new HashSet();
+        Set defaultMethods  = new HashSet();
+
         clazz.hierarchyAccept(true, false, true, false,
                               new AllMethodVisitor(
-                              new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
                               new MultiMemberVisitor(
-                                  abstractMethodCounter,
-                                  new SimilarMemberVisitor(clazz, true, true, true, false,
-                                  new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
-                                  defaultMethodCounter))
-                              ))));
+                                  new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                                  new MemberCollector(false, true, true, abstractMethods)),
 
-        return abstractMethodCounter.getCount() - defaultMethodCounter.getCount() == 1;
+                                  new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
+                                  new MemberCollector(false, true, true, defaultMethods))
+                              )));
+
+        // Ignore marker interfaces.
+        if (abstractMethods.size() == 0)
+        {
+            return false;
+        }
+
+        // Subtract default methods, since only abstract methods that don't
+        // have default implementations count.
+        abstractMethods.removeAll(defaultMethods);
+
+        // Also consider this a functional interface if all abstract methods
+        // have default implementations. Dynamic invocations may explicitly
+        // specify the intended single abstract method. [PGD-756]
+        return abstractMethods.size() <= 1;
     }
 }
