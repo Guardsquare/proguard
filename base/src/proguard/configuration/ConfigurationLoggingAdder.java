@@ -53,7 +53,7 @@ implements   // Implementation interfaces.
     private final Configuration configuration;
 
     // Field acting as parameter for the visitor methods.
-    private  MultiValueMap<String, String> injectedClassMap;
+    private  ExtraDataEntryNameMap extraDataEntryNameMap;
 
 
     /**
@@ -68,14 +68,14 @@ implements   // Implementation interfaces.
     /**
      * Instruments the given program class pool.
      */
-    public void execute(ClassPool                     programClassPool,
-                        ClassPool                     libraryClassPool,
-                        MultiValueMap<String, String> injectedClassMap )
+    public void execute(ClassPool             programClassPool,
+                        ClassPool             libraryClassPool,
+                        ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         // Load the logging utility classes in the program class pool.
         // TODO: The initialization could be incomplete if the loaded classes depend on one another.
         ClassReader classReader =
-            new ClassReader(false, false, false, null,
+            new ClassReader(false, false, false, false, null,
             new MultiClassVisitor(
                 new ClassPoolFiller(programClassPool),
                 new ClassReferenceInitializer(programClassPool, libraryClassPool),
@@ -101,7 +101,7 @@ implements   // Implementation interfaces.
         CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
 
         // Set the injected class map for the extra visitor.
-        this.injectedClassMap = injectedClassMap;
+        this.extraDataEntryNameMap = extraDataEntryNameMap;
 
         // Replace the instruction sequences in all non-ProGuard classes.
         programClassPool.classesAccept(
@@ -122,7 +122,7 @@ implements   // Implementation interfaces.
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
     {
         // Add a dependency from the modified class on the logging class.
-        injectedClassMap.put(clazz.getName(), internalClassName(ConfigurationLogger.class.getName()));
-        injectedClassMap.put(clazz.getName(), internalClassName(ConfigurationLogger.MethodSignature.class.getName()));
+        extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.class);
+        extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.MethodSignature.class);
     }
 }

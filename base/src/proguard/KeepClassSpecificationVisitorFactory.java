@@ -23,8 +23,9 @@ package proguard;
 import proguard.classfile.ClassConstants;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.visitor.*;
+import proguard.util.WildcardManager;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * This factory creates visitors to efficiently travel to specified classes and
@@ -132,7 +133,7 @@ extends      ClassSpecificationVisitorFactory
                                                    MemberVisitor          methodVisitor,
                                                    AttributeVisitor       attributeVisitor)
     {
-        // Start a global list of wilcdard matchers, so they can be referenced
+        // Create a global wildcard manager, so wildcards can be referenced
         // from regular expressions. They are identified by their indices,
         // which imposes a number of tricky constraints:
         // - They need to be parsed in the right order, so the list is filled
@@ -140,7 +141,7 @@ extends      ClassSpecificationVisitorFactory
         //   configuration).
         // - They need to be matched in the right order, so the variable
         //   matchers are matched before they are referenced.
-        List variableStringMatchers = new ArrayList();
+        WildcardManager wildcardManager = new WildcardManager();
 
         // If specified, let the class visitor also visit the descriptor
         // classes and the signature classes.
@@ -199,7 +200,7 @@ extends      ClassSpecificationVisitorFactory
             ClassPoolVisitor conditionalKeepClassPoolVisitor =
                 createClassTester(condition,
                                   keepClassPoolVisitor,
-                                  variableStringMatchers);
+                                  wildcardManager);
 
             // Parse the actual keep specification and add it to the
             // placeholder.
@@ -209,7 +210,7 @@ extends      ClassSpecificationVisitorFactory
                                        fieldVisitor,
                                        methodVisitor,
                                        attributeVisitor,
-                                       variableStringMatchers));
+                                       wildcardManager));
 
             return conditionalKeepClassPoolVisitor;
         }
@@ -221,7 +222,7 @@ extends      ClassSpecificationVisitorFactory
                                           fieldVisitor,
                                           methodVisitor,
                                           attributeVisitor,
-                                          variableStringMatchers);
+                                          wildcardManager);
         }
     }
 
@@ -240,15 +241,15 @@ extends      ClassSpecificationVisitorFactory
      *                               to matching methods.
      * @param attributeVisitor       an optional AttributeVisitor to be applied
      *                               to matching code attributes.
-     * @param variableStringMatchers a mutable list of VariableStringMatcher
-     *                               instances that match the wildcards.
+     * @param wildcardManager        a scope for StringMatcher instances
+     *                               that match wildcards.
      */
     private ClassPoolVisitor createClassPoolVisitor(KeepClassSpecification keepClassSpecification,
                                                     ClassVisitor           classVisitor,
                                                     MemberVisitor          fieldVisitor,
                                                     MemberVisitor          methodVisitor,
                                                     AttributeVisitor       attributeVisitor,
-                                                    List                   variableStringMatchers)
+                                                    WildcardManager        wildcardManager)
     {
         // If specified, let the marker visit the class and its class
         // members conditionally.
@@ -267,7 +268,7 @@ extends      ClassSpecificationVisitorFactory
             ClassPoolVisitor conditionalKeepClassPoolVisitor =
                 createClassTester(keepClassSpecification,
                                   keepClassVisitor,
-                                  new ArrayList(variableStringMatchers));
+                                  new WildcardManager(wildcardManager));
 
             // Parse the actual keep specification and add it to the
             // placeholder.
@@ -279,7 +280,7 @@ extends      ClassSpecificationVisitorFactory
                                            fieldVisitor,
                                            methodVisitor,
                                            attributeVisitor,
-                                           variableStringMatchers));
+                                           wildcardManager));
 
             return conditionalKeepClassPoolVisitor;
         }
@@ -291,7 +292,7 @@ extends      ClassSpecificationVisitorFactory
                                                 fieldVisitor,
                                                 methodVisitor,
                                                 attributeVisitor,
-                                                variableStringMatchers);
+                                                wildcardManager);
         }
     }
 }

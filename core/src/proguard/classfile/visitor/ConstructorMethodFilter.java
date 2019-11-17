@@ -70,6 +70,14 @@ implements   MemberVisitor,
     }
 
 
+
+    public ConstructorMethodFilter(MemberVisitor constructorVisitor,
+                                   MemberVisitor otherMethodVisitor)
+    {
+        this(constructorVisitor, constructorVisitor, otherMethodVisitor);
+    }
+
+
     public ConstructorMethodFilter(MemberVisitor superCallingConstructorVisitor,
                                    MemberVisitor constructorVisitor,
                                    MemberVisitor otherMethodVisitor)

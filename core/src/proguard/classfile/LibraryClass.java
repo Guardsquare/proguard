@@ -22,15 +22,20 @@ package proguard.classfile;
 
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.visitors.KotlinMetadataVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.util.*;
 
 /**
  * This Clazz is a compact representation of the essential data in a Java class.
  *
  * @author Eric Lafortune
  */
-public class LibraryClass implements Clazz
+public class LibraryClass
+extends      SimpleFeatureNamedProcessableVisitorAccepter
+implements   Clazz
 {
     public int             u2accessFlags;
     public String          thisClassName;
@@ -38,6 +43,7 @@ public class LibraryClass implements Clazz
     public String[]        interfaceNames;
     public LibraryField[]  fields;
     public LibraryMethod[] methods;
+    public KotlinMetadata  kotlinMetadata;
 
     /**
      * An extra field pointing to the superclass of this class.
@@ -56,12 +62,6 @@ public class LibraryClass implements Clazz
      * This field is filled out by the {@link ClassSubHierarchyInitializer}.
      */
     public Clazz[] subClasses;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an empty LibraryClass.
@@ -162,12 +162,37 @@ public class LibraryClass implements Clazz
         else
         {
             // Copy the old elements into new larger array.
-            Clazz[] temp     = new Clazz[subClasses.length+1];
-            System.arraycopy(subClasses, 0, temp, 0, subClasses.length);
-            subClasses = temp;
+            Clazz[] newSubClasses = new Clazz[subClasses.length+1];
+            System.arraycopy(subClasses, 0, newSubClasses, 0, subClasses.length);
+            subClasses = newSubClasses;
         }
 
         subClasses[subClasses.length-1] = clazz;
+    }
+
+
+    public void removeSubClass(Clazz clazz)
+    {
+        if (subClasses.length == 1)
+        {
+            subClasses = null;
+        }
+        else
+        {
+            // Copy the old elements into new smaller array.
+            Clazz[] newSubClasses = new Clazz[subClasses.length-1];
+
+            int newIndex = 0;
+            for (int index = 0; index < subClasses.length; index++)
+            {
+                if (!subClasses[index].equals(clazz))
+                {
+                    newSubClasses[newIndex++] = subClasses[index];
+                }
+            }
+
+            subClasses = newSubClasses;
+        }
     }
 
 
@@ -531,16 +556,12 @@ public class LibraryClass implements Clazz
     }
 
 
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
+    public void kotlinMetadataAccept(KotlinMetadataVisitor kotlinMetadataVisitor)
     {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
+        if (kotlinMetadata != null)
+        {
+            kotlinMetadata.accept(this, kotlinMetadataVisitor);
+        }
     }
 
 

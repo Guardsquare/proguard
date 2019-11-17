@@ -25,8 +25,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
 /**
- * This Instruction represents a simple instruction without variable arguments
- * or constant pool references.
+ * This Instruction represents a table switch instruction.
  *
  * @author Eric Lafortune
  */
@@ -44,6 +43,7 @@ public class TableSwitchInstruction extends SwitchInstruction
 
     /**
      * Creates a new TableSwitchInstruction with the given arguments.
+     * All offsets are relative to this instruction's offset.
      */
     public TableSwitchInstruction(byte  opcode,
                                   int   defaultOffset,

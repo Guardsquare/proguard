@@ -22,8 +22,8 @@ package proguard.util;
 
 
 /**
- * This interface provides methods to determine whether strings match a given
- * criterion, which is specified by the implementation.
+ * This abstract class provides methods to determine whether strings match a
+ * given criterion, which is specified by the implementation.
  *
  * @author Eric Lafortune
  */

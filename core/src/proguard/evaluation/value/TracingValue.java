@@ -37,7 +37,6 @@ public class TracingValue extends Value
      */
     public TracingValue(Value traceValue, Value value)
     {
-
         this.traceValue = traceValue;
         this.value      = value;
     }

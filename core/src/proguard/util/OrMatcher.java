@@ -21,24 +21,21 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings matches either of the given
- *  StringMatcher instances.
+ * This StringMatcher tests whether strings matches at least one of the given StringMatcher instances.
  *
  * @author Eric Lafortune
  */
 public class OrMatcher extends StringMatcher
 {
-    private final StringMatcher matcher1;
-    private final StringMatcher matcher2;
+    private final StringMatcher[] matchers;
 
 
     /**
-     * Creates a new OrMatcher with the two given string matchers.
+     * Creates a new OrMatcher with the given string matchers.
      */
-    public OrMatcher(StringMatcher matcher1, StringMatcher matcher2)
+    public OrMatcher(StringMatcher... matchers)
     {
-        this.matcher1 = matcher1;
-        this.matcher2 = matcher2;
+        this.matchers = matchers;
     }
 
 
@@ -47,7 +44,14 @@ public class OrMatcher extends StringMatcher
     @Override
     protected boolean matches(String string, int beginOffset, int endOffset)
     {
-        return matcher1.matches(string, beginOffset, endOffset) ||
-               matcher2.matches(string, beginOffset, endOffset);
+        for (StringMatcher matcher : matchers)
+        {
+            if (matcher.matches(string, beginOffset, endOffset))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

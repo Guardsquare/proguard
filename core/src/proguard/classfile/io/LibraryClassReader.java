@@ -25,6 +25,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.RuntimeDataInput;
 
 import java.io.DataInput;
 

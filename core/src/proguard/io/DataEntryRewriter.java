@@ -54,6 +54,7 @@ public class DataEntryRewriter extends DataEntryCopier
 
     // Implementations for DataEntryCopier.
 
+    @Override
     protected void copyData(InputStream  inputStream,
                             OutputStream outputStream)
     throws IOException
@@ -75,77 +76,55 @@ public class DataEntryRewriter extends DataEntryCopier
                             Writer writer)
     throws IOException
     {
-        StringBuffer word = new StringBuffer();
+        DataEntryTokenizer tokenizer = new DataEntryTokenizer(reader);
+        DataEntryToken     token;
 
-        while (true)
+        // Read all tokens.
+        while ((token = tokenizer.nextToken()) != null)
         {
-            int i = reader.read();
-            if (i < 0)
+            String word = token.string;
+
+            // Adapt the word if it is a valid Java identifier.
+            if (token.type == DataEntryTokenType.JAVA_IDENTIFIER)
             {
-                break;
+                word = adaptedWord(word);
             }
 
-            // Is the character part of a word?
-            char c = (char)i;
-            if (Character.isJavaIdentifierPart(c) ||
-                c == '.' ||
-                c == '-')
-            {
-                // Collect the characters in this word.
-                word.append(c);
-            }
-            else
-            {
-                // Write out the updated word, if any.
-                writeUpdatedWord(writer, word.toString());
-                word.setLength(0);
-
-                // Write out the character that terminated it.
-                writer.write(c);
-            }
+            // Write the word.
+            writer.write(word);
         }
-
-        // Write out the final word.
-        writeUpdatedWord(writer, word.toString());
     }
 
 
     // Small utility methods.
 
     /**
-     * Writes the given word to the given writer, after having adapted it,
-     * based on the renamed class names.
+     * Adapts the given word if possible, based on the renamed class names.
      */
-    private void writeUpdatedWord(Writer writer, String word)
-    throws IOException
+    private String adaptedWord(String word)
     {
-        if (word.length() > 0)
+        boolean containsDots = word.indexOf('.') >= 0;
+
+        // Replace dots by forward slashes.
+        String className = containsDots ?
+            word.replace('.', ClassConstants.PACKAGE_SEPARATOR) :
+            word;
+
+        // Find the class corresponding to the word.
+        Clazz clazz = classPool.getClass(className);
+        if (clazz != null)
         {
-            String newWord = word;
-
-            boolean containsDots = word.indexOf('.') >= 0;
-
-            // Replace dots by forward slashes.
-            String className = containsDots ?
-                word.replace('.', ClassConstants.PACKAGE_SEPARATOR) :
-                word;
-
-            // Find the class corresponding to the word.
-            Clazz clazz = classPool.getClass(className);
-            if (clazz != null)
+            // Update the word if necessary.
+            String newClassName = clazz.getName();
+            if (!className.equals(newClassName))
             {
-                // Update the word if necessary.
-                String newClassName = clazz.getName();
-                if (!className.equals(newClassName))
-                {
-                    // Replace forward slashes by dots.
-                    newWord = containsDots ?
-                        newClassName.replace(ClassConstants.PACKAGE_SEPARATOR, '.') :
-                        newClassName;
-                }
+                // Replace forward slashes by dots.
+                word = containsDots ?
+                    newClassName.replace(ClassConstants.PACKAGE_SEPARATOR, '.') :
+                    newClassName;
             }
-
-            writer.write(newWord);
         }
+
+        return word;
     }
 }

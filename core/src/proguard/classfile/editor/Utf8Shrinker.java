@@ -31,6 +31,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
+import proguard.util.VisitorAccepter;
 
 import java.util.Arrays;
 
@@ -151,6 +152,13 @@ implements   ClassVisitor,
         markCpUtf8Entry(clazz, sourceDirAttribute.u2attributeNameIndex);
 
         markCpUtf8Entry(clazz, sourceDirAttribute.u2sourceDirIndex);
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz,
+                                                   SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        markCpUtf8Entry(clazz, sourceDebugExtensionAttribute.u2attributeNameIndex);
     }
 
 
@@ -438,7 +446,7 @@ implements   ClassVisitor,
      */
     private void markCpUtf8Entry(Clazz clazz, int index)
     {
-         markAsUsed((Utf8Constant)((ProgramClass)clazz).getConstant(index));
+         markAsUsed(((ProgramClass)clazz).getConstant(index));
     }
 
 

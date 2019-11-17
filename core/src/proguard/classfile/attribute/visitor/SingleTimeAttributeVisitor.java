@@ -96,6 +96,17 @@ implements   AttributeVisitor
     }
 
     @Override
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        if (!sourceDebugExtensionAttribute.equals(lastVisitedAttribute))
+        {
+            attributeVisitor.visitSourceDebugExtensionAttribute(clazz, sourceDebugExtensionAttribute);
+
+            lastVisitedAttribute = sourceDebugExtensionAttribute;
+        }
+    }
+
+    @Override
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
         if (!innerClassesAttribute.equals(lastVisitedAttribute))

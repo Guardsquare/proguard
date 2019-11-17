@@ -1,6 +1,6 @@
 # GNU/Linux makefile for ProGuard.
 
-BASIC_MODULES    = core retrace gui annotations
+BASIC_MODULES    = core base retrace gui annotations
 OPTIONAL_MODULES = gradle ant wtk
 
 MODULES = $(BASIC_MODULES) $(OPTIONAL_MODULES)

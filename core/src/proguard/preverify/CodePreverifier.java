@@ -35,7 +35,7 @@ import java.util.*;
 
 /**
  * This AttributeVisitor adds preverification information (for Java Micro
- * Edition or for Java 6 or higher) ot the code attributes that it visits.
+ * Edition or for Java 6 or higher) to the code attributes that it visits.
  *
  * @author Eric Lafortune
  */
@@ -636,6 +636,19 @@ implements   AttributeVisitor
         }
 
         return true;
+    }
+
+
+    /**
+     * Returns wheter the specified variable is an uninitialized "this" at the
+     * given instruction offset.
+     */
+    private boolean isUninitalizedThis(int offset, int variableIndex)
+    {
+        return
+            variableIndex == 0                   &&
+            initializationFinder.isInitializer() &&
+            offset <= initializationFinder.superInitializationOffset();
     }
 
 

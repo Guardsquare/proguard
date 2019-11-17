@@ -58,6 +58,17 @@ public abstract class AnnotationsAttribute extends Attribute
 
 
     /**
+     * Applies the given visitor to the specified class annotation.
+     */
+    public void annotationAccept(Clazz clazz, int index, AnnotationVisitor annotationVisitor)
+    {
+        // We don't need double dispatching here, since there is only one
+        // type of Annotation.
+        annotationVisitor.visitAnnotation(clazz, annotations[index]);
+    }
+
+
+    /**
      * Applies the given visitor to all class annotations.
      */
     public void annotationsAccept(Clazz clazz, AnnotationVisitor annotationVisitor)
@@ -72,6 +83,17 @@ public abstract class AnnotationsAttribute extends Attribute
 
 
     /**
+     * Applies the given visitor to the specified field annotation.
+     */
+    public void annotationAccept(Clazz clazz, Field field, int index, AnnotationVisitor annotationVisitor)
+    {
+        // We don't need double dispatching here, since there is only one
+        // type of Annotation.
+        annotationVisitor.visitAnnotation(clazz, field, annotations[index]);
+    }
+
+
+    /**
      * Applies the given visitor to all field annotations.
      */
     public void annotationsAccept(Clazz clazz, Field field, AnnotationVisitor annotationVisitor)
@@ -82,6 +104,17 @@ public abstract class AnnotationsAttribute extends Attribute
             // type of Annotation.
             annotationVisitor.visitAnnotation(clazz, field, annotations[index]);
         }
+    }
+
+
+    /**
+     * Applies the given visitor to the specified method annotation.
+     */
+    public void annotationAccept(Clazz clazz, Method method, int index, AnnotationVisitor annotationVisitor)
+    {
+        // We don't need double dispatching here, since there is only one
+        // type of Annotation.
+        annotationVisitor.visitAnnotation(clazz, method, annotations[index]);
     }
 
 

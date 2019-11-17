@@ -21,11 +21,8 @@
 
 package proguard.classfile.constant;
 
-import proguard.classfile.ClassConstants;
-import proguard.classfile.Clazz;
-import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.constant.visitor.PrimitiveArrayConstantElementVisitor;
-import proguard.classfile.constant.visitor.PrimitiveArrayConstantVisitor;
+import proguard.classfile.*;
+import proguard.classfile.constant.visitor.*;
 
 /**
  * This unofficial Constant represents an array of primitives in the constant

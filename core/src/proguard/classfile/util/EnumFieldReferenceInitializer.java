@@ -43,10 +43,10 @@ implements   ElementValueVisitor,
              InstructionVisitor,
              ConstantVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
+    /*
     private static       boolean DEBUG = true;
+    /*/
+    private static final boolean DEBUG = false;
     //*/
 
     private MemberVisitor enumFieldFinder = new AllAttributeVisitor(
@@ -67,7 +67,6 @@ implements   ElementValueVisitor,
 
     public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
     {
-
         if (enumConstantElementValue.referencedClasses != null    &&
             enumConstantElementValue.referencedClasses.length > 0)
         {

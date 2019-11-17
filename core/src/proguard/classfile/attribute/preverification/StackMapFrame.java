@@ -23,6 +23,7 @@ package proguard.classfile.attribute.preverification;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * This abstract class represents a stack map frame. Specific types
@@ -30,7 +31,7 @@ import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor
  *
  * @author Eric Lafortune
  */
-public abstract class StackMapFrame implements VisitorAccepter
+public abstract class StackMapFrame extends SimpleVisitorAccepter
 {
     public static final int SAME_ZERO_FRAME          =   0;
     public static final int SAME_ONE_FRAME           =  64;
@@ -42,12 +43,6 @@ public abstract class StackMapFrame implements VisitorAccepter
 
 
     public int u2offsetDelta;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
 
     /**
@@ -72,19 +67,6 @@ public abstract class StackMapFrame implements VisitorAccepter
      * Accepts the given visitor.
      */
     public abstract void accept(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, StackMapFrameVisitor stackMapFrameVisitor);
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
-    }
 
 
     // Implementations for Object.

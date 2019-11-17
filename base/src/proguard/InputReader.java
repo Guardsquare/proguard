@@ -83,6 +83,7 @@ public class InputReader
                       new ClassReader(true,
                                       configuration.skipNonPublicLibraryClasses,
                                       configuration.skipNonPublicLibraryClassMembers,
+                                      true,
                                       warningPrinter,
                       new ClassPresenceFilter(libraryClassPool, duplicateClassPrinter,
                       new ClassPoolFiller(libraryClassPool)))));
@@ -98,6 +99,7 @@ public class InputReader
                   new ClassReader(false,
                                   configuration.skipNonPublicLibraryClasses,
                                   configuration.skipNonPublicLibraryClassMembers,
+                                  false,
                                   warningPrinter,
                   new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
                   new ClassPresenceFilter(libraryClassPool, duplicateClassPrinter,
@@ -122,6 +124,7 @@ public class InputReader
                       new ClassReader(true,
                                       configuration.skipNonPublicLibraryClasses,
                                       configuration.skipNonPublicLibraryClassMembers,
+                                      true,
                                       warningPrinter,
                       new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
                       new ClassPresenceFilter(libraryClassPool, duplicateClassPrinter,

@@ -22,6 +22,7 @@ package proguard.classfile.attribute;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.util.SimpleProcessableVisitorAccepter;
 
 /**
  * This abstract class represents an attribute that is attached to a class,
@@ -31,17 +32,11 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
  * @author Eric Lafortune
  * @noinspection AbstractClassWithoutAbstractMethods
  */
-public abstract class Attribute implements VisitorAccepter
+public abstract class Attribute extends SimpleProcessableVisitorAccepter
 {
     public int u2attributeNameIndex;
     //public int  u4attributeLength;
     //public byte info[];
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Create an uninitialized Attribute.
@@ -126,18 +121,5 @@ public abstract class Attribute implements VisitorAccepter
         {
             throw new UnsupportedOperationException("Method must be overridden in ["+this.getClass().getName()+"] if ever called");
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

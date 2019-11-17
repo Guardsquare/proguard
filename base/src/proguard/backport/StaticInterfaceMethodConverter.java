@@ -29,6 +29,7 @@ import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.util.MultiValueMap;
 
 import java.util.*;
@@ -44,24 +45,24 @@ public class StaticInterfaceMethodConverter
 extends      SimplifiedVisitor
 implements   ClassVisitor
 {
-    private final ClassPool                     programClassPool;
-    private final ClassPool                     libraryClassPool;
-    private final MultiValueMap<String, String> injectedClassNameMap;
-    private final ClassVisitor                  modifiedClassVisitor;
-    private final MemberVisitor                 extraMemberVisitor;
+    private final ClassPool             programClassPool;
+    private final ClassPool             libraryClassPool;
+    private final ExtraDataEntryNameMap extraDataEntryNameMap;
+    private final ClassVisitor          modifiedClassVisitor;
+    private final MemberVisitor         extraMemberVisitor;
 
 
-    public StaticInterfaceMethodConverter(ClassPool                     programClassPool,
-                                          ClassPool                     libraryClassPool,
-                                          MultiValueMap<String, String> injectedClassNameMap,
-                                          ClassVisitor                  modifiedClassVisitor,
-                                          MemberVisitor                 extraMemberVisitor)
+    public StaticInterfaceMethodConverter(ClassPool             programClassPool,
+                                          ClassPool             libraryClassPool,
+                                          ExtraDataEntryNameMap extraDataEntryNameMap,
+                                          ClassVisitor          modifiedClassVisitor,
+                                          MemberVisitor         extraMemberVisitor)
     {
-        this.programClassPool     = programClassPool;
-        this.libraryClassPool     = libraryClassPool;
-        this.injectedClassNameMap = injectedClassNameMap;
-        this.modifiedClassVisitor = modifiedClassVisitor;
-        this.extraMemberVisitor   = extraMemberVisitor;
+        this.programClassPool      = programClassPool;
+        this.libraryClassPool      = libraryClassPool;
+        this.extraDataEntryNameMap = extraDataEntryNameMap;
+        this.modifiedClassVisitor  = modifiedClassVisitor;
+        this.extraMemberVisitor    = extraMemberVisitor;
     }
 
 
@@ -116,7 +117,7 @@ implements   ClassVisitor
             // Add the utility class to the program class pool
             // and the injected class name map.
             programClassPool.addClass(utilityClass);
-            injectedClassNameMap.put(programClass.getName(), utilityClass.getName());
+            extraDataEntryNameMap.addExtraClassToClass(programClass, utilityClass);
 
             // Change all invokestatic invocations of the static interface
             // methods to use the utility class instead.

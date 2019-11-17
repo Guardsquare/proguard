@@ -62,30 +62,35 @@ public class ClassPathDataEntry implements DataEntry
 
     // Implementations for DataEntry.
 
+    @Override
     public String getName()
     {
         return name;
     }
 
 
+    @Override
     public String getOriginalName()
     {
         return name;
     }
 
 
+    @Override
     public long getSize()
     {
         return -1;
     }
 
 
+    @Override
     public boolean isDirectory()
     {
         return false;
     }
 
 
+    @Override
     public InputStream getInputStream() throws IOException
     {
         if (inputStream == null)
@@ -96,6 +101,7 @@ public class ClassPathDataEntry implements DataEntry
     }
 
 
+    @Override
     public void closeInputStream() throws IOException
     {
         inputStream.close();
@@ -103,6 +109,7 @@ public class ClassPathDataEntry implements DataEntry
     }
 
 
+    @Override
     public DataEntry getParent()
     {
         return null;
@@ -111,6 +118,7 @@ public class ClassPathDataEntry implements DataEntry
 
     // Implementations for Object.
 
+    @Override
     public String toString()
     {
         return getName();

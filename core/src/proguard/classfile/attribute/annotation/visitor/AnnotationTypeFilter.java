@@ -37,16 +37,16 @@ import java.util.List;
 public class AnnotationTypeFilter
 implements   AnnotationVisitor
 {
-    private final StringMatcher     regularExpressionMatcher;
+    private final StringMatcher     stringMatcher;
     private final AnnotationVisitor annotationVisitor;
 
 
     /**
      * Creates a new AnnotationTypeFilter.
-     * @param regularExpression      the regular expression against which
-     *                               annotation type names will be matched.
-     * @param annotationVisitor      the annotation visitor to which visits
-     *                               will be delegated.
+     * @param regularExpression the regular expression against which
+     *                          annotation type names will be matched.
+     * @param annotationVisitor the annotation visitor to which visits
+     *                          will be delegated.
      */
     public AnnotationTypeFilter(String            regularExpression,
                                 AnnotationVisitor annotationVisitor)
@@ -57,35 +57,34 @@ implements   AnnotationVisitor
 
     /**
      * Creates a new AnnotationTypeFilter.
-     * @param regularExpression      the regular expression against which
-     *                               annotation type names will be matched.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
-     * @param annotationVisitor      the annotation visitor to which visits
-     *                               will be delegated.
+     * @param regularExpression the regular expression against which
+     *                          annotation type names will be matched.
+     * @param wildcardManager   an optional scope for StringMatcher instances
+     *                          that match wildcards.
+     * @param annotationVisitor the annotation visitor to which visits
+     *                          will be delegated.
      */
     public AnnotationTypeFilter(String            regularExpression,
-                                List              variableStringMatchers,
+                                WildcardManager   wildcardManager,
                                 AnnotationVisitor annotationVisitor)
     {
-        this(new ListParser(new ClassNameParser()).parse(regularExpression),
+        this(new ListParser(new ClassNameParser(wildcardManager)).parse(regularExpression),
              annotationVisitor);
     }
 
 
     /**
      * Creates a new AnnotationTypeFilter.
-     * @param regularExpressionMatcher the string matcher against which
-     *                                 class names will be matched.
-     * @param annotationVisitor        the annotation visitor to which visits
-     *                                 will be delegated.
+     * @param stringMatcher     the matcher against which annotation type names
+     *                          will be matched.
+     * @param annotationVisitor the <code>annotationVisitor</code> to which
+     *                          visits will be delegated.
      */
-    public AnnotationTypeFilter(StringMatcher     regularExpressionMatcher,
+    public AnnotationTypeFilter(StringMatcher     stringMatcher,
                                 AnnotationVisitor annotationVisitor)
     {
-        this.regularExpressionMatcher = regularExpressionMatcher;
-        this.annotationVisitor        = annotationVisitor;
+        this.stringMatcher     = stringMatcher;
+        this.annotationVisitor = annotationVisitor;
     }
 
 
@@ -140,6 +139,6 @@ implements   AnnotationVisitor
 
     private boolean accepted(String name)
     {
-        return regularExpressionMatcher.matches(name);
+        return stringMatcher.matches(name);
     }
 }

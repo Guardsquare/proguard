@@ -305,7 +305,12 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(false,
+                                         false,
+                                         false,
                                          true,
+                                         true,
+                                         true,
+                                         false,
                                          false,
                                          keepArgs,
                                          classSpecificationString));
@@ -324,7 +329,12 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(false,
+                                         false,
+                                         false,
                                          true,
+                                         true,
+                                         true,
+                                         false,
                                          false,
                                          keepClassSpecificationArgs,
                                          classMembersClosure));
@@ -343,6 +353,11 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(false,
+                                         false,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
                                          false,
                                          false,
                                          keepArgs,
@@ -364,6 +379,11 @@ public class ProGuardTask extends DefaultTask
             createKeepClassSpecification(false,
                                          false,
                                          false,
+                                         true,
+                                         false,
+                                         true,
+                                         false,
+                                         false,
                                          keepClassSpecificationArgs,
                                          classMembersClosure));
     }
@@ -381,6 +401,11 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(false,
+                                         false,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
                                          false,
                                          true,
                                          keepArgs,
@@ -401,6 +426,11 @@ public class ProGuardTask extends DefaultTask
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(false,
                                          false,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
+                                         false,
                                          true,
                                          keepClassSpecificationArgs,
                                          classMembersClosure));
@@ -419,7 +449,12 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(true,
+                                         false,
+                                         false,
                                          true,
+                                         true,
+                                         true,
+                                         false,
                                          false,
                                          keepArgs,
                                          classSpecificationString));
@@ -438,7 +473,12 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(true,
+                                         false,
+                                         false,
                                          true,
+                                         true,
+                                         true,
+                                         false,
                                          false,
                                          keepClassSpecificationArgs,
                                          classMembersClosure));
@@ -457,6 +497,11 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(true,
+                                         false,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
                                          false,
                                          false,
                                          keepArgs,
@@ -478,6 +523,11 @@ public class ProGuardTask extends DefaultTask
             createKeepClassSpecification(true,
                                          false,
                                          false,
+                                         true,
+                                         false,
+                                         true,
+                                         false,
+                                         false,
                                          keepClassSpecificationArgs,
                                          classMembersClosure));
     }
@@ -495,6 +545,11 @@ public class ProGuardTask extends DefaultTask
         configuration.keep =
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(true,
+                                         false,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
                                          false,
                                          true,
                                          keepArgs,
@@ -515,6 +570,59 @@ public class ProGuardTask extends DefaultTask
             extendClassSpecifications(configuration.keep,
             createKeepClassSpecification(true,
                                          false,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
+                                         false,
+                                         true,
+                                         keepClassSpecificationArgs,
+                                         classMembersClosure));
+    }
+
+    public void keepcode(String classSpecificationString)
+    throws ParseException
+    {
+        keepcode(null, classSpecificationString);
+    }
+
+    public void keepcode(Map    keepArgs,
+                         String classSpecificationString)
+    throws ParseException
+    {
+        configuration.keep =
+            extendClassSpecifications(configuration.keep,
+            createKeepClassSpecification(true,
+                                         false,
+                                         false,
+                                         true,
+                                         false,
+                                         false,
+                                         true,
+                                         true,
+                                         keepArgs,
+                                         classSpecificationString));
+    }
+
+    public void keepcode(Map keepClassSpecificationArgs)
+    throws ParseException
+    {
+        keepcode(keepClassSpecificationArgs, (Closure)null);
+    }
+
+    public void keepcode(Map     keepClassSpecificationArgs,
+                         Closure classMembersClosure)
+    throws ParseException
+    {
+        configuration.keep =
+            extendClassSpecifications(configuration.keep,
+            createKeepClassSpecification(true,
+                                         false,
+                                         false,
+                                         true,
+                                         false,
+                                         false,
+                                         true,
                                          true,
                                          keepClassSpecificationArgs,
                                          classMembersClosure));
@@ -1026,6 +1134,30 @@ public class ProGuardTask extends DefaultTask
         configuration.android = true;
     }
 
+    public void keystore(Object keyStore)
+    {
+        configuration.keyStores =
+            extendList(configuration.keyStores, getProject().file(keyStore));
+    }
+
+    public void keystorepassword(String keyStorePassword)
+    {
+        configuration.keyStorePasswords =
+            extendList(configuration.keyStorePasswords, keyStorePassword);
+    }
+
+    public void keyalias(String keyAlias)
+    {
+        configuration.keyAliases =
+            extendList(configuration.keyAliases, keyAlias);
+    }
+
+    public void keypassword(String keyPassword)
+    {
+        configuration.keyPasswords =
+            extendList(configuration.keyPasswords, keyPassword);
+    }
+
     // Hack: support the keyword without parentheses in Groovy.
     public Object getverbose()
     {
@@ -1271,8 +1403,8 @@ public class ProGuardTask extends DefaultTask
                 // Check if this is the name of an internal configuration file.
                 if (isInternalConfigurationFile(file))
                 {
-                    getLogger().debug("Loading default configuration file " +
-                                      file.getAbsolutePath());
+                    getLogger().info("Loading default configuration file " +
+                                     file.getAbsolutePath());
 
                     String internalConfigFileName =
                         internalConfigurationFileName(file);
@@ -1301,8 +1433,8 @@ public class ProGuardTask extends DefaultTask
                 }
                 else
                 {
-                    getLogger().debug("Loading configuration file " +
-                                      file.getAbsolutePath());
+                    getLogger().info("Loading configuration file " +
+                                     file.getAbsolutePath());
 
                     ConfigurationParser parser =
                         new ConfigurationParser(file,
@@ -1329,7 +1461,6 @@ public class ProGuardTask extends DefaultTask
 
 
     // Small utility methods.
-
 
     /**
      * Returns whether the given file object is an internal configuration
@@ -1382,15 +1513,19 @@ public class ProGuardTask extends DefaultTask
                 // Create the class path entry.
                 ClassPathEntry classPathEntry = new ClassPathEntry(file, output);
 
-                // Add any filters to the class path entry.
+                // Add the optional feature name and filters to the class path entry.
                 if (filterArgs != null)
                 {
+                    classPathEntry.setFeatureName((String)filterArgs.get("feature"));
+
                     classPathEntry.setFilter(ListUtil.commaSeparatedList((String)filterArgs.get("filter")));
                     classPathEntry.setApkFilter(ListUtil.commaSeparatedList((String)filterArgs.get("apkfilter")));
+                    classPathEntry.setAabFilter(ListUtil.commaSeparatedList((String)filterArgs.get("aabfilter")));
                     classPathEntry.setJarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("jarfilter")));
                     classPathEntry.setAarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("aarfilter")));
                     classPathEntry.setWarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("warfilter")));
                     classPathEntry.setEarFilter(ListUtil.commaSeparatedList((String)filterArgs.get("earfilter")));
+                    classPathEntry.setJmodFilter(ListUtil.commaSeparatedList((String)filterArgs.get("jmodfilter")));
                     classPathEntry.setZipFilter(ListUtil.commaSeparatedList((String)filterArgs.get("zipfilter")));
                 }
 
@@ -1407,7 +1542,12 @@ public class ProGuardTask extends DefaultTask
      * given parameters.
      */
     private KeepClassSpecification createKeepClassSpecification(boolean allowShrinking,
+                                                                boolean allowOptimization,
+                                                                boolean allowObfuscation,
+                                                                boolean allowMultidexing,
                                                                 boolean markClasses,
+                                                                boolean markClassMebers,
+                                                                boolean markCodeAttributes,
                                                                 boolean markConditionally,
                                                                 Map     keepArgs,
                                                                 String  classSpecificationString)
@@ -1421,7 +1561,12 @@ public class ProGuardTask extends DefaultTask
 
         return
             createKeepClassSpecification(allowShrinking,
+                                         allowOptimization,
+                                         allowObfuscation,
+                                         allowMultidexing,
                                          markClasses,
+                                         markClassMebers,
+                                         markCodeAttributes,
                                          markConditionally,
                                          keepArgs,
                                          condition,
@@ -1434,7 +1579,12 @@ public class ProGuardTask extends DefaultTask
      * given parameters.
      */
     private KeepClassSpecification createKeepClassSpecification(boolean allowShrinking,
+                                                                boolean allowOptimization,
+                                                                boolean allowObfuscation,
+                                                                boolean allowMultidexing,
                                                                 boolean markClasses,
+                                                                boolean markClassMebers,
+                                                                boolean markCodeAttributes,
                                                                 boolean markConditionally,
                                                                 Map     classSpecificationArgs,
                                                                 Closure classMembersClosure)
@@ -1450,7 +1600,12 @@ public class ProGuardTask extends DefaultTask
 
         return
             createKeepClassSpecification(allowShrinking,
+                                         allowOptimization,
+                                         allowObfuscation,
+                                         allowMultidexing,
                                          markClasses,
+                                         markClassMebers,
+                                         markCodeAttributes,
                                          markConditionally,
                                          classSpecificationArgs,
                                          condition,
@@ -1485,7 +1640,12 @@ public class ProGuardTask extends DefaultTask
      * given parameters.
      */
     private KeepClassSpecification createKeepClassSpecification(boolean            allowShrinking,
+                                                                boolean            allowOptimization,
+                                                                boolean            allowObfuscation,
+                                                                boolean            allowMultidexing,
                                                                 boolean            markClasses,
+                                                                boolean            markClassMebers,
+                                                                boolean            markCodeAttributes,
                                                                 boolean            markConditionally,
                                                                 Map                keepArgs,
                                                                 ClassSpecification condition,
@@ -1493,12 +1653,13 @@ public class ProGuardTask extends DefaultTask
     {
         return
             new KeepClassSpecification(markClasses,
+                                       markClassMebers,
                                        markConditionally,
                                        retrieveBoolean(keepArgs, "includedescriptorclasses", false),
-                                       false,
+                                       retrieveBoolean(keepArgs, "includecode",              false) || markCodeAttributes,
                                        retrieveBoolean(keepArgs, "allowshrinking",           allowShrinking),
-                                       retrieveBoolean(keepArgs, "allowoptimization",        false),
-                                       retrieveBoolean(keepArgs, "allowobfuscation",         false),
+                                       retrieveBoolean(keepArgs, "allowoptimization",        allowOptimization),
+                                       retrieveBoolean(keepArgs, "allowobfuscation",         allowObfuscation),
                                        condition,
                                        classSpecification);
     }
@@ -1519,7 +1680,7 @@ public class ProGuardTask extends DefaultTask
 
             try
             {
-                return parser.parseClassSpecificationArguments(allowValues);
+                return parser.parseClassSpecificationArguments(true, true, allowValues);
             }
             finally
             {
@@ -1941,6 +2102,37 @@ public class ProGuardTask extends DefaultTask
 
 
     /**
+     * Adds the given filter to the given list of filter lists, creating a
+     * new list if necessary.
+     */
+    private List extendFilters(List   filters,
+                               String filterString)
+    {
+        return extendFilters(filters, filterString, false);
+    }
+
+
+    /**
+     * Adds the given filter to the given list of filter lists, creating a
+     * new list if necessary. External class names are converted to internal
+     * class names, if requested.
+     */
+    private List extendFilters(List    filters,
+                               String  filterString,
+                               boolean convertExternalClassNames)
+    {
+        if (filters == null)
+        {
+            filters = new ArrayList();
+        }
+
+        filters.add(extendFilter(null, filterString, convertExternalClassNames));
+
+        return filters;
+    }
+
+
+    /**
      * Adds the given filter to the given list, creating a new list if
      * necessary.
      */
@@ -1982,6 +2174,24 @@ public class ProGuardTask extends DefaultTask
         }
 
         return filter;
+    }
+
+
+    /**
+     * Adds the given object to the given list, creating a new list if
+     * necessary.
+     */
+    private List extendList(List list, Object object)
+    {
+        if (list == null)
+        {
+            list = new ArrayList();
+        }
+
+        // Append to the list.
+        list.add(object);
+
+        return list;
     }
 
 

@@ -23,9 +23,9 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.Utf8Constant;
+import proguard.classfile.constant.*;
 import proguard.classfile.util.*;
-import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.*;
 
 import java.util.Arrays;
 
@@ -44,16 +44,21 @@ implements   ClassVisitor,
 
 
     private final boolean[] delete;
+    private final boolean   removeSubclasses;
 
 
     /**
      * Creates a new InterfaceDeleter to remove the specified interfaces.
-     * @param delete an array that corresponds to the interfaces of a class
-     *               and that specifies the ones to be removed.
+     * @param delete           an array that corresponds to the interfaces of
+     *                         a class and that specifies the ones to be
+     *                         removed.
+     * @param removeSubclasses specifies whether to remove the specified
+     *                         interfaces as subclasses of their superclasses.
      */
-    public InterfaceDeleter(boolean[] delete)
+    public InterfaceDeleter(boolean[] delete, boolean removeSubclasses)
     {
-        this.delete = delete;
+        this.delete           = delete;
+        this.removeSubclasses = removeSubclasses;
     }
 
 
@@ -78,9 +83,20 @@ implements   ClassVisitor,
                 System.out.println("InterfaceDeleter:   "+(delete[index]?"- ":"+ ")+programClass.getInterfaceName(index));
             }
 
+            int interfaceIndex = interfaces[index];
+
+            // Should we delete the interface from the list?
             if (!delete[index])
             {
-                interfaces[newInterfacesCount++] = interfaces[index];
+                // Just copy the interface.
+                interfaces[newInterfacesCount++] = interfaceIndex;
+            }
+            else if (removeSubclasses)
+            {
+                // Remove the class from the subclasses of the interface.
+                programClass.constantPoolEntryAccept(interfaceIndex,
+                    new ReferencedClassVisitor(
+                    new SubclassRemover(programClass)));
             }
         }
 

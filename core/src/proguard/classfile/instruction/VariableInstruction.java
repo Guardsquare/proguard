@@ -344,7 +344,6 @@ public class VariableInstruction extends Instruction
                (variableIndex &   0xff) == variableIndex ? 1 :
                (variableIndex & 0xffff) == variableIndex ? 2 :
                                                            4;
-
     }
 
 

@@ -29,7 +29,10 @@ import proguard.classfile.attribute.preverification.visitor.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.visitors.KotlinMetadataVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.util.VisitorAccepter;
 
 /**
  * This <code>ClassVisitor</code> removes all visitor information of the
@@ -53,7 +56,8 @@ implements   ClassVisitor,
              LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
              TypeAnnotationVisitor,
-             ElementValueVisitor
+             ElementValueVisitor,
+             KotlinMetadataVisitor
 {
     // Implementations for ClassVisitor.
 
@@ -67,6 +71,8 @@ implements   ClassVisitor,
         programClass.methodsAccept(this);
 
         programClass.attributesAccept(this);
+
+        programClass.kotlinMetadataAccept(this);
     }
 
 
@@ -76,6 +82,8 @@ implements   ClassVisitor,
 
         libraryClass.fieldsAccept(this);
         libraryClass.methodsAccept(this);
+
+        libraryClass.kotlinMetadataAccept(this);
     }
 
 
@@ -139,7 +147,7 @@ implements   ClassVisitor,
     {
         clean(exceptionsAttribute);
 
-        exceptionsAttribute.exceptionEntriesAccept((ProgramClass)clazz, this);
+        exceptionsAttribute.exceptionEntriesAccept(clazz, this);
     }
 
 
@@ -352,6 +360,14 @@ implements   ClassVisitor,
     public void visitArrayElementValue(Clazz clazz, Annotation annotation, ArrayElementValue arrayElementValue)
     {
         clean(arrayElementValue);
+    }
+
+
+    // Implementations for KotlinMetadataVisitor.
+    @Override
+    public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata)
+    {
+        clean(kotlinMetadata);
     }
 
 

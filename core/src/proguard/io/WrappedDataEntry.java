@@ -38,47 +38,56 @@ public class WrappedDataEntry implements DataEntry
     }
 
 
+    @Override
     public void closeInputStream() throws IOException
     {
         wrappedEntry.closeInputStream();
     }
 
+
+    @Override
     public String getName()
     {
         return wrappedEntry.getName();
     }
 
 
+    @Override
     public String getOriginalName()
     {
         return wrappedEntry.getOriginalName();
     }
 
 
+    @Override
     public long getSize()
     {
         return wrappedEntry.getSize();
     }
 
 
+    @Override
     public boolean isDirectory()
     {
         return wrappedEntry.isDirectory();
     }
 
 
+    @Override
     public InputStream getInputStream() throws IOException
     {
         return wrappedEntry.getInputStream();
     }
 
 
+    @Override
     public DataEntry getParent()
     {
         return wrappedEntry.getParent();
     }
 
 
+    @Override
     public String toString()
     {
         return getName();

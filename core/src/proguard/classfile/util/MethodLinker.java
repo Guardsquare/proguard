@@ -22,6 +22,7 @@ package proguard.classfile.util;
 
 import proguard.classfile.*;
 import proguard.classfile.visitor.*;
+import proguard.util.VisitorAccepter;
 
 import java.util.*;
 

@@ -70,6 +70,15 @@ public class ArrayElementValue extends ElementValue
 
 
     /**
+     * Applies the given visitor to the specified nested element value.
+     */
+    public void elementValueAccept(Clazz clazz, Annotation annotation, int index, ElementValueVisitor elementValueVisitor)
+    {
+        elementValues[index].accept(clazz, annotation, elementValueVisitor);
+    }
+
+
+    /**
      * Applies the given visitor to all nested element values.
      */
     public void elementValuesAccept(Clazz clazz, Annotation annotation, ElementValueVisitor elementValueVisitor)

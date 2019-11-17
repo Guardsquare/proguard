@@ -23,16 +23,21 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.ExceptionInfoVisitor;
+import proguard.util.Counter;
 
 /**
  * This ExceptionInfoVisitor counts the number of exceptions that has been visited.
  *
  * @author Eric Lafortune
  */
-public class ExceptionCounter implements ExceptionInfoVisitor
+public class ExceptionCounter
+implements   ExceptionInfoVisitor,
+             Counter
 {
     private int count;
 
+
+    // Implementations for Counter.
 
     /**
      * Returns the number of exceptions that has been visited so far.

@@ -41,6 +41,7 @@ public class RenamedDataEntry extends WrappedDataEntry
 
     // Implementations for DataEntry.
 
+    @Override
     public String getName()
     {
         return name;
@@ -49,6 +50,7 @@ public class RenamedDataEntry extends WrappedDataEntry
 
     // Implementations for Object.
 
+    @Override
     public String toString()
     {
         return name + " == " + wrappedEntry;

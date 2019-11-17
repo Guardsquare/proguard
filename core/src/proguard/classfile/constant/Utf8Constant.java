@@ -22,6 +22,7 @@ package proguard.classfile.constant;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.StringUtil;
 
 import java.io.UnsupportedEncodingException;
 
@@ -32,24 +33,6 @@ import java.io.UnsupportedEncodingException;
  */
 public class Utf8Constant extends Constant
 {
-    private static final char TWO_BYTE_LIMIT     = 0x80;
-    private static final int  TWO_BYTE_CONSTANT1 = 0xc0;
-    private static final int  TWO_BYTE_CONSTANT2 = 0x80;
-    private static final int  TWO_BYTE_SHIFT1    = 6;
-    private static final int  TWO_BYTE_MASK1     = 0x1f;
-    private static final int  TWO_BYTE_MASK2     = 0x3f;
-
-    private static final char THREE_BYTE_LIMIT     = 0x800;
-    private static final int  THREE_BYTE_CONSTANT1 = 0xe0;
-    private static final int  THREE_BYTE_CONSTANT2 = 0x80;
-    private static final int  THREE_BYTE_CONSTANT3 = 0x80;
-    private static final int  THREE_BYTE_SHIFT1    = 12;
-    private static final int  THREE_BYTE_SHIFT2    = 6;
-    private static final int  THREE_BYTE_MASK1     = 0x0f;
-    private static final int  THREE_BYTE_MASK2     = 0x3f;
-    private static final int  THREE_BYTE_MASK3     = 0x3f;
-
-
     // There are a lot of Utf8Constant objects, so we're optimising their storage.
     // Initially, we're storing the UTF-8 bytes in a byte array.
     // When the corresponding String is requested, we ditch the array and just
@@ -95,14 +78,7 @@ public class Utf8Constant extends Constant
      */
     public byte[] getBytes()
     {
-        try
-        {
-            switchToByteArrayRepresentation();
-        }
-        catch (UnsupportedEncodingException ex)
-        {
-            throw new RuntimeException(ex.getMessage());
-        }
+        switchToByteArrayRepresentation();
 
         return bytes;
     }
@@ -123,14 +99,7 @@ public class Utf8Constant extends Constant
      */
     public String getString()
     {
-        try
-        {
-            switchToStringRepresentation();
-        }
-        catch (UnsupportedEncodingException ex)
-        {
-            throw new RuntimeException(ex.getMessage());
-        }
+        switchToStringRepresentation();
 
         return string;
     }
@@ -154,11 +123,11 @@ public class Utf8Constant extends Constant
     /**
      * Switches to a byte array representation of the UTF-8 data.
      */
-    private void switchToByteArrayRepresentation() throws UnsupportedEncodingException
+    private void switchToByteArrayRepresentation()
     {
         if (bytes == null)
         {
-            bytes  = getByteArrayRepresentation(string);
+            bytes  = StringUtil.getModifiedUtf8Bytes(string);
             string = null;
         }
     }
@@ -167,119 +136,12 @@ public class Utf8Constant extends Constant
     /**
      * Switches to a String representation of the UTF-8 data.
      */
-    private void switchToStringRepresentation() throws UnsupportedEncodingException
+    private void switchToStringRepresentation()
     {
         if (string == null)
         {
-            string = getStringRepresentation(bytes);
+            string = StringUtil.getString(bytes);
             bytes  = null;
         }
-    }
-
-
-    /**
-     * Returns the modified UTF-8 byte array representation of the given string.
-     */
-    private byte[] getByteArrayRepresentation(String string) throws UnsupportedEncodingException
-    {
-        // We're computing the byte array ourselves, because the implementation
-        // of String.getBytes("UTF-8") has a bug, at least up to JRE 1.4.2.
-        // Also note the special treatment of the 0 character.
-
-        // Compute the byte array length.
-        int byteLength   = 0;
-        int stringLength = string.length();
-        for (int stringIndex = 0; stringIndex < stringLength; stringIndex++)
-        {
-            char c = string.charAt(stringIndex);
-
-            // The character is represented by one, two, or three bytes.
-            byteLength += c == 0                ? 2 :
-                          c <  TWO_BYTE_LIMIT   ? 1 :
-                          c <  THREE_BYTE_LIMIT ? 2 :
-                                                  3;
-        }
-
-        // Allocate the byte array with the computed length.
-        byte[] bytes  = new byte[byteLength];
-
-        // Fill out the array.
-        int byteIndex = 0;
-        for (int stringIndex = 0; stringIndex < stringLength; stringIndex++)
-        {
-            char c = string.charAt(stringIndex);
-            if (c == 0)
-            {
-                // The 0 character gets a two-byte representation in classes.
-                bytes[byteIndex++] = (byte)TWO_BYTE_CONSTANT1;
-                bytes[byteIndex++] = (byte)TWO_BYTE_CONSTANT2;
-            }
-            else if (c < TWO_BYTE_LIMIT)
-            {
-                // The character is represented by a single byte.
-                bytes[byteIndex++] = (byte)c;
-            }
-            else if (c < THREE_BYTE_LIMIT)
-            {
-                // The character is represented by two bytes.
-                bytes[byteIndex++] = (byte)(TWO_BYTE_CONSTANT1 | ((c >>> TWO_BYTE_SHIFT1) & TWO_BYTE_MASK1));
-                bytes[byteIndex++] = (byte)(TWO_BYTE_CONSTANT2 | ( c                      & TWO_BYTE_MASK2));
-            }
-            else
-            {
-                // The character is represented by three bytes.
-                bytes[byteIndex++] = (byte)(THREE_BYTE_CONSTANT1 | ((c >>> THREE_BYTE_SHIFT1) & THREE_BYTE_MASK1));
-                bytes[byteIndex++] = (byte)(THREE_BYTE_CONSTANT2 | ((c >>> THREE_BYTE_SHIFT2) & THREE_BYTE_MASK2));
-                bytes[byteIndex++] = (byte)(THREE_BYTE_CONSTANT3 | ( c                        & THREE_BYTE_MASK3));
-            }
-        }
-
-        return bytes;
-    }
-
-
-    /**
-     * Returns the String representation of the given modified UTF-8 byte array.
-     */
-    private String getStringRepresentation(byte[] bytes) throws UnsupportedEncodingException
-    {
-        // We're computing the string ourselves, because the implementation
-        // of "new String(bytes)" doesn't honor the special treatment of
-        // the 0 character in JRE 1.6_u11.
-
-        // Allocate the byte array with the computed length.
-        char[] chars  = new char[bytes.length];
-
-        // Fill out the array.
-        int charIndex = 0;
-        int byteIndex = 0;
-        while (byteIndex < bytes.length)
-        {
-
-            int b = bytes[byteIndex++] & 0xff;
-
-            // Depending on the flag bits in the first byte, the character
-            // is represented by a single byte, by two bytes, or by three
-            // bytes. We're not checking the redundant flag bits in the
-            // second byte and the third byte.
-            try
-            {
-                chars[charIndex++] =
-                    (char)(b < TWO_BYTE_CONSTANT1   ? b                                                          :
-
-                           b < THREE_BYTE_CONSTANT1 ? ((b                  & TWO_BYTE_MASK1) << TWO_BYTE_SHIFT1) |
-                                                      ((bytes[byteIndex++] & TWO_BYTE_MASK2)                   ) :
-
-                                                      ((b                  & THREE_BYTE_MASK1) << THREE_BYTE_SHIFT1) |
-                                                      ((bytes[byteIndex++] & THREE_BYTE_MASK2) << THREE_BYTE_SHIFT2) |
-                                                      ((bytes[byteIndex++] & THREE_BYTE_MASK3)                     ));
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                throw new UnsupportedEncodingException("Missing UTF-8 bytes after initial byte [0x"+Integer.toHexString(b)+"] in string ["+new String(chars, 0, charIndex)+"]");
-            }
-        }
-
-        return new String(chars, 0, charIndex);
     }
 }

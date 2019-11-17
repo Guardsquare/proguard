@@ -47,6 +47,8 @@ public class GsonClassConstants
     public static final String METHOD_TYPE_REGISTER_TYPE_ADAPTER                    = "(Ljava/lang/reflect/Type;Ljava/lang/Object;)Lcom/google/gson/GsonBuilder;";
     public static final String METHOD_NAME_REGISTER_TYPE_HIERARCHY_ADAPTER          = "registerTypeHierarchyAdapter";
     public static final String METHOD_TYPE_REGISTER_TYPE_HIERARCHY_ADAPTER          = "(Ljava/lang/Class;Ljava/lang/Object;)Lcom/google/gson/GsonBuilder;";
+    public static final String METHOD_NAME_REGISTER_TYPE_ADAPTER_FACTORY            = "registerTypeAdapterFactory";
+    public static final String METHOD_TYPE_REGISTER_TYPE_ADAPTER_FACTORY            = "(Lcom/google/gson/TypeAdapterFactory;)Lcom/google/gson/GsonBuilder;";
     public static final String METHOD_NAME_SERIALIZE_NULLS                          = "serializeNulls";
     public static final String METHOD_TYPE_SERIALIZE_NULLS                          = "()Lcom/google/gson/GsonBuilder;";
     public static final String METHOD_NAME_SERIALIZE_SPECIAL_FLOATING_POINT_VALUES  = "serializeSpecialFloatingPointValues";

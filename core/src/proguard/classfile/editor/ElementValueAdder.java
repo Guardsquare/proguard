@@ -23,6 +23,7 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
+import proguard.util.ArrayUtil;
 
 /**
  * This AnnotationVisitor adds all element values that it visits to the given
@@ -126,8 +127,7 @@ implements   ElementValueVisitor
         newEnumConstantElementValue.referencedClass  = enumConstantElementValue.referencedClass;
         newEnumConstantElementValue.referencedMethod = enumConstantElementValue.referencedMethod;
 
-        // TODO: Clone array.
-        newEnumConstantElementValue.referencedClasses = enumConstantElementValue.referencedClasses;
+        newEnumConstantElementValue.referencedClasses = ArrayUtil.cloneOrNull(enumConstantElementValue.referencedClasses);
 
         // Add it to the target.
         addElementValue(newEnumConstantElementValue);
@@ -145,8 +145,7 @@ implements   ElementValueVisitor
         newClassElementValue.referencedClass  = classElementValue.referencedClass;
         newClassElementValue.referencedMethod = classElementValue.referencedMethod;
 
-        // TODO: Clone array.
-        newClassElementValue.referencedClasses = classElementValue.referencedClasses;
+        newClassElementValue.referencedClasses = ArrayUtil.cloneOrNull(classElementValue.referencedClasses);
 
         // Add it to the target.
         addElementValue(newClassElementValue);

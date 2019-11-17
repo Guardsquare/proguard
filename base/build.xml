@@ -16,13 +16,19 @@
     <mkdir dir = "out"/>
   </target>
 
-  <target name = "download">
+  <target name = "download" depends = "lib">
     <get src          = "https://jcenter.bintray.com/com/google/code/gson/gson/2.8.5/gson-${gson.version}.jar"
          dest         = "../lib/gson-${gson.version}.jar"
          skipexisting = "true"/>
   </target>
 
-  <target name = "compile" depends = "out,download">
+  <target name = "core">
+    <ant dir        = "../core"
+         target     = "compile"
+         inheritAll = "false"/>
+  </target>
+
+  <target name = "compile" depends = "out,download,core">
     <javac nowarn            = "true"
            deprecation       = "false"
            includeantruntime = "false"
@@ -30,7 +36,7 @@
            target            = "${target}"
            srcdir            = "src"
            destdir           = "out"
-           classpath         = "../lib/gson-${gson.version}.jar"
+           classpath         = "../core/out:../lib/gson-${gson.version}.jar"
            includes          = "proguard/ProGuard.java">
       <compilerarg value = "-Xlint:none"/>
     </javac>
@@ -53,6 +59,7 @@
 
   <target name = "dist" depends = "compile,resources,lib">
     <jar jarfile  = "../lib/proguard.jar"
+         update   = "true"
          manifest = "src/META-INF/MANIFEST.MF"
          basedir  = "out"/>
   </target>

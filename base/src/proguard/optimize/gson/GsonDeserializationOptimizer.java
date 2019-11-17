@@ -27,6 +27,7 @@ import proguard.classfile.editor.*;
 import proguard.classfile.editor.CodeAttributeEditor.Label;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.util.MultiValueMap;
 
@@ -52,13 +53,13 @@ implements   ClassVisitor,
 
     private static final Map<String, InlineDeserializer> inlineDeserializers = new HashMap<String, InlineDeserializer>();
 
-    private final ClassPool                     programClassPool;
-    private final ClassPool                     libraryClassPool;
-    private final GsonRuntimeSettings           gsonRuntimeSettings;
-    private final CodeAttributeEditor           codeAttributeEditor;
-    private final OptimizedJsonInfo             deserializationInfo;
-    private final boolean                       supportExposeAnnotation;
-    private final MultiValueMap<String, String> injectedClassNameMap;
+    private final ClassPool             programClassPool;
+    private final ClassPool             libraryClassPool;
+    private final GsonRuntimeSettings   gsonRuntimeSettings;
+    private final CodeAttributeEditor   codeAttributeEditor;
+    private final OptimizedJsonInfo     deserializationInfo;
+    private final boolean               supportExposeAnnotation;
+    private final ExtraDataEntryNameMap extraDataEntryNameMap;
 
     private InstructionSequenceBuilder      ____;
     private OptimizedJsonInfo.ClassJsonInfo classDeserializationInfo;
@@ -91,15 +92,15 @@ implements   ClassVisitor,
      *                              optimized code into the domain classes.
      * @param deserializationInfo   contains information on which class and
      *                              fields need to be optimized and how.
-     * @param injectedClassNameMap  the map that keeps track of injected
+     * @param extraDataEntryNameMap the map that keeps track of injected
      *                              classes.
      */
-    public GsonDeserializationOptimizer(ClassPool                     programClassPool,
-                                        ClassPool                     libraryClassPool,
-                                        GsonRuntimeSettings           gsonRuntimeSettings,
-                                        CodeAttributeEditor           codeAttributeEditor,
-                                        OptimizedJsonInfo             deserializationInfo,
-                                        MultiValueMap<String, String> injectedClassNameMap)
+    public GsonDeserializationOptimizer(ClassPool             programClassPool,
+                                        ClassPool             libraryClassPool,
+                                        GsonRuntimeSettings   gsonRuntimeSettings,
+                                        CodeAttributeEditor   codeAttributeEditor,
+                                        OptimizedJsonInfo     deserializationInfo,
+                                        ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool        = programClassPool;
         this.libraryClassPool        = libraryClassPool;
@@ -107,7 +108,7 @@ implements   ClassVisitor,
         this.codeAttributeEditor     = codeAttributeEditor;
         this.deserializationInfo     = deserializationInfo;
         this.supportExposeAnnotation = gsonRuntimeSettings.excludeFieldsWithoutExposeAnnotation;
-        this.injectedClassNameMap    = injectedClassNameMap;
+        this.extraDataEntryNameMap   = extraDataEntryNameMap;
     }
 
 
@@ -555,7 +556,7 @@ implements   ClassVisitor,
                         typeTokenClass.accept(new ClassReferenceInitializer(programClassPool,
                                                                             libraryClassPool));
                         typeTokenClassName = typeTokenClass.getName();
-                        injectedClassNameMap.put(programClass.getName(), typeTokenClassName);
+                        extraDataEntryNameMap.addExtraClassToClass(programClass, typeTokenClassName);
                     }
 
                     // Retrieve type adapter and deserialize value from Json.

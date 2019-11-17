@@ -76,7 +76,8 @@ class TypeTokenClassBuilder
         SimplifiedClassEditor classEditor =
             new SimplifiedClassEditor(ClassConstants.ACC_PUBLIC,
                                       typeTokenClassName,
-                                      GsonClassConstants.NAME_TYPE_TOKEN);
+                                      GsonClassConstants.NAME_TYPE_TOKEN,
+                                      0);
         classEditor.addMethod(ACC_PUBLIC,
                               ClassConstants.METHOD_NAME_INIT,
                               ClassConstants.METHOD_TYPE_INIT,

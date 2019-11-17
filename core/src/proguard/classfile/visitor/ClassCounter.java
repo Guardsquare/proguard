@@ -21,21 +21,23 @@
 package proguard.classfile.visitor;
 
 import proguard.classfile.*;
+import proguard.util.Counter;
 
 /**
  * This ClassVisitor counts the number of classes that has been visited.
  *
  * @author Eric Lafortune
  */
-public class ClassCounter implements ClassVisitor
+public class ClassCounter
+implements   ClassVisitor,
+             Counter
 {
     private int count;
 
 
-    /**
-     * Returns the number of classes that has been visited so far.
-     */
-    public int getCount()
+    // Implementations for Counter.
+
+    public synchronized int getCount()
     {
         return count;
     }
@@ -43,13 +45,13 @@ public class ClassCounter implements ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitLibraryClass(LibraryClass libraryClass)
+    public synchronized void visitLibraryClass(LibraryClass libraryClass)
     {
         count++;
     }
 
 
-    public void visitProgramClass(ProgramClass programClass)
+    public synchronized void visitProgramClass(ProgramClass programClass)
     {
         count++;
     }

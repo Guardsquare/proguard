@@ -20,7 +20,7 @@
  */
 package proguard.io;
 
-import proguard.util.StringUtil;
+import proguard.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -55,15 +55,19 @@ public class ZipOutput
     private static final boolean DEBUG = false;
 
 
-    private       DataOutputStream outputStream;
+    protected     DataOutputStream outputStream;
     private final int              uncompressedAlignment;
+
+    private final StringMatcher    extraUncompressedAlignmentFilter;
+    private final int              extraUncompressedAlignment;
+
     private final String           comment;
 
     private List zipEntries    = new ArrayList();
     private Set  zipEntryNames = new HashSet();
 
-    private long centralDirectoryOffset;
 
+    // Regular constructors.
 
     /**
      * Creates a new ZipOutput.
@@ -71,9 +75,8 @@ public class ZipOutput
      *                     written.
      */
     public ZipOutput(OutputStream outputStream)
-    throws IOException
     {
-        this(outputStream, null, null, 1);
+        this(outputStream, 1);
     }
 
 
@@ -81,20 +84,140 @@ public class ZipOutput
      * Creates a new ZipOutput that aligns uncompressed entries.
      * @param outputStream          the output stream to which the zip data will
      *                              be written.
-     * @param header                an optional header for the jar file.
-     * @param comment               optional comment for the entire zip file.
+     * @param uncompressedAlignment the requested alignment of uncompressed data.
+     */
+    public ZipOutput(OutputStream outputStream,
+                     int          uncompressedAlignment)
+    {
+        this(outputStream, uncompressedAlignment, null, 1, null);
+    }
+
+
+    /**
+     * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
+     *
+     * @param outputStream                        the output stream to which the zip data will
+     *                                            be written.
+     * @param uncompressedAlignment               the requested alignment of uncompressed data.
+     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
+     *                                            that should use a different alignment.
+     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
+     *                                            that match the extraUncompressedAlignmentFilter.
+     * @param comment                             optional comment for the entire zip file.
+     */
+    public ZipOutput(OutputStream  outputStream,
+                     int           uncompressedAlignment,
+                     StringMatcher extraUncompressedAlignmentFilter,
+                     int           extraUncompressedAlignment,
+                     String        comment)
+    {
+        this(new DataOutputStream(outputStream),
+             uncompressedAlignment,
+             extraUncompressedAlignmentFilter,
+             extraUncompressedAlignment,
+             comment);
+    }
+
+
+    /**
+     * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
+     *
+     * @param outputStream                        the output stream to which the zip data will
+     *                                            be written.
+     * @param uncompressedAlignment               the requested alignment of uncompressed data.
+     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
+     *                                            that should use a different alignment.
+     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
+     *                                            that match the extraUncompressedAlignmentFilter.
+     * @param comment                             optional comment for the entire zip file.
+     */
+    public ZipOutput(DataOutputStream outputStream,
+                     int              uncompressedAlignment,
+                     StringMatcher    extraUncompressedAlignmentFilter,
+                     int              extraUncompressedAlignment,
+                     String           comment)
+    {
+        this.outputStream                     = outputStream;
+        this.uncompressedAlignment            = uncompressedAlignment;
+        this.extraUncompressedAlignmentFilter = extraUncompressedAlignmentFilter;
+        this.extraUncompressedAlignment       = extraUncompressedAlignment;
+        this.comment                          = comment;
+    }
+
+    // These constructors write out a header immediately.
+
+    /**
+     * Creates a new ZipOutput that aligns uncompressed entries.
+     * @param outputStream          the output stream to which the zip data will
+     *                              be written.
+     * @param header                              an optional header for the zip file.
      * @param uncompressedAlignment the requested alignment of uncompressed data.
      */
     public ZipOutput(OutputStream outputStream,
                      byte[]       header,
-                     String       comment,
                      int          uncompressedAlignment)
     throws IOException
     {
-        this.outputStream          = new DataOutputStream(outputStream);
-        this.comment               = comment;
-        this.uncompressedAlignment = uncompressedAlignment;
+        this(outputStream, header, uncompressedAlignment, null, 1, null);
+    }
 
+
+    /**
+     * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
+     *
+     * @param outputStream                        the output stream to which the zip data will
+     *                                            be written.
+     * @param header                              an optional header for the zip file.
+     * @param uncompressedAlignment               the requested alignment of uncompressed data.
+     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
+     *                                            that should use a different alignment.
+     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
+     *                                            that match the extraUncompressedAlignmentFilter.
+     * @param comment                             optional comment for the entire zip file.
+     */
+    public ZipOutput(OutputStream  outputStream,
+                     byte[]        header,
+                     int           uncompressedAlignment,
+                     StringMatcher extraUncompressedAlignmentFilter,
+                     int           extraUncompressedAlignment,
+                     String        comment)
+    throws IOException
+    {
+        this(new DataOutputStream(outputStream),
+             header,
+             uncompressedAlignment,
+             extraUncompressedAlignmentFilter,
+             extraUncompressedAlignment,
+             comment);
+    }
+
+
+    /**
+     * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
+     *
+     * @param outputStream                        the output stream to which the zip data will
+     *                                            be written.
+     * @param header                              an optional header for the zip file.
+     * @param uncompressedAlignment               the requested alignment of uncompressed data.
+     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
+     *                                            that should use a different alignment.
+     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
+     *                                            that match the extraUncompressedAlignmentFilter.
+     * @param comment                             optional comment for the entire zip file.
+     */
+    public ZipOutput(DataOutputStream outputStream,
+                     byte[]           header,
+                     int              uncompressedAlignment,
+                     StringMatcher    extraUncompressedAlignmentFilter,
+                     int              extraUncompressedAlignment,
+                     String           comment)
+    throws IOException
+    {
+        this.outputStream                     = outputStream;
+        this.uncompressedAlignment            = uncompressedAlignment;
+        this.extraUncompressedAlignmentFilter = extraUncompressedAlignmentFilter;
+        this.extraUncompressedAlignment       = extraUncompressedAlignment;
+        this.comment                          = comment;
         if (header != null)
         {
             outputStream.write(header);
@@ -169,21 +292,28 @@ public class ZipOutput
 
 
     /**
-     * Closes the zip archive, also closing the underlying output stream.
+     * Closes the zip archive, writing out its central directory and closing
+     * the underlying output stream.
      */
     public void close() throws IOException
     {
+        long centralDirectoryOffset = writeStartOfCentralDirectory();
+
+        close(centralDirectoryOffset);
+    }
+
+
+    /**
+     * Closes the zip archive, writing out its central directory and closing
+     * the underlying output stream.
+     */
+    public void close(long centralDirectoryOffset) throws IOException
+    {
         // Write the central directory.
-        writeStartOfCentralDirectory();
+        long centralDirectorySize = writeEntriesOfCentralDirectory();
 
-        for (int index = 0; index < zipEntries.size(); index++)
-        {
-            ZipEntry entry = (ZipEntry)zipEntries.get(index);
-
-            entry.writeCentralDirectoryFileHeader();
-        }
-
-        writeEndOfCentralDirectory();
+        writeEndOfCentralDirectory(centralDirectoryOffset,
+                                   centralDirectorySize);
 
         // Close the underlying output stream.
         outputStream.close();
@@ -196,27 +326,67 @@ public class ZipOutput
 
 
     /**
-     * Starts the central directory.
+     * Returns the current size of the data written to the output stream.
      */
-    private void writeStartOfCentralDirectory()
+    protected long size()
     {
+        return outputStream.size();
+    }
+
+
+    /**
+     * Starts the central directory.
+     * @return the current position in the output stream.
+     */
+    protected long writeStartOfCentralDirectory()
+    {
+        if (DEBUG)
+        {
+            System.out.println("ZipOutput.writeStartOfCentralDirectory");
+        }
+
         // The central directory as such doesn't have a header.
-        centralDirectoryOffset = outputStream.size();
+        return outputStream.size();
+    }
+
+
+    /**
+     * Writes the zip entries in the central directory.
+     * @return the total size of the directory entries.
+     */
+    protected long writeEntriesOfCentralDirectory() throws IOException
+    {
+        if (DEBUG)
+        {
+            System.out.println("ZipOutput.writeEntriesOfCentralDirectory ("+zipEntries.size()+" entries)");
+        }
+
+        long offset = outputStream.size();
+
+        for (int index = 0; index < zipEntries.size(); index++)
+        {
+            ZipEntry entry = (ZipEntry)zipEntries.get(index);
+
+            entry.writeCentralDirectoryFileHeader();
+        }
+
+        return outputStream.size() - offset;
     }
 
 
     /**
      * Ends the central directory.
+     * @param centralDirectoryOffset the offset of the central directory.
+     * @param centralDirectorySize   the size of the central directory, not
+     *                               counting the empty header and the trailer.
      */
-    private void writeEndOfCentralDirectory() throws IOException
+    protected void writeEndOfCentralDirectory(long centralDirectoryOffset,
+                                              long centralDirectorySize) throws IOException
     {
         if (DEBUG)
         {
             System.out.println("ZipOutput.writeEndOfCentralDirectory ("+zipEntries.size()+" entries)");
         }
-
-       // The size of the central directory, not counting this trailer.
-        long centralDirectorySize = outputStream.size() - centralDirectoryOffset;
 
         writeInt(MAGIC_END_OF_CENTRAL_DIRECTORY);
         writeShort(0);                    // Number of this disk.
@@ -234,7 +404,7 @@ public class ZipOutput
         else
         {
             // Comment length and comment.
-            byte[] commentBytes = StringUtil.getUtf8Bytes(comment);
+            byte[] commentBytes = StringUtil.getModifiedUtf8Bytes(comment);
             writeShort(commentBytes.length);
             outputStream.write(commentBytes);
         }
@@ -251,6 +421,7 @@ public class ZipOutput
     {
         private boolean compressed;
         private int     modificationTime;
+        private int     watermark;
         private int     crc;
         private long    compressedSize;
         private long    uncompressedSize;
@@ -294,8 +465,8 @@ public class ZipOutput
         public OutputStream createOutputStream() throws IOException
         {
             return compressed ?
-                (OutputStream)new CompressedZipEntryOutputStream() :
-                (OutputStream)new UncompressedZipEntryOutputStream();
+                new CompressedZipEntryOutputStream() :
+                new UncompressedZipEntryOutputStream();
         }
 
 
@@ -319,18 +490,44 @@ public class ZipOutput
             writeInt(compressedSize);
             writeInt(uncompressedSize);
 
-            byte[] nameBytes     = StringUtil.getUtf8Bytes(name);
+            byte[] nameBytes = StringUtil.getModifiedUtf8Bytes(name);
             int nameLength       = nameBytes.length;
             int extraFieldLength = extraField == null ? 0 : extraField.length;
 
             writeShort(nameLength);
-            writeShort(extraFieldLength);
+
+            // Compute the required delta to get uncompressed data aligned.
+            // These filler bytes will be appended to the extra field.
+            int alignmentDelta = 0;
+            if (!compressed)
+            {
+                int alignment = extraUncompressedAlignmentFilter != null &&
+                                extraUncompressedAlignmentFilter.matches(name) ?
+                    extraUncompressedAlignment :
+                    uncompressedAlignment;
+
+                long dataOffset = outputStream.size() + 2 + nameLength + extraFieldLength;
+                alignmentDelta = (int)(dataOffset % alignment);
+                if (alignmentDelta > 0)
+                {
+                    alignmentDelta = alignment - alignmentDelta;
+                }
+            }
+
+            writeShort(extraFieldLength + alignmentDelta);
 
             outputStream.write(nameBytes);
 
             if (extraField != null)
             {
                 outputStream.write(extraField);
+            }
+
+            // Now append the filler bytes, as part of the extra field,
+            // right before the data that will be added after the header.
+            if (alignmentDelta > 0)
+            {
+                outputStream.write(new byte[alignmentDelta]);
             }
         }
 
@@ -356,9 +553,9 @@ public class ZipOutput
             writeInt(compressedSize);
             writeInt(uncompressedSize);
 
-            byte[] nameBytes    = StringUtil.getUtf8Bytes(name);
+            byte[] nameBytes    = StringUtil.getModifiedUtf8Bytes(name);
             byte[] commentBytes = comment == null ? null :
-                                  StringUtil.getUtf8Bytes(comment);
+                                  StringUtil.getModifiedUtf8Bytes(comment);
 
             writeShort(nameBytes.length);
             writeShort(extraField   == null ? 0 : extraField.length);
@@ -397,6 +594,7 @@ public class ZipOutput
 
             // Overridden methods for OutputStream.
 
+            @Override
             public void write(int b)
             {
                 super.write(b);
@@ -412,6 +610,7 @@ public class ZipOutput
             //}
 
 
+            @Override
             public void write(byte[] b, int off, int len)
             {
                 super.write(b, off, len);
@@ -420,6 +619,7 @@ public class ZipOutput
             }
 
 
+            @Override
             public void close() throws IOException
             {
                 super.close();
@@ -470,6 +670,7 @@ public class ZipOutput
             //}
 
 
+            @Override
             public void write(byte[] b, int off, int len) throws IOException
             {
                 super.write(b, off, len);
@@ -479,6 +680,7 @@ public class ZipOutput
             }
 
 
+            @Override
             public void close() throws IOException
             {
                 // Make sure the memory is freed. [JDK-4797189]
@@ -507,7 +709,7 @@ public class ZipOutput
     /**
      * Writes out a little-endian short value to the zip output stream.
      */
-    private void writeShort(int value) throws IOException
+    protected void writeShort(int value) throws IOException
     {
         outputStream.write(value);
         outputStream.write(value >>> 8);
@@ -517,7 +719,7 @@ public class ZipOutput
     /**
      * Writes out a little-endian int value to the zip output stream.
      */
-    private void writeInt(int value) throws IOException
+    protected void writeInt(int value) throws IOException
     {
         outputStream.write(value);
         outputStream.write(value >>>  8);
@@ -529,12 +731,28 @@ public class ZipOutput
     /**
      * Writes out a little-endian int value to the zip output stream.
      */
-    private void writeInt(long value) throws IOException
+    protected void writeInt(long value) throws IOException
     {
         outputStream.write((int)value);
         outputStream.write((int)(value >>>  8));
         outputStream.write((int)(value >>> 16));
         outputStream.write((int)(value >>> 24));
+    }
+
+
+    /**
+     * Writes out a little-endian long value to the zip output stream.
+     */
+    protected void writeLong(long value) throws IOException
+    {
+        outputStream.write((int)value);
+        outputStream.write((int)(value >>>  8));
+        outputStream.write((int)(value >>> 16));
+        outputStream.write((int)(value >>> 24));
+        outputStream.write((int)(value >>> 32));
+        outputStream.write((int)(value >>> 40));
+        outputStream.write((int)(value >>> 48));
+        outputStream.write((int)(value >>> 56));
     }
 
 
@@ -547,7 +765,7 @@ public class ZipOutput
         try
         {
             ZipOutput output =
-                new ZipOutput(new FileOutputStream(args[0]), null, "Main file comment", 4);
+                new ZipOutput(new FileOutputStream(args[0]), null, 4, null, 1, "Main file comment");
 
             PrintWriter printWriter1 =
                 new PrintWriter(output.createOutputStream("file1.txt", false, 0, new byte[] { 0x34, 0x12, 4, 0, 0x48, 0x65, 0x6c, 0x6c, 0x6f }, "Comment"));

@@ -41,33 +41,34 @@ public class MemberDescriptorFilter implements MemberVisitor
 
     /**
      * Creates a new MemberDescriptorFilter.
-     * @param regularExpression      the regular expression against which member
-     *                               descriptors will be matched.
-     * @param memberVisitor          the <code>MemberVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression the regular expression against which member
+     *                          descriptors will be matched.
+     * @param memberVisitor     the <code>MemberVisitor</code> to which
+     *                          visits will be delegated.
      */
     public MemberDescriptorFilter(String        regularExpression,
                                   MemberVisitor memberVisitor)
     {
-        this(regularExpression, null, memberVisitor);
+        this(regularExpression,
+             null,
+             memberVisitor);
     }
 
 
     /**
      * Creates a new MemberDescriptorFilter.
-     * @param regularExpression      the regular expression against which member
-     *                               descriptors will be matched.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
-     * @param memberVisitor          the <code>MemberVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression the regular expression against which member
+     *                          descriptors will be matched.
+     * @param wildcardManager   an optional scope for StringMatcher instances
+     *                          that match wildcards.
+     * @param memberVisitor     the <code>MemberVisitor</code> to which
+     *                          visits will be delegated.
      */
-    public MemberDescriptorFilter(String        regularExpression,
-                                  List          variableStringMatchers,
-                                  MemberVisitor memberVisitor)
+    public MemberDescriptorFilter(String          regularExpression,
+                                  WildcardManager wildcardManager,
+                                  MemberVisitor   memberVisitor)
     {
-        this(new ListParser(new ClassNameParser(variableStringMatchers)).parse(regularExpression),
+        this(new ListParser(new ClassNameParser(wildcardManager)).parse(regularExpression),
              memberVisitor);
     }
 

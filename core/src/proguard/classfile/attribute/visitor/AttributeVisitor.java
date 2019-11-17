@@ -36,17 +36,21 @@ public interface AttributeVisitor
 {
     // Attributes that are attached to classes.
 
-    public void visitUnknownAttribute(               Clazz clazz,                UnknownAttribute           unknownAttribute);
-    public void visitBootstrapMethodsAttribute(      Clazz clazz,                BootstrapMethodsAttribute  bootstrapMethodsAttribute);
-    public void visitSourceFileAttribute(            Clazz clazz,                SourceFileAttribute        sourceFileAttribute);
-    public void visitSourceDirAttribute(             Clazz clazz,                SourceDirAttribute         sourceDirAttribute);
-    public void visitInnerClassesAttribute(          Clazz clazz,                InnerClassesAttribute      innerClassesAttribute);
-    public void visitEnclosingMethodAttribute(       Clazz clazz,                EnclosingMethodAttribute   enclosingMethodAttribute);
-    public void visitNestHostAttribute(              Clazz clazz,                NestHostAttribute          nestHostAttribute);
-    public void visitNestMembersAttribute(           Clazz clazz,                NestMembersAttribute       nestMembersAttribute);
-    public void visitModuleAttribute(                Clazz clazz,                ModuleAttribute            moduleAttribute);
-    public void visitModuleMainClassAttribute(       Clazz clazz,                ModuleMainClassAttribute   moduleMainClassAttribute);
-    public void visitModulePackagesAttribute(        Clazz clazz,                ModulePackagesAttribute    modulePackagesAttribute);
+    public void visitUnknownAttribute(               Clazz clazz,                UnknownAttribute              unknownAttribute);
+    public void visitBootstrapMethodsAttribute(      Clazz clazz,                BootstrapMethodsAttribute     bootstrapMethodsAttribute);
+    public void visitSourceFileAttribute(            Clazz clazz,                SourceFileAttribute           sourceFileAttribute);
+    public void visitSourceDirAttribute(             Clazz clazz,                SourceDirAttribute            sourceDirAttribute);
+    public void visitSourceDebugExtensionAttribute(  Clazz clazz,                SourceDebugExtensionAttribute sourceDebugExtensionAttribute);
+    public void visitInnerClassesAttribute(          Clazz clazz,                InnerClassesAttribute         innerClassesAttribute);
+    public void visitEnclosingMethodAttribute(       Clazz clazz,                EnclosingMethodAttribute      enclosingMethodAttribute);
+    public void visitNestHostAttribute(              Clazz clazz,                NestHostAttribute             nestHostAttribute);
+    public void visitNestMembersAttribute(           Clazz clazz,                NestMembersAttribute          nestMembersAttribute);
+    public void visitModuleAttribute(                Clazz clazz,                ModuleAttribute               moduleAttribute);
+    public void visitModuleMainClassAttribute(       Clazz clazz,                ModuleMainClassAttribute      moduleMainClassAttribute);
+    public void visitModulePackagesAttribute(        Clazz clazz,                ModulePackagesAttribute       modulePackagesAttribute);
+
+    // Attributes that are attached to classes, fields, or methods.
+
     public void visitDeprecatedAttribute(            Clazz clazz,                DeprecatedAttribute deprecatedAttribute);
     public void visitDeprecatedAttribute(            Clazz clazz, Field  field,  DeprecatedAttribute deprecatedAttribute);
     public void visitDeprecatedAttribute(            Clazz clazz, Method method, DeprecatedAttribute deprecatedAttribute);

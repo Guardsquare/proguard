@@ -47,6 +47,7 @@ public class KeepSpecificationElement extends ClassSpecificationElement
      */
     public void appendTo(List    keepSpecifications,
                          boolean markClasses,
+                         boolean markClassMembers,
                          boolean markConditionally)
     {
         // Get the referenced file set, or else this one.
@@ -57,6 +58,7 @@ public class KeepSpecificationElement extends ClassSpecificationElement
 
         KeepClassSpecification keepClassSpecification =
             new KeepClassSpecification(markClasses,
+                                       markClassMembers,
                                        markConditionally,
                                        markDescriptorClasses,
                                        markCodeAttributes,

@@ -25,7 +25,7 @@ import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.*;
-import proguard.util.MultiValueMap;
+import proguard.util.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -40,16 +40,21 @@ import static proguard.optimize.gson.OptimizedClassConstants.NAME_OPTIMIZED_TYPE
  */
 public class OptimizedTypeAdapterAdder implements ClassVisitor
 {
-    private static final boolean DEBUG = false;
+    //*
+    public static final boolean DEBUG = false;
+    /*/
+    public static       boolean DEBUG = System.getProperty("otaa") != null;
+    //*/
 
-    private final ClassPool                     programClassPool;
-    private final ClassPool                     libraryClassPool;
-    private final CodeAttributeEditor           codeAttributeEditor;
-    private final OptimizedJsonInfo             serializationInfo;
-    private final OptimizedJsonInfo             deserializationInfo;
-    private final MultiValueMap<String, String> injectedClassNameMap;
-    private final Map<String, String>           typeAdapterRegistry;
-    private final ClassPool                     instanceCreatorClassPool;
+
+    private final ClassPool             programClassPool;
+    private final ClassPool             libraryClassPool;
+    private final CodeAttributeEditor   codeAttributeEditor;
+    private final OptimizedJsonInfo     serializationInfo;
+    private final OptimizedJsonInfo     deserializationInfo;
+    private final ExtraDataEntryNameMap extraDataEntryNameMap;
+    private final Map<String, String>   typeAdapterRegistry;
+    private final GsonRuntimeSettings   gsonRuntimeSettings;
 
 
     /**
@@ -65,32 +70,30 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
      *                                 and fields to serialize and how.
      * @param deserializationInfo      contains information on which classes
      *                                 and fields to deserialize and how.
-     * @param injectedClassNameMap     map to which the names of new type
+     * @param extraDataEntryNameMap    map to which the names of new type
      *                                 adapter classes are added.
      * @param typeAdapterRegistry      the registry to which the corresponding
      *                                 type adapter class name is added for a
      *                                 given domain class name.
-     * @param instanceCreatorClassPool class pool that contains the domain
-     *                                 classes for which an InstanceCreator
-     *                                 is registered.
+     * @param gsonRuntimeSettings      keeps track of all GsonBuilder invocations.
      */
-    public OptimizedTypeAdapterAdder(ClassPool                     programClassPool,
-                                     ClassPool                     libraryClassPool,
-                                     CodeAttributeEditor           codeAttributeEditor,
-                                     OptimizedJsonInfo             serializationInfo,
-                                     OptimizedJsonInfo             deserializationInfo,
-                                     MultiValueMap<String, String> injectedClassNameMap,
-                                     Map<String, String>           typeAdapterRegistry,
-                                     ClassPool                     instanceCreatorClassPool)
+    public OptimizedTypeAdapterAdder(ClassPool             programClassPool,
+                                     ClassPool             libraryClassPool,
+                                     CodeAttributeEditor   codeAttributeEditor,
+                                     OptimizedJsonInfo     serializationInfo,
+                                     OptimizedJsonInfo     deserializationInfo,
+                                     ExtraDataEntryNameMap extraDataEntryNameMap,
+                                     Map<String, String>   typeAdapterRegistry,
+                                     GsonRuntimeSettings   gsonRuntimeSettings)
     {
-        this.programClassPool         = programClassPool;
-        this.libraryClassPool         = libraryClassPool;
-        this.codeAttributeEditor      = codeAttributeEditor;
-        this.serializationInfo        = serializationInfo;
-        this.deserializationInfo      = deserializationInfo;
-        this.injectedClassNameMap     = injectedClassNameMap;
-        this.typeAdapterRegistry      = typeAdapterRegistry;
-        this.instanceCreatorClassPool = instanceCreatorClassPool;
+        this.programClassPool      = programClassPool;
+        this.libraryClassPool      = libraryClassPool;
+        this.codeAttributeEditor   = codeAttributeEditor;
+        this.serializationInfo     = serializationInfo;
+        this.deserializationInfo   = deserializationInfo;
+        this.extraDataEntryNameMap = extraDataEntryNameMap;
+        this.typeAdapterRegistry   = typeAdapterRegistry;
+        this.gsonRuntimeSettings   = gsonRuntimeSettings;
     }
 
 
@@ -118,15 +121,16 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
             }
 
             ClassReader templateClassReader =
-                new ClassReader(false, false, false, null,
+                new ClassReader(false, false, false, false, null,
                                 new OptimizedTypeAdapterInitializer(
                                     typeAdapterClassName,
                                     programClass,
                                     codeAttributeEditor,
                                     serializationInfo,
                                     deserializationInfo,
-                                    instanceCreatorClassPool,
+                                    gsonRuntimeSettings.instanceCreatorClassPool,
                                     new MultiClassVisitor(
+                                        new ProcessingFlagSetter(ProcessingFlags.INJECTED),
                                         new ClassPresenceFilter(programClassPool, null,
                                             new ClassPoolFiller(programClassPool)),
                                             new ClassReferenceInitializer(programClassPool, libraryClassPool),
@@ -136,7 +140,7 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
             {
                 String dataEntryName = getDataEntryName(NAME_OPTIMIZED_TYPE_ADAPTER_IMPL);
                 templateClassReader.read(new ClassPathDataEntry(dataEntryName));
-                injectedClassNameMap.put(programClass.getName(), typeAdapterClassName);
+                extraDataEntryNameMap.addExtraClassToClass(programClass, typeAdapterClassName);
                 typeAdapterRegistry.put(programClass.getName(), typeAdapterClassName);
             }
             catch (IOException e)

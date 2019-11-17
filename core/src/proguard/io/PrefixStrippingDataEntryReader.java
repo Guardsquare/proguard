@@ -49,6 +49,7 @@ public class PrefixStrippingDataEntryReader implements DataEntryReader
 
     // Implementation for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry) throws IOException
     {
         // Strip the prefix if necessary.

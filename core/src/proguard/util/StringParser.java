@@ -21,7 +21,7 @@
 package proguard.util;
 
 /**
- * This interface provides a method to create a SringMatcher for a given
+ * This interface provides a method to create a StringMatcher for a given
  * regular expression.
  *
  * @author Eric Lafortune

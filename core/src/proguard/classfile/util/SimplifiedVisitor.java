@@ -30,9 +30,19 @@ import proguard.classfile.constant.*;
 import proguard.classfile.instruction.*;
 
 /**
- * This abstract utility class allows to implement various visitor interfaces
- * with simplified methods. The provided methods delegate to other versions
- * with fewer arguments or more general arguments.
+ * This abstract utility class allows to implement various extensive visitor
+ * interfaces with a limited number of simplified methods. The provided
+ * methods delegate to other versions with fewer arguments or more general
+ * arguments.
+ *
+ * An extension can for example implement ConstantVisitor by implementing
+ * visitIntegerConstant (for handling integer constants) and visitAnyConstant
+ * (for generically handling all other constants).
+ *
+ * The abstract class does not implement the interfaces itself, because that
+ * would lead to many unintended implementations, messing up helpful
+ * auto-completion and run-time JIT compiler optimizations. The extensions
+ * have to declare the relevant interfaces explicitly.
  *
  * @author Eric Lafortune
  * @noinspection AbstractClassWithoutAbstractMethods
@@ -391,6 +401,12 @@ public abstract class SimplifiedVisitor
     public void visitSourceDirAttribute(Clazz clazz, SourceDirAttribute sourceDirAttribute)
     {
         visitAnyAttribute(clazz, sourceDirAttribute);
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        visitAnyAttribute(clazz, sourceDebugExtensionAttribute);
     }
 
 

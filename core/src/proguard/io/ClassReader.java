@@ -44,6 +44,7 @@ public class ClassReader implements DataEntryReader
     private final boolean        isLibrary;
     private final boolean        skipNonPublicLibraryClasses;
     private final boolean        skipNonPublicLibraryClassMembers;
+    private final boolean        ignoreStackMapAttributes;
     private final WarningPrinter warningPrinter;
     private final ClassVisitor   classVisitor;
 
@@ -55,12 +56,14 @@ public class ClassReader implements DataEntryReader
     public ClassReader(boolean        isLibrary,
                        boolean        skipNonPublicLibraryClasses,
                        boolean        skipNonPublicLibraryClassMembers,
+                       boolean        ignoreStackMapAttributes,
                        WarningPrinter warningPrinter,
                        ClassVisitor   classVisitor)
     {
         this.isLibrary                        = isLibrary;
         this.skipNonPublicLibraryClasses      = skipNonPublicLibraryClasses;
         this.skipNonPublicLibraryClassMembers = skipNonPublicLibraryClassMembers;
+        this.ignoreStackMapAttributes         = ignoreStackMapAttributes;
         this.warningPrinter                   = warningPrinter;
         this.classVisitor                     = classVisitor;
     }
@@ -68,6 +71,7 @@ public class ClassReader implements DataEntryReader
 
     // Implementations for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry) throws IOException
     {
         try
@@ -88,7 +92,7 @@ public class ClassReader implements DataEntryReader
             else
             {
                 clazz = new ProgramClass();
-                clazz.accept(new ProgramClassReader(dataInputStream));
+                clazz.accept(new ProgramClassReader(dataInputStream, ignoreStackMapAttributes));
             }
 
             // Apply the visitor, if we have a real class.

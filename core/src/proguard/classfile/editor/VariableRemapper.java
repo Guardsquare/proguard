@@ -111,7 +111,7 @@ implements   AttributeVisitor,
         // Remap the variables of the instructions.
         codeAttribute.instructionsAccept(clazz, method, this);
 
-        // Apply the code atribute editor.
+        // Apply the code attribute editor.
         codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
     }
 

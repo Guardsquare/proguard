@@ -25,7 +25,7 @@ package proguard;
  *
  * @author Eric Lafortune
  */
-class ConfigurationConstants
+public class ConfigurationConstants
 {
     public static final String OPTION_PREFIX            = "-";
     public static final String AT_DIRECTIVE             = "@";
@@ -44,6 +44,7 @@ class ConfigurationConstants
     public static final String KEEP_NAMES_OPTION                     = "-keepnames";
     public static final String KEEP_CLASS_MEMBER_NAMES_OPTION        = "-keepclassmembernames";
     public static final String KEEP_CLASSES_WITH_MEMBER_NAMES_OPTION = "-keepclasseswithmembernames";
+    public static final String KEEP_CODE_OPTION                      = "-keepcode";
     public static final String INCLUDE_DESCRIPTOR_CLASSES_SUBOPTION  = "includedescriptorclasses";
     public static final String INCLUDE_CODE_SUBOPTION                = "includecode";
     public static final String ALLOW_SHRINKING_SUBOPTION             = "allowshrinking";
@@ -90,6 +91,11 @@ class ConfigurationConstants
     public static final String MICRO_EDITION_OPTION  = "-microedition";
     public static final String ANDROID_OPTION        = "-android";
 
+    public static final String KEY_STORE_OPTION             = "-keystore";
+    public static final String KEY_STORE_PASSWORD_OPTION    = "-keystorepassword";
+    public static final String KEY_ALIAS_OPTION             = "-keyalias";
+    public static final String KEY_PASSWORD_OPTION          = "-keypassword";
+
     public static final String VERBOSE_OPTION                                    = "-verbose";
     public static final String DONT_NOTE_OPTION                                  = "-dontnote";
     public static final String DONT_WARN_OPTION                                  = "-dontwarn";
@@ -102,8 +108,11 @@ class ConfigurationConstants
     public static final String DONT_SKIP_NON_PUBLIC_LIBRARY_CLASS_MEMBERS_OPTION = "-dontskipnonpubliclibraryclassmembers";
     public static final String TARGET_OPTION                                     = "-target";
     public static final String KEEP_DIRECTORIES_OPTION                           = "-keepdirectories";
+    public static final String DONT_COMPRESS_OPTION                              = "-dontcompress";
+    public static final String ZIP_ALIGN_OPTION                                  = "-zipalign";
     public static final String FORCE_PROCESSING_OPTION                           = "-forceprocessing";
 
+    public static final String ADAPT_KOTLIN_METADATA                             = "-adaptkotlinmetadata";
 
     public static final String ANY_FILE_KEYWORD            = "**";
 

@@ -20,25 +20,21 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of an Inner Classes table entry.
  *
  * @author Eric Lafortune
  */
-public class InnerClassesInfo implements VisitorAccepter
+public class InnerClassesInfo extends SimpleVisitorAccepter
 {
     public int u2innerClassIndex;
     public int u2outerClassIndex;
     public int u2innerNameIndex;
     public int u2innerClassAccessFlags;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
 
 
     /**
@@ -77,18 +73,5 @@ public class InnerClassesInfo implements VisitorAccepter
         {
             clazz.constantPoolEntryAccept(u2innerNameIndex, constantVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

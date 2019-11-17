@@ -22,14 +22,12 @@ package proguard.evaluation;
 
 import proguard.*;
 import proguard.classfile.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.OptimizationInfoMemberFilter;
 import proguard.optimize.info.*;
-
-import java.util.*;
+import proguard.util.WildcardManager;
 
 /**
  * This factory creates visitors to efficiently travel to specified classes and
@@ -55,7 +53,7 @@ extends      ClassSpecificationVisitorFactory
                                                         boolean             isField,
                                                         MemberVisitor       memberVisitor,
                                                         AttributeVisitor    attributeVisitor,
-                                                        List                variableStringMatchers)
+                                                        WildcardManager wildcardManager)
     {
         if (memberSpecification instanceof MemberValueSpecification)
         {
@@ -83,7 +81,7 @@ extends      ClassSpecificationVisitorFactory
                                                   isField,
                                                   memberVisitor,
                                                   attributeVisitor,
-                                                  variableStringMatchers);
+                                                  wildcardManager);
     }
 
 

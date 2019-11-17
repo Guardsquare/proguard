@@ -60,7 +60,7 @@ implements   InstructionVisitor
      */
     public InstructionSequencesReplacer(Constant[]          constants,
                                         Instruction[][][]   instructionSequences,
-                                        BranchTargetFinder branchTargetFinder,
+                                        BranchTargetFinder  branchTargetFinder,
                                         CodeAttributeEditor codeAttributeEditor)
     {
         this(constants,

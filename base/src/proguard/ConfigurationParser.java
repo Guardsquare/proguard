@@ -151,23 +151,26 @@ public class ConfigurationParser
             else if (ConfigurationConstants.BASE_DIRECTORY_DIRECTIVE                         .startsWith(nextWord)) parseBaseDirectoryArgument();
 
             // Then configuration options with or without arguments.
-            else if (ConfigurationConstants.INJARS_OPTION                                    .startsWith(nextWord)) configuration.programJars                           = parseClassPathArgument(configuration.programJars, false);
-            else if (ConfigurationConstants.OUTJARS_OPTION                                   .startsWith(nextWord)) configuration.programJars                           = parseClassPathArgument(configuration.programJars, true);
-            else if (ConfigurationConstants.LIBRARYJARS_OPTION                               .startsWith(nextWord)) configuration.libraryJars                           = parseClassPathArgument(configuration.libraryJars, false);
+            else if (ConfigurationConstants.INJARS_OPTION                                    .startsWith(nextWord)) configuration.programJars                           = parseClassPathArgument(configuration.programJars, false, true);
+            else if (ConfigurationConstants.OUTJARS_OPTION                                   .startsWith(nextWord)) configuration.programJars                           = parseClassPathArgument(configuration.programJars, true, false);
+            else if (ConfigurationConstants.LIBRARYJARS_OPTION                               .startsWith(nextWord)) configuration.libraryJars                           = parseClassPathArgument(configuration.libraryJars, false, false);
             else if (ConfigurationConstants.RESOURCEJARS_OPTION                              .startsWith(nextWord)) throw new ParseException("The '-resourcejars' option is no longer supported. Please use the '-injars' option for all input");
             else if (ConfigurationConstants.SKIP_NON_PUBLIC_LIBRARY_CLASSES_OPTION           .startsWith(nextWord)) configuration.skipNonPublicLibraryClasses           = parseNoArgument(true);
             else if (ConfigurationConstants.DONT_SKIP_NON_PUBLIC_LIBRARY_CLASSES_OPTION      .startsWith(nextWord)) configuration.skipNonPublicLibraryClasses           = parseNoArgument(false);
             else if (ConfigurationConstants.DONT_SKIP_NON_PUBLIC_LIBRARY_CLASS_MEMBERS_OPTION.startsWith(nextWord)) configuration.skipNonPublicLibraryClassMembers      = parseNoArgument(false);
             else if (ConfigurationConstants.TARGET_OPTION                                    .startsWith(nextWord)) configuration.targetClassVersion                    = parseClassVersion();
+            else if (ConfigurationConstants.DONT_COMPRESS_OPTION                             .startsWith(nextWord)) configuration.dontCompress                          = parseCommaSeparatedList("file name", true, true, false, true, false, true, false, false, false, configuration.dontCompress);
+            else if (ConfigurationConstants.ZIP_ALIGN_OPTION                                 .startsWith(nextWord)) configuration.zipAlign                              = parseIntegerArgument();
             else if (ConfigurationConstants.FORCE_PROCESSING_OPTION                          .startsWith(nextWord)) configuration.lastModified                          = parseNoArgument(Long.MAX_VALUE);
 
             else if (ConfigurationConstants.IF_OPTION                                        .startsWith(nextWord)) configuration.keep                                  = parseIfCondition(configuration.keep);
-            else if (ConfigurationConstants.KEEP_OPTION                                      .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, true,  false, false, null);
-            else if (ConfigurationConstants.KEEP_CLASS_MEMBERS_OPTION                        .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, false, false, null);
-            else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBERS_OPTION                 .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, true,  false, null);
-            else if (ConfigurationConstants.KEEP_NAMES_OPTION                                .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, true,  false, true,  null);
-            else if (ConfigurationConstants.KEEP_CLASS_MEMBER_NAMES_OPTION                   .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, false, true,  null);
-            else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBER_NAMES_OPTION            .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, true,  true,  null);
+            else if (ConfigurationConstants.KEEP_OPTION                                      .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, true,  true,  false, false, false, null);
+            else if (ConfigurationConstants.KEEP_CLASS_MEMBERS_OPTION                        .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, true,  false, false, false, null);
+            else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBERS_OPTION                 .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, true,  false, true,  false, null);
+            else if (ConfigurationConstants.KEEP_NAMES_OPTION                                .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, true,  true,  false, false, true,  null);
+            else if (ConfigurationConstants.KEEP_CLASS_MEMBER_NAMES_OPTION                   .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, true,  false, false, true,  null);
+            else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBER_NAMES_OPTION            .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, true,  false, true,  true,  null);
+            else if (ConfigurationConstants.KEEP_CODE_OPTION                                 .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, false, false, true,  false, false, null);
             else if (ConfigurationConstants.PRINT_SEEDS_OPTION                               .startsWith(nextWord)) configuration.printSeeds                            = parseOptionalFile();
 
             // After '-keep'.
@@ -175,7 +178,7 @@ public class ConfigurationParser
 
             else if (ConfigurationConstants.DONT_SHRINK_OPTION                               .startsWith(nextWord)) configuration.shrink                                = parseNoArgument(false);
             else if (ConfigurationConstants.PRINT_USAGE_OPTION                               .startsWith(nextWord)) configuration.printUsage                            = parseOptionalFile();
-            else if (ConfigurationConstants.WHY_ARE_YOU_KEEPING_OPTION                       .startsWith(nextWord)) configuration.whyAreYouKeeping                      = parseKeepClassSpecificationArguments(configuration.whyAreYouKeeping, false, false, false, null);
+            else if (ConfigurationConstants.WHY_ARE_YOU_KEEPING_OPTION                       .startsWith(nextWord)) configuration.whyAreYouKeeping                      = parseClassSpecificationArguments(configuration.whyAreYouKeeping);
 
             else if (ConfigurationConstants.DONT_OPTIMIZE_OPTION                             .startsWith(nextWord)) configuration.optimize                              = parseNoArgument(false);
             else if (ConfigurationConstants.OPTIMIZATION_PASSES                              .startsWith(nextWord)) configuration.optimizationPasses                    = parseIntegerArgument();
@@ -199,18 +202,24 @@ public class ConfigurationParser
             else if (ConfigurationConstants.DONT_USE_MIXED_CASE_CLASS_NAMES_OPTION           .startsWith(nextWord)) configuration.useMixedCaseClassNames                = parseNoArgument(false);
             else if (ConfigurationConstants.KEEP_PACKAGE_NAMES_OPTION                        .startsWith(nextWord)) configuration.keepPackageNames                      = parseCommaSeparatedList("package name", true, true, false, false, true, false, false, true, false, configuration.keepPackageNames);
             else if (ConfigurationConstants.FLATTEN_PACKAGE_HIERARCHY_OPTION                 .startsWith(nextWord)) configuration.flattenPackageHierarchy               = ClassUtil.internalClassName(parseOptionalArgument());
-            else if (ConfigurationConstants.REPACKAGE_CLASSES_OPTION                         .startsWith(nextWord)) configuration.repackageClasses                      = ClassUtil.internalClassName(parseOptionalArgument());
-            else if (ConfigurationConstants.DEFAULT_PACKAGE_OPTION                           .startsWith(nextWord)) configuration.repackageClasses                      = ClassUtil.internalClassName(parseOptionalArgument());
+            else if (ConfigurationConstants.REPACKAGE_CLASSES_OPTION                         .startsWith(nextWord) ||
+                     ConfigurationConstants.DEFAULT_PACKAGE_OPTION                           .startsWith(nextWord)) configuration.repackageClasses                      = ClassUtil.internalClassName(parseOptionalArgument());
             else if (ConfigurationConstants.KEEP_ATTRIBUTES_OPTION                           .startsWith(nextWord)) configuration.keepAttributes                        = parseCommaSeparatedList("attribute name", true, true, false, false, true, false, false, false, false, configuration.keepAttributes);
             else if (ConfigurationConstants.KEEP_PARAMETER_NAMES_OPTION                      .startsWith(nextWord)) configuration.keepParameterNames                    = parseNoArgument(true);
             else if (ConfigurationConstants.RENAME_SOURCE_FILE_ATTRIBUTE_OPTION              .startsWith(nextWord)) configuration.newSourceFileAttribute                = parseOptionalArgument();
             else if (ConfigurationConstants.ADAPT_CLASS_STRINGS_OPTION                       .startsWith(nextWord)) configuration.adaptClassStrings                     = parseCommaSeparatedList("class name", true, true, false, false, true, false, false, true, false, configuration.adaptClassStrings);
             else if (ConfigurationConstants.ADAPT_RESOURCE_FILE_NAMES_OPTION                 .startsWith(nextWord)) configuration.adaptResourceFileNames                = parseCommaSeparatedList("resource file name", true, true, false, true, false, true, false, false, false, configuration.adaptResourceFileNames);
             else if (ConfigurationConstants.ADAPT_RESOURCE_FILE_CONTENTS_OPTION              .startsWith(nextWord)) configuration.adaptResourceFileContents             = parseCommaSeparatedList("resource file name", true, true, false, true, false, true, false, false, false, configuration.adaptResourceFileContents);
+            else if (ConfigurationConstants.ADAPT_KOTLIN_METADATA                            .startsWith(nextWord)) configuration.adaptKotlinMetadata                   = parseNoArgument(true);
 
             else if (ConfigurationConstants.DONT_PREVERIFY_OPTION                            .startsWith(nextWord)) configuration.preverify                             = parseNoArgument(false);
             else if (ConfigurationConstants.MICRO_EDITION_OPTION                             .startsWith(nextWord)) configuration.microEdition                          = parseNoArgument(true);
             else if (ConfigurationConstants.ANDROID_OPTION                                   .startsWith(nextWord)) configuration.android                               = parseNoArgument(true);
+
+            else if (ConfigurationConstants.KEY_STORE_OPTION                                 .startsWith(nextWord)) configuration.keyStores                             = parseFiles(configuration.keyStores);
+            else if (ConfigurationConstants.KEY_STORE_PASSWORD_OPTION                        .startsWith(nextWord)) configuration.keyStorePasswords                     = parseCommaSeparatedList("keystore password", true, false, false, false, false, false, true, false, false, configuration.keyStorePasswords);
+            else if (ConfigurationConstants.KEY_ALIAS_OPTION                                 .startsWith(nextWord)) configuration.keyAliases                            = parseCommaSeparatedList("key", true, false, false, false, false, false, true, false, false, configuration.keyAliases);
+            else if (ConfigurationConstants.KEY_PASSWORD_OPTION                              .startsWith(nextWord)) configuration.keyPasswords                          = parseCommaSeparatedList("key password", true, false, false, false, false, false, true, false, false, configuration.keyPasswords);
 
             else if (ConfigurationConstants.VERBOSE_OPTION                                   .startsWith(nextWord)) configuration.verbose                               = parseNoArgument(true);
             else if (ConfigurationConstants.DONT_NOTE_OPTION                                 .startsWith(nextWord)) configuration.note                                  = parseCommaSeparatedList("class name", true, true, false, false, true, false, false, true, false, configuration.note);
@@ -304,7 +313,8 @@ public class ConfigurationParser
 
 
     private ClassPath parseClassPathArgument(ClassPath classPath,
-                                             boolean   isOutput)
+                                             boolean   isOutput,
+                                             boolean   allowFeatureName)
     throws ParseException, IOException
     {
         // Create a new List if necessary.
@@ -313,13 +323,41 @@ public class ConfigurationParser
             classPath = new ClassPath();
         }
 
+        // Read the first jar name.
+        readNextWord("jar or directory name", true, false, false);
+
+        // Do we have a suboption with a feature name instead?
+        // The file name then comes out as an empty string.
+        String featureName = null;
+
+        if (allowFeatureName &&
+            nextWord.length() == 0)
+        {
+            // Read the separator.
+            readNextWord("separating '" + ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD + "'");
+
+            if (!ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD.equals(nextWord))
+            {
+                throw new ParseException("Expecting separating '" + ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD +
+                                         "' or jar or directory name" +
+                                         "' before " + reader.locationDescription());
+            }
+
+            // Read and remember the feature name.
+            readNextWord("feature name", false, false, false);
+
+            featureName = nextWord;
+
+            // Read the first jar name.
+            readNextWord("jar or directory name", true, false, false);
+        }
+
         while (true)
         {
-            // Read the next jar name.
-            readNextWord("jar or directory name", true, false, false);
-
             // Create a new class path entry.
-            ClassPathEntry entry = new ClassPathEntry(file(nextWord), isOutput);
+            ClassPathEntry entry = new ClassPathEntry(file(nextWord),
+                                                      isOutput,
+                                                      featureName);
 
             // Read the opening parenthesis or the separator, if any.
             readNextWord();
@@ -369,14 +407,21 @@ public class ConfigurationParser
                                     entry.setZipFilter(filters[--counter]);
                                     if (counter > 0)
                                     {
-                                        // For backward compatibility, the apk
-                                        // filter comes second in the list.
+                                        // For backward compatibility, the
+                                        // jmod/aar/aab/apk filters come first
+                                        // in the list.
                                         entry.setApkFilter(filters[--counter]);
                                         if (counter > 0)
                                         {
-                                            // For backward compatibility, the aar
-                                            // filter comes first in the list.
-                                            entry.setAarFilter(filters[--counter]);
+                                            entry.setAabFilter(filters[--counter]);
+                                            if (counter > 0)
+                                            {
+                                                entry.setAarFilter(filters[--counter]);
+                                                if (counter > 0)
+                                                {
+                                                    entry.setJmodFilter(filters[--counter]);
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -402,6 +447,9 @@ public class ConfigurationParser
                 throw new ParseException("Expecting class path separator '" + ConfigurationConstants.JAR_SEPARATOR_KEYWORD +
                                          "' before " + reader.locationDescription());
             }
+
+            // Read the next jar name.
+            readNextWord("jar or directory name", true, false, false);
         }
     }
 
@@ -463,6 +511,20 @@ public class ConfigurationParser
         readNextWord();
 
         return url;
+    }
+
+
+    private List parseFiles(List files)
+    throws ParseException, IOException
+    {
+        if (files == null)
+        {
+            files = new ArrayList();
+        }
+
+        files.add(parseFile());
+
+        return files;
     }
 
 
@@ -540,6 +602,7 @@ public class ConfigurationParser
     /**
      * Parses and adds a conditional class specification to keep other classes
      * and class members.
+     * For example: -if "public class SomeClass { void someMethod(); } -keep"
      * @throws ParseException if the class specification contains a syntax error.
      * @throws IOException    if an IO error occurs while reading the class
      *                        specification.
@@ -548,15 +611,8 @@ public class ConfigurationParser
     throws ParseException, IOException
     {
         // Read the condition.
-        readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
-                     "', '"      + JavaConstants.ACC_INTERFACE +
-                     "', or '"   + JavaConstants.ACC_ENUM + "'",
-                     false,
-                     false,
-                     true);
-
         ClassSpecification condition =
-            parseClassSpecificationArguments(false);
+            parseClassSpecificationArguments(true, true, false);
 
         // Read the corresponding keep option.
         if (nextWord == null)
@@ -564,12 +620,13 @@ public class ConfigurationParser
             throw new ParseException("Expecting '-keep' option after '-if' option, before " + reader.locationDescription());
         }
 
-        if      (ConfigurationConstants.KEEP_OPTION                          .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, true,  false, false, condition);
-        else if (ConfigurationConstants.KEEP_CLASS_MEMBERS_OPTION            .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, false, false, condition);
-        else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBERS_OPTION     .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, true,  false, condition);
-        else if (ConfigurationConstants.KEEP_NAMES_OPTION                    .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, true,  false, true,  condition);
-        else if (ConfigurationConstants.KEEP_CLASS_MEMBER_NAMES_OPTION       .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, false, true,  condition);
-        else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBER_NAMES_OPTION.startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, true,  true,  condition);
+        if      (ConfigurationConstants.KEEP_OPTION                          .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, true,  true,  false, false, false, condition);
+        else if (ConfigurationConstants.KEEP_CLASS_MEMBERS_OPTION            .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, true,  false, false, false, condition);
+        else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBERS_OPTION     .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, true,  false, true,  false, condition);
+        else if (ConfigurationConstants.KEEP_NAMES_OPTION                    .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, true,  true,  false, false, true,  condition);
+        else if (ConfigurationConstants.KEEP_CLASS_MEMBER_NAMES_OPTION       .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, true,  false, false, true,  condition);
+        else if (ConfigurationConstants.KEEP_CLASSES_WITH_MEMBER_NAMES_OPTION.startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, true,  false, true,  true,  condition);
+        else if (ConfigurationConstants.KEEP_CODE_OPTION                     .startsWith(nextWord)) keepClassSpecifications = parseKeepClassSpecificationArguments(keepClassSpecifications, false, false, true,  false, false, condition);
         else
         {
             throw new ParseException("Expecting '-keep' option after '-if' option, before " + reader.locationDescription());
@@ -581,12 +638,15 @@ public class ConfigurationParser
 
     /**
      * Parses and adds a class specification to keep classes and class members.
+     * For example: -keep "public class SomeClass { void someMethod(); }"
      * @throws ParseException if the class specification contains a syntax error.
      * @throws IOException    if an IO error occurs while reading the class
      *                        specification.
      */
     private List parseKeepClassSpecificationArguments(List               keepClassSpecifications,
                                                       boolean            markClasses,
+                                                      boolean            markMembers,
+                                                      boolean            markCodeAttributes,
                                                       boolean            markConditionally,
                                                       boolean            allowShrinking,
                                                       ClassSpecification condition)
@@ -600,6 +660,8 @@ public class ConfigurationParser
 
         // Read and add the keep configuration.
         keepClassSpecifications.add(parseKeepClassSpecificationArguments(markClasses,
+                                                                         markMembers,
+                                                                         markCodeAttributes,
                                                                          markConditionally,
                                                                          allowShrinking,
                                                                          condition));
@@ -610,18 +672,20 @@ public class ConfigurationParser
     /**
      * Parses and returns a class specification to keep classes and class
      * members.
+     * For example: -keep "public class SomeClass { void someMethod(); }"
      * @throws ParseException if the class specification contains a syntax error.
      * @throws IOException    if an IO error occurs while reading the class
      *                        specification.
      */
     private KeepClassSpecification parseKeepClassSpecificationArguments(boolean            markClasses,
+                                                                        boolean            markMembers,
+                                                                        boolean            markCodeAttributes,
                                                                         boolean            markConditionally,
                                                                         boolean            allowShrinking,
                                                                         ClassSpecification condition)
     throws ParseException, IOException
     {
         boolean markDescriptorClasses = false;
-        boolean markCodeAttributes    = false;
         //boolean allowShrinking        = false;
         boolean allowOptimization     = false;
         boolean allowObfuscation      = false;
@@ -677,10 +741,11 @@ public class ConfigurationParser
 
         // Read the class configuration.
         ClassSpecification classSpecification =
-            parseClassSpecificationArguments(false);
+            parseClassSpecificationArguments(false, true, false);
 
         // Create and return the keep configuration.
         return new KeepClassSpecification(markClasses,
+                                          markMembers,
                                           markConditionally,
                                           markDescriptorClasses,
                                           markCodeAttributes,
@@ -694,6 +759,7 @@ public class ConfigurationParser
 
     /**
      * Parses and adds a class specification for optimization assumptions.
+     * For example: -assumenosideeffects "public class Simple { void simple(); }"
      * @throws ParseException if the class specification contains a syntax error.
      * @throws IOException    if an IO error occurs while reading the class
      *                        specification.
@@ -707,13 +773,31 @@ public class ConfigurationParser
             classSpecifications = new ArrayList();
         }
 
-        readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
-                     "', '"      + JavaConstants.ACC_INTERFACE +
-                     "', or '"   + JavaConstants.ACC_ENUM + "'",
-                     false, false, true);
-
         // Read and add the class configuration.
-        classSpecifications.add(parseClassSpecificationArguments(true));
+        classSpecifications.add(parseClassSpecificationArguments(true, true, true));
+
+        return classSpecifications;
+    }
+
+
+    /**
+     * Parses and adds a class specification.
+     * For example: "class SomeClass { void someMethod(); }"
+     * @throws ParseException if the class specification contains a syntax error.
+     * @throws IOException    if an IO error occurs while reading the class
+     *                        specification.
+     */
+    private List<ClassSpecification> parseClassSpecificationArguments(List<ClassSpecification> classSpecifications)
+    throws ParseException, IOException
+    {
+        // Create a new List if necessary.
+        if (classSpecifications == null)
+        {
+            classSpecifications = new ArrayList();
+        }
+
+        // Read and add the keep configuration.
+        classSpecifications.add(parseClassSpecificationArguments(true, true, false));
 
         return classSpecifications;
     }
@@ -729,13 +813,24 @@ public class ConfigurationParser
 
     /**
      * Parses and returns a class specification.
+     * For example: "public class SomeClass { public void someMethod(); }"
      * @throws ParseException if the class specification contains a syntax error.
      * @throws IOException    if an IO error occurs while reading the class
      *                        specification.
      */
-    public ClassSpecification parseClassSpecificationArguments(boolean allowValues)
+    public ClassSpecification parseClassSpecificationArguments(boolean readFirstWord,
+                                                               boolean allowClassMembers,
+                                                               boolean allowValues)
     throws ParseException, IOException
     {
+        if (readFirstWord)
+        {
+            readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
+                         "', '"      + JavaConstants.ACC_INTERFACE +
+                         "', or '"   + JavaConstants.ACC_ENUM + "'",
+                         false, false, true);
+        }
+
         // Clear the annotation type.
         String annotationType = null;
 
@@ -840,7 +935,7 @@ public class ConfigurationParser
         String extendsAnnotationType = null;
         String extendsClassName      = null;
 
-        if (!configurationEnd())
+        if (allowClassMembers && !configurationEnd())
         {
             // Parse 'implements ...' or 'extends ...' part, if any.
             if (ConfigurationConstants.IMPLEMENTS_KEYWORD.equals(nextWord) ||
@@ -880,7 +975,7 @@ public class ConfigurationParser
 
 
         // Now add any class members to this class specification.
-        if (!configurationEnd())
+        if (allowClassMembers && !configurationEnd())
         {
             // Check the class member opening part.
             if (!ConfigurationConstants.OPEN_KEYWORD.equals(nextWord))
@@ -898,6 +993,9 @@ public class ConfigurationParser
 
                 if (nextWord.equals(ConfigurationConstants.CLOSE_KEYWORD))
                 {
+                    lastComments = reader.lastComments();
+                    classSpecification.memberComments = lastComments;
+
                     // The closing brace. Stop parsing the class members.
                     readNextWord();
 
@@ -999,7 +1097,7 @@ public class ConfigurationParser
             ConfigurationConstants.ANY_FIELD_KEYWORD       .equals(nextWord) ||
             ConfigurationConstants.ANY_METHOD_KEYWORD      .equals(nextWord))
         {
-            // Act according to the type of wildcard..
+            // Act according to the type of wildcard.
             if (ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD.equals(nextWord))
             {
                 checkFieldAccessFlags(requiredSetMemberAccessFlags,
@@ -1058,7 +1156,8 @@ public class ConfigurationParser
         {
             // Make sure we have a proper type.
             checkJavaIdentifier("java type");
-            String type = nextWord;
+            String type         = nextWord;
+            String typeLocation = reader.locationDescription();
 
             readNextWord("class member name");
             String name = nextWord;
@@ -1093,6 +1192,13 @@ public class ConfigurationParser
                              "' or separator '" + ConfigurationConstants.SEPARATOR_KEYWORD + "'");
             }
 
+            // Check if the type actually contains the use of generics.
+            // Can not do it right away as we also support "<init>" as a type (see case above).
+            if (containsGenerics(type))
+            {
+                throw new ParseException("Generics are not allowed (erased) for java type" + typeLocation);
+            }
+
             // Are we looking at a field, a method, or something else?
             if (ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
             {
@@ -1102,6 +1208,13 @@ public class ConfigurationParser
 
                 // We already have a field descriptor.
                 String descriptor = ClassUtil.internalType(type);
+
+                if (ConfigurationConstants.ANY_FIELD_KEYWORD.equals(name))
+                {
+                    throw new ParseException("Not expecting field type before with wildcard '" + ConfigurationConstants.ANY_FIELD_KEYWORD +
+                                             "before " + reader.locationDescription() +
+                                             " (use '" + ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD + "' instead)");
+                }
 
                 // Add the field.
                 classSpecification.addField(
@@ -1166,6 +1279,13 @@ public class ConfigurationParser
 
                 if (ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
                 {
+                    if (ConfigurationConstants.ANY_METHOD_KEYWORD.equals(name))
+                    {
+                        throw new ParseException("Not expecting method descriptor with wildcard '" + ConfigurationConstants.ANY_METHOD_KEYWORD +
+                                                 "before " + reader.locationDescription() +
+                                                 " (use '" + ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD + "' instead)");
+                    }
+
                     // Add the plain method.
                     classSpecification.addMethod(
                         new MemberSpecification(requiredSetMemberAccessFlags,
@@ -1392,6 +1512,35 @@ public class ConfigurationParser
                                          List    list)
     throws ParseException, IOException
     {
+        return parseCommaSeparatedList(expectedDescription,
+                                       readFirstWord,
+                                       allowEmptyList,
+                                       null,
+                                       expectClosingParenthesis,
+                                       isFileName,
+                                       checkJavaIdentifiers,
+                                       allowGenerics,
+                                       replaceSystemProperties,
+                                       replaceExternalClassNames,
+                                       replaceExternalTypes,
+                                       list);
+    }
+
+
+    private List parseCommaSeparatedList(String  expectedDescription,
+                                         boolean readFirstWord,
+                                         boolean allowEmptyList,
+                                         String  defaultIfEmpty,
+                                         boolean expectClosingParenthesis,
+                                         boolean isFileName,
+                                         boolean checkJavaIdentifiers,
+                                         boolean allowGenerics,
+                                         boolean replaceSystemProperties,
+                                         boolean replaceExternalClassNames,
+                                         boolean replaceExternalTypes,
+                                         List    list)
+    throws ParseException, IOException
+    {
         if (list == null)
         {
             list = new ArrayList();
@@ -1417,10 +1566,18 @@ public class ConfigurationParser
                     readNextWord("closing '" + ConfigurationConstants.CLOSE_ARGUMENTS_KEYWORD +
                                  "'");
 
+                    if (defaultIfEmpty != null)
+                    {
+                        list.add(defaultIfEmpty);
+                    }
                     return list;
                 }
                 else if (nextWord.equals(ConfigurationConstants.CLOSE_ARGUMENTS_KEYWORD))
                 {
+                    if (defaultIfEmpty != null)
+                    {
+                        list.add(defaultIfEmpty);
+                    }
                     return list;
                 }
             }
@@ -1432,6 +1589,10 @@ public class ConfigurationParser
                 // Check if the list is empty.
                 if (configurationEnd())
                 {
+                    if (defaultIfEmpty != null)
+                    {
+                        list.add(defaultIfEmpty);
+                    }
                     return list;
                 }
             }
@@ -1482,6 +1643,34 @@ public class ConfigurationParser
             // Read the next list entry.
             readNextWord(expectedDescription, isFileName, true, false);
         }
+    }
+
+
+    /**
+     * Converts a list of class name matchers to a class specification.
+     */
+    private ClassSpecification convertToClassSpecification(List<String> list)
+    {
+        return new ClassSpecification(null,
+                                      0,
+                                      0,
+                                      null,
+                                      StringUtil.join(",", list.toArray(new String[list.size()])),
+                                      null,
+                                      null);
+    }
+
+
+    /**
+     * Removes any present member specification from the provided
+     * class specification.
+     */
+    private ClassSpecification removeMemberSpecification(ClassSpecification classSpecification)
+    {
+        classSpecification.fieldSpecifications  = null;
+        classSpecification.methodSpecifications = null;
+
+        return classSpecification;
     }
 
 
@@ -1581,8 +1770,20 @@ public class ConfigurationParser
             String propertyValue = properties.getProperty(propertyName);
             if (propertyValue == null)
             {
-                throw new ParseException("Value of system property '" + propertyName +
-                                         "' is undefined in " + reader.locationDescription());
+                try
+                {
+                    // Allow integer names, since they may be references
+                    // to wildcards.
+                    Integer.parseInt(propertyName);
+
+                    fromIndex = toIndex + 1;
+                    continue;
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new ParseException("Value of system property '" + propertyName +
+                                             "' is undefined in " + reader.locationDescription());
+                }
             }
 
             word = word.substring(0, fromIndex) + propertyValue + word.substring(toIndex+1);

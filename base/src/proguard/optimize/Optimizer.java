@@ -30,6 +30,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.evaluation.*;
 import proguard.optimize.info.*;
 import proguard.optimize.peephole.*;
@@ -242,9 +243,10 @@ public class Optimizer
     /**
      * Performs optimization of the given program class pool.
      */
-    public boolean execute(final ClassPool                     programClassPool,
-                           final ClassPool                     libraryClassPool,
-                           final MultiValueMap<String, String> injectedClassNameMap) throws IOException
+    public boolean execute(final ClassPool             programClassPool,
+                           final ClassPool             libraryClassPool,
+                           final ExtraDataEntryNameMap extraDataEntryNameMap)
+    throws IOException
     {
         // Check if we have at least some keep commands.
         if (configuration.keep         == null &&
@@ -1134,7 +1136,6 @@ public class Optimizer
             // merge interfaces down into their implementing classes.
             programClassPool.accept(
                 new TimedClassPoolVisitor("Merging classes vertically",
-                // Exclude injected classes - they might not end up in the output.
                 new VerticalClassMerger(configuration.allowAccessModification,
                                         configuration.mergeInterfacesAggressively,
                                         classMergingVerticalCounter)));
@@ -1145,10 +1146,9 @@ public class Optimizer
             // Merge classes into their sibling classes.
             programClassPool.accept(
                 new TimedClassPoolVisitor("Merging classes horizontally",
-                // Exclude injected classes - they might not end up in the output.
-                new ClassNameFilter(
-                    new NotMatcher(
-                    new CollectionMatcher(injectedClassNameMap.getValues())),
+                new ClassNameFilter(new NotMatcher(
+                    new TransformedStringMatcher(new SuffixAddingStringFunction(ClassConstants.CLASS_FILE_EXTENSION),
+                    new CollectionMatcher(extraDataEntryNameMap.getAllExtraDataEntryNames()))),
                 new HorizontalClassMerger(configuration.allowAccessModification,
                                           configuration.mergeInterfacesAggressively,
                                           classMergingHorizontalCounter))));

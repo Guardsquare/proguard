@@ -67,7 +67,7 @@ implements   ClassVisitor
                                   ClassConstants.ACC_STATIC,
         new MyReferencedMemberAccessFixer())))));
 
-    
+
     // Fields acting as parameters for the visitors.
 
     private Clazz referencingClass;

@@ -24,6 +24,8 @@ import proguard.classfile.*;
 
 import java.util.*;
 
+import java.util.*;
+
 /**
  * This <code>ClassVisitor</code> delegates its visits to another given
  * <code>ClassVisitor</code>, but only for functional interfaces, that

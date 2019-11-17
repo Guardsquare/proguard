@@ -65,6 +65,5 @@ public class ListMatcher extends StringMatcher
 
         return negate != null &&
                negate[negate.length - 1];
-
     }
 }

@@ -35,6 +35,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.RuntimeDataOutput;
 
 import java.io.*;
 
@@ -422,6 +423,12 @@ implements   ClassVisitor,
         }
 
 
+        public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+        {
+            dataOutput.write(sourceDebugExtensionAttribute.info);
+        }
+
+
         public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
         {
             // Write the inner classes.
@@ -672,7 +679,6 @@ implements   ClassVisitor,
                 {
                     visitAnnotation(clazz, annotations[index]);
                 }
-
             }
         }
 

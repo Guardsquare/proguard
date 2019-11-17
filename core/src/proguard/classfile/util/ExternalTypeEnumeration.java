@@ -20,8 +20,7 @@
  */
 package proguard.classfile.util;
 
-import proguard.classfile.*;
-
+import proguard.classfile.JavaConstants;
 
 /**
  * An <code>ExternalTypeEnumeration</code> provides an enumeration of all

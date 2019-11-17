@@ -29,6 +29,7 @@ import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.util.MultiValueMap;
 
 import java.io.PrintWriter;
@@ -49,9 +50,9 @@ public class Backporter
     }
 
 
-    public void execute(ClassPool                     programClassPool,
-                        ClassPool                     libraryClassPool,
-                        MultiValueMap<String, String> injectedClassNameMap)
+    public void execute(ClassPool             programClassPool,
+                        ClassPool             libraryClassPool,
+                        ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         int targetClassVersion = configuration.targetClassVersion;
 
@@ -119,7 +120,7 @@ public class Backporter
                     // Replace the indy instructions related to lambda expressions.
                     new LambdaExpressionConverter(programClassPool,
                                                   libraryClassPool,
-                                                  injectedClassNameMap,
+                                                  extraDataEntryNameMap,
                                                   lambdaExpressionCounter),
 
                     // Clean up unused bootstrap methods and their dangling constants.
@@ -148,7 +149,7 @@ public class Backporter
                 new MultiClassVisitor(
                     new StaticInterfaceMethodConverter(programClassPool,
                                                        libraryClassPool,
-                                                       injectedClassNameMap,
+                                                       extraDataEntryNameMap,
                                                        modifiedClassCollector,
                                                        staticInterfaceMethodCounter),
 

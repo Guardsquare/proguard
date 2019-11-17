@@ -83,7 +83,9 @@ public class AssumeNoSideEffectsChecker
                             if (methodSpecification.name       == null &&
                                 methodSpecification.descriptor == null)
                             {
-                                notePrinter.print(className,
+                                notePrinter.print(className == null ?
+                                                      ConfigurationConstants.ANY_CLASS_KEYWORD :
+                                                      className,
                                                   "Note: the configuration specifies that none of the methods of class '" +
                                                   (className == null ?
                                                        ConfigurationConstants.ANY_CLASS_KEYWORD :

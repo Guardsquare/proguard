@@ -17,13 +17,13 @@
     <mkdir dir = "out"/>
   </target>
 
-  <target name = "core">
-    <ant dir        = "../core"
+  <target name = "base">
+    <ant dir        = "../base"
          target     = "compile"
          inheritAll = "false"/>
   </target>
 
-  <target name = "compile" depends = "out,core">
+  <target name = "compile" depends = "out,base">
     <fail message="Please set the value of the property wtk.home in the file build.properties.">
       <condition>
         <not>
@@ -37,7 +37,7 @@
            includeantruntime = "false"
            source            = "${target}"
            target            = "${target}"
-           classpath         = "../lib/proguard.jar:${wtk.jar}"
+           classpath         = "../base/out:../core/out:${wtk.jar}"
            srcdir            = "src"
            destdir           = "out"
            includes          = "proguard/wtk/ProGuardObfuscator.java">

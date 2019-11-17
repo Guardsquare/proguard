@@ -49,6 +49,7 @@ implements   AttributeVisitor
      * Creates a new CompactCodeAttributeComposer that doesn't allow external
      * branch targets or exception handlers and that automatically shrinks
      * instructions.
+     * @param targetClass the class to be edited.
      */
     public CompactCodeAttributeComposer(ProgramClass targetClass)
     {
@@ -57,7 +58,26 @@ implements   AttributeVisitor
 
 
     /**
+     * Creates a new CompactCodeAttributeComposer that doesn't allow external
+     * branch targets or exception handlers and that automatically shrinks
+     * instructions.
+     * @param targetClass      the class to be edited.
+     * @param programClassPool the program class pool from which new
+     *                         constants can be initialized.
+     * @param libraryClassPool the library class pool from which new
+     *                         constants can be initialized.
+     */
+    public CompactCodeAttributeComposer(ProgramClass targetClass,
+                                        ClassPool    programClassPool,
+                                        ClassPool    libraryClassPool)
+    {
+        this(targetClass, false, false, true, programClassPool, libraryClassPool);
+    }
+
+
+    /**
      * Creates a new CompactCodeAttributeComposer.
+     * @param targetClass                    the class to be edited.
      * @param allowExternalBranchTargets     specifies whether branch targets
      *                                       can lie outside the code fragment
      *                                       of the branch instructions.
@@ -74,8 +94,39 @@ implements   AttributeVisitor
                                         boolean      allowExternalExceptionHandlers,
                                         boolean      shrinkInstructions)
     {
+        this(targetClass, allowExternalBranchTargets, allowExternalExceptionHandlers, shrinkInstructions, null, null);
+    }
+
+
+    /**
+     * Creates a new CompactCodeAttributeComposer.
+     * @param targetClass                    the class to be edited.
+     * @param allowExternalBranchTargets     specifies whether branch targets
+     *                                       can lie outside the code fragment
+     *                                       of the branch instructions.
+     * @param allowExternalExceptionHandlers specifies whether exception
+     *                                       handlers can lie outside the code
+     *                                       fragment in which exceptions are
+     *                                       defined.
+     * @param shrinkInstructions             specifies whether instructions
+     *                                       should automatically be shrunk
+     *                                       before being written.
+     * @param programClassPool               the program class pool from which new
+     *                                       constants can be initialized.
+     * @param libraryClassPool               the library class pool from which new
+     *                                       constants can be initialized.
+     */
+    public CompactCodeAttributeComposer(ProgramClass targetClass,
+                                        boolean      allowExternalBranchTargets,
+                                        boolean      allowExternalExceptionHandlers,
+                                        boolean      shrinkInstructions,
+                                        ClassPool    programClassPool,
+                                        ClassPool    libraryClassPool)
+    {
         constantPoolEditor =
-            new ConstantPoolEditor(targetClass);
+            new ConstantPoolEditor(targetClass,
+                                   programClassPool,
+                                   libraryClassPool);
 
         codeAttributeComposer =
             new CodeAttributeComposer(allowExternalBranchTargets,

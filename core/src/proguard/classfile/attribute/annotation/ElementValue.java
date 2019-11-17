@@ -23,6 +23,7 @@ package proguard.classfile.attribute.annotation;
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.visitor.MemberVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * This abstract class represents an element value that is attached to an
@@ -31,7 +32,7 @@ import proguard.classfile.visitor.MemberVisitor;
  *
  * @author Eric Lafortune
  */
-public abstract class ElementValue implements VisitorAccepter
+public abstract class ElementValue extends SimpleVisitorAccepter
 {
     /**
      * An extra field for the optional element name. It is used in element value
@@ -52,12 +53,6 @@ public abstract class ElementValue implements VisitorAccepter
      * <code>{@link proguard.classfile.util.ClassReferenceInitializer}</code>.
      */
     public Method referencedMethod;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an uninitialized ElementValue.
@@ -109,18 +104,5 @@ public abstract class ElementValue implements VisitorAccepter
         {
             referencedMethod.accept(referencedClass, memberVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

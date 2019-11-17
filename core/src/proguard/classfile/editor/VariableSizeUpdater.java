@@ -87,7 +87,8 @@ implements   AttributeVisitor,
     public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction)
     {
         int variableSize = variableInstruction.variableIndex + 1;
-        if (variableInstruction.isCategory2())
+        if (variableInstruction.stackPopCount(clazz)  == 2 ||
+            variableInstruction.stackPushCount(clazz) == 2)
         {
             variableSize++;
         }

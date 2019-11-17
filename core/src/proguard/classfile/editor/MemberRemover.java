@@ -64,13 +64,15 @@ implements   ClassVisitor,
         ClassEditor classEditor = new ClassEditor(programClass);
 
         // Remove all collected methods.
-        for (Method method : methodsToRemove) {
+        for (Method method : methodsToRemove)
+        {
             classEditor.removeMethod(method);
         }
         methodsToRemove.clear();
 
         // Remove all collected fields.
-        for (Field field : fieldsToRemove) {
+        for (Field field : fieldsToRemove)
+        {
             classEditor.removeField(field);
         }
         fieldsToRemove.clear();

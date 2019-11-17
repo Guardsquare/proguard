@@ -70,9 +70,9 @@ public class AccessUtil
      *                    <code>PACKAGE_VISIBLE</code>, <code>PROTECTED</code>,
      *                    or <code>PUBLIC</code>.
      * @return the corresponding internal access flags,  the internal access
-     *         flags as a logical bit mask of <code>INTERNAL_ACC_PRIVATE</code>,
-     *         <code>INTERNAL_ACC_PROTECTED</code>, and
-     *         <code>INTERNAL_ACC_PUBLIC</code>.
+     *         flags as a logical bit mask of <code>ACC_PRIVATE</code>,
+     *         <code>ACC_PROTECTED</code>, and
+     *         <code>ACC_PUBLIC</code>.
      */
     public static int accessFlags(int accessLevel)
     {
@@ -101,5 +101,22 @@ public class AccessUtil
 
         return (accessFlags    & ~ACCESS_MASK) |
                (newAccessFlags &  ACCESS_MASK);
+    }
+
+
+    /**
+     * Returns whether the given access flags match the required set and unset
+     * access flags.
+     */
+    public static boolean accepted(int accessFlags,
+                                   int requiredSetAccessFlags,
+                                   int requiredUnsetAccessFlags)
+    {
+        int requiredCombinedSetAccessFlags = requiredSetAccessFlags & ~ACCESS_MASK;
+        int requiredOneSetAccessFlags      = requiredSetAccessFlags &  ACCESS_MASK;
+
+        return (requiredCombinedSetAccessFlags & ~accessFlags) == 0 &&
+               (requiredUnsetAccessFlags       &  accessFlags) == 0 &&
+               (requiredOneSetAccessFlags == 0 || (requiredOneSetAccessFlags & accessFlags) != 0);
     }
 }

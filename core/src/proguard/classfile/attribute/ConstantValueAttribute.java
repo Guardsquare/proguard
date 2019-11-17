@@ -52,7 +52,7 @@ public class ConstantValueAttribute extends Attribute
         this.u2constantValueIndex = u2constantValueIndex;
     }
 
-    
+
     // Implementations for Attribute.
 
     public void accept(Clazz clazz, Field field, AttributeVisitor attributeVisitor)

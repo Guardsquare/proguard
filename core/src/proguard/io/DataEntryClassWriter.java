@@ -55,6 +55,7 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Rename the data entry if necessary.

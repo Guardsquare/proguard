@@ -23,6 +23,7 @@ sourceSets.main {
 }
 
 dependencies {
+    compile project(':base')
     compile project(':core')
     compile 'org.apache.ant:ant:1.9.7'
 }

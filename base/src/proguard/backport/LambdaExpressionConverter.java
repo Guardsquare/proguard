@@ -29,6 +29,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.util.MultiValueMap;
 
 import java.util.*;
@@ -52,7 +53,7 @@ implements ClassVisitor,
 
     private final ClassPool                      programClassPool;
     private final ClassPool                      libraryClassPool;
-    private final MultiValueMap<String, String>  injectedClassNameMap;
+    private final ExtraDataEntryNameMap          extraDataEntryNameMap;
     private final ClassVisitor                   extraClassVisitor;
 
     private final Map<Integer, LambdaExpression> lambdaExpressionMap;
@@ -60,15 +61,15 @@ implements ClassVisitor,
     private final MemberRemover                  memberRemover;
 
 
-    public LambdaExpressionConverter(ClassPool                     programClassPool,
-                                     ClassPool                     libraryClassPool,
-                                     MultiValueMap<String, String> injectedClassNameMap,
-                                     ClassVisitor                  extraClassVisitor)
+    public LambdaExpressionConverter(ClassPool             programClassPool,
+                                     ClassPool             libraryClassPool,
+                                     ExtraDataEntryNameMap extraDataEntryNameMap,
+                                     ClassVisitor          extraClassVisitor)
     {
-        this.programClassPool     = programClassPool;
-        this.libraryClassPool     = libraryClassPool;
-        this.injectedClassNameMap = injectedClassNameMap;
-        this.extraClassVisitor    = extraClassVisitor;
+        this.programClassPool      = programClassPool;
+        this.libraryClassPool      = libraryClassPool;
+        this.extraDataEntryNameMap = extraDataEntryNameMap;
+        this.extraClassVisitor     = extraClassVisitor;
 
         this.lambdaExpressionMap  = new HashMap<Integer, LambdaExpression>();
         this.codeAttributeEditor  = new CodeAttributeEditor(true, true);
@@ -95,7 +96,7 @@ implements ClassVisitor,
             // Add the converted lambda class to the program class pool
             // and the injected class name map.
             programClassPool.addClass(lambdaClass);
-            injectedClassNameMap.put(programClass.getName(), lambdaClass.getName());
+            extraDataEntryNameMap.addExtraClassToClass(programClass, lambdaClass);
 
             if (extraClassVisitor != null)
             {

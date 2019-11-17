@@ -32,7 +32,7 @@ import proguard.classfile.util.AccessUtil;
  * @author Eric Lafortune
  */
 public class MemberAccessSetter
-    implements   MemberVisitor
+implements   MemberVisitor
 {
     private final int accessFlags;
 

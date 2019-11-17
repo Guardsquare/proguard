@@ -79,6 +79,13 @@ implements   AttributeVisitor
     }
 
 
+    public void visitSourceDebugExtensionAttribute(Clazz                         clazz,
+                                                   SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        attributeVisitor.visitSourceDebugExtensionAttribute(clazz, sourceDebugExtensionAttribute);
+    }
+
+
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
         if (innerClassesAttribute.u2classesCount > 0)

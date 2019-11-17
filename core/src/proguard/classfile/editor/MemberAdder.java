@@ -51,9 +51,9 @@ implements   MemberVisitor
     private static final Attribute[] EMPTY_ATTRIBUTES = new Attribute[0];
 
 
-    private final ProgramClass       targetClass;
-    private final StringTransformer  nameTransformer;
-    private final MemberVisitor      extraMemberVisitor;
+    private final ProgramClass   targetClass;
+    private final StringFunction nameTransformer;
+    private final MemberVisitor  extraMemberVisitor;
 
     private final ClassEditor        classEditor;
     private final ConstantPoolEditor constantPoolEditor;
@@ -98,9 +98,9 @@ implements   MemberVisitor
      *                           new member right after it has been added. This
      *                           allows changing the visitor info, for instance.
      */
-    public MemberAdder(ProgramClass      targetClass,
-                       StringTransformer nameTransformer,
-                       MemberVisitor     extraMemberVisitor)
+    public MemberAdder(ProgramClass   targetClass,
+                       StringFunction nameTransformer,
+                       MemberVisitor  extraMemberVisitor)
     {
         this.targetClass        = targetClass;
         this.nameTransformer    = nameTransformer;
@@ -184,7 +184,8 @@ implements   MemberVisitor
                              programField.u2attributesCount > 0 ?
                                  new Attribute[programField.u2attributesCount] :
                                  EMPTY_ATTRIBUTES,
-                             programField.referencedClass);
+                             programField.referencedClass,
+                             programField.processingFlags);
 
         // Link to its visitor info.
         newProgramField.setVisitorInfo(programField);
@@ -286,7 +287,8 @@ implements   MemberVisitor
                               programMethod.u2attributesCount > 0 ?
                                   new Attribute[programMethod.u2attributesCount] :
                                   EMPTY_ATTRIBUTES,
-                              ArrayUtil.cloneOrNull(programMethod.referencedClasses));
+                              ArrayUtil.cloneOrNull(programMethod.referencedClasses),
+                              programMethod.processingFlags);
 
         // Link to its visitor info.
         newProgramMethod.setVisitorInfo(programMethod);

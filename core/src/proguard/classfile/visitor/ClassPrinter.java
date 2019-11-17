@@ -36,9 +36,10 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
+import proguard.util.VisitorAccepter;
 
 import java.io.PrintWriter;
-
+import java.nio.charset.StandardCharsets;
 
 /**
  * This <code>ClassVisitor</code> prints out the complete internal
@@ -464,6 +465,13 @@ implements   ClassVisitor,
         indent();
         clazz.constantPoolEntryAccept(sourceDirAttribute.u2sourceDirIndex, this);
         outdent();
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        println(visitorInfo(sourceDebugExtensionAttribute) +
+                " Source debug extension attribute: " + new String(sourceDebugExtensionAttribute.info, StandardCharsets.UTF_8));
     }
 
 

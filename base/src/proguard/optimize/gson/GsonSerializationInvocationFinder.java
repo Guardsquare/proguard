@@ -43,11 +43,17 @@ public class GsonSerializationInvocationFinder
 extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
-    private static final boolean DEBUG = false;
+    //*
+    public static final boolean DEBUG = false;
+    /*/
+    public static       boolean DEBUG = System.getProperty("gsif") != null;
+    //*/
+
 
     private final ClassPool                  programClassPool;
+    private final ClassPool                  libraryClassPool;
     private final ClassVisitor               domainClassVisitor;
-    private final WarningPrinter             notePrinter;
+    private final WarningPrinter             warningPrinter;
     private final ToJsonInvocationMatcher[]  toJsonInvocationMatchers;
     private final TypedReferenceValueFactory valueFactory         =
         new TypedReferenceValueFactory();
@@ -65,19 +71,23 @@ implements   InstructionVisitor
      *
      * @param programClassPool   the program class pool used to look up class
      *                           references.
+     * @param libraryClassPool   the library class pool used to look up class
+     *                           references.
      * @param domainClassVisitor the visitor to which found domain classes that
      *                           are involved in Gson serialization will
      *                           be delegated.
-     * @param notePrinter        used to print notes about domain classes that
+     * @param warningPrinter     used to print warnings about domain classes that
      *                           can not be handled by the Gson optimization.
      */
     public GsonSerializationInvocationFinder(ClassPool      programClassPool,
+                                             ClassPool      libraryClassPool,
                                              ClassVisitor   domainClassVisitor,
-                                             WarningPrinter notePrinter)
+                                             WarningPrinter warningPrinter)
     {
         this.programClassPool   = programClassPool;
+        this.libraryClassPool   = libraryClassPool;
         this.domainClassVisitor = domainClassVisitor;
-        this.notePrinter        = notePrinter;
+        this.warningPrinter     = warningPrinter;
 
         // Create matchers for relevant instruction sequences.
         InstructionSequenceBuilder builder = new InstructionSequenceBuilder();
@@ -200,6 +210,11 @@ implements   InstructionVisitor
 
                 if (targetClass instanceof ProgramClass)
                 {
+                    if(DEBUG)
+                    {
+                        System.out.println("GsonSerializationInvocationFinder: serialized type: " +
+                                           targetClass.getName());
+                    }
                     targetClass.accept(domainClassVisitor);
                 }
             }
@@ -213,7 +228,9 @@ implements   InstructionVisitor
                                     .instructionOffsetValue();
 
                 TypeArgumentFinder typeArgumentFinder =
-                    new TypeArgumentFinder(programClassPool, partialEvaluator);
+                    new TypeArgumentFinder(programClassPool,
+                                           libraryClassPool,
+                                           partialEvaluator);
                 for (int i = 0; i < producer.instructionOffsetCount(); i++)
                 {
                     codeAttribute.instructionAccept(clazz,
@@ -227,17 +244,22 @@ implements   InstructionVisitor
                 {
                     for (String targetType : targetTypes)
                     {
+                        if(DEBUG)
+                        {
+                            System.out.println("GsonSerializationInvocationFinder: serialized type: " +
+                                               targetType);
+                        }
                         programClassPool.classAccept(targetType, domainClassVisitor);
                     }
                 }
-                else if (notePrinter != null)
+                else if (warningPrinter != null)
                 {
-                    notePrinter.print(clazz.getName(),
-                                      "Warning: can't derive serialized type from toJson() invocation in " +
-                                      clazz.getName() +
-                                      "." +
-                                      method.getName(clazz) +
-                                      method.getDescriptor(clazz));
+                    warningPrinter.print(clazz.getName(),
+                                         "Warning: can't derive serialized type from toJson() invocation in " +
+                                         clazz.getName() +
+                                         "." +
+                                         method.getName(clazz) +
+                                         method.getDescriptor(clazz));
                 }
             }
         }

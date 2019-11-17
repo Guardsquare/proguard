@@ -58,7 +58,7 @@ public class ClassNameParser implements StringParser
     };
 
 
-    private List variableStringMatchers;
+    private final WildcardManager wildcardManager;
 
 
     /**
@@ -74,13 +74,12 @@ public class ClassNameParser implements StringParser
      * Creates a new ClassNameParser that supports references to earlier
      * wildcards.
      *
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
+     * @param wildcardManager an optional scope for StringMatcher instances
+     *                        that match wildcards.
      */
-    public ClassNameParser(List variableStringMatchers)
+    public ClassNameParser(WildcardManager wildcardManager)
     {
-        this.variableStringMatchers = variableStringMatchers;
+        this.wildcardManager = wildcardManager;
     }
 
 
@@ -94,37 +93,56 @@ public class ClassNameParser implements StringParser
         // Look for wildcards.
         for (index = 0; index < regularExpression.length(); index++)
         {
-            int wildCardIndex;
-
             // Is there an 'L///;' wildcard?
             if (regularExpression.regionMatches(index, "L///;", 0, 5))
             {
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               new char[] { ClassConstants.METHOD_ARGUMENTS_CLOSE },
                                               0,
                                               Integer.MAX_VALUE,
-                                              settableMatcher));
+                                              settableMatcher);
 
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
+
+                // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 5)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there an 'L***;' wildcard?
             else if (regularExpression.regionMatches(index, "L***;", 0, 5))
             {
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
                 // TODO: The returned variable matcher is actually a composite that doesn't return the entire matched string.
-                nextMatcher = rememberVariableStringMatcher(
-                    createAnyTypeMatcher(settableMatcher));
+                VariableStringMatcher variableStringMatcher =
+                    createAnyTypeMatcher(settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 5)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
@@ -138,95 +156,138 @@ public class ClassNameParser implements StringParser
                         new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               new char[] { ClassConstants.TYPE_CLASS_END },
                                               0,
                                               Integer.MAX_VALUE,
-                                              settableMatcher));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 if (settableMatcher != null)
                 {
                     settableMatcher.setMatcher(parse(regularExpression.substring(index + 2)));
                 }
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '*' wildcard?
             else if (regularExpression.charAt(index) == '*')
             {
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               new char[] { ClassConstants.TYPE_CLASS_END, ClassConstants.PACKAGE_SEPARATOR },
                                               0,
                                               Integer.MAX_VALUE,
-                                              settableMatcher));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '?' wildcard?
             else if (regularExpression.charAt(index) == '?')
             {
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               new char[] { ClassConstants.TYPE_CLASS_END, ClassConstants.PACKAGE_SEPARATOR },
                                               1,
                                               1,
-                                              settableMatcher));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '%' wildcard?
             else if (regularExpression.charAt(index) == '%')
             {
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(PRIMITIVE_TYPES,
                                               null,
                                               1,
                                               1,
-                                              settableMatcher));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '<n>' wildcard?
-            else if ((wildCardIndex = wildCardIndex(regularExpression, index)) > 0)
+            else if (wildcardManager != null)
             {
-                // Find the index of the closing bracket again.
-                int closingIndex = regularExpression.indexOf('>', index + 1);
+                int wildCardIndex = wildcardManager.wildCardIndex(regularExpression, index);
+                if (wildCardIndex >= 0)
+                {
+                    // Find the index of the closing bracket again.
+                    int closingIndex = regularExpression.indexOf('>', index + 1);
 
-                // Retrieve the specified variable string matcher and
-                // recursively create a matcher for the rest of the string.
-                nextMatcher =
-                    new MatchedStringMatcher(retrieveVariableStringMatcher(wildCardIndex - 1),
-                                             parse(regularExpression.substring(closingIndex + 1)));
-                break;
+                    // Retrieve the specified variable string matcher and
+                    // recursively create a matcher for the rest of the string.
+                    nextMatcher = wildcardManager.createMatchedStringMatcher(
+                        wildCardIndex,
+                        parse(regularExpression.substring(closingIndex + 1)));
+
+                    break;
+                }
             }
         }
 
         // Return a matcher for the fixed first part of the regular expression,
         // if any, and the remainder.
         return index != 0 ?
-            (StringMatcher)new FixedStringMatcher(regularExpression.substring(0, index), nextMatcher) :
-            (StringMatcher)nextMatcher;
+            new FixedStringMatcher(regularExpression.substring(0, index), nextMatcher) :
+            nextMatcher;
     }
 
 
@@ -255,9 +316,9 @@ public class ClassNameParser implements StringParser
 
                 // Or a class type.
                 new VariableStringMatcher(new char[] { ClassConstants.TYPE_CLASS_START },
-                                          null,
-                                          1,
-                                          1,
+                                                                    null,
+                                                                    1,
+                                                                    1,
                 new VariableStringMatcher(null,
                                           new char[] { ClassConstants.TYPE_CLASS_END },
                                           0,
@@ -267,73 +328,6 @@ public class ClassNameParser implements StringParser
                                           1,
                                           1,
                                           nextMatcher)))));
-    }
-
-
-    /**
-     * Adds the given variable string matcher to the list of string matchers.
-     */
-    private VariableStringMatcher rememberVariableStringMatcher(VariableStringMatcher variableStringMatcher)
-    {
-        if (variableStringMatchers != null)
-        {
-            variableStringMatchers.add(variableStringMatcher);
-        }
-
-        return variableStringMatcher;
-    }
-
-
-    /**
-     * Retrieves the specified variable string matcher from the list of string
-     * matchers.
-     */
-    private VariableStringMatcher retrieveVariableStringMatcher(int index)
-    {
-        return (VariableStringMatcher) variableStringMatchers.get(index);
-    }
-
-
-    /**
-     * Parses a reference to a wildcard at the given index, if any.
-     * Returns the 1-based index, or 0 otherwise.
-     */
-    private int wildCardIndex(String string, int index)
-    throws IllegalArgumentException
-    {
-        if (string.charAt(index) != '<')
-        {
-            return 0;
-        }
-
-        int closingBracketIndex = string.indexOf('>', index);
-        if (closingBracketIndex < 0)
-        {
-            throw new IllegalArgumentException("Missing closing angular bracket after opening bracket at index "+index+" in ["+string+"]");
-        }
-
-        if (variableStringMatchers == null)
-        {
-            throw new IllegalArgumentException("References to wildcards are not supported in this argument ["+string+"]");
-        }
-
-        String argumentBetweenBrackets = string.substring(index+1, closingBracketIndex);
-
-        try
-        {
-            int wildcardIndex = Integer.parseInt(argumentBetweenBrackets);
-            if (wildcardIndex < 1 ||
-                wildcardIndex > variableStringMatchers.size())
-            {
-                throw new IllegalArgumentException("Invalid reference to wildcard ("+wildcardIndex+", must lie between 1 and "+variableStringMatchers.size()+" in ["+string+"])");
-            }
-
-            return wildcardIndex;
-        }
-        catch (NumberFormatException e)
-        {
-            throw new IllegalArgumentException("Reference to wildcard must be a number ["+argumentBetweenBrackets+"] in ["+string+"]");
-        }
     }
 
 
@@ -359,5 +353,4 @@ public class ClassNameParser implements StringParser
             ex.printStackTrace();
         }
     }
-
 }

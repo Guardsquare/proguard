@@ -20,10 +20,11 @@
  */
 package proguard.obfuscate;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.util.VisitorAccepter;
 
 /**
  * This AttributeVisitor marks all attributes that it visits.

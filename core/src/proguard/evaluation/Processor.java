@@ -554,7 +554,11 @@ implements   InstructionVisitor
             case InstructionConstants.OP_ATHROW:
                 ReferenceValue exceptionReferenceValue = stack.apop();
                 stack.clear();
-                stack.push(exceptionReferenceValue);
+                // Don't push the thrown exception here; we'll consider the
+                // pushing the responsibility of the exception handler.
+                // It clashes with the stack entry ID of a following
+                // exception handler in the variable mapper.
+                //stack.push(exceptionReferenceValue);
                 branchUnit.throwException();
                 break;
 

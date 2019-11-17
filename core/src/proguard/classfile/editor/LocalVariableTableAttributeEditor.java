@@ -50,8 +50,8 @@ public class LocalVariableTableAttributeEditor
     public void addLocalVariableInfo(LocalVariableInfo localVariableInfo)
     {
         targetLocalVariableTableAttribute.localVariableTable =
-            (LocalVariableInfo[])ArrayUtil.add(targetLocalVariableTableAttribute.localVariableTable,
-                                               targetLocalVariableTableAttribute.u2localVariableTableLength++,
-                                               localVariableInfo);
+            ArrayUtil.add(targetLocalVariableTableAttribute.localVariableTable,
+                          targetLocalVariableTableAttribute.u2localVariableTableLength++,
+                          localVariableInfo);
     }
 }

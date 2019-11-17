@@ -26,7 +26,7 @@ import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents an exceptions attribute.
+ * This Attribute represents a stack map attribute.
  *
  * @author Eric Lafortune
  */

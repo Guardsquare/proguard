@@ -21,7 +21,6 @@
 package proguard.classfile.attribute.annotation.target;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.annotation.TypeAnnotation;
 import proguard.classfile.attribute.annotation.target.visitor.TargetInfoVisitor;
 

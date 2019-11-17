@@ -27,67 +27,104 @@ import proguard.classfile.visitor.MemberVisitor;
  * This MemberVisitor delegates all its method calls to another MemberVisitor,
  * but only for Member objects that are marked as used.
  *
- * @see UsageMarker
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
 public class UsedMemberFilter
 implements   MemberVisitor
 {
-    private final UsageMarker   usageMarker;
-    private final MemberVisitor memberVisitor;
+    private final SimpleUsageMarker usageMarker;
+    private final MemberVisitor     usedMemberFilter;
+    private final MemberVisitor     unusedMemberVisitor;
+
+
+    public UsedMemberFilter(ClassUsageMarker classUsageMarker,
+                            MemberVisitor    usedMemberFilter)
+    {
+        this(classUsageMarker.getUsageMarker(), usedMemberFilter);
+    }
 
 
     /**
      * Creates a new UsedMemberFilter.
      * @param usageMarker   the usage marker that is used to mark the classes
      *                      and class members.
-     * @param memberVisitor the member visitor to which the visiting will be
+     * @param usedMemberFilter the member visitor to which the visiting will be
      *                      delegated.
      */
-    public UsedMemberFilter(UsageMarker   usageMarker,
-                            MemberVisitor memberVisitor)
+    public UsedMemberFilter(SimpleUsageMarker usageMarker,
+                            MemberVisitor     usedMemberFilter)
     {
-        this.usageMarker   = usageMarker;
-        this.memberVisitor = memberVisitor;
+        this(usageMarker, usedMemberFilter, null);
+    }
+
+
+    /**
+     * Creates a new UsedMemberFilter.
+     *
+     * @param usageMarker         the usage marker that is used to mark the classes
+     *                            and class members.
+     * @param usedMemberFilter    the member visitor to which the visiting of used members
+     *                            will be delegated.
+     * @param unusedMemberVisitor the member visitor to which the visiting of unused members
+     *                            will bedelegated.
+     */
+    public UsedMemberFilter(SimpleUsageMarker usageMarker,
+                            MemberVisitor     usedMemberFilter,
+                            MemberVisitor     unusedMemberVisitor)
+    {
+        this.usageMarker         = usageMarker;
+        this.usedMemberFilter    = usedMemberFilter;
+        this.unusedMemberVisitor = unusedMemberVisitor;
     }
 
 
     // Implementations for MemberVisitor.
 
-
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
-        if (usageMarker.isUsed(programField))
+        MemberVisitor delegateVisitor = delegateVisitor(programField);
+        if (delegateVisitor != null)
         {
-            memberVisitor.visitProgramField(programClass, programField);
+            delegateVisitor.visitProgramField(programClass, programField);
         }
     }
 
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        if (usageMarker.isUsed(programMethod))
+        MemberVisitor delegateVisitor = delegateVisitor(programMethod);
+        if (delegateVisitor != null)
         {
-            memberVisitor.visitProgramMethod(programClass, programMethod);
+            delegateVisitor.visitProgramMethod(programClass, programMethod);
         }
     }
 
 
     public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
     {
-        if (usageMarker.isUsed(libraryField))
+        MemberVisitor delegateVisitor = delegateVisitor(libraryField);
+        if (delegateVisitor != null)
         {
-            memberVisitor.visitLibraryField(libraryClass, libraryField);
+            delegateVisitor.visitLibraryField(libraryClass, libraryField);
         }
     }
 
 
     public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
-        if (usageMarker.isUsed(libraryMethod))
+        MemberVisitor delegateVisitor = delegateVisitor(libraryMethod);
+        if (delegateVisitor != null)
         {
-            memberVisitor.visitLibraryMethod(libraryClass, libraryMethod);
+            delegateVisitor.visitLibraryMethod(libraryClass, libraryMethod);
         }
+    }
+
+
+    // Small utility methods.
+    private MemberVisitor delegateVisitor(Member member)
+    {
+        return usageMarker.isUsed(member) ? usedMemberFilter : unusedMemberVisitor;
     }
 }

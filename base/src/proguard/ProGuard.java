@@ -27,11 +27,14 @@ import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
+import proguard.io.ExtraDataEntryNameMap;
+import proguard.mark.Marker;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.preverify.*;
+import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.Shrinker;
 import proguard.util.*;
 
@@ -46,14 +49,15 @@ public class ProGuard
 {
     public static final String VERSION = "ProGuard, version 6.2.2";
 
-    private final Configuration configuration;
-    private       ClassPool     programClassPool = new ClassPool();
-    private final ClassPool     libraryClassPool = new ClassPool();
+    private final Configuration    configuration;
 
-    // Map with class names as keys, and the names of all injected classes that are
-    // referenced from these key classes as values.
-    // All names are the original, non-obfuscated class names.
-    private final MultiValueMap<String, String> injectedClassNameMap = new MultiValueMap<String, String>();
+    private       ClassPool        programClassPool = new ClassPool();
+    private final ClassPool        libraryClassPool = new ClassPool();
+
+    private final ResourceFilePool resourceFilePool = new ResourceFilePool();
+
+    // All injected data entries.
+    private final ExtraDataEntryNameMap extraDataEntryNameMap = new ExtraDataEntryNameMap();
 
 
     /**
@@ -112,6 +116,16 @@ public class ProGuard
             configuration.backport)
         {
             initialize();
+        }
+
+        if (configuration.printSeeds != null        ||
+            configuration.shrink                    ||
+            configuration.optimize                  ||
+            configuration.obfuscate                 ||
+            configuration.addConfigurationDebugging ||
+            configuration.adaptKotlinMetadata)
+        {
+            mark();
         }
 
         if (configuration.obfuscate ||
@@ -288,6 +302,22 @@ public class ProGuard
 
 
     /**
+     * Marks the classes, class members and attributes to be kept or encrypted,
+     * by setting the appropriate access flags.
+     */
+    private void mark()
+    {
+        if (configuration.verbose)
+        {
+            System.out.println("Marking classes and class members to be kept or encrypted...");
+        }
+
+        new Marker(configuration).mark(programClassPool,
+                                       libraryClassPool);
+    }
+
+
+    /**
      * Replaces primitive array initialization code by primitive array constants.
      */
     private void introducePrimitiveArrayConstants()
@@ -313,7 +343,7 @@ public class ProGuard
     {
         new Backporter(configuration).execute(programClassPool,
                                               libraryClassPool,
-                                              injectedClassNameMap);
+                                              extraDataEntryNameMap);
     }
 
 
@@ -325,7 +355,7 @@ public class ProGuard
     {
         new ConfigurationLoggingAdder(configuration).execute(programClassPool,
                                                              libraryClassPool,
-                                                             injectedClassNameMap);
+                                                             extraDataEntryNameMap);
     }
 
 
@@ -426,7 +456,7 @@ public class ProGuard
 
             new GsonOptimizer().execute(programClassPool,
                                         libraryClassPool,
-                                        injectedClassNameMap,
+                                        extraDataEntryNameMap,
                                         configuration);
         }
     }
@@ -446,7 +476,7 @@ public class ProGuard
         // Perform the actual optimization.
         return new Optimizer(configuration).execute(programClassPool,
                                                     libraryClassPool,
-                                                    injectedClassNameMap);
+                                                    extraDataEntryNameMap);
     }
 
 
@@ -535,7 +565,8 @@ public class ProGuard
 
         // Write out the program class pool.
         new OutputWriter(configuration).execute(programClassPool,
-                                                injectedClassNameMap);
+                                                resourceFilePool,
+                                                extraDataEntryNameMap);
     }
 
 

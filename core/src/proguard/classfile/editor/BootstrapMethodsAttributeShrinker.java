@@ -28,7 +28,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
-import proguard.classfile.VisitorAccepter;
+import proguard.util.VisitorAccepter;
 
 import java.util.Arrays;
 

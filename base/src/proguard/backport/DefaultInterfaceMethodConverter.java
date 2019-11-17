@@ -30,7 +30,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.util.StringTransformer;
+import proguard.util.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -217,19 +217,14 @@ implements ClassVisitor,
                                                 ProgramMethod interfaceMethod)
     {
         // Copy the interface method to the target class, with an updated name.
-        StringTransformer memberRenamer = new StringTransformer()
-        {
-            public String transform(String string)
-            {
-                return "default$" + string;
-            }
-        };
+        StringFunction memberNameFunction =
+            new PrefixAddingStringFunction("default$");
 
         interfaceMethod.accept(interfaceClass,
-            new MemberAdder(targetClass, memberRenamer, null));
+            new MemberAdder(targetClass, memberNameFunction, null));
 
         String targetMethodName =
-            memberRenamer.transform(interfaceMethod.getName(interfaceClass));
+            memberNameFunction.transform(interfaceMethod.getName(interfaceClass));
 
         // Update invocations of the method inside the target class.
         String descriptor   = interfaceMethod.getDescriptor(interfaceClass);

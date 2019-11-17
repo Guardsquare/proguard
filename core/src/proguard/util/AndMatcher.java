@@ -21,7 +21,7 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings matches both given StringMatcher
+ * This StringMatcher tests whether strings match both given StringMatcher
  * instances.
  *
  * @author Eric Lafortune

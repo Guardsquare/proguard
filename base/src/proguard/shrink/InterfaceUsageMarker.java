@@ -26,12 +26,11 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
-
 /**
  * This ClassVisitor recursively marks all interface
  * classes that are being used in the visited class.
  *
- * @see UsageMarker
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
@@ -40,7 +39,7 @@ extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor
 {
-    private final UsageMarker usageMarker;
+    private final ClassUsageMarker classUsageMarker;
 
     // Fields acting as return parameters for the visitor methods.
     private boolean used;
@@ -49,12 +48,12 @@ implements   ClassVisitor,
 
     /**
      * Creates a new InterfaceUsageMarker.
-     * @param usageMarker the usage marker that is used to mark the classes
-     *                    and class members.
+     * @param classUsageMarker the marker to mark and check the classes and
+     *                         class members.
      */
-    public InterfaceUsageMarker(UsageMarker usageMarker)
+    public InterfaceUsageMarker(ClassUsageMarker classUsageMarker)
     {
-        this.usageMarker = usageMarker;
+        this.classUsageMarker = classUsageMarker;
     }
 
 
@@ -62,8 +61,8 @@ implements   ClassVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        boolean classUsed         = usageMarker.isUsed(programClass);
-        boolean classPossiblyUsed = usageMarker.isPossiblyUsed(programClass);
+        boolean classUsed         = classUsageMarker.isUsed(programClass);
+        boolean classPossiblyUsed = classUsageMarker.isPossiblyUsed(programClass);
 
         if (classUsed || classPossiblyUsed)
         {
@@ -84,7 +83,7 @@ implements   ClassVisitor,
                 {
                     // At least one if this interface's interfaces is being used.
                     // Mark this interface as well.
-                    usageMarker.markAsUsed(programClass);
+                    classUsageMarker.markAsUsed(programClass);
 
                     // Mark this interface's name.
                     programClass.thisClassConstantAccept(this);
@@ -95,7 +94,7 @@ implements   ClassVisitor,
                 else
                 {
                     // Unmark this interface, so we don't bother looking at it again.
-                    usageMarker.markAsUnused(programClass);
+                    classUsageMarker.markAsUnused(programClass);
                 }
             }
         }
@@ -117,7 +116,7 @@ implements   ClassVisitor,
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
-        boolean classUsed = usageMarker.isUsed(classConstant);
+        boolean classUsed = classUsageMarker.isUsed(classConstant);
 
         if (!classUsed)
         {
@@ -130,7 +129,7 @@ implements   ClassVisitor,
             {
                 // The class is being used. Mark the ClassConstant as being used
                 // as well.
-                usageMarker.markAsUsed(classConstant);
+                classUsageMarker.markAsUsed(classConstant);
 
                 clazz.constantPoolEntryAccept(classConstant.u2nameIndex, this);
             }
@@ -144,9 +143,9 @@ implements   ClassVisitor,
 
     public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant)
     {
-        if (!usageMarker.isUsed(utf8Constant))
+        if (!classUsageMarker.isUsed(utf8Constant))
         {
-            usageMarker.markAsUsed(utf8Constant);
+            classUsageMarker.markAsUsed(utf8Constant);
         }
     }
 }

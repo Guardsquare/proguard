@@ -66,5 +66,4 @@ extends      BasicValueFactory
                                     false,
                                     arrayLength);
     }
-
 }

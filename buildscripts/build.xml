@@ -18,6 +18,10 @@
     <ant dir = "core"/>
   </target>
 
+  <target name = "base">
+    <ant dir = "base"/>
+  </target>
+
   <target name = "retrace">
     <ant dir = "retrace"/>
   </target>

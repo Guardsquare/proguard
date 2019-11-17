@@ -21,3 +21,9 @@ sourceSets.main {
         include '**/*.pro'
     }
 }
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-common:${kotlinVersion}"
+    compile "org.jetbrains.kotlinx:kotlinx-metadata-jvm:${kotlinxMetadataVersion}"
+}

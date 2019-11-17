@@ -21,7 +21,7 @@
 package proguard.classfile.visitor;
 
 import proguard.classfile.*;
-
+import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This <code>MemberVisitor</code> delegates its visits to another given
@@ -36,6 +36,7 @@ import proguard.classfile.*;
  * @author Eric Lafortune
  */
 public class MemberAccessFilter
+extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     // A mask of conflicting access flags. These are interpreted in a special
@@ -49,7 +50,8 @@ implements   MemberVisitor
     private final int           requiredSetAccessFlags;
     private final int           requiredUnsetAccessFlags;
     private final int           requiredOneSetAccessFlags;
-    private final MemberVisitor memberVisitor;
+    private final MemberVisitor acceptedMemberVisitor;
+    private final MemberVisitor rejectedMemberVisitor;
 
 
     /**
@@ -58,59 +60,61 @@ implements   MemberVisitor
      *                                 set.
      * @param requiredUnsetAccessFlags the member access flags that should be
      *                                 unset.
-     * @param memberVisitor            the <code>MemberVisitor</code> to
+     * @param acceptedMemberVisitor    the <code>MemberVisitor</code> to
      *                                 which visits will be delegated.
      */
     public MemberAccessFilter(int           requiredSetAccessFlags,
                               int           requiredUnsetAccessFlags,
-                              MemberVisitor memberVisitor)
+                              MemberVisitor acceptedMemberVisitor)
+    {
+        this(requiredSetAccessFlags, requiredUnsetAccessFlags, acceptedMemberVisitor, null);
+    }
+
+
+    /**
+     * Creates a new MemberAccessFilter.
+     * @param requiredSetAccessFlags   the member access flags that should be
+     *                                 set.
+     * @param requiredUnsetAccessFlags the member access flags that should be
+     *                                 unset.
+     * @param acceptedMemberVisitor    the <code>MemberVisitor</code> to
+     *                                 which visits will be delegated.
+     * @param rejectedMemberVisitor    the <code>MemberVisitor</code> to which visits of members that do not have
+     *                                 the proper flags will be delegated.
+     */
+    public MemberAccessFilter(int           requiredSetAccessFlags,
+                              int           requiredUnsetAccessFlags,
+                              MemberVisitor acceptedMemberVisitor,
+                              MemberVisitor rejectedMemberVisitor)
     {
         this.requiredSetAccessFlags    = requiredSetAccessFlags & ~ACCESS_MASK;
         this.requiredUnsetAccessFlags  = requiredUnsetAccessFlags;
-        this.requiredOneSetAccessFlags = requiredSetAccessFlags &  ACCESS_MASK;
-        this.memberVisitor             = memberVisitor;
+        this.requiredOneSetAccessFlags = requiredSetAccessFlags & ACCESS_MASK;
+        this.acceptedMemberVisitor     = acceptedMemberVisitor;
+        this.rejectedMemberVisitor     = rejectedMemberVisitor;
     }
 
 
     // Implementations for MemberVisitor.
 
-    public void visitProgramField(ProgramClass programClass, ProgramField programField)
+    @Override
+    public void visitAnyMember(Clazz clazz, Member member)
     {
-        if (accepted(programField.getAccessFlags()))
+        MemberVisitor delegateVisitor = getDelegateVisitor(member.getAccessFlags());
+        if (delegateVisitor != null)
         {
-            memberVisitor.visitProgramField(programClass, programField);
-        }
-    }
-
-
-    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
-    {
-        if (accepted(programMethod.getAccessFlags()))
-        {
-            memberVisitor.visitProgramMethod(programClass, programMethod);
-        }
-    }
-
-
-    public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
-    {
-        if (accepted(libraryField.getAccessFlags()))
-        {
-            memberVisitor.visitLibraryField(libraryClass, libraryField);
-        }
-    }
-
-
-    public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
-    {
-        if (accepted(libraryMethod.getAccessFlags()))
-        {
-            memberVisitor.visitLibraryMethod(libraryClass, libraryMethod);
+            member.accept(clazz, delegateVisitor);
         }
     }
 
 
     // Small utility methods.
+
+    private MemberVisitor getDelegateVisitor(int accessFlags)
+    {
+        return accepted(accessFlags) ? acceptedMemberVisitor : rejectedMemberVisitor;
+    }
+
 
     private boolean accepted(int accessFlags)
     {

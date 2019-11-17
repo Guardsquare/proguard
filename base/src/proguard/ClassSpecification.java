@@ -33,6 +33,7 @@ import java.util.*;
 public class ClassSpecification implements Cloneable
 {
     public final String comments;
+    public       String memberComments;
     public       int    requiredSetAccessFlags;
     public       int    requiredUnsetAccessFlags;
     public final String annotationType;

@@ -237,9 +237,16 @@ implements   AttributeVisitor,
                        ConstantInstruction constantInstruction,
                        Instruction         replacementInstruction)
     {
-        System.out.println("MethodInvocationFixer ["+clazz.getName()+"."+
-                           method.getName(clazz)+method.getDescriptor(clazz)+"] "+
-                           constantInstruction.toString(offset)+" -> "+
-                           replacementInstruction.toString(offset));
+        System.out.println("MethodInvocationFixer:");
+        System.out.println("  Class       = "+clazz.getName());
+        System.out.println("  Method      = "+method.getName(clazz)+method.getDescriptor(clazz));
+        System.out.println("  Instruction = "+constantInstruction.toString(offset));
+        System.out.println("  -> Class    = "+referencedClass);
+        System.out.println("     Method   = "+referencedMethod);
+        if ((referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0)
+        {
+            System.out.println("     Parameter size   = "+(ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)));
+        }
+        System.out.println("  Replacement instruction = "+replacementInstruction.toString(offset));
     }
 }

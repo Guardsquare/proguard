@@ -23,6 +23,7 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.LocalVariableTypeInfoVisitor;
+import proguard.util.ArrayUtil;
 
 /**
  * This LocalVariableTypeInfoVisitor adds all local variable types that it
@@ -59,8 +60,7 @@ implements   LocalVariableTypeInfoVisitor
                                       constantAdder.addConstant(clazz, localVariableTypeInfo.u2signatureIndex),
                                       localVariableTypeInfo.u2index);
 
-        // TODO: Clone array.
-        newLocalVariableTypeInfo.referencedClasses = localVariableTypeInfo.referencedClasses;
+        newLocalVariableTypeInfo.referencedClasses = ArrayUtil.cloneOrNull(localVariableTypeInfo.referencedClasses);
 
         // Add it to the target.
         localVariableTypeTableAttributeEditor.addLocalVariableTypeInfo(newLocalVariableTypeInfo);

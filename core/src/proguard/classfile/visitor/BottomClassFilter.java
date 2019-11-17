@@ -24,25 +24,40 @@ import proguard.classfile.*;
 
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, but only when visiting classes that don't
- * have any subclasses.
+ * This <code>ClassVisitor</code> delegates its visits to one of two other given
+ * <code>ClassVisitor</code> instances, depending on whether they have any
+ * subclasses or not.
  *
  * @author Eric Lafortune
  */
 public class BottomClassFilter implements ClassVisitor
 {
-    private final ClassVisitor classVisitor;
+    private final ClassVisitor bottomClassVisitor;
+    private final ClassVisitor otherClassVisitor;
+
+    /**
+     * Creates a new BottomClassFilter.
+     * @param bottomClassVisitor the <code>ClassVisitor</code> to which visits
+     *                           to bottom classes will be delegated.
+     */
+    public BottomClassFilter(ClassVisitor bottomClassVisitor)
+    {
+        this(bottomClassVisitor, null);
+    }
 
 
     /**
-     * Creates a new ProgramClassFilter.
-     * @param classVisitor     the <code>ClassVisitor</code> to which visits
-     *                         will be delegated.
+     * Creates a new BottomClassFilter.
+     * @param bottomClassVisitor the <code>ClassVisitor</code> to which visits
+     *                           to bottom classes will be delegated.
+     * @param otherClassVisitor  the <code>ClassVisitor</code> to which visits
+     *                           to non-bottom classes will be delegated.
      */
-    public BottomClassFilter(ClassVisitor classVisitor)
+    public BottomClassFilter(ClassVisitor bottomClassVisitor,
+                             ClassVisitor otherClassVisitor)
     {
-        this.classVisitor = classVisitor;
+        this.bottomClassVisitor = bottomClassVisitor;
+        this.otherClassVisitor  = otherClassVisitor;
     }
 
 
@@ -51,7 +66,11 @@ public class BottomClassFilter implements ClassVisitor
     public void visitProgramClass(ProgramClass programClass)
     {
         // Is this a bottom class in the class hierarchy?
-        if (programClass.subClasses == null)
+        ClassVisitor classVisitor = programClass.subClasses == null ?
+            bottomClassVisitor :
+            otherClassVisitor;
+
+        if (classVisitor != null)
         {
             classVisitor.visitProgramClass(programClass);
         }
@@ -61,7 +80,11 @@ public class BottomClassFilter implements ClassVisitor
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         // Is this a bottom class in the class hierarchy?
-        if (libraryClass.subClasses == null)
+        ClassVisitor classVisitor = libraryClass.subClasses == null ?
+            bottomClassVisitor :
+            otherClassVisitor;
+
+        if (classVisitor != null)
         {
             classVisitor.visitLibraryClass(libraryClass);
         }

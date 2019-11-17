@@ -50,6 +50,7 @@ public class DataEntryCopier implements DataEntryReader
 
     // Implementations for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry) throws IOException
     {
         try
@@ -155,7 +156,11 @@ public class DataEntryCopier implements DataEntryReader
                     new DirectoryWriter(new File(output));
 
             // Zip up any zips, if necessary.
-            DataEntryWriter zipWriter = new JarWriter(writer);
+            DataEntryWriter zipWriter = new ZipWriter(null,
+                                                      1,
+                                                      0,
+                                                      new byte[0],
+                                                      writer);
             if (outputIsZip)
             {
                 // Always zip.
@@ -172,7 +177,11 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any jmods, if necessary.
-            DataEntryWriter jmodWriter = new JarWriter(ClassConstants.JMOD_HEADER, writer);
+            DataEntryWriter jmodWriter = new ZipWriter(null,
+                                                       1,
+                                                       0,
+                                                       ClassConstants.JMOD_HEADER,
+                                                       writer);
             if (outputIsJmod)
             {
                 // Always zip.
@@ -189,7 +198,11 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any wars, if necessary.
-            DataEntryWriter warWriter = new JarWriter(writer);
+            DataEntryWriter warWriter = new ZipWriter(null,
+                                                      1,
+                                                      0,
+                                                      new byte[0],
+                                                      writer);
             if (outputIsWar)
             {
                 // Always zip.
@@ -206,7 +219,11 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any aars, if necessary.
-            DataEntryWriter aarWriter = new JarWriter(writer);
+            DataEntryWriter aarWriter = new ZipWriter(null,
+                                                      1,
+                                                      0,
+                                                      new byte[0],
+                                                      writer);
             if (outputIsWar)
             {
                 // Always zip.
@@ -223,7 +240,11 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any jars, if necessary.
-            DataEntryWriter jarWriter = new JarWriter(writer);
+            DataEntryWriter jarWriter = new ZipWriter(null,
+                                                      1,
+                                                      0,
+                                                      new byte[0],
+                                                      writer);
             if (outputIsJar)
             {
                 // Always zip.
@@ -240,7 +261,11 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any apks, if necessary.
-            DataEntryWriter apkWriter = new JarWriter(writer);
+            DataEntryWriter apkWriter = new ZipWriter(null,
+                                                      1,
+                                                      0,
+                                                      new byte[0],
+                                                      writer);
             if (outputIsApk)
             {
                 // Always zip.

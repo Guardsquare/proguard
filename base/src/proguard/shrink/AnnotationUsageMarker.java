@@ -27,14 +27,16 @@ import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
+import proguard.util.ProcessingFlags;
 
 /**
  * This AttributeVisitor recursively marks all necessary annotation information
  * in the attributes that it visits.
  *
- * @see UsageMarker
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
@@ -47,7 +49,7 @@ implements   AttributeVisitor,
              ClassVisitor,
              MemberVisitor
 {
-    private final UsageMarker usageMarker;
+    private final ClassUsageMarker classUsageMarker;
 
     // Fields acting as a return parameters for several methods.
     private boolean attributeUsed;
@@ -58,12 +60,12 @@ implements   AttributeVisitor,
 
     /**
      * Creates a new AnnotationUsageMarker.
-     * @param usageMarker the usage marker that is used to mark the classes
-     *                    and class members.
+     * @param classUsageMarker the marker to mark and check the classes and
+     *                         class members.
      */
-    public AnnotationUsageMarker(UsageMarker usageMarker)
+    public AnnotationUsageMarker(ClassUsageMarker classUsageMarker)
     {
-        this.usageMarker = usageMarker;
+        this.classUsageMarker = classUsageMarker;
     }
 
 
@@ -82,7 +84,7 @@ implements   AttributeVisitor,
         {
             // We got a positive used flag, so some annotation is being used.
             // Mark this attribute as being used as well.
-            usageMarker.markAsUsed(annotationsAttribute);
+            classUsageMarker.markAsUsed(annotationsAttribute);
 
             markConstant(clazz, annotationsAttribute.u2attributeNameIndex);
         }
@@ -99,7 +101,7 @@ implements   AttributeVisitor,
         {
             // We got a positive used flag, so some annotation is being used.
             // Mark this attribute as being used as well.
-            usageMarker.markAsUsed(parameterAnnotationsAttribute);
+            classUsageMarker.markAsUsed(parameterAnnotationsAttribute);
 
             markConstant(clazz, parameterAnnotationsAttribute.u2attributeNameIndex);
         }
@@ -112,7 +114,7 @@ implements   AttributeVisitor,
         annotationDefaultAttribute.defaultValueAccept(clazz, this);
 
         // Always mark annotation defaults.
-        usageMarker.markAsUsed(annotationDefaultAttribute);
+        classUsageMarker.markAsUsed(annotationDefaultAttribute);
 
         markConstant(clazz, annotationDefaultAttribute.u2attributeNameIndex);
     }
@@ -125,7 +127,7 @@ implements   AttributeVisitor,
         if (isReferencedClassUsed(annotation))
         {
             // Mark the annotation as being used.
-            usageMarker.markAsUsed(annotation);
+            classUsageMarker.markAsUsed(annotation);
 
             markConstant(clazz, annotation.u2typeIndex);
 
@@ -146,7 +148,7 @@ implements   AttributeVisitor,
         if (isReferencedMethodUsed(constantElementValue))
         {
             // Mark the element value as being used.
-            usageMarker.markAsUsed(constantElementValue);
+            classUsageMarker.markAsUsed(constantElementValue);
 
             markConstant(clazz, constantElementValue.u2elementNameIndex);
             markConstant(clazz, constantElementValue.u2constantValueIndex);
@@ -165,7 +167,7 @@ implements   AttributeVisitor,
             if (allClassesUsed)
             {
                 // Mark the element value as being used.
-                usageMarker.markAsUsed(enumConstantElementValue);
+                classUsageMarker.markAsUsed(enumConstantElementValue);
 
                 markConstant(clazz, enumConstantElementValue.u2elementNameIndex);
                 markConstant(clazz, enumConstantElementValue.u2typeNameIndex);
@@ -180,7 +182,7 @@ implements   AttributeVisitor,
         if (isReferencedMethodUsed(classElementValue))
         {
             // Mark the element value as being used.
-            usageMarker.markAsUsed(classElementValue);
+            classUsageMarker.markAsUsed(classElementValue);
 
             markConstant(clazz, classElementValue.u2elementNameIndex);
             markConstant(clazz, classElementValue.u2classInfoIndex);
@@ -188,7 +190,7 @@ implements   AttributeVisitor,
             // Mark the referenced classes, since they can be retrieved from
             // the annotation and then used.
             // TODO: This could mark more annotation methods, affecting other annotations.
-            classElementValue.referencedClassesAccept(usageMarker);
+            classElementValue.referencedClassesAccept(classUsageMarker);
         }
     }
 
@@ -206,7 +208,7 @@ implements   AttributeVisitor,
             if (annotationUsed)
             {
                 // Mark the element value as being used.
-                usageMarker.markAsUsed(annotationElementValue);
+                classUsageMarker.markAsUsed(annotationElementValue);
 
                 markConstant(clazz, annotationElementValue.u2elementNameIndex);
             }
@@ -224,7 +226,7 @@ implements   AttributeVisitor,
             arrayElementValue.elementValuesAccept(clazz, annotation, this);
 
             // Mark the element value as being used.
-            usageMarker.markAsUsed(arrayElementValue);
+            classUsageMarker.markAsUsed(arrayElementValue);
 
             markConstant(clazz, arrayElementValue.u2elementNameIndex);
         }
@@ -235,14 +237,15 @@ implements   AttributeVisitor,
 
     public void visitAnyConstant(Clazz clazz, Constant constant)
     {
-        usageMarker.markAsUsed(constant);
+        // Mark the constant (and apply the optional extra visitor).
+        constant.accept(clazz, classUsageMarker);
     }
 
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
         // Is the class constant marked as being used?
-        if (!usageMarker.isUsed(classConstant))
+        if (!classUsageMarker.isUsed(classConstant))
         {
             // Check the referenced class.
             allClassesUsed = true;
@@ -252,9 +255,7 @@ implements   AttributeVisitor,
             if (allClassesUsed)
             {
                 // Mark the class constant and its Utf8 constant.
-                usageMarker.markAsUsed(classConstant);
-
-                markConstant(clazz, classConstant.u2nameIndex);
+                visitAnyConstant(clazz, classConstant);
             }
         }
     }
@@ -264,12 +265,28 @@ implements   AttributeVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        allClassesUsed &= usageMarker.isUsed(programClass);
+        allClassesUsed &= classUsageMarker.isUsed(programClass);
+
+        // Add this special case for kotlin DebugMetadata annotation.
+        // Unless it is explicitly kept for shrinking, remove it as it exposes
+        // information about the original class / member names, see DGD-1361.
+        if (programClass.getName().equals(KotlinConstants.NAME_KOTLIN_COROUTINES_DEBUG_METADATA))
+        {
+            allClassesUsed &= (programClass.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0;
+        }
     }
 
 
     public void visitLibraryClass(LibraryClass libraryClass)
     {
+        // Add this special case for kotlin Metadata / DebugMetadata annotation
+        // in library projects. We want to strip it (default is to keep -libraryjar
+        // annotations). You can override this by keeping kotlin.Metadata in configuration.
+        if (libraryClass.getName().equals(KotlinConstants.NAME_KOTLIN_METADATA) ||
+            libraryClass.getName().equals(KotlinConstants.NAME_KOTLIN_COROUTINES_DEBUG_METADATA))
+        {
+            allClassesUsed &= (libraryClass.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0;
+        }
     }
 
 
@@ -277,11 +294,11 @@ implements   AttributeVisitor,
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        methodUsed = usageMarker.isUsed(programMethod);
+        methodUsed = classUsageMarker.isUsed(programMethod);
     }
 
 
-    public void visitLibraryMethod(LibraryClass LibraryClass, LibraryMethod libraryMethod)
+    public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
     }
 

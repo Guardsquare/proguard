@@ -19,6 +19,7 @@ sourceSets.main {
 }
 
 dependencies {
+    compile project(':base')
     compile project(':core')
     compile project(':retrace')
 }

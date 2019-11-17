@@ -52,6 +52,7 @@ public class CascadingDataEntryWriter implements DataEntryWriter
 
     // Implementations for DataEntryWriter.
 
+    @Override
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
         // Try to create a directory with the first data entry writer, or
@@ -61,6 +62,7 @@ public class CascadingDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public boolean sameOutputStream(DataEntry dataEntry1,
                                     DataEntry dataEntry2)
     throws IOException
@@ -70,6 +72,7 @@ public class CascadingDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public OutputStream createOutputStream(DataEntry dataEntry) throws IOException
     {
         // Try to get an output stream from the first data entry writer.
@@ -84,16 +87,24 @@ public class CascadingDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public void close() throws IOException
     {
-        dataEntryWriter1.close();
-        dataEntryWriter2.close();
+        if (dataEntryWriter1 != null)
+        {
+            dataEntryWriter1.close();
+            dataEntryWriter1 = null;
+        }
 
-        dataEntryWriter1 = null;
-        dataEntryWriter2 = null;
+        if (dataEntryWriter2 != null)
+        {
+            dataEntryWriter2.close();
+            dataEntryWriter2 = null;
+        }
     }
 
 
+    @Override
     public void println(PrintWriter pw, String prefix)
     {
         pw.println(prefix + "CascadingDataEntryWriter");

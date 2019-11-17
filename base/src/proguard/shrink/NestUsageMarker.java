@@ -42,7 +42,7 @@ implements   AttributeVisitor,
              ConstantVisitor,
              ClassVisitor
 {
-    private final UsageMarker usageMarker;
+    private final ClassUsageMarker classUsageMarker;
 
     // Fields acting as return parameters for several methods.
     private boolean attributeUsed;
@@ -51,12 +51,12 @@ implements   AttributeVisitor,
 
     /**
      * Creates a new NestUsageMarker.
-     * @param usageMarker the usage marker that is used to mark the classes
-     *                    and class members.
+     * @param classUsageMarker the marker to mark and check the classes and
+     *                         class members.
      */
-    public NestUsageMarker(UsageMarker usageMarker)
+    public NestUsageMarker(ClassUsageMarker classUsageMarker)
     {
-        this.usageMarker = usageMarker;
+        this.classUsageMarker = classUsageMarker;
     }
 
 
@@ -75,7 +75,7 @@ implements   AttributeVisitor,
         {
             // We got a positive used flag, so the nest host class is being used.
             // Mark this attribute as being used as well.
-            usageMarker.markAsUsed(nestHostAttribute);
+            classUsageMarker.markAsUsed(nestHostAttribute);
 
             markConstant(clazz, nestHostAttribute.u2attributeNameIndex);
         }
@@ -92,7 +92,7 @@ implements   AttributeVisitor,
         {
             // We got a positive used flag, so the nest members class is being used.
             // Mark this attribute as being used as well.
-            usageMarker.markAsUsed(nestMembersAttribute);
+            classUsageMarker.markAsUsed(nestMembersAttribute);
 
             markConstant(clazz, nestMembersAttribute.u2attributeNameIndex);
         }
@@ -103,7 +103,7 @@ implements   AttributeVisitor,
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
-        classUsed = usageMarker.isUsed(classConstant);
+        classUsed = classUsageMarker.isUsed(classConstant);
 
         // Is the class constant marked as being used?
         if (!classUsed)
@@ -116,7 +116,7 @@ implements   AttributeVisitor,
             if (classUsed)
             {
                 // Mark the class constant and its Utf8 constant.
-                usageMarker.markAsUsed(classConstant);
+                classUsageMarker.markAsUsed(classConstant);
 
                 markConstant(clazz, classConstant.u2nameIndex);
             }
@@ -129,7 +129,7 @@ implements   AttributeVisitor,
 
     public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant)
     {
-        usageMarker.markAsUsed(utf8Constant);
+        classUsageMarker.markAsUsed(utf8Constant);
     }
 
 
@@ -137,7 +137,7 @@ implements   AttributeVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        classUsed = usageMarker.isUsed(programClass);
+        classUsed = classUsageMarker.isUsed(programClass);
     }
 
 

@@ -43,7 +43,7 @@ final class CompositeLongValue extends SpecificLongValue
 
     private final LongValue longValue1;
     private final byte      operation;
-    private final Value longValue2;
+    private final Value     longValue2;
 
 
     /**

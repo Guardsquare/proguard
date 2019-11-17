@@ -68,39 +68,45 @@ import static proguard.optimize.gson.OptimizedClassConstants.*;
  */
 public class GsonOptimizer
 {
-    private static final boolean DEBUG = false;
+    //*
+    public static final boolean DEBUG = false;
+    /*/
+    public static       boolean DEBUG = System.getProperty("go") != null;
+    //*/
+
 
     // The order of this matters to ensure that the class references are
     // initialized properly.
-    private static final String[] TEMPLATE_CLASSES =
-        {
-            NAME_OPTIMIZED_TYPE_ADAPTER,
-            NAME_GSON_UTIL,
-            NAME_OPTIMIZED_JSON_READER,
-            NAME_OPTIMIZED_JSON_READER_IMPL,
-            NAME_OPTIMIZED_JSON_WRITER,
-            NAME_OPTIMIZED_JSON_WRITER_IMPL,
-            NAME_OPTIMIZED_TYPE_ADAPTER_FACTORY
-        };
+    private static final String[] TEMPLATE_CLASS_NAMES =
+    {
+        NAME_OPTIMIZED_TYPE_ADAPTER,
+        NAME_GSON_UTIL,
+        NAME_OPTIMIZED_JSON_READER,
+        NAME_OPTIMIZED_JSON_READER_IMPL,
+        NAME_OPTIMIZED_JSON_WRITER,
+        NAME_OPTIMIZED_JSON_WRITER_IMPL,
+        NAME_OPTIMIZED_TYPE_ADAPTER_FACTORY
+    };
 
 
     /**
      * Performs the Gson optimizations.
      *
-     * @param programClassPool     the program class pool on which to perform
-     *                             the Gson optimizations.
-     * @param libraryClassPool     the library class pool used to look up
-     *                             library class references.
-     * @param injectedClassNameMap the map to which injected class names are
-     *                             added.
-     * @param configuration        the DexGuard configuration that is applied.
-     * @throws IOException         when the injected template classes can not
-     *                             be read.
+     * @param programClassPool      the program class pool on which to perform
+     *                              the Gson optimizations.
+     * @param libraryClassPool      the library class pool used to look up
+     *                              library class references.
+     * @param extraDataEntryNameMap the map to which injected class names are
+     *                              added.
+     * @param configuration         the DexGuard configuration that is applied.
+     * @throws IOException          when the injected template classes can not
+     *                              be read.
      */
-    public void execute(ClassPool                     programClassPool,
-                        ClassPool                     libraryClassPool,
-                        MultiValueMap<String, String> injectedClassNameMap,
-                        Configuration                 configuration) throws IOException
+    public void execute(ClassPool             programClassPool,
+                        ClassPool             libraryClassPool,
+                        ExtraDataEntryNameMap extraDataEntryNameMap,
+                        Configuration         configuration)
+    throws IOException
     {
         // Set all fields of Gson to public.
         programClassPool.classesAccept(
@@ -120,11 +126,11 @@ public class GsonOptimizer
         // class pool.
         PrintWriter out =
             new PrintWriter(System.out, true);
-        WarningPrinter notePrinter =
-            new WarningPrinter(out, configuration.note);
+        WarningPrinter warningPrinter =
+            new WarningPrinter(out, configuration.warn);
 
         GsonContext gsonContext = new GsonContext();
-        gsonContext.setupFor(programClassPool, notePrinter);
+        gsonContext.setupFor(programClassPool, libraryClassPool, warningPrinter);
 
         // Is there something to optimize at all?
         if (gsonContext.gsonDomainClassPool.size() > 0)
@@ -159,18 +165,19 @@ public class GsonOptimizer
 
             // Inject all serialization and deserialization template classes.
             ClassReader helperClassReader =
-                new ClassReader(false, false, false, null,
+                new ClassReader(false, false, false, false, null,
                                 new MultiClassVisitor(
+                                    new ProcessingFlagSetter(ProcessingFlags.INJECTED),
                                     new ClassPresenceFilter(programClassPool, null,
                                                             new ClassPoolFiller(programClassPool)),
                                     new ClassReferenceInitializer(programClassPool, libraryClassPool),
                                     new ClassSubHierarchyInitializer()));
 
-            for (String clazz : TEMPLATE_CLASSES)
+            for (String className : TEMPLATE_CLASS_NAMES)
             {
-                helperClassReader.read(new ClassPathDataEntry(clazz + CLASS_FILE_EXTENSION));
-                injectedClassNameMap.put(GsonClassConstants.NAME_GSON,
-                                         clazz);
+                helperClassReader.read(new ClassPathDataEntry(className + CLASS_FILE_EXTENSION));
+                extraDataEntryNameMap.addExtraClassToClass(GsonClassConstants.NAME_GSON,
+                                                           className);
             }
 
             // Inject serialization and deserialization data structures in
@@ -211,7 +218,7 @@ public class GsonOptimizer
                                                               gsonContext.gsonRuntimeSettings,
                                                               codeAttributeEditor,
                                                               serializationInfo,
-                                                              injectedClassNameMap)));
+                                                              extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool
                 .classesAccept(new ClassAccessFilter(0, ACC_ENUM,
                                new GsonDeserializationOptimizer(programClassPool,
@@ -219,7 +226,7 @@ public class GsonOptimizer
                                                                 gsonContext.gsonRuntimeSettings,
                                                                 codeAttributeEditor,
                                                                 deserializationInfo,
-                                                                injectedClassNameMap)));
+                                                                extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool
                 .classesAccept(new ClassReferenceInitializer(programClassPool, libraryClassPool));
 
@@ -231,9 +238,9 @@ public class GsonOptimizer
                                               codeAttributeEditor,
                                               serializationInfo,
                                               deserializationInfo,
-                                              injectedClassNameMap,
+                                              extraDataEntryNameMap,
                                               typeAdapterRegistry,
-                                              gsonContext.instanceCreatorClassPool);
+                                              gsonContext.gsonRuntimeSettings);
 
             gsonContext.gsonDomainClassPool.classesAccept(optimizedTypeAdapterAdder);
 

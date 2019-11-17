@@ -20,7 +20,6 @@
  */
 package proguard.util;
 
-
 import java.util.*;
 
 /**
@@ -35,9 +34,45 @@ import java.util.*;
  */
 public class MultiValueMap<K, V>
 {
-    private final Map<K, Set<V>> keyValueMap = new HashMap<K, Set<V>>();
+    private final Map<K, Set<V>> keyValueMap = createKeyMap();
 
-    private final Set<V> values = new HashSet<V>();
+    private final Set<V> values = createValueSet();
+
+
+    protected Set<V> createValueSet()
+    {
+        return new HashSet<V>();
+    }
+
+
+    protected Map<K, Set<V>> createKeyMap()
+    {
+        return new HashMap<K, Set<V>>();
+    }
+
+
+    public int size()
+    {
+        return keyValueMap.size();
+    }
+
+
+    public Set<K> keySet()
+    {
+        return keyValueMap.keySet();
+    }
+
+
+    public Collection<Set<V>> values()
+    {
+        return keyValueMap.values();
+    }
+
+
+    public Set<Map.Entry<K, Set<V>>> entrySet()
+    {
+        return keyValueMap.entrySet();
+    }
 
 
     public void put(K key, V value)
@@ -67,10 +102,17 @@ public class MultiValueMap<K, V>
         Set<V> existingValues = keyValueMap.get(key);
         if (existingValues == null)
         {
-            existingValues = new HashSet<V>();
+            existingValues = createValueSet();
             keyValueMap.put(key, existingValues);
         }
         existingValues.addAll(values);
+    }
+
+
+    public boolean remove(K key, V value)
+    {
+        Set<V> values = keyValueMap.get(key);
+        return values != null && values.remove(value);
     }
 
 
@@ -88,5 +130,12 @@ public class MultiValueMap<K, V>
     public Set<V> getValues()
     {
         return values;
+    }
+
+
+    public void clear()
+    {
+        keyValueMap.clear();
+        values.clear();
     }
 }

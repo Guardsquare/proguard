@@ -47,6 +47,7 @@ public class ManifestRewriter extends DataEntryRewriter
 
     // Implementations for DataEntryRewriter.
 
+    @Override
     protected void copyData(Reader reader,
                             Writer writer)
     throws IOException
@@ -75,6 +76,7 @@ public class ManifestRewriter extends DataEntryRewriter
 
         // Implementations for Reader.
 
+        @Override
         public int read() throws IOException
         {
             while (true)
@@ -116,6 +118,7 @@ public class ManifestRewriter extends DataEntryRewriter
         }
 
 
+        @Override
         public int read(char[] cbuf, int off, int len) throws IOException
         {
             // Delegate to reading a single character at a time.
@@ -135,6 +138,7 @@ public class ManifestRewriter extends DataEntryRewriter
         }
 
 
+        @Override
         public long skip(long n) throws IOException
         {
             // Delegate to reading a single character at a time.
@@ -171,6 +175,7 @@ public class ManifestRewriter extends DataEntryRewriter
 
         // Implementations for Reader.
 
+        @Override
         public void write(int c) throws IOException
         {
             // TODO: We should actually count the Utf-8 bytes, not the characters.
@@ -196,6 +201,7 @@ public class ManifestRewriter extends DataEntryRewriter
         }
 
 
+        @Override
         public void write(char[] cbuf, int off, int len) throws IOException
         {
             for (int count = 0; count < len; count++)
@@ -205,6 +211,7 @@ public class ManifestRewriter extends DataEntryRewriter
         }
 
 
+        @Override
         public void write(String str, int off, int len) throws IOException
         {
             write(str.toCharArray(), off, len);

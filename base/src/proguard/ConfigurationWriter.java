@@ -39,7 +39,8 @@ public class ConfigurationWriter
     {
         ConfigurationConstants.KEEP_OPTION,
         ConfigurationConstants.KEEP_CLASS_MEMBERS_OPTION,
-        ConfigurationConstants.KEEP_CLASSES_WITH_MEMBERS_OPTION
+        ConfigurationConstants.KEEP_CLASSES_WITH_MEMBERS_OPTION,
+        ConfigurationConstants.KEEP_CODE_OPTION
     };
 
 
@@ -99,6 +100,8 @@ public class ConfigurationWriter
         writeOption(ConfigurationConstants.SKIP_NON_PUBLIC_LIBRARY_CLASSES_OPTION,            configuration.skipNonPublicLibraryClasses);
         writeOption(ConfigurationConstants.DONT_SKIP_NON_PUBLIC_LIBRARY_CLASS_MEMBERS_OPTION, !configuration.skipNonPublicLibraryClassMembers);
         writeOption(ConfigurationConstants.KEEP_DIRECTORIES_OPTION,                           configuration.keepDirectories);
+        writeOption(ConfigurationConstants.DONT_COMPRESS_OPTION,                              configuration.dontCompress);
+        writeOption(ConfigurationConstants.ZIP_ALIGN_OPTION,                                  configuration.zipAlign);
         writeOption(ConfigurationConstants.TARGET_OPTION,                                     ClassUtil.externalClassVersion(configuration.targetClassVersion));
         writeOption(ConfigurationConstants.FORCE_PROCESSING_OPTION,                           configuration.lastModified == Long.MAX_VALUE);
 
@@ -129,10 +132,16 @@ public class ConfigurationWriter
         writeOption(ConfigurationConstants.ADAPT_CLASS_STRINGS_OPTION,                       configuration.adaptClassStrings, true);
         writeOption(ConfigurationConstants.ADAPT_RESOURCE_FILE_NAMES_OPTION,                 configuration.adaptResourceFileNames);
         writeOption(ConfigurationConstants.ADAPT_RESOURCE_FILE_CONTENTS_OPTION,              configuration.adaptResourceFileContents);
+        writeOption(ConfigurationConstants.ADAPT_KOTLIN_METADATA,                            configuration.adaptKotlinMetadata);
 
         writeOption(ConfigurationConstants.DONT_PREVERIFY_OPTION,     !configuration.preverify);
         writeOption(ConfigurationConstants.MICRO_EDITION_OPTION,      configuration.microEdition);
         writeOption(ConfigurationConstants.ANDROID_OPTION,            configuration.android);
+
+        writeOptions(ConfigurationConstants.KEY_STORE_OPTION,          configuration.keyStores,
+                     ConfigurationConstants.KEY_STORE_PASSWORD_OPTION, configuration.keyStorePasswords,
+                     ConfigurationConstants.KEY_ALIAS_OPTION,          configuration.keyAliases,
+                     ConfigurationConstants.KEY_PASSWORD_OPTION,       configuration.keyPasswords);
 
         writeOption(ConfigurationConstants.VERBOSE_OPTION,                     configuration.verbose);
         writeOption(ConfigurationConstants.DONT_NOTE_OPTION,                   configuration.note, true);
@@ -159,7 +168,6 @@ public class ConfigurationWriter
         writeOptions(ConfigurationConstants.ASSUME_NO_EXTERNAL_RETURN_VALUES_OPTION, configuration.assumeNoExternalReturnValues);
         writeOptions(ConfigurationConstants.ASSUME_VALUES_OPTION,                    configuration.assumeValues);
 
-
         if (writer.checkError())
         {
             throw new IOException("Can't write configuration");
@@ -181,15 +189,26 @@ public class ConfigurationWriter
                      inputEntryOptionName;
 
                 writer.print(optionName);
+
+                // Append the feature name, if any, as a suboption.
+                String featureName = entry.getFeatureName();
+                if (featureName != null)
+                {
+                    writer.print(ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD);
+                    writer.print(featureName);
+                }
+
                 writer.print(' ');
                 writer.print(relativeFileName(entry.getFile()));
 
                 // Append the filters, if any.
                 boolean filtered = false;
 
-                // For backward compatibility, the aar and apk filters come
-                // first.
+                // For backward compatibility, the jmod/aar/aab/apk filters
+                // come first.
+                filtered = writeFilter(filtered, entry.getJmodFilter());
                 filtered = writeFilter(filtered, entry.getAarFilter());
+                filtered = writeFilter(filtered, entry.getAabFilter());
                 filtered = writeFilter(filtered, entry.getApkFilter());
                 filtered = writeFilter(filtered, entry.getZipFilter());
                 filtered = writeFilter(filtered, entry.getJmodFilter());
@@ -255,6 +274,67 @@ public class ConfigurationWriter
     private void writeOption(String optionName, List arguments)
     {
         writeOption(optionName, arguments, false);
+    }
+
+
+    private void writeOptions(String  optionName,
+                              List    arguments,
+                              boolean replaceInternalClassNames)
+    {
+        if (arguments != null)
+        {
+            for (int index = 0; index < arguments.size(); index++)
+            {
+                writeOption(optionName,
+                            (List)arguments.get(index),
+                            replaceInternalClassNames);
+            }
+        }
+    }
+
+
+    private void writeOptions(String optionName1, List<File>   arguments1,
+                              String optionName2, List<String> arguments2,
+                              String optionName3, List<String> arguments3,
+                              String optionName4, List<String> arguments4)
+    {
+        for (int index = 0; true; index++)
+        {
+            boolean written = false;
+
+            if (arguments1 != null && index < arguments1.size())
+            {
+                writeOption(optionName1, arguments1.get(index));
+
+                written = true;
+            }
+
+            if (arguments2 != null && index < arguments2.size())
+            {
+                writeOption(optionName2, arguments2.get(index));
+
+                written = true;
+            }
+
+            if (arguments3 != null && index < arguments3.size())
+            {
+                writeOption(optionName3, arguments3.get(index));
+
+                written = true;
+            }
+
+            if (arguments4 != null && index < arguments4.size())
+            {
+                writeOption(optionName4, arguments4.get(index));
+
+                written = true;
+            }
+
+            if (!written)
+            {
+                break;
+            }
+        }
     }
 
 
@@ -380,7 +460,8 @@ public class ConfigurationWriter
         // Compose the option name.
         String optionName = optionNames[keepClassSpecification.markConditionally ? 2 :
                                         keepClassSpecification.markClasses       ? 0 :
-                                                                                   1];
+                                        keepClassSpecification.markClassMembers  ? 1 :
+                                                                                   3];
 
         if (keepClassSpecification.markDescriptorClasses)
         {
@@ -388,7 +469,9 @@ public class ConfigurationWriter
                           ConfigurationConstants.INCLUDE_DESCRIPTOR_CLASSES_SUBOPTION;
         }
 
-        if (keepClassSpecification.markCodeAttributes)
+        if ((keepClassSpecification.markClasses ||
+             keepClassSpecification.markClassMembers) &&
+            keepClassSpecification.markCodeAttributes)
         {
             optionName += ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD +
                           ConfigurationConstants.INCLUDE_CODE_SUBOPTION;
@@ -497,13 +580,15 @@ public class ConfigurationWriter
 
         // Write out the keep field and keep method options, if any.
         if (classSpecification.fieldSpecifications  != null ||
-            classSpecification.methodSpecifications != null)
+            classSpecification.methodSpecifications != null ||
+            classSpecification.memberComments       != null)
         {
             writer.print(' ');
             writer.println(ConfigurationConstants.OPEN_KEYWORD);
 
             writeFieldSpecification( classSpecification.fieldSpecifications);
             writeMethodSpecification(classSpecification.methodSpecifications);
+            writeComments(classSpecification.memberComments);
 
             writer.println(ConfigurationConstants.CLOSE_KEYWORD);
         }

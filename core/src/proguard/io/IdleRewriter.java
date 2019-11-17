@@ -25,7 +25,8 @@ import java.io.IOException;
 /**
  * This DataEntryReader reads data entries and requests their corresponding
  * output streams from a given DataEntryWriter, without actually using the
- * output stream.
+ * output stream. This approach correctly accounts for any filtering of the
+ * classes to output archives.
  *
  * @author Eric Lafortune
  */
@@ -42,6 +43,7 @@ public class IdleRewriter implements DataEntryReader
 
     // Implementations for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry) throws IOException
     {
         // Get the output entry corresponding to this input entry, but don't

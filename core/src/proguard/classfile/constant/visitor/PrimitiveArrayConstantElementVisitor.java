@@ -32,11 +32,11 @@ import proguard.classfile.constant.PrimitiveArrayConstant;
 public interface PrimitiveArrayConstantElementVisitor
 {
     public void visitBooleanArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, boolean value);
-    public void visitByteArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, byte value);
-    public void visitCharArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, char value);
-    public void visitShortArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, short value);
-    public void visitIntArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, int value);
-    public void visitFloatArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, float value);
-    public void visitLongArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, long value);
-    public void visitDoubleArrayConstantElement(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, double value);
+    public void visitByteArrayConstantElement(   Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, byte    value);
+    public void visitCharArrayConstantElement(   Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, char    value);
+    public void visitShortArrayConstantElement(  Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, short   value);
+    public void visitIntArrayConstantElement(    Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, int     value);
+    public void visitFloatArrayConstantElement(  Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, float   value);
+    public void visitLongArrayConstantElement(   Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, long    value);
+    public void visitDoubleArrayConstantElement( Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int index, double  value);
 }

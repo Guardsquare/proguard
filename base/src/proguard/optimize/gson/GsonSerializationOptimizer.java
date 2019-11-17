@@ -27,6 +27,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.util.MultiValueMap;
 
@@ -53,13 +54,13 @@ implements   MemberVisitor,
 
     private static final Map<String,InlineSerializer> inlineSerializers = new HashMap<String, InlineSerializer>();
 
-    private final ClassPool                     programClassPool;
-    private final ClassPool                     libraryClassPool;
-    private final GsonRuntimeSettings           gsonRuntimeSettings;
-    private final CodeAttributeEditor           codeAttributeEditor;
-    private final OptimizedJsonInfo             serializationInfo;
-    private final boolean                       supportExposeAnnotation;
-    private final MultiValueMap<String, String> injectedClassNameMap;
+    private final ClassPool             programClassPool;
+    private final ClassPool             libraryClassPool;
+    private final GsonRuntimeSettings   gsonRuntimeSettings;
+    private final CodeAttributeEditor   codeAttributeEditor;
+    private final OptimizedJsonInfo     serializationInfo;
+    private final boolean               supportExposeAnnotation;
+    private final ExtraDataEntryNameMap extraDataEntryNameMap;
 
     private InstructionSequenceBuilder ____;
 
@@ -93,15 +94,15 @@ implements   MemberVisitor,
      *                              classes.
      * @param serializationInfo     contains information on which class
      *                              and fields need to be optimized and how.
-     * @param injectedClassNameMap the map that keeps track of injected
+     * @param extraDataEntryNameMap the map that keeps track of injected
      *                              classes.
      */
-    public GsonSerializationOptimizer(ClassPool                     programClassPool,
-                                      ClassPool                     libraryClassPool,
-                                      GsonRuntimeSettings           gsonRuntimeSettings,
-                                      CodeAttributeEditor           codeAttributeEditor,
-                                      OptimizedJsonInfo             serializationInfo,
-                                      MultiValueMap<String, String> injectedClassNameMap)
+    public GsonSerializationOptimizer(ClassPool             programClassPool,
+                                      ClassPool             libraryClassPool,
+                                      GsonRuntimeSettings   gsonRuntimeSettings,
+                                      CodeAttributeEditor   codeAttributeEditor,
+                                      OptimizedJsonInfo     serializationInfo,
+                                      ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool        = programClassPool;
         this.libraryClassPool        = libraryClassPool;
@@ -109,7 +110,7 @@ implements   MemberVisitor,
         this.codeAttributeEditor     = codeAttributeEditor;
         this.serializationInfo       = serializationInfo;
         this.supportExposeAnnotation = gsonRuntimeSettings.excludeFieldsWithoutExposeAnnotation;
-        this.injectedClassNameMap    = injectedClassNameMap;
+        this.extraDataEntryNameMap   = extraDataEntryNameMap;
     }
 
 
@@ -380,7 +381,7 @@ implements   MemberVisitor,
                                 programClassPool.addClass(typeTokenClass);
                                 typeTokenClass.accept(new ClassReferenceInitializer(programClassPool,
                                                                                     libraryClassPool));
-                                injectedClassNameMap.put(programClass.getName(), typeTokenClass.getName());
+                                extraDataEntryNameMap.addExtraClassToClass(programClass, typeTokenClass);
 
                                 // Instantiate type token.
                                 ____.new_(typeTokenClass.getName())

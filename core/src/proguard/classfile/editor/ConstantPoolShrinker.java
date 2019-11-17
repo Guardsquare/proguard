@@ -35,6 +35,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
+import proguard.util.VisitorAccepter;
 
 import java.util.Arrays;
 
@@ -79,6 +80,9 @@ implements   ClassVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
+        // Remove any previous visitor info from the constant pool entries.
+        programClass.constantPoolEntriesAccept(new ClassCleaner());
+
         // Mark this class's name.
         markConstant(programClass, programClass.u2thisClass);
 
@@ -348,7 +352,7 @@ implements   ClassVisitor,
         markConstant(clazz, exceptionsAttribute.u2attributeNameIndex);
 
         // Mark the constant pool entries referenced by the exceptions.
-        exceptionsAttribute.exceptionEntriesAccept((ProgramClass)clazz, this);
+        exceptionsAttribute.exceptionEntriesAccept(clazz, this);
     }
 
 

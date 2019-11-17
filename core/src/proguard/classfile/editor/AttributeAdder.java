@@ -111,6 +111,8 @@ implements   AttributeVisitor
                                  unknownAttribute.u4attributeLength,
                                  unknownAttribute.info);
 
+        newUnknownAttribute.setProcessingFlags(unknownAttribute.getProcessingFlags());
+
         // Add it to the target class.
         attributesEditor.addAttribute(newUnknownAttribute);
     }
@@ -122,6 +124,8 @@ implements   AttributeVisitor
         SourceFileAttribute newSourceFileAttribute =
             new SourceFileAttribute(constantAdder.addConstant(clazz, sourceFileAttribute.u2attributeNameIndex),
                                     constantAdder.addConstant(clazz, sourceFileAttribute.u2sourceFileIndex));
+
+        newSourceFileAttribute.setProcessingFlags(sourceFileAttribute.getProcessingFlags());
 
         // Add it to the target class.
         attributesEditor.addAttribute(newSourceFileAttribute);
@@ -135,8 +139,25 @@ implements   AttributeVisitor
             new SourceDirAttribute(constantAdder.addConstant(clazz, sourceDirAttribute.u2attributeNameIndex),
                                    constantAdder.addConstant(clazz, sourceDirAttribute.u2sourceDirIndex));
 
+        newSourceDirAttribute.setProcessingFlags(sourceDirAttribute.getProcessingFlags());
+
         // Add it to the target class.
         attributesEditor.addAttribute(newSourceDirAttribute);
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        // Create a copy of the attribute.
+        SourceDebugExtensionAttribute newSourceDebugExtensionAttribute =
+            new SourceDebugExtensionAttribute(constantAdder.addConstant(clazz, sourceDebugExtensionAttribute.u2attributeNameIndex),
+                                              sourceDebugExtensionAttribute.u4attributeLength,
+                                              sourceDebugExtensionAttribute.info);
+
+        newSourceDebugExtensionAttribute.setProcessingFlags(sourceDebugExtensionAttribute.getProcessingFlags());
+
+        // Add it to the target class.
+        attributesEditor.addAttribute(newSourceDebugExtensionAttribute);
     }
 
 
@@ -147,6 +168,8 @@ implements   AttributeVisitor
             new InnerClassesAttribute(constantAdder.addConstant(clazz, innerClassesAttribute.u2attributeNameIndex),
                                       0,
                                       null);
+
+        newInnerClassesAttribute.setProcessingFlags(innerClassesAttribute.getProcessingFlags());
 
         // Add it to the target class.
         attributesEditor.addAttribute(newInnerClassesAttribute);
@@ -161,6 +184,8 @@ implements   AttributeVisitor
                                          constantAdder.addConstant(clazz, enclosingMethodAttribute.u2classIndex),
                                          enclosingMethodAttribute.u2nameAndTypeIndex == 0 ? 0 :
                                          constantAdder.addConstant(clazz, enclosingMethodAttribute.u2nameAndTypeIndex));
+
+        newEnclosingMethodAttribute.setProcessingFlags(enclosingMethodAttribute.getProcessingFlags());
 
         newEnclosingMethodAttribute.referencedClass  = enclosingMethodAttribute.referencedClass;
         newEnclosingMethodAttribute.referencedMethod = enclosingMethodAttribute.referencedMethod;
@@ -208,6 +233,8 @@ implements   AttributeVisitor
         DeprecatedAttribute newDeprecatedAttribute =
             new DeprecatedAttribute(constantAdder.addConstant(clazz, deprecatedAttribute.u2attributeNameIndex));
 
+        newDeprecatedAttribute.setProcessingFlags(deprecatedAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newDeprecatedAttribute);
     }
@@ -218,6 +245,8 @@ implements   AttributeVisitor
         // Create a copy of the attribute.
         SyntheticAttribute newSyntheticAttribute =
             new SyntheticAttribute(constantAdder.addConstant(clazz, syntheticAttribute.u2attributeNameIndex));
+
+        newSyntheticAttribute.setProcessingFlags(syntheticAttribute.getProcessingFlags());
 
         // Add it to the target.
         attributesEditor.addAttribute(newSyntheticAttribute);
@@ -230,6 +259,8 @@ implements   AttributeVisitor
         SignatureAttribute newSignatureAttribute =
             new SignatureAttribute(constantAdder.addConstant(clazz, signatureAttribute.u2attributeNameIndex),
                                    constantAdder.addConstant(clazz, signatureAttribute.u2signatureIndex));
+
+        newSignatureAttribute.setProcessingFlags(signatureAttribute.getProcessingFlags());
 
         newSignatureAttribute.referencedClasses = signatureAttribute.referencedClasses;
 
@@ -244,6 +275,8 @@ implements   AttributeVisitor
         ConstantValueAttribute newConstantValueAttribute =
             new ConstantValueAttribute(constantAdder.addConstant(clazz, constantValueAttribute.u2attributeNameIndex),
                                        constantAdder.addConstant(clazz, constantValueAttribute.u2constantValueIndex));
+
+        newConstantValueAttribute.setProcessingFlags(constantValueAttribute.getProcessingFlags());
 
         // Add it to the target field.
         attributesEditor.addAttribute(newConstantValueAttribute);
@@ -263,6 +296,8 @@ implements   AttributeVisitor
                                                    method,
                                                    new ParameterInfoAdder(targetClass, newMethodParametersAttribute));
 
+        newMethodParametersAttribute.setProcessingFlags(methodParametersAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newMethodParametersAttribute);
     }
@@ -279,9 +314,11 @@ implements   AttributeVisitor
                                         EMPTY_INTS);
 
         // Add the exceptions.
-        exceptionsAttribute.exceptionEntriesAccept((ProgramClass)clazz,
+        exceptionsAttribute.exceptionEntriesAccept(clazz,
                                                    new ExceptionAdder(targetClass,
                                                                       newExceptionsAttribute));
+
+        newExceptionsAttribute.setProcessingFlags(exceptionsAttribute.getProcessingFlags());
 
         // Add it to the target method.
         attributesEditor.addAttribute(newExceptionsAttribute);
@@ -305,6 +342,8 @@ implements   AttributeVisitor
                               codeAttribute.u2attributesCount > 0 ?
                                   new Attribute[codeAttribute.u2attributesCount] :
                                   EMPTY_ATTRIBUTES);
+
+        newCodeAttribute.setProcessingFlags(codeAttribute.getProcessingFlags());
 
         CodeAttributeComposer codeAttributeComposer = new CodeAttributeComposer();
 
@@ -385,6 +424,8 @@ implements   AttributeVisitor
                                         codeAttribute,
                                         new LineNumberInfoAdder(newLineNumberTableAttribute));
 
+        newLineNumberTableAttribute.setProcessingFlags(lineNumberTableAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newLineNumberTableAttribute);
     }
@@ -403,6 +444,8 @@ implements   AttributeVisitor
                                                          method,
                                                          codeAttribute,
                                                          new LocalVariableInfoAdder(targetClass, newLocalVariableTableAttribute));
+
+        newLocalVariableTableAttribute.setProcessingFlags(localVariableTableAttribute.getProcessingFlags());
 
         // Add it to the target.
         attributesEditor.addAttribute(newLocalVariableTableAttribute);
@@ -423,6 +466,8 @@ implements   AttributeVisitor
                                                              codeAttribute,
                                                              new LocalVariableTypeInfoAdder(targetClass, newLocalVariableTypeTableAttribute));
 
+        newLocalVariableTypeTableAttribute.setProcessingFlags(localVariableTypeTableAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newLocalVariableTypeTableAttribute);
     }
@@ -441,6 +486,8 @@ implements   AttributeVisitor
                                                              new AnnotationAdder(targetClass,
                                                                                  newAnnotationsAttribute));
 
+        newAnnotationsAttribute.setProcessingFlags(runtimeVisibleAnnotationsAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newAnnotationsAttribute);
     }
@@ -458,6 +505,8 @@ implements   AttributeVisitor
         runtimeInvisibleAnnotationsAttribute.annotationsAccept(clazz,
                                                                new AnnotationAdder(targetClass,
                                                                                    newAnnotationsAttribute));
+
+        newAnnotationsAttribute.setProcessingFlags(runtimeInvisibleAnnotationsAttribute.getProcessingFlags());
 
         // Add it to the target.
         attributesEditor.addAttribute(newAnnotationsAttribute);
@@ -484,6 +533,8 @@ implements   AttributeVisitor
                                                                       new AnnotationAdder(targetClass,
                                                                                           newParameterAnnotationsAttribute));
 
+        newParameterAnnotationsAttribute.setProcessingFlags(runtimeVisibleParameterAnnotationsAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newParameterAnnotationsAttribute);
     }
@@ -509,6 +560,8 @@ implements   AttributeVisitor
                                                                         new AnnotationAdder(targetClass,
                                                                                             newParameterAnnotationsAttribute));
 
+        newParameterAnnotationsAttribute.setProcessingFlags(runtimeInvisibleParameterAnnotationsAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newParameterAnnotationsAttribute);
     }
@@ -526,6 +579,8 @@ implements   AttributeVisitor
         runtimeVisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz,
                                                                      new TypeAnnotationAdder(targetClass,
                                                                                              newTypeAnnotationsAttribute));
+
+        newTypeAnnotationsAttribute.setProcessingFlags(runtimeVisibleTypeAnnotationsAttribute.getProcessingFlags());
 
         // Add it to the target.
         attributesEditor.addAttribute(newTypeAnnotationsAttribute);
@@ -545,6 +600,8 @@ implements   AttributeVisitor
                                                                        new TypeAnnotationAdder(targetClass,
                                                                                                newTypeAnnotationsAttribute));
 
+        newTypeAnnotationsAttribute.setProcessingFlags(runtimeInvisibleTypeAnnotationsAttribute.getProcessingFlags());
+
         // Add it to the target.
         attributesEditor.addAttribute(newTypeAnnotationsAttribute);
     }
@@ -562,6 +619,8 @@ implements   AttributeVisitor
                                                       new ElementValueAdder(targetClass,
                                                                             newAnnotationDefaultAttribute,
                                                                             false));
+
+        newAnnotationDefaultAttribute.setProcessingFlags(annotationDefaultAttribute.getProcessingFlags());
 
         // Add it to the target.
         attributesEditor.addAttribute(newAnnotationDefaultAttribute);

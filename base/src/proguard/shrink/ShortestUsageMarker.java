@@ -21,104 +21,39 @@
 package proguard.shrink;
 
 import proguard.classfile.*;
+import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
-
+import proguard.util.VisitorAccepter;
 
 /**
- * This ClassVisitor and MemberVisitor recursively marks all classes
- * and class elements that are being used. For each element, it finds the
- * shortest chain of dependencies.
+ * This SimpleUsageMarker keeps track of the shortest dependency chains.
  *
- * @see ClassShrinker
- *
- * @author Eric Lafortune
+ * @author Johan Leys
  */
-public class ShortestUsageMarker extends UsageMarker
+public class ShortestUsageMarker
+extends      SimpleUsageMarker
 {
-    private static final ShortestUsageMark INITIAL_MARK =
-        new ShortestUsageMark("is kept by a directive in the configuration.\n\n");
-
-
     // A field acting as a parameter to the visitor methods.
-    private ShortestUsageMark currentUsageMark = INITIAL_MARK;
-
-    // A utility object to check for recursive causes.
-    private final MyRecursiveCauseChecker recursiveCauseChecker = new MyRecursiveCauseChecker();
+    public ShortestUsageMark currentUsageMark;
 
 
-    // Overriding implementations for UsageMarker.
+    // A utility object to check for direct or indirect references.
+    private final MyReferenceChecker referenceChecker = new MyReferenceChecker();
 
-    protected void markProgramClassBody(ProgramClass programClass)
+
+    public void setCurrentUsageMark(ShortestUsageMark currentUsageMark)
     {
-        ShortestUsageMark previousUsageMark = currentUsageMark;
-
-        currentUsageMark = new ShortestUsageMark(getShortestUsageMark(programClass),
-                                                 "is extended by   ",
-                                                 10000,
-                                                 programClass);
-
-        super.markProgramClassBody(programClass);
-
-        currentUsageMark = previousUsageMark;
+        this.currentUsageMark = currentUsageMark;
     }
 
 
-    protected void markProgramFieldBody(ProgramClass programClass, ProgramField programField)
-    {
-        ShortestUsageMark previousUsageMark = currentUsageMark;
+    // Implementations for SimpleUsageMarker.
 
-        currentUsageMark = new ShortestUsageMark(getShortestUsageMark(programField),
-                                                 "is referenced by ",
-                                                 1,
-                                                 programClass,
-                                                 programField);
-
-        super.markProgramFieldBody(programClass, programField);
-
-        currentUsageMark = previousUsageMark;
-    }
-
-
-    protected void markProgramMethodBody(ProgramClass programClass, ProgramMethod programMethod)
-    {
-        ShortestUsageMark previousUsageMark = currentUsageMark;
-
-        currentUsageMark = new ShortestUsageMark(getShortestUsageMark(programMethod),
-                                                 "is invoked by    ",
-                                                 1,
-                                                 programClass,
-                                                 programMethod);
-
-        super.markProgramMethodBody(programClass, programMethod);
-
-        currentUsageMark = previousUsageMark;
-    }
-
-
-    protected void markMethodHierarchy(Clazz clazz, Method method)
-    {
-        ShortestUsageMark previousUsageMark = currentUsageMark;
-
-        currentUsageMark = new ShortestUsageMark(getShortestUsageMark(method),
-                                                 "implements       ",
-                                                 100,
-                                                 clazz,
-                                                 method);
-
-        super.markMethodHierarchy(clazz, method);
-
-        currentUsageMark = previousUsageMark;
-    }
-
-
-    // Small utility methods.
-
-    protected void markAsUsed(VisitorAccepter visitorAccepter)
+    public void markAsUsed(VisitorAccepter visitorAccepter)
     {
         Object visitorInfo = visitorAccepter.getVisitorInfo();
 
         ShortestUsageMark shortestUsageMark =
-            visitorInfo != null                           &&
             visitorInfo instanceof ShortestUsageMark      &&
             !((ShortestUsageMark)visitorInfo).isCertain() &&
             !currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) ?
@@ -129,20 +64,7 @@ public class ShortestUsageMarker extends UsageMarker
     }
 
 
-    protected boolean shouldBeMarkedAsUsed(VisitorAccepter visitorAccepter)
-    {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
-
-        return //!(visitorAccepter instanceof Clazz &&
-               //  isCausedBy(currentUsageMark, (Clazz)visitorAccepter)) &&
-               (visitorInfo == null                           ||
-               !(visitorInfo instanceof ShortestUsageMark)   ||
-               !((ShortestUsageMark)visitorInfo).isCertain() ||
-               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo));
-    }
-
-
-    protected boolean isUsed(VisitorAccepter visitorAccepter)
+    public boolean isUsed(VisitorAccepter visitorAccepter)
     {
         Object visitorInfo = visitorAccepter.getVisitorInfo();
 
@@ -152,24 +74,75 @@ public class ShortestUsageMarker extends UsageMarker
     }
 
 
-    protected void markAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsUsed(ProgramClass programClass)
+    {
+        Object visitorInfo = programClass.getVisitorInfo();
+
+        return visitorInfo == null                           ||
+               !(visitorInfo instanceof ShortestUsageMark)   ||
+               !((ShortestUsageMark)visitorInfo).isCertain() ||
+               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+               !referencesClassMember(currentUsageMark, programClass);
+    }
+
+
+    public boolean shouldBeMarkedAsUsed(ProgramClass  programClass,
+                                        ProgramMember programMember)
+    {
+        Object visitorInfo = programMember.getVisitorInfo();
+
+        return visitorInfo == null                           ||
+               !(visitorInfo instanceof ShortestUsageMark)   ||
+               !((ShortestUsageMark)visitorInfo).isCertain() ||
+               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+               !referencesClass(currentUsageMark, programClass);
+    }
+
+
+    public boolean shouldBeMarkedAsUsed(VisitorAccepter visitorAccepter)
+    {
+        Object visitorInfo = visitorAccepter.getVisitorInfo();
+
+        return visitorInfo == null                           ||
+               !(visitorInfo instanceof ShortestUsageMark)   ||
+               !((ShortestUsageMark)visitorInfo).isCertain() ||
+               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo);
+    }
+
+
+    public void markAsPossiblyUsed(VisitorAccepter visitorAccepter)
     {
         visitorAccepter.setVisitorInfo(new ShortestUsageMark(currentUsageMark, false));
     }
 
 
-    protected boolean shouldBeMarkedAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsPossiblyUsed(ProgramClass  programClass,
+                                                ProgramMember programMember)
+    {
+        Object visitorInfo = programMember.getVisitorInfo();
+
+        return visitorInfo == null                         ||
+               !(visitorInfo instanceof ShortestUsageMark) ||
+               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+               // Do not overwrite a certain mark with a shorter potential mark.
+               !((ShortestUsageMark)visitorInfo).isCertain()              &&
+               !referencesClass(currentUsageMark, programClass);
+    }
+
+
+    public boolean shouldBeMarkedAsPossiblyUsed(VisitorAccepter visitorAccepter)
     {
         Object visitorInfo = visitorAccepter.getVisitorInfo();
 
         return visitorInfo == null                         ||
                !(visitorInfo instanceof ShortestUsageMark) ||
-               (!((ShortestUsageMark)visitorInfo).isCertain() &&
-                currentUsageMark.isShorter((ShortestUsageMark)visitorInfo));
+               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+               // Do not overwrite a certain mark with a shorter potential mark.
+               !((ShortestUsageMark)visitorInfo).isCertain();
     }
 
 
-    protected boolean isPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean isPossiblyUsed(VisitorAccepter visitorAccepter)
     {
         Object visitorInfo = visitorAccepter.getVisitorInfo();
 
@@ -189,89 +162,119 @@ public class ShortestUsageMarker extends UsageMarker
 
     // Small utility methods.
 
-    private boolean isCausedBy(ShortestUsageMark shortestUsageMark,
-                               Clazz             clazz)
+    /**
+     * Returns whether the given usage mark references the given class,
+     * directly or indirectly.
+     */
+    private boolean referencesClass(ShortestUsageMark shortestUsageMark,
+                                    Clazz             clazz)
     {
-        return recursiveCauseChecker.check(shortestUsageMark, clazz);
+        return referenceChecker.referencesClass(shortestUsageMark, clazz);
     }
 
 
-    private class MyRecursiveCauseChecker implements ClassVisitor, MemberVisitor
+    /**
+     * Returns whether the given usage mark references a member of the given
+     * class, directly or indirectly.
+     */
+    private boolean referencesClassMember(ShortestUsageMark shortestUsageMark,
+                                          Clazz             clazz)
+    {
+        return referenceChecker.referencesClassMember(shortestUsageMark, clazz);
+    }
+
+
+    /**
+     * This class checks whether a given usage mark is caused by a given
+     * class or a member of a given class, directly or indirectly.
+     */
+    private class MyReferenceChecker
+    extends       SimplifiedVisitor
+    implements    ClassVisitor,
+                  MemberVisitor
     {
         private Clazz   checkClass;
-        private boolean isRecursing;
+        private boolean checkMember;
+        private boolean isReferencing;
 
 
-        public boolean check(ShortestUsageMark shortestUsageMark,
-                             Clazz             clazz)
+        public boolean referencesClass(ShortestUsageMark shortestUsageMark,
+                                       Clazz             clazz)
         {
-            checkClass  = clazz;
-            isRecursing = false;
+            checkClass    = clazz;
+            checkMember   = false;
+            isReferencing = false;
 
-            shortestUsageMark.acceptClassVisitor(this);
-            shortestUsageMark.acceptMemberVisitor(this);
+            checkReferenceFrom(shortestUsageMark);
 
-            return isRecursing;
+            return isReferencing;
         }
+
+
+        public boolean referencesClassMember(ShortestUsageMark shortestUsageMark,
+                                             Clazz             clazz)
+        {
+            checkClass    = clazz;
+            checkMember   = true;
+            isReferencing = false;
+
+            checkReferenceFrom(shortestUsageMark);
+
+            return isReferencing;
+        }
+
 
         // Implementations for ClassVisitor.
 
+        public void visitLibraryClass(LibraryClass libraryClass) {}
+
+
         public void visitProgramClass(ProgramClass programClass)
         {
-            checkCause(programClass);
-        }
-
-
-        public void visitLibraryClass(LibraryClass libraryClass)
-        {
-            checkCause(libraryClass);
+            checkReferenceFrom(programClass);
         }
 
 
         // Implementations for MemberVisitor.
 
+        public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField) {}
+        public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod) {}
+
+
         public void visitProgramField(ProgramClass programClass, ProgramField programField)
         {
-            checkCause(programField);
+            checkReferenceFrom(programField);
         }
 
 
         public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
         {
-            checkCause(programMethod);
+            checkReferenceFrom(programMethod);
         }
 
 
-        public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
+       // Small utility members.
+
+        private void checkReferenceFrom(VisitorAccepter visitorAccepter)
         {
-             checkCause(libraryField);
-       }
-
-
-        public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
-        {
-            checkCause(libraryMethod);
-        }
-
-
-        // Small utility methods.
-
-        private void checkCause(VisitorAccepter visitorAccepter)
-        {
-            if (ShortestUsageMarker.this.isUsed(visitorAccepter))
+            // Check the causing class or member, if still necessary.
+            if (!isReferencing)
             {
-                ShortestUsageMark shortestUsageMark = ShortestUsageMarker.this.getShortestUsageMark(visitorAccepter);
-
-                // Check the class of this mark, if any
-                isRecursing = shortestUsageMark.isCausedBy(checkClass);
-
-                // Check the causing class or method, if still necessary.
-                if (!isRecursing)
-                {
-                    shortestUsageMark.acceptClassVisitor(this);
-                    shortestUsageMark.acceptMemberVisitor(this);
-                }
+                checkReferenceFrom(getShortestUsageMark(visitorAccepter));
             }
+        }
+
+
+        private void checkReferenceFrom(ShortestUsageMark shortestUsageMark)
+        {
+            // Check whether the class is marked because of a member of the
+            // class, or the class member is marked because of the class.
+            isReferencing = checkMember ?
+                shortestUsageMark.isCausedByMember(checkClass) :
+                shortestUsageMark.isCausedBy(checkClass);
+
+            shortestUsageMark.acceptClassVisitor(this);
+            shortestUsageMark.acceptMemberVisitor(this);
         }
     }
 }

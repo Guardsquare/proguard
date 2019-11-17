@@ -314,6 +314,14 @@ implements   ClassVisitor,
     }
 
 
+    public void visitSourceDebugExtensionAttribute(Clazz clazz,
+                                                   SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        sourceDebugExtensionAttribute.u2attributeNameIndex =
+            remapConstantIndex(sourceDebugExtensionAttribute.u2attributeNameIndex);
+    }
+
+
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
         innerClassesAttribute.u2attributeNameIndex =

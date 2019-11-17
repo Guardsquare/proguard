@@ -101,30 +101,33 @@ implements   InstructionVisitor,
 
     private static final int LABEL_FLAG = 0x20000000;
 
-    private static final int BOOLEAN_STRING = 0x1;
-    private static final int CHAR_STRING    = 0x2;
-    private static final int INT_STRING     = 0x3;
-    private static final int LONG_STRING    = 0x4;
-    private static final int FLOAT_STRING   = 0x5;
-    private static final int DOUBLE_STRING  = 0x6;
-    private static final int STRING_STRING  = 0x7;
+    private static final int BOOLEAN_STRING = 0x8;
+    private static final int CHAR_STRING    = 0x9;
+    private static final int INT_STRING     = 0xa;
+    private static final int LONG_STRING    = 0xb;
+    private static final int FLOAT_STRING   = 0xc;
+    private static final int DOUBLE_STRING  = 0xd;
+    private static final int STRING_STRING  = 0xe;
 
     // Replacement constants that are derived from matched variables.
-    public static final int STRING_A_LENGTH  = 0x20000000;
-    public static final int BOOLEAN_A_STRING = 0x20000001;
-    public static final int CHAR_A_STRING    = 0x20000002;
-    public static final int INT_A_STRING     = 0x20000003;
-    public static final int LONG_A_STRING    = 0x20000004;
-    public static final int FLOAT_A_STRING   = 0x20000005;
-    public static final int DOUBLE_A_STRING  = 0x20000006;
-    public static final int STRING_A_STRING  = 0x20000007;
-    public static final int BOOLEAN_B_STRING = 0x20000010;
-    public static final int CHAR_B_STRING    = 0x20000020;
-    public static final int INT_B_STRING     = 0x20000030;
-    public static final int LONG_B_STRING    = 0x20000040;
-    public static final int FLOAT_B_STRING   = 0x20000050;
-    public static final int DOUBLE_B_STRING  = 0x20000060;
-    public static final int STRING_B_STRING  = 0x20000070;
+    public static final int STRING_A_LENGTH     = 0x20000000;
+    public static final int CLASS_A_NAME        = 0x20000001;
+    public static final int CLASS_A_SIMPLE_NAME = 0x20000002;
+
+    public static final int BOOLEAN_A_STRING    = 0x20000000 | BOOLEAN_STRING;
+    public static final int CHAR_A_STRING       = 0x20000000 | CHAR_STRING;
+    public static final int INT_A_STRING        = 0x20000000 | INT_STRING;
+    public static final int LONG_A_STRING       = 0x20000000 | LONG_STRING;
+    public static final int FLOAT_A_STRING      = 0x20000000 | FLOAT_STRING;
+    public static final int DOUBLE_A_STRING     = 0x20000000 | DOUBLE_STRING;
+    public static final int STRING_A_STRING     = 0x20000000 | STRING_STRING;
+    public static final int BOOLEAN_B_STRING    = 0x20000000 | (BOOLEAN_STRING<< 4);
+    public static final int CHAR_B_STRING       = 0x20000000 | (CHAR_STRING   << 4);
+    public static final int INT_B_STRING        = 0x20000000 | (INT_STRING    << 4);
+    public static final int LONG_B_STRING       = 0x20000000 | (LONG_STRING   << 4);
+    public static final int FLOAT_B_STRING      = 0x20000000 | (FLOAT_STRING  << 4);
+    public static final int DOUBLE_B_STRING     = 0x20000000 | (DOUBLE_STRING << 4);
+    public static final int STRING_B_STRING     = 0x20000000 | (STRING_STRING << 4);
 
     private static int labelCounter;
 
@@ -432,7 +435,6 @@ implements   InstructionVisitor,
                                            instructionSequenceMatcher.matchedArgument(tableSwitchInstruction.lowCase),
                                            instructionSequenceMatcher.matchedArgument(tableSwitchInstruction.highCase),
                                            matchedJumpOffsets(offset, tableSwitchInstruction.jumpOffsets));
-
         }
 
 
@@ -511,10 +513,26 @@ implements   InstructionVisitor,
         if (constantIndex >= BOOLEAN_A_STRING &&
             constantIndex <= (STRING_A_STRING  | STRING_B_STRING))
         {
-            // Create a new string constant and return its index.
+            // Create a new concatenated string constant and return its index.
             return new ConstantPoolEditor(programClass).addStringConstant(
                 argumentAsString(programClass, constantIndex & 0xf, A) +
                 argumentAsString(programClass, (constantIndex >>> 4) & 0xf, B),
+                null,
+                null);
+        }
+        else if (constantIndex == CLASS_A_NAME)
+        {
+            // Create a new name string constant and return its index.
+            return new ConstantPoolEditor(programClass).addStringConstant(
+                ClassUtil.externalClassName(programClass.getClassName(instructionSequenceMatcher.matchedConstantIndex(A))),
+                null,
+                null);
+        }
+        else if (constantIndex == CLASS_A_SIMPLE_NAME)
+        {
+            // Create a new simple name string constant and return its index.
+            return new ConstantPoolEditor(programClass).addStringConstant(
+                ClassUtil.internalSimpleClassName(programClass.getClassName(instructionSequenceMatcher.matchedConstantIndex(A))),
                 null,
                 null);
         }

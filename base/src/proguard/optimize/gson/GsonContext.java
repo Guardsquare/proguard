@@ -34,10 +34,7 @@ import proguard.classfile.visitor.*;
  */
 public class GsonContext
 {
-    public ClassPool           filteredClasses;
     public ClassPool           gsonDomainClassPool;
-    public ClassPool           instanceCreatorClassPool;
-    public ClassPool           typeAdapterClassPool;
     public GsonRuntimeSettings gsonRuntimeSettings;
 
 
@@ -46,29 +43,30 @@ public class GsonContext
      * Notes will be printed to the given printer if provided.
      *
      * @param programClassPool the program class pool
-     * @param notePrinter      the optional note printer to which notes
+     * @param libraryClassPool the library class pool
+     * @param warningPrinter   the optional warning printer to which notes
      *                         can be printed.
      */
     public void setupFor(ClassPool      programClassPool,
-                         WarningPrinter notePrinter)
+                         ClassPool      libraryClassPool,
+                         WarningPrinter warningPrinter)
     {
         // Only apply remaining optimizations to classes that are not part of
         // Gson itself.
-        filteredClasses = new ClassPool();
+        ClassPool filteredClasses = new ClassPool();
         programClassPool.classesAccept(
             new ClassNameFilter("!com/google/gson/**",
                                 new ClassPoolFiller(filteredClasses)));
 
         // Find all GsonBuilder invocations.
         gsonRuntimeSettings      = new GsonRuntimeSettings();
-        instanceCreatorClassPool = new ClassPool();
-        typeAdapterClassPool     = new ClassPool();
         GsonBuilderInvocationFinder gsonBuilderInvocationFinder =
             new GsonBuilderInvocationFinder(
                 programClassPool,
+                libraryClassPool,
                 gsonRuntimeSettings,
-                new ClassPoolFiller(instanceCreatorClassPool),
-                new ClassPoolFiller(typeAdapterClassPool));
+                new ClassPoolFiller(gsonRuntimeSettings.instanceCreatorClassPool),
+                new ClassPoolFiller(gsonRuntimeSettings.typeAdapterClassPool));
 
         filteredClasses.classesAccept(
             new AllMethodVisitor(
@@ -78,9 +76,9 @@ public class GsonContext
         // Find all Gson invocations.
         gsonDomainClassPool = new ClassPool();
         GsonDomainClassFinder domainClassFinder  =
-            new GsonDomainClassFinder(typeAdapterClassPool,
+            new GsonDomainClassFinder(gsonRuntimeSettings,
                                       gsonDomainClassPool,
-                                      notePrinter);
+                                      warningPrinter);
 
         filteredClasses.accept(
             new AllClassVisitor(
@@ -89,11 +87,13 @@ public class GsonContext
             new AllInstructionVisitor(
             new MultiInstructionVisitor(
                 new GsonSerializationInvocationFinder(programClassPool,
+                                                      libraryClassPool,
                                                       domainClassFinder,
-                                                      notePrinter),
+                                                      warningPrinter),
                 new GsonDeserializationInvocationFinder(programClassPool,
+                                                        libraryClassPool,
                                                         domainClassFinder,
-                                                        notePrinter)))))));
+                                                        warningPrinter)))))));
     }
 
 }

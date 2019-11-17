@@ -107,6 +107,16 @@ implements   AttributeVisitor
     }
 
 
+    public void visitSourceDebugExtensionAttribute(Clazz                         clazz,
+                                                   SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        if (optionalAttributeVisitor != null)
+        {
+            optionalAttributeVisitor.visitSourceDebugExtensionAttribute(clazz, sourceDebugExtensionAttribute);
+        }
+    }
+
+
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
         if (optionalAttributeVisitor != null)

@@ -22,10 +22,12 @@ package proguard.classfile.util;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
-import proguard.classfile.instruction.visitor.InstructionVisitor;
+import proguard.classfile.instruction.visitor.*;
 
 import java.util.Arrays;
 
@@ -820,20 +822,72 @@ implements   InstructionVisitor,
      * after the pattern has been successfully fully matched with the
      * sequence. Subclasses may override this method to implement
      * additional constraints on the matched sequences.
-     *
-     * @param clazz
-     * @param method
-     * @param codeAttribute
-     * @param offset
-     * @param instruction
-     * @return
      */
     protected boolean finalMatch(Clazz         clazz,
                                  Method        method,
                                  CodeAttribute codeAttribute,
                                  int           offset,
-                                 Instruction   instruction   )
+                                 Instruction   instruction)
     {
         return true;
+    }
+
+
+    /**
+     * Small sample application that illustrates the use of this class.
+     */
+    public static void main(String[] args)
+    {
+        // Create a class with a method with code.
+        SimplifiedClassEditor editor =
+            new SimplifiedClassEditor(ClassConstants.ACC_PUBLIC,
+                                      "Test",
+                                      0);
+
+        ProgramClass programClass = editor.getProgramClass();
+
+        editor.addMethod(ClassConstants.ACC_PUBLIC,
+                         "getAnswer",
+                         "()I",
+                         0,
+                         new InstructionSequenceBuilder(programClass)
+                             .nop()
+                             .iconst_2()
+                             .bipush(40)
+                             .iadd()
+                             .ireturn()
+                             .instructions());
+
+        // Create a matcher.
+        InstructionSequenceBuilder builder =
+            new InstructionSequenceBuilder();
+
+        builder
+            .iconst(InstructionSequenceMatcher.A) // Matches iconst/bipush/sipush.
+            .iconst(InstructionSequenceMatcher.B) // Matches iconst/bipush/sipush.
+            .iadd();
+
+        final InstructionSequenceMatcher matcher =
+            new InstructionSequenceMatcher(builder.constants(),
+                                           builder.instructions());
+
+        // Find the match in the code.
+        class MatchPrinter extends SimplifiedVisitor implements InstructionVisitor
+        {
+            public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
+            {
+                System.out.println(instruction.toString(offset));
+                instruction.accept(clazz, method, codeAttribute, offset, matcher);
+                if (matcher.isMatching())
+                {
+                    System.out.println("  -> matching sequence starting at ["+matcher.matchedInstructionOffset(0)+"]");
+                }
+            }
+        };
+
+        programClass.methodsAccept(
+            new AllAttributeVisitor(
+            new AllInstructionVisitor(
+            new MatchPrinter())));
     }
 }

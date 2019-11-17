@@ -20,16 +20,17 @@
  */
 package proguard.classfile.attribute.annotation;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.visitor.ClassVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of an annotation.
  *
  * @author Eric Lafortune
  */
-public class Annotation implements VisitorAccepter
+public class Annotation extends SimpleVisitorAccepter
 {
     public int            u2typeIndex;
     public int            u2elementValuesCount;
@@ -43,12 +44,6 @@ public class Annotation implements VisitorAccepter
      * References to primitive types are ignored.
      */
     public Clazz[] referencedClasses;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an uninitialized Annotation.
@@ -78,7 +73,6 @@ public class Annotation implements VisitorAccepter
     {
         return clazz.getString(u2typeIndex);
     }
-
 
 
     /**
@@ -118,6 +112,15 @@ public class Annotation implements VisitorAccepter
 
 
     /**
+     * Applies the given visitor to the specified element value pair.
+     */
+    public void elementValueAccept(Clazz clazz, int index, ElementValueVisitor elementValueVisitor)
+    {
+        elementValues[index].accept(clazz, this, elementValueVisitor);
+    }
+
+
+    /**
      * Applies the given visitor to all element value pairs.
      */
     public void elementValuesAccept(Clazz clazz, ElementValueVisitor elementValueVisitor)
@@ -126,18 +129,5 @@ public class Annotation implements VisitorAccepter
         {
             elementValues[index].accept(clazz, this, elementValueVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

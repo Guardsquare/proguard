@@ -25,7 +25,6 @@ import proguard.util.*;
 
 import java.util.List;
 
-
 /**
  * This <code>MemberVisitor</code> delegates its visits to another given
  * <code>MemberVisitor</code>, but only when the visited member
@@ -41,10 +40,10 @@ public class MemberNameFilter implements MemberVisitor
 
     /**
      * Creates a new MemberNameFilter.
-     * @param regularExpression      the regular expression against which member
-     *                               names will be matched.
-     * @param memberVisitor          the <code>MemberVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression the regular expression against which member
+     *                          names will be matched.
+     * @param memberVisitor     the <code>MemberVisitor</code> to which
+     *                          visits will be delegated.
      */
     public MemberNameFilter(String        regularExpression,
                             MemberVisitor memberVisitor)
@@ -55,19 +54,18 @@ public class MemberNameFilter implements MemberVisitor
 
     /**
      * Creates a new MemberNameFilter.
-     * @param regularExpression      the regular expression against which member
-     *                               names will be matched.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
-     * @param memberVisitor          the <code>MemberVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression the regular expression against which member
+     *                          names will be matched.
+     * @param wildcardManager   an optional scope for StringMatcher instances
+     *                          that match wildcards.
+     * @param memberVisitor     the <code>MemberVisitor</code> to which
+     *                          visits will be delegated.
      */
-    public MemberNameFilter(String        regularExpression,
-                            List          variableStringMatchers,
-                            MemberVisitor memberVisitor)
+    public MemberNameFilter(String          regularExpression,
+                            WildcardManager wildcardManager,
+                            MemberVisitor   memberVisitor)
     {
-        this(new ListParser(new NameParser(variableStringMatchers)).parse(regularExpression),
+        this(new ListParser(new NameParser(wildcardManager)).parse(regularExpression),
              memberVisitor);
     }
 

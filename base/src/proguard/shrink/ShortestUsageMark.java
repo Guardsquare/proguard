@@ -145,6 +145,26 @@ final class ShortestUsageMark
 
 
     /**
+     * Returns whether this is mark is caused by a mmeber of the given class.
+     */
+    public boolean isCausedByMember(Clazz clazz)
+    {
+        return clazz.equals(this.clazz) &&
+               member != null;
+    }
+
+
+    /**
+     * Returns whether this is mark is caused by the given class member.
+     */
+    public boolean isCausedBy(Clazz clazz, Member member)
+    {
+        return clazz.equals(this.clazz) &&
+               member.equals(this.member);
+    }
+
+
+    /**
      * Applies the given class visitor to this mark's class, if any,
      * and if this mark doesn't have a member.
      */

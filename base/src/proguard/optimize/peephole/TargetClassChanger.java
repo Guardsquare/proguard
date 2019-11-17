@@ -95,7 +95,7 @@ implements   ClassVisitor,
 
         if (delete != null)
         {
-            new InterfaceDeleter(delete).visitProgramClass(programClass);
+            new InterfaceDeleter(delete, false).visitProgramClass(programClass);
         }
 
         // Is the class being retargeted?

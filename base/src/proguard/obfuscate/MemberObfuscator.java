@@ -23,6 +23,7 @@ package proguard.obfuscate;
 import proguard.classfile.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
+import proguard.util.VisitorAccepter;
 
 import java.util.*;
 

@@ -20,18 +20,22 @@
  */
 package proguard;
 
-import proguard.classfile.*;
+import proguard.classfile.ClassPool;
 import proguard.classfile.util.ClassUtil;
 import proguard.configuration.ConfigurationLogger;
 import proguard.io.*;
+import proguard.resources.file.ResourceFilePool;
 import proguard.util.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 /**
- * This class writes the output class files.
+ * This class writes the output class files and resource files, packaged in
+ * jar files, etc, if required.
  *
  * @author Eric Lafortune
  */
@@ -54,15 +58,41 @@ public class OutputWriter
      * Writes the given class pool to class files, based on the current
      * configuration.
      */
-    public void execute(ClassPool                              programClassPool,
-                        MultiValueMap<String, String>          injectedClassNameMap) throws IOException
+    public void execute(ClassPool             programClassPool,
+                        ResourceFilePool      resourceFilePool,
+                        ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
         ClassPath programJars = configuration.programJars;
 
-        // Create a data entry writer factory with common archival parameters.
+        // Construct a filter for files that shouldn't be compressed.
+        StringMatcher uncompressedFilter =
+            configuration.dontCompress == null ? null :
+                new ListParser(new FileNameParser()).parse(configuration.dontCompress);
+
+        // Get the private key from the key store.
+        KeyStore.PrivateKeyEntry[] privateKeyEntries =
+            retrievePrivateKeys(configuration);
+
+        // Convert the current time into DOS date and time.
+        Date currentDate = new Date();
+        int modificationTime =
+            (currentDate.getYear()  - 80) << 25 |
+            (currentDate.getMonth() + 1 ) << 21 |
+             currentDate.getDate()        << 16 |
+             currentDate.getHours()       << 11 |
+             currentDate.getMinutes()     << 5  |
+             currentDate.getSeconds()     >> 1;
+
+        // Create a main data entry writer factory for all nested archives.
         DataEntryWriterFactory dataEntryWriterFactory =
             new DataEntryWriterFactory(programClassPool,
-                                       injectedClassNameMap);
+                                       resourceFilePool,
+                                       modificationTime,
+                                       uncompressedFilter,
+                                       configuration.zipAlign,
+                                       configuration.android, //resourceInfo.pageAlignNativeLibs,
+                                       configuration.obfuscate,
+                                       privateKeyEntries);
 
         int firstInputIndex = 0;
         int lastInputIndex  = 0;
@@ -88,6 +118,7 @@ public class OutputWriter
                     // Write the processed input entries to the output entries.
                     writeOutput(dataEntryWriterFactory,
                                 programClassPool,
+                                extraDataEntryNameMap,
                                 programJars,
                                 firstInputIndex,
                                 lastInputIndex + 1,
@@ -102,16 +133,141 @@ public class OutputWriter
 
 
     /**
+     * Gets the private keys from the key stores, based on the given configuration.
+     */
+    private KeyStore.PrivateKeyEntry[] retrievePrivateKeys(Configuration configuration)
+    throws IOException
+    {
+        // Check the signing variables.
+        List<File>   keyStoreFiles     = configuration.keyStores;
+        List<String> keyStorePasswords = configuration.keyStorePasswords;
+        List<String> keyAliases        = configuration.keyAliases;
+        List<String> keyPasswords      = configuration.keyPasswords;
+
+        // Don't sign if not all of the signing parameters have been
+        // specified.
+        if (keyStoreFiles     == null ||
+            keyStorePasswords == null ||
+            keyAliases        == null ||
+            keyPasswords      == null)
+        {
+            // Print a note if any of the signing parameters have been
+            // specified.
+            if ((keyStoreFiles     != null ||
+                 keyStorePasswords != null ||
+                 keyAliases        != null ||
+                 keyPasswords      != null) &&
+                (configuration.note == null ||
+                 !configuration.note.isEmpty()))
+            {
+                StringBuffer missing   = new StringBuffer();
+                StringBuffer specified = new StringBuffer();
+
+                (keyStoreFiles     == null ? missing : specified).append("a key store file, ");
+                (keyStorePasswords == null ? missing : specified).append("a key store password, ");
+                (keyAliases        == null ? missing : specified).append("a key alias, ");
+                (keyPasswords      == null ? missing : specified).append("a key password, ");
+
+                System.out.println("Note: you've specified "+specified.toString());
+                System.out.println("      but not "+missing.substring(0, missing.length()-2)+".");
+                System.out.println("      You should specify the missing parameters to sign the output jars.");
+            }
+
+            return null;
+        }
+
+       try
+       {
+           // We'll interpret the configuration in a flexible way,
+           // e.g. with a single key store and multiple keys, or vice versa.
+           int keyCount = Math.max(keyStoreFiles.size(), keyAliases.size());
+
+           KeyStore.PrivateKeyEntry[] privateKeys =
+               new KeyStore.PrivateKeyEntry[keyCount];
+
+           Map certificates = new HashMap(keyCount);
+
+           for (int index = 0; index < keyCount; index++)
+           {
+               // Create the private key
+               File   keyStoreFile     = keyStoreFiles    .get(Math.min(index, keyStoreFiles    .size()-1));
+               String keyStorePassword = keyStorePasswords.get(Math.min(index, keyStorePasswords.size()-1));
+               String keyAlias         = keyAliases       .get(Math.min(index, keyAliases       .size()-1));
+               String keyPassword      = keyPasswords     .get(Math.min(index, keyPasswords     .size()-1));
+
+               KeyStore.PrivateKeyEntry privateKeyEntry =
+                   retrievePrivateKey(keyStoreFile,
+                                      keyStorePassword,
+                                      keyAlias,
+                                      keyPassword);
+
+               // Check if the certificate accidentally is a duplicate,
+               // to avoid basic configuration errors.
+               X509Certificate certificate    = (X509Certificate)privateKeyEntry.getCertificate();
+               Integer         duplicateIndex = (Integer)certificates.put(certificate, Integer.valueOf(index));
+               if (duplicateIndex != null)
+               {
+                   throw new IllegalArgumentException("Duplicate specified signing certificates #"+(duplicateIndex.intValue()+1)+" and #"+(index+1)+" out of "+keyCount+" ["+certificate.getSubjectDN().getName()+"]");
+               }
+
+               // Add the private key to the list.
+               privateKeys[index] = privateKeyEntry;
+           }
+
+           return privateKeys;
+       }
+       catch (Exception e)
+       {
+           throw (IOException)new IOException("Can't sign jar ("+e.getMessage()+")", e);
+        }
+    }
+
+
+    private KeyStore.PrivateKeyEntry retrievePrivateKey(File   keyStoreFile,
+                                                        String keyStorePassword,
+                                                        String keyAlias,
+                                                        String keyPassword)
+    throws IOException, GeneralSecurityException
+    {
+        // Get the private key from the key store.
+        FileInputStream keyStoreInputStream =
+            new FileInputStream(keyStoreFile);
+
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(keyStoreInputStream, keyStorePassword.toCharArray());
+        keyStoreInputStream.close();
+
+        KeyStore.ProtectionParameter protectionParameter =
+            new KeyStore.PasswordProtection(keyPassword.toCharArray());
+
+        KeyStore.PrivateKeyEntry entry =
+            (KeyStore.PrivateKeyEntry)keyStore.getEntry(keyAlias, protectionParameter);
+
+        if (entry == null)
+        {
+            throw new GeneralSecurityException("Can't find key alias '"+keyAlias+"' in key store ["+keyStoreFile.getPath()+"]");
+        }
+
+        return entry;
+    }
+
+
+    /**
      * Transfers the specified input jars to the specified output jars.
      */
     private void writeOutput(DataEntryWriterFactory dataEntryWriterFactory,
                              ClassPool              programClassPool,
+                             ExtraDataEntryNameMap  extraDataEntryNameMap,
                              ClassPath              classPath,
                              int                    fromInputIndex,
                              int                    fromOutputIndex,
                              int                    toOutputIndex)
     throws IOException
     {
+        // Debugging tip: your can wrap data entry writers and readers with
+        //     new DebugDataEntryWriter("...", ....)
+        //     new DebugDataEntryReader("...", ....)
+
         try
         {
             // Construct the writer that can write apks, jars, wars, ears, zips,
@@ -119,7 +275,8 @@ public class OutputWriter
             DataEntryWriter writer =
                 dataEntryWriterFactory.createDataEntryWriter(classPath,
                                                              fromOutputIndex,
-                                                             toOutputIndex);
+                                                             toOutputIndex,
+                                                             null);
 
             if (configuration.addConfigurationDebugging)
             {
@@ -170,7 +327,7 @@ public class OutputWriter
 
                 // Add the overall filter for adapting resource file contents.
                 resourceRewriter =
-                    new NameFilter(configuration.adaptResourceFileContents,
+                    new NameFilteredDataEntryReader(configuration.adaptResourceFileContents,
                         adaptingContentWriter,
                         resourceRewriter);
             }
@@ -185,6 +342,10 @@ public class OutputWriter
             reader =
                 new ClassFilter(new IdleRewriter(writer),
                                 reader);
+
+            // Inject any attached data entries.
+            reader = new ExtraDataEntryReader(extraDataEntryNameMap,
+                                              reader);
 
             // Go over the specified input entries and write their processed
             // versions.
@@ -211,11 +372,12 @@ public class OutputWriter
     private DataEntryWriter renameResourceFiles(ClassPool       programClassPool,
                                                 DataEntryWriter dataEntryWriter)
     {
-        Map packagePrefixMap = createPackagePrefixMap(programClassPool);
+        StringFunction packagePrefixFunction =
+            new MapStringFunction(createPackagePrefixMap(programClassPool));
 
         return
             new NameFilteredDataEntryWriter(configuration.adaptResourceFileNames,
-                new RenamedDataEntryWriter(programClassPool, packagePrefixMap, dataEntryWriter),
+                new RenamedDataEntryWriter(packagePrefixFunction, dataEntryWriter),
                 dataEntryWriter);
     }
 
@@ -235,7 +397,7 @@ public class OutputWriter
 
         // Filter between the various general resource files.
         return
-            new NameFilter("META-INF/MANIFEST.MF,META-INF/*.SF",
+            new NameFilteredDataEntryReader("META-INF/MANIFEST.MF,META-INF/*.SF",
                 new ManifestRewriter(programClassPool, charset, writer),
             new DataEntryRewriter(programClassPool, charset, writer));
     }
@@ -254,11 +416,12 @@ public class OutputWriter
         // Wrap the directory copier with a filter and a data entry renamer.
         if (configuration.keepDirectories != null)
         {
-            Map packagePrefixMap = createPackagePrefixMap(programClassPool);
+            StringFunction packagePrefixFunction =
+                new MapStringFunction(createPackagePrefixMap(programClassPool));
 
             directoryRewriter =
-                new NameFilter(configuration.keepDirectories,
-                new RenamedDataEntryReader(packagePrefixMap,
+                new NameFilteredDataEntryReader(configuration.keepDirectories,
+                new RenamedDataEntryReader(packagePrefixFunction,
                                            directoryCopier,
                                            directoryCopier));
         }

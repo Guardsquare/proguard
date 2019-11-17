@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class NameParser implements StringParser
 {
-    private List variableStringMatchers;
+    private final WildcardManager wildcardManager;
 
 
     /**
@@ -53,13 +53,12 @@ public class NameParser implements StringParser
      * Creates a new NameParser that supports references to earlier
      * wildcards.
      *
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
+     * @param wildcardManager an optional scope for StringMatcher instances
+     *                        that match wildcards.
      */
-    public NameParser(List variableStringMatchers)
+    public NameParser(WildcardManager wildcardManager)
     {
-        this.variableStringMatchers = variableStringMatchers;
+        this.wildcardManager = wildcardManager;
     }
 
 
@@ -73,23 +72,29 @@ public class NameParser implements StringParser
         // Look for wildcards.
         for (index = 0; index < regularExpression.length(); index++)
         {
-            int wildCardIndex;
-
             // Is there a '*' wildcard?
             if (regularExpression.charAt(index) == '*')
             {
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               null,
                                               0,
                                               Integer.MAX_VALUE,
-                                              settableMatcher));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
@@ -99,103 +104,51 @@ public class NameParser implements StringParser
                 SettableMatcher settableMatcher = new SettableMatcher();
 
                 // Create a matcher for the wildcard.
-                nextMatcher = rememberVariableStringMatcher(
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               null,
                                               1,
                                               1,
-                                              settableMatcher));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
 
                 // Recursively create a matcher for the rest of the string.
                 settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '<n>' wildcard?
-            else if ((wildCardIndex = wildCardIndex(regularExpression, index)) > 0)
+            else if (wildcardManager != null)
             {
-                // Find the index of the closing bracket again.
-                int closingIndex = regularExpression.indexOf('>', index + 1);
+                int wildCardIndex = wildcardManager.wildCardIndex(regularExpression, index);
+                if (wildCardIndex >= 0)
+                {
+                    // Find the index of the closing bracket again.
+                    int closingIndex = regularExpression.indexOf('>', index + 1);
 
-                // Retrieve the specified variable string matcher and
-                // recursively create a matcher for the rest of the string.
-                nextMatcher =
-                    new MatchedStringMatcher(retrieveVariableStringMatcher(wildCardIndex - 1),
-                                             parse(regularExpression.substring(closingIndex + 1)));
-                break;
+                    // Retrieve the specified variable string matcher and
+                    // recursively create a matcher for the rest of the string.
+                    nextMatcher = wildcardManager.createMatchedStringMatcher(
+                        wildCardIndex,
+                        parse(regularExpression.substring(closingIndex + 1)));
+
+                    break;
+                }
             }
         }
 
         // Return a matcher for the fixed first part of the regular expression,
         // if any, and the remainder.
         return index != 0 ?
-            (StringMatcher)new FixedStringMatcher(regularExpression.substring(0, index), nextMatcher) :
-            (StringMatcher)nextMatcher;
-    }
-
-
-    // Small utility methods.
-
-    /**
-     * Parses a reference to a wildcard at the given index, if any.
-     * Returns the 1-based index, or 0 otherwise.
-     */
-    private int wildCardIndex(String string, int index)
-    throws IllegalArgumentException
-    {
-        if (variableStringMatchers == null ||
-            string.charAt(index) != '<')
-        {
-            return 0;
-        }
-
-        int closingBracketIndex = string.indexOf('>', index);
-        if (closingBracketIndex < 0)
-        {
-            throw new IllegalArgumentException("Missing closing angular bracket");
-        }
-
-        String argumentBetweenBrackets = string.substring(index+1, closingBracketIndex);
-
-        try
-        {
-            int wildcardIndex = Integer.parseInt(argumentBetweenBrackets);
-            if (wildcardIndex < 1 ||
-                wildcardIndex > variableStringMatchers.size())
-            {
-                throw new IllegalArgumentException("Invalid reference to wildcard ("+wildcardIndex+", must lie between 1 and "+variableStringMatchers.size()+")");
-            }
-
-            return wildcardIndex;
-        }
-        catch (NumberFormatException e)
-        {
-            return 0;
-        }
-    }
-
-
-    /**
-     * Adds the given variable string matcher to the list of string matchers.
-     */
-    private VariableStringMatcher rememberVariableStringMatcher(VariableStringMatcher variableStringMatcher)
-    {
-        if (variableStringMatchers != null)
-        {
-            variableStringMatchers.add(variableStringMatcher);
-        }
-
-        return variableStringMatcher;
-    }
-
-
-    /**
-     * Retrieves the specified variable string matcher from the list of string
-     * matchers.
-     */
-    private VariableStringMatcher retrieveVariableStringMatcher(int index)
-    {
-        return (VariableStringMatcher)variableStringMatchers.get(index);
+            new FixedStringMatcher(regularExpression.substring(0, index), nextMatcher) :
+            nextMatcher;
     }
 
 

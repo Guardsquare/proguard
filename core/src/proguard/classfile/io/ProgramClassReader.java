@@ -35,6 +35,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.io.RuntimeDataInput;
 
 import java.io.DataInput;
 
@@ -71,6 +72,7 @@ implements   ClassVisitor,
              ElementValueVisitor
 {
     private final RuntimeDataInput dataInput;
+    private final boolean          ignoreStackMapAttributes;
 
 
     /**
@@ -78,7 +80,19 @@ implements   ClassVisitor,
      */
     public ProgramClassReader(DataInput dataInput)
     {
+        this(dataInput, false);
+    }
+
+
+    /**
+     * Creates a new ProgramClassReader for reading from the given DataInput,
+     * optionally treating stack map attributes as unknown attributes.
+     */
+    public ProgramClassReader(DataInput dataInput,
+                              boolean   ignoreStackMapAttributes)
+    {
         this.dataInput                = new RuntimeDataInput(dataInput);
+        this.ignoreStackMapAttributes = ignoreStackMapAttributes;
     }
 
 
@@ -428,6 +442,7 @@ implements   ClassVisitor,
         // Read the unknown information.
         byte[] info = new byte[unknownAttribute.u4attributeLength];
         dataInput.readFully(info);
+
         unknownAttribute.info = info;
     }
 
@@ -456,6 +471,15 @@ implements   ClassVisitor,
     public void visitSourceDirAttribute(Clazz clazz, SourceDirAttribute sourceDirAttribute)
     {
         sourceDirAttribute.u2sourceDirIndex = dataInput.readUnsignedShort();
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        // Read the source debug extension information.
+        byte[] info = new byte[sourceDebugExtensionAttribute.u4attributeLength];
+        dataInput.readFully(info);
+        sourceDebugExtensionAttribute.info = info;
     }
 
 
@@ -1228,36 +1252,37 @@ implements   ClassVisitor,
         String attributeName     = clazz.getString(u2attributeNameIndex);
 
         Attribute attribute =
-            attributeName.equals(ClassConstants.ATTR_BootstrapMethods)                           ? (Attribute)new BootstrapMethodsAttribute()                     :
-            attributeName.equals(ClassConstants.ATTR_SourceFile)                                 ? (Attribute)new SourceFileAttribute()                           :
-            attributeName.equals(ClassConstants.ATTR_SourceDir)                                  ? (Attribute)new SourceDirAttribute()                            :
-            attributeName.equals(ClassConstants.ATTR_InnerClasses)                               ? (Attribute)new InnerClassesAttribute()                         :
-            attributeName.equals(ClassConstants.ATTR_EnclosingMethod)                            ? (Attribute)new EnclosingMethodAttribute()                      :
-            attributeName.equals(ClassConstants.ATTR_NestHost)                                   ? (Attribute)new NestHostAttribute()                             :
-            attributeName.equals(ClassConstants.ATTR_NestMembers)                                ? (Attribute)new NestMembersAttribute()                          :
-            attributeName.equals(ClassConstants.ATTR_Deprecated)                                 ? (Attribute)new DeprecatedAttribute()                           :
-            attributeName.equals(ClassConstants.ATTR_Synthetic)                                  ? (Attribute)new SyntheticAttribute()                            :
-            attributeName.equals(ClassConstants.ATTR_Signature)                                  ? (Attribute)new SignatureAttribute()                            :
-            attributeName.equals(ClassConstants.ATTR_ConstantValue)                              ? (Attribute)new ConstantValueAttribute()                        :
-            attributeName.equals(ClassConstants.ATTR_MethodParameters)                           ? (Attribute)new MethodParametersAttribute()                     :
-            attributeName.equals(ClassConstants.ATTR_Exceptions)                                 ? (Attribute)new ExceptionsAttribute()                           :
-            attributeName.equals(ClassConstants.ATTR_Code)                                       ? (Attribute)new CodeAttribute()                                 :
-            attributeName.equals(ClassConstants.ATTR_StackMap)                                   ? (Attribute)new StackMapAttribute()                             :
-            attributeName.equals(ClassConstants.ATTR_StackMapTable)                              ? (Attribute)new StackMapTableAttribute()                        :
-            attributeName.equals(ClassConstants.ATTR_LineNumberTable)                            ? (Attribute)new LineNumberTableAttribute()                      :
-            attributeName.equals(ClassConstants.ATTR_LocalVariableTable)                         ? (Attribute)new LocalVariableTableAttribute()                   :
-            attributeName.equals(ClassConstants.ATTR_LocalVariableTypeTable)                     ? (Attribute)new LocalVariableTypeTableAttribute()               :
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleAnnotations)                  ? (Attribute)new RuntimeVisibleAnnotationsAttribute()            :
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleAnnotations)                ? (Attribute)new RuntimeInvisibleAnnotationsAttribute()          :
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)         ? (Attribute)new RuntimeVisibleParameterAnnotationsAttribute()   :
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations)       ? (Attribute)new RuntimeInvisibleParameterAnnotationsAttribute() :
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleTypeAnnotations)              ? (Attribute)new RuntimeVisibleTypeAnnotationsAttribute()        :
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations)            ? (Attribute)new RuntimeInvisibleTypeAnnotationsAttribute()      :
-            attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                          ? (Attribute)new AnnotationDefaultAttribute()                    :
-            attributeName.equals(ClassConstants.ATTR_Module)                                     ? (Attribute)new ModuleAttribute()                               :
-            attributeName.equals(ClassConstants.ATTR_ModuleMainClass)                            ? (Attribute)new ModuleMainClassAttribute()                      :
-            attributeName.equals(ClassConstants.ATTR_ModulePackages)                             ? (Attribute)new ModulePackagesAttribute()                       :
-                                                                                                   (Attribute)new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
+            attributeName.equals(ClassConstants.ATTR_BootstrapMethods)                           ? new BootstrapMethodsAttribute()                               :
+            attributeName.equals(ClassConstants.ATTR_SourceFile)                                 ? new SourceFileAttribute()                                     :
+            attributeName.equals(ClassConstants.ATTR_SourceDir)                                  ? new SourceDirAttribute()                                      :
+            attributeName.equals(ClassConstants.ATTR_SourceDebugExtension)                       ? new SourceDebugExtensionAttribute(0, u4attributeLength, null) :
+            attributeName.equals(ClassConstants.ATTR_InnerClasses)                               ? new InnerClassesAttribute()                                   :
+            attributeName.equals(ClassConstants.ATTR_EnclosingMethod)                            ? new EnclosingMethodAttribute()                                :
+            attributeName.equals(ClassConstants.ATTR_NestHost)                                   ? new NestHostAttribute()                                       :
+            attributeName.equals(ClassConstants.ATTR_NestMembers)                                ? new NestMembersAttribute()                                    :
+            attributeName.equals(ClassConstants.ATTR_Deprecated)                                 ? new DeprecatedAttribute()                                     :
+            attributeName.equals(ClassConstants.ATTR_Synthetic)                                  ? new SyntheticAttribute()                                      :
+            attributeName.equals(ClassConstants.ATTR_Signature)                                  ? new SignatureAttribute()                                      :
+            attributeName.equals(ClassConstants.ATTR_ConstantValue)                              ? new ConstantValueAttribute()                                  :
+            attributeName.equals(ClassConstants.ATTR_MethodParameters)                           ? new MethodParametersAttribute()                               :
+            attributeName.equals(ClassConstants.ATTR_Exceptions)                                 ? new ExceptionsAttribute()                                     :
+            attributeName.equals(ClassConstants.ATTR_Code)                                       ? new CodeAttribute()                                           :
+            attributeName.equals(ClassConstants.ATTR_StackMap)      && !ignoreStackMapAttributes ? new StackMapAttribute()                                       :
+            attributeName.equals(ClassConstants.ATTR_StackMapTable) && !ignoreStackMapAttributes ? new StackMapTableAttribute()                                  :
+            attributeName.equals(ClassConstants.ATTR_LineNumberTable)                            ? new LineNumberTableAttribute()                                :
+            attributeName.equals(ClassConstants.ATTR_LocalVariableTable)                         ? new LocalVariableTableAttribute()                             :
+            attributeName.equals(ClassConstants.ATTR_LocalVariableTypeTable)                     ? new LocalVariableTypeTableAttribute()                         :
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleAnnotations)                  ? new RuntimeVisibleAnnotationsAttribute()                      :
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleAnnotations)                ? new RuntimeInvisibleAnnotationsAttribute()                    :
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)         ? new RuntimeVisibleParameterAnnotationsAttribute()             :
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations)       ? new RuntimeInvisibleParameterAnnotationsAttribute()           :
+            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleTypeAnnotations)              ? new RuntimeVisibleTypeAnnotationsAttribute()                  :
+            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations)            ? new RuntimeInvisibleTypeAnnotationsAttribute()                :
+            attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                          ? new AnnotationDefaultAttribute()                              :
+            attributeName.equals(ClassConstants.ATTR_Module)                                     ? new ModuleAttribute()                                         :
+            attributeName.equals(ClassConstants.ATTR_ModuleMainClass)                            ? new ModuleMainClassAttribute()                                :
+            attributeName.equals(ClassConstants.ATTR_ModulePackages)                             ? new ModulePackagesAttribute()                                 :
+                                                                                                   new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
         attribute.u2attributeNameIndex = u2attributeNameIndex;
 
         return attribute;
@@ -1269,13 +1294,13 @@ implements   ClassVisitor,
         int u1tag = dataInput.readUnsignedByte();
 
         return
-            u1tag < StackMapFrame.SAME_ONE_FRAME           ? (StackMapFrame)new SameZeroFrame(u1tag) :
-            u1tag < StackMapFrame.SAME_ONE_FRAME_EXTENDED  ? (StackMapFrame)new SameOneFrame(u1tag)  :
-            u1tag < StackMapFrame.LESS_ZERO_FRAME          ? (StackMapFrame)new SameOneFrame(u1tag)  :
-            u1tag < StackMapFrame.SAME_ZERO_FRAME_EXTENDED ? (StackMapFrame)new LessZeroFrame(u1tag) :
-            u1tag < StackMapFrame.MORE_ZERO_FRAME          ? (StackMapFrame)new SameZeroFrame(u1tag) :
-            u1tag < StackMapFrame.FULL_FRAME               ? (StackMapFrame)new MoreZeroFrame(u1tag) :
-                                                             (StackMapFrame)new FullFrame();
+            u1tag < StackMapFrame.SAME_ONE_FRAME           ? new SameZeroFrame(u1tag) :
+            u1tag < StackMapFrame.SAME_ONE_FRAME_EXTENDED  ? new SameOneFrame(u1tag)  :
+            u1tag < StackMapFrame.LESS_ZERO_FRAME          ? new SameOneFrame(u1tag)  :
+            u1tag < StackMapFrame.SAME_ZERO_FRAME_EXTENDED ? new LessZeroFrame(u1tag) :
+            u1tag < StackMapFrame.MORE_ZERO_FRAME          ? new SameZeroFrame(u1tag) :
+            u1tag < StackMapFrame.FULL_FRAME               ? new MoreZeroFrame(u1tag) :
+                                                             new FullFrame();
     }
 
 
@@ -1349,7 +1374,6 @@ implements   ClassVisitor,
             case ClassConstants.TYPE_LONG:
             case ClassConstants.TYPE_DOUBLE:
             case ClassConstants.ELEMENT_VALUE_STRING_CONSTANT: return new ConstantElementValue((char)u1tag);
-
             case ClassConstants.ELEMENT_VALUE_ENUM_CONSTANT:   return new EnumConstantElementValue();
             case ClassConstants.ELEMENT_VALUE_CLASS:           return new ClassElementValue();
             case ClassConstants.ELEMENT_VALUE_ANNOTATION:      return new AnnotationElementValue();

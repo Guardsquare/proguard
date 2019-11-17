@@ -138,6 +138,15 @@ implements   AttributeVisitor
         checkTime(clazz, sourceDirAttribute, startTime);
     }
 
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        long startTime = startTime();
+
+        attributeVisitor.visitSourceDebugExtensionAttribute(clazz, sourceDebugExtensionAttribute);
+
+        checkTime(clazz, sourceDebugExtensionAttribute, startTime);
+    }
+
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
         long startTime = startTime();

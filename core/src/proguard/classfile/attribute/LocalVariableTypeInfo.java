@@ -20,15 +20,18 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.visitor.ClassVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of an Local Variable table entry.
  *
  * @author Eric Lafortune
  */
-public class LocalVariableTypeInfo implements VisitorAccepter, Comparable
+public class LocalVariableTypeInfo
+extends      SimpleVisitorAccepter
+implements   Comparable
 {
     public int u2startPC;
     public int u2length;
@@ -45,11 +48,6 @@ public class LocalVariableTypeInfo implements VisitorAccepter, Comparable
      */
     public Clazz[] referencedClasses;
 
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an uninitialized LocalVariableTypeInfo.
@@ -62,11 +60,11 @@ public class LocalVariableTypeInfo implements VisitorAccepter, Comparable
     /**
      * Creates an initialized LocalVariableTypeInfo.
      */
-    public LocalVariableTypeInfo(int   u2startPC,
-                                 int   u2length,
-                                 int   u2nameIndex,
-                                 int   u2signatureIndex,
-                                 int   u2index)
+    public LocalVariableTypeInfo(int u2startPC,
+                                 int u2length,
+                                 int u2nameIndex,
+                                 int u2signatureIndex,
+                                 int u2index)
     {
         this.u2startPC        = u2startPC;
         this.u2length         = u2length;
@@ -110,19 +108,6 @@ public class LocalVariableTypeInfo implements VisitorAccepter, Comparable
                 }
             }
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 
 

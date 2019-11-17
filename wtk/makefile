@@ -6,7 +6,7 @@ endif
 
 MAIN_CLASS = proguard/wtk/ProGuardObfuscator
 WTK_JAR    = $(WTK_HOME)/wtklib/kenv.zip
-CLASSPATH  = ../core/$(OUT):$(WTK_JAR)
+CLASSPATH  = ../base/$(OUT):../core/$(OUT):$(WTK_JAR)
 TARGET     = proguard
 UPDATE_JAR = true
 

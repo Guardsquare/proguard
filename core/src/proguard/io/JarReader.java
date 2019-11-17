@@ -21,7 +21,8 @@
 package proguard.io;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.*;
+import java.util.Enumeration;
 import java.util.zip.*;
 
 /**
@@ -58,37 +59,70 @@ public class JarReader implements DataEntryReader
 
     // Implementation for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry) throws IOException
     {
-        if (jmod)
+        // Can we parse the jar entries more robustly from a file?
+        if (dataEntry instanceof FileDataEntry)
         {
-            // Eat the magic bytes
-            dataEntry.getInputStream().read(new byte[4]);
-        }
+            // Read the data entry using its file.
+            FileDataEntry fileDataEntry = (FileDataEntry)dataEntry;
 
-        ZipInputStream zipInputStream = new ZipInputStream(dataEntry.getInputStream(), Charset.forName("UTF-8"));
+            ZipFile zipFile = new ZipFile(fileDataEntry.getFile(), StandardCharsets.UTF_8);
 
-        try
-        {
-            // Get all entries from the input jar.
-            while (true)
+            try
             {
-                // Can we get another entry?
-                ZipEntry zipEntry = zipInputStream.getNextEntry();
-                if (zipEntry == null)
-                {
-                    break;
-                }
+                Enumeration entries = zipFile.entries();
 
-                // Delegate the actual reading to the data entry reader.
-                dataEntryReader.read(new ZipDataEntry(dataEntry,
-                                                      zipEntry,
-                                                      zipInputStream));
+                // Get all entries from the input jar.
+                while (entries.hasMoreElements())
+                {
+                    ZipEntry zipEntry = (ZipEntry)entries.nextElement();
+
+                    // Delegate the actual reading to the data entry reader.
+                    dataEntryReader.read(new ZipFileDataEntry(dataEntry,
+                                                              zipEntry,
+                                                              zipFile));
+                }
+            }
+            finally
+            {
+                zipFile.close();
             }
         }
-        finally
+        else
         {
-            dataEntry.closeInputStream();
+            if (jmod)
+            {
+                // Eat the magic bytes
+                dataEntry.getInputStream().read(new byte[4]);
+            }
+
+            // Read the data entry using its stream.
+            ZipInputStream zipInputStream = new ZipInputStream(dataEntry.getInputStream(), StandardCharsets.UTF_8);
+
+            try
+            {
+                // Get all entries from the input jar.
+                while (true)
+                {
+                    // Can we get another entry?
+                    ZipEntry zipEntry = zipInputStream.getNextEntry();
+                    if (zipEntry == null)
+                    {
+                        break;
+                    }
+
+                    // Delegate the actual reading to the data entry reader.
+                    dataEntryReader.read(new ZipDataEntry(dataEntry,
+                                                          zipEntry,
+                                                          zipInputStream));
+                }
+            }
+            finally
+            {
+                dataEntry.closeInputStream();
+            }
         }
     }
 }

@@ -50,6 +50,7 @@ public class ZipDataEntry implements DataEntry
 
     // Implementations for DataEntry.
 
+    @Override
     public String getName()
     {
         // Get the right separators.
@@ -65,24 +66,29 @@ public class ZipDataEntry implements DataEntry
     }
 
 
+    @Override
     public String getOriginalName()
     {
         return getName();
     }
 
 
+    @Override
     public long getSize()
     {
-        return zipEntry.getSize();
+        // Try to get some estimate of the size.
+        return Math.max(zipEntry.getSize(), zipEntry.getCompressedSize());
     }
 
 
+    @Override
     public boolean isDirectory()
     {
         return zipEntry.isDirectory();
     }
 
 
+    @Override
     public InputStream getInputStream() throws IOException
     {
         if (bufferedInputStream == null)
@@ -94,6 +100,7 @@ public class ZipDataEntry implements DataEntry
     }
 
 
+    @Override
     public void closeInputStream() throws IOException
     {
         zipInputStream.closeEntry();
@@ -102,6 +109,7 @@ public class ZipDataEntry implements DataEntry
     }
 
 
+    @Override
     public DataEntry getParent()
     {
         return parent;
@@ -110,6 +118,7 @@ public class ZipDataEntry implements DataEntry
 
     // Implementations for Object.
 
+    @Override
     public String toString()
     {
         return parent.toString() + ':' + getName();

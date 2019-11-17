@@ -75,6 +75,7 @@ public class FilteredDataEntryReader implements DataEntryReader
 
     // Implementations for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry)
     throws IOException
     {

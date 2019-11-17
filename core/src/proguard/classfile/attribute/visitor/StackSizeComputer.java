@@ -43,7 +43,7 @@ implements   AttributeVisitor,
     //*
     private static final boolean DEBUG = false;
     /*/
-    private static       boolean DEBUG = true;
+    private static       boolean DEBUG = System.getProperty("ssc") != null;
     //*/
 
 

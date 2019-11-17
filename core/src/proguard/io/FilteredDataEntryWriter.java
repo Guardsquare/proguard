@@ -74,6 +74,7 @@ public class FilteredDataEntryWriter implements DataEntryWriter
 
     // Implementations for DataEntryWriter.
 
+    @Override
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
         // Get the right data entry writer.
@@ -87,6 +88,7 @@ public class FilteredDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public boolean sameOutputStream(DataEntry dataEntry1,
                                     DataEntry dataEntry2)
     throws IOException
@@ -99,6 +101,7 @@ public class FilteredDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public OutputStream createOutputStream(DataEntry dataEntry) throws IOException
     {
         // Get the right data entry writer.
@@ -113,6 +116,7 @@ public class FilteredDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public void close() throws IOException
     {
         if (acceptedDataEntryWriter != null)
@@ -129,6 +133,7 @@ public class FilteredDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public void println(PrintWriter pw, String prefix)
     {
         pw.println(prefix + "FilteredDataEntryWriter (filter = "+dataEntryFilter+")");

@@ -32,11 +32,11 @@ import proguard.classfile.constant.PrimitiveArrayConstant;
 public interface PrimitiveArrayConstantVisitor
 {
     public void visitBooleanArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, boolean[] values);
-    public void visitByteArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, byte[] values);
-    public void visitCharArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, char[] values);
-    public void visitShortArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, short[] values);
-    public void visitIntArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int[] values);
-    public void visitFloatArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, float[] values);
-    public void visitLongArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, long[] values);
-    public void visitDoubleArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, double[] values);
+    public void visitByteArrayConstant(   Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, byte[]    values);
+    public void visitCharArrayConstant(   Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, char[]    values);
+    public void visitShortArrayConstant(  Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, short[]   values);
+    public void visitIntArrayConstant(    Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, int[]     values);
+    public void visitFloatArrayConstant(  Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, float[]   values);
+    public void visitLongArrayConstant(   Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, long[]    values);
+    public void visitDoubleArrayConstant( Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant, double[]  values);
 }

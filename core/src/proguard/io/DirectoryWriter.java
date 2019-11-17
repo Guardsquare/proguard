@@ -47,6 +47,7 @@ public class DirectoryWriter implements DataEntryWriter
 
     // Implementations for DataEntryWriter.
 
+    @Override
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
         File directory = getFile(dataEntry);
@@ -60,14 +61,15 @@ public class DirectoryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public boolean sameOutputStream(DataEntry dataEntry1,
-                                    DataEntry dataEntry2)
-    throws IOException
+                                    DataEntry dataEntry2) throws IOException
     {
         return getFile(dataEntry1).equals(getFile(dataEntry2));
     }
 
 
+    @Override
     public OutputStream createOutputStream(DataEntry dataEntry) throws IOException
     {
         File file = getFile(dataEntry);
@@ -87,11 +89,13 @@ public class DirectoryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public void close() throws IOException
     {
     }
 
 
+    @Override
     public void println(PrintWriter pw, String prefix)
     {
         pw.println(prefix + "DirectoryWriter (base directory ["+baseDirectory+"])");

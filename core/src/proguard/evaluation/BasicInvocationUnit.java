@@ -21,7 +21,6 @@
 package proguard.evaluation;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.constant.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.MemberVisitor;

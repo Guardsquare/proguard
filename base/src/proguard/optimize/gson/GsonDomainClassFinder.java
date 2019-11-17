@@ -26,6 +26,7 @@ import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.util.ProcessingFlags;
 
 import java.util.Arrays;
 
@@ -40,37 +41,39 @@ public class GsonDomainClassFinder
 extends      SimplifiedVisitor
 implements   ClassVisitor
 {
-    private static final boolean DEBUG = false;
+    //*
+    public static final boolean DEBUG = false;
+    /*/
+    public static       boolean DEBUG = System.getProperty("gdcf") != null;
+    //*/
 
-    private final ClassPool                     typeAdapterClassPool;
+
+    private final GsonRuntimeSettings           gsonRuntimeSettings;
     private final ClassPool                     gsonDomainClassPool;
-    private final WarningPrinter                notePrinter;
-    private final LocalOrAnonymousClassChecker  localOrAnonymousClassChecker =
-        new LocalOrAnonymousClassChecker();
-    private final TypeParameterClassChecker     typeParameterClassChecker    =
-        new TypeParameterClassChecker();
-    private final DuplicateJsonFieldNameChecker duplicateFieldNameChecker    =
-        new DuplicateJsonFieldNameChecker();
+    private final WarningPrinter                warningPrinter;
+
+    private final ClassPool                     unoptimizedClassPool         = new ClassPool();
+    private final LocalOrAnonymousClassChecker  localOrAnonymousClassChecker = new LocalOrAnonymousClassChecker();
+    private final TypeParameterClassChecker     typeParameterClassChecker    = new TypeParameterClassChecker();
+    private final DuplicateJsonFieldNameChecker duplicateFieldNameChecker    = new DuplicateJsonFieldNameChecker();
 
 
     /**
      * Creates a new GsonDomainClassFinder.
      *
-     * @param typeAdapterClassPool the class pool containing the classes for
-     *                             which a custom Gson type adapter is
-     *                             registered.
-     * @param gsonDomainClassPool  the class pool to which the found domain
-     *                             classes are added.
-     * @param notePrinter          used to print notes about domain classes that
-     *                             can not be handled by the Gson optimization.
+     * @param gsonRuntimeSettings keeps track of all GsonBuilder invocations.
+     * @param gsonDomainClassPool the class pool to which the found domain
+     *                            classes are added.
+     * @param warningPrinter      used to print notes about domain classes that
+     *                            can not be handled by the Gson optimization.
      */
-    public GsonDomainClassFinder(ClassPool      typeAdapterClassPool,
-                                 ClassPool      gsonDomainClassPool,
-                                 WarningPrinter notePrinter)
+    public GsonDomainClassFinder(GsonRuntimeSettings gsonRuntimeSettings,
+                                 ClassPool           gsonDomainClassPool,
+                                 WarningPrinter      warningPrinter)
     {
-        this.typeAdapterClassPool = typeAdapterClassPool;
-        this.gsonDomainClassPool  = gsonDomainClassPool;
-        this.notePrinter          = notePrinter;
+        this.gsonRuntimeSettings = gsonRuntimeSettings;
+        this.gsonDomainClassPool = gsonDomainClassPool;
+        this.warningPrinter      = warningPrinter;
     }
 
 
@@ -79,7 +82,26 @@ implements   ClassVisitor
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (gsonDomainClassPool.getClass(programClass.getName()) == null)
+        // For classes that are Gson "seeds" (they immediately occur in Gson
+        // invocations or are a field of another Gson domain class), we also
+        // want to visit the super and sub classes in the class hierarchy.
+        handleDomainClass(programClass, new HierarchyClassVisitor());
+    }
+
+
+    @Override
+    public void visitLibraryClass(LibraryClass libraryClass)
+    {
+        // Library classes can not be optimized.
+    }
+
+
+    // Utility methods.
+
+    private void handleDomainClass(ProgramClass programClass, ClassVisitor hierarchyClassVisitor)
+    {
+        if (gsonDomainClassPool.getClass(programClass.getName())  == null &&
+            unoptimizedClassPool.getClass(programClass.getName()) == null)
         {
             // Local or anonymous classes are excluded by GSON.
             programClass.accept(localOrAnonymousClassChecker);
@@ -92,8 +114,8 @@ implements   ClassVisitor
 
             if(librarySuperClassCount(programClass) != 0)
             {
-                note(programClass.getName(),
-                     "Note: " + ClassUtil.externalClassName(programClass.getName() +
+                note(programClass,
+                     "Warning: " + ClassUtil.externalClassName(programClass.getName() +
                      " can not be optimized for GSON because" +
                      " it is or inherits from a library class."));
                 return;
@@ -101,8 +123,8 @@ implements   ClassVisitor
 
             if(gsonSuperClassCount(programClass) != 0)
             {
-                note(programClass.getName(),
-                     "Note: " + ClassUtil.externalClassName(programClass.getName() +
+                note(programClass,
+                     "Warning: " + ClassUtil.externalClassName(programClass.getName() +
                      " can not be optimized for GSON because" +
                      " it is or inherits from a GSON API class."));
                 return;
@@ -120,8 +142,8 @@ implements   ClassVisitor
                                          typeParameterClassChecker);
             if (typeParameterClassChecker.hasFieldWithTypeParameter)
             {
-                note(programClass.getName(),
-                     "Note: " + ClassUtil.externalClassName(programClass.getName() +
+                note(programClass,
+                     "Warning: " + ClassUtil.externalClassName(programClass.getName() +
                      " can not be optimized for GSON because" +
                      " it uses generic type variables."));
                 return;
@@ -137,8 +159,8 @@ implements   ClassVisitor
                                          duplicateFieldNameChecker);
             if (duplicateFieldNameChecker.hasDuplicateJsonFieldNames)
             {
-                note(programClass.getName(),
-                     "Note: " + ClassUtil.externalClassName(programClass.getName() +
+                note(programClass,
+                     "Warning: " + ClassUtil.externalClassName(programClass.getName() +
                      " can not be optimized for GSON because" +
                      " it contains duplicate field names in its JSON representation."));
                 return;
@@ -150,12 +172,14 @@ implements   ClassVisitor
                                          true,
                                          false,
                                          false,
-                                         new ClassPresenceFilter(typeAdapterClassPool,
-                                             typeAdapterClassCounter, null));
+                                         new ClassPresenceFilter(
+                                             gsonRuntimeSettings.typeAdapterClassPool,
+                                             typeAdapterClassCounter,
+                                             null));
             if (typeAdapterClassCounter.getCount() > 0)
             {
-                note(programClass.getName(),
-                     "Note: " + ClassUtil.externalClassName(programClass.getName() +
+                note(programClass,
+                     "Warning: " + ClassUtil.externalClassName(programClass.getName() +
                      " can not be optimized for GSON because" +
                      " a custom type adapter is registered for it."));
                 return;
@@ -174,8 +198,8 @@ implements   ClassVisitor
                                              annotationFinder)))));
             if (annotationFinder.found)
             {
-                note(programClass.getName(),
-                     "Note: " + ClassUtil.externalClassName(programClass.getName() +
+                note(programClass,
+                     "Warning: " + ClassUtil.externalClassName(programClass.getName() +
                      " can not be optimized for GSON because" +
                      " it contains a JsonAdapter annotation."));
                 return;
@@ -194,31 +218,38 @@ implements   ClassVisitor
 
                 // Recursively visit the fields of the domain class and consider
                 // their classes as domain classes too.
+                int requiredUnsetAccessFlags = ClassConstants.ACC_SYNTHETIC;
+                if (!gsonRuntimeSettings.excludeFieldsWithModifiers)
+                {
+                    // If fields are not excluded based on modifiers, we assume
+                    // the default behavior of Gson, which is to exclude
+                    // transient and static fields.
+                    requiredUnsetAccessFlags |= ClassConstants.ACC_TRANSIENT |
+                                                ClassConstants.ACC_STATIC;
+                }
                 programClass.fieldsAccept(
-                    new MemberAccessFilter(0, ClassConstants.ACC_SYNTHETIC,
+                    new MemberAccessFilter(0, requiredUnsetAccessFlags,
                     new MultiMemberVisitor(
                         new MemberDescriptorReferencedClassVisitor(this),
                         new AllAttributeVisitor(
                         new SignatureAttributeReferencedClassVisitor(this)))));
             }
 
-            // Consider super and sub classes as domain classes too.
-            programClass.hierarchyAccept(false,
-                                         true,
-                                         false,
-                                         true,
-                                         this);
+            // Consider super and sub classes as domain classes too, except for
+            // sub classes of enum types that are generated by the compiler
+            // but don't contain any additional fields serialized by Gson.
+            if (hierarchyClassVisitor != null &&
+                (programClass.getAccessFlags() & ClassConstants.ACC_ENUM) == 0)
+            {
+                programClass.hierarchyAccept(false,
+                                             true,
+                                             false,
+                                             true,
+                                             hierarchyClassVisitor);
+            }
         }
     }
 
-    @Override
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        // Library classes can not be optimized.
-    }
-
-
-    // Utility methods.
 
     private int librarySuperClassCount(ProgramClass programClass)
     {
@@ -247,12 +278,58 @@ implements   ClassVisitor
     }
 
 
-    private void note(String className, String note)
+    private void note(ProgramClass programClass, String note)
     {
-        if (notePrinter != null)
+        if (warningPrinter != null && !isKept(programClass))
         {
-            notePrinter.print(className, note);
-            notePrinter.print(className, "      You should consider keeping this class and its fields.");
+            warningPrinter.print(programClass.getName(), note);
+            warningPrinter.print(programClass.getName(),
+                                 "      You should consider including dexguard-gson.pro " +
+                                 "or keeping this class and its members in your configuration " +
+                                 "as follows:");
+            warningPrinter.print(programClass.getName(),
+                                 "      -keep class " +
+                                 ClassUtil.externalClassName(programClass.getName()) + " { *; }");
+        }
+
+        unoptimizedClassPool.addClass(programClass);
+    }
+
+
+    private boolean isKept(ProgramClass programClass)
+    {
+        if((programClass.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0 &&
+           (programClass.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0){
+            UnkeptFieldFinder unkeptFieldFinder = new UnkeptFieldFinder();
+            programClass.fieldsAccept(unkeptFieldFinder);
+            return !unkeptFieldFinder.found;
+        }
+
+        return false;
+    }
+
+
+    private class HierarchyClassVisitor
+    extends       SimplifiedVisitor
+    implements    ClassVisitor
+    {
+
+        // Implementations for ClassVisitor.
+
+        @Override
+        public void visitProgramClass(ProgramClass programClass)
+        {
+            // For classes that are only a subclass or a superclass of a Gson
+            // "seed", we don't want to visit the super and sub classes in the
+            // class hierarchy.
+            handleDomainClass(programClass, null);
+        }
+
+
+        @Override
+        public void visitLibraryClass(LibraryClass libraryClass)
+        {
+            // Library classes can not be optimized.
         }
     }
 
@@ -263,6 +340,8 @@ implements   ClassVisitor
     {
         private boolean found;
 
+        // Implementations for AnnotationVisitor.
+
         @Override
         public void visitAnnotation(Clazz clazz, Annotation annotation)
         {
@@ -270,4 +349,27 @@ implements   ClassVisitor
         }
     }
 
+
+    private class UnkeptFieldFinder
+    extends       SimplifiedVisitor
+    implements    MemberVisitor
+    {
+        private boolean found;
+
+        // Implementations for MemberVisitor.
+
+        @Override
+        public void visitProgramField(ProgramClass programClass, ProgramField programField)
+        {
+            found = found || !isKept(programField);
+        }
+
+        // Utility methods.
+
+        private boolean isKept(ProgramField programField)
+        {
+            return (programField.getProcessingFlags() & ProcessingFlags.DONT_SHRINK)    != 0 &&
+                   (programField.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0;
+        }
+    }
 }

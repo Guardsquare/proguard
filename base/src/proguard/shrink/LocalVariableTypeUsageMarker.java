@@ -33,7 +33,7 @@ import proguard.classfile.visitor.ClassVisitor;
  * classes, in the LocalVariableTable and LocalVariableTypeTable attributes that
  * it visits.
  *
- * @see UsageMarker
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
@@ -45,7 +45,7 @@ implements   AttributeVisitor,
              ClassVisitor,
              ConstantVisitor
 {
-    private final UsageMarker usageMarker;
+    private final ClassUsageMarker classUsageMarker;
 
     // Fields acting as return values for several visitor methods.
     private boolean tableUsed;
@@ -54,12 +54,12 @@ implements   AttributeVisitor,
 
     /**
      * Creates a new LocalVariableTypeUsageMarker.
-     * @param usageMarker the usage marker that is used to mark the classes
-     *                    and class members.
+     * @param classUsageMarker the marker to mark and check the classes and
+     *                         class members.
      */
-    public LocalVariableTypeUsageMarker(UsageMarker usageMarker)
+    public LocalVariableTypeUsageMarker(ClassUsageMarker classUsageMarker)
     {
-        this.usageMarker = usageMarker;
+        this.classUsageMarker = classUsageMarker;
     }
 
 
@@ -77,7 +77,7 @@ implements   AttributeVisitor,
         // Mark the table if any of the entries is marked.
         if (tableUsed)
         {
-            usageMarker.markAsUsed(localVariableTableAttribute);
+            classUsageMarker.markAsUsed(localVariableTableAttribute);
 
             markConstant(clazz, localVariableTableAttribute.u2attributeNameIndex);
         }
@@ -93,7 +93,7 @@ implements   AttributeVisitor,
         // Mark the table if any of the entries is marked.
         if (tableUsed)
         {
-            usageMarker.markAsUsed(localVariableTypeTableAttribute);
+            classUsageMarker.markAsUsed(localVariableTypeTableAttribute);
 
             markConstant(clazz, localVariableTypeTableAttribute.u2attributeNameIndex);
         }
@@ -111,7 +111,7 @@ implements   AttributeVisitor,
         if (variableInfoUsed)
         {
             // We got a positive used flag, so the local variable info is useful.
-            usageMarker.markAsUsed(localVariableInfo);
+            classUsageMarker.markAsUsed(localVariableInfo);
 
             markConstant(clazz, localVariableInfo.u2nameIndex);
             markConstant(clazz, localVariableInfo.u2descriptorIndex);
@@ -132,7 +132,7 @@ implements   AttributeVisitor,
         if (variableInfoUsed)
         {
             // We got a positive used flag, so the local variable info is useful.
-            usageMarker.markAsUsed(localVariableTypeInfo);
+            classUsageMarker.markAsUsed(localVariableTypeInfo);
 
             markConstant(clazz, localVariableTypeInfo.u2nameIndex);
             markConstant(clazz, localVariableTypeInfo.u2signatureIndex);
@@ -150,7 +150,7 @@ implements   AttributeVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         // Don't keep the local variable info if one of its classes is not used.
-        if (!usageMarker.isUsed(programClass))
+        if (!classUsageMarker.isUsed(programClass))
         {
             variableInfoUsed = false;
         }
@@ -161,7 +161,7 @@ implements   AttributeVisitor,
 
     public void visitAnyConstant(Clazz clazz, Constant constant)
     {
-        usageMarker.markAsUsed(constant);
+        classUsageMarker.markAsUsed(constant);
     }
 
 

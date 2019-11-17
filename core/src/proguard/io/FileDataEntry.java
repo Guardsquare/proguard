@@ -57,6 +57,7 @@ public class FileDataEntry implements DataEntry
 
     // Implementations for DataEntry.
 
+    @Override
     public String getName()
     {
         // Chop the directory name from the file name and get the right separators.
@@ -80,24 +81,28 @@ public class FileDataEntry implements DataEntry
     }
 
 
+    @Override
     public String getOriginalName()
     {
         return getName();
     }
 
 
+    @Override
     public long getSize()
     {
         return file.length();
     }
 
 
+    @Override
     public boolean isDirectory()
     {
         return file.isDirectory();
     }
 
 
+    @Override
     public InputStream getInputStream() throws IOException
     {
         if (inputStream == null)
@@ -109,6 +114,7 @@ public class FileDataEntry implements DataEntry
     }
 
 
+    @Override
     public void closeInputStream() throws IOException
     {
         inputStream.close();
@@ -116,6 +122,7 @@ public class FileDataEntry implements DataEntry
     }
 
 
+    @Override
     public DataEntry getParent()
     {
         return null;
@@ -124,6 +131,7 @@ public class FileDataEntry implements DataEntry
 
     // Implementations for Object.
 
+    @Override
     public String toString()
     {
         return getName();

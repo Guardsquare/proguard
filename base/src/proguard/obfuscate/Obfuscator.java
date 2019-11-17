@@ -160,7 +160,7 @@ public class Obfuscator
         {
             programClassPool.classesAccept(
                 new AllMethodVisitor(
-                new MemberNameFilter(
+                new NewMemberNameFilter(
                 new AllAttributeVisitor(true,
                 new ParameterNameMarker(attributeUsageMarker)))));
         }

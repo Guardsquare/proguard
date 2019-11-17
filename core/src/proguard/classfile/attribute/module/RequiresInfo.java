@@ -22,23 +22,18 @@ package proguard.classfile.attribute.module;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of a Requires entry in a Module attribute.
  *
  * @author Joachim Vandersmissen
  */
-public class RequiresInfo implements VisitorAccepter
+public class RequiresInfo extends SimpleVisitorAccepter
 {
     public int u2requiresIndex;
     public int u2requiresFlags;
     public int u2requiresVersionIndex;
-
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
 
 
     /**
@@ -84,19 +79,5 @@ public class RequiresInfo implements VisitorAccepter
         {
             clazz.constantPoolEntryAccept(u2requiresVersionIndex, constantVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

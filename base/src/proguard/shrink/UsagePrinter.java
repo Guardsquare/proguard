@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * This ClassVisitor prints out the classes and class members that have been
  * marked as being used (or not used).
  *
- * @see UsageMarker
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
@@ -43,12 +43,12 @@ implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor
 {
-    private final UsageMarker usageMarker;
-    private final boolean     printUnusedItems;
-    private final PrintWriter pw;
+    private final SimpleUsageMarker usageMarker;
+    private final boolean           printUnusedItems;
+    private final PrintWriter       pw;
 
     // A field to remember the class name, if a header is needed for class members.
-    private String      className;
+    private String className;
 
 
     /**
@@ -60,9 +60,9 @@ implements   ClassVisitor,
      *                         items.
      * @param printWriter      the writer to which to print.
      */
-    public UsagePrinter(UsageMarker usageMarker,
-                        boolean     printUnusedItems,
-                        PrintWriter printWriter)
+    public UsagePrinter(SimpleUsageMarker usageMarker,
+                        boolean           printUnusedItems,
+                        PrintWriter       printWriter)
     {
         this.usageMarker      = usageMarker;
         this.printUnusedItems = printUnusedItems;

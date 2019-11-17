@@ -183,12 +183,12 @@ public class InstructionSequenceBuilder
      */
     public Instruction[] instructions()
     {
-        Instruction[] instructions_array = new Instruction[instructions.size()];
-        instructions.toArray(instructions_array);
+        Instruction[] instructionsArray = new Instruction[instructions.size()];
+        instructions.toArray(instructionsArray);
 
         instructions.clear();
 
-        return instructions_array;
+        return instructionsArray;
     }
 
 
@@ -210,6 +210,15 @@ public class InstructionSequenceBuilder
         targetClass.u2constantPoolCount = 0;
 
         return constantPool;
+    }
+
+
+    /**
+     * Returns the number of instructions accumulated by this InstructionSequenceBuilder.
+     */
+    public int size()
+    {
+        return instructions.size();
     }
 
 
@@ -1913,6 +1922,32 @@ public class InstructionSequenceBuilder
             case ClassConstants.TYPE_FLOAT:  return fastore();
             case ClassConstants.TYPE_DOUBLE: return dastore();
             default:                         return aastore();
+        }
+    }
+
+
+    /**
+     * Loads an element from an array.
+     *
+     * Operand stack:
+     * ..., array, index -> ..., value
+     *
+     * @param elementType the type of the value to be loaded.
+     */
+    public InstructionSequenceBuilder loadFromArray(String elementType)
+    {
+        // Load element from array on stack.
+        switch (elementType.charAt(0))
+        {
+            case ClassConstants.TYPE_BOOLEAN:
+            case ClassConstants.TYPE_BYTE:   return baload();
+            case ClassConstants.TYPE_CHAR:   return caload();
+            case ClassConstants.TYPE_SHORT:  return saload();
+            case ClassConstants.TYPE_INT:    return iaload();
+            case ClassConstants.TYPE_LONG:   return laload();
+            case ClassConstants.TYPE_FLOAT:  return faload();
+            case ClassConstants.TYPE_DOUBLE: return daload();
+            default:                         return aaload();
         }
     }
 

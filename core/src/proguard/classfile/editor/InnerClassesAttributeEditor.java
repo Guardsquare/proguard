@@ -88,5 +88,4 @@ public class InnerClassesAttributeEditor
 
         return innerClassesCount;
     }
-
 }

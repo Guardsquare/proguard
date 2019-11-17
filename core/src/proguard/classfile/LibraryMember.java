@@ -21,23 +21,20 @@
 package proguard.classfile;
 
 import proguard.classfile.visitor.MemberVisitor;
+import proguard.util.SimpleProcessableVisitorAccepter;
 
 /**
  * Representation of a field or method from a library class.
  *
  * @author Eric Lafortune
  */
-public abstract class LibraryMember implements Member
+public abstract class LibraryMember
+extends               SimpleProcessableVisitorAccepter
+implements            Member
 {
     public int    u2accessFlags;
     public String name;
     public String descriptor;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an uninitialized LibraryMember.
@@ -87,18 +84,5 @@ public abstract class LibraryMember implements Member
     public void accept(Clazz clazz, MemberVisitor memberVisitor)
     {
         accept((LibraryClass)clazz, memberVisitor);
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

@@ -62,6 +62,19 @@ public interface DataEntryWriter
 
     /**
      * Finishes writing all data entries.
+     * <p>
+     * Implementations typically create graphs of writers that can split and
+     * merge again, possibly even with cycles.
+     * <p>
+     * For splits and merges, implementations need to be idempotent; once
+     * closed, subsequent attempts to close a writer have no effect. If
+     * needed, the wrapper {@link NonClosingDataEntryWriter} can avoid closing
+     * a branch prematurely.
+     * <p>
+     * For cycles, implementations must perform any custom behavior, then
+     * delegate {@link #close()} invocations, and only finally clean up. It is
+     * possible that delegates call {@link #createOutputStream(DataEntry)}
+     * while {@link #close()} is in progress.
      */
     public void close() throws IOException;
 

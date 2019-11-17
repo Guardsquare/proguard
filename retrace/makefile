@@ -1,7 +1,7 @@
 # GNU/Linux makefile for ReTrace.
 
 MAIN_CLASS       = proguard/retrace/ReTrace
-CLASSPATH        = ../core/$(OUT)
+CLASSPATH        = ../base/$(OUT):../core/$(OUT)
 TARGET           = retrace
 INCLUDE_MANIFEST = true
 

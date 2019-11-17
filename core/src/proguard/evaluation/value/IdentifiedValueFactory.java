@@ -20,8 +20,7 @@
  */
 package proguard.evaluation.value;
 
-import proguard.classfile.ClassConstants;
-import proguard.classfile.Clazz;
+import proguard.classfile.*;
 
 /**
  * This class provides methods to create and reuse Value objects that are

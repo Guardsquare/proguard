@@ -21,51 +21,53 @@
 package proguard.io;
 
 import proguard.classfile.ClassConstants;
+import proguard.util.StringFunction;
 
 import java.io.IOException;
 import java.util.Map;
 
 /**
  * This DataEntryReader delegates to another DataEntryReader, renaming the
- * data entries based on the given map. Entries whose name does not appear
- * in the map may be passed to an alternative DataEntryReader.
+ * data entries based on the given string function. Entries whose name are
+ * transformed to null or an empty string are passed to an optional
+ * alternative DataEntryReader.
  *
  * @author Eric Lafortune
  */
 public class RenamedDataEntryReader implements DataEntryReader
 {
-    private final Map             nameMap;
+    private final StringFunction  nameFunction;
     private final DataEntryReader dataEntryReader;
     private final DataEntryReader missingDataEntryReader;
 
 
     /**
      * Creates a new RenamedDataEntryReader.
-     * @param nameMap         the map from old names to new names.
+     * @param nameFunction    the function from old names to new names.
      * @param dataEntryReader the DataEntryReader to which renamed data
      *                        entries will be passed.
      */
-    public RenamedDataEntryReader(Map             nameMap,
+    public RenamedDataEntryReader(StringFunction  nameFunction,
                                   DataEntryReader dataEntryReader)
     {
-        this(nameMap, dataEntryReader, null);
+        this(nameFunction, dataEntryReader, null);
     }
 
 
     /**
      * Creates a new RenamedDataEntryReader.
-     * @param nameMap                the map from old names to new names.
+     * @param nameFunction           the function from old names to new names.
      * @param dataEntryReader        the DataEntryReader to which renamed data
      *                               entries will be passed.
      * @param missingDataEntryReader the optional DataEntryReader to which data
      *                               entries that can't be renamed will be
      *                               passed.
      */
-    public RenamedDataEntryReader(Map             nameMap,
+    public RenamedDataEntryReader(StringFunction  nameFunction,
                                   DataEntryReader dataEntryReader,
                                   DataEntryReader missingDataEntryReader)
     {
-        this.nameMap                = nameMap;
+        this.nameFunction           = nameFunction;
         this.dataEntryReader        = dataEntryReader;
         this.missingDataEntryReader = missingDataEntryReader;
     }
@@ -73,6 +75,7 @@ public class RenamedDataEntryReader implements DataEntryReader
 
     // Implementations for DataEntryReader.
 
+    @Override
     public void read(DataEntry dataEntry) throws IOException
     {
         String name = dataEntry.getName();
@@ -84,12 +87,12 @@ public class RenamedDataEntryReader implements DataEntryReader
             name += ClassConstants.PACKAGE_SEPARATOR;
         }
 
-        String newName = (String)nameMap.get(name);
-        if (newName != null)
+        String newName = nameFunction.transform(name);
+        if (newName != null &&
+            newName.length() > 0)
         {
             // Remove the directory separator if necessary.
-            if (dataEntry.isDirectory() &&
-                newName.length() > 0)
+            if (dataEntry.isDirectory())
             {
                 newName = newName.substring(0, newName.length() -  1);
             }

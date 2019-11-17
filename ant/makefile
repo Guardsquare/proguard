@@ -6,7 +6,7 @@ endif
 
 MAIN_CLASS = proguard/ant/ProGuardTask
 ANT_JAR    = $(ANT_HOME)/lib/ant.jar
-CLASSPATH  = ../core/$(OUT):$(ANT_JAR)
+CLASSPATH  = ../base/$(OUT):../core/$(OUT):$(ANT_JAR)
 TARGET     = proguard
 UPDATE_JAR = true
 

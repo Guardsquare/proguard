@@ -22,24 +22,19 @@ package proguard.classfile.attribute.module;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of a Exports entry in a Module attribute.
  *
  * @author Joachim Vandersmissen
  */
-public class ExportsInfo implements VisitorAccepter
+public class ExportsInfo extends SimpleVisitorAccepter
 {
     public int   u2exportsIndex;
     public int   u2exportsFlags;
     public int   u2exportsToCount;
     public int[] u2exportsToIndex;
-
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
 
 
     /**
@@ -88,19 +83,5 @@ public class ExportsInfo implements VisitorAccepter
         {
             clazz.constantPoolEntryAccept(u2exportsToIndex[index], constantVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

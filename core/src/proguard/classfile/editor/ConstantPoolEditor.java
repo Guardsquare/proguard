@@ -24,6 +24,7 @@ import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
+import proguard.resources.file.ResourceFile;
 
 /**
  * This class can add constant pool entries to a given class.
@@ -218,6 +219,33 @@ public class ConstantPoolEditor
                                  Clazz  referencedClass,
                                  Member referencedMember)
     {
+        return addStringConstant(string, referencedClass, referencedMember, 0, null);
+    }
+
+
+    /**
+     * Finds or creates a StringConstant constant pool entry with the given
+     * value.
+     * @return the constant pool index of the StringConstant.
+     */
+    public int addStringConstant(String       string,
+                                 ResourceFile referencedResourceFile)
+    {
+        return addStringConstant(string, null, null, 0, referencedResourceFile);
+    }
+
+
+    /**
+     * Finds or creates a StringConstant constant pool entry with the given
+     * value.
+     * @return the constant pool index of the StringConstant.
+     */
+    public int addStringConstant(String       string,
+                                 Clazz        referencedClass,
+                                 Member       referencedMember,
+                                 int          resourceFileId,
+                                 ResourceFile resourceFile)
+    {
         int        constantPoolCount = targetClass.u2constantPoolCount;
         Constant[] constantPool      = targetClass.constantPool;
 
@@ -230,10 +258,12 @@ public class ConstantPoolEditor
                 constant.getTag() == ClassConstants.CONSTANT_String)
             {
                 StringConstant stringConstant = (StringConstant)constant;
-                if (stringConstant.u2stringIndex < constantPoolCount     &&
-                    stringConstant.getString(targetClass).equals(string) &&
-                    stringConstant.referencedClass  == referencedClass   &&
-                    stringConstant.referencedMember == referencedMember)
+                if (stringConstant.u2stringIndex < constantPoolCount          &&
+                    stringConstant.getString(targetClass).equals(string)      &&
+                    stringConstant.referencedClass        == referencedClass  &&
+                    stringConstant.referencedMember       == referencedMember &&
+                    stringConstant.referencedResourceId   == resourceFileId   &&
+                    stringConstant.referencedResourceFile == resourceFile)
                 {
                     return index;
                 }
@@ -242,7 +272,9 @@ public class ConstantPoolEditor
 
         return addConstant(new StringConstant(addUtf8Constant(string),
                                               referencedClass,
-                                              referencedMember));
+                                              referencedMember,
+                                              resourceFileId,
+                                              resourceFile));
     }
 
 

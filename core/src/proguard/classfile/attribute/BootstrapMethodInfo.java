@@ -20,8 +20,9 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.VisitorAccepter;
 
 /**
  * Representation of a bootstrap method.

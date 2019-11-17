@@ -44,6 +44,7 @@ implements   DataEntryFilter
 
     // Implementations for DataEntryFilter.
 
+    @Override
     public boolean accepts(DataEntry dataEntry)
     {
         return dataEntry != null && dataEntryFilter.accepts(dataEntry.getParent());

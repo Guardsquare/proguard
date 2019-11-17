@@ -28,10 +28,14 @@ import java.util.List;
 
 /**
  * This class represents an entry from a class path: an apk, a jar, an aar, a
- * war, a zip, an ear, or a directory, with a name and a flag to indicates
- * whether the entry is an input entry or an output entry. Optional filters can
- * be specified for the names of the contained resource/classes, apks, jars,
- * aars, wars, ears, and zips.
+ * war, a zip, an ear, or a directory. It has a name, and a flag to indicate
+ * whether the entry is an input entry or an output entry.
+ *
+ * It also has an optional feature name that can serve as a tag to indicate
+ * the group to which the entry belongs, e.g. a given Android dynamic feature.
+ *
+ * It also has optional filters for the names of the contained
+ * resource/classes, apks, jars, aars, wars, ears, and zips.
  *
  * @author Eric Lafortune
  */
@@ -39,8 +43,10 @@ public class ClassPathEntry
 {
     private File    file;
     private boolean output;
+    private String  featureName;
     private List    filter;
     private List    apkFilter;
+    private List    aabFilter;
     private List    jarFilter;
     private List    aarFilter;
     private List    warFilter;
@@ -58,6 +64,18 @@ public class ClassPathEntry
     {
         this.file   = file;
         this.output = isOutput;
+    }
+
+
+    /**
+     * Creates a new ClassPathEntry with the given file, output flag,
+     * and optional feature name.
+     */
+    public ClassPathEntry(File file, boolean isOutput, String featureName)
+    {
+        this.file        = file;
+        this.output      = isOutput;
+        this.featureName = featureName;
     }
 
 
@@ -129,6 +147,24 @@ public class ClassPathEntry
 
 
     /**
+     * Returns the feature name.
+     */
+    public String getFeatureName()
+    {
+        return featureName;
+    }
+
+
+    /**
+     * Sets the feature name.
+     */
+    public void setFeatureName(String featureName)
+    {
+        this.featureName = featureName;
+    }
+
+
+    /**
      * Returns whether this data entry is a dex file.
      */
     public boolean isDex()
@@ -144,6 +180,15 @@ public class ClassPathEntry
     {
         return hasExtension(".apk") ||
                hasExtension(".ap_");
+    }
+
+
+    /**
+     * Returns whether this data entry is an aab file.
+     */
+    public boolean isAab()
+    {
+        return hasExtension(".aab");
     }
 
 
@@ -231,6 +276,7 @@ public class ClassPathEntry
     {
         return filter     != null ||
                apkFilter  != null ||
+               aabFilter  != null ||
                jarFilter  != null ||
                aarFilter  != null ||
                warFilter  != null ||
@@ -271,6 +317,23 @@ public class ClassPathEntry
     public void setApkFilter(List filter)
     {
         this.apkFilter = filter == null || filter.size() == 0 ? null : filter;
+    }
+
+
+    /**
+     * Returns the name filter that is applied to aab files in this entry, if any.
+     */
+    public List getAabFilter()
+    {
+        return aabFilter;
+    }
+
+    /**
+     * Sets the name filter that is applied to aab files in this entry, if any.
+     */
+    public void setAabFilter(List filter)
+    {
+        this.aabFilter = filter == null || filter.size() == 0 ? null : filter;
     }
 
 
@@ -355,7 +418,7 @@ public class ClassPathEntry
      */
     public void setJmodFilter(List filter)
     {
-        this.jmodFilter = filter == null || filter.size() == 0 ? null : jmodFilter;
+        this.jmodFilter = filter == null || filter.size() == 0 ? null : filter;
     }
 
     /**
@@ -382,6 +445,8 @@ public class ClassPathEntry
         String string = getName();
 
         if (filter     != null ||
+            apkFilter  != null ||
+            aabFilter  != null ||
             jarFilter  != null ||
             aarFilter  != null ||
             warFilter  != null ||
@@ -391,21 +456,23 @@ public class ClassPathEntry
         {
             string +=
                 ConfigurationConstants.OPEN_ARGUMENTS_KEYWORD +
-                (aarFilter  != null ? ListUtil.commaSeparatedString(aarFilter, true)  : "") +
+                (aarFilter  != null ? ListUtil.commaSeparatedString(aarFilter,  true) : "")  +
+                 ConfigurationConstants.SEPARATOR_KEYWORD +
+                (aabFilter  != null ? ListUtil.commaSeparatedString(aabFilter,  true) : "")  +
+                 ConfigurationConstants.SEPARATOR_KEYWORD +
+                (apkFilter  != null ? ListUtil.commaSeparatedString(apkFilter,  true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
-                (apkFilter  != null ? ListUtil.commaSeparatedString(apkFilter, true)  : "") +
+                (zipFilter  != null ? ListUtil.commaSeparatedString(zipFilter,  true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
-                (zipFilter  != null ? ListUtil.commaSeparatedString(zipFilter, true)  : "") +
+                (jmodFilter != null ? ListUtil.commaSeparatedString(jmodFilter, true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
-                (jmodFilter != null ? ListUtil.commaSeparatedString(jmodFilter, true) : "") +
+                (earFilter  != null ? ListUtil.commaSeparatedString(earFilter,  true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
-                (earFilter  != null ? ListUtil.commaSeparatedString(earFilter, true)  : "") +
+                (warFilter  != null ? ListUtil.commaSeparatedString(warFilter,  true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
-                (warFilter  != null ? ListUtil.commaSeparatedString(warFilter, true)  : "") +
+                (jarFilter  != null ? ListUtil.commaSeparatedString(jarFilter,  true) : "")  +
                 ConfigurationConstants.SEPARATOR_KEYWORD +
-                (jarFilter  != null ? ListUtil.commaSeparatedString(jarFilter, true)  : "") +
-                ConfigurationConstants.SEPARATOR_KEYWORD +
-                (filter     != null ? ListUtil.commaSeparatedString(filter, true)     : "") +
+                (filter     != null ? ListUtil.commaSeparatedString(filter,     true) : "")  +
                 ConfigurationConstants.CLOSE_ARGUMENTS_KEYWORD;
         }
 

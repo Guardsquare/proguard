@@ -25,31 +25,50 @@ import proguard.classfile.visitor.ClassVisitor;
 
 /**
  * This ClassVisitor delegates all its method calls to another ClassVisitor,
- * but only for Clazz objects that are marked as used.
+ * depending on whether the Clazz objects are marked as used.
  *
- * @see UsageMarker
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
 public class UsedClassFilter
 implements   ClassVisitor
 {
-    private final UsageMarker  usageMarker;
-    private final ClassVisitor classVisitor;
+    private final SimpleUsageMarker usageMarker;
+    private final ClassVisitor      usedClassVisitor;
+    private final ClassVisitor      unusedClassVisitor;
 
 
     /**
      * Creates a new UsedClassFilter.
-     * @param usageMarker  the usage marker that is used to mark the classes
-     *                     and class members.
-     * @param classVisitor the class visitor to which the visiting will be
-     *                     delegated.
+     * @param usageMarker        the usage marker that is used to mark the
+     *                           classes and class members.
+     * @param usedClassVisitor   the class visitor to which the visiting
+     *                           used classes will be delegated.
      */
-    public UsedClassFilter(UsageMarker  usageMarker,
-                           ClassVisitor classVisitor)
+    public UsedClassFilter(SimpleUsageMarker usageMarker,
+                           ClassVisitor      usedClassVisitor)
     {
-        this.usageMarker  = usageMarker;
-        this.classVisitor = classVisitor;
+        this(usageMarker, usedClassVisitor, null);
+    }
+
+
+    /**
+     * Creates a new UsedClassFilter.
+     * @param usageMarker        the usage marker that is used to mark the
+     *                           classes and class members.
+     * @param usedClassVisitor   the class visitor to which the visiting
+     *                           used classes will be delegated.
+     * @param unusedClassVisitor the class visitor to which the visiting
+     *                           unused classes will be delegated.
+     */
+    public UsedClassFilter(SimpleUsageMarker usageMarker,
+                           ClassVisitor      usedClassVisitor,
+                           ClassVisitor      unusedClassVisitor)
+    {
+        this.usageMarker        = usageMarker;
+        this.usedClassVisitor   = usedClassVisitor;
+        this.unusedClassVisitor = unusedClassVisitor;
     }
 
 
@@ -57,7 +76,12 @@ implements   ClassVisitor
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (usageMarker.isUsed(programClass))
+        // Is the class marked?
+        ClassVisitor classVisitor = usageMarker.isUsed(programClass) ?
+            usedClassVisitor :
+            unusedClassVisitor;
+
+        if (classVisitor != null)
         {
             classVisitor.visitProgramClass(programClass);
         }
@@ -66,7 +90,12 @@ implements   ClassVisitor
 
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        if (usageMarker.isUsed(libraryClass))
+        // Is the class marked?
+        ClassVisitor classVisitor = usageMarker.isUsed(libraryClass) ?
+            usedClassVisitor :
+            unusedClassVisitor;
+
+        if (classVisitor != null)
         {
             classVisitor.visitLibraryClass(libraryClass);
         }

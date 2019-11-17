@@ -20,6 +20,8 @@
  */
 package proguard.classfile.editor;
 
+import kotlinx.metadata.*;
+import kotlinx.metadata.jvm.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -27,13 +29,21 @@ import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.flags.KotlinPropertyAccessorFlags;
+import proguard.classfile.kotlin.visitors.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
+import java.util.*;
+
+import static proguard.classfile.ClassConstants.ATTR_RuntimeInvisibleAnnotations;
+import static proguard.classfile.kotlin.KotlinConstants.TYPE_KOTLIN_JVM_JVMNAME;
+
 /**
  * This ClassVisitor fixes references of constant pool entries, fields,
- * methods, and attributes to classes whose names have changed. Descriptors
- * of member references are not updated yet.
+ * methods, attributes and kotlin metadata to classes whose names have
+ * changed. Descriptors of member references are not updated yet.
  *
  * @see MemberReferenceFixer
  * @author Eric Lafortune
@@ -41,6 +51,8 @@ import proguard.classfile.visitor.*;
 public class ClassReferenceFixer
 extends      SimplifiedVisitor
 implements   ClassVisitor,
+
+             // Implementation interfaces.
              ConstantVisitor,
              MemberVisitor,
              AttributeVisitor,
@@ -52,6 +64,7 @@ implements   ClassVisitor,
 {
     private final boolean ensureUniqueMemberNames;
 
+    private final KotlinReferenceFixer kotlinReferenceFixer = new KotlinReferenceFixer();
 
     /**
      * Creates a new ClassReferenceFixer.
@@ -73,12 +86,15 @@ implements   ClassVisitor,
         // Fix the constant pool.
         programClass.constantPoolEntriesAccept(this);
 
-        // Fix class members.
+        // Fix the class members.
         programClass.fieldsAccept(this);
         programClass.methodsAccept(this);
 
         // Fix the attributes.
         programClass.attributesAccept(this);
+
+        // Fix the Kotlin Metadata.
+        programClass.kotlinMetadataAccept(kotlinReferenceFixer);
     }
 
 
@@ -99,58 +115,47 @@ implements   ClassVisitor,
         String newDescriptor = newDescriptor(descriptor,
                                              programField.referencedClass);
 
-        if (!descriptor.equals(newDescriptor))
-        {
-            ConstantPoolEditor constantPoolEditor =
-                new ConstantPoolEditor(programClass);
-
-            // Update the descriptor.
-            programField.u2descriptorIndex =
-                constantPoolEditor.addUtf8Constant(newDescriptor);
-
-            // Update the name, if requested.
-            if (ensureUniqueMemberNames)
-            {
-                String name    = programField.getName(programClass);
-                String newName = newUniqueMemberName(name, descriptor);
-                programField.u2nameIndex =
-                    constantPoolEditor.addUtf8Constant(newName);
-            }
-        }
-
-        // Fix the attributes.
-        programField.attributesAccept(programClass, this);
+        visitProgramMember(programClass, programField, descriptor, newDescriptor);
     }
 
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        // Has the descriptor changed?
         String descriptor    = programMethod.getDescriptor(programClass);
         String newDescriptor = newDescriptor(descriptor,
                                              programMethod.referencedClasses);
 
+        visitProgramMember(programClass, programMethod, descriptor, newDescriptor);
+    }
+
+
+    private void visitProgramMember(ProgramClass programClass,
+                                    ProgramMember programMember,
+                                    String descriptor,
+                                    String newDescriptor)
+    {
+        // Has the descriptor changed?
         if (!descriptor.equals(newDescriptor))
         {
             ConstantPoolEditor constantPoolEditor =
                 new ConstantPoolEditor(programClass);
 
             // Update the descriptor.
-            programMethod.u2descriptorIndex =
+            programMember.u2descriptorIndex =
                 constantPoolEditor.addUtf8Constant(newDescriptor);
 
             // Update the name, if requested.
             if (ensureUniqueMemberNames)
             {
-                String name    = programMethod.getName(programClass);
+                String name    = programMember.getName(programClass);
                 String newName = newUniqueMemberName(name, descriptor);
-                programMethod.u2nameIndex =
+                programMember.u2nameIndex =
                     constantPoolEditor.addUtf8Constant(newName);
             }
         }
 
         // Fix the attributes.
-        programMethod.attributesAccept(programClass, this);
+        programMember.attributesAccept(programClass, this);
     }
 
 
@@ -444,7 +449,7 @@ implements   ClassVisitor,
 
     public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
     {
-        // Has the type name chamged?
+        // Has the type name changed?
         String typeName    = enumConstantElementValue.getTypeName(clazz);
         String newTypeName = newDescriptor(typeName,
                                            enumConstantElementValue.referencedClasses);
@@ -488,8 +493,291 @@ implements   ClassVisitor,
     }
 
 
+    private static class KotlinReferenceFixer
+    implements           KotlinMetadataVisitor,
+                         KotlinPropertyVisitor,
+                         KotlinFunctionVisitor,
+                         KotlinConstructorVisitor,
+                         KotlinTypeVisitor,
+                         KotlinTypeAliasVisitor,
+                         KotlinValueParameterVisitor,
+                         KotlinTypeParameterVisitor
+    {
+        // Implementations for KotlinMetadataVisitor.
+        @Override
+        public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {}
+
+        @Override
+        public void visitKotlinDeclarationContainerMetadata(Clazz                              clazz,
+                                                            KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata)
+        {
+            kotlinDeclarationContainerMetadata.ownerClassName = newClassName(kotlinDeclarationContainerMetadata.ownerClassName,
+                                                                             kotlinDeclarationContainerMetadata.ownerReferencedClass);
+            kotlinDeclarationContainerMetadata.propertiesAccept(clazz, this);
+            kotlinDeclarationContainerMetadata.delegatedPropertiesAccept(clazz, this);
+            kotlinDeclarationContainerMetadata.functionsAccept(clazz, this);
+            kotlinDeclarationContainerMetadata.typeAliasesAccept(clazz, this);
+        }
+
+
+        @Override
+        public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
+        {
+            kotlinClassKindMetadata.className = newClassName(kotlinClassKindMetadata.className,
+                                                             kotlinClassKindMetadata.referencedClass);
+
+            if (kotlinClassKindMetadata.anonymousObjectOriginName != null)
+            {
+                kotlinClassKindMetadata.anonymousObjectOriginName =
+                    newClassName(kotlinClassKindMetadata.anonymousObjectOriginName,
+                                 kotlinClassKindMetadata.anonymousObjectOriginClass);
+            }
+
+            if (kotlinClassKindMetadata.companionObjectName != null)
+            {
+                kotlinClassKindMetadata.companionObjectName = kotlinClassKindMetadata.referencedCompanionField.getName(clazz);
+            }
+
+            for (int k = 0; k < kotlinClassKindMetadata.enumEntryNames.size(); k++)
+            {
+                kotlinClassKindMetadata.enumEntryNames.set(k,
+                    kotlinClassKindMetadata.referencedEnumEntries.get(k).getName(clazz));
+            }
+
+            for (int k = 0; k < kotlinClassKindMetadata.nestedClassNames.size(); k++)
+            {
+                kotlinClassKindMetadata.nestedClassNames.set(k,
+                     newInnerClassName(clazz.getName(),
+                                       kotlinClassKindMetadata.nestedClassNames       .get(k),
+                                       kotlinClassKindMetadata.referencedNestedClasses.get(k)));
+            }
+
+            for (int k = 0; k < kotlinClassKindMetadata.sealedSubclassNames.size(); k++)
+            {
+                kotlinClassKindMetadata.sealedSubclassNames.set(k,
+                     newClassName(kotlinClassKindMetadata.sealedSubclassNames       .get(k),
+                                  kotlinClassKindMetadata.referencedSealedSubClasses.get(k)));
+            }
+
+            kotlinClassKindMetadata.typeParametersAccept(clazz, this);
+            kotlinClassKindMetadata.superTypesAccept(    clazz, this);
+            kotlinClassKindMetadata.constructorsAccept(  clazz, this);
+
+            visitKotlinDeclarationContainerMetadata(clazz, kotlinClassKindMetadata);
+        }
+
+        @Override
+        public void visitKotlinFileFacadeMetadata(Clazz clazz, KotlinFileFacadeKindMetadata kotlinFileFacadeKindMetadata)
+        {
+            visitKotlinDeclarationContainerMetadata(clazz, kotlinFileFacadeKindMetadata);
+        }
+
+        @Override
+        public void visitKotlinSyntheticClassMetadata(Clazz clazz, KotlinSyntheticClassKindMetadata kotlinSyntheticClassKindMetadata)
+        {
+            kotlinSyntheticClassKindMetadata.className = newClassName(kotlinSyntheticClassKindMetadata.className,
+                                                                      kotlinSyntheticClassKindMetadata.referencedClass);
+            kotlinSyntheticClassKindMetadata.functionsAccept(clazz, this);
+        }
+
+        @Override
+        public void visitKotlinMultiFileFacadeMetadata(Clazz clazz, KotlinMultiFileFacadeKindMetadata kotlinMultiFileFacadeKindMetadata)
+        {
+            for (int k = 0; k < kotlinMultiFileFacadeKindMetadata.partClassNames.size(); k++)
+            {
+                kotlinMultiFileFacadeKindMetadata.partClassNames.set(k,
+                    newClassName(kotlinMultiFileFacadeKindMetadata.partClassNames.get(k),
+                                 kotlinMultiFileFacadeKindMetadata.referencedPartClasses.get(k)));
+            }
+        }
+
+        @Override
+        public void visitKotlinMultiFilePartMetadata(Clazz clazz, KotlinMultiFilePartKindMetadata kotlinMultiFilePartKindMetadata)
+        {
+            kotlinMultiFilePartKindMetadata.xs = newClassName(kotlinMultiFilePartKindMetadata.xs,
+                                                              kotlinMultiFilePartKindMetadata.referencedFacade);
+
+            visitKotlinDeclarationContainerMetadata(clazz, kotlinMultiFilePartKindMetadata);
+        }
+
+
+        // Implementations for KotlinPropertyVisitor.
+        @Override
+        public void visitAnyProperty(Clazz                              clazz,
+                                     KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                     KotlinPropertyMetadata             kotlinPropertyMetadata)
+        {
+            ProgramClass programClass = (ProgramClass)clazz;
+            if (kotlinPropertyMetadata.backingFieldSignature != null)
+            {
+                Clazz backingFieldClass = kotlinPropertyMetadata.referencedBackingFieldClass;
+                Field backingField      = kotlinPropertyMetadata.referencedBackingField;
+                kotlinPropertyMetadata.backingFieldSignature =
+                    new JvmFieldSignature(backingField.getName(backingFieldClass),
+                                          backingField.getDescriptor(backingFieldClass));
+            }
+
+            kotlinPropertyMetadata.getterSignature =
+                fixPropertyMethod(programClass,
+                                  kotlinPropertyMetadata.referencedGetterMethod,
+                                  kotlinPropertyMetadata.getterFlags,
+                                  kotlinPropertyMetadata.getterSignature);
+
+            kotlinPropertyMetadata.setterSignature =
+                fixPropertyMethod(programClass,
+                                  kotlinPropertyMetadata.referencedSetterMethod,
+                                  kotlinPropertyMetadata.setterFlags,
+                                  kotlinPropertyMetadata.setterSignature);
+
+            kotlinPropertyMetadata.syntheticMethodForAnnotations =
+                fixPropertyMethod(kotlinPropertyMetadata.referencedSyntheticMethodClass,
+                                  kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations,
+                                  null,
+                                  kotlinPropertyMetadata.syntheticMethodForAnnotations);
+
+            kotlinPropertyMetadata.typeParametersAccept(  clazz, kotlinDeclarationContainerMetadata, this);
+            kotlinPropertyMetadata.receiverTypeAccept(    clazz, kotlinDeclarationContainerMetadata, this);
+            kotlinPropertyMetadata.typeAccept(            clazz, kotlinDeclarationContainerMetadata, this);
+            kotlinPropertyMetadata.setterParametersAccept(clazz, kotlinDeclarationContainerMetadata, this);
+
+            //TODO change name, etc.
+        }
+
+
+        // Implementations for KotlinFunctionVisitor.
+        @Override
+        public void visitAnyFunction(Clazz                  clazz,
+                                     KotlinMetadata         kotlinMetadata,
+                                     KotlinFunctionMetadata kotlinFunctionMetadata)
+        {
+            if (kotlinFunctionMetadata.lambdaClassOriginName != null)
+            {
+                //TODO in future, we could provide configurable option for this.
+                kotlinFunctionMetadata.lambdaClassOriginName       = null;
+                kotlinFunctionMetadata.referencedLambdaClassOrigin = null;
+            }
+
+            // Fix the JVM signatures.
+            if (kotlinFunctionMetadata.jvmSignature != null)
+            {
+                Method jvmMethod = kotlinFunctionMetadata.referencedMethod;
+                kotlinFunctionMetadata.jvmSignature =
+                    new JvmMethodSignature(jvmMethod.getName(kotlinFunctionMetadata.referencedMethodClass),
+                                           jvmMethod.getDescriptor(kotlinFunctionMetadata.referencedMethodClass));
+            }
+
+            kotlinFunctionMetadata.typeParametersAccept( clazz, kotlinMetadata, this);
+            kotlinFunctionMetadata.receiverTypeAccept(   clazz, kotlinMetadata, this);
+            kotlinFunctionMetadata.valueParametersAccept(clazz, kotlinMetadata, this);
+            kotlinFunctionMetadata.returnTypeAccept(     clazz, kotlinMetadata, this);
+            kotlinFunctionMetadata.contractsAccept(      clazz, kotlinMetadata, new AllTypeVisitor(this));
+
+            //TODO change name, name variants, etc.
+            kotlinFunctionMetadata.name = kotlinFunctionMetadata.referencedMethod.getName(kotlinFunctionMetadata.referencedMethodClass);
+        }
+
+
+        // Implementations for KotlinConstructorVisitor.
+        @Override
+        public void visitConstructor(Clazz                     clazz,
+                                     KotlinClassKindMetadata   kotlinClassKindMetadata,
+                                     KotlinConstructorMetadata kotlinConstructorMetadata)
+        {
+            if (kotlinConstructorMetadata.jvmSignature != null)
+            {
+                Method jvmMethod = kotlinConstructorMetadata.referencedMethod;
+                kotlinConstructorMetadata.jvmSignature = new JvmMethodSignature(jvmMethod.getName(clazz),
+                                                                                jvmMethod.getDescriptor(clazz));
+            }
+
+            kotlinConstructorMetadata.valueParametersAccept(clazz, kotlinClassKindMetadata, this);
+        }
+
+        //TODO Fix KotlinTypeMetadata.
+
+        // Implementations for KotlinTypeVisitor.
+        @Override
+        public void visitAnyType(Clazz clazz, KotlinTypeMetadata kotlinTypeMetadata)
+        {
+            fixKotlinAnnotations(kotlinTypeMetadata.annotations);
+
+            if (kotlinTypeMetadata.className != null)
+            {
+                kotlinTypeMetadata.className = kotlinTypeMetadata.referencedClass.getName();
+            }
+
+            // We fix aliasName using KotlinAliasReferenceFixer after ClassReferenceFixer is finished.
+
+            kotlinTypeMetadata.typeArgumentsAccept(clazz, this);
+            kotlinTypeMetadata.outerClassAccept(   clazz, this);
+            kotlinTypeMetadata.upperBoundsAccept(  clazz, this);
+            kotlinTypeMetadata.abbreviationAccept( clazz, this);
+        }
+
+
+        // Implementations for KotlinTypeAliasVisitor.
+        @Override
+        public void visitTypeAlias(Clazz                              clazz,
+                                   KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                   KotlinTypeAliasMetadata            kotlinTypeAliasMetadata)
+        {
+            fixKotlinAnnotations(kotlinTypeAliasMetadata.annotations);
+
+            kotlinTypeAliasMetadata.underlyingTypeAccept(clazz, kotlinDeclarationContainerMetadata, this);
+            kotlinTypeAliasMetadata.expandedTypeAccept(  clazz, kotlinDeclarationContainerMetadata, this);
+            kotlinTypeAliasMetadata.typeParametersAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        }
+
+
+        // Implementations for KotlinValueParameterVisitor
+        @Override
+        public void visitAnyValueParameter(Clazz                        clazz,
+                                           KotlinValueParameterMetadata kotlinValueParameterMetadata) {}
+
+        @Override
+        public void visitFunctionValParameter(Clazz                        clazz,
+                                              KotlinMetadata               kotlinMetadata,
+                                              KotlinFunctionMetadata       kotlinFunctionMetadata,
+                                              KotlinValueParameterMetadata kotlinValueParameterMetadata)
+        {
+            kotlinValueParameterMetadata.typeAccept(clazz, kotlinMetadata, kotlinFunctionMetadata, this);
+        }
+
+        @Override
+        public void visitConstructorValParameter(Clazz                        clazz,
+                                                 KotlinClassKindMetadata      kotlinClassKindMetadata,
+                                                 KotlinConstructorMetadata    kotlinConstructorMetadata,
+                                                 KotlinValueParameterMetadata kotlinValueParameterMetadata)
+        {
+            kotlinValueParameterMetadata.typeAccept(clazz, kotlinClassKindMetadata, kotlinConstructorMetadata, this);
+        }
+
+        @Override
+        public void visitPropertyValParameter(Clazz                              clazz,
+                                              KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                              KotlinPropertyMetadata             kotlinPropertyMetadata,
+                                              KotlinValueParameterMetadata       kotlinValueParameterMetadata)
+        {
+            kotlinValueParameterMetadata.typeAccept(clazz, kotlinDeclarationContainerMetadata, kotlinPropertyMetadata, this);
+        }
+
+
+        // Implementations for KotlinTypeParameterVisitor
+        @Override
+        public void visitAnyTypeParameter(Clazz clazz, KotlinTypeParameterMetadata kotlinTypeParameterMetadata)
+        {
+            fixKotlinAnnotations(kotlinTypeParameterMetadata.annotations);
+
+            kotlinTypeParameterMetadata.upperBoundsAccept(clazz, this);
+        }
+    }
+
     // Small utility methods.
 
+    /**
+     * Returns the new descriptor of a field after applying the obfuscation,
+     * given the old descriptor and the referenced classes.
+     */
     private static String newDescriptor(String descriptor,
                                         Clazz  referencedClass)
     {
@@ -524,8 +812,12 @@ implements   ClassVisitor,
     }
 
 
-    private static String newDescriptor(String  descriptor,
-                                        Clazz[] referencedClasses)
+    /**
+     * Returns the new descriptor of a method after applying the obfuscation,
+     * given the old descriptor and the referenced classes.
+     */
+    public static String newDescriptor(String  descriptor,
+                                       Clazz[] referencedClasses)
     {
         // If there are no referenced classes, the descriptor won't change.
         if (referencedClasses == null ||
@@ -534,35 +826,56 @@ implements   ClassVisitor,
             return descriptor;
         }
 
-        // Unravel and reconstruct the class elements of the descriptor.
-        DescriptorClassEnumeration descriptorClassEnumeration =
-            new DescriptorClassEnumeration(descriptor);
-
-        StringBuffer newDescriptorBuffer = new StringBuffer(descriptor.length());
-        newDescriptorBuffer.append(descriptorClassEnumeration.nextFluff());
-
-        int index = 0;
-        while (descriptorClassEnumeration.hasMoreClassNames())
+        // TODO: Remove the try/catch when the code has stabilized.
+        // Catch any unexpected exceptions.
+        try
         {
-            String  className        = descriptorClassEnumeration.nextClassName();
-            boolean isInnerClassName = descriptorClassEnumeration.isInnerClassName();
-            String  fluff            = descriptorClassEnumeration.nextFluff();
+            // Unravel and reconstruct the class elements of the descriptor.
+            DescriptorClassEnumeration descriptorClassEnumeration =
+                new DescriptorClassEnumeration(descriptor);
 
-            String newClassName = newClassName(className,
-                                               referencedClasses[index++]);
+            StringBuffer newDescriptorBuffer = new StringBuffer(descriptor.length());
+            newDescriptorBuffer.append(descriptorClassEnumeration.nextFluff());
 
-            // Strip the outer class name again, if it's an inner class.
-            if (isInnerClassName)
+            int index = 0;
+            while (descriptorClassEnumeration.hasMoreClassNames())
             {
-                newClassName =
-                    newClassName.substring(newClassName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                String  className        = descriptorClassEnumeration.nextClassName();
+                boolean isInnerClassName = descriptorClassEnumeration.isInnerClassName();
+                String  fluff            = descriptorClassEnumeration.nextFluff();
+
+                String newClassName = newClassName(className,
+                                                   referencedClasses[index++]);
+
+                // Strip the outer class name again, if it's an inner class.
+                if (isInnerClassName)
+                {
+                    newClassName =
+                        newClassName.substring(newClassName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                }
+
+                newDescriptorBuffer.append(newClassName);
+                newDescriptorBuffer.append(fluff);
             }
 
-            newDescriptorBuffer.append(newClassName);
-            newDescriptorBuffer.append(fluff);
+            return newDescriptorBuffer.toString();
         }
+        catch (RuntimeException e)
+        {
+            System.err.println("Unexpected error while updating descriptor:");
+            System.err.println("  Descriptor = ["+descriptor+"]");
+            System.err.println("  Referenced classes: "+referencedClasses.length);
+            for (int index = 0; index < referencedClasses.length; index++)
+            {
+                Clazz referencedClass = referencedClasses[index];
+                if (referencedClass != null)
+                {
+                    System.err.println("    #"+index+": ["+referencedClass.getName()+"]");
+                }
+            }
 
-        return newDescriptorBuffer.toString();
+            throw e;
+        }
     }
 
 
@@ -605,5 +918,86 @@ implements   ClassVisitor,
         }
 
         return newClassName;
+    }
+
+
+    private static String newInnerClassName(String enclosingClassName,
+                                            String shortInnerClassName,
+                                            Clazz referencedClass)
+    {
+        String newFulllName = newClassName(enclosingClassName + "$" + shortInnerClassName,
+                                           referencedClass);
+
+        return newFulllName.substring(newFulllName.indexOf('$') + 1);
+    }
+
+
+    // Small utility helper methods for KotlinReferenceFixer.
+
+    private static void fixKotlinAnnotations(List<KotlinMetadataAnnotation> annotations)
+    {
+        for (KotlinMetadataAnnotation annotation : annotations)
+        {
+            Map<String, KmAnnotationArgument<?>> newKeys = new HashMap<>();
+
+            for (Map.Entry<String, KmAnnotationArgument<?>> entry : annotation.kmAnnotation.getArguments().entrySet())
+            {
+                String originalName = entry.getKey();
+                Method refMethod    = annotation.referencedArgumentMethods.get(originalName);
+                String newName      = refMethod.getName(annotation.referencedAnnotationClass);
+                newKeys.put(newName, entry.getValue());
+                // Update the new name in the referencedKeys as well.
+                annotation.referencedArgumentMethods.remove(originalName);
+                annotation.referencedArgumentMethods.put(newName, refMethod);
+            }
+
+            annotation.kmAnnotation = new KmAnnotation(annotation.referencedAnnotationClass.getName(), newKeys);
+        }
+    }
+
+    private static JvmMethodSignature fixPropertyMethod(Clazz                       referencedMethodClass,
+                                                        Method                      referencedMethod,
+                                                        KotlinPropertyAccessorFlags flags,
+                                                        JvmMethodSignature          oldSignature)
+    {
+        if (oldSignature == null)
+        {
+            return null;
+        }
+
+        JvmMethodSignature newSignature = new JvmMethodSignature(referencedMethod.getName(referencedMethodClass),
+                                                                 referencedMethod.getDescriptor(referencedMethodClass));
+
+        if (!oldSignature.equals(newSignature) &&
+            flags != null)
+        {
+            addJvmNameAnnotation((ProgramClass) referencedMethodClass,
+                                 (ProgramMethod)referencedMethod);
+            flags.common.hasAnnotations = true;
+        }
+
+        return newSignature;
+    }
+
+
+    private static void addJvmNameAnnotation(ProgramClass programClass, ProgramMethod programMethod)
+    {
+        ConstantPoolEditor editor = new ConstantPoolEditor(programClass);
+
+        Annotation jvmName = new Annotation(editor.addUtf8Constant(TYPE_KOTLIN_JVM_JVMNAME),
+                                            1,
+                                            new ElementValue[]
+                                            {
+                                                new ConstantElementValue('s',
+                                                                         editor.addUtf8Constant("name"),
+                                                                         editor.addUtf8Constant(programMethod.getName(programClass)))
+                                            });
+
+        RuntimeInvisibleAnnotationsAttribute attribute =
+            new RuntimeInvisibleAnnotationsAttribute(editor.addUtf8Constant(ATTR_RuntimeInvisibleAnnotations),
+                                                     1,
+                                                     new Annotation[] { jvmName });
+
+        new AttributesEditor(programClass, programMethod, false).addAttribute(attribute);
     }
 }

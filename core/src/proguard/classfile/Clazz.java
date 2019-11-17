@@ -22,15 +22,16 @@ package proguard.classfile;
 
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.visitors.KotlinMetadataVisitor;
 import proguard.classfile.visitor.*;
-
+import proguard.util.*;
 
 /**
- * This interface provides access to the representation of a Java class.
+ * This interface provides access to the fundamental properties of a Java class.
  *
  * @author Eric Lafortune
  */
-public interface Clazz extends VisitorAccepter
+public interface Clazz extends FeatureNamed, Processable, VisitorAccepter
 {
     /**
      * Returns the access flags of this class.
@@ -114,6 +115,12 @@ public interface Clazz extends VisitorAccepter
     public void addSubClass(Clazz clazz);
 
     /**
+     * Notifies this Clazz that it is no longer being subclassed by another
+     * class.
+     */
+    public void removeSubClass(Clazz clazz);
+
+    /**
      * Returns the super class of this class.
      */
     public Clazz getSuperClass();
@@ -156,13 +163,19 @@ public interface Clazz extends VisitorAccepter
 
     /**
      * Returns the field with the given name and descriptor.
+     * @param name       the field name, or null if it is irrelevant.
+     * @param descriptor the field type, or null if it is irrelevant.
+     * @return the first matching field, or null there is no matching field.
      */
-    Field findField(String name, String descriptor);
+    public Field findField(String name, String descriptor);
 
     /**
      * Returns the method with the given name and descriptor.
+     * @param name       the method name, or null if it is irrelevant.
+     * @param descriptor the method descriptor, or null if it is irrelevant.
+     * @return the first matching method, or null there is no matching method.
      */
-    Method findMethod(String name, String descriptor);
+    public Method findMethod(String name, String descriptor);
 
 
     // Methods for accepting various types of visitors.
@@ -263,4 +276,9 @@ public interface Clazz extends VisitorAccepter
      * Lets the given attribute info visitor visit the specified attribute.
      */
     public void attributeAccept(String name, AttributeVisitor attributeVisitor);
+
+    /**
+     * Lets the given Kotlin metadata visitor visit the metadata of this class.
+     */
+    public void kotlinMetadataAccept(KotlinMetadataVisitor kotlinMetadataVisitor);
 }

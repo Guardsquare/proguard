@@ -64,9 +64,27 @@ public class ProgramMethod extends ProgramMember implements Method
         this(u2accessFlags,
              u2nameIndex,
              u2descriptorIndex,
+             referencedClasses,
+             0);
+    }
+
+
+    /**
+     * Creates an initialized ProgramMethod without attributes.
+     */
+    public ProgramMethod(int     u2accessFlags,
+                         int     u2nameIndex,
+                         int     u2descriptorIndex,
+                         Clazz[] referencedClasses,
+                         int     processingFlags)
+    {
+        this(u2accessFlags,
+             u2nameIndex,
+             u2descriptorIndex,
              0,
              EMPTY_ATTRIBUTES,
-             referencedClasses);
+             referencedClasses,
+             processingFlags);
     }
 
 
@@ -80,7 +98,28 @@ public class ProgramMethod extends ProgramMember implements Method
                          Attribute[] attributes,
                          Clazz[]     referencedClasses)
     {
-        super(u2accessFlags, u2nameIndex, u2descriptorIndex, u2attributesCount, attributes);
+        this(u2accessFlags,
+             u2nameIndex,
+             u2descriptorIndex,
+             u2attributesCount,
+             attributes,
+             referencedClasses,
+             0);
+    }
+
+
+    /**
+     * Creates an initialized ProgramMethod.
+     */
+    public ProgramMethod(int         u2accessFlags,
+                         int         u2nameIndex,
+                         int         u2descriptorIndex,
+                         int         u2attributesCount,
+                         Attribute[] attributes,
+                         Clazz[]     referencedClasses,
+                         int         processingFlags)
+    {
+        super(u2accessFlags, u2nameIndex, u2descriptorIndex, u2attributesCount, attributes, processingFlags);
 
         this.referencedClasses = referencedClasses;
     }

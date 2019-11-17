@@ -58,6 +58,7 @@ implements   InstructionVisitor
     private final InstructionSequenceMatcher addDeserializationExclusionStrategyMatcher;
     private final InstructionSequenceMatcher registerTypeAdapterMatcher;
     private final InstructionSequenceMatcher registerTypeHierachyAdapterMatcher;
+    private final InstructionSequenceMatcher registerTypeAdapterFactoryMatcher;
     private final InstructionSequenceMatcher serializeSpecialFloatingPointValuesMatcher;
     private final TypedReferenceValueFactory valueFactory         =
         new TypedReferenceValueFactory();
@@ -70,6 +71,7 @@ implements   InstructionVisitor
                                 new SingleTimeAttributeVisitor(
                                              partialEvaluator));
     private final ClassPool                  programClassPool;
+    private final ClassPool                  libraryClassPool;
     private final GsonRuntimeSettings        gsonRuntimeSettings;
     private final ClassVisitor               instanceCreatorClassVisitor;
     private final ClassVisitor               typeAdapterClassVisitor;
@@ -79,6 +81,8 @@ implements   InstructionVisitor
      *
      * @param programClassPool            the program class pool used to look
      *                                    up class references.
+     * @param libraryClassPool            the library class pool used to look
+     *                                    up class references.
      * @param instanceCreatorClassVisitor visitor to which domain classes for
      *                                    which an InstanceCreator is
      *                                    registered will be delegated.
@@ -87,11 +91,13 @@ implements   InstructionVisitor
      *                                    will be delegated.
      */
     public GsonBuilderInvocationFinder(ClassPool           programClassPool,
+                                       ClassPool           libraryClassPool,
                                        GsonRuntimeSettings gsonRuntimeSettings,
                                        ClassVisitor        instanceCreatorClassVisitor,
                                        ClassVisitor        typeAdapterClassVisitor)
     {
         this.programClassPool            = programClassPool;
+        this.libraryClassPool            = libraryClassPool;
         this.gsonRuntimeSettings         = gsonRuntimeSettings;
         this.instanceCreatorClassVisitor = instanceCreatorClassVisitor;
         this.typeAdapterClassVisitor     = typeAdapterClassVisitor;
@@ -188,6 +194,12 @@ implements   InstructionVisitor
                            GsonClassConstants.METHOD_TYPE_REGISTER_TYPE_HIERARCHY_ADAPTER)
             .instructions();
 
+        Instruction[] registerTypeAdapterFactoryInstructions = builder
+            .invokevirtual(GsonClassConstants.NAME_GSON_BUILDER,
+                           GsonClassConstants.METHOD_NAME_REGISTER_TYPE_ADAPTER_FACTORY,
+                           GsonClassConstants.METHOD_TYPE_REGISTER_TYPE_ADAPTER_FACTORY)
+            .instructions();
+
         Instruction[] serializeSpecialFloatingPointValuesInstructions = builder
             .invokevirtual(GsonClassConstants.NAME_GSON_BUILDER,
                            GsonClassConstants.METHOD_NAME_SERIALIZE_SPECIAL_FLOATING_POINT_VALUES,
@@ -249,6 +261,10 @@ implements   InstructionVisitor
         registerTypeHierachyAdapterMatcher =
             new InstructionSequenceMatcher(constants,
                                            registerTypeHierarchyAdapterInstructions);
+
+        registerTypeAdapterFactoryMatcher =
+            new InstructionSequenceMatcher(constants,
+                                           registerTypeAdapterFactoryInstructions);
 
         serializeSpecialFloatingPointValuesMatcher =
             new InstructionSequenceMatcher(constants,
@@ -419,6 +435,18 @@ implements   InstructionVisitor
                 serializeSpecialFloatingPointValuesMatcher.isMatching();
         }
 
+        if (!gsonRuntimeSettings.registerTypeAdapterFactory)
+        {
+            instruction.accept(clazz,
+                               method,
+                               codeAttribute,
+                               offset,
+                               registerTypeAdapterFactoryMatcher);
+
+            gsonRuntimeSettings.registerTypeAdapterFactory =
+                registerTypeAdapterFactoryMatcher.isMatching();
+        }
+
         if (instanceCreatorClassVisitor != null && typeAdapterClassVisitor != null)
         {
             instruction.accept(clazz,
@@ -447,7 +475,9 @@ implements   InstructionVisitor
                         .instructionOffsetValue();
 
                 TypeArgumentFinder typeArgumentFinder =
-                    new TypeArgumentFinder(programClassPool, partialEvaluator);
+                    new TypeArgumentFinder(programClassPool,
+                                           libraryClassPool,
+                                           partialEvaluator);
                 for (int i = 0; i < typeProducer.instructionOffsetCount(); i++)
                 {
                     codeAttribute.instructionAccept(clazz,
@@ -462,6 +492,10 @@ implements   InstructionVisitor
                     String typeArgumentClass =
                         typeArgumentFinder.typeArgumentClasses[0];
                     Clazz type = programClassPool.getClass(typeArgumentClass);
+                    if (type == null)
+                    {
+                        type = libraryClassPool.getClass(typeArgumentClass);
+                    }
 
                     if (type != null)
                     {
@@ -472,7 +506,9 @@ implements   InstructionVisitor
                                 .instructionOffsetValue();
 
                         TypeArgumentFinder typeAdapterArgumentFinder =
-                            new TypeArgumentFinder(programClassPool, partialEvaluator);
+                            new TypeArgumentFinder(programClassPool,
+                                                   libraryClassPool,
+                                                   partialEvaluator);
                         for (int i = 0; i < typeAdapterProducer.instructionOffsetCount(); i++)
                         {
                             codeAttribute.instructionAccept(clazz,
@@ -497,6 +533,7 @@ implements   InstructionVisitor
                                                            new ClassVisitorPropagator(type, instanceCreatorClassVisitor),
                                                            new ClassVisitorPropagator(type, typeAdapterClassVisitor));
                             programClassPool.classAccept(typeAdapterArgumentClass, implementsInstanceCreatorFilter);
+                            libraryClassPool.classAccept(typeAdapterArgumentClass, implementsInstanceCreatorFilter);
                         }
                     }
                 }

@@ -20,8 +20,9 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of a parameter, as defined in a method parameters
@@ -29,15 +30,10 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
  *
  * @author Eric Lafortune
  */
-public class ParameterInfo implements VisitorAccepter
+public class ParameterInfo extends SimpleVisitorAccepter
 {
     public int u2nameIndex;
     public int u2accessFlags;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
 
 
     /**
@@ -78,18 +74,5 @@ public class ParameterInfo implements VisitorAccepter
         {
             clazz.constantPoolEntryAccept(u2nameIndex, constantVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

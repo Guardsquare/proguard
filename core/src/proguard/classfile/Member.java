@@ -21,13 +21,15 @@
 package proguard.classfile;
 
 import proguard.classfile.visitor.*;
+import proguard.util.*;
 
 /**
- * Representation of a field or method from a class.
+ * This abstract class provides the basis for representing a field or a method
+ * from a class.
  *
  * @author Eric Lafortune
  */
-public interface Member extends VisitorAccepter
+public interface Member extends Processable, VisitorAccepter
 {
     /**
      * Returns the access flags.

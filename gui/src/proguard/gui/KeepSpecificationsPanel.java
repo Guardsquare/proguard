@@ -67,6 +67,7 @@ final class KeepSpecificationsPanel extends ClassSpecificationsPanel
                                           markConditionally,
                                           markDescriptorClasses,
                                           false,
+                                          false,
                                           allowShrinking,
                                           allowOptimization,
                                           allowObfuscation,

@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import proguard.classfile.ClassPool;
+
 /**
  * This class keeps track of which parameters of the GsonBuilder are being
  * utilized in the code.
@@ -55,11 +57,15 @@ public class GsonRuntimeSettings
     // This setting is taken care of by the built-in DateTypeAdapters of Gson.
     //    public boolean setDateFormat;
 
-    // These type adapters come before the _OptimizedTypeAdapterFactory we
-    // inject.
-    //    public boolean registerTypeAdapter;
-    //    public boolean registerTypeAdapterFactory;
-    //    public boolean registerTypeHierarchyAdapter;
+    // These are the classes for which an instance creator or type adapter was
+    // register using either registerTypeAdapter() or
+    // registerTypeHierarchyAdapter()
+    public ClassPool instanceCreatorClassPool = new ClassPool();
+    public ClassPool typeAdapterClassPool     = new ClassPool();
+
+    // These type adapter factories come before the _OptimizedTypeAdapterFactory
+    // we inject.
+    public boolean registerTypeAdapterFactory;
 
     public boolean serializeSpecialFloatingPointValues;
 }

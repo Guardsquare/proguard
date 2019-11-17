@@ -35,6 +35,31 @@ import java.io.File;
  */
 public class FileNameParser implements StringParser
 {
+    private final WildcardManager wildcardManager;
+
+
+    /**
+     * Creates a new FileNameParser.
+     */
+    public FileNameParser()
+    {
+        this(null);
+    }
+
+
+    /**
+     * Creates a new FileNameParser that supports references to earlier
+     * wildcards.
+     *
+     * @param wildcardManager an optional scope for StringMatcher instances
+     *                        that match wildcards.
+     */
+    public FileNameParser(WildcardManager wildcardManager)
+    {
+        this.wildcardManager = wildcardManager;
+    }
+
+
     // Implementations for StringParser.
 
     public StringMatcher parse(String regularExpression)
@@ -48,42 +73,84 @@ public class FileNameParser implements StringParser
             // Is there a '**' wildcard?
             if (regularExpression.regionMatches(index, "**", 0, 2))
             {
-                // Create a matcher for the wildcard and, recursively, for the
-                // remainder of the string.
-                nextMatcher =
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
+                SettableMatcher settableMatcher = new SettableMatcher();
+
+                // Create a matcher for the wildcard.
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               null,
                                               0,
                                               Integer.MAX_VALUE,
-                                              parse(regularExpression.substring(index + 2)));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
+
+                // Recursively create a matcher for the rest of the string.
+                settableMatcher.setMatcher(parse(regularExpression.substring(index + 2)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '*' wildcard?
             else if (regularExpression.charAt(index) == '*')
             {
-                // Create a matcher for the wildcard and, recursively, for the
-                // remainder of the string.
-                nextMatcher =
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
+                SettableMatcher settableMatcher = new SettableMatcher();
+
+                // Create a matcher for the wildcard.
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               new char[] { File.pathSeparatorChar, '/' },
                                               0,
                                               Integer.MAX_VALUE,
-                                              parse(regularExpression.substring(index + 1)));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
+
+                // Recursively create a matcher for the rest of the string.
+                settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
 
             // Is there a '?' wildcard?
             else if (regularExpression.charAt(index) == '?')
             {
-                // Create a matcher for the wildcard and, recursively, for the
-                // remainder of the string.
-                nextMatcher =
+                // Create a settable matcher so we can parse wildcards from
+                // left to right.
+                SettableMatcher settableMatcher = new SettableMatcher();
+
+                // Create a matcher for the wildcard.
+                VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
                                               new char[] { File.pathSeparatorChar, '/' },
                                               1,
                                               1,
-                                              parse(regularExpression.substring(index + 1)));
+                                              settableMatcher);
+
+                // Remember it so it can be referenced back.
+                if (wildcardManager != null)
+                {
+                    wildcardManager.rememberVariableStringMatcher(variableStringMatcher);
+                }
+
+                // Recursively create a matcher for the rest of the string.
+                settableMatcher.setMatcher(parse(regularExpression.substring(index + 1)));
+
+                nextMatcher = variableStringMatcher;
                 break;
             }
         }
@@ -91,8 +158,8 @@ public class FileNameParser implements StringParser
         // Return a matcher for the fixed first part of the regular expression,
         // if any, and the remainder.
         return index != 0 ?
-            (StringMatcher)new FixedStringMatcher(regularExpression.substring(0, index), nextMatcher) :
-            (StringMatcher)nextMatcher;
+            new FixedStringMatcher(regularExpression.substring(0, index), nextMatcher) :
+            nextMatcher;
     }
 
 

@@ -21,16 +21,21 @@
 package proguard.classfile.visitor;
 
 import proguard.classfile.*;
+import proguard.util.Counter;
 
 /**
  * This MemberVisitor counts the number of class members that have been visited.
  *
  * @author Eric Lafortune
  */
-public class MemberCounter implements MemberVisitor
+public class MemberCounter
+implements   MemberVisitor,
+             Counter
 {
     private int count;
 
+
+    // Implementations for Counter.
 
     /**
      * Returns the number of class members that has been visited so far.

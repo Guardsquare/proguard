@@ -35,72 +35,79 @@ import java.util.List;
 public class ClassNameFilter implements ClassVisitor
 {
     private final StringMatcher regularExpressionMatcher;
-    private final ClassVisitor  classVisitor;
+    private final ClassVisitor  acceptedClassVisitor;
+    private final ClassVisitor  rejectedClassVisitor;
 
 
     /**
      * Creates a new ClassNameFilter.
-     * @param regularExpression      the regular expression against which class
-     *                               names will be matched.
-     * @param classVisitor           the <code>ClassVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
      */
     public ClassNameFilter(String       regularExpression,
-                           ClassVisitor classVisitor)
+                           ClassVisitor acceptedClassVisitor)
     {
-        this(regularExpression, null, classVisitor);
+        this(regularExpression,
+             (WildcardManager)null,
+             acceptedClassVisitor);
     }
 
 
     /**
      * Creates a new ClassNameFilter.
-     * @param regularExpression      the regular expression against which class
-     *                               names will be matched.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
-     * @param classVisitor           the <code>ClassVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param wildcardManager      an optional scope for StringMatcher instances
+     *                             that match wildcards.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
      */
-    public ClassNameFilter(String       regularExpression,
-                           List         variableStringMatchers,
-                           ClassVisitor classVisitor)
+    public ClassNameFilter(String          regularExpression,
+                           WildcardManager wildcardManager,
+                           ClassVisitor    acceptedClassVisitor)
     {
-        this(new ListParser(new ClassNameParser(variableStringMatchers)).parse(regularExpression),
-             classVisitor);
+        this(regularExpression,
+             wildcardManager,
+             acceptedClassVisitor,
+             null);
     }
 
 
     /**
      * Creates a new ClassNameFilter.
-     * @param regularExpression      the regular expression against which class
-     *                               names will be matched.
-     * @param classVisitor           the <code>ClassVisitor</code> to which
-     *                               visits will be delegated.
-     */
-    public ClassNameFilter(List         regularExpression,
-                           ClassVisitor classVisitor)
-    {
-        this(regularExpression, null, classVisitor);
-    }
-
-
-    /**
-     * Creates a new ClassNameFilter.
-     * @param regularExpression      the regular expression against which class
-     *                               names will be matched.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
-     * @param classVisitor           the <code>ClassVisitor</code> to which
-     *                               visits will be delegated.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
      */
     public ClassNameFilter(List         regularExpression,
-                           List         variableStringMatchers,
-                           ClassVisitor classVisitor)
+                           ClassVisitor acceptedClassVisitor)
     {
-        this(new ListParser(new ClassNameParser(variableStringMatchers)).parse(regularExpression),
-             classVisitor);
+        this(regularExpression,
+             (WildcardManager)null,
+             acceptedClassVisitor);
+    }
+
+
+    /**
+     * Creates a new ClassNameFilter.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param wildcardManager      an optional scope for StringMatcher instances
+     *                             that match wildcards.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
+     */
+    public ClassNameFilter(List            regularExpression,
+                           WildcardManager wildcardManager,
+                           ClassVisitor    acceptedClassVisitor)
+    {
+        this(regularExpression,
+             wildcardManager,
+             acceptedClassVisitor,
+             null);
     }
 
 
@@ -108,41 +115,151 @@ public class ClassNameFilter implements ClassVisitor
      * Creates a new ClassNameFilter.
      * @param regularExpressionMatcher the string matcher against which
      *                                 class names will be matched.
-     * @param classVisitor             the <code>ClassVisitor</code> to which
-     *                                 visits will be delegated.
+     * @param acceptedClassVisitor     the <code>ClassVisitor</code> to which
+     *                                 accepted visits will be delegated.
      */
     public ClassNameFilter(StringMatcher regularExpressionMatcher,
-                           ClassVisitor  classVisitor)
+                           ClassVisitor  acceptedClassVisitor)
+    {
+        this(regularExpressionMatcher,
+             acceptedClassVisitor,
+             null);
+    }
+
+
+    /**
+     * Creates a new ClassNameFilter.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
+     * @param rejectedClassVisitor the <code>ClassVisitor</code> to which
+     *                             rejected visits will be delegated.
+     */
+    public ClassNameFilter(String       regularExpression,
+                           ClassVisitor acceptedClassVisitor,
+                           ClassVisitor rejectedClassVisitor)
+    {
+        this(regularExpression,
+             null,
+             acceptedClassVisitor,
+             rejectedClassVisitor);
+    }
+
+
+    /**
+     * Creates a new ClassNameFilter.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param wildcardManager      an optional scope for StringMatcher instances
+     *                             that match wildcards.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
+     * @param rejectedClassVisitor the <code>ClassVisitor</code> to which
+     *                             rejected visits will be delegated.
+     */
+    public ClassNameFilter(String          regularExpression,
+                           WildcardManager wildcardManager,
+                           ClassVisitor    acceptedClassVisitor,
+                           ClassVisitor    rejectedClassVisitor)
+    {
+        this(new ListParser(new ClassNameParser(wildcardManager)).parse(regularExpression),
+             acceptedClassVisitor,
+             rejectedClassVisitor);
+    }
+
+
+    /**
+     * Creates a new ClassNameFilter.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
+     * @param rejectedClassVisitor the <code>ClassVisitor</code> to which
+     *                             rejected visits will be delegated.
+     */
+    public ClassNameFilter(List         regularExpression,
+                           ClassVisitor acceptedClassVisitor,
+                           ClassVisitor rejectedClassVisitor)
+    {
+        this(regularExpression,
+             null,
+             acceptedClassVisitor,
+             rejectedClassVisitor);
+    }
+
+
+    /**
+     * Creates a new ClassNameFilter.
+     * @param regularExpression    the regular expression against which class
+     *                             names will be matched.
+     * @param wildcardManager      an optional scope for StringMatcher instances
+     *                             that match wildcards.
+     * @param acceptedClassVisitor the <code>ClassVisitor</code> to which
+     *                             accepted visits will be delegated.
+     * @param rejectedClassVisitor the <code>ClassVisitor</code> to which
+     *                             rejected visits will be delegated.
+     */
+    public ClassNameFilter(List            regularExpression,
+                           WildcardManager wildcardManager,
+                           ClassVisitor    acceptedClassVisitor,
+                           ClassVisitor    rejectedClassVisitor)
+    {
+        this(new ListParser(new ClassNameParser(wildcardManager)).parse(regularExpression),
+             acceptedClassVisitor,
+             rejectedClassVisitor);
+    }
+
+
+    /**
+     * Creates a new ClassNameFilter.
+     * @param regularExpressionMatcher the string matcher against which
+     *                                 class names will be matched.
+     * @param acceptedClassVisitor     the <code>ClassVisitor</code> to which
+     *                                 accepted visits will be delegated.
+     * @param rejectedClassVisitor     the <code>ClassVisitor</code> to which
+     *                                 rejected visits will be delegated.
+     */
+    public ClassNameFilter(StringMatcher regularExpressionMatcher,
+                           ClassVisitor  acceptedClassVisitor,
+                           ClassVisitor  rejectedClassVisitor)
     {
         this.regularExpressionMatcher = regularExpressionMatcher;
-        this.classVisitor             = classVisitor;
+        this.acceptedClassVisitor     = acceptedClassVisitor;
+        this.rejectedClassVisitor     = rejectedClassVisitor;
     }
 
 
     // Implementations for ClassVisitor.
 
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (accepted(programClass.getName()))
+        ClassVisitor delegate = getDelegateVisitor(programClass);
+        if (delegate != null)
         {
-            classVisitor.visitProgramClass(programClass);
+            delegate.visitProgramClass(programClass);
         }
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        if (accepted(libraryClass.getName()))
+        ClassVisitor delegate = getDelegateVisitor(libraryClass);
+        if (delegate != null)
         {
-            classVisitor.visitLibraryClass(libraryClass);
+            delegate.visitLibraryClass(libraryClass);
         }
     }
 
 
     // Small utility methods.
 
-    private boolean accepted(String name)
+    private ClassVisitor getDelegateVisitor(Clazz clazz)
     {
-        return regularExpressionMatcher.matches(name);
+        return regularExpressionMatcher.matches(clazz.getName()) ?
+            acceptedClassVisitor :
+            rejectedClassVisitor;
     }
 }

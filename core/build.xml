@@ -16,9 +16,15 @@
     <mkdir dir = "out"/>
   </target>
 
-  <target name = "download">
-    <get src          = "https://jcenter.bintray.com/com/google/code/gson/gson/2.8.5/gson-${gson.version}.jar"
-         dest         = "../lib/gson-${gson.version}.jar"
+  <target name = "download" depends = "lib">
+    <get src          = "https://jcenter.bintray.com/org/jetbrains/kotlin/kotlin-stdlib/${kotlin.version}/kotlin-stdlib-${kotlin.version}.jar"
+         dest         = "../lib/kotlin-stdlib-${kotlin.version}.jar"
+         skipexisting = "true"/>
+    <get src          = "https://jcenter.bintray.com/org/jetbrains/kotlin/kotlin-stdlib-common/${kotlin.version}/kotlin-stdlib-common-${kotlin.version}.jar"
+         dest         = "../lib/kotlin-stdlib-common-${kotlin.version}.jar"
+         skipexisting = "true"/>
+    <get src          = "https://jcenter.bintray.com/org/jetbrains/kotlinx/kotlinx-metadata-jvm/${kotlinx.metadata.version}/kotlinx-metadata-jvm-${kotlinx.metadata.version}.jar"
+         dest         = "../lib/kotlinx-metadata-jvm-${kotlinx.metadata.version}.jar"
          skipexisting = "true"/>
   </target>
 
@@ -30,8 +36,7 @@
            target            = "${target}"
            srcdir            = "src"
            destdir           = "out"
-           classpath         = "../lib/gson-${gson.version}.jar"
-           includes          = "proguard/ProGuard.java">
+           classpath         = "../lib/kotlin-stdlib-${kotlin.version}.jar:../lib/kotlin-stdlib-common-${kotlin.version}.jar:../lib/kotlinx-metadata-jvm-${kotlinx.metadata.version}.jar">
       <compilerarg value = "-Xlint:none"/>
     </javac>
   </target>
@@ -53,7 +58,6 @@
 
   <target name = "dist" depends = "compile,resources,lib">
     <jar jarfile  = "../lib/proguard.jar"
-         manifest = "src/META-INF/MANIFEST.MF"
          basedir  = "out"/>
   </target>
 

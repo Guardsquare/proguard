@@ -31,6 +31,7 @@ implements   DataEntryFilter
 {
     // Implementations for DataEntryFilter.
 
+    @Override
     public boolean accepts(DataEntry dataEntry)
     {
         return dataEntry != null && dataEntry.isDirectory();

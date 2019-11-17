@@ -20,8 +20,6 @@
  */
 package proguard.util;
 
-import java.io.UnsupportedEncodingException;
-
 /**
  * This class contains utility methods for strings.
  */
@@ -46,15 +44,10 @@ public class StringUtil
 
 
     /**
-     * Returns the modified UTF-8 byte array representation of the given string.
+     * Returns the length of the modified UTF-8 byte array representation of the given string.
      */
-    public static byte[] getUtf8Bytes(String string)
+    public static int getModifiedUtf8Length(String string)
     {
-        // We're computing the byte array ourselves, because the implementation
-        // of String.getBytes("UTF-8") has a bug, at least up to JRE 1.4.2.
-        // Also note the special treatment of the 0 character.
-
-        // Compute the byte array length.
         int byteLength   = 0;
         int stringLength = string.length();
         for (int stringIndex = 0; stringIndex < stringLength; stringIndex++)
@@ -67,6 +60,29 @@ public class StringUtil
                           c <  THREE_BYTE_LIMIT ? 2 :
                                                   3;
         }
+
+        return byteLength;
+    }
+
+
+    /**
+     * Returns the modified UTF-8 byte array representation of the given string.
+     * <p>
+     * Note: surrogate pairs are encoded separately as three byte values as requested
+     * by the modified UTF-8 specification. This method is suited for encoding strings
+     * stored in class files, dex files or native libraries.
+     *
+     * @link https://www.oracle.com/technetwork/articles/java/supplementary-142654.html
+     * @link https://source.android.com/devices/tech/dalvik/dex-format#mutf-8
+     */
+    public static byte[] getModifiedUtf8Bytes(String string)
+    {
+        // We're computing the byte array ourselves, because the implementation
+        // of String.getBytes("UTF-8") has a bug, at least up to JRE 1.4.2.
+        // Also note the special treatment of the 0 character.
+
+        int byteLength   = getModifiedUtf8Length(string);
+        int stringLength = string.length();
 
         // Allocate the byte array with the computed length.
         byte[] bytes  = new byte[byteLength];
@@ -109,33 +125,30 @@ public class StringUtil
     /**
      * Returns the String representation of the given modified UTF-8 byte array.
      */
-    public static String getString(byte[] bytes)
-        throws UnsupportedEncodingException
+    public static String getString(byte[] modifiedUtf8Bytes)
     {
-        return getStringRepresentation(bytes, bytes.length);
+        return getString(modifiedUtf8Bytes, 0, modifiedUtf8Bytes.length);
     }
 
 
     /**
      * Returns the String representation of the given modified UTF-8 byte array.
      */
-    public static String getStringRepresentation(byte[] bytes, int size)
-        throws UnsupportedEncodingException
+    public static String getString(byte[] modifiedUtf8Bytes,
+                                   int    startIndex,
+                                   int    endIndex)
     {
         // We're computing the string ourselves, because the implementation
         // of "new String(bytes)" doesn't honor the special treatment of
         // the 0 character in JRE 1.6_u11 and higher.
 
-        // Allocate the byte array with the computed length.
-        char[] chars  = new char[size];
+        StringBuilder builder = new StringBuilder(endIndex - startIndex);
 
         // Fill out the array.
-        int charIndex = 0;
-        int byteIndex = 0;
-        while (byteIndex < size)
+        int byteIndex = startIndex;
+        while (byteIndex < endIndex)
         {
-
-            int b = bytes[byteIndex++] & 0xff;
+            int b = modifiedUtf8Bytes[byteIndex++] & 0xff;
 
             // Depending on the flag bits in the first byte, the character
             // is represented by a single byte, by two bytes, or by three
@@ -143,23 +156,24 @@ public class StringUtil
             // second byte and the third byte.
             try
             {
-                chars[charIndex++] =
+                char c =
                     (char)(b < TWO_BYTE_CONSTANT1   ? b                                                          :
 
-                           b < THREE_BYTE_CONSTANT1 ? ((b                  & TWO_BYTE_MASK1) << TWO_BYTE_SHIFT1) |
-                                                      ((bytes[byteIndex++] & TWO_BYTE_MASK2)                   ) :
+                           b < THREE_BYTE_CONSTANT1 ? ((b                              & TWO_BYTE_MASK1) << TWO_BYTE_SHIFT1) |
+                                                      ((modifiedUtf8Bytes[byteIndex++] & TWO_BYTE_MASK2)                   ) :
 
-                                                      ((b                  & THREE_BYTE_MASK1) << THREE_BYTE_SHIFT1) |
-                                                      ((bytes[byteIndex++] & THREE_BYTE_MASK2) << THREE_BYTE_SHIFT2) |
-                                                      ((bytes[byteIndex++] & THREE_BYTE_MASK3)                     ));
+                                                      ((b                              & THREE_BYTE_MASK1) << THREE_BYTE_SHIFT1) |
+                                                      ((modifiedUtf8Bytes[byteIndex++] & THREE_BYTE_MASK2) << THREE_BYTE_SHIFT2) |
+                                                      ((modifiedUtf8Bytes[byteIndex++] & THREE_BYTE_MASK3)                     ));
+                builder.append(c);
             }
             catch (ArrayIndexOutOfBoundsException e)
             {
-                throw new UnsupportedEncodingException("Missing UTF-8 bytes after initial byte [0x"+Integer.toHexString(b)+"] in string ["+new String(chars, 0, charIndex)+"]");
+                throw new IllegalArgumentException("Missing UTF-8 bytes after byte [0x"+Integer.toHexString(b)+"] in string ["+builder.toString()+"]");
             }
         }
 
-        return new String(chars, 0, charIndex);
+        return builder.toString();
     }
 
 
@@ -190,36 +204,69 @@ public class StringUtil
      */
     public static String toHexString(byte[] bytes)
     {
-        return toHexString(bytes, bytes.length);
+        return toHexString(bytes, null, true);
     }
 
 
     /**
      * Returns the hexadecimal representation of the given byte array.
      */
-    public static String toHexString(byte[] bytes, int size)
+    public static String toHexString(byte[]  bytes,
+                                     String  separator,
+                                     boolean upperCase)
     {
-        StringBuffer buffer = new StringBuffer(2*size);
+        if (bytes == null)
+        {
+            return null;
+        }
+
+        StringBuilder builder = new StringBuilder(2 * bytes.length +
+                                                  (separator == null ? 0 : separator.length() * (bytes.length-1)));
 
         for (int index = 0; index < bytes.length; index++)
         {
             byte b = bytes[index];
 
-            buffer.append(hexNibble(b >> 4)).append(hexNibble(b));
+            // Append the two nibbles of the byte.
+            builder.append(hexNibble(b >> 4, upperCase))
+                   .append(hexNibble(b,      upperCase));
+
+            // Append the separator, if any.
+            if (separator != null && index < bytes.length - 1)
+            {
+                builder.append(separator);
+            }
         }
 
-        return buffer.toString();
+        return builder.toString();
     }
 
 
     /**
      * Returns the hexadecimal representation of the given nibble.
      */
-    private static char hexNibble(int nibble)
+    private static char hexNibble(int nibble, boolean upperCase)
     {
         nibble &= 0xf;
         return (char)(nibble < 10 ?
-                          '0' + nibble :
-                          'a' + nibble - 10);
+                          '0'                     + nibble :
+                          (upperCase ? 'A' : 'a') + nibble - 10);
+    }
+
+
+    /**
+     * Escapes control characters (\n, \r, \b, \t, \f).
+     */
+    public static String escapeControlCharacters(String input)
+    {
+        String result = input;
+
+        result = result.replaceAll("\n", "\\\\n");
+        result = result.replaceAll("\r", "\\\\r");
+        result = result.replaceAll("\t", "\\\\t");
+        result = result.replaceAll("\f", "\\\\f");
+        result = result.replaceAll("\b", "\\\\b");
+
+        return result;
     }
 }

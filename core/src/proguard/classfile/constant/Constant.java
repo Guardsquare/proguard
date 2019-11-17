@@ -20,8 +20,9 @@
  */
 package proguard.classfile.constant;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * This abstract class represents an entry in the ConstantPool. Specific types
@@ -29,16 +30,10 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
  *
  * @author Eric Lafortune
  */
-public abstract class Constant implements VisitorAccepter
+public abstract class Constant extends SimpleVisitorAccepter
 {
     //public int  u1tag;
     //public byte info[];
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     // Abstract methods to be implemented by extensions.
 
@@ -52,17 +47,4 @@ public abstract class Constant implements VisitorAccepter
      * Accepts the given visitor.
      */
     public abstract void accept(Clazz clazz, ConstantVisitor constantVisitor);
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
-    }
 }

@@ -24,6 +24,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.util.ArrayUtil;
 
 /**
  * This AnnotationVisitor adds all annotations that it visits to the given
@@ -106,8 +107,7 @@ implements   AnnotationVisitor
                                new ElementValue[annotation.u2elementValuesCount] :
                                EMPTY_ELEMENT_VALUES);
 
-        // TODO: Clone array.
-        newAnnotation.referencedClasses = annotation.referencedClasses;
+        newAnnotation.referencedClasses = ArrayUtil.cloneOrNull(annotation.referencedClasses);
 
         // Add the element values.
         annotation.elementValuesAccept(clazz,
@@ -138,8 +138,7 @@ implements   AnnotationVisitor
                                new ElementValue[annotation.u2elementValuesCount] :
                                EMPTY_ELEMENT_VALUES);
 
-        // TODO: Clone array.
-        newAnnotation.referencedClasses = annotation.referencedClasses;
+        newAnnotation.referencedClasses = ArrayUtil.cloneOrNull(annotation.referencedClasses);
 
         // Add the element values.
         annotation.elementValuesAccept(clazz,

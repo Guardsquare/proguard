@@ -23,8 +23,11 @@ package proguard.shrink;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.kotlin.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.kotlin.asserter.KotlinMetadataAsserter;
+import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
-import proguard.util.PrintWriterUtil;
+import proguard.util.*;
 
 import java.io.*;
 
@@ -68,46 +71,22 @@ public class Shrinker
         libraryClassPool.classesAccept(new ClassCleaner());
 
         // Create a visitor for marking the seeds.
-        UsageMarker usageMarker = configuration.whyAreYouKeeping == null ?
-            new UsageMarker() :
+        SimpleUsageMarker usageMarker = configuration.whyAreYouKeeping == null ?
+            new SimpleUsageMarker() :
             new ShortestUsageMarker();
 
-        // Automatically mark the parameterless constructors of seed classes,
-        // mainly for convenience and for backward compatibility.
-        ClassVisitor classUsageMarker =
-            new MultiClassVisitor(
-                usageMarker,
-                new NamedMethodVisitor(ClassConstants.METHOD_NAME_INIT,
-                                       ClassConstants.METHOD_TYPE_INIT,
-                                       usageMarker)
-            );
+         // Create a usage marker for resources and code, tracing the reasons
+         // if specified.
+         ClassUsageMarker classUsageMarker = configuration.whyAreYouKeeping == null ?
+             new ClassUsageMarker(usageMarker) :
+             new ShortestClassUsageMarker((ShortestUsageMarker) usageMarker,
+                                          "is kept by a directive in the configuration.\n\n");
 
-        ClassPoolVisitor classPoolvisitor =
-            new KeepClassSpecificationVisitorFactory(true, false, false)
-                .createClassPoolVisitor(configuration.keep,
-                                        classUsageMarker,
-                                        usageMarker,
-                                        usageMarker,
-                                        usageMarker);
-
-        // Mark the seeds.
-        programClassPool.accept(classPoolvisitor);
-        libraryClassPool.accept(classPoolvisitor);
-        libraryClassPool.classesAccept(usageMarker);
-
-        // Mark the inner class and annotation information that has to be kept.
-        programClassPool.classesAccept(
-            new UsedClassFilter(usageMarker,
-            new AllAttributeVisitor(true,
-            new MultiAttributeVisitor(
-                new InnerUsageMarker(usageMarker),
-                new NestUsageMarker(usageMarker),
-                new AnnotationUsageMarker(usageMarker),
-                new LocalVariableTypeUsageMarker(usageMarker)
-            ))));
-
-        // Mark interfaces that have to be kept.
-        programClassPool.classesAccept(new InterfaceUsageMarker(usageMarker));
+        // Mark all used code and resources and resource files.
+        new UsageMarker(configuration).mark(programClassPool,
+                                            libraryClassPool,
+                                            usageMarker,
+                                            classUsageMarker);
 
         // Should we explain ourselves?
         if (configuration.whyAreYouKeeping != null)
@@ -116,7 +95,7 @@ public class Shrinker
 
             // Create a visitor for explaining classes and class members.
             ShortestUsagePrinter shortestUsagePrinter =
-                new ShortestUsagePrinter((ShortestUsageMarker)usageMarker,
+                new ShortestUsagePrinter((ShortestUsageMarker)classUsageMarker.getUsageMarker(),
                                          configuration.verbose,
                                          out);
 
@@ -124,9 +103,7 @@ public class Shrinker
                 new ClassSpecificationVisitorFactory()
                     .createClassPoolVisitor(configuration.whyAreYouKeeping,
                                             shortestUsagePrinter,
-                                            shortestUsagePrinter,
-                                            shortestUsagePrinter,
-                                            null);
+                                            shortestUsagePrinter);
 
             // Mark the seeds.
             programClassPool.accept(whyClassPoolvisitor);
@@ -152,8 +129,6 @@ public class Shrinker
         }
 
         // Clean up used program classes and discard unused program classes.
-        int originalProgramClassPoolSize = programClassPool.size();
-
         ClassPool newProgramClassPool = new ClassPool();
         programClassPool.classesAccept(
             new UsedClassFilter(usageMarker,
@@ -162,22 +137,51 @@ public class Shrinker
                 new ClassPoolFiller(newProgramClassPool)
             )));
 
-        programClassPool.clear();
-
-        // Clean up library classes.
         libraryClassPool.classesAccept(
-            new ClassShrinker(usageMarker));
+            new UsedClassFilter(usageMarker,
+            new ClassShrinker(usageMarker)));
 
-        // Check if we have at least some output classes.
-        int newProgramClassPoolSize = newProgramClassPool.size();
-
-        if (configuration.verbose)
+        if (configuration.adaptKotlinMetadata)
         {
-            out.println("Removing unused program classes and class elements...");
-            out.println("  Original number of program classes: " + originalProgramClassPoolSize);
-            out.println("  Final number of program classes:    " + newProgramClassPoolSize);
+            // Clean up Kotlin metadata.
+            newProgramClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new KotlinShrinker(usageMarker)));
+
+            if (configuration.enableKotlinAsserter)
+            {
+                WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.err, true));
+                programClassPool.classesAccept(
+                    new ReferencedKotlinMetadataVisitor(
+                    new KotlinMetadataAsserter(programClassPool, libraryClassPool, warningPrinter)));
+            }
         }
 
+        int newProgramClassPoolSize = newProgramClassPool.size();
+
+        // Collect some statistics.
+        if (configuration.verbose)
+        {
+           ClassCounter originalClassCounter = new ClassCounter();
+           programClassPool.classesAccept(
+               new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
+                                             originalClassCounter));
+
+           ClassCounter newClassCounter = new ClassCounter();
+           newProgramClassPool.classesAccept(
+               new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
+               newClassCounter));
+
+            out.println("Removing unused program classes and class elements...");
+            out.println("  Original number of program classes:            " + originalClassCounter.getCount());
+            out.println("  Final number of program classes:               " + newClassCounter.getCount());
+            if (newClassCounter.getCount() != newProgramClassPoolSize)
+            {
+                out.println("  Final number of program and injected classes:  " + newProgramClassPoolSize);
+            }
+        }
+
+        // Check if we have at least some output classes.
         if (newProgramClassPoolSize == 0 &&
             (configuration.warn == null || !configuration.warn.isEmpty()))
         {

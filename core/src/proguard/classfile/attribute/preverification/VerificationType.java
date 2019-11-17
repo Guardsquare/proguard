@@ -23,6 +23,7 @@ package proguard.classfile.attribute.preverification;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisitor;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * This abstract class represents a verification type of a local variable or
@@ -30,7 +31,7 @@ import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisi
  *
  * @author Eric Lafortune
  */
-public abstract class VerificationType implements VisitorAccepter
+public abstract class VerificationType extends SimpleVisitorAccepter
 {
     public static final int TOP_TYPE                = 0;
     public static final int INTEGER_TYPE            = 1;
@@ -41,12 +42,6 @@ public abstract class VerificationType implements VisitorAccepter
     public static final int UNINITIALIZED_THIS_TYPE = 6;
     public static final int OBJECT_TYPE             = 7;
     public static final int UNINITIALIZED_TYPE      = 8;
-
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
 
 
     /**
@@ -72,19 +67,6 @@ public abstract class VerificationType implements VisitorAccepter
      * Accepts the given visitor in the context of a variable in a method's code.
      */
     public abstract void variablesAccept(Clazz clazz, Method method, CodeAttribute codeAttribute, int instructionOffset, int variableIndex, VerificationTypeVisitor verificationTypeVisitor);
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
-    }
 
 
     // Implementations for Object.

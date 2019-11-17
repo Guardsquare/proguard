@@ -32,6 +32,56 @@ import java.util.*;
 public class ListUtil
 {
     /**
+     * Returns a List instance that contains the elements of the two given List
+     * instances. The instances may be null. If both instances are null, the
+     * result is null too.
+     */
+    public static List concatenate(List list1, List list2)
+    {
+        if (list1 != null)
+        {
+            if (list2 != null)
+            {
+                // Combine the lists into a new list.
+                List list = new ArrayList(list1);
+                list.addAll(list2);
+
+                return list;
+            }
+            else
+            {
+                // Ignore the second (null) list.
+                return list1;
+            }
+        }
+        else
+        {
+            // Ignore the first (null) list.
+            return list2;
+        }
+    }
+
+
+    /**
+     * Returns the subset of the given list, containing all strings that
+     * match the given filter.
+     */
+    public static List<String> filter(Collection<String> list,
+                                      StringMatcher      filter)
+    {
+        List<String> filteredList = new ArrayList<String>();
+        for (String string : list)
+        {
+            if (filter.matches(string))
+            {
+                filteredList.add(string);
+            }
+        }
+        return filteredList;
+    }
+
+
+    /**
      * Creates a comma-separated String from the given List of String objects.
      */
     public static String commaSeparatedString(List list, boolean quoteStrings)
@@ -112,6 +162,23 @@ public class ListUtil
         }
 
         return list;
+    }
+
+
+    /**
+     * Converts a List of Integers to an int array.
+     *
+     * @param integerList the List of Integers to convert.
+     * @return the corresponding int array.
+     */
+    public static int[] toIntArray(List<Integer> integerList)
+    {
+        int[] intArray = new int[integerList.size()];
+        for (int i = 0; i < intArray.length; i++)
+        {
+            intArray[i] = integerList.get(i);
+        }
+        return intArray;
     }
 
 

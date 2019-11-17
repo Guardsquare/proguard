@@ -1,7 +1,7 @@
 # GNU/Linux makefile for the ProGuard GUI.
 
 MAIN_CLASS       = proguard/gui/ProGuardGUI
-CLASSPATH        = ../core/$(OUT):../retrace/$(OUT)
+CLASSPATH        = ../base/$(OUT):../core/$(OUT):../retrace/$(OUT)
 TARGET           = proguardgui
 INCLUDE_MANIFEST = true
 

@@ -48,6 +48,7 @@ implements InstructionVisitor,
            ConstantVisitor
 {
     private final ClassPool        programClassPool;
+    private final ClassPool        libraryClassPool;
     private final PartialEvaluator partialEvaluator;
                   String[]         typeArgumentClasses;
 
@@ -57,13 +58,17 @@ implements InstructionVisitor,
      *
      * @param programClassPool the program class pool used for looking up
      *                         class references.
+     * @param libraryClassPool the library class pool used for looking up
+     *                         class references.
      * @param partialEvaluator the partial evaluator used to evaluate visited
      *                         code attributes.
      */
     TypeArgumentFinder(ClassPool        programClassPool,
+                       ClassPool        libraryClassPool,
                        PartialEvaluator partialEvaluator)
     {
         this.programClassPool = programClassPool;
+        this.libraryClassPool = libraryClassPool;
         this.partialEvaluator = partialEvaluator;
     }
 
@@ -230,6 +235,8 @@ implements InstructionVisitor,
                 methodrefConstant.getName(clazz).equals(GsonClassConstants.METHOD_NAME_GET_TYPE))
             {
                 programClassPool.classAccept(methodrefConstant.getClassName(clazz),
+                                             new AllAttributeVisitor(this));
+                libraryClassPool.classAccept(methodrefConstant.getClassName(clazz),
                                              new AllAttributeVisitor(this));
             }
         }

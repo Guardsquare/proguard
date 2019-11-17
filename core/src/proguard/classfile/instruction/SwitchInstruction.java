@@ -21,8 +21,7 @@
 package proguard.classfile.instruction;
 
 /**
- * This Instruction represents a simple instruction without variable arguments
- * or constant pool references.
+ * This Instruction represents a switch instruction.
  *
  * @author Eric Lafortune
  */
@@ -40,6 +39,7 @@ public abstract class SwitchInstruction extends Instruction
 
     /**
      * Creates a new SwitchInstruction with the given arguments.
+     * All offsets are relative to this instruction's offset.
      */
     public SwitchInstruction(byte  opcode,
                              int   defaultOffset,

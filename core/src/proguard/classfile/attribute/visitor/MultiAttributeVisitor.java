@@ -63,7 +63,6 @@ public class MultiAttributeVisitor implements AttributeVisitor
 
     // Implementations for AttributeVisitor.
 
-
     public void visitUnknownAttribute(Clazz clazz, UnknownAttribute unknownAttribute)
     {
         for (int index = 0; index < attributeVisitorCount; index++)
@@ -71,7 +70,6 @@ public class MultiAttributeVisitor implements AttributeVisitor
             attributeVisitors[index].visitUnknownAttribute(clazz, unknownAttribute);
         }
     }
-
 
     public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute)
     {
@@ -96,6 +94,15 @@ public class MultiAttributeVisitor implements AttributeVisitor
         for (int index = 0; index < attributeVisitorCount; index++)
         {
             attributeVisitors[index].visitSourceDirAttribute(clazz, sourceDirAttribute);
+        }
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        for (int index = 0; index < attributeVisitorCount; index++)
+        {
+            attributeVisitors[index].visitSourceDebugExtensionAttribute(clazz, sourceDebugExtensionAttribute);
         }
     }
 

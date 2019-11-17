@@ -241,6 +241,21 @@ public class ClassUtil
 
 
     /**
+     * Returns the internal short class name of an internal class name, dropping
+     * the package specification.
+     * @param internalClassName the internal class name,
+     *                          e.g. "<code>java/lang/Object</code>"
+     * @return the internal short class name,
+     *                          e.g. "<code>Object</code>".
+     */
+    public static String internalShortClassName(String internalClassName)
+    {
+        int index = internalClassName.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR);
+        return internalClassName.substring(index+1);
+    }
+
+
+    /**
      * Returns whether the given internal type is an array type.
      * @param internalType the internal type,
      *                     e.g. "<code>[[Ljava/lang/Object;</code>".
@@ -579,6 +594,23 @@ public class ClassUtil
         if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_REFLECT_ARRAY)) return ClassConstants.TYPE_ARRAY;
 
         throw new IllegalArgumentException("Unexpected primitive class name ["+internalPrimitiveClassName+"]");
+    }
+
+
+    /**
+     * Returns the simple name of an internal class name, dropping the package
+     * specification and any outer class part.
+     * @param internalClassName the internal class name,
+     *                          e.g. "<code>java/lang/Object</code>"
+     * @return the simple class name,
+     *                          e.g. "<code>Object</code>".
+     */
+    public static String internalSimpleClassName(String internalClassName)
+    {
+        int index1 = internalClassName.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR);
+        int index2 = internalClassName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR);
+
+        return internalClassName.substring(Math.max(index1, index2) + 1);
     }
 
 

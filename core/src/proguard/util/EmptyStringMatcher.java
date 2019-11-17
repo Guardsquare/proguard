@@ -32,6 +32,6 @@ public class EmptyStringMatcher extends StringMatcher
     @Override
     protected boolean matches(String string, int beginOffset, int endOffset)
     {
-        return beginOffset == endOffset;
+        return endOffset <= beginOffset;
     }
 }

@@ -43,12 +43,14 @@ import java.util.concurrent.*;
  * @author Thomas Neidhart
  */
 public class ParallelAllClassVisitor
-implements ClassPoolVisitor
+implements   ClassPoolVisitor
 {
     private static final int THREAD_COUNT;
-    static {
+    static
+    {
         Integer threads = null;
-        try {
+        try
+        {
             String threadCountString = System.getProperty("parallel.threads");
             if (threadCountString != null)
             {

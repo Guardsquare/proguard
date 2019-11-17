@@ -144,6 +144,7 @@ public class ConfigurationTask extends Task
         configuration.keep = extendKeepSpecifications(configuration.keep,
                                                       keepSpecificationElement,
                                                       true,
+                                                      true,
                                                       false);
     }
 
@@ -153,6 +154,7 @@ public class ConfigurationTask extends Task
         configuration.keep = extendKeepSpecifications(configuration.keep,
                                                       keepSpecificationElement,
                                                       false,
+                                                      true,
                                                       false);
     }
 
@@ -161,6 +163,7 @@ public class ConfigurationTask extends Task
     {
         configuration.keep = extendKeepSpecifications(configuration.keep,
                                                       keepSpecificationElement,
+                                                      true,
                                                       true,
                                                       true);
     }
@@ -174,6 +177,7 @@ public class ConfigurationTask extends Task
         configuration.keep = extendKeepSpecifications(configuration.keep,
                                                       keepSpecificationElement,
                                                       true,
+                                                      true,
                                                       false);
     }
 
@@ -186,6 +190,7 @@ public class ConfigurationTask extends Task
         configuration.keep = extendKeepSpecifications(configuration.keep,
                                                       keepSpecificationElement,
                                                       false,
+                                                      true,
                                                       false);
     }
 
@@ -197,6 +202,7 @@ public class ConfigurationTask extends Task
 
         configuration.keep = extendKeepSpecifications(configuration.keep,
                                                       keepSpecificationElement,
+                                                      true,
                                                       true,
                                                       true);
     }
@@ -404,6 +410,7 @@ public class ConfigurationTask extends Task
     private List extendKeepSpecifications(List                     keepSpecifications,
                                           KeepSpecificationElement keepSpecificationElement,
                                           boolean                  markClasses,
+                                          boolean                  markClassMembers,
                                           boolean                  markClassesConditionally)
     {
         if (keepSpecifications == null)
@@ -413,6 +420,7 @@ public class ConfigurationTask extends Task
 
         keepSpecificationElement.appendTo(keepSpecifications,
                                           markClasses,
+                                          markClassMembers,
                                           markClassesConditionally);
 
         return keepSpecifications;

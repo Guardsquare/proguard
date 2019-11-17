@@ -43,7 +43,7 @@ implements   InstructionVisitor,
     //*
     private static final boolean DEBUG = false;
     /*/
-    public  static       boolean DEBUG = false;
+    public  static       boolean DEBUG = System.getProperty("iw") != null;
     //*/
 
 
@@ -53,7 +53,9 @@ implements   InstructionVisitor,
 
 
     /**
-     * Resets the accumulated code.
+     * Resets the accumulated code changes for a given anticipated maximum
+     * code length. If necessary, the size may still be extended while
+     * editing the code, with {@link #extend(int)}.
      * @param codeLength the length of the code that will be edited next.
      */
     public void reset(int codeLength)

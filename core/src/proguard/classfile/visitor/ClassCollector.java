@@ -23,7 +23,7 @@ package proguard.classfile.visitor;
 import proguard.classfile.Clazz;
 import proguard.classfile.util.SimplifiedVisitor;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * This <code>ClassVisitor</code> collects the classes that it visits in the
@@ -35,24 +35,24 @@ public class ClassCollector
 extends      SimplifiedVisitor
 implements   ClassVisitor
 {
-    private final Set set;
+    private final Collection<Clazz> collection;
 
 
     /**
      * Creates a new ClassCollector.
-     * @param set the <code>Set</code> in which all class names will be
-     *            collected.
+     * @param collection the <code>Collection</code> in which all classes will be collected.
      */
-    public ClassCollector(Set set)
+    public ClassCollector(Collection<Clazz> collection)
     {
-        this.set = set;
+        this.collection = collection;
     }
 
 
     // Implementations for ClassVisitor.
 
+    @Override
     public void visitAnyClass(Clazz clazz)
     {
-        set.add(clazz);
+        collection.add(clazz);
     }
 }

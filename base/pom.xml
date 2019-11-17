@@ -8,7 +8,7 @@
     <parent>
         <groupId>net.sf.proguard</groupId>
         <artifactId>proguard-parent</artifactId>
-        <version>6.1.0</version>
+        <version>7.0.0</version>
         <relativePath>../buildscripts/pom.xml</relativePath>
     </parent>
     <artifactId>proguard-base</artifactId>
@@ -40,6 +40,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>proguard-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

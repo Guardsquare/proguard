@@ -130,7 +130,9 @@ implements   ConstantVisitor
         constantIndex =
             constantPoolEditor.addStringConstant(stringConstant.getString(clazz),
                                                  stringConstant.referencedClass,
-                                                 stringConstant.referencedMember);
+                                                 stringConstant.referencedMember,
+                                                 stringConstant.referencedResourceId,
+                                                 stringConstant.referencedResourceFile);
     }
 
 

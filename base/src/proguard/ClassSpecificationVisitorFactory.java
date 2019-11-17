@@ -118,16 +118,15 @@ public class ClassSpecificationVisitorFactory
      *                               matching methods.
      * @param attributeVisitor       an optional AttributeVisitor to be applied
      *                               to matching attributes.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
+     * @param wildcardManager        an optional scope for StringMatcher
+     *                               instances that match wildcards.
      */
     protected ClassPoolVisitor createClassPoolVisitor(ClassSpecification classSpecification,
                                                       ClassVisitor       classVisitor,
                                                       MemberVisitor      fieldVisitor,
                                                       MemberVisitor      methodVisitor,
                                                       AttributeVisitor   attributeVisitor,
-                                                      List               variableStringMatchers)
+                                                      WildcardManager    wildcardManager)
     {
         String className             = classSpecification.className;
         String annotationType        = classSpecification.annotationType;
@@ -145,16 +144,16 @@ public class ClassSpecificationVisitorFactory
         // make sure the list of variable string matchers is filled out in the
         // right order.
         StringMatcher annotationTypeMatcher = annotationType == null ? null :
-            new ListParser(new ClassNameParser(variableStringMatchers)).parse(annotationType);
+            new ListParser(new ClassNameParser(wildcardManager)).parse(annotationType);
 
         StringMatcher classNameMatcher =
-            new ListParser(new ClassNameParser(variableStringMatchers)).parse(className);
+            new ListParser(new ClassNameParser(wildcardManager)).parse(className);
 
         StringMatcher extendsAnnotationTypeMatcher = extendsAnnotationType == null ? null :
-            new ListParser(new ClassNameParser(variableStringMatchers)).parse(extendsAnnotationType);
+            new ListParser(new ClassNameParser(wildcardManager)).parse(extendsAnnotationType);
 
         StringMatcher extendsClassNameMatcher = extendsClassName == null ? null :
-            new ListParser(new ClassNameParser(variableStringMatchers)).parse(extendsClassName);
+            new ListParser(new ClassNameParser(wildcardManager)).parse(extendsClassName);
 
         // Combine both visitors.
         ClassVisitor combinedClassVisitor =
@@ -165,7 +164,7 @@ public class ClassSpecificationVisitorFactory
                                        fieldVisitor,
                                        methodVisitor,
                                        attributeVisitor,
-                                       variableStringMatchers);
+                                       wildcardManager);
 
         // If the class name has wildcards, only visit classes with matching names.
         if (extendsAnnotationType != null ||
@@ -260,8 +259,8 @@ public class ClassSpecificationVisitorFactory
      *                               matching methods.
      * @param attributeVisitor       an optional AttributeVisitor to be applied
      *                               to matching attributes.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
+     * @param wildcardManager        an optional scope for StringMatcher
+     *                               instances that match wildcards.
      */
     protected ClassVisitor createCombinedClassVisitor(List             attributeNames,
                                                       List             fieldSpecifications,
@@ -270,7 +269,7 @@ public class ClassSpecificationVisitorFactory
                                                       MemberVisitor    fieldVisitor,
                                                       MemberVisitor    methodVisitor,
                                                       AttributeVisitor attributeVisitor,
-                                                      List             variableStringMatchers)
+                                                      WildcardManager  wildcardManager)
     {
         // Don't visit any members if there aren't any member specifications.
         if (fieldSpecifications  == null)
@@ -314,8 +313,9 @@ public class ClassSpecificationVisitorFactory
         }
 
         // If specified, let the member info visitor visit the class members.
-        if (fieldVisitor  != null ||
-            methodVisitor != null)
+        if (fieldVisitor     != null ||
+            methodVisitor    != null ||
+            attributeVisitor != null)
         {
             ClassVisitor memberClassVisitor =
                 createClassVisitor(fieldSpecifications,
@@ -323,7 +323,7 @@ public class ClassSpecificationVisitorFactory
                                    fieldVisitor,
                                    methodVisitor,
                                    attributeVisitor,
-                                   variableStringMatchers);
+                                   wildcardManager);
 
             // This class visitor may be the only one.
             if (classVisitor == null)
@@ -350,21 +350,20 @@ public class ClassSpecificationVisitorFactory
      *                               matching methods.
      * @param attributeVisitor       an optional AttributeVisitor to be applied
      *                               to matching attributes.
-     * @param variableStringMatchers an optional mutable list of
-     *                               VariableStringMatcher instances that match
-     *                               the wildcards.
+     * @param wildcardManager        an optional scope for StringMatcher
+     *                               instances that match wildcards.
      */
     private ClassVisitor createClassVisitor(List             fieldSpecifications,
                                             List             methodSpecifications,
                                             MemberVisitor    fieldVisitor,
                                             MemberVisitor    methodVisitor,
                                             AttributeVisitor attributeVisitor,
-                                            List             variableStringMatchers)
+                                            WildcardManager  wildcardManager)
     {
         MultiClassVisitor multiClassVisitor = new MultiClassVisitor();
 
-        addMemberVisitors(fieldSpecifications,  true,  multiClassVisitor, fieldVisitor,  attributeVisitor, variableStringMatchers);
-        addMemberVisitors(methodSpecifications, false, multiClassVisitor, methodVisitor, attributeVisitor, variableStringMatchers);
+        addMemberVisitors(fieldSpecifications,  true,  multiClassVisitor, fieldVisitor,  attributeVisitor, wildcardManager);
+        addMemberVisitors(methodSpecifications, false, multiClassVisitor, methodVisitor, attributeVisitor, wildcardManager);
 
         // Mark the class member in this class and in super classes.
         return new ClassHierarchyTraveler(true, true, false, false,
@@ -382,9 +381,10 @@ public class ClassSpecificationVisitorFactory
                                    MultiClassVisitor multiClassVisitor,
                                    MemberVisitor     memberVisitor,
                                    AttributeVisitor  attributeVisitor,
-                                   List              variableStringMatchers)
+                                   WildcardManager   wildcardManager)
     {
-        if (memberSpecifications != null)
+        if (memberSpecifications != null &&
+            memberVisitor        != null)
         {
             for (int index = 0; index < memberSpecifications.size(); index++)
             {
@@ -396,7 +396,7 @@ public class ClassSpecificationVisitorFactory
                                                  isField,
                                                  memberVisitor,
                                                  attributeVisitor,
-                                                 variableStringMatchers));
+                                                 wildcardManager));
             }
         }
     }
@@ -410,20 +410,20 @@ public class ClassSpecificationVisitorFactory
      *                               visit.
      * @param memberVisitor          the MemberVisitor to be applied to matching
      *                               class member(s).
-     * @param variableStringMatchers a mutable list of VariableStringMatcher
-     *                               instances that match the wildcards.
+     * @param wildcardManager        an optional scope for StringMatcher
+     *                               instances that match wildcards.
      */
     protected ClassVisitor createNonTestingClassVisitor(MemberSpecification memberSpecification,
                                                         boolean             isField,
                                                         MemberVisitor       memberVisitor,
                                                         AttributeVisitor    attributeVisitor,
-                                                        List                variableStringMatchers)
+                                                        WildcardManager     wildcardManager)
     {
         return createClassVisitor(memberSpecification,
                                   isField,
                                   memberVisitor,
                                   attributeVisitor,
-                                  variableStringMatchers);
+                                  wildcardManager);
     }
 
 
@@ -434,7 +434,7 @@ public class ClassSpecificationVisitorFactory
      */
     protected ClassPoolVisitor createClassTester(ClassSpecification classSpecification,
                                                  ClassPoolVisitor   classPoolVisitor,
-                                                 List               variableStringMatchers)
+                                                 WildcardManager    wildcardManager)
     {
         ClassPoolClassVisitor classPoolClassVisitor =
             new ClassPoolClassVisitor(classPoolVisitor);
@@ -443,16 +443,14 @@ public class ClassSpecificationVisitorFactory
         ClassPoolVisitor conditionalClassTester =
             createClassTester(classSpecification,
                               (ClassVisitor)classPoolClassVisitor,
-                              variableStringMatchers);
+                              wildcardManager);
 
         // The ClassPoolClassVisitor first needs to visit the class pool
         // and then its classes.
         return new MultiClassPoolVisitor(
-               new ClassPoolVisitor[]
-               {
-                   classPoolClassVisitor,
-                   conditionalClassTester
-               });
+            classPoolClassVisitor,
+            conditionalClassTester
+        );
     }
 
 
@@ -462,7 +460,7 @@ public class ClassSpecificationVisitorFactory
      */
     protected ClassPoolVisitor createClassTester(ClassSpecification classSpecification,
                                                  ClassVisitor       classVisitor,
-                                                 List               variableStringMatchers)
+                                                 WildcardManager    wildcardManager)
     {
         // Create a placeholder for the class visitor that tests class
         // members.
@@ -476,14 +474,14 @@ public class ClassSpecificationVisitorFactory
                                    null,
                                    null,
                                    null,
-                                   variableStringMatchers);
+                                   wildcardManager);
 
         // Parse the member conditions and add the result to the placeholder.
         conditionalMemberTester.addClassVisitor(
             createClassMemberTester(classSpecification.fieldSpecifications,
                                     classSpecification.methodSpecifications,
                                     classVisitor,
-                                    variableStringMatchers));
+                                    wildcardManager));
 
         return conditionalClassTester;
     }
@@ -493,10 +491,10 @@ public class ClassSpecificationVisitorFactory
      * Constructs a ClassVisitor that conditionally applies the given
      * ClassVisitor to all classes that contain the given class members.
      */
-    private ClassVisitor createClassMemberTester(List         fieldSpecifications,
-                                                 List         methodSpecifications,
-                                                 ClassVisitor classVisitor,
-                                                 List         variableStringMatchers)
+    private ClassVisitor createClassMemberTester(List            fieldSpecifications,
+                                                 List            methodSpecifications,
+                                                 ClassVisitor    classVisitor,
+                                                 WildcardManager wildcardManager)
     {
         // Create a linked list of conditional visitors, for fields and for
         // methods.
@@ -504,8 +502,8 @@ public class ClassSpecificationVisitorFactory
                                        true,
                createClassMemberTester(methodSpecifications,
                                        false,
-                                       classVisitor, variableStringMatchers),
-                                       variableStringMatchers);
+                                       classVisitor, wildcardManager),
+                                       wildcardManager);
     }
 
 
@@ -514,10 +512,10 @@ public class ClassSpecificationVisitorFactory
      * ClassVisitor to all classes that contain the given List of class
      * members (of the given type).
      */
-    private ClassVisitor createClassMemberTester(List         memberSpecifications,
-                                                 boolean      isField,
-                                                 ClassVisitor classVisitor,
-                                                 List         variableStringMatchers)
+    private ClassVisitor createClassMemberTester(List            memberSpecifications,
+                                                 boolean         isField,
+                                                 ClassVisitor    classVisitor,
+                                                 WildcardManager wildcardManager)
     {
         // Create a linked list of conditional visitors.
         if (memberSpecifications != null)
@@ -532,7 +530,7 @@ public class ClassSpecificationVisitorFactory
                                        isField,
                                        new MemberToClassVisitor(classVisitor),
                                        null,
-                                       variableStringMatchers);
+                                       wildcardManager);
             }
         }
 
@@ -544,18 +542,18 @@ public class ClassSpecificationVisitorFactory
      * Creates a new ClassVisitor to efficiently travel to the specified class
      * members and attributes.
      *
-     * @param memberSpecification    the specification of the class member(s) to
-     *                               visit.
-     * @param memberVisitor          the MemberVisitor to be applied to matching
-     *                               class member(s).
-     * @param variableStringMatchers a mutable list of VariableStringMatcher
-     *                               instances that match the wildcards.
+     * @param memberSpecification the specification of the class member(s) to
+     *                            visit.
+     * @param memberVisitor       the MemberVisitor to be applied to matching
+     *                            class member(s).
+     * @param wildcardManager     a mutable list of VariableStringMatcher
+     *                            instances that match the wildcards.
      */
     private ClassVisitor createClassVisitor(MemberSpecification memberSpecification,
                                             boolean             isField,
                                             MemberVisitor       memberVisitor,
                                             AttributeVisitor    attributeVisitor,
-                                            List                variableStringMatchers)
+                                            WildcardManager     wildcardManager)
     {
         String annotationType = memberSpecification.annotationType;
         String name           = memberSpecification.name;
@@ -565,16 +563,16 @@ public class ClassSpecificationVisitorFactory
         // We need to parse the names before the descriptors, to make sure the
         // list of variable string matchers is filled out in the right order.
         StringMatcher annotationTypeMatcher = annotationType == null ? null :
-            new ListParser(new ClassNameParser(variableStringMatchers)).parse(annotationType);
+            new ListParser(new ClassNameParser(wildcardManager)).parse(annotationType);
 
         StringMatcher nameMatcher = name == null ? null :
-            new ListParser(new NameParser(variableStringMatchers)).parse(name);
+            new ListParser(new NameParser(wildcardManager)).parse(name);
 
         StringMatcher descriptorMatcher = descriptor == null ? null :
-            new ListParser(new ClassNameParser(variableStringMatchers)).parse(descriptor);
+            new ListParser(new ClassNameParser(wildcardManager)).parse(descriptor);
 
         StringMatcher attributesMatcher = attributeNames == null ? null :
-            new ListParser(new NameParser(variableStringMatchers)).parse(attributeNames);
+            new ListParser(new NameParser(wildcardManager)).parse(attributeNames);
 
         // If specified, let the attribute visitor visit the class member
         // attributes.
@@ -587,13 +585,11 @@ public class ClassSpecificationVisitorFactory
                     new AttributeNameFilter(attributesMatcher, attributeVisitor);
             }
 
-            memberVisitor =
+            memberVisitor = memberVisitor != null ?
                 new MultiMemberVisitor(
-                new MemberVisitor[]
-                {
                     memberVisitor,
-                    new AllAttributeVisitor(attributeVisitor)
-                });
+                    new AllAttributeVisitor(attributeVisitor)) :
+                new AllAttributeVisitor(attributeVisitor);
         }
 
         // If specified, only visit class members with the right annotation.

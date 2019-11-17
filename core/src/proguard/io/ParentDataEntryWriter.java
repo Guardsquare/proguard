@@ -46,12 +46,14 @@ public class ParentDataEntryWriter implements DataEntryWriter
 
     // Implementations for DataEntryWriter.
 
+    @Override
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
         return dataEntryWriter.createDirectory(dataEntry.getParent());
     }
 
 
+    @Override
     public boolean sameOutputStream(DataEntry dataEntry1,
                                     DataEntry dataEntry2)
     throws IOException
@@ -61,19 +63,25 @@ public class ParentDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public OutputStream createOutputStream(DataEntry dataEntry) throws IOException
     {
         return dataEntryWriter.createOutputStream(dataEntry.getParent());
     }
 
 
+    @Override
     public void close() throws IOException
     {
-        dataEntryWriter.close();
-        dataEntryWriter = null;
+        if (dataEntryWriter != null)
+        {
+            dataEntryWriter.close();
+            dataEntryWriter = null;
+        }
     }
 
 
+    @Override
     public void println(PrintWriter pw, String prefix)
     {
         pw.println(prefix + "ParentDataEntryWriter");

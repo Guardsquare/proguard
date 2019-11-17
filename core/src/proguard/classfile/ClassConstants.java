@@ -101,7 +101,7 @@ public class ClassConstants
     public static final int ACC_TRANSITIVE   = 0x0020;
     public static final int ACC_STATIC_PHASE = 0x0040;
 
-    // Custom flags introduced by ProGuard
+    // Custom flags introduced by ProGuard.
     public static final int ACC_RENAMED             = 0x00010000; // Marks whether a class or class member has been renamed.
     public static final int ACC_REMOVED_METHODS     = 0x00020000; // Marks whether a class has (at least one) methods removed.
     public static final int ACC_REMOVED_FIELDS      = 0x00040000; // Marks whether a class has (at least one) fields removed.
@@ -215,6 +215,7 @@ public class ClassConstants
     public static final String ATTR_ModuleMainClass                      = "ModuleMainClass";
     public static final String ATTR_ModulePackages                       = "ModulePackages";
     // TODO: More attributes.
+    public static final String ATTR_SourceDebugExtension                 = "SourceDebugExtension";
     public static final String ATTR_CharacterRangeTable                  = "CharacterRangeTable";
     public static final String ATTR_CompilationID                        = "CompilationID";
     public static final String ATTR_SourceID                             = "SourceID";
@@ -261,53 +262,80 @@ public class ClassConstants
     public static final char METHOD_ARGUMENTS_OPEN  = '(';
     public static final char METHOD_ARGUMENTS_CLOSE = ')';
 
-    public static final String PACKAGE_JAVA_LANG                           = "java/lang/";
-    public static final String NAME_JAVA_LANG_OBJECT                       = "java/lang/Object";
-    public static final String TYPE_JAVA_LANG_OBJECT                       = "Ljava/lang/Object;";
-    public static final String NAME_JAVA_LANG_CLONEABLE                    = "java/lang/Cloneable";
-    public static final String NAME_JAVA_LANG_THROWABLE                    = "java/lang/Throwable";
-    public static final String NAME_JAVA_LANG_EXCEPTION                    = "java/lang/Exception";
-    public static final String NAME_JAVA_LANG_NUMBER_FORMAT_EXCEPTION      = "java/lang/NumberFormatException";
-    public static final String NAME_JAVA_LANG_CLASS                        = "java/lang/Class";
-    public static final String TYPE_JAVA_LANG_CLASS                        = "Ljava/lang/Class;";
-    public static final String NAME_JAVA_LANG_CLASS_LOADER                 = "java/lang/ClassLoader";
-    public static final String NAME_JAVA_LANG_STRING                       = "java/lang/String";
-    public static final String TYPE_JAVA_LANG_STRING                       = "Ljava/lang/String;";
-    public static final String NAME_JAVA_LANG_STRING_BUFFER                = "java/lang/StringBuffer";
-    public static final String NAME_JAVA_LANG_STRING_BUILDER               = "java/lang/StringBuilder";
-    public static final String NAME_JAVA_LANG_INVOKE_METHOD_HANDLE         = "java/lang/invoke/MethodHandle";
-    public static final String NAME_JAVA_LANG_INVOKE_METHOD_TYPE           = "java/lang/invoke/MethodType";
-    public static final String NAME_JAVA_LANG_INVOKE_STRING_CONCAT_FACTORY = "java/lang/invoke/StringConcatFactory";
-    public static final String NAME_JAVA_LANG_VOID                         = "java/lang/Void";
-    public static final String NAME_JAVA_LANG_BOOLEAN                      = "java/lang/Boolean";
-    public static final String TYPE_JAVA_LANG_BOOLEAN                      = "Ljava/lang/Boolean;";
-    public static final String NAME_JAVA_LANG_BYTE                         = "java/lang/Byte";
-    public static final String NAME_JAVA_LANG_SHORT                        = "java/lang/Short";
-    public static final String NAME_JAVA_LANG_CHARACTER                    = "java/lang/Character";
-    public static final String NAME_JAVA_LANG_INTEGER                      = "java/lang/Integer";
-    public static final String NAME_JAVA_LANG_LONG                         = "java/lang/Long";
-    public static final String NAME_JAVA_LANG_FLOAT                        = "java/lang/Float";
-    public static final String NAME_JAVA_LANG_DOUBLE                       = "java/lang/Double";
-    public static final String NAME_JAVA_LANG_MATH                         = "java/lang/Math";
-    public static final String NAME_JAVA_LANG_SYSTEM                       = "java/lang/System";
-    public static final String NAME_JAVA_LANG_RUNTIME                      = "java/lang/Runtime";
-    public static final String NAME_JAVA_LANG_REFLECT_ARRAY                = "java/lang/reflect/Array";
-    public static final String NAME_JAVA_LANG_REFLECT_FIELD                = "java/lang/reflect/Field";
-    public static final String NAME_JAVA_LANG_REFLECT_METHOD               = "java/lang/reflect/Method";
-    public static final String NAME_JAVA_LANG_REFLECT_CONSTRUCTOR          = "java/lang/reflect/Constructor";
-    public static final String NAME_JAVA_LANG_REFLECT_ACCESSIBLE_OBJECT    = "java/lang/reflect/AccessibleObject";
-    public static final String NAME_JAVA_IO_SERIALIZABLE                   = "java/io/Serializable";
-    public static final String NAME_JAVA_IO_BYTE_ARRAY_INPUT_STREAM        = "java/io/ByteArrayInputStream";
-    public static final String NAME_JAVA_IO_DATA_INPUT_STREAM              = "java/io/DataInputStream";
-    public static final String NAME_JAVA_IO_INPUT_STREAM                   = "java/io/InputStream";
-    public static final String NAME_JAVA_UTIL_MAP                          = "java/util/Map";
-    public static final String TYPE_JAVA_UTIL_MAP                          = "Ljava/util/Map;";
-    public static final String NAME_JAVA_UTIL_HASH_MAP                     = "java/util/HashMap";
+    public static final String PACKAGE_JAVA_LANG                            = "java/lang/";
+    public static final String NAME_JAVA_LANG_OBJECT                        = "java/lang/Object";
+    public static final String TYPE_JAVA_LANG_OBJECT                        = "Ljava/lang/Object;";
+    public static final String NAME_JAVA_LANG_CLONEABLE                     = "java/lang/Cloneable";
+    public static final String NAME_JAVA_LANG_THROWABLE                     = "java/lang/Throwable";
+    public static final String NAME_JAVA_LANG_EXCEPTION                     = "java/lang/Exception";
+    public static final String NAME_JAVA_LANG_UNSUPPORTED_OP_EXCEPTION      = "java/lang/UnsupportedOperationException";
+    public static final String NAME_JAVA_LANG_NUMBER_FORMAT_EXCEPTION       = "java/lang/NumberFormatException";
+    public static final String NAME_JAVA_LANG_CLASS                         = "java/lang/Class";
+    public static final String TYPE_JAVA_LANG_CLASS                         = "Ljava/lang/Class;";
+    public static final String NAME_JAVA_LANG_CLASS_LOADER                  = "java/lang/ClassLoader";
+    public static final String NAME_JAVA_LANG_STRING                        = "java/lang/String";
+    public static final String TYPE_JAVA_LANG_STRING                        = "Ljava/lang/String;";
+    public static final String NAME_JAVA_LANG_STRING_BUFFER                 = "java/lang/StringBuffer";
+    public static final String NAME_JAVA_LANG_STRING_BUILDER                = "java/lang/StringBuilder";
+    public static final String NAME_JAVA_LANG_INVOKE_METHOD_HANDLE          = "java/lang/invoke/MethodHandle";
+    public static final String NAME_JAVA_LANG_INVOKE_METHOD_TYPE            = "java/lang/invoke/MethodType";
+    public static final String NAME_JAVA_LANG_INVOKE_STRING_CONCAT_FACTORY  = "java/lang/invoke/StringConcatFactory";
+    public static final String NAME_JAVA_LANG_VOID                          = "java/lang/Void";
+    public static final String NAME_JAVA_LANG_BOOLEAN                       = "java/lang/Boolean";
+    public static final String TYPE_JAVA_LANG_BOOLEAN                       = "Ljava/lang/Boolean;";
+    public static final String NAME_JAVA_LANG_BYTE                          = "java/lang/Byte";
+    public static final String NAME_JAVA_LANG_SHORT                         = "java/lang/Short";
+    public static final String NAME_JAVA_LANG_CHARACTER                     = "java/lang/Character";
+    public static final String NAME_JAVA_LANG_INTEGER                       = "java/lang/Integer";
+    public static final String NAME_JAVA_LANG_LONG                          = "java/lang/Long";
+    public static final String NAME_JAVA_LANG_FLOAT                         = "java/lang/Float";
+    public static final String NAME_JAVA_LANG_DOUBLE                        = "java/lang/Double";
+    public static final String NAME_JAVA_LANG_MATH                          = "java/lang/Math";
+    public static final String NAME_JAVA_LANG_SYSTEM                        = "java/lang/System";
+    public static final String NAME_JAVA_LANG_RUNTIME                       = "java/lang/Runtime";
+    public static final String NAME_JAVA_LANG_REFLECT_ARRAY                 = "java/lang/reflect/Array";
+    public static final String NAME_JAVA_LANG_REFLECT_FIELD                 = "java/lang/reflect/Field";
+    public static final String NAME_JAVA_LANG_REFLECT_METHOD                = "java/lang/reflect/Method";
+    public static final String NAME_JAVA_LANG_REFLECT_CONSTRUCTOR           = "java/lang/reflect/Constructor";
+    public static final String NAME_JAVA_LANG_REFLECT_ACCESSIBLE_OBJECT     = "java/lang/reflect/AccessibleObject";
+    public static final String NAME_JAVA_IO_SERIALIZABLE                    = "java/io/Serializable";
+    public static final String NAME_JAVA_IO_BYTE_ARRAY_INPUT_STREAM         = "java/io/ByteArrayInputStream";
+    public static final String NAME_JAVA_IO_DATA_INPUT_STREAM               = "java/io/DataInputStream";
+    public static final String NAME_JAVA_IO_INPUT_STREAM                    = "java/io/InputStream";
+    public static final String NAME_JAVA_NIO_BUFFER                         = "java/nio/Buffer";
+    public static final String NAME_JAVA_NIO_BYTE_BUFFER                    = "java/nio/ByteBuffer";
+    public static final String NAME_JAVA_NIO_CHAR_BUFFER                    = "java/nio/CharBuffer";
+    public static final String NAME_JAVA_NIO_SHORT_BUFFER                   = "java/nio/ShortBuffer";
+    public static final String NAME_JAVA_NIO_INT_BUFFER                     = "java/nio/IntBuffer";
+    public static final String NAME_JAVA_NIO_LONG_BUFFER                    = "java/nio/LongBuffer";
+    public static final String NAME_JAVA_NIO_FLOAT_BUFFER                   = "java/nio/FloatBuffer";
+    public static final String NAME_JAVA_NIO_DOUBLE_BUFFER                  = "java/nio/DoubleBuffer";
+    public static final String NAME_JAVA_NIO_CHANNELS_CHANNELS              = "java/nio/channels/Channels";
+    public static final String NAME_JAVA_NIO_CHANNELS_READABLE_BYTE_CHANNEL = "java/nio/channels/ReadableByteChannel";
+    public static final String NAME_JAVA_UTIL_MAP                           = "java/util/Map";
+    public static final String TYPE_JAVA_UTIL_MAP                           = "Ljava/util/Map;";
+    public static final String NAME_JAVA_UTIL_HASH_MAP                      = "java/util/HashMap";
     public static final String NAME_JAVA_UTIL_LIST                          = "java/util/List";
     public static final String TYPE_JAVA_UTIL_LIST                          = "Ljava/util/List;";
     public static final String NAME_JAVA_UTIL_ARRAY_LIST                    = "java/util/ArrayList";
 
-    public static final String NAME_ANDROID_UTIL_FLOAT_MATH                = "android/util/FloatMath";
+    public static final String NAME_ANDROID_APP_ACTIVITY                    = "android/app/Activity";
+    public static final String NAME_ANDROID_APP_APPLICATION                 = "android/app/Application";
+    public static final String NAME_ANDROID_APP_FRAGMENT                    = "android/app/Fragment";
+    public static final String NAME_ANDROID_APP_INSTRUMENTATION             = "android/app/Instrumentation";
+    public static final String NAME_ANDROID_APP_SERVICE                     = "android/app/Service";
+    public static final String NAME_ANDROID_APP_BACKUP_BACKUP_AGENT         = "android/app/backup/BackupAgent";
+    public static final String NAME_ANDROID_CONTENT_BROADCAST_RECEIVER      = "android/content/BroadcastReceiver";
+    public static final String NAME_ANDROID_CONTENT_CONTENT_PROVIDER        = "android/content/ContentProvider";
+    public static final String NAME_ANDROID_CONTENT_CONTEXT                 = "android/content/Context";
+    public static final String NAME_ANDROID_CONTENT_RES_RESOURCES           = "android/content/res/Resources";
+    public static final String NAME_ANDROID_PREFERENCE_PREFERENCE           = "android/preference/Preference";
+    public static final String NAME_ANDROID_PREFERENCE_PREFERENCE_FRAGMENT  = "android/preference/PreferenceFragment";
+    public static final String NAME_ANDROID_VIEW_ACTION_PROVIDER            = "android/view/ActionProvider";
+    public static final String NAME_ANDROID_VIEW_VIEW                       = "android/view/View";
+    public static final String NAME_ANDROID_UTIL_FLOAT_MATH                 = "android/util/FloatMath";
+    public static final String NAME_ANDROID_WEBKIT_WEB_VIEW                 = "android/webkit/WebView";
+    public static final String NAME_ANDROID_SUPPORT_V4_APP_FRAGMENT         = "android/support/v4/app/Fragment";
 
     public static final String NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_INTEGER_FIELD_UPDATER   = "java/util/concurrent/atomic/AtomicIntegerFieldUpdater";
     public static final String NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_LONG_FIELD_UPDATER      = "java/util/concurrent/atomic/AtomicLongFieldUpdater";
@@ -322,8 +350,11 @@ public class ClassConstants
     public static final String METHOD_TYPE_OBJECT_GET_CLASS                 = "()Ljava/lang/Class;";
     public static final String METHOD_NAME_CLASS_FOR_NAME                   = "forName";
     public static final String METHOD_TYPE_CLASS_FOR_NAME                   = "(Ljava/lang/String;)Ljava/lang/Class;";
+    public static final String METHOD_TYPE_CLASS_FOR_NAME_CLASSLOADER       = "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;";
     public static final String METHOD_NAME_CLASS_IS_INSTANCE                = "isInstance";
     public static final String METHOD_TYPE_CLASS_IS_INSTANCE                = "(Ljava/lang/Object;)Z";
+    public static final String METHOD_NAME_CLASS_IS_ASSIGNABLE_FROM         = "isAssignableFrom";
+    public static final String METHOD_TYPE_CLASS_IS_ASSIGNABLE_FROM         = "(Ljava/lang/Class;)Z";
     public static final String METHOD_NAME_CLASS_GET_CLASS_LOADER           = "getClassLoader";
     public static final String METHOD_NAME_CLASS_GET_COMPONENT_TYPE         = "getComponentType";
     public static final String METHOD_TYPE_CLASS_GET_COMPONENT_TYPE         = "()Ljava/lang/Class;";
@@ -364,7 +395,7 @@ public class ClassConstants
     public static final String METHOD_TYPE_LOAD                             = "(Ljava/lang/String;)V";
     public static final String METHOD_TYPE_LOAD2                            = "(Ljava/lang/String;Ljava/lang/ClassLoader;)V";
     public static final String METHOD_NAME_NATIVE_LOAD                      = "nativeLoad";
-    public static final String METHOD_TYPE_NATIVE_LOAD                      = "(Ljava/lang/String;Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/String;";
+    public static final String METHOD_TYPE_NATIVE_LOAD                      = "(Ljava/lang/String;Ljava/lang/ClassLoader;)V";
     public static final String METHOD_NAME_MAP_LIBRARY_NAME                 = "mapLibraryName";
     public static final String METHOD_TYPE_MAP_LIBRARY_NAME                 = "(Ljava/lang/String;)Ljava/lang/String;";
     public static final String METHOD_NAME_GET_RUNTIME                      = "getRuntime";
@@ -461,8 +492,8 @@ public class ClassConstants
     public static final String METHOD_TYPE_VALUE_OF_FLOAT   = "(F)Ljava/lang/Float;";
     public static final String METHOD_TYPE_VALUE_OF_DOUBLE  = "(D)Ljava/lang/Double;";
 
-    public static final String FIELD_NAME_TYPE = "TYPE";
-    public static final String FIELD_TYPE_TYPE = "Ljava/lang/Class;";
+    public static final String FIELD_NAME_TYPE                    = "TYPE";
+    public static final String FIELD_TYPE_TYPE                    = "Ljava/lang/Class;";
     public static final String METHOD_NAME_EQUALS                 = "equals";
     public static final String METHOD_TYPE_EQUALS                 = "(Ljava/lang/Object;)Z";
     public static final String METHOD_NAME_LENGTH                 = "length";
@@ -510,6 +541,24 @@ public class ClassConstants
     public static final String METHOD_NAME_ORDINAL                = "ordinal";
     public static final String METHOD_TYPE_ORDINAL                = "()I";
 
+    public static final String METHOD_NAME_ABS                    = "abs";
+    public static final String METHOD_NAME_SQRT                   = "sqrt";
+    public static final String METHOD_NAME_COS                    = "cos";
+    public static final String METHOD_NAME_SIN                    = "sin";
+    public static final String METHOD_NAME_FLOOR                  = "floor";
+    public static final String METHOD_NAME_CEIL                   = "ceil";
+    public static final String METHOD_TYPE_FLOAT_FLOAT            = "(F)F";
+    public static final String METHOD_TYPE_DOUBLE_DOUBLE          = "(D)D";
+    public static final String METHOD_NAME_MIN                    = "min";
+    public static final String METHOD_NAME_MAX                    = "max";
+    public static final String METHOD_TYPE_FLOAT_FLOAT_FLOAT      = "(FF)F";
+    public static final String METHOD_TYPE_DOUBLE_DOUBLE_DOUBLE   = "(DD)D";
+
+    public static final String METHOD_NAME_ADD_JAVASCRIPT_INTERFACE = "addJavascriptInterface";
+    public static final String METHOD_TYPE_ADD_JAVASCRIPT_INTERFACE = "(Ljava/lang/Object;Ljava/lang/String;)V";
+
+    public static final String METHOD_TYPE_ON_CLICK_HANDLER = "(L**;)L***;";
+
     public static final char TYPE_VOID                   = 'V';
     public static final char TYPE_BOOLEAN                = 'Z';
     public static final char TYPE_BYTE                   = 'B';
@@ -538,8 +587,8 @@ public class ClassConstants
     public static final int TYPICAL_STACK_SIZE                       = 16;
     public static final int TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE = 16;
 
-    public static final int MAXIMUM_BOOLEAN_AS_STRING_LENGTH = 5; // false
-    public static final int MAXIMUM_CHAR_AS_STRING_LENGTH    = 1; // any char
+    public static final int MAXIMUM_BOOLEAN_AS_STRING_LENGTH = 5;  // false
+    public static final int MAXIMUM_CHAR_AS_STRING_LENGTH    = 1;  // any char
     public static final int MAXIMUM_BYTE_AS_STRING_LENGTH    = 3;  // 255
     public static final int MAXIMUM_SHORT_AS_STRING_LENGTH   = 6;  // -32768
     public static final int MAXIMUM_INT_AS_STRING_LENGTH     = 11; //-2147483648
@@ -549,5 +598,4 @@ public class ClassConstants
     public static final int MAXIMUM_AT_HASHCODE_LENGTH       = MAXIMUM_CHAR_AS_STRING_LENGTH +
                                                                MAXIMUM_INT_AS_STRING_LENGTH;
     public static final int DEFAULT_STRINGBUILDER_INIT_SIZE = 16;
-
 }

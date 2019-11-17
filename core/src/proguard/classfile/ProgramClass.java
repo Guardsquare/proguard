@@ -24,15 +24,21 @@ import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.visitors.KotlinMetadataVisitor;
 import proguard.classfile.util.ClassSubHierarchyInitializer;
-import proguard.classfile.visitor.*;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.MemberVisitor;
+import proguard.util.*;
 
 /**
  * This Clazz is a complete representation of the data in a Java class.
  *
  * @author Eric Lafortune
  */
-public class ProgramClass implements Clazz
+public class ProgramClass
+extends      SimpleFeatureNamedProcessableVisitorAccepter
+implements   Clazz
 {
     private static final int[]           EMPTY_INTERFACES = new int[0];
     private static final ProgramField[]  EMPTY_FIELDS     = new ProgramField[0];
@@ -55,18 +61,13 @@ public class ProgramClass implements Clazz
     public ProgramMethod[] methods;
     public int             u2attributesCount;
     public Attribute[]     attributes;
+    public KotlinMetadata  kotlinMetadata;
 
     /**
      * An extra field pointing to the subclasses of this class.
      * This field is filled out by the {@link ClassSubHierarchyInitializer}.
      */
     public Clazz[] subClasses;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an uninitialized ProgramClass.
@@ -91,6 +92,28 @@ public class ProgramClass implements Clazz
              u2accessFlags,
              u2thisClass,
              u2superClass,
+             0);
+    }
+
+
+    /**
+     * Creates an initialized ProgramClass without fields, methods, attributes,
+     * or subclasses.
+     */
+    public ProgramClass(int             u4version,
+                        int             u2constantPoolCount,
+                        Constant[]      constantPool,
+                        int             u2accessFlags,
+                        int             u2thisClass,
+                        int             u2superClass,
+                        int             processingFlags)
+    {
+        this(u4version,
+             u2constantPoolCount,
+             constantPool,
+             u2accessFlags,
+             u2thisClass,
+             u2superClass,
              0,
              EMPTY_INTERFACES,
              0,
@@ -99,7 +122,8 @@ public class ProgramClass implements Clazz
              EMPTY_METHODS,
              0,
              EMPTY_ATTRIBUTES,
-             null);
+             null,
+             processingFlags);
     }
 
 
@@ -122,6 +146,47 @@ public class ProgramClass implements Clazz
                         Attribute[]     attributes,
                         Clazz[]         subClasses)
     {
+        this(u4version,
+             u2constantPoolCount,
+             constantPool,
+             u2accessFlags,
+             u2thisClass,
+             u2superClass,
+             u2interfacesCount,
+             u2interfaces,
+             u2fieldsCount,
+             fields,
+             u2methodsCount,
+             methods,
+             u2attributesCount,
+             attributes,
+             subClasses,
+             0);
+    }
+
+
+    /**
+     * Creates an initialized ProgramClass.
+     */
+    public ProgramClass(int             u4version,
+                        int             u2constantPoolCount,
+                        Constant[]      constantPool,
+                        int             u2accessFlags,
+                        int             u2thisClass,
+                        int             u2superClass,
+                        int             u2interfacesCount,
+                        int[]           u2interfaces,
+                        int             u2fieldsCount,
+                        ProgramField[]  fields,
+                        int             u2methodsCount,
+                        ProgramMethod[] methods,
+                        int             u2attributesCount,
+                        Attribute[]     attributes,
+                        Clazz[]         subClasses,
+                        int             processingFlags)
+    {
+        super(processingFlags);
+
         this.u4version           = u4version;
         this.u2constantPoolCount = u2constantPoolCount;
         this.constantPool        = constantPool;
@@ -294,6 +359,31 @@ public class ProgramClass implements Clazz
         }
 
         subClasses[subClasses.length-1] = clazz;
+    }
+
+
+    public void removeSubClass(Clazz clazz)
+    {
+        if (subClasses.length == 1)
+        {
+            subClasses = null;
+        }
+        else
+        {
+            // Copy the old elements into a new smaller array.
+            Clazz[] newSubClasses = new Clazz[subClasses.length-1];
+
+            int newIndex = 0;
+            for (int index = 0; index < subClasses.length; index++)
+            {
+                if (!subClasses[index].equals(clazz))
+                {
+                    newSubClasses[newIndex++] = subClasses[index];
+                }
+            }
+
+            subClasses = newSubClasses;
+        }
     }
 
 
@@ -634,16 +724,12 @@ public class ProgramClass implements Clazz
     }
 
 
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
+    public void kotlinMetadataAccept(KotlinMetadataVisitor kotlinMetadataVisitor)
     {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
+        if (kotlinMetadata != null)
+        {
+            kotlinMetadata.accept(this, kotlinMetadataVisitor);
+        }
     }
 
 

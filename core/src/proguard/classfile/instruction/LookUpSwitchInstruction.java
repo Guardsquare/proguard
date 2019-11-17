@@ -25,8 +25,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
 /**
- * This Instruction represents a simple instruction without variable arguments
- * or constant pool references.
+ * This Instruction represents a lookup switch instruction.
  *
  * @author Eric Lafortune
  */
@@ -43,6 +42,7 @@ public class LookUpSwitchInstruction extends SwitchInstruction
 
     /**
      * Creates a new LookUpSwitchInstruction with the given arguments.
+     * All offsets are relative to this instruction's offset.
      */
     public LookUpSwitchInstruction(byte  opcode,
                                    int   defaultOffset,

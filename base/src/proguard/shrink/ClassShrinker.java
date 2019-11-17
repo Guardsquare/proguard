@@ -26,15 +26,19 @@ import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
+import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.util.*;
 
 import java.util.*;
 
 /**
  * This ClassVisitor removes constant pool entries, class members, and other
  * class elements that are not marked as being used.
+ *
+ * @see ClassUsageMarker
  *
  * @author Eric Lafortune
  */
@@ -46,7 +50,7 @@ implements   ClassVisitor,
              AnnotationVisitor,
              ElementValueVisitor
 {
-    private final UsageMarker usageMarker;
+    private final SimpleUsageMarker usageMarker;
 
     private       int[]                   constantIndexMap        = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
     private       int[]                   bootstrapMethodIndexMap = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
@@ -62,7 +66,7 @@ implements   ClassVisitor,
      * @param usageMarker the usage marker that is used to mark the classes
      *                    and class members.
      */
-    public ClassShrinker(UsageMarker usageMarker)
+    public ClassShrinker(SimpleUsageMarker usageMarker)
     {
         this.usageMarker = usageMarker;
     }
@@ -72,13 +76,46 @@ implements   ClassVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
+        // Mark the classes with processing flags if fields or methods are removed
+        // (used for configuration debugging).
+        programClass.fieldsAccept(
+            new UsedMemberFilter(usageMarker, null,
+            new MemberAccessFilter(ClassConstants.ACC_PUBLIC, 0,
+            new MemberToClassVisitor(
+            new MultiClassVisitor(
+                new ProcessingFlagSetter(ProcessingFlags.REMOVED_FIELDS),
+                new ProcessingFlagSetter(ProcessingFlags.REMOVED_PUBLIC_FIELDS)
+            )),
+            new MemberToClassVisitor(
+            new ProcessingFlagSetter(ProcessingFlags.REMOVED_FIELDS)))));
+
+        programClass.methodsAccept(
+            new UsedMemberFilter(usageMarker, null,
+            new ConstructorMethodFilter(
+
+            new MemberAccessFilter(ClassConstants.ACC_PUBLIC, 0,
+            new MemberToClassVisitor(
+            new MultiClassVisitor(
+                new ProcessingFlagSetter(ProcessingFlags.REMOVED_CONSTRUCTORS),
+                new ProcessingFlagSetter(ProcessingFlags.REMOVED_PUBLIC_CONSTRUCTORS)
+            )),
+            new MemberToClassVisitor(
+            new ProcessingFlagSetter(ProcessingFlags.REMOVED_CONSTRUCTORS))),
+
+            new MemberAccessFilter(ClassConstants.ACC_PUBLIC, 0,
+            new MemberToClassVisitor(
+            new MultiClassVisitor(
+                new ProcessingFlagSetter(ProcessingFlags.REMOVED_METHODS),
+                new ProcessingFlagSetter(ProcessingFlags.REMOVED_PUBLIC_METHODS)
+            )),
+            new MemberToClassVisitor(
+            new ProcessingFlagSetter(ProcessingFlags.REMOVED_METHODS))))));
+
         // Shrink the arrays for constant pool, interfaces, fields, methods,
         // and class attributes.
         if (programClass.u2interfacesCount > 0)
         {
-            new InterfaceDeleter(shrinkFlags(programClass.constantPool,
-                                             programClass.u2interfaces,
-                                             programClass.u2interfacesCount))
+            new InterfaceDeleter(shrinkInterfaceFlags(programClass), true)
                 .visitProgramClass(programClass);
         }
 
@@ -96,7 +133,7 @@ implements   ClassVisitor,
                         programClass.u2fieldsCount);
         if (programClass.u2fieldsCount < oldFieldsCount)
         {
-            programClass.u2accessFlags |= ClassConstants.ACC_REMOVED_FIELDS;
+            programClass.processingFlags |= ProcessingFlags.REMOVED_FIELDS;
         }
 
         int oldMethodsCount = programClass.u2methodsCount;
@@ -105,7 +142,7 @@ implements   ClassVisitor,
                         programClass.u2methodsCount);
         if (programClass.u2methodsCount < oldMethodsCount)
         {
-            programClass.u2accessFlags |= ClassConstants.ACC_REMOVED_METHODS;
+            programClass.processingFlags |= ProcessingFlags.REMOVED_METHODS;
         }
 
         programClass.u2attributesCount =
@@ -462,6 +499,63 @@ implements   ClassVisitor,
         for (int index = 0; index < length; index++)
         {
             if (!usageMarker.isUsed(constantPool[array[index]]))
+            {
+                unused[index] = true;
+            }
+        }
+
+        return unused;
+    }
+
+
+    /**
+     * Creates an array marking unused constant pool entries for all the
+     * elements in the given array of constant pool indices, pointing to
+     * class constants of interfaces.
+     * @return an array of flags indicating unused elements.
+     */
+    private boolean[] shrinkInterfaceFlags(ProgramClass programClass)
+    {
+        Constant[] constantPool    = programClass.constantPool;
+        int[]      interfaces      = programClass.u2interfaces;
+        int        interfacesCount = programClass.u2interfacesCount;
+
+        // Collect the names of all indirectly implemented interfaces, unless
+        // they are kept or the class itself is kept. That avoids problems if
+        // some code applies reflection to the list of interfaces.
+        Set indirectlyImplementedInterfaces = new HashSet();
+
+        if ((programClass.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) == 0)
+        {
+            ConstantVisitor interfaceNameCollector =
+                new ReferencedClassVisitor(
+                new UsedClassFilter(usageMarker,
+                new ClassHierarchyTraveler(false, true, true, false,
+                new ProgramClassFilter(
+                new UsedClassFilter(usageMarker,
+                new ClassAccessFilter(ClassConstants.ACC_INTERFACE, 0,
+                new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_SHRINK,
+                new ClassNameCollector(indirectlyImplementedInterfaces))))))));
+
+            programClass.superClassConstantAccept(interfaceNameCollector);
+            programClass.interfaceConstantsAccept(interfaceNameCollector);
+        }
+
+        boolean[] unused = new boolean[interfacesCount];
+
+        // Remember the unused or unnecessary constants.
+        for (int index = 0; index < interfacesCount; index++)
+        {
+            // The interface may be unused, or it may be unnecessary in the
+            // list of implemented interfaces, if a superclass/interface
+            // already implements it.
+            ClassConstant interfaceClassConstant =
+                (ClassConstant)constantPool[interfaces[index]];
+            String interfaceClassName =
+                interfaceClassConstant.getName(programClass);
+
+            if (!usageMarker.isUsed(interfaceClassConstant) ||
+                indirectlyImplementedInterfaces.contains(interfaceClassName))
             {
                 unused[index] = true;
             }

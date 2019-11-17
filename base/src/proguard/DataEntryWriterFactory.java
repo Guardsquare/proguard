@@ -72,10 +72,53 @@ public class DataEntryWriterFactory
         {
             ClassPathEntry entry = classPath.get(index);
 
-            writer = createClassPathEntryWriter(entry, writer);
+            // We're allowing the same output file to be specified multiple
+            // times in the class path. We only add a control manifest for
+            // the input of the first occurrence.
+            boolean addCheckingJarWriter =
+                !outputFileOccurs(entry,
+                                  classPath,
+                                  0,
+                                  index);
+
+            // We're allowing the same output file to be specified multiple
+            // times in the class path. We only close cached jar writers
+            // for this entry if its file doesn't occur again later on.
+            boolean closeCachedJarWriter =
+                !outputFileOccurs(entry,
+                                  classPath,
+                                  index + 1,
+                                  classPath.size());
+
+            writer = createClassPathEntryWriter(entry,
+                                                writer,
+                                                extraDataEntryWriter,
+                                                addCheckingJarWriter,
+                                                closeCachedJarWriter);
         }
 
         return writer;
+    }
+
+
+    private boolean outputFileOccurs(ClassPathEntry entry,
+                                     ClassPath      classPath,
+                                     int            startIndex,
+                                     int            endIndex)
+    {
+        File file = entry.getFile();
+
+        for (int index = startIndex; index < endIndex; index++)
+        {
+            ClassPathEntry classPathEntry = classPath.get(index);
+            if (classPathEntry.isOutput() &&
+                classPathEntry.getFile().equals(file))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
@@ -84,9 +127,15 @@ public class DataEntryWriterFactory
      * or delegate to another DataEntryWriter if its filters don't match.
      */
     private DataEntryWriter createClassPathEntryWriter(ClassPathEntry  classPathEntry,
-                                                       DataEntryWriter alternativeWriter)
+                                                       DataEntryWriter alternativeWriter,
+                                                       DataEntryWriter extraDataEntryWriter,
+                                                       boolean         addCheckingJarWriter,
+                                                       boolean         closeCachedJarWriter)
     {
+        File file = classPathEntry.getFile();
+
         boolean isApk  = classPathEntry.isApk();
+        boolean isAab  = classPathEntry.isAab();
         boolean isJar  = classPathEntry.isJar();
         boolean isAar  = classPathEntry.isAar();
         boolean isWar  = classPathEntry.isWar();
@@ -96,6 +145,7 @@ public class DataEntryWriterFactory
 
         List filter     = getFilterExcludingVersionedClasses(classPathEntry);
         List apkFilter  = classPathEntry.getApkFilter();
+        List aabFilter  = classPathEntry.getAabFilter();
         List jarFilter  = classPathEntry.getJarFilter();
         List aarFilter  = classPathEntry.getAarFilter();
         List warFilter  = classPathEntry.getWarFilter();
@@ -103,8 +153,11 @@ public class DataEntryWriterFactory
         List jmodFilter = classPathEntry.getJmodFilter();
         List zipFilter  = classPathEntry.getZipFilter();
 
-        System.out.println("Preparing output " +
+        System.out.println("Preparing " +
+                           (privateKeyEntries == null ? "" : "signed ") +
+                           "output " +
                            (isApk  ? "apk"  :
+                            isAab  ? "aab"  :
                             isJar  ? "jar"  :
                             isAar  ? "aar"  :
                             isWar  ? "war"  :
@@ -115,6 +168,7 @@ public class DataEntryWriterFactory
                            " [" + classPathEntry.getName() + "]" +
                            (filter     != null ||
                             apkFilter  != null ||
+                            aabFilter  != null ||
                             jarFilter  != null ||
                             aarFilter  != null ||
                             warFilter  != null ||
@@ -122,46 +176,86 @@ public class DataEntryWriterFactory
                             jmodFilter != null ||
                             zipFilter  != null ? " (filtered)" : ""));
 
+        // Create the writer for the main file or directory.
+        DataEntryWriter writer =
+            isApk  ||
+            isAab  ||
+            isJar  ||
+            isAar  ||
+            isWar  ||
+            isEar  ||
+            isJmod ||
+            isZip ?
+                new FixedFileWriter(file) :
+                new DirectoryWriter(file);
+
         // If the output is an archive, we'll flatten (unpack the contents of)
         // higher level input archives, e.g. when writing into a jar file, we
         // flatten zip files.
         boolean flattenApks  = false;
-        boolean flattenJars  = flattenApks  || isApk;
+        boolean flattenAabs  = flattenApks  || isApk;
+        boolean flattenJars  = flattenAabs  || isAab;
         boolean flattenAars  = flattenJars  || isJar;
         boolean flattenWars  = flattenAars  || isAar;
         boolean flattenEars  = flattenWars  || isWar;
         boolean flattenJmods = flattenEars  || isEar;
         boolean flattenZips  = flattenJmods || isJmod;
 
-        DataEntryWriter writer = flattenZips ?
-            new FixedFileWriter(classPathEntry.getFile()) :
-            new DirectoryWriter(classPathEntry.getFile());
-
         // Set up the filtered jar writers.
-        writer = wrapInJarWriter(writer, flattenZips,  isZip,  ".zip",  zipFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenJmods, isJmod, ".jmod", jmodFilter, ClassConstants.JMOD_HEADER, ClassConstants.JMOD_CLASS_FILE_PREFIX);
-        writer = wrapInJarWriter(writer, flattenEars,  isEar,  ".ear",  earFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenWars,  isWar,  ".war",  warFilter,  null,                       ClassConstants.WAR_CLASS_FILE_PREFIX);
-        writer = wrapInJarWriter(writer, flattenAars,  isAar,  ".aar",  aarFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenJars,  isJar,  ".jar",  jarFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenApks,  isApk,  ".apk",  apkFilter,  null,                       null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenZips,  isZip,  false, ".zip",  zipFilter,  null,                       false,               null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJmods, isJmod, false, ".jmod", jmodFilter, ClassConstants.JMOD_HEADER, false,               JMOD_PREFIXES);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenEars,  isEar,  false, ".ear",  earFilter,  null,                       false,               null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenWars,  isWar,  false, ".war",  warFilter,  null,                       false,               WAR_PREFIXES);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenAars,  isAar,  false, ".aar",  aarFilter,  null,                       false,               null);
 
-        // Set up for writing out the program classes.
-        writer = new ClassDataEntryWriter(programClassPool, writer);
+        if (isAar && mergeBundleJars)
+        {
+            // If we're writing an obfuscated AAR, all input jars need to
+            // be merged into a final classes.jar file.
+            writer =
+                new FilteredDataEntryWriter(new DataEntryNameFilter(new ExtensionMatcher(".jar")),
+                new RenamedDataEntryWriter(new ConstantStringFunction("classes.jar"), writer),
+                    writer);
+        }
 
-        // Add a data entry filter, if specified.
-        writer = filter != null ?
-            new FilteredDataEntryWriter(
-                new DataEntryNameFilter(
-                    new ListParser(new FileNameParser()).parse(filter)),
-                writer) :
-            writer;
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJars,  isJar,  false, ".jar",  jarFilter,  null,                       false,               null);
 
-        // Add a writer for the injected classes.
-        writer = new ExtraDataEntryWriter(extraClassNameMap,
-                                          writer,
-                                          writer,
-                                          ClassConstants.CLASS_FILE_EXTENSION);
+        // Either we create an aab or apk; they can not be nested.
+        writer = isAab ?
+            wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenAabs, isAab, true,  ".aab", aabFilter, null, false,               null) :
+            wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenApks, isApk, false, ".apk", apkFilter, null, pageAlignNativeLibs, null);
+
+        // Create a writer for plain class files. Don't close the enclosed
+        // writer through it, but let it be closed later on.
+        DataEntryWriter classWriter =
+            new ClassDataEntryWriter(programClassPool,
+            new NonClosingDataEntryWriter(writer));
+
+        // Add a renaming filter, if specified.
+        if (filter != null)
+        {
+            WildcardManager wildcardManager = new WildcardManager();
+
+            StringFunction fileNameFunction =
+                new ListFunctionParser(
+                new SingleFunctionParser(
+                new FileNameParser(wildcardManager), wildcardManager)).parse(filter);
+
+            // Slight asymmetry: we filter plain class files beforehand,
+            // but we filter and rename dex files and resource files after
+            // creating and renaming them in the feature structure.
+            // We therefore don't filter class files that go into dex
+            // files.
+            classWriter = new RenamedDataEntryWriter(fileNameFunction, classWriter);
+            writer      = new RenamedDataEntryWriter(fileNameFunction, writer);
+        }
+
+        writer =
+            // Filter on class files.
+            new NameFilteredDataEntryWriter(
+            new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION),
+                classWriter,
+                writer);
 
         // Let the writer cascade, if specified.
         return alternativeWriter != null ?
@@ -171,43 +265,83 @@ public class DataEntryWriterFactory
 
 
     /**
-     * Wraps the given DataEntryWriter in a JarWriter, filtering if necessary.
+     * Wraps the given DataEntryWriter in a ZipWriter, filtering and signing
+     * if necessary.
      */
-    private DataEntryWriter wrapInJarWriter(DataEntryWriter writer,
+    private DataEntryWriter wrapInJarWriter(File            file,
+                                            DataEntryWriter writer,
+                                            DataEntryWriter extraDataEntryWriter,
+                                            boolean         closeCachedJarWriter,
                                             boolean         flatten,
-                                            boolean         isOutputJar,
+                                            boolean         isJar,
+                                            boolean         isAab,
                                             String          jarFilterExtension,
                                             List            jarFilter,
                                             byte[]          jarHeader,
-                                            String          classFilePrefix)
+                                            boolean         pageAlignNativeLibs,
+                                            String[][]      prefixes)
     {
+        StringMatcher pageAlignmentFilter = pageAlignNativeLibs ?
+            new FileNameParser().parse("lib/*/*.so") :
+            null;
+
         // Flatten jars or zip them up.
-        DataEntryWriter jarWriter;
+        DataEntryWriter zipWriter;
         if (flatten)
         {
             // Unpack the jar.
-            jarWriter = new ParentDataEntryWriter(writer);
+            zipWriter = new ParentDataEntryWriter(writer);
         }
-        else
-        {
-            // Pack the jar.
-            jarWriter = new JarWriter(jarHeader, writer);
 
-            // Add a prefix for class files inside the jar, if specified.
-            if (classFilePrefix != null)
+        // Do we have a cached writer?
+        else if (!isJar || (zipWriter = jarWriterCache.get(file)) == null)
+        {
+            // Sign the jar.
+            zipWriter =
+                wrapInSignedJarWriter(writer,
+                                      extraDataEntryWriter,
+                                      isAab,
+                                      jarHeader,
+                                      pageAlignmentFilter);
+
+            // Add a prefix to specified files inside the jar.
+            if (prefixes != null)
             {
-                jarWriter =
-                    new FilteredDataEntryWriter(
-                    new DataEntryNameFilter(
-                    new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION)),
-                    new PrefixAddingDataEntryWriter(classFilePrefix,
-                                                    jarWriter),
-                    jarWriter);
+                DataEntryWriter prefixlessJarWriter = zipWriter;
+
+                for (int index = prefixes.length - 1; index >= 0; index--)
+                {
+                    String prefixFileNameFilter = prefixes[index][0];
+                    String prefix               = prefixes[index][1];
+
+                    zipWriter =
+                        new FilteredDataEntryWriter(
+                            new DataEntryNameFilter(
+                                new ListParser(new FileNameParser()).parse(prefixFileNameFilter)),
+                            new PrefixAddingDataEntryWriter(prefix,
+                                                            prefixlessJarWriter),
+                            zipWriter);
+                }
             }
+
+            // Is it an outermost archive?
+            if (isJar)
+            {
+                // Cache the jar writer so it can be reused.
+                jarWriterCache.put(file, zipWriter);
+            }
+        }
+
+        // Only close an outermost archive if specified.
+        // It may be used later on.
+        if (isJar && !closeCachedJarWriter)
+        {
+            zipWriter = new NonClosingDataEntryWriter(zipWriter);
         }
 
         // Either zip up the jar or delegate to the original writer.
         return
+            // Is the data entry part of the specified type of jar?
             new FilteredDataEntryWriter(
             new DataEntryParentFilter(
             new DataEntryNameFilter(
@@ -221,14 +355,49 @@ public class DataEntryWriterFactory
                     new DataEntryParentFilter(
                     new DataEntryNameFilter(
                     new ListParser(new FileNameParser()).parse(jarFilter))),
-                    jarWriter) :
-                    jarWriter,
+                    zipWriter) :
+                    zipWriter,
 
                 // The parent of the data entry is not a jar.
                 // Write the entry to a jar anyway if the output is a jar.
                 // Otherwise just delegate to the original writer.
-                isOutputJar ?
-                    jarWriter :
+                isJar ?
+                    zipWriter :
                     writer);
+    }
+
+
+    /**
+     * Wraps the given DataEntryWriter in a ZipWriter, signing if necessary.
+     */
+    private DataEntryWriter wrapInSignedJarWriter(DataEntryWriter writer,
+                                                  DataEntryWriter extraDataEntryWriter,
+                                                  boolean         isAab,
+                                                  byte[]          jarHeader,
+                                                  StringMatcher   pageAlignmentFilter)
+    {
+        // Pack the zip.
+        DataEntryWriter zipWriter =
+            new ZipWriter(uncompressedFilter,
+                          uncompressedAlignment,
+                          pageAlignmentFilter,
+                          PAGE_ALIGNMENT,
+                          modificationTime,
+                          jarHeader,
+                          writer);
+
+        // Do we need to sign the jar?
+        if (privateKeyEntries != null)
+        {
+            // Sign the jar (signature scheme v1).
+            zipWriter =
+                new SignedJarWriter(privateKeyEntries[0],
+                                    new String[] { JarWriter.DEFAULT_DIGEST_ALGORITHM },
+                                    ProGuard.VERSION,
+                                    null,
+                                    zipWriter);
+        }
+
+        return zipWriter;
     }
 }

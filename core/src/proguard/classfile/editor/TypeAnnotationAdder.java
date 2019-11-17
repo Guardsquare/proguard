@@ -22,9 +22,9 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.*;
-import proguard.classfile.attribute.annotation.target.TargetInfo;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.util.ArrayUtil;
 
 /**
  * This TypeAnnotationVisitor adds all type annotations that it visits to the given
@@ -93,8 +93,7 @@ implements   TypeAnnotationVisitor
                                null,
                                newTypePath);
 
-        // TODO: Clone array.
-        newTypeAnnotation.referencedClasses = typeAnnotation.referencedClasses;
+        newTypeAnnotation.referencedClasses = ArrayUtil.cloneOrNull(typeAnnotation.referencedClasses);
 
         // Add the element values.
         typeAnnotation.elementValuesAccept(clazz,

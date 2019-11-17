@@ -55,12 +55,14 @@ public class ClassDataEntryWriter implements DataEntryWriter
 
     // Implementations for DataEntryWriter.
 
+    @Override
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
         return dataEntryWriter.createDirectory(dataEntry);
     }
 
 
+    @Override
     public boolean sameOutputStream(DataEntry dataEntry1,
                                     DataEntry dataEntry2)
     throws IOException
@@ -69,6 +71,7 @@ public class ClassDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public OutputStream createOutputStream(DataEntry dataEntry) throws IOException
     {
         String inputName = dataEntry.getName();
@@ -120,6 +123,7 @@ public class ClassDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public void close() throws IOException
     {
         // Close the delegate writer.
@@ -127,6 +131,7 @@ public class ClassDataEntryWriter implements DataEntryWriter
     }
 
 
+    @Override
     public void println(PrintWriter pw, String prefix)
     {
         pw.println(prefix + "ClassDataEntryWriter");

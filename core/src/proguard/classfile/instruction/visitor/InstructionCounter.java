@@ -40,7 +40,7 @@ implements   InstructionVisitor
     /**
      * Returns the number of instructions that has been visited so far.
      */
-    public int getCount()
+    public synchronized int getCount()
     {
         return count;
     }
@@ -48,11 +48,11 @@ implements   InstructionVisitor
 
     // Implementations for InstructionVisitor.
 
-    public void visitAnyInstruction(Clazz         clazz,
-                                    Method        method,
-                                    CodeAttribute codeAttribute,
-                                    int           offset,
-                                    Instruction   instruction)
+    public synchronized void visitAnyInstruction(Clazz         clazz,
+                                                 Method        method,
+                                                 CodeAttribute codeAttribute,
+                                                 int           offset,
+                                                 Instruction   instruction)
     {
         count++;
     }

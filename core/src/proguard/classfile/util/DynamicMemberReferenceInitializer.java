@@ -75,7 +75,7 @@ implements   AttributeVisitor,
 
 
     // Retrieving fields or methods from known, constant classes.
-    private final InstructionSequenceMatcher knownItegerUpdaterMatcher;
+    private final InstructionSequenceMatcher knownIntegerUpdaterMatcher;
     private final InstructionSequenceMatcher knownLongUpdaterMatcher;
     private final InstructionSequenceMatcher knownReferenceUpdaterMatcher;
 
@@ -115,7 +115,7 @@ implements   AttributeVisitor,
             new InstructionSequenceBuilder(programClassPool, libraryClassPool);
 
         // AtomicIntegerFieldUpdater.newUpdater(A.class, "someField").
-        Instruction[] knownItegerUpdaterInstructions = builder
+        Instruction[] knownIntegerUpdaterInstructions = builder
             .ldc_(CLASS_INDEX)
             .ldc_(MEMBER_NAME_INDEX)
             .invokestatic(ClassConstants.NAME_JAVA_UTIL_CONCURRENT_ATOMIC_ATOMIC_INTEGER_FIELD_UPDATER,
@@ -168,7 +168,7 @@ implements   AttributeVisitor,
 
         Constant[] constants = builder.constants();
 
-        knownItegerUpdaterMatcher      = new InstructionSequenceMatcher(constants, knownItegerUpdaterInstructions);
+        knownIntegerUpdaterMatcher     = new InstructionSequenceMatcher(constants, knownIntegerUpdaterInstructions);
         knownLongUpdaterMatcher        = new InstructionSequenceMatcher(constants, knownLongUpdaterInstructions);
         knownReferenceUpdaterMatcher   = new InstructionSequenceMatcher(constants, knownReferenceUpdaterInstructions);
         unknownIntegerUpdaterMatcher   = new InstructionSequenceMatcher(constants, unknownIntegerUpdaterInstructions);
@@ -210,7 +210,7 @@ implements   AttributeVisitor,
         // Try to match the AtomicIntegerFieldUpdater.newUpdater(
         // SomeClass.class, "someField") construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
-                       knownItegerUpdaterMatcher,
+                       knownIntegerUpdaterMatcher,
                        unknownIntegerUpdaterMatcher, true, false, false,
                        "" + ClassConstants.TYPE_INT);
 
@@ -614,6 +614,28 @@ implements   AttributeVisitor,
         }
 
 
+        @Override
+        public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction)
+        {
+            if (DEBUG)
+            {
+                System.out.println("Label ["+label+"] V "+variableInstruction.toString(offset));
+            }
+
+            switch (variableInstruction.canonicalOpcode())
+            {
+                case InstructionConstants.OP_ASTORE:
+                case InstructionConstants.OP_ALOAD:
+                    // Ignore astore/aload instructions.
+                    break;
+
+                default:
+                    reset();
+                    break;
+            }
+        }
+
+
         public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction)
         {
             if (DEBUG)
@@ -696,8 +718,14 @@ implements   AttributeVisitor,
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                     break;
 
+                case InstructionConstants.OP_CHECKCAST:
+                    // We simply ignore any casts, typically to Class[],
+                    // but maybe even to Class or String.
+                    break;
+
                 case InstructionConstants.OP_GETSTATIC:
                 case InstructionConstants.OP_INVOKEVIRTUAL:
+                case InstructionConstants.OP_INVOKESTATIC:
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                     break;
 
@@ -779,6 +807,12 @@ implements   AttributeVisitor,
             // Argument of ldc instruction.
             switch (label)
             {
+                case LABEL_START:
+                    // Also handle calls to Class.forName("className") that have
+                    // already been processed by the DynamicClassReferenceInitializer.
+                    referencedClass = stringConstant.referencedClass;
+                    break;
+
                 case LABEL_LOAD_MEMBER_NAME:
                     break;
 
@@ -833,7 +867,7 @@ implements   AttributeVisitor,
 
         public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant)
         {
-            // Argument of invokevirtual instruction.
+            // Argument of invokevirtual/invokestatic instruction.
             String className = methodrefConstant.getClassName(clazz);
 
             if (className.equals(ClassConstants.NAME_JAVA_LANG_CLASS))
@@ -890,6 +924,12 @@ implements   AttributeVisitor,
                     {
                         reset();
                     }
+                }
+                else if (label == LABEL_LOAD_CLASS_ARRAY_SIZE &&
+                         methodName.equals(ClassConstants.METHOD_NAME_CLASS_FOR_NAME) &&
+                         methodType.equals(ClassConstants.METHOD_TYPE_CLASS_FOR_NAME))
+                {
+                    label = LABEL_LOAD_MEMBER_NAME;
                 }
                 else
                 {
@@ -966,6 +1006,8 @@ implements   AttributeVisitor,
                                              isConstructor,
                                              isDeclared);
             }
+
+            reset();
         }
     }
 }

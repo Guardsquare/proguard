@@ -55,5 +55,4 @@ implements   AttributeVisitor,
     {
         count++;
     }
-
 }

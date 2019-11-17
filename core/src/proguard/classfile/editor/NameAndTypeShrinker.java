@@ -27,6 +27,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
+import proguard.util.VisitorAccepter;
 
 import java.util.Arrays;
 
@@ -118,7 +119,7 @@ implements   ClassVisitor,
      */
     private void markNameAndTypeConstant(Clazz clazz, int index)
     {
-         markAsUsed((NameAndTypeConstant)((ProgramClass)clazz).getConstant(index));
+         markAsUsed(((ProgramClass)clazz).getConstant(index));
     }
 
 

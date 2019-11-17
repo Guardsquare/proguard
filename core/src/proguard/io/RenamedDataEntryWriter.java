@@ -20,72 +20,89 @@
  */
 package proguard.io;
 
-import proguard.classfile.*;
-import proguard.classfile.util.ClassUtil;
+import proguard.classfile.ClassConstants;
+import proguard.util.*;
 
 import java.io.*;
-import java.util.Map;
 
 /**
  * This DataEntryWriter delegates to another DataEntryWriter, renaming the
- * data entries based on the renamed classes in the given ClassPool.
+ * data entries with the given string function.
  *
  * @author Eric Lafortune
  */
 public class RenamedDataEntryWriter implements DataEntryWriter
 {
-    private final ClassPool       classPool;
-    private final Map             packagePrefixMap;
+    private final StringFunction  nameFunction;
     private final DataEntryWriter dataEntryWriter;
 
 
     /**
      * Creates a new RenamedDataEntryWriter.
-     * @param classPool        the class pool that maps from old names to new
-     *                         names.
-     * @param packagePrefixMap the map from old package prefixes to new package
-     *                         prefixes.
-     * @param dataEntryWriter  the DataEntryWriter to which calls will be
-     *                         delegated.
+     * @param nameFunction    the function from old names to new names.
+     * @param dataEntryWriter the DataEntryWriter to which renamed data
+     *                        entries will be passed.
      */
-    public RenamedDataEntryWriter(ClassPool       classPool,
-                                  Map             packagePrefixMap,
+    public RenamedDataEntryWriter(StringFunction  nameFunction,
                                   DataEntryWriter dataEntryWriter)
     {
-        this.classPool        = classPool;
-        this.packagePrefixMap = packagePrefixMap;
-        this.dataEntryWriter  = dataEntryWriter;
+        this.nameFunction    = nameFunction;
+        this.dataEntryWriter = dataEntryWriter;
     }
 
 
     // Implementations for DataEntryWriter.
 
+    @Override
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
-        return dataEntryWriter.createDirectory(renamedDataEntry(dataEntry));
+        // Add the directory separator.
+        String name    = dataEntry.getName() + ClassConstants.PACKAGE_SEPARATOR;
+        String newName = nameFunction.transform(name);
+
+        boolean result = newName != null && newName.length() > 0;
+        if (result)
+        {
+            // Remove the directory separator again.
+            dataEntryWriter.createDirectory(new RenamedDataEntry(dataEntry, newName.substring(0, newName.length() - 1)));
+        }
+
+        return result;
     }
 
 
+    @Override
     public boolean sameOutputStream(DataEntry dataEntry1, DataEntry dataEntry2) throws IOException
     {
-        return dataEntryWriter.sameOutputStream(dataEntry1, dataEntry2);
+        DataEntry renamedDataEntry1 = rename(dataEntry1);
+        DataEntry renamedDataEntry2 = rename(dataEntry2);
+
+        return renamedDataEntry1 != null &&
+               renamedDataEntry2 != null &&
+               dataEntryWriter.sameOutputStream(renamedDataEntry1, renamedDataEntry2);
     }
 
 
+    @Override
     public OutputStream createOutputStream(DataEntry dataEntry) throws IOException
     {
-        return dataEntryWriter.createOutputStream(renamedDataEntry(dataEntry));
+        DataEntry renamedDataEntry = rename(dataEntry);
+
+        return renamedDataEntry == null ? null : dataEntryWriter.createOutputStream(renamedDataEntry);
     }
 
 
+    @Override
     public void close() throws IOException
     {
         dataEntryWriter.close();
     }
 
 
+    @Override
     public void println(PrintWriter pw, String prefix)
     {
+        pw.println(prefix + "RenamedDataEntryWriter");
         dataEntryWriter.println(pw, prefix);
     }
 
@@ -93,83 +110,13 @@ public class RenamedDataEntryWriter implements DataEntryWriter
     // Small utility methods.
 
     /**
-     * Create a renamed data entry, if possible.
+     * Returns the suitably renamed data entry, or null.
      */
-    private DataEntry renamedDataEntry(DataEntry dataEntry)
+    private DataEntry rename(DataEntry dataEntry)
     {
-        String dataEntryName = dataEntry.getName();
+        String name    = dataEntry.getName();
+        String newName = nameFunction.transform(name);
 
-        // Try to find a corresponding class name by removing increasingly
-        // long suffixes.
-        for (int suffixIndex = dataEntryName.length() - 1;
-             suffixIndex > 0;
-             suffixIndex--)
-        {
-            char c = dataEntryName.charAt(suffixIndex);
-            if (!Character.isLetterOrDigit(c))
-            {
-                // Chop off the suffix.
-                String className = dataEntryName.substring(0, suffixIndex);
-
-                // Did we get to the package separator?
-                if (c == ClassConstants.PACKAGE_SEPARATOR)
-                {
-                    break;
-                }
-
-                // Is there a class corresponding to the data entry?
-                Clazz clazz = classPool.getClass(className);
-                if (clazz != null)
-                {
-                    // Did the class get a new name?
-                    String newClassName = clazz.getName();
-                    if (!className.equals(newClassName))
-                    {
-                        // Return a renamed data entry.
-                        String newDataEntryName =
-                            newClassName + dataEntryName.substring(suffixIndex);
-
-                        return new RenamedDataEntry(dataEntry, newDataEntryName);
-                    }
-                    else
-                    {
-                        // Otherwise stop looking.
-                        return dataEntry;
-                    }
-                }
-            }
-        }
-
-        // Try to find a corresponding package name by increasingly removing
-        // more subpackages.
-        String packagePrefix = dataEntryName;
-        do
-        {
-            // Chop off the class name or the last subpackage name.
-            packagePrefix = ClassUtil.internalPackagePrefix(packagePrefix);
-
-            // Is there a package corresponding to the package prefix?
-            String newPackagePrefix = (String)packagePrefixMap.get(packagePrefix);
-            if (newPackagePrefix != null)
-            {
-                // Did the package get a new name?
-                if (!packagePrefix.equals(newPackagePrefix))
-                {
-                    // Return a renamed data entry.
-                    String newDataEntryName =
-                        newPackagePrefix + dataEntryName.substring(packagePrefix.length());
-
-                    return new RenamedDataEntry(dataEntry, newDataEntryName);
-                }
-                else
-                {
-                    // Otherwise stop looking.
-                    return dataEntry;
-                }
-            }
-        }
-        while (packagePrefix.length() > 0);
-
-        return dataEntry;
+        return newName == null ? null : new RenamedDataEntry(dataEntry, newName);
     }
 }

@@ -24,25 +24,22 @@ package proguard.classfile;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.MemberVisitor;
+import proguard.util.SimpleProcessableVisitorAccepter;
 
 /**
  * Representation of a field or method from a program class.
  *
  * @author Eric Lafortune
  */
-public abstract class ProgramMember implements Member
+public abstract class ProgramMember
+extends               SimpleProcessableVisitorAccepter
+implements            Member
 {
     public int         u2accessFlags;
     public int         u2nameIndex;
     public int         u2descriptorIndex;
     public int         u2attributesCount;
     public Attribute[] attributes;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
 
     /**
      * Creates an uninitialized ProgramMember.
@@ -59,8 +56,11 @@ public abstract class ProgramMember implements Member
                             int         u2nameIndex,
                             int         u2descriptorIndex,
                             int         u2attributesCount,
-                            Attribute[] attributes)
+                            Attribute[] attributes,
+                            int         processingFlags)
     {
+        super(processingFlags);
+
         this.u2accessFlags     = u2accessFlags;
         this.u2nameIndex       = u2nameIndex;
         this.u2descriptorIndex = u2descriptorIndex;
@@ -123,18 +123,5 @@ public abstract class ProgramMember implements Member
     public void accept(Clazz clazz, MemberVisitor memberVisitor)
     {
         accept((ProgramClass)clazz, memberVisitor);
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

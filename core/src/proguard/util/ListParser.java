@@ -51,7 +51,7 @@ public class ListParser implements StringParser
 
     public StringMatcher parse(String regularExpression)
     {
-        // Does the regular expression contain a ',' list separator?
+        // Split the regular expression to a list and parse it.
         return parse(ListUtil.commaSeparatedList(regularExpression));
     }
 
@@ -97,8 +97,8 @@ public class ListParser implements StringParser
     {
         // Wrap the matcher if the regular expression starts with a '!' negator.
         return isNegated(regularExpression) ?
-          new NotMatcher(stringParser.parse(regularExpression.substring(1))) :
-          stringParser.parse(regularExpression);
+            new NotMatcher(stringParser.parse(regularExpression.substring(1))) :
+            stringParser.parse(regularExpression);
     }
 
 

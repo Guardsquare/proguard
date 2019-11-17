@@ -161,6 +161,16 @@ implements   AttributeVisitor,
 
 
     /**
+     * Returns whether the specified stack entry is initialized.
+     */
+    public boolean isTopInitializedBefore(int offset, int stackEntryIndexTop)
+    {
+        return isInitializedBefore(offset,
+                                   (partialEvaluator.getStackBefore(offset).size() - 1) - stackEntryIndexTop);
+    }
+
+
+    /**
      * Returns whether the given creation offset is initialized before the given
      * offset.
      */
@@ -198,7 +208,7 @@ implements   AttributeVisitor,
 
         // Make sure the global arrays are sufficiently large.
         initializationOffsets = ArrayUtil.ensureArraySize(initializationOffsets, codeLength, NONE);
-        uninitializedOffsets  = ArrayUtil.ensureArraySize(uninitializedOffsets,codeLength, null);
+        uninitializedOffsets  = ArrayUtil.ensureArraySize(uninitializedOffsets,  codeLength, null);
 
         // Evaluate the method.
         if (runPartialEvaluator)

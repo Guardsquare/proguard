@@ -2,7 +2,7 @@
 Please consult the [license page](license.md) for more details.
 
 ProGuard is written in Java, so it requires a Java Runtime Environment
-(JRE 1.7 or higher).
+(JRE 1.8 or higher).
 
 You can download ProGuard in various forms:
 

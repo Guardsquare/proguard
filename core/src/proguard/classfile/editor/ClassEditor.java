@@ -21,6 +21,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.*;
+import proguard.util.ArrayUtil;
 
 /**
  * This class can add interfaces and class members to a given class.
@@ -51,26 +52,14 @@ public class ClassEditor
      */
     public void addInterface(int interfaceConstantIndex)
     {
-        int   interfacesCount = targetClass.u2interfacesCount;
-        int[] interfaces      = targetClass.u2interfaces;
-
-        // Make sure there is enough space for the new interface.
-        if (interfaces.length <= interfacesCount)
-        {
-            targetClass.u2interfaces = new int[interfacesCount+1];
-            System.arraycopy(interfaces, 0,
-                             targetClass.u2interfaces, 0,
-                             interfacesCount);
-            interfaces = targetClass.u2interfaces;
-        }
-
+        targetClass.u2interfaces =
+            ArrayUtil.add(targetClass.u2interfaces,
+                          targetClass.u2interfacesCount++,
+                          interfaceConstantIndex);
         if (DEBUG)
         {
             System.out.println(targetClass.getName()+": adding interface ["+targetClass.getClassName(interfaceConstantIndex)+"]");
         }
-
-        // Add the interface.
-        interfaces[targetClass.u2interfacesCount++] = interfaceConstantIndex;
     }
 
     /**
@@ -78,18 +67,14 @@ public class ClassEditor
      */
     public void removeInterface(int interfaceConstantIndex)
     {
-        int   interfacesCount = targetClass.u2interfacesCount;
-        int[] interfaces      = targetClass.u2interfaces;
+        if (DEBUG)
+        {
+            System.out.println(targetClass.getName()+": removing interface ["+targetClass.getClassName(interfaceConstantIndex)+"]");
+        }
 
-        int interfaceIndex = findInterfaceIndex(interfaceConstantIndex);
-
-        // Shift the interface entries.
-        System.arraycopy(interfaces, interfaceIndex+1,
-                         interfaces, interfaceIndex,
-                         interfacesCount - interfaceIndex - 1);
-
-        // Clear the last entry.
-        interfaces[--targetClass.u2interfacesCount] = 0;
+        ArrayUtil.remove(targetClass.u2interfaces,
+                         targetClass.u2interfacesCount--,
+                         findInterfaceIndex(interfaceConstantIndex));
     }
 
 
@@ -119,26 +104,15 @@ public class ClassEditor
      */
     public void addField(Field field)
     {
-        int     fieldsCount = targetClass.u2fieldsCount;
-        Field[] fields      = targetClass.fields;
-
-        // Make sure there is enough space for the new field.
-        if (fields.length <= fieldsCount)
-        {
-            targetClass.fields = new ProgramField[fieldsCount+1];
-            System.arraycopy(fields, 0,
-                             targetClass.fields, 0,
-                             fieldsCount);
-            fields = targetClass.fields;
-        }
-
         if (DEBUG)
         {
             System.out.println(targetClass.getName()+": adding field ["+field.getName(targetClass)+" "+field.getDescriptor(targetClass)+"]");
         }
 
-        // Add the field.
-        fields[targetClass.u2fieldsCount++] = field;
+        targetClass.fields =
+            (ProgramField[])ArrayUtil.add(targetClass.fields,
+                                          targetClass.u2fieldsCount++,
+                                          field);
     }
 
 
@@ -148,18 +122,14 @@ public class ClassEditor
      */
     public void removeField(Field field)
     {
-        int     fieldsCount = targetClass.u2fieldsCount;
-        Field[] fields      = targetClass.fields;
+        if (DEBUG)
+        {
+            System.out.println(targetClass.getName()+": removing field ["+field.getName(targetClass)+" "+field.getDescriptor(targetClass)+"]");
+        }
 
-        int fieldIndex = findFieldIndex(field);
-
-        // Shift the field entries.
-        System.arraycopy(fields, fieldIndex+1,
-                         fields, fieldIndex,
-                         fieldsCount - fieldIndex - 1);
-
-        // Clear the last entry.
-        fields[--targetClass.u2fieldsCount] = null;
+        ArrayUtil.remove(targetClass.fields,
+                         targetClass.u2fieldsCount--,
+                         findFieldIndex(field));
     }
 
 
@@ -189,26 +159,15 @@ public class ClassEditor
      */
     public void addMethod(Method method)
     {
-        int      methodsCount = targetClass.u2methodsCount;
-        Method[] methods      = targetClass.methods;
-
-        // Make sure there is enough space for the new method.
-        if (methods.length <= methodsCount)
-        {
-            targetClass.methods = new ProgramMethod[methodsCount+1];
-            System.arraycopy(methods, 0,
-                             targetClass.methods, 0,
-                             methodsCount);
-            methods = targetClass.methods;
-        }
-
         if (DEBUG)
         {
             System.out.println(targetClass.getName()+": adding method ["+method.getName(targetClass)+method.getDescriptor(targetClass)+"]");
         }
 
-        // Add the method.
-        methods[targetClass.u2methodsCount++] = method;
+        targetClass.methods =
+            (ProgramMethod[])ArrayUtil.add(targetClass.methods,
+                                           targetClass.u2methodsCount++,
+                                           method);
     }
 
 
@@ -218,18 +177,14 @@ public class ClassEditor
      */
     public void removeMethod(Method method)
     {
-        int      methodsCount = targetClass.u2methodsCount;
-        Method[] methods      = targetClass.methods;
+        if (DEBUG)
+        {
+            System.out.println(targetClass.getName()+": removing method ["+method.getName(targetClass)+method.getDescriptor(targetClass)+"]");
+        }
 
-        int methodIndex = findMethodIndex(method);
-
-        // Shift the method entries.
-        System.arraycopy(methods, methodIndex+1,
-                         methods, methodIndex,
-                         methodsCount - methodIndex - 1);
-
-        // Clear the last entry.
-        methods[--targetClass.u2methodsCount] = null;
+        ArrayUtil.remove(targetClass.methods,
+                         targetClass.u2methodsCount--,
+                         findMethodIndex(method));
     }
 
 

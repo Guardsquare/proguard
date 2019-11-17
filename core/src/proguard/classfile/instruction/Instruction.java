@@ -229,7 +229,7 @@ public abstract class Instruction
         true,  // checkcast
         false, // instanceof
         true,  // monitorenter
-        true,  // monitorexit
+        false, // monitorexit
         false, // wide
         true,  // multianewarray
         false, // ifnull

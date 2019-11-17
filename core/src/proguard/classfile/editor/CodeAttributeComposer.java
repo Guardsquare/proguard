@@ -190,6 +190,15 @@ implements   AttributeVisitor,
 
 
     /**
+     * Returns the current length (in bytes) of the code attribute being composed.
+     */
+    public int getCodeLength()
+    {
+        return codeLength;
+    }
+
+
+    /**
      * Appends the given instruction with the given old offset.
      * Branch instructions must fit, for instance by enabling automatic
      * shrinking of instructions.
@@ -344,9 +353,9 @@ implements   AttributeVisitor,
 
         // Add the exception.
         exceptionTable =
-            (ExceptionInfo[])ArrayUtil.add(exceptionTable,
-                                           exceptionTableLength++,
-                                           exceptionInfo);
+            ArrayUtil.add(exceptionTable,
+                          exceptionTableLength++,
+                          exceptionInfo);
     }
 
 
@@ -386,8 +395,8 @@ implements   AttributeVisitor,
         }
 
         lineNumberTable =
-            (LineNumberInfo[])ArrayUtil.extendArray(lineNumberTable,
-                                                    lineNumberTableLength + 1);
+            ArrayUtil.extendArray(lineNumberTable,
+                                  lineNumberTableLength + 1);
 
         // Find the insertion index, starting from the end.
         // Don't insert before a negative line number, in case of a tie.
@@ -427,9 +436,9 @@ implements   AttributeVisitor,
 
         // Add the line number.
         lineNumberTable =
-            (LineNumberInfo[])ArrayUtil.add(lineNumberTable,
-                                            lineNumberTableLength++,
-                                            lineNumberInfo);
+            ArrayUtil.add(lineNumberTable,
+                          lineNumberTableLength++,
+                          lineNumberInfo);
     }
 
 
@@ -660,6 +669,12 @@ implements   AttributeVisitor,
     }
 
 
+    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
+    {
+        typeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
+    }
+
+
     // Implementations for InstructionVisitor.
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {}
@@ -874,6 +889,44 @@ implements   AttributeVisitor,
 
         localVariableTargetElement.u2startPC = startPC;
         localVariableTargetElement.u2length  = endPC - startPC;
+    }
+
+    // Implementations for TypeAnnotationVisitor.
+
+    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
+    {
+        // Update all local variable targets.
+        typeAnnotation.targetInfoAccept(clazz, this);
+    }
+
+
+    // Implementations for TargetInfoVisitor.
+
+    public void visitAnyTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TargetInfo targetInfo) {}
+
+
+    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
+    {
+        // Update the offsets of the variables.
+        localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
+    }
+
+
+    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
+    {
+        // Update the offset.
+        offsetTargetInfo.u2offset = newInstructionOffset(offsetTargetInfo.u2offset);
+    }
+
+
+    // Implementations for LocalVariableTargetElementVisitor.
+
+    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
+    {
+        // Update the variable start offset and length.
+        // Be careful to update the length first.
+        localVariableTargetElement.u2length  = newBranchOffset(localVariableTargetElement.u2startPC, localVariableTargetElement.u2length);
+        localVariableTargetElement.u2startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
     }
 
     // Small utility methods.

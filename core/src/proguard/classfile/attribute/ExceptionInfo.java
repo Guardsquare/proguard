@@ -20,14 +20,14 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.classfile.VisitorAccepter;
+import proguard.util.SimpleVisitorAccepter;
 
 /**
  * Representation of an Exception table entry.
  *
  * @author Eric Lafortune
  */
-public class ExceptionInfo implements VisitorAccepter
+public class ExceptionInfo extends SimpleVisitorAccepter
 {
     public int u2startPC;
     public int u2endPC;
@@ -35,21 +35,16 @@ public class ExceptionInfo implements VisitorAccepter
     public int u2catchType;
 
     /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
-
-
-    /**
      * Creates an uninitialized ExceptionInfo.
      */
     public ExceptionInfo()
     {
+        this(0, 0, 0, 0);
     }
 
 
     /**
-     * Creates an initialized ExceptionInfo.
+     * Creates an ExceptionInfo with the given properties.
      */
     public ExceptionInfo(int u2startPC,
                          int u2endPC,
@@ -82,18 +77,5 @@ public class ExceptionInfo implements VisitorAccepter
     {
         return u2startPC < endOffset &&
                u2endPC   > startOffset;
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }
