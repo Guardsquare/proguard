@@ -95,5 +95,4 @@ public class GsonContext
                                                         domainClassFinder,
                                                         warningPrinter)))))));
     }
-
 }

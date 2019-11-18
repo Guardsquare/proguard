@@ -89,6 +89,18 @@ public class GsonOptimizer
     };
 
 
+    private final Configuration configuration;
+
+
+    /**
+     * Creates a new GsonOptimizer.
+     */
+    public GsonOptimizer(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Performs the Gson optimizations.
      *
@@ -98,14 +110,12 @@ public class GsonOptimizer
      *                              library class references.
      * @param extraDataEntryNameMap the map to which injected class names are
      *                              added.
-     * @param configuration         the DexGuard configuration that is applied.
      * @throws IOException          when the injected template classes can not
      *                              be read.
      */
     public void execute(ClassPool             programClassPool,
                         ClassPool             libraryClassPool,
-                        ExtraDataEntryNameMap extraDataEntryNameMap,
-                        Configuration         configuration)
+                        ExtraDataEntryNameMap extraDataEntryNameMap)
     throws IOException
     {
         // Set all fields of Gson to public.
@@ -135,7 +145,6 @@ public class GsonOptimizer
         // Is there something to optimize at all?
         if (gsonContext.gsonDomainClassPool.size() > 0)
         {
-
             // Collect fields that need to be serialized and deserialized.
             OptimizedJsonInfo serializationInfo   = new OptimizedJsonInfo();
             OptimizedJsonInfo deserializationInfo = new OptimizedJsonInfo();

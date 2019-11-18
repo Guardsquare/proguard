@@ -53,7 +53,6 @@ public class ProGuard
 
     private       ClassPool        programClassPool = new ClassPool();
     private final ClassPool        libraryClassPool = new ClassPool();
-
     private final ResourceFilePool resourceFilePool = new ResourceFilePool();
 
     // All injected data entries.
@@ -108,28 +107,21 @@ public class ProGuard
             clearPreverification();
         }
 
-        if (configuration.printSeeds != null ||
-            configuration.shrink    ||
-            configuration.optimize  ||
-            configuration.obfuscate ||
-            configuration.preverify ||
-            configuration.backport)
-        {
-            initialize();
-        }
-
         if (configuration.printSeeds != null        ||
+            configuration.backport                  ||
             configuration.shrink                    ||
             configuration.optimize                  ||
             configuration.obfuscate                 ||
+            configuration.preverify                 ||
             configuration.addConfigurationDebugging ||
             configuration.adaptKotlinMetadata)
         {
+            initialize();
             mark();
         }
 
-        if (configuration.obfuscate ||
-            configuration.optimize)
+        if (configuration.optimize ||
+            configuration.obfuscate)
         {
             introducePrimitiveArrayConstants();
         }
@@ -160,12 +152,7 @@ public class ProGuard
             shrink();
         }
 
-        StringMatcher filter = configuration.optimizations != null ?
-            new ListParser(new NameParser()).parse(configuration.optimizations) :
-            new ConstantMatcher(true);
-
-        if (configuration.optimize &&
-            filter.matches(Optimizer.LIBRARY_GSON))
+        if (configuration.optimize)
         {
             optimizeGson();
         }
@@ -309,7 +296,7 @@ public class ProGuard
     {
         if (configuration.verbose)
         {
-            System.out.println("Marking classes and class members to be kept or encrypted...");
+            System.out.println("Marking classes and class members to be kept...");
         }
 
         new Marker(configuration).mark(programClassPool,
@@ -447,17 +434,22 @@ public class ProGuard
      */
     private void optimizeGson() throws IOException
     {
-        if (programClassPool.getClass("com/google/gson/Gson") != null)
+        // Do we have Gson code?
+        // Is Gson optimization enabled?
+        if (programClassPool.getClass("com/google/gson/Gson") != null &&
+            (configuration.optimizations == null ||
+             new ListParser(new NameParser()).parse(configuration.optimizations)
+                 .matches(Optimizer.LIBRARY_GSON)))
         {
             if (configuration.verbose)
             {
                 System.out.println("Optimizing usages of Gson library...");
             }
 
-            new GsonOptimizer().execute(programClassPool,
-                                        libraryClassPool,
-                                        extraDataEntryNameMap,
-                                        configuration);
+            // Perform the Gson optimization.
+            new GsonOptimizer(configuration).execute(programClassPool,
+                                                     libraryClassPool,
+                                                     extraDataEntryNameMap);
         }
     }
 
