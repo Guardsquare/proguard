@@ -51,6 +51,9 @@ public class UsageMarker
     private final Configuration configuration;
 
 
+    /**
+     * Creates a new UsageMarker.
+     */
     public UsageMarker(Configuration configuration)
     {
         this.configuration = configuration;
@@ -61,19 +64,19 @@ public class UsageMarker
      * Marks classes, resources, resource files and native libraries as being
      * used, based on the configuration.
      *
-     * @param programClassPool the program class pool.
-     * @param libraryClassPool the library class pool.
-     * @param usageMarker      the usage marker to use for marking
-     *                         classes, resources,...
+     * @param programClassPool  the program class pool.
+     * @param libraryClassPool  the library class pool.
+     * @param simpleUsageMarker the usage marker for marking any visitor
+     *                          accepters.
      */
     public void mark(ClassPool         programClassPool,
                      ClassPool         libraryClassPool,
-                     SimpleUsageMarker usageMarker)
+                     SimpleUsageMarker simpleUsageMarker)
     {
         mark(programClassPool,
              libraryClassPool,
-             usageMarker,
-             new ClassUsageMarker(usageMarker));
+             simpleUsageMarker,
+             new ClassUsageMarker(simpleUsageMarker));
     }
 
 
@@ -81,15 +84,16 @@ public class UsageMarker
      * Marks classes, resources, resource files and native libraries as being
      * used, based on the configuration.
      *
-     * @param programClassPool the program class pool.
-     * @param libraryClassPool the library class pool.
-     * @param usageMarker      the usage marker to use for marking
-     *                         resources,...
-     * @param classUsageMarker the class usage marker to use.
+     * @param programClassPool  the program class pool.
+     * @param libraryClassPool  the library class pool.
+     * @param simpleUsageMarker the usage marker for marking any visitor
+     *                          accepters.
+     * @param classUsageMarker  the usage marker for recursively marking
+     *                          classes.
      */
     public void mark(ClassPool         programClassPool,
                      ClassPool         libraryClassPool,
-                     SimpleUsageMarker usageMarker,
+                     SimpleUsageMarker simpleUsageMarker,
                      ClassUsageMarker  classUsageMarker)
     {
         // Mark the seeds.
@@ -102,12 +106,12 @@ public class UsageMarker
                                               classUsageMarker),
                 new AllMemberVisitor(
                 new MemberProcessingFlagFilter(ProcessingFlags.DONT_SHRINK, 0,
-                classUsageMarker
-            ))));
+                classUsageMarker))
+            ));
 
         // Mark the inner class and annotation information that has to be kept.
         programClassPool.classesAccept(
-            new UsedClassFilter(usageMarker,
+            new UsedClassFilter(simpleUsageMarker,
             new AllAttributeVisitor(true,
             new MultiAttributeVisitor(
                 new InnerUsageMarker(classUsageMarker),
@@ -121,9 +125,9 @@ public class UsageMarker
         {
             //TODO find a way to ensure consumer rules can force elements to be kept anyway. Maybe mark() them with DONT_SHRINK, then test for that flag in KotlinUsageMarker?
             programClassPool.classesAccept(
-                new UsedClassFilter(usageMarker,
+                new UsedClassFilter(simpleUsageMarker,
                                     new ReferencedKotlinMetadataVisitor(
-                                    new KotlinUsageMarker(usageMarker,
+                                    new KotlinUsageMarker(simpleUsageMarker,
                                                           classUsageMarker))));
         }
 

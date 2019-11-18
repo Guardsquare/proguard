@@ -29,7 +29,7 @@ import proguard.util.*;
 import static proguard.util.ProcessingFlags.INJECTED;
 
 /**
- * Translates the keep rules and encryption class specifications from the
+ * Translates the keep rules and other class specifications from the
  * configuration into processing flags on classes and class members.
  *
  * @author Johan Leys
@@ -39,6 +39,9 @@ public class Marker
     private final Configuration configuration;
 
 
+    /**
+     * Creates a new Marker for the given configuration.
+     */
     public Marker(Configuration configuration)
     {
         this.configuration = configuration;
@@ -66,6 +69,8 @@ public class Marker
         libraryClassPool.accept(classPoolVisitor);
     }
 
+
+    // Small utility methods.
 
     private ClassPoolVisitor createShrinkingMarker()
     {

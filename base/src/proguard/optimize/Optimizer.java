@@ -307,20 +307,35 @@ public class Optimizer
 
         // Create a visitor for marking the seeds.
         final KeepMarker keepMarker = new KeepMarker();
-        ClassPoolVisitor classPoolvisitor =
-            new KeepClassSpecificationVisitorFactory(false, true, false)
-                .createClassPoolVisitor(configuration.keep,
-                                        keepMarker,
-                                        keepMarker,
-                                        keepMarker,
-                                        keepMarker);
-        // Mark the seeds.
-        programClassPool.accept(classPoolvisitor);
-        libraryClassPool.accept(classPoolvisitor);
 
         // All library classes and library class members remain unchanged.
         libraryClassPool.classesAccept(keepMarker);
         libraryClassPool.classesAccept(new AllMemberVisitor(keepMarker));
+
+        // Mark classes that have the DONT_OPTIMIZE flag set.
+        programClassPool.classesAccept(
+            new MultiClassVisitor(
+                new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0,
+                keepMarker),
+
+                new AllMemberVisitor(
+                new MultiMemberVisitor(
+                    new MemberProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0,
+                    keepMarker),
+
+                    new AllAttributeVisitor(
+                    new AttributeProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0,
+                    keepMarker))
+                ))
+            ));
+
+        // We also keep all members that have the DONT_OPTIMIZE flag set on their code attribute.
+        programClassPool.classesAccept(
+            new AllMemberVisitor(
+            new AllAttributeVisitor(
+            new AttributeNameFilter(ClassConstants.ATTR_Code,
+            new AttributeProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0,
+            new CodeAttributeToMethodVisitor(keepMarker))))));
 
         // We also keep all classes that are involved in .class constructs.
         // We're not looking at enum classes though, so they can be simplified.

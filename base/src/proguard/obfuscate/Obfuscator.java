@@ -92,20 +92,19 @@ public class Obfuscator
 
         // Create a visitor for marking the seeds.
         NameMarker nameMarker = new NameMarker();
-        ClassPoolVisitor classPoolvisitor =
-            new KeepClassSpecificationVisitorFactory(false, false, true)
-                .createClassPoolVisitor(configuration.keep,
-                                        nameMarker,
-                                        nameMarker,
-                                        nameMarker,
-                                        null);
-        // Mark the seeds.
-        programClassPool.accept(classPoolvisitor);
-        libraryClassPool.accept(classPoolvisitor);
 
         // All library classes and library class members keep their names.
         libraryClassPool.classesAccept(nameMarker);
         libraryClassPool.classesAccept(new AllMemberVisitor(nameMarker));
+
+        // Mark classes that have the DONT_OBFUSCATE flag set.
+        programClassPool.classesAccept(
+            new MultiClassVisitor(
+                new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
+                nameMarker),
+                new AllMemberVisitor(
+                new MemberProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
+                nameMarker))));
 
         // We also keep the names of the abstract methods of functional
         // interfaces referenced from bootstrap method arguments (additional

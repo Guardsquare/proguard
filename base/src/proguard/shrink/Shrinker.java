@@ -71,21 +71,21 @@ public class Shrinker
         libraryClassPool.classesAccept(new ClassCleaner());
 
         // Create a visitor for marking the seeds.
-        SimpleUsageMarker usageMarker = configuration.whyAreYouKeeping == null ?
+        SimpleUsageMarker simpleUsageMarker = configuration.whyAreYouKeeping == null ?
             new SimpleUsageMarker() :
             new ShortestUsageMarker();
 
          // Create a usage marker for resources and code, tracing the reasons
          // if specified.
          ClassUsageMarker classUsageMarker = configuration.whyAreYouKeeping == null ?
-             new ClassUsageMarker(usageMarker) :
-             new ShortestClassUsageMarker((ShortestUsageMarker) usageMarker,
+             new ClassUsageMarker(simpleUsageMarker) :
+             new ShortestClassUsageMarker((ShortestUsageMarker) simpleUsageMarker,
                                           "is kept by a directive in the configuration.\n\n");
 
         // Mark all used code and resources and resource files.
         new UsageMarker(configuration).mark(programClassPool,
                                             libraryClassPool,
-                                            usageMarker,
+                                            simpleUsageMarker,
                                             classUsageMarker);
 
         // Should we explain ourselves?
@@ -119,7 +119,7 @@ public class Shrinker
             {
                 // Print out items that will be removed.
                 programClassPool.classesAcceptAlphabetically(
-                    new UsagePrinter(usageMarker, true, usageWriter));
+                    new UsagePrinter(simpleUsageMarker, true, usageWriter));
             }
             finally
             {
@@ -131,22 +131,22 @@ public class Shrinker
         // Clean up used program classes and discard unused program classes.
         ClassPool newProgramClassPool = new ClassPool();
         programClassPool.classesAccept(
-            new UsedClassFilter(usageMarker,
+            new UsedClassFilter(simpleUsageMarker,
             new MultiClassVisitor(
-                new ClassShrinker(usageMarker),
+                new ClassShrinker(simpleUsageMarker),
                 new ClassPoolFiller(newProgramClassPool)
             )));
 
         libraryClassPool.classesAccept(
-            new UsedClassFilter(usageMarker,
-            new ClassShrinker(usageMarker)));
+            new UsedClassFilter(simpleUsageMarker,
+            new ClassShrinker(simpleUsageMarker)));
 
         if (configuration.adaptKotlinMetadata)
         {
             // Clean up Kotlin metadata.
             newProgramClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
-                new KotlinShrinker(usageMarker)));
+                new KotlinShrinker(simpleUsageMarker)));
 
             if (configuration.enableKotlinAsserter)
             {

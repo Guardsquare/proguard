@@ -22,7 +22,6 @@ package proguard.shrink;
 
 import proguard.util.VisitorAccepter;
 
-
 /**
  * This class marks visitor accepters, in order to remember whether they are
  * unused, possibly used, or definitely used.
