@@ -1680,7 +1680,7 @@ public class ProGuardTask extends DefaultTask
 
             try
             {
-                return parser.parseClassSpecificationArguments(true, true, allowValues);
+                return parser.parseClassSpecificationArguments(false, true, allowValues);
             }
             finally
             {
