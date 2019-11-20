@@ -25,6 +25,7 @@ import proguard.classfile.util.ClassUtil;
 import proguard.configuration.ConfigurationLogger;
 import proguard.io.*;
 import proguard.resources.file.ResourceFilePool;
+import proguard.resources.file.util.ResourceFilePoolNameFunction;
 import proguard.util.*;
 
 import java.io.*;
@@ -118,6 +119,7 @@ public class OutputWriter
                     // Write the processed input entries to the output entries.
                     writeOutput(dataEntryWriterFactory,
                                 programClassPool,
+                                resourceFilePool,
                                 extraDataEntryNameMap,
                                 programJars,
                                 firstInputIndex,
@@ -257,6 +259,7 @@ public class OutputWriter
      */
     private void writeOutput(DataEntryWriterFactory dataEntryWriterFactory,
                              ClassPool              programClassPool,
+                             ResourceFilePool       resourceFilePool,
                              ExtraDataEntryNameMap  extraDataEntryNameMap,
                              ClassPath              classPath,
                              int                    fromInputIndex,
@@ -296,7 +299,7 @@ public class OutputWriter
             {
                 // Rename processed general resources.
                 resourceWriter =
-                    renameResourceFiles(programClassPool,
+                    renameResourceFiles(resourceFilePool,
                                         resourceWriter);
             }
 
@@ -369,16 +372,11 @@ public class OutputWriter
      * Returns a writer that writes possibly renamed resource files to the
      * given resource writer.
      */
-    private DataEntryWriter renameResourceFiles(ClassPool       programClassPool,
-                                                DataEntryWriter dataEntryWriter)
+    private DataEntryWriter renameResourceFiles(ResourceFilePool resourceFilePool,
+                                                DataEntryWriter  dataEntryWriter)
     {
-        StringFunction packagePrefixFunction =
-            new MapStringFunction(createPackagePrefixMap(programClassPool));
-
-        return
-            new NameFilteredDataEntryWriter(configuration.adaptResourceFileNames,
-                new RenamedDataEntryWriter(packagePrefixFunction, dataEntryWriter),
-                dataEntryWriter);
+        return new RenamedDataEntryWriter(new ResourceFilePoolNameFunction(resourceFilePool),
+                                          dataEntryWriter);
     }
 
 

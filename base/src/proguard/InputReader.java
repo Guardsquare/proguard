@@ -20,10 +20,14 @@
  */
 package proguard;
 
-import proguard.classfile.ClassPool;
-import proguard.classfile.util.WarningPrinter;
+import proguard.classfile.*;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.*;
+import proguard.resources.file.*;
+import proguard.resources.file.io.ResourceFileDataEntryReader;
+import proguard.resources.file.visitor.*;
+import proguard.util.*;
 
 import java.io.*;
 
@@ -42,6 +46,10 @@ public class InputReader
 
     private final Configuration configuration;
 
+    // Field that acts as a parameter to the visitors that attach
+    // feature names to classes and resource files.
+    private String featureName;
+
 
     /**
      * Creates a new InputReader to read input class files as specified by the
@@ -54,11 +62,12 @@ public class InputReader
 
 
     /**
-     * Fills the given program class pool and library class pool by reading
-     * class files, based on the current configuration.
+     * Fills the given program class pool, library class pool, and resource file
+     * pool by reading files based on the current configuration.
      */
-    public void execute(ClassPool programClassPool,
-                        ClassPool libraryClassPool) throws IOException
+    public void execute(ClassPool        programClassPool,
+                        ClassPool        libraryClassPool,
+                        ResourceFilePool resourceFilePool) throws IOException
     {
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
@@ -68,42 +77,54 @@ public class InputReader
         WarningPrinter notePrinter    = new WarningPrinter(out, configuration.note);
         WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
 
-        DuplicateClassPrinter duplicateClassPrinter = new DuplicateClassPrinter(notePrinter);
+        DuplicateClassPrinter        duplicateClassPrinter        = new DuplicateClassPrinter(notePrinter);
+        DuplicateResourceFilePrinter duplicateResourceFilePrinter = new DuplicateResourceFilePrinter(notePrinter);
 
-        // Read the library class files, if any and if they should get priority.
-        if (FAVOR_LIBRARY_CLASSES &&
-            configuration.libraryJars != null)
-        {
-            // Prepare a data entry reader to filter all classes,
-            // which are then decoded to classes by a class reader,
-            // which are then put in the class pool by a class pool filler.
-            readInput("Reading library ",
-                      configuration.libraryJars,
-                      new ClassFilter(
-                      new ClassReader(true,
-                                      configuration.skipNonPublicLibraryClasses,
-                                      configuration.skipNonPublicLibraryClassMembers,
-                                      true,
-                                      warningPrinter,
-                      new ClassPresenceFilter(libraryClassPool, duplicateClassPrinter,
-                      new ClassPoolFiller(libraryClassPool)))));
-        }
+        ClassVisitor classPoolFiller =
+            new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
+            new MultiClassVisitor(
+                new ClassPoolFiller(programClassPool),
+                new MyClassFeatureNameSetter()));
 
-        // Read the program class files.
-        // Prepare a data entry reader to filter all classes,
-        // which are then decoded to classes by a class reader,
-        // which are then put in the class pool by a class pool filler.
+        // Create a reader to fill the program class pool (while checking for
+        // duplicates).
+        DataEntryReader classReader =
+            new ClassReader(false,
+                            configuration.skipNonPublicLibraryClasses,
+                            configuration.skipNonPublicLibraryClassMembers,
+                            configuration.shrink   ||
+                            configuration.optimize ||
+                            configuration.obfuscate,
+                            warningPrinter,
+                            classPoolFiller);
+
+        // Create a visitor that initializes the references from resource files
+        // to Java classes.
+        DataEntryNameFilter adaptedDataEntryFilter =
+            configuration.adaptResourceFileContents != null ?
+                new DataEntryNameFilter(
+                new ListParser(
+                new FileNameParser()).parse(configuration.adaptResourceFileContents)) :
+                null;
+
+        // Create a visitor and a reader to fill the resource file pool with
+        // plain resource file instances (while checking for duplicates).
+        ResourceFileVisitor resourceFilePoolFiller =
+            new ResourceFilePresenceFilter(resourceFilePool, duplicateResourceFilePrinter,
+            new MultiResourceFileVisitor(
+                new ResourceFilePoolFiller(resourceFilePool),
+                new MyResourceFileFeatureNameSetter()));
+
+        DataEntryReader resourceReader =
+            new ResourceFileDataEntryReader(resourceFilePoolFiller,
+                                            adaptedDataEntryFilter);
+
+        // Read the program class files and resource files and put them in the
+        // program class pool and resource file pool.
         readInput("Reading program ",
                   configuration.programJars,
-                  new ClassFilter(
-                  new ClassReader(false,
-                                  configuration.skipNonPublicLibraryClasses,
-                                  configuration.skipNonPublicLibraryClassMembers,
-                                  false,
-                                  warningPrinter,
-                  new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
-                  new ClassPresenceFilter(libraryClassPool, duplicateClassPrinter,
-                  new ClassPoolFiller(programClassPool))))));
+                  new ClassFilter(classReader,
+                                  resourceReader));
 
         // Check if we have at least some input classes.
         if (programClassPool.size() == 0)
@@ -112,12 +133,16 @@ public class InputReader
         }
 
         // Read the library class files, if any.
-        if (!FAVOR_LIBRARY_CLASSES &&
-            configuration.libraryJars != null)
+        if (configuration.libraryJars != null &&
+            (configuration.printSeeds != null ||
+             configuration.shrink    ||
+             configuration.optimize  ||
+             configuration.obfuscate ||
+             configuration.preverify ||
+             configuration.backport))
         {
-            // Prepare a data entry reader to filter all classes,
-            // which are then decoded to classes by a class reader,
-            // which are then put in the class pool by a class pool filler.
+            // Read the library class files and put then in the library class
+            // pool.
             readInput("Reading library ",
                       configuration.libraryJars,
                       new ClassFilter(
@@ -165,7 +190,8 @@ public class InputReader
      */
     private void readInput(String          messagePrefix,
                            ClassPath       classPath,
-                           DataEntryReader reader) throws IOException
+                           DataEntryReader reader)
+    throws IOException
     {
         readInput(messagePrefix,
                   classPath,
@@ -182,7 +208,8 @@ public class InputReader
                           ClassPath       classPath,
                           int             fromIndex,
                           int             toIndex,
-                          DataEntryReader reader) throws IOException
+                          DataEntryReader reader)
+    throws IOException
     {
         for (int index = fromIndex; index < toIndex; index++)
         {
@@ -200,19 +227,25 @@ public class InputReader
      */
     private void readInput(String          messagePrefix,
                            ClassPathEntry  classPathEntry,
-                           DataEntryReader dataEntryReader) throws IOException
+                           DataEntryReader dataEntryReader)
+    throws IOException
     {
         try
         {
             // Create a reader that can unwrap jars, wars, ears, jmods and zips.
             DataEntryReader reader =
-                DataEntryReaderFactory.createDataEntryReader(messagePrefix,
-                                                             classPathEntry,
-                                                             dataEntryReader);
+                new DataEntryReaderFactory(configuration.android)
+                    .createDataEntryReader(messagePrefix,
+                                           classPathEntry,
+                                           dataEntryReader);
 
             // Create the data entry pump.
             DirectoryPump directoryPump =
                 new DirectoryPump(classPathEntry.getFile());
+
+            // Set he feature name for the class files and resource files
+            // that we'll read.
+            featureName = classPathEntry.getFeatureName();
 
             // Pump the data entries into the reader.
             directoryPump.pumpDataEntries(reader);
@@ -220,6 +253,40 @@ public class InputReader
         catch (IOException ex)
         {
             throw (IOException)new IOException("Can't read [" + classPathEntry + "] (" + ex.getMessage() + ")").initCause(ex);
+        }
+    }
+
+
+    /**
+     * This class visitor attaches the current resource name, if any,
+     * to any program classes that it visits.
+     */
+    private class MyClassFeatureNameSetter
+        extends SimplifiedVisitor
+    implements    ClassVisitor
+    {
+        // Implementations for ClassVisitor.
+
+        public void visitProgramClass(ProgramClass programClass)
+        {
+            programClass.setFeatureName(featureName);
+        }
+    }
+
+
+    /**
+     * This resource file visitor attaches the current resource name, if any,
+     * to any resource files that it visits.
+     */
+    private class MyResourceFileFeatureNameSetter
+        extends SimplifiedResourceFileVisitor
+    implements    ResourceFileVisitor
+    {
+        // Implementations for ResourceFileVisitor.
+
+        public void visitAnyResourceFile(ResourceFile resourceFile)
+        {
+            resourceFile.setFeatureName(featureName);
         }
     }
 }

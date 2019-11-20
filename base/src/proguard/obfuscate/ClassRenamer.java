@@ -43,6 +43,35 @@ implements   ClassVisitor,
              MemberVisitor,
              ConstantVisitor
 {
+    private final ClassVisitor  extraClassVisitor;
+    private final MemberVisitor extraMemberVisitor;
+
+
+    /**
+     * Creates a new ClassRenamer.
+     */
+    public ClassRenamer()
+    {
+        this(null, null);
+    }
+
+
+    /**
+     * Creates a new ClassRenamer.
+     *
+     * @param extraClassVisitor  an optional extra visitor for classes that
+     *                           have been renamed.
+     * @param extraMemberVisitor an optional extra visitor for class members
+     *                           that have been renamed.
+     */
+    public ClassRenamer(ClassVisitor  extraClassVisitor,
+                        MemberVisitor extraMemberVisitor)
+    {
+        this.extraClassVisitor  = extraClassVisitor;
+        this.extraMemberVisitor = extraMemberVisitor;
+    }
+
+
     // Implementations for ClassVisitor.
 
     public void visitProgramClass(ProgramClass programClass)
@@ -58,7 +87,18 @@ implements   ClassVisitor,
 
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        libraryClass.thisClassName = ClassObfuscator.newClassName(libraryClass);
+        // Has the library class name changed?
+        String name    = libraryClass.getName();
+        String newName = ClassObfuscator.newClassName(libraryClass);
+        if (newName != null && !newName.equals(name))
+        {
+            libraryClass.thisClassName = newName;
+
+            if (extraClassVisitor != null)
+            {
+                extraClassVisitor.visitLibraryClass(libraryClass);
+            }
+        }
 
         // Rename the class members.
         libraryClass.fieldsAccept(this);
@@ -74,21 +114,32 @@ implements   ClassVisitor,
         // Has the class member name changed?
         String name    = programMember.getName(programClass);
         String newName = MemberObfuscator.newMemberName(programMember);
-        if (newName != null &&
-            !newName.equals(name))
+        if (newName != null && !newName.equals(name))
         {
             programMember.u2nameIndex =
                 new ConstantPoolEditor(programClass).addUtf8Constant(newName);
+
+            if (extraMemberVisitor != null)
+            {
+                programMember.accept(programClass, extraMemberVisitor);
+            }
         }
     }
 
     public void visitLibraryMember(LibraryClass  libraryClass,
                                    LibraryMember libraryMember)
     {
+        // Has the library member name changed?
+        String name    = libraryMember.getName(libraryClass);
         String newName = MemberObfuscator.newMemberName(libraryMember);
-        if (newName != null)
+        if (newName != null && !newName.equals(name))
         {
             libraryMember.name = newName;
+
+            if (extraMemberVisitor != null)
+            {
+                libraryMember.accept(libraryClass, extraMemberVisitor);
+            }
         }
     }
 
@@ -98,12 +149,18 @@ implements   ClassVisitor,
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
         // Update the Class entry if required.
+        String name    = clazz.getName();
         String newName = ClassObfuscator.newClassName(clazz);
-        if (newName != null)
+        if (newName != null && !newName.equals(name))
         {
             // Refer to a new Utf8 entry.
             classConstant.u2nameIndex =
                 new ConstantPoolEditor((ProgramClass)clazz).addUtf8Constant(newName);
+
+            if (extraClassVisitor != null)
+            {
+                clazz.accept(extraClassVisitor);
+            }
         }
     }
 }

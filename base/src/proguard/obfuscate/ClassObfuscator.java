@@ -25,8 +25,11 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.kotlin.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitors.KotlinMetadataToClazzVisitor;
+import proguard.classfile.kotlin.visitors.filter.KotlinSyntheticClassKindFilter;
 import proguard.classfile.util.*;
-import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.*;
 import proguard.util.*;
 
 import java.util.*;
@@ -54,6 +57,7 @@ implements   ClassVisitor,
     private final String                flattenPackageHierarchy;
     private final String                repackageClasses;
     private final boolean               allowAccessModification;
+    private final boolean               adaptKotlin;
 
     private final Set classNamesToAvoid                       = new HashSet();
 
@@ -94,6 +98,7 @@ implements   ClassVisitor,
      *                                are to be repackaged.
      * @param allowAccessModification specifies whether obfuscated classes can
      *                                be freely moved between packages.
+     * @param adaptKotlin             specifies whether Kotlin should be supported.
      */
     public ClassObfuscator(ClassPool             programClassPool,
                            ClassPool             libraryClassPool,
@@ -103,7 +108,8 @@ implements   ClassVisitor,
                            List                  keepPackageNames,
                            String                flattenPackageHierarchy,
                            String                repackageClasses,
-                           boolean               allowAccessModification)
+                           boolean               allowAccessModification,
+                           boolean               adaptKotlin)
     {
         this.classNameFactory   = classNameFactory;
         this.packageNameFactory = packageNameFactory;
@@ -128,6 +134,7 @@ implements   ClassVisitor,
         this.flattenPackageHierarchy = flattenPackageHierarchy;
         this.repackageClasses        = repackageClasses;
         this.allowAccessModification = allowAccessModification;
+        this.adaptKotlin             = adaptKotlin;
 
         // Map the root package onto the root package.
         packagePrefixMap.put("", "");
@@ -218,10 +225,34 @@ implements   ClassVisitor,
 
                 String outerClassName = clazz.getClassName(outerClassIndex);
 
-                numericClassName = isNumericClassName(innerClassName,
-                                                      outerClassName);
+                numericClassName =
+                    adaptKotlin && isSyntheticKotlinLambdaClass(clazz) ||
+                    isNumericClassName(innerClassName,
+                                       outerClassName);
             }
         }
+    }
+
+
+    /**
+     * Returns whether the given class is a synthetic Kotlin lambda class.
+     * We then know it's numeric.
+     */
+    private boolean isSyntheticKotlinLambdaClass(Clazz innerClass)
+    {
+        // Kotlin synthetic lambda classes that were named based on the
+        // location that they were inlined from may be named like
+        // OuterClass$methodName$1 where $methodName$1 is the inner class
+        // name. We can rename this class to OuterClass$1 but the default
+        // code below doesn't detect it as numeric.
+        ClassCounter counter = new ClassCounter();
+        innerClass.accept(
+            new ReferencedKotlinMetadataVisitor(
+            new KotlinSyntheticClassKindFilter(
+                KotlinSyntheticClassKindFilter::isLambda,
+                new KotlinMetadataToClazzVisitor(counter))));
+
+        return counter.getCount() == 1;
     }
 
 
@@ -549,6 +580,18 @@ implements   ClassVisitor,
     static void setNewClassName(Clazz clazz, String name)
     {
         clazz.setVisitorInfo(name);
+    }
+
+
+    /**
+     * Returns whether the class name of the given class has changed.
+     *
+     * @param clazz the given class.
+     * @return true if the class name is unchanged, false otherwise.
+     */
+    static boolean hasOriginalClassName(Clazz clazz)
+    {
+        return clazz.getName().equals(newClassName(clazz));
     }
 
 

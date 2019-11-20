@@ -268,7 +268,8 @@ public class ProGuard
 
         // Fill the program class pool and the library class pool.
         new InputReader(configuration).execute(programClassPool,
-                                               libraryClassPool);
+                                               libraryClassPool,
+                                               resourceFilePool);
     }
 
 
@@ -284,7 +285,8 @@ public class ProGuard
         }
 
         new Initializer(configuration).execute(programClassPool,
-                                               libraryClassPool);
+                                               libraryClassPool,
+                                               resourceFilePool);
     }
 
 
@@ -484,7 +486,8 @@ public class ProGuard
 
         // Perform the actual obfuscation.
         new Obfuscator(configuration).execute(programClassPool,
-                                              libraryClassPool);
+                                              libraryClassPool,
+                                              resourceFilePool);
     }
 
 

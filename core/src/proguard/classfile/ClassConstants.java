@@ -28,6 +28,7 @@ public class ClassConstants
 
     public static final byte[] JMOD_HEADER            = new byte[] { 'J', 'M', 1, 0 };
     public static final String JMOD_CLASS_FILE_PREFIX = "classes/";
+    public static final String MODULE_INFO_CLASS      = "module-info.class";
 
     public static final String CLASS_FILE_EXTENSION   = ".class";
 
@@ -589,10 +590,10 @@ public class ClassConstants
     public static final int MAXIMUM_BYTE_AS_STRING_LENGTH    = 3;  // 255
     public static final int MAXIMUM_SHORT_AS_STRING_LENGTH   = 6;  // -32768
     public static final int MAXIMUM_INT_AS_STRING_LENGTH     = 11; //-2147483648
-    public static final int MAXIMUM_LONG_AS_STRING_LENGTH    = 20; //-9223372036854775808
-    public static final int MAXIMUM_FLOAT_AS_STRING_LENGTH   = 13; //-3.4028235E38
-    public static final int MAXIMUM_DOUBLE_AS_STRING_LENGTH  = 23; //-1.7976931348623157E308
-    public static final int MAXIMUM_AT_HASHCODE_LENGTH       = MAXIMUM_CHAR_AS_STRING_LENGTH +
-                                                               MAXIMUM_INT_AS_STRING_LENGTH;
-    public static final int DEFAULT_STRINGBUILDER_INIT_SIZE = 16;
+    public static final int    MAXIMUM_LONG_AS_STRING_LENGTH   = 20; //-9223372036854775808
+    public static final int    MAXIMUM_FLOAT_AS_STRING_LENGTH  = 13; //-3.4028235E38
+    public static final int    MAXIMUM_DOUBLE_AS_STRING_LENGTH = 23; //-1.7976931348623157E308
+    public static final int    MAXIMUM_AT_HASHCODE_LENGTH      = MAXIMUM_CHAR_AS_STRING_LENGTH +
+                                                                 MAXIMUM_INT_AS_STRING_LENGTH;
+    public static final int    DEFAULT_STRINGBUILDER_INIT_SIZE = 16;
 }

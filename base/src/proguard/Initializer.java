@@ -21,12 +21,18 @@
 package proguard;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.annotation.visitor.AllElementValueVisitor;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.annotation.visitor.*;
+import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.visitor.AllConstantVisitor;
 import proguard.classfile.instruction.visitor.AllInstructionVisitor;
+import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.asserter.KotlinMetadataAsserter;
+import proguard.classfile.kotlin.initialize.*;
+import proguard.classfile.kotlin.visitors.MultiKotlinMetadataVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.resources.file.ResourceFilePool;
+import proguard.resources.file.visitor.ResourceJavaReferenceClassInitializer;
 import proguard.util.*;
 
 import java.io.*;
@@ -40,6 +46,7 @@ import java.util.*;
 public class Initializer
 {
     private final Configuration configuration;
+    private final boolean       checkConfiguration;
 
 
     /**
@@ -49,6 +56,12 @@ public class Initializer
     public Initializer(Configuration configuration)
     {
         this.configuration = configuration;
+
+        // Only check the configuration if either shrinking, optimization or obfuscation is enabled,
+        // in other cases the configuration does not have any effect. This will speed up pure debug builds.
+        this.checkConfiguration = configuration.shrink   ||
+                                  configuration.optimize ||
+                                  configuration.obfuscate;
     }
 
 
@@ -56,8 +69,10 @@ public class Initializer
      * Initializes the classes in the given program class pool and library class
      * pool, performs some basic checks, and shrinks the library class pool.
      */
-    public void execute(ClassPool programClassPool,
-                        ClassPool libraryClassPool) throws IOException
+    public void execute(ClassPool        programClassPool,
+                        ClassPool        libraryClassPool,
+                        ResourceFilePool resourceFilePool)
+    throws IOException
     {
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
@@ -69,16 +84,19 @@ public class Initializer
         // Perform basic checks on the configuration.
         WarningPrinter fullyQualifiedClassNameNotePrinter = new WarningPrinter(out, configuration.note);
 
-        FullyQualifiedClassNameChecker fullyQualifiedClassNameChecker =
-            new FullyQualifiedClassNameChecker(programClassPool,
-                                               libraryClassPool,
-                                               fullyQualifiedClassNameNotePrinter);
+        if (checkConfiguration)
+        {
+            FullyQualifiedClassNameChecker fullyQualifiedClassNameChecker =
+                new FullyQualifiedClassNameChecker(programClassPool,
+                                                   libraryClassPool,
+                                                   fullyQualifiedClassNameNotePrinter);
 
-        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.keep);
-        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoSideEffects);
-        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoExternalSideEffects);
-        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoEscapingParameters);
-        fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoExternalReturnValues);
+            fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.keep);
+            fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoSideEffects);
+            fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoExternalSideEffects);
+            fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoEscapingParameters);
+            fullyQualifiedClassNameChecker.checkClassSpecifications(configuration.assumeNoExternalReturnValues);
+        }
 
         StringMatcher keepAttributesMatcher = configuration.keepAttributes != null ?
             new ListParser(new NameParser()).parse(configuration.keepAttributes) :
@@ -144,6 +162,20 @@ public class Initializer
                                                libraryClassPool,
                                                null,
                                                dependencyWarningPrinter));
+
+        // Initialize the Kotlin Metadata for Kotlin classes.
+        if (configuration.adaptKotlinMetadata)
+        {
+            ClassVisitor kotlinMetadataInitializer =
+                new AllAttributeVisitor(
+                new AttributeNameFilter(ClassConstants.ATTR_RuntimeVisibleAnnotations,
+                new AllAnnotationVisitor(
+                new AnnotationTypeFilter(KotlinConstants.TYPE_KOTLIN_METADATA,
+                new KotlinMetadataInitializer()))));
+
+            programClassPool.classesAccept(kotlinMetadataInitializer);
+            libraryClassPool.classesAccept(kotlinMetadataInitializer);
+        }
 
         // Initialize the class references of program class members and
         // attributes. Note that all superclass hierarchies have to be
@@ -280,6 +312,31 @@ public class Initializer
         programClassPool.classesAccept(new ClassSubHierarchyInitializer());
         libraryClassPool.classesAccept(new ClassSubHierarchyInitializer());
 
+        WarningPrinter kotlinInitialisationWarningPrinter = new WarningPrinter(err, configuration.warn);
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            // Initialize the inter-class references including property backing fields in Kotlin
+            // companion objects to their declaring class, default implementations of interface methods
+            // and synthetic methods referencing the enclosing method attribute.
+            // Initialize the $default methods - these methods are generated for methods with default parameters.
+            programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(
+                                           new MultiKotlinMetadataVisitor(
+                                           new KotlinInterClassReferenceInitializer(programClassPool,
+                                                                                    kotlinInitialisationWarningPrinter),
+                                           new KotlinDefaultMethodInitializer(programClassPool,
+                                                                              kotlinInitialisationWarningPrinter),
+                                           new KotlinDefaultImplsInitializer(programClassPool,
+                                                                             kotlinInitialisationWarningPrinter))
+                                           ));
+
+            if (configuration.enableKotlinAsserter)
+            {
+                programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(
+                                               new KotlinMetadataAsserter(programClassPool, libraryClassPool, kotlinInitialisationWarningPrinter)));
+            }
+        }
+
         // Share strings between the classes, to reduce heap memory usage.
         programClassPool.classesAccept(new StringSharer());
         libraryClassPool.classesAccept(new StringSharer());
@@ -287,6 +344,8 @@ public class Initializer
         // Check for any unmatched class members.
         WarningPrinter classMemberNotePrinter = new WarningPrinter(out, configuration.note);
 
+        if (checkConfiguration)
+        {
         ClassMemberChecker classMemberChecker =
             new ClassMemberChecker(programClassPool,
                                    classMemberNotePrinter);
@@ -296,20 +355,31 @@ public class Initializer
         classMemberChecker.checkClassSpecifications(configuration.assumeNoExternalSideEffects);
         classMemberChecker.checkClassSpecifications(configuration.assumeNoEscapingParameters);
         classMemberChecker.checkClassSpecifications(configuration.assumeNoExternalReturnValues);
+        }
 
         // Check for unkept descriptor classes of kept class members.
         WarningPrinter descriptorKeepNotePrinter = new WarningPrinter(out, configuration.note);
 
+        if (checkConfiguration)
+        {
         new DescriptorKeepChecker(programClassPool,
                                   libraryClassPool,
                                   descriptorKeepNotePrinter).checkClassSpecifications(configuration.keep);
+        }
 
         // Check for keep options that only match library classes.
         WarningPrinter libraryKeepNotePrinter = new WarningPrinter(out, configuration.note);
 
+        if (checkConfiguration)
+        {
         new LibraryKeepChecker(programClassPool,
                                libraryClassPool,
                                libraryKeepNotePrinter).checkClassSpecifications(configuration.keep);
+        }
+
+        // Initialize the references to Java classes in resource files.
+        resourceFilePool.resourceFilesAccept(
+            new ResourceJavaReferenceClassInitializer(programClassPool));
 
         // Print out a summary of the notes, if necessary.
         int fullyQualifiedNoteCount = fullyQualifiedClassNameNotePrinter.getWarningCount();
@@ -474,6 +544,26 @@ public class Initializer
             }
 
             err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unresolvedlibraryclassmember)");
+        }
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            int kotlinInitializationWarningCount = kotlinInitialisationWarningPrinter.getWarningCount();
+
+            if (kotlinInitializationWarningCount > 0)
+            {
+                //TODO
+                err.println("Warning: there were " + kotlinInitializationWarningCount +
+                            " errors during Kotlin metadata initialisation.");
+            }
+        }
+
+        boolean incompatibleOptimization = configuration.optimize && !configuration.shrink;
+
+        if (incompatibleOptimization)
+        {
+            err.println("Warning: optimization is enabled while shrinking is disabled.");
+            err.println("         You need to remove the option -dontshrink or optimization might result in classes that fail verification at runtime.");
         }
 
         if ((classReferenceWarningCount         > 0 ||

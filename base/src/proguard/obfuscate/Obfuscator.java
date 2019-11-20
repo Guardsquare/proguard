@@ -27,6 +27,7 @@ import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.resources.file.ResourceFilePool;
 import proguard.util.*;
 
 import java.io.*;
@@ -55,8 +56,9 @@ public class Obfuscator
     /**
      * Performs obfuscation of the given program class pool.
      */
-    public void execute(ClassPool programClassPool,
-                        ClassPool libraryClassPool) throws IOException
+    public void execute(ClassPool        programClassPool,
+                        ClassPool        libraryClassPool,
+                        ResourceFilePool resourceFilePool) throws IOException
     {
         // Check if we have at least some keep commands.
         if (configuration.keep         == null &&
@@ -234,7 +236,8 @@ public class Obfuscator
                                 configuration.keepPackageNames,
                                 configuration.flattenPackageHierarchy,
                                 configuration.repackageClasses,
-                                configuration.allowAccessModification));
+                                configuration.allowAccessModification,
+                                configuration.adaptKotlinMetadata));
 
         // Come up with new names for all class members.
         NameFactory nameFactory = new SimpleNameFactory();
@@ -490,9 +493,26 @@ public class Obfuscator
             programClassPool.classesAccept(new RenamedFlagSetter());
         }
 
+        // Collect some statistics about the number of obfuscated
+        // classes and members.
+        ClassCounter  obfuscatedClassCounter  = new ClassCounter();
+        MemberCounter obfuscatedFieldCounter  = new MemberCounter();
+        MemberCounter obfuscatedMethodCounter = new MemberCounter();
+
+        ClassVisitor classRenamer =
+            new ClassRenamer(
+                new ProgramClassFilter(
+                obfuscatedClassCounter),
+
+                new ProgramMemberFilter(
+                new MethodFilter(
+                obfuscatedMethodCounter,
+                obfuscatedFieldCounter))
+            );
+
         // Actually apply the new names.
-        programClassPool.classesAccept(new ClassRenamer());
-        libraryClassPool.classesAccept(new ClassRenamer());
+        programClassPool.classesAccept(classRenamer);
+        libraryClassPool.classesAccept(classRenamer);
 
         // Update all references to these new names.
         programClassPool.classesAccept(new ClassReferenceFixer(false));
@@ -508,10 +528,13 @@ public class Obfuscator
                 new AccessFixer());
 
             // Fix the access flags of the inner classes information.
+            // Don't change the access flags of inner classes that
+            // have not been renamed (Guice). [DGD-63]
             programClassPool.classesAccept(
+                new OriginalClassNameFilter(null,
                 new AllAttributeVisitor(
                 new AllInnerClassesInfoVisitor(
-                new InnerClassesAccessFixer())));
+                new InnerClassesAccessFixer()))));
         }
 
         // Fix the bridge method flags.
@@ -528,5 +551,20 @@ public class Obfuscator
         // Remove unused constants.
         programClassPool.classesAccept(
             new ConstantPoolShrinker());
+
+        // Adapt resource file names that correspond to class names, if necessary.
+        if (configuration.adaptResourceFileNames != null)
+        {
+            resourceFilePool.resourceFilesAccept(
+                new ListParser(new FileNameParser()).parse(configuration.adaptResourceFileNames),
+                new ResourceFileNameObfuscator(new ClassNameAdapterFunction(programClassPool), true));
+        }
+
+        if (configuration.verbose)
+        {
+            System.out.println("  Number of obfuscated classes:                  " + obfuscatedClassCounter.getCount());
+            System.out.println("  Number of obfuscated fields:                   " + obfuscatedFieldCounter.getCount());
+            System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
+        }
     }
 }

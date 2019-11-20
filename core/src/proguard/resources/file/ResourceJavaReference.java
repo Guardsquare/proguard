@@ -30,21 +30,8 @@ public class ResourceJavaReference
     public Clazz  referencedClass;
 
 
-    /**
-     * Creates an uninitialized ResourceJavaReference.
-     */
-    public ResourceJavaReference()
-    {
-    }
-
-
-    /**
-     * Creates an initialized ResourceJavaReference.
-     */
-    public ResourceJavaReference(String externalClassName,
-                                 Clazz  referencedClass)
+    public ResourceJavaReference(String externalClassName)
     {
         this.externalClassName = externalClassName;
-        this.referencedClass   = referencedClass;
     }
 }

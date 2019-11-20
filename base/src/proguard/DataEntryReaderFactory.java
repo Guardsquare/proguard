@@ -40,6 +40,52 @@ public class DataEntryReaderFactory
     private static final String VERSIONS_EXCLUDE = "!META-INF/versions/**";
 
 
+    private final boolean android;
+
+
+    /**
+     * Creates a new DataEntryReaderFactory.
+     *
+     * @param android Specifies whether the packaging is targeted at the
+     *                Android platform. Archives inside the assets directory
+     *                then aren't unpacked but simply read as data files.
+     */
+    public DataEntryReaderFactory(boolean android)
+    {
+        this.android = android;
+    }
+
+    /**
+     * Creates a DataEntryReader that can read the given class path entry.
+     *
+     * @param classPathEntry the input class path entry.
+     * @param reader         a data entry reader to which the reading of actual
+     *                       classes and resource files can be delegated.
+     * @return a DataEntryReader for reading the given class path entry.
+     */
+    public DataEntryReader createDataEntryReader(ClassPathEntry  classPathEntry,
+                                                 DataEntryReader reader)
+    {
+        return createDataEntryReader("", classPathEntry, reader, null);
+    }
+
+    /**
+     * Creates a DataEntryReader that can read the given class path entry.
+     *
+     * @param messagePrefix  a prefix for messages that are printed out (with System.out)
+     * @param classPathEntry the input class path entry.
+     * @param reader         a data entry reader to which the reading of actual
+     *                       classes and resource files can be delegated.
+     * @return a DataEntryReader for reading the given class path entry.
+     */
+    public DataEntryReader createDataEntryReader(String          messagePrefix,
+                                                 ClassPathEntry  classPathEntry,
+                                                 DataEntryReader reader)
+    {
+        return createDataEntryReader(messagePrefix, classPathEntry, reader, System.out);
+    }
+
+
     /**
      * Creates a DataEntryReader that can read the given class path entry.
      *
@@ -47,13 +93,16 @@ public class DataEntryReaderFactory
      * @param classPathEntry the input class path entry.
      * @param reader         a data entry reader to which the reading of actual
      *                       classes and resource files can be delegated.
+     * @param out            an optional print stream for messages.
      * @return a DataEntryReader for reading the given class path entry.
      */
-    public static DataEntryReader createDataEntryReader(String          messagePrefix,
-                                                        ClassPathEntry  classPathEntry,
-                                                        DataEntryReader reader)
+    public DataEntryReader createDataEntryReader(String          messagePrefix,
+                                                 ClassPathEntry  classPathEntry,
+                                                 DataEntryReader reader,
+                                                 PrintStream     out)
     {
         boolean isApk  = classPathEntry.isApk();
+        boolean isAab  = classPathEntry.isAab();
         boolean isJar  = classPathEntry.isJar();
         boolean isAar  = classPathEntry.isAar();
         boolean isWar  = classPathEntry.isWar();
@@ -63,6 +112,7 @@ public class DataEntryReaderFactory
 
         List filter     = getFilterExcludingVersionedClasses(classPathEntry);
         List apkFilter  = classPathEntry.getApkFilter();
+        List aabFilter  = classPathEntry.getAabFilter();
         List jarFilter  = classPathEntry.getJarFilter();
         List aarFilter  = classPathEntry.getAarFilter();
         List warFilter  = classPathEntry.getWarFilter();
@@ -70,8 +120,11 @@ public class DataEntryReaderFactory
         List jmodFilter = classPathEntry.getJmodFilter();
         List zipFilter  = classPathEntry.getZipFilter();
 
-        System.out.println(messagePrefix +
+        if (out != null)
+        {
+            out.println(messagePrefix +
                            (isApk  ? "apk"  :
+                            isAab  ? "aab"  :
                             isJar  ? "jar"  :
                             isAar  ? "aar"  :
                             isWar  ? "war"  :
@@ -82,48 +135,59 @@ public class DataEntryReaderFactory
                            " [" + classPathEntry.getName() + "]" +
                            (filter     != null ||
                             apkFilter  != null ||
+                            aabFilter  != null ||
                             jarFilter  != null ||
                             aarFilter  != null ||
                             warFilter  != null ||
                             earFilter  != null ||
                             jmodFilter != null ||
                             zipFilter  != null ? " (filtered)" : ""));
+        }
 
-        // Add a filter, if specified.
+        // Add a renaming filter, if specified.
         if (filter != null)
         {
-            reader = new FilteredDataEntryReader(
-                     new DataEntryNameFilter(
-                     new ListParser(new FileNameParser()).parse(filter)),
-                         reader);
+            WildcardManager wildcardManager = new WildcardManager();
+
+            StringFunction nameFunction =
+                new ListFunctionParser(
+                new SingleFunctionParser(
+                new FileNameParser(wildcardManager), wildcardManager)).parse(filter);
+
+            reader = new RenamedDataEntryReader(nameFunction, reader);
         }
 
         // Unzip any apks, if necessary.
         reader = wrapInJarReader(reader, false, false, isApk, apkFilter, ".apk");
         if (!isApk)
         {
-            // Unzip any jars, if necessary.
-            reader = wrapInJarReader(reader, false, false, isJar, jarFilter, ".jar");
-            if (!isJar)
+            // Unzip any aabs, if necessary.
+            reader = wrapInJarReader(reader, false, false, isAab, aabFilter, ".aab");
+            if (!isAab)
             {
-                // Unzip any aars, if necessary.
-                reader = wrapInJarReader(reader, false, false, isAar, aarFilter, ".aar");
-                if (!isAar)
+                // Unzip any jars, if necessary.
+                reader = wrapInJarReader(reader, false, false, isJar, jarFilter, ".jar");
+                if (!isJar)
                 {
-                    // Unzip any wars, if necessary.
-                    reader = wrapInJarReader(reader, true, false, isWar, warFilter, ".war");
-                    if (!isWar)
+                    // Unzip any aars, if necessary.
+                    reader = wrapInJarReader(reader, false, false, isAar, aarFilter, ".aar");
+                    if (!isAar)
                     {
-                        // Unzip any ears, if necessary.
-                        reader = wrapInJarReader(reader, false, false, isEar, earFilter, ".ear");
-                        if (!isEar)
+                        // Unzip any wars, if necessary.
+                        reader = wrapInJarReader(reader, true, false, isWar, warFilter, ".war");
+                        if (!isWar)
                         {
-                            // Unzip any jmods, if necessary.
-                            reader = wrapInJarReader(reader, true, true, isJmod, jmodFilter, ".jmod");
-                            if (!isJmod)
+                            // Unzip any ears, if necessary.
+                            reader = wrapInJarReader(reader, false, false, isEar, earFilter, ".ear");
+                            if (!isEar)
                             {
-                                // Unzip any zips, if necessary.
-                                reader = wrapInJarReader(reader, false, false, isZip, zipFilter, ".zip");
+                                // Unzip any jmods, if necessary.
+                                reader = wrapInJarReader(reader, true, true, isJmod, jmodFilter, ".jmod");
+                                if (!isJmod)
+                                {
+                                    // Unzip any zips, if necessary.
+                                    reader = wrapInJarReader(reader, false, false, isZip, zipFilter, ".zip");
+                                }
                             }
                         }
                     }
@@ -153,12 +217,12 @@ public class DataEntryReaderFactory
      * @return a DataEntryReader for reading the entries of jar file data
      *         entries.
      */
-    private static DataEntryReader wrapInJarReader(DataEntryReader reader,
-                                                   boolean         stripClassesPrefix,
-                                                   boolean         stripJmodHeader,
-                                                   boolean         isJar,
-                                                   List            jarFilter,
-                                                   String          jarExtension)
+    private DataEntryReader wrapInJarReader(DataEntryReader reader,
+                                            boolean         stripClassesPrefix,
+                                            boolean         stripJmodHeader,
+                                            boolean         isJar,
+                                            List            jarFilter,
+                                            String          jarExtension)
     {
         if (stripClassesPrefix)
         {
@@ -187,10 +251,23 @@ public class DataEntryReaderFactory
                                 jarReader);
             }
 
+            StringMatcher jarMatcher =
+                new ExtensionMatcher(jarExtension);
+
+            // Don't unzip archives in Android assets directories.
+            if (android)
+            {
+                jarMatcher =
+                    new AndMatcher(new NotMatcher(
+                                   new FixedStringMatcher("assets/",
+                                   new ConstantMatcher(true))),
+
+                                   jarMatcher);
+            }
+
             // Only unzip the right type of jars.
             return new FilteredDataEntryReader(
-                   new DataEntryNameFilter(
-                   new ExtensionMatcher(jarExtension)),
+                   new DataEntryNameFilter(jarMatcher),
                        jarReader,
                        reader);
         }
