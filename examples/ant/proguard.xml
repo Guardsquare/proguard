@@ -17,39 +17,23 @@
 
     <!-- Specify the input jars, output jars, and library jars. -->
 
-    <injar  file="lib/proguard.jar" />
-    <injar  file="lib/proguardgui.jar" filter="!META-INF/**" />
-    <injar  file="lib/retrace.jar"     filter="!META-INF/**" />
-
+    <injar  file="lib/proguard.jar" filter="!proguard/ant/**,!proguard/gradle/**,!proguard/wtk/**" />
     <outjar file="examples/ant/proguard_out.jar" />
 
-    <libraryjar file="${java.home}/lib/rt.jar" />
+    <!-- Before Java 9, the runtime classes were packaged in a single jar file. -->
+    <!-- libraryjar file="${java.home}/lib/rt.jar" -->
 
-    <libraryjar file="/usr/local/java/ant/lib/ant.jar" />
-    <libraryjar file="/usr/local/java/wtk2.5.2/wtklib/kenv.zip" />
+    <!-- As of Java 9, the runtime classes are packaged in modular jmod files. -->
+    <libraryjar file="${java.home}/jmods/java.base.jmod" jarfilter="!**.jar" filter="!module-info.class" />
 
-    <libraryjar file="/usr/local/java/gradle-4.2.1/lib/plugins/gradle-plugins-4.2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-4.2.1/lib/gradle-base-services-4.2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-4.2.1/lib/gradle-logging-4.2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-4.2.1/lib/gradle-core-api-4.2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-4.2.1/lib/gradle-core-4.2.1.jar" />
-    <libraryjar file="/usr/local/java/gradle-4.2.1/lib/groovy-all-2.4.12.jar" />
-
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder/3.0.0/36884960f350cb29f1c2c93107f4fa27f4e7444e/builder-3.0.0.jar" />
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-api/3.0.0/e98ade5c308a99980d2a61f4ce1d9286df0105e3/gradle-api-3.0.0.jar" />
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder-model/3.0.0/a86b254415fded5297e1d849fa1884dfdf62ff42/builder-model-3.0.0.jar" />
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle/3.0.0/2356ee8e98b68c53dafc28898e7034080e5c91aa/gradle-3.0.0.jar" />
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-core/3.0.0/b4b02fa623c5a618e68478d9a4a67e1e87c023c6/gradle-core-3.0.0.jar" filter="!com/android/build/gradle/tasks/TestModuleProGuardTask*.class" />
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-jdk5/17.0/463f8378feba44df7ba7cd9272d01837dad62b36/guava-jdk5-17.0.jar" />
-    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.6/562424e36df3d2327e8e9301a76027fca17d54ea/slf4j-api-1.7.6.jar" />
+    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.31/11289d20fd95ae219333f3456072be9f081c30cc/kotlin-stdlib-1.3.31.jar" />
+    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.31/20c34a04ea25cb1ef0139598bd67c764562cb170/kotlin-stdlib-common-1.3.31.jar" />
+    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-metadata-jvm/0.1.0/505481587ce23e1d8207734e496632df5c4e6f58/kotlinx-metadata-jvm-0.1.0.jar" />
+    <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.5/f645ed69d595b24d4cf8b3fbb64cc505bede8829/gson-2.8.5.jar" />
 
     <!-- Don't print notes about reflection in injected code. -->
 
     <dontnote filter="proguard.configuration.ConfigurationLogger" />
-
-    <!-- Don't print warnings about GSON dependencies. -->
-
-    <dontwarn filter="com.google.gson.**" />
 
     <!-- Preserve injected GSON utility classes and their members. -->
 

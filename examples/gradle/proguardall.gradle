@@ -33,7 +33,7 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
     // We'll read all jars from the lib directory, process them, and write the
     // processed jars to a new out directory.
 
-    injars  '../../lib'
+    injars  '../../lib', jarfilter: 'proguardgui.jar,proguard.jar,retrace.jar'
     outjars 'out'
 
     // You may have to adapt the paths below.
@@ -44,35 +44,29 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
         libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
     } else {
         // As of Java 9, the runtime classes are packaged in modular jmod files.
-        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod   ", jarfilter: '!**.jar', filter: '!module-info.class'
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod",    jarfilter: '!**.jar', filter: '!module-info.class'
         libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
     }
 
     libraryjars '/usr/local/java/ant/lib/ant.jar'
     libraryjars '/usr/local/java/wtk2.5.2/wtklib/kenv.zip'
 
-    libraryjars '/usr/local/java/gradle-4.2.1/lib/plugins/gradle-plugins-4.2.1.jar'
-    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-base-services-4.2.1.jar'
-    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-logging-4.2.1.jar'
-    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-core-api-4.2.1.jar'
-    libraryjars '/usr/local/java/gradle-4.2.1/lib/gradle-core-4.2.1.jar'
-    libraryjars '/usr/local/java/gradle-4.2.1/lib/groovy-all-2.4.12.jar'
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.31/11289d20fd95ae219333f3456072be9f081c30cc/kotlin-stdlib-1.3.31.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.31/20c34a04ea25cb1ef0139598bd67c764562cb170/kotlin-stdlib-common-1.3.31.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-metadata-jvm/0.1.0/505481587ce23e1d8207734e496632df5c4e6f58/kotlinx-metadata-jvm-0.1.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.5/f645ed69d595b24d4cf8b3fbb64cc505bede8829/gson-2.8.5.jar"
+libraryjars '/usr/local/java/gradle-5.4.1/lib', jarfilter: 'plugins/gradle-plugins-*.jar,gradle-logging-*.jar,gradle-base-services-?.*.jar,gradle-base-services-groovy-*.jar,gradle-model-core-*.jar,gradle-core-?.*.jar,gradle-core-api-*.jar,groovy-all-*.jar'
 
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder/3.0.0/36884960f350cb29f1c2c93107f4fa27f4e7444e/builder-3.0.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-api/3.0.0/e98ade5c308a99980d2a61f4ce1d9286df0105e3/gradle-api-3.0.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder-model/3.0.0/a86b254415fded5297e1d849fa1884dfdf62ff42/builder-model-3.0.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle/3.0.0/2356ee8e98b68c53dafc28898e7034080e5c91aa/gradle-3.0.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-core/3.0.0/b4b02fa623c5a618e68478d9a4a67e1e87c023c6/gradle-core-3.0.0.jar", filter: '!com/android/build/gradle/tasks/TestModuleProGuardTask*.class'
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-jdk5/17.0/463f8378feba44df7ba7cd9272d01837dad62b36/guava-jdk5-17.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.6/562424e36df3d2327e8e9301a76027fca17d54ea/slf4j-api-1.7.6.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder/3.4.0/b237d03672bae54a1013deab3bbd936d78f07e79/builder-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder-model/3.4.0/768154ff0029313694e6b7d1576ef79dfe7e2b7e/builder-model-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-api/3.4.0/ac85b2c363dbcad0303df561c8c4f99a925c2878/gradle-api-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle/3.4.0/16af40a504b8f8ff572c8c2bbf4ace3dccd2f5b/gradle-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-jdk5/13.0/381ae6c8add7c98e9bcddb1e0b898400cd6fc3f7/guava-jdk5-13.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.21/139535a69a4239db087de9bab0bee568bf8e0b70/slf4j-api-1.7.21.jar"
 
     // Don't print notes about reflection in injected code.
 
     dontnote 'proguard.configuration.ConfigurationLogger'
-
-    // Don't print warnings about GSON dependencies.
-
-    dontwarn 'com.google.gson.**'
 
     // Preserve injected GSON utility classes and their members.
 
