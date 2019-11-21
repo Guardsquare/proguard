@@ -181,7 +181,8 @@ implements   KotlinMetadataVisitor,
                 // so we must ensure that the synthetic method is marked as used, if there
                 // are any used annotations there.
 
-                KotlinAnnotationCounter annotationCounter = new KotlinAnnotationCounter(javaUsageMarker);
+                // TODO: Don't use SimpleUsageMarker in ProGuard API.
+                KotlinAnnotationCounter annotationCounter = new KotlinAnnotationCounter();//javaUsageMarker);
                 kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations.accept(
                     kotlinPropertyMetadata.referencedSyntheticMethodClass,
                     annotationCounter

@@ -21,13 +21,12 @@
 package proguard.classfile.kotlin.visitors;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.*;
-import proguard.classfile.attribute.annotation.visitor.*;
+import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.classfile.visitor.*;
-import proguard.shrink.SimpleUsageMarker;
+import proguard.classfile.visitor.MemberVisitor;
 
 public class KotlinAnnotationCounter
 extends      SimplifiedVisitor
@@ -37,12 +36,13 @@ implements   MemberVisitor,
 {
     private int   count                    = 0;
     private int[] parameterAnnotationCount = null;
-    private       SimpleUsageMarker usageMarker;
-
-    public KotlinAnnotationCounter(SimpleUsageMarker javaUsageMarker)
-    {
-        this.usageMarker = javaUsageMarker;
-    }
+// TODO: Don't use SimpleUsageMarker in ProGuard API.
+//   private       SimpleUsageMarker usageMarker;
+//
+//    public KotlinAnnotationCounter(SimpleUsageMarker javaUsageMarker)
+//    {
+//        this.usageMarker = javaUsageMarker;
+//    }
 
     public KotlinAnnotationCounter()
     {
@@ -114,7 +114,8 @@ implements   MemberVisitor,
     @Override
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
-        if (usageMarker == null || usageMarker.isUsed(annotation))
+// TODO: Don't use SimpleUsageMarker in ProGuard API.
+//        if (usageMarker == null || usageMarker.isUsed(annotation))
         {
             this.count++;
         }
@@ -123,7 +124,8 @@ implements   MemberVisitor,
     @Override
     public void visitAnnotation(Clazz clazz, Method method, int parameterIndex, Annotation annotation)
     {
-        if (usageMarker == null || usageMarker.isUsed(annotation))
+// TODO: Don't use SimpleUsageMarker in ProGuard API.
+//        if (usageMarker == null || usageMarker.isUsed(annotation))
         {
             this.parameterAnnotationCount[parameterIndex]++;
         }

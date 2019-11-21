@@ -19,7 +19,6 @@ package proguard.classfile.visitor;
 
 import proguard.classfile.*;
 
-
 /**
  * This <code>ClassVisitor</code> delegates its visits to another given
  * <code>ClassVisitor</code>, but only when the visited class
