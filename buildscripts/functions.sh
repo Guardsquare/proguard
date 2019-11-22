@@ -58,28 +58,26 @@ function compile {
 
   # Copy resource files.
   (cd "$SRC" && \
-   find \
+   find proguard \
      \( -name \*.properties -o -name \*.png -o -name \*.gif -o -name \*.pro \) \
      -exec cp --parents {} "../$OUT" \; )
 }
 
 function createjar {
   echo "Creating $1..."
-  DIRS=$(ls "$OUT" | sed -e "s|^|-C $OUT |")
   mkdir -p $(dirname "$1") && \
   if [ -f "$SRC/META-INF/MANIFEST.MF" ]; then
-    jar -cfm "$1" "$SRC/META-INF/MANIFEST.MF" $DIRS
+    jar -cfm "$1" "$SRC/META-INF/MANIFEST.MF" -C "$OUT" proguard
   else
-    jar -cf "$1" $DIRS
+    jar -cf "$1" -C "$OUT" proguard
   fi
 }
 
 function updatejar {
   echo "Updating $1..."
-  DIRS=$(ls "$OUT" | sed -e "s|^|-C $OUT |")
   if [ -f "$SRC/META-INF/MANIFEST.MF" ]; then
-    jar -ufm "$1" "$SRC/META-INF/MANIFEST.MF" $DIRS
+    jar -ufm "$1" "$SRC/META-INF/MANIFEST.MF" -C "$OUT" proguard
   else
-    jar -uf "$1" $DIRS
+    jar -uf "$1" -C "$OUT" proguard
   fi
 }

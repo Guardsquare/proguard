@@ -3,6 +3,11 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 
+repositories {
+    google()
+    jcenter()
+}
+
 sourceCompatibility = "${target}"
 targetCompatibility = "${target}"
 
@@ -26,6 +31,11 @@ sourceSets.main {
 
 jar {
     metaInf.from 'src/META-INF'
+}
+
+repositories {
+    google()
+    jcenter()
 }
 
 dependencies {

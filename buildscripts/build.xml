@@ -12,7 +12,7 @@
   </target>
 
   <target name    = "all"
-          depends = "core,retrace,gui,gradle,ant,wtk,annotations"/>
+          depends = "core,base,retrace,gui,gradle,ant,wtk,annotations"/>
 
   <target name = "core">
     <ant dir = "core"/>

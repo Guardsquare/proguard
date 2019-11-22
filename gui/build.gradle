@@ -2,6 +2,10 @@
 
 apply plugin: 'java'
 
+repositories {
+    jcenter()
+}
+
 sourceCompatibility = "${target}"
 targetCompatibility = "${target}"
 

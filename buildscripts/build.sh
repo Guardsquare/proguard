@@ -6,6 +6,7 @@ cd $(dirname "$0")
 
 # Standard modules.
 ../core/build.sh        && \
+../base/build.sh        && \
 ../retrace/build.sh     && \
 ../gui/build.sh         && \
 ../annotations/build.sh || exit 1

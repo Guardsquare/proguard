@@ -1,12 +1,5 @@
 // Gradle build script for all ProGuard jars.
 
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
 task clean {
     delete fileTree('../lib')
 }
@@ -17,7 +10,7 @@ task assembleProguardJar(type: Jar) {
     destinationDir = file('../lib')
     baseName       = 'proguard'
 
-    manifest.from '../core/src/META-INF/MANIFEST.MF'
+    manifest.from '../base/src/META-INF/MANIFEST.MF'
 }
 
 def proguardSubprojects =
