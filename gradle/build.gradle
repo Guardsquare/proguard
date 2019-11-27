@@ -1,4 +1,4 @@
-// Gradle build script for the ProGuard Gradle task.
+// Gradle build script for the ProGuard Gradle task and plugin.
 
 apply plugin: 'java'
 apply plugin: 'groovy'

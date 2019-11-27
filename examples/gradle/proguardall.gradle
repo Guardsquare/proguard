@@ -51,18 +51,24 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
     libraryjars '/usr/local/java/ant/lib/ant.jar'
     libraryjars '/usr/local/java/wtk2.5.2/wtklib/kenv.zip'
 
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder/3.4.0/b237d03672bae54a1013deab3bbd936d78f07e79/builder-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder-model/3.4.0/768154ff0029313694e6b7d1576ef79dfe7e2b7e/builder-model-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle/3.4.0/16af40a504b8f8ff572c8c2bbf4ace3dccd2f5b/gradle-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-api/3.4.0/ac85b2c363dbcad0303df561c8c4f99a925c2878/gradle-api-3.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.lint/lint-gradle-api/26.4.0/931c6d23146c4d8286aa814eb8d5d8af9b69af11/lint-gradle-api-26.4.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-jdk5/13.0/381ae6c8add7c98e9bcddb1e0b898400cd6fc3f7/guava-jdk5-13.0.jar"
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.21/139535a69a4239db087de9bab0bee568bf8e0b70/slf4j-api-1.7.21.jar"
+    libraryjars '/usr/local/java/gradle-5.4.1/lib', jarfilter: 'gradle-base-services-?.*.jar,gradle-base-services-groovy-*.jar,gradle-core-?.*.jar,gradle-core-api-*.jar,gradle-language-java-*.jar,gradle-logging-*.jar,gradle-model-core-*.jar,gradle-process-services-*.jar,plugins/gradle-workers-*.jar,groovy-all-*.jar,slf4j-api-*.jar'
+
+    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.5/f645ed69d595b24d4cf8b3fbb64cc505bede8829/gson-2.8.5.jar"
     libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.31/11289d20fd95ae219333f3456072be9f081c30cc/kotlin-stdlib-1.3.31.jar"
     libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.31/20c34a04ea25cb1ef0139598bd67c764562cb170/kotlin-stdlib-common-1.3.31.jar"
     libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-metadata-jvm/0.1.0/505481587ce23e1d8207734e496632df5c4e6f58/kotlinx-metadata-jvm-0.1.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.5/f645ed69d595b24d4cf8b3fbb64cc505bede8829/gson-2.8.5.jar"
-libraryjars '/usr/local/java/gradle-5.4.1/lib', jarfilter: 'plugins/gradle-plugins-*.jar,gradle-logging-*.jar,gradle-base-services-?.*.jar,gradle-base-services-groovy-*.jar,gradle-model-core-*.jar,gradle-core-?.*.jar,gradle-core-api-*.jar,groovy-all-*.jar'
 
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder/3.4.0/b237d03672bae54a1013deab3bbd936d78f07e79/builder-3.4.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder-model/3.4.0/768154ff0029313694e6b7d1576ef79dfe7e2b7e/builder-model-3.4.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle-api/3.4.0/ac85b2c363dbcad0303df561c8c4f99a925c2878/gradle-api-3.4.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.android.tools.build/gradle/3.4.0/16af40a504b8f8ff572c8c2bbf4ace3dccd2f5b/gradle-3.4.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-jdk5/13.0/381ae6c8add7c98e9bcddb1e0b898400cd6fc3f7/guava-jdk5-13.0.jar"
-    libraryjars "${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.21/139535a69a4239db087de9bab0bee568bf8e0b70/slf4j-api-1.7.21.jar"
+    // Don't print warnings about missing classes from old APIs.
+
+    dontwarn 'com.android.builder.Version'
+    dontwarn 'com.android.build.gradle.internal.scope.TaskOutputHolder$TaskOutputType'
 
     // Don't print notes about reflection in injected code.
 
