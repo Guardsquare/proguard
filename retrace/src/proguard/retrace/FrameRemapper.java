@@ -426,9 +426,12 @@ public class FrameRemapper implements MappingProcessor
                                 String originalArguments)
         {
             return
-                (obfuscatedLineNumber == 0 ? obfuscatedLastLineNumber == 0 :
-                     obfuscatedFirstLineNumber <= obfuscatedLineNumber && obfuscatedLineNumber <= obfuscatedLastLineNumber) &&
-                (originalType         == null || originalType.equals(this.originalType))                                    &&
+                // We're allowing unknown values, represented as 0.
+                (obfuscatedLineNumber     == 0 ||
+                 obfuscatedLastLineNumber == 0 ||
+                (obfuscatedFirstLineNumber <= obfuscatedLineNumber  &&
+                 obfuscatedLineNumber      <= obfuscatedLastLineNumber))                 &&
+                (originalType         == null || originalType.equals(this.originalType)) &&
                 (originalArguments    == null || originalArguments.equals(this.originalArguments));
         }
     }

@@ -24,7 +24,7 @@ import proguard.classfile.ClassConstants;
 import proguard.io.*;
 import proguard.util.*;
 
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -36,6 +36,10 @@ import java.util.List;
  */
 public class DataEntryReaderFactory
 {
+    private static final String VERSIONS_PATTERN = "META-INF/versions";
+    private static final String VERSIONS_EXCLUDE = "!META-INF/versions/**";
+
+
     /**
      * Creates a DataEntryReader that can read the given class path entry.
      *
@@ -57,7 +61,7 @@ public class DataEntryReaderFactory
         boolean isJmod = classPathEntry.isJmod();
         boolean isZip  = classPathEntry.isZip();
 
-        List filter     = classPathEntry.getFilter();
+        List filter     = getFilterExcludingVersionedClasses(classPathEntry);
         List apkFilter  = classPathEntry.getApkFilter();
         List jarFilter  = classPathEntry.getJarFilter();
         List aarFilter  = classPathEntry.getAarFilter();
@@ -189,6 +193,44 @@ public class DataEntryReaderFactory
                    new ExtensionMatcher(jarExtension)),
                        jarReader,
                        reader);
+        }
+    }
+
+
+    /**
+     * Method to return an augmented filter for supported features.
+     * <p>
+     * Currently versioned class files (a feature introduced in Java 9) are not fully
+     * supported by ProGuard. Only 1 version of a class can be read and processed.
+     * If no custom filter targeting a specific version is used, exclude such classes
+     * from being read.
+     */
+    public static List getFilterExcludingVersionedClasses(ClassPathEntry classPathEntry)
+    {
+        List originalFilter = classPathEntry.getFilter();
+        if (originalFilter == null)
+        {
+            return Arrays.asList(VERSIONS_EXCLUDE);
+        }
+        else
+        {
+            // If there is already a custom filter for versioned classes
+            // assume that the filter is properly setup.
+            ListIterator it = originalFilter.listIterator();
+            while (it.hasNext())
+            {
+                String element = (String) it.next();
+                if (element.contains(VERSIONS_PATTERN))
+                {
+                    return originalFilter;
+                }
+            }
+
+            // Otherwise, exclude all versioned classes.
+            List filter = new ArrayList();
+            filter.add(VERSIONS_EXCLUDE);
+            filter.addAll(originalFilter);
+            return filter;
         }
     }
 }

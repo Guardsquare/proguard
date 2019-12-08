@@ -17,6 +17,7 @@ sourceSets.main {
 
     resources {
         srcDirs = ['src']
+        include '**/*.properties'
         include '**/*.gif'
         include '**/*.png'
         include '**/*.pro'

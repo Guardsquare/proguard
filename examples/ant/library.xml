@@ -21,11 +21,13 @@
 
     <!-- Keep some useful attributes. -->
 
+    <keepattribute name="Exceptions" />
     <keepattribute name="InnerClasses" />
+    <keepattribute name="Signature" />
+    <keepattribute name="Deprecated" />
     <keepattribute name="SourceFile" />
     <keepattribute name="LineNumberTable" />
-    <keepattribute name="Deprecated" />
-    <keepattribute name="*Annotation*" />
+    <keepattribute name="EnclosingMethod" />
 
     <!-- Preserve all public classes, and their public and protected fields
         and methods. -->

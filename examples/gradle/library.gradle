@@ -51,8 +51,7 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
     printmapping 'out.map'
     keepparameternames
     renamesourcefileattribute 'SourceFile'
-    keepattributes 'Exceptions,InnerClasses,Signature,Deprecated,'
-                    SourceFile,LineNumberTable,EnclosingMethod
+    keepattributes 'Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,EnclosingMethod'
 
     // Preserve all annotations.
 
@@ -74,7 +73,7 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
 
     // Preserve all native method names and the names of their classes.
 
-    keepclasseswithmembernames,includedescriptorclasses 'class * { \
+    keepclasseswithmembernames includedescriptorclasses: true, 'class * { \
         native <methods>; \
     }'
 

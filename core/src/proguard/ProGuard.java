@@ -44,7 +44,7 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 6.2.0";
+    public static final String VERSION = "ProGuard, version 6.2.1";
 
     private final Configuration configuration;
     private       ClassPool     programClassPool = new ClassPool();
@@ -193,11 +193,6 @@ public class ProGuard
             expandPrimitiveArrayConstants();
         }
 
-        if (configuration.optimize)
-        {
-            trimLineNumbers();
-        }
-
         if (configuration.targetClassVersion != 0)
         {
             target();
@@ -206,6 +201,14 @@ public class ProGuard
         if (configuration.preverify)
         {
             preverify();
+        }
+
+        // Trim line numbers after preverification as this might
+        // also remove some instructions.
+        if (configuration.optimize ||
+            configuration.preverify)
+        {
+            trimLineNumbers();
         }
 
         if (configuration.shrink    ||

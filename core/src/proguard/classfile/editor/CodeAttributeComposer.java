@@ -867,10 +867,13 @@ implements   AttributeVisitor,
 
     public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
     {
-        // Update the variable start offset and length.
-        // Be careful to update the length first.
-        localVariableTargetElement.u2length  = newBranchOffset(localVariableTargetElement.u2startPC, localVariableTargetElement.u2length);
-        localVariableTargetElement.u2startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
+        // Remap the code offset and length.
+        int startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
+        int endPC   = newInstructionOffset(localVariableTargetElement.u2startPC +
+                                           localVariableTargetElement.u2length);
+
+        localVariableTargetElement.u2startPC = startPC;
+        localVariableTargetElement.u2length  = endPC - startPC;
     }
 
     // Small utility methods.

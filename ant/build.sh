@@ -19,13 +19,10 @@ if [ ! -f "$ANT_JAR" ]; then
   exit 1
 fi
 
-# Make sure the ProGuard core has been compiled.
-if [ ! -d ../core/$OUT ]; then
+# Make sure ProGuard has been compiled.
+if [[ ! -d ../core/$OUT || ! -f "$PROGUARD_JAR" ]]; then
   ../core/build.sh || exit 1
 fi
 
-# Compile and package.
-export CLASSPATH=../core/$OUT:$ANT_JAR
-
-compile   $MAIN_CLASS && \
+compile   $MAIN_CLASS "../core/$OUT:$ANT_JAR" && \
 updatejar "$PROGUARD_JAR" || exit 1

@@ -8,12 +8,13 @@
 
   <path id="gradle.path">
     <fileset dir="${gradle.home}/lib">
-      <include name="plugins/gradle-plugins-*.jar"/>
-      <include name="gradle-logging-*.jar"/>
-      <include name="gradle-base-services-*.jar"/>
+      <include name="gradle-core-?.*.jar"/>
+      <include name="gradle-core-api-*.jar"/>
+      <include name="gradle-base-services-?.*.jar"/>
       <include name="gradle-base-services-groovy-*.jar"/>
-      <include name="gradle-model-core-*.jar"/>
-      <include name="gradle-core-*.jar"/>
+      <include name="gradle-logging-*.jar"/>
+      <include name="gradle-model-base-*.jar"/>
+      <include name="plugins/gradle-plugins-*.jar"/>
       <include name="groovy-all-*.jar"/>
       <include name="slf4j-api-*.jar"/>
     </fileset>

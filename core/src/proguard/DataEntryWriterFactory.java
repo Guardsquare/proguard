@@ -24,6 +24,8 @@ import proguard.classfile.*;
 import proguard.io.*;
 import proguard.util.*;
 
+import static proguard.DataEntryReaderFactory.getFilterExcludingVersionedClasses;
+
 import java.util.List;
 
 /**
@@ -92,7 +94,7 @@ public class DataEntryWriterFactory
         boolean isJmod = classPathEntry.isJmod();
         boolean isZip  = classPathEntry.isZip();
 
-        List filter     = classPathEntry.getFilter();
+        List filter     = getFilterExcludingVersionedClasses(classPathEntry);
         List apkFilter  = classPathEntry.getApkFilter();
         List jarFilter  = classPathEntry.getJarFilter();
         List aarFilter  = classPathEntry.getAarFilter();

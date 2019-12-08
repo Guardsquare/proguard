@@ -3,13 +3,14 @@
 // support of the Android Gradle plugin.
 buildscript {
     repositories {
-        flatDir dirs: '../../lib' // For the ProGuard plugin.
-        google()                  // For the Android plugin.
-        jcenter()                 // For anything else.
+        //flatDir dirs: '../../lib' // For the local copy of the ProGuard plugin.
+        google()                    // For the Android Gradle plugin.
+        jcenter()                   // For anything else.
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath ':proguard:'
+        //classpath ':proguard:'    // For the local copy of the ProGuard plugin.
+        classpath 'net.sf.proguard:proguard-gradle:6.2.1' // For the copy from Jcenter.
+        classpath 'com.android.tools.build:gradle:3.3.0'
     }
 }
 

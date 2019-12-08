@@ -45,6 +45,7 @@ implements   AttributeVisitor,
 
 
     private final CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
+    private final NestHostFinder      nestHostFinder      = new NestHostFinder();
 
     // Return values for the visitor methods.
     private Clazz  referencedClass;
@@ -116,7 +117,9 @@ implements   AttributeVisitor,
                      referencedMethod.getName(referencedMethodClass).equals(ClassConstants.METHOD_NAME_INIT))
             {
                 // But is it not a special invocation?
-                if (opcode != InstructionConstants.OP_INVOKESPECIAL)
+                if (opcode != InstructionConstants.OP_INVOKESPECIAL &&
+                    // Check if the two classes are in the same nest.
+                    !nestHostFinder.inSameNest(clazz, referencedClass))
                 {
                     // Replace the invocation by an invokespecial instruction.
                     Instruction replacementInstruction =

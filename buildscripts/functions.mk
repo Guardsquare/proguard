@@ -19,7 +19,11 @@ TARGET_JAR = $(LIB)/$(TARGET).jar
 DOWNLOAD = wget -O
 #DOWNLOAD = curl -L -o
 
-# Function to find the resource files of a given target.
+# Functions to find the class files and resource files of a given target.
+
+define CLASS_FILES
+  $(subst .java,.class,$(shell find $(SRC)/$(dir $(1)) -path "$(SRC)/$(MAIN_CLASS).java" -printf $(OUT)/$(dir $(1))%P\\n))
+endef
 
 define RESOURCES
   $(shell find $(SRC)/$(dir $(1)) -maxdepth 1 \( -name \*.properties -o -name \*.png -o -name \*.gif -o -name \*.pro \) -printf $(OUT)/$(dir $(1))%P\\n)
@@ -29,14 +33,18 @@ endef
 
 all: $(TARGET_JAR)
 
-$(TARGET_JAR): $(OUT)/$(MAIN_CLASS).class $(LIB)
+$(TARGET_JAR): $(call CLASS_FILES,$(MAIN_CLASS)) $(LIB)
 ifeq ($(UPDATE_JAR),true)
-	jar -uf  $@ -C $(OUT) $(dir $(MAIN_CLASS))
+ifeq ($(INCLUDE_MANIFEST),true)
+	jar -ufm $@ $(SRC)/META-INF/MANIFEST.MF -C $(OUT) $(dir $(MAIN_CLASS))
+else
+	jar -uf  $@                             -C $(OUT) $(dir $(MAIN_CLASS))
+endif
 else
 ifeq ($(INCLUDE_MANIFEST),true)
 	jar -cfm $@ $(SRC)/META-INF/MANIFEST.MF -C $(OUT) $(dir $(MAIN_CLASS))
 else
-	jar -cf $@ -C $(OUT) $(dir $(MAIN_CLASS))
+	jar -cf  $@                             -C $(OUT) $(dir $(MAIN_CLASS))
 endif
 endif
 
@@ -44,7 +52,7 @@ $(TARGET_JAR): $(call RESOURCES,$(MAIN_CLASS))
 
 # Rule for compiling the class files.
 
-$(OUT)/%.class: $(SRC)/%.java $(subst :, ,$(CLASSPATH)) $(OUT)
+$(OUT)/%.class: $(OUT) $(SRC)/%.java $(subst :, ,$(CLASSPATH))
 	javac -nowarn -Xlint:none $(CLASSPATH_OPTION) -source $(JAVA_TARGET) -target $(JAVA_TARGET) -sourcepath $(SRC) -d $(OUT) $(filter %.java,$^) 2>&1 | sed -e 's|^|  |'
 
 # Rule for copying the resource files.

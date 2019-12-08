@@ -228,9 +228,13 @@ implements   ClassVisitor,
             }
             else if (source == null && previousSource != null)
             {
-                // When exiting a top-level inlined block, the source might be null.
-                // See LineNumberLinearizer, line 185, exiting an inlined block.
-                enclosingLineNumbers.pop();
+                // TODO: There appear to be cases where the stack is empty at this point, so we've added a check.
+                if (!enclosingLineNumbers.isEmpty())
+                {
+                    // When exiting a top-level inlined block, the source might be null.
+                    // See LineNumberLinearizer, line 185, exiting an inlined block.
+                    enclosingLineNumbers.pop();
+                }
             }
 
             previousInfo = info;

@@ -190,7 +190,7 @@ public class TypedReferenceValue extends ReferenceValue
                 this.type.equals(type)) ||
                (!alwaysCast &&
                 (this.type == null ||
-                 instanceOf(this.type, referencedClass) == ALWAYS)) ? this :
+                 instanceOf(type, referencedClass) == ALWAYS)) ? this :
             valueFactory.createReferenceValue(type,
                                               referencedClass,
                                               true,
