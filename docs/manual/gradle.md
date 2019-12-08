@@ -10,7 +10,7 @@ line to your **`build.gradle`** file:
             jcenter()
         }
         dependencies {
-            classpath 'net.sf.proguard:proguard-gradle:6.2.1'
+            classpath 'net.sf.proguard:proguard-gradle:6.2.2'
         }
     }
 

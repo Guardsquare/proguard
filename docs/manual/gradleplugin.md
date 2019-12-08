@@ -39,7 +39,7 @@ project as follows:
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:3.3.0'
-            classpath 'net.sf.proguard:proguard-gradle:6.2.1'
+            classpath 'net.sf.proguard:proguard-gradle:6.2.2'
         }
     }
 

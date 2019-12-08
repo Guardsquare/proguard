@@ -1,2 +1,3 @@
 Manifest-Version: 1.0
 Main-Class: proguard.ProGuard
+Class-Path: gson-2.8.5.jar
