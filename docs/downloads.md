@@ -52,6 +52,7 @@ don't be afraid to update.
 
 |        |          |          |
 |--------|----------|----------|----------------------------------
+| 6.3.x  | DGD-1317 | CORE     | Fixed potential build errors when optimizing methods with many parameters.
 | 6.3.x  | PGD-750  | CORE     | Fixed UnsupportedOperationException when optimizing enum types in closure arguments.
 | 6.3.x  | PGD-12   | CORE     | Fixed building gradle plugin.
 
