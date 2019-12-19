@@ -48,7 +48,7 @@ implements ClassVisitor,
            AttributeVisitor,
            InstructionVisitor
 {
-    /*
+    //*
     private static final boolean DEBUG = false;
     /*/
     public  static       boolean DEBUG = System.getProperty("lec") != null;
