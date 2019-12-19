@@ -1217,14 +1217,14 @@ public class InstructionSequenceBuilder
         return add(new SimpleInstruction(InstructionConstants.OP_RETURN));
     }
 
-    public InstructionSequenceBuilder getstatic(Clazz  referencedClass,
-                                                Member referencedMember)
+    public InstructionSequenceBuilder getstatic(Clazz clazz,
+                                                Field field)
     {
-        return getstatic(referencedClass.getName(),
-                         referencedMember.getName(referencedClass),
-                         referencedMember.getDescriptor(referencedClass),
-                         referencedClass,
-                         referencedMember);
+        return getstatic(clazz.getName(),
+                         field.getName(clazz),
+                         field.getDescriptor(clazz),
+                         clazz,
+                         field);
     }
 
     public InstructionSequenceBuilder getstatic(String className,
@@ -1238,13 +1238,13 @@ public class InstructionSequenceBuilder
                                                 String name,
                                                 String descriptor,
                                                 Clazz  referencedClass,
-                                                Member referencedMember)
+                                                Field  referencedField)
     {
         return getstatic(constantPoolEditor.addFieldrefConstant(className,
                                                                 name,
                                                                 descriptor,
                                                                 referencedClass,
-                                                                referencedMember));
+                                                                referencedField));
     }
 
     public InstructionSequenceBuilder getstatic(int constantIndex)
@@ -1252,14 +1252,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_GETSTATIC, constantIndex));
     }
 
-    public InstructionSequenceBuilder putstatic(Clazz  referencedClass,
-                                                Member referencedMember)
+    public InstructionSequenceBuilder putstatic(Clazz clazz,
+                                                Field field)
     {
-        return putstatic(referencedClass.getName(),
-                         referencedMember.getName(referencedClass),
-                         referencedMember.getDescriptor(referencedClass),
-                         referencedClass,
-                         referencedMember);
+        return putstatic(clazz.getName(),
+                         field.getName(clazz),
+                         field.getDescriptor(clazz),
+                         clazz,
+                         field);
     }
 
     public InstructionSequenceBuilder putstatic(String className,
@@ -1273,13 +1273,13 @@ public class InstructionSequenceBuilder
                                                 String name,
                                                 String descriptor,
                                                 Clazz  referencedClass,
-                                                Member referencedMember)
+                                                Field  referencedField)
     {
         return putstatic(constantPoolEditor.addFieldrefConstant(className,
                                                                 name,
                                                                 descriptor,
                                                                 referencedClass,
-                                                                referencedMember));
+                                                                referencedField));
     }
 
     public InstructionSequenceBuilder putstatic(int constantIndex)
@@ -1287,14 +1287,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_PUTSTATIC, constantIndex));
     }
 
-    public InstructionSequenceBuilder getfield(Clazz  referencedClass,
-                                               Member referencedMember)
+    public InstructionSequenceBuilder getfield(Clazz clazz,
+                                               Field field)
     {
-        return getfield(referencedClass.getName(),
-                        referencedMember.getName(referencedClass),
-                        referencedMember.getDescriptor(referencedClass),
-                        referencedClass,
-                        referencedMember);
+        return getfield(clazz.getName(),
+                        field.getName(clazz),
+                        field.getDescriptor(clazz),
+                        clazz,
+                        field);
     }
 
     public InstructionSequenceBuilder getfield(String className,
@@ -1308,13 +1308,13 @@ public class InstructionSequenceBuilder
                                                String name,
                                                String descriptor,
                                                Clazz  referencedClass,
-                                               Member referencedMember)
+                                               Field  referencedField)
     {
         return getfield(constantPoolEditor.addFieldrefConstant(className,
                                                                name,
                                                                descriptor,
                                                                referencedClass,
-                                                               referencedMember));
+                                                               referencedField));
     }
 
     public InstructionSequenceBuilder getfield(int constantIndex)
@@ -1322,14 +1322,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_GETFIELD, constantIndex));
     }
 
-    public InstructionSequenceBuilder putfield(Clazz  referencedClass,
-                                               Member referencedMember)
+    public InstructionSequenceBuilder putfield(Clazz clazz,
+                                               Field field)
     {
-        return putfield(referencedClass.getName(),
-                        referencedMember.getName(referencedClass),
-                        referencedMember.getDescriptor(referencedClass),
-                        referencedClass,
-                        referencedMember);
+        return putfield(clazz.getName(),
+                        field.getName(clazz),
+                        field.getDescriptor(clazz),
+                        clazz,
+                        field);
     }
 
     public InstructionSequenceBuilder putfield(String className,
@@ -1343,13 +1343,13 @@ public class InstructionSequenceBuilder
                                                String name,
                                                String descriptor,
                                                Clazz  referencedClass,
-                                               Member referencedMember)
+                                               Field  referencedField)
     {
         return putfield(constantPoolEditor.addFieldrefConstant(className,
                                                                name,
                                                                descriptor,
                                                                referencedClass,
-                                                               referencedMember));
+                                                               referencedField));
     }
 
     public InstructionSequenceBuilder putfield(int constantIndex)
@@ -1357,14 +1357,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_PUTFIELD, constantIndex));
     }
 
-    public InstructionSequenceBuilder invokevirtual(Clazz  referencedClass,
-                                                    Member referencedMember)
+    public InstructionSequenceBuilder invokevirtual(Clazz  clazz,
+                                                    Method method)
     {
-        return invokevirtual(referencedClass.getName(),
-                             referencedMember.getName(referencedClass),
-                             referencedMember.getDescriptor(referencedClass),
-                             referencedClass,
-                             referencedMember);
+        return invokevirtual(clazz.getName(),
+                             method.getName(clazz),
+                             method.getDescriptor(clazz),
+                             clazz,
+                             method);
     }
 
     public InstructionSequenceBuilder invokevirtual(String className,
@@ -1389,18 +1389,28 @@ public class InstructionSequenceBuilder
                                                     String name,
                                                     String descriptor,
                                                     Clazz  referencedClass,
-                                                    Member referencedMember)
+                                                    Method referencedMethod)
     {
         return invokevirtual(constantPoolEditor.addMethodrefConstant(className,
                                                                      name,
                                                                      descriptor,
                                                                      referencedClass,
-                                                                     referencedMember));
+                                                                     referencedMethod));
     }
 
     public InstructionSequenceBuilder invokevirtual(int constantIndex)
     {
         return add(new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL, constantIndex));
+    }
+
+    public InstructionSequenceBuilder invokespecial(Clazz  clazz,
+                                                    Method method)
+    {
+        return invokespecial(clazz.getName(),
+                             method.getName(clazz),
+                             method.getDescriptor(clazz),
+                             clazz,
+                             method);
     }
 
     public InstructionSequenceBuilder invokespecial(String className,
@@ -1410,57 +1420,47 @@ public class InstructionSequenceBuilder
         return invokespecial(className, name, descriptor, null, null);
     }
 
-    public InstructionSequenceBuilder invokespecial(Clazz  referencedClass,
-                                                    Member referencedMember)
-    {
-        return invokespecial(referencedClass.getName(),
-                             referencedMember.getName(referencedClass),
-                             referencedMember.getDescriptor(referencedClass),
-                             referencedClass,
-                             referencedMember);
-    }
-
     public InstructionSequenceBuilder invokespecial(String className,
                                                     String name,
                                                     String descriptor,
                                                     Clazz  referencedClass,
-                                                    Member referencedMember)
+                                                    Method referencedMethod)
     {
         return invokespecial(constantPoolEditor.addMethodrefConstant(className,
                                                                      name,
                                                                      descriptor,
                                                                      referencedClass,
-                                                                     referencedMember));
+                                                                     referencedMethod));
+    }
+
+    public InstructionSequenceBuilder invokespecial_interface(Clazz  clazz,
+                                                              Method method)
+    {
+        return invokespecial_interface(clazz.getName(),
+                                       method.getName(clazz),
+                                       method.getDescriptor(clazz),
+                                       clazz,
+                                       method);
     }
 
     public InstructionSequenceBuilder invokespecial_interface(String className,
                                                               String name,
-                                                    String descriptor)
+                                                              String descriptor)
     {
         return invokespecial_interface(className, name, descriptor, null, null);
     }
 
-    public InstructionSequenceBuilder invokespecial_interface(Clazz  referencedClass,
-                                                              Member referencedMember)
-    {
-        return invokespecial_interface(referencedClass.getName(),
-                             referencedMember.getName(referencedClass),
-                             referencedMember.getDescriptor(referencedClass),
-                             referencedClass,
-                             referencedMember);
-    }
-
     public InstructionSequenceBuilder invokespecial_interface(String className,
-                                                    String name,
-                                                    String descriptor,
-                                                    Clazz  referencedClass,
-                                                    Member referencedMember)
+                                                              String name,
+                                                              String descriptor,
+                                                              Clazz  referencedClass,
+                                                              Method referencedMethod)
     {
         return invokespecial(constantPoolEditor.addInterfaceMethodrefConstant(className,
                                                                               name,
                                                                               descriptor,
                                                                               referencedClass,
-                                                                              referencedMember));
+                                                                              referencedMethod));
     }
 
     public InstructionSequenceBuilder invokespecial(int constantIndex)
@@ -1468,14 +1468,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, constantIndex));
     }
 
-    public InstructionSequenceBuilder invokestatic(Clazz  referencedClass,
-                                                   Member referencedMember)
+    public InstructionSequenceBuilder invokestatic(Clazz  clazz,
+                                                   Method method)
     {
-        return invokestatic(referencedClass.getName(),
-                            referencedMember.getName(referencedClass),
-                            referencedMember.getDescriptor(referencedClass),
-                            referencedClass,
-                            referencedMember);
+        return invokestatic(clazz.getName(),
+                            method.getName(clazz),
+                            method.getDescriptor(clazz),
+                            clazz,
+                            method);
     }
 
     public InstructionSequenceBuilder invokestatic(String className,
@@ -1489,13 +1489,23 @@ public class InstructionSequenceBuilder
                                                    String name,
                                                    String descriptor,
                                                    Clazz  referencedClass,
-                                                   Member referencedMember)
+                                                   Method referencedMethod)
     {
         return invokestatic(constantPoolEditor.addMethodrefConstant(className,
                                                                     name,
                                                                     descriptor,
                                                                     referencedClass,
-                                                                    referencedMember));
+                                                                    referencedMethod));
+    }
+
+    public InstructionSequenceBuilder invokestatic_interface(Clazz  clazz,
+                                                             Method method)
+    {
+        return invokestatic_interface(clazz.getName(),
+                                      method.getName(clazz),
+                                      method.getDescriptor(clazz),
+                                      clazz,
+                                      method);
     }
 
     public InstructionSequenceBuilder invokestatic_interface(String className,
@@ -1508,14 +1518,14 @@ public class InstructionSequenceBuilder
     public InstructionSequenceBuilder invokestatic_interface(String className,
                                                              String name,
                                                              String descriptor,
-                                                   Clazz  referencedClass,
-                                                   Member referencedMember)
+                                                             Clazz  referencedClass,
+                                                             Method referencedMethod)
     {
         return invokestatic(constantPoolEditor.addInterfaceMethodrefConstant(className,
                                                                              name,
                                                                              descriptor,
                                                                              referencedClass,
-                                                                             referencedMember));
+                                                                             referencedMethod));
     }
 
     public InstructionSequenceBuilder invokestatic(int constantIndex)
@@ -1523,14 +1533,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, constantIndex));
     }
 
-    public InstructionSequenceBuilder invokeinterface(Clazz  referencedClass,
-                                                      Member referencedMember)
+    public InstructionSequenceBuilder invokeinterface(Clazz  clazz,
+                                                      Method method)
     {
-        return invokeinterface(referencedClass.getName(),
-                               referencedMember.getName(referencedClass),
-                               referencedMember.getDescriptor(referencedClass),
-                               referencedClass,
-                               referencedMember);
+        return invokeinterface(clazz.getName(),
+                               method.getName(clazz),
+                               method.getDescriptor(clazz),
+                               clazz,
+                               method);
     }
 
     public InstructionSequenceBuilder invokeinterface(String className,
@@ -1544,7 +1554,7 @@ public class InstructionSequenceBuilder
                                                       String name,
                                                       String descriptor,
                                                       Clazz  referencedClass,
-                                                      Member referencedMember)
+                                                      Method referencedMethod)
     {
         int invokeinterfaceConstant =
             (ClassUtil.internalMethodParameterSize(descriptor, false)) << 8;
@@ -1553,7 +1563,7 @@ public class InstructionSequenceBuilder
                                                                                 name,
                                                                                 descriptor,
                                                                                 referencedClass,
-                                                                                referencedMember),
+                                                                                referencedMethod),
                                invokeinterfaceConstant);
     }
 
@@ -1585,12 +1595,18 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_INVOKEDYNAMIC, constantIndex));
     }
 
+    public InstructionSequenceBuilder new_(Clazz clazz)
+    {
+        return new_(clazz.getName(), clazz);
+    }
+
     public InstructionSequenceBuilder new_(String className)
     {
         return new_(className, null);
     }
 
-    public InstructionSequenceBuilder new_(String className, Clazz referencedClass)
+    public InstructionSequenceBuilder new_(String className,
+                                           Clazz  referencedClass)
     {
         return new_(constantPoolEditor.addClassConstant(className, referencedClass));
     }
@@ -1605,9 +1621,15 @@ public class InstructionSequenceBuilder
         return add(new SimpleInstruction(InstructionConstants.OP_NEWARRAY, constant));
     }
 
-    public InstructionSequenceBuilder anewarray(String className, Clazz referencedClass)
+    public InstructionSequenceBuilder anewarray(Clazz elementType)
     {
-        return anewarray(constantPoolEditor.addClassConstant(className, referencedClass));
+        return anewarray(elementType.getName(), elementType);
+    }
+
+    public InstructionSequenceBuilder anewarray(String elementTypeName,
+                                                Clazz  referencedClass)
+    {
+        return anewarray(constantPoolEditor.addClassConstant(elementTypeName, referencedClass));
     }
 
     public InstructionSequenceBuilder anewarray(int constantIndex)
@@ -1625,14 +1647,19 @@ public class InstructionSequenceBuilder
         return add(new SimpleInstruction(InstructionConstants.OP_ATHROW));
     }
 
-    public InstructionSequenceBuilder checkcast(String className)
+    public InstructionSequenceBuilder checkcast(Clazz type)
     {
-        return checkcast(className, null);
+        return checkcast(type.getName(), type);
     }
 
-    public InstructionSequenceBuilder checkcast(String className, Clazz referencedClass)
+    public InstructionSequenceBuilder checkcast(String typeName)
     {
-        return checkcast(constantPoolEditor.addClassConstant(className, referencedClass));
+        return checkcast(typeName, null);
+    }
+
+    public InstructionSequenceBuilder checkcast(String typeName, Clazz referencedClass)
+    {
+        return checkcast(constantPoolEditor.addClassConstant(typeName, referencedClass));
     }
 
     public InstructionSequenceBuilder checkcast(int constantIndex)
@@ -1640,9 +1667,14 @@ public class InstructionSequenceBuilder
         return add(new ConstantInstruction(InstructionConstants.OP_CHECKCAST, constantIndex));
     }
 
-    public InstructionSequenceBuilder instanceof_(String className, Clazz referencedClass)
+    public InstructionSequenceBuilder instanceof_(Clazz type)
     {
-        return instanceof_(constantPoolEditor.addClassConstant(className, referencedClass));
+        return instanceof_(type.getName(), type);
+    }
+
+    public InstructionSequenceBuilder instanceof_(String typeName, Clazz referencedClass)
+    {
+        return instanceof_(constantPoolEditor.addClassConstant(typeName, referencedClass));
     }
 
     public InstructionSequenceBuilder instanceof_(int constantIndex)
@@ -1665,9 +1697,19 @@ public class InstructionSequenceBuilder
         return add(new SimpleInstruction(InstructionConstants.OP_WIDE));
     }
 
-    public InstructionSequenceBuilder multianewarray(String className, Clazz referencedClass)
+    public InstructionSequenceBuilder multianewarray(Clazz type)
     {
-        return multianewarray(constantPoolEditor.addClassConstant(className, referencedClass));
+        return multianewarray(type.getName(), type);
+    }
+
+    public InstructionSequenceBuilder multianewarray(String typeName)
+    {
+        return multianewarray(typeName, null);
+    }
+
+    public InstructionSequenceBuilder multianewarray(String typeName, Clazz referencedClass)
+    {
+        return multianewarray(constantPoolEditor.addClassConstant(typeName, referencedClass));
     }
 
     public InstructionSequenceBuilder multianewarray(int constantIndex)
@@ -1963,7 +2005,7 @@ public class InstructionSequenceBuilder
 
 
     /**
-     * This main method tests the class.
+     * Small sample application that illustrates the use of this class.
      */
     public static void main(String[] args)
     {
@@ -1981,6 +2023,7 @@ public class InstructionSequenceBuilder
 
         Constant[] constants = builder.constants();
 
+        System.out.println("Instructions:");
         for (Instruction instruction : instructions)
         {
             System.out.println(instruction);
@@ -1988,6 +2031,7 @@ public class InstructionSequenceBuilder
 
         System.out.println();
 
+        System.out.println("Constants:");
         for (int index = 0; index < constants.length; index++)
         {
             System.out.println("#"+index+": " + constants[index]);

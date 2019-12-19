@@ -259,9 +259,9 @@ implements   AttributeVisitor,
 
         // Implementations for ConstantVisitor.
 
-        public void visitAnyMethodrefConstant(Clazz clazz, RefConstant methodrefConstant)
+        public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant methodrefConstant)
         {
-            recursive = targetMethod.equals(methodrefConstant.referencedMember);
+            recursive = targetMethod.equals(methodrefConstant.referencedMethod);
         }
 
 

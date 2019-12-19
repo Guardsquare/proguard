@@ -30,7 +30,6 @@ import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
-import proguard.util.MultiValueMap;
 
 import java.util.*;
 
@@ -85,7 +84,27 @@ implements   ClassVisitor
 
         if (!staticMethods.isEmpty())
         {
-            ProgramClass utilityClass = createUtilityClass(programClass);
+            // Create a new utility class.
+            ProgramClass utilityClass = new ClassBuilder(
+                ClassConstants.ACC_PUBLIC |
+                ClassConstants.ACC_SYNTHETIC,
+                programClass.getName() + "$$Util",
+                ClassConstants.NAME_JAVA_LANG_OBJECT)
+
+                // Add a private constructor.
+                .addMethod(
+                    ClassConstants.ACC_PRIVATE,
+                    ClassConstants.METHOD_NAME_INIT,
+                    ClassConstants.METHOD_TYPE_INIT,
+                    10,
+                    code -> code
+                        .aload_0()
+                        .invokespecial(ClassConstants.NAME_JAVA_LANG_OBJECT,
+                                       ClassConstants.METHOD_NAME_INIT,
+                                       ClassConstants.METHOD_TYPE_INIT)
+                        .return_())
+
+                .getProgramClass();
 
             // Copy all static interface methods to the utility class.
             MemberVisitor memberAdder = new MemberAdder(utilityClass);
@@ -143,46 +162,6 @@ implements   ClassVisitor
 
 
     // Small utility methods.
-
-    private ProgramClass createUtilityClass(ProgramClass interfaceClazz)
-    {
-        ProgramClass utilityClass =
-            new ProgramClass(ClassConstants.CLASS_VERSION_1_2,
-                             1,
-                             new Constant[10],
-                             ClassConstants.ACC_PUBLIC | ClassConstants.ACC_SYNTHETIC,
-                             0,
-                             0);
-
-        String utilityClassName = interfaceClazz.getName() + "$$Util";
-        ConstantPoolEditor constantPoolEditor =
-            new ConstantPoolEditor(utilityClass, programClassPool, libraryClassPool);
-
-        utilityClass.u2thisClass =
-            constantPoolEditor.addClassConstant(utilityClassName,
-                                                utilityClass);
-        utilityClass.u2superClass =
-            constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_OBJECT,
-                                                null);
-
-        SimplifiedClassEditor classEditor =
-            new SimplifiedClassEditor(utilityClass);
-
-        // Add a private constructor.
-        classEditor.addMethod(ClassConstants.ACC_PRIVATE,
-                              ClassConstants.METHOD_NAME_INIT,
-                              ClassConstants.METHOD_TYPE_INIT,
-                              10)
-            .aload_0()
-            .invokespecial(ClassConstants.NAME_JAVA_LANG_OBJECT,
-                           ClassConstants.METHOD_NAME_INIT,
-                           ClassConstants.METHOD_TYPE_INIT)
-            .return_();
-
-        classEditor.finishEditing();
-        return utilityClass;
-    }
-
 
     /**
      * Replaces all static invocations of the given methods in the given

@@ -218,9 +218,9 @@ public abstract class SimplifiedVisitor
     /**
      * Visits any type of method RefConstant of the given class.
      */
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        visitAnyRefConstant(clazz, refConstant);
+        visitAnyRefConstant(clazz, anyMethodrefConstant);
     }
 
 

@@ -22,7 +22,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.constant.*;
 import proguard.classfile.instruction.ConstantInstruction;
-import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 
 /**
@@ -89,43 +88,42 @@ extends      SimplifiedInvocationUnit
 
     // Implementations for SimplifiedInvocationUnit.
 
-    public Value getExceptionValue(Clazz         clazz,
-                                   ClassConstant catchClassConstant)
+    public Value getExceptionValue(Clazz clazz, ClassConstant catchClassConstant)
     {
         return trace(invocationUnit.getExceptionValue(clazz, catchClassConstant),
                      offset | InstructionOffsetValue.EXCEPTION_HANDLER);
     }
 
 
-    public void setFieldClassValue(Clazz clazz, RefConstant refConstant, ReferenceValue value)
+    public void setFieldClassValue(Clazz clazz, FieldrefConstant fieldrefConstant, ReferenceValue value)
     {
-        invocationUnit.setFieldClassValue(clazz, refConstant, value);
+        invocationUnit.setFieldClassValue(clazz, fieldrefConstant, value);
     }
 
 
-    public Value getFieldClassValue(Clazz clazz, RefConstant refConstant, String type)
+    public Value getFieldClassValue(Clazz clazz, FieldrefConstant fieldrefConstant, String type)
     {
-        return trace(invocationUnit.getFieldClassValue(clazz, refConstant, type),
+        return trace(invocationUnit.getFieldClassValue(clazz, fieldrefConstant, type),
                      offset | InstructionOffsetValue.FIELD_VALUE);
     }
 
 
-    public void setFieldValue(Clazz clazz, RefConstant refConstant, Value value)
+    public void setFieldValue(Clazz clazz, FieldrefConstant fieldrefConstant, Value value)
     {
-        invocationUnit.setFieldValue(clazz, refConstant, value);
+        invocationUnit.setFieldValue(clazz, fieldrefConstant, value);
     }
 
 
-    public Value getFieldValue(Clazz clazz, RefConstant refConstant, String type)
+    public Value getFieldValue(Clazz clazz, FieldrefConstant fieldrefConstant, String type)
     {
-        return trace(invocationUnit.getFieldValue(clazz, refConstant, type),
+        return trace(invocationUnit.getFieldValue(clazz, fieldrefConstant, type),
                      offset | InstructionOffsetValue.FIELD_VALUE);
     }
 
 
-    public void setMethodParameterValue(Clazz clazz, RefConstant refConstant, int parameterIndex, Value value)
+    public void setMethodParameterValue(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant, int parameterIndex, Value value)
     {
-        invocationUnit.setMethodParameterValue(clazz, refConstant, parameterIndex, value);
+        invocationUnit.setMethodParameterValue(clazz, anyMethodrefConstant, parameterIndex, value);
     }
 
 
@@ -148,10 +146,10 @@ extends      SimplifiedInvocationUnit
     }
 
 
-    public Value getMethodReturnValue(Clazz clazz, RefConstant refConstant, String type)
+    public Value getMethodReturnValue(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant, String type)
     {
         Value returnValue =
-            invocationUnit.getMethodReturnValue(clazz, refConstant, type);
+            invocationUnit.getMethodReturnValue(clazz, anyMethodrefConstant, type);
 
         return trace(returnValue,
                      offset | InstructionOffsetValue.METHOD_RETURN_VALUE);

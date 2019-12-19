@@ -26,6 +26,7 @@ import proguard.classfile.attribute.annotation.visitor.TypeAnnotationVisitor;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.preverification.visitor.*;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.constant.Constant;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
@@ -35,8 +36,77 @@ import proguard.util.ArrayUtil;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor accumulates instructions and exceptions, and then
- * copies them into code attributes that it visits.
+ * This AttributeVisitor accumulates instructions, exceptions and line numbers,
+ * and then copies them into code attributes that it visits.
+ *
+ * The class supports composing
+ *   instructions       ({@link #appendInstruction(Instruction)}),
+ *   labels             ({@link #appendLabel(int)}),
+ *   exception handlers ({@link #appendException(ExceptionInfo)}), and
+ *   line numbers       ({@link #appendLineNumber(LineNumberInfo)}).
+ *
+ * The labels are numeric labels that you can choose freely, for example
+ * instruction offsets from existing code that you are copying. You can then
+ * refer to them in branches and exception handlers. You can compose the
+ * code as a hierarchy of code fragments with their own local labels.
+ *
+ * You should provide an estimated maximum size (expressed in number of
+ * bytes in the bytecode), so the implementation can efficiently allocate
+ * the necessary internal buffers without reallocating them as the code
+ * grows.
+ *
+ * For example:
+ * <pre>
+ *     ProgramClass  programClass  = ...
+ *     ProgramMethod programMethod = ...
+ *     CodeAttribute codeAttribute = ...
+ *
+ *     // Create any constants for the code.
+ *     ConstantPoolEditor constantPoolEditor =
+ *         new ConstantPoolEditor(programClass);
+ *
+ *     int exceptionType =
+ *         constantPoolEditor.addClassConstant("java/lang/Exception", null);
+ *
+ *     // Compose the code.
+ *     CodeAttributeComposer composer =
+ *         new CodeAttributeComposer();
+ *
+ *     final int TRY_LABEL   =  0;
+ *     final int IF_LABEL    =  1;
+ *     final int THEN_LABEL  = 10;
+ *     final int ELSE_LABEL  = 20;
+ *     final int CATCH_LABEL = 30;
+ *
+ *     composer.beginCodeFragment(50);
+ *     composer.appendLabel(TRY_LABEL);
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+ *     composer.appendLabel(IF_LABEL);
+ *     composer.appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPLT, 20-1));
+ *
+ *     composer.appendLabel(THEN_LABEL);
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+ *
+ *     composer.appendLabel(ELSE_LABEL);
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+ *
+ *     composer.appendLabel(CATCH_LABEL);
+ *     composer.appendException(new ExceptionInfo(TRY_LABEL, CATCH_LABEL, CATCH_LABEL, exceptionType));
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_M1));
+ *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+ *     composer.endCodeFragment();
+ *
+ *     // Put the code in the given code attribute.
+ *     composer.visitCodeAttribute(programClass, programMethod, codeAttribute);
+ * </pre>
+ *
+ * This class is mostly convenient to compose code based on existing code,
+ * where the instructions are already available. For a more compact and
+ * readable alternative to compose code programmatically from scratch,
+ * see {@link CompactCodeAttributeComposer}.
  *
  * @author Eric Lafortune
  */
@@ -1151,23 +1221,94 @@ implements   AttributeVisitor,
     }
 
 
+    /**
+     * Small sample application that illustrates the use of this class.
+     */
     public static void main(String[] args)
     {
-        CodeAttributeComposer composer = new CodeAttributeComposer();
+        // Create an empty class.
+        ProgramClass programClass =
+            new ProgramClass(ClassConstants.CLASS_VERSION_1_8,
+                             1,
+                             new Constant[10],
+                             ClassConstants.ACC_PUBLIC,
+                             0,
+                             0);
 
-        composer.beginCodeFragment(4);
-        composer.appendInstruction(0, new SimpleInstruction(InstructionConstants.OP_ICONST_0));
-        composer.appendInstruction(1, new VariableInstruction(InstructionConstants.OP_ISTORE, 0));
-        composer.appendInstruction(2, new BranchInstruction(InstructionConstants.OP_GOTO, 1));
+        // Add its name and superclass.
+        ConstantPoolEditor constantPoolEditor =
+            new ConstantPoolEditor(programClass);
 
-        composer.beginCodeFragment(4);
-        composer.appendInstruction(0, new VariableInstruction(InstructionConstants.OP_IINC, 0, 1));
-        composer.appendInstruction(1, new VariableInstruction(InstructionConstants.OP_ILOAD, 0));
-        composer.appendInstruction(2, new SimpleInstruction(InstructionConstants.OP_ICONST_5));
-        composer.appendInstruction(3, new BranchInstruction(InstructionConstants.OP_IFICMPLT, -3));
+        programClass.u2thisClass  = constantPoolEditor.addClassConstant("com/example/Test", programClass);
+        programClass.u2superClass = constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_OBJECT, null);
+
+        // Create an empty method.
+        ProgramMethod programMethod =
+            new ProgramMethod(ClassConstants.ACC_PUBLIC,
+                              constantPoolEditor.addUtf8Constant("test"),
+                              constantPoolEditor.addUtf8Constant("()I"),
+                              null);
+
+        // Create an empty code attribute.
+        CodeAttribute codeAttribute =
+            new CodeAttribute(constantPoolEditor.addUtf8Constant(ClassConstants.ATTR_Code));
+
+        // Add the code attribute to the method.
+        AttributesEditor attributesEditor =
+            new AttributesEditor(programClass, programMethod, false);
+
+        attributesEditor.addAttribute(codeAttribute);
+
+        // Add the method to the class.
+        ClassEditor classEditor =
+            new ClassEditor(programClass);
+
+        classEditor.addMethod(programMethod);
+
+        // Create any constants for the code.
+        int exceptionType =
+            constantPoolEditor.addClassConstant("java/lang/Exception", null);
+
+        // Compose the code -- the equivalent of this java code:
+        //     try
+        //     {
+        //         if (1 < 2) return 1; else return 2;
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         return -1;
+        //     }
+        CodeAttributeComposer composer =
+            new CodeAttributeComposer();
+
+        final int TRY_LABEL   =  0;
+        final int IF_LABEL    =  1;
+        final int THEN_LABEL  = 10;
+        final int ELSE_LABEL  = 20;
+        final int CATCH_LABEL = 30;
+
+        composer.beginCodeFragment(50);
+        composer.appendLabel(TRY_LABEL);
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+        composer.appendLabel(IF_LABEL);
+        composer.appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPLT, 20-1));
+
+        composer.appendLabel(THEN_LABEL);
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+
+        composer.appendLabel(ELSE_LABEL);
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+
+        composer.appendLabel(CATCH_LABEL);
+        composer.appendException(new ExceptionInfo(TRY_LABEL, CATCH_LABEL, CATCH_LABEL, exceptionType));
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_M1));
+        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
         composer.endCodeFragment();
 
-        composer.appendInstruction(3, new SimpleInstruction(InstructionConstants.OP_RETURN));
-        composer.endCodeFragment();
+        // Put the code in the given code attribute.
+        composer.visitCodeAttribute(programClass, programMethod, codeAttribute);
     }
 }

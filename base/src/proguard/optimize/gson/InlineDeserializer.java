@@ -55,16 +55,13 @@ interface InlineDeserializer
      *                             deserialize.
      * @param programField         The field of the domain class to
      *                             deserialize.
-     * @param codeAttributeEditor  the code attribute editor to be used for
-     *                             injecting instructions.
-     * @param builder              the instruction sequence builder to be used
-     *                             for generating instructions.
+     * @param compactCodeAttributeComposer the code attribute composer to be
+     *                                     used for generating instructions.
      * @param gsonRuntimeSettings  tracks the GSON parameters that are utilized
      *                             in the code.
      */
-    void deserialize(ProgramClass               programClass,
-                     ProgramField               programField,
-                     CodeAttributeEditor        codeAttributeEditor,
-                     InstructionSequenceBuilder builder,
-                     GsonRuntimeSettings        gsonRuntimeSettings);
+    void deserialize(ProgramClass                 programClass,
+                     ProgramField                 programField,
+                     CompactCodeAttributeComposer compactCodeAttributeComposer,
+                     GsonRuntimeSettings          gsonRuntimeSettings);
 }

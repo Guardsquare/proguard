@@ -25,32 +25,33 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
  *
  * @author Eric Lafortune
  */
-public class InterfaceMethodrefConstant extends RefConstant
+public class InterfaceMethodrefConstant extends AnyMethodrefConstant
 {
     /**
      * Creates an uninitialized InterfaceMethodrefConstant.
      */
     public InterfaceMethodrefConstant()
     {
+        super();
     }
 
 
     /**
      * Creates a new InterfaceMethodrefConstant with the given name and type indices.
-     * @param u2classIndex         the index   of the class in the constant pool.
-     * @param u2nameAndTypeIndex   the index   of the name and type entry in the constant pool.
-     * @param referencedClass      the referenced class.
-     * @param referencedMember     the referenced member info.
+     * @param u2classIndex       the index of the class in the constant pool.
+     * @param u2nameAndTypeIndex the index of the name and type entry in the constant pool.
+     * @param referencedClass    the referenced class.
+     * @param referencedMethod   the referenced method.
      */
     public InterfaceMethodrefConstant(int    u2classIndex,
                                       int    u2nameAndTypeIndex,
                                       Clazz  referencedClass,
-                                      Member referencedMember)
+                                      Method referencedMethod)
     {
-        this.u2classIndex       = u2classIndex;
-        this.u2nameAndTypeIndex = u2nameAndTypeIndex;
-        this.referencedClass    = referencedClass;
-        this.referencedMember   = referencedMember;
+        super(u2classIndex,
+              u2nameAndTypeIndex,
+              referencedClass,
+              referencedMethod);
     }
 
 

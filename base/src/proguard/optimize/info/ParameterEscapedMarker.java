@@ -177,9 +177,9 @@ implements   ClassPoolVisitor,
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        Method referencedMethod = (Method)refConstant.referencedMember;
+        Method referencedMethod = anyMethodrefConstant.referencedMethod;
 
         if (referencedMethod != null &&
             MethodOptimizationInfo.getMethodOptimizationInfo(referencedMethod) instanceof ProgramMethodOptimizationInfo)

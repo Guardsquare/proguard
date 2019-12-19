@@ -21,7 +21,7 @@
 package proguard.optimize.evaluation;
 
 import proguard.classfile.*;
-import proguard.classfile.constant.RefConstant;
+import proguard.classfile.constant.*;
 import proguard.evaluation.BasicInvocationUnit;
 import proguard.evaluation.value.*;
 import proguard.optimize.KeepMarker;
@@ -70,47 +70,47 @@ extends      BasicInvocationUnit
 
     // Implementations for BasicInvocationUnit.
 
-    public void setFieldClassValue(Clazz          clazz,
-                                   RefConstant    refConstant,
-                                   ReferenceValue value)
+    public void setFieldClassValue(Clazz            clazz,
+                                   FieldrefConstant fieldrefConstant,
+                                   ReferenceValue   value)
     {
         if (storeFieldValues)
         {
-            Member referencedMember = refConstant.referencedMember;
-            if (referencedMember != null)
+            Field referencedField = fieldrefConstant.referencedField;
+            if (referencedField != null)
             {
-                generalizeFieldClassValue((Field)referencedMember, value);
+                generalizeFieldClassValue(referencedField, value);
             }
         }
     }
 
 
-    public void setFieldValue(Clazz       clazz,
-                              RefConstant refConstant,
-                              Value       value)
+    public void setFieldValue(Clazz            clazz,
+                              FieldrefConstant fieldrefConstant,
+                              Value            value)
     {
         if (storeFieldValues)
         {
-            Member referencedMember = refConstant.referencedMember;
-            if (referencedMember != null)
+            Field referencedField = fieldrefConstant.referencedField;
+            if (referencedField != null)
             {
-                generalizeFieldValue((Field)referencedMember, value);
+                generalizeFieldValue((Field)referencedField, value);
             }
         }
     }
 
 
     public void setMethodParameterValue(Clazz       clazz,
-                                        RefConstant refConstant,
+                                        AnyMethodrefConstant anyMethodrefConstant,
                                         int         parameterIndex,
                                         Value       value)
     {
         if (storeMethodParameterValues)
         {
-            Member referencedMember = refConstant.referencedMember;
-            if (referencedMember != null)
+            Method referencedMethod = anyMethodrefConstant.referencedMethod;
+            if (referencedMethod != null)
             {
-                generalizeMethodParameterValue((Method)referencedMember,
+                generalizeMethodParameterValue(referencedMethod,
                                                parameterIndex,
                                                value);
             }

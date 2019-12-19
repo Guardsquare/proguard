@@ -438,20 +438,20 @@ implements ClassVisitor,
 
 
     @Override
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        if (!replaceMethodInvocation(referencingOffset, clazz, referencingMethod, refConstant))
+        if (!replaceMethodInvocation(referencingOffset, clazz, referencingMethod, anyMethodrefConstant))
         {
             // If the method invocation was not replaced, we still
             // have to replace the descriptor if necessary.
 
-            String name = refConstant.getName(clazz);
-            String desc = refConstant.getType(clazz);
+            String name = anyMethodrefConstant.getName(clazz);
+            String desc = anyMethodrefConstant.getType(clazz);
 
             String newDesc = replaceDescriptor(clazz, desc);
             if (!newDesc.equals(desc))
             {
-                refConstant.u2nameAndTypeIndex =
+                anyMethodrefConstant.u2nameAndTypeIndex =
                     constantPoolEditor.addNameAndTypeConstant(name, newDesc);
                 classModified = true;
             }
@@ -540,13 +540,13 @@ implements ClassVisitor,
      * Checks if the instruction at the given offset has to be replaced and
      * modifies the code attribute accordingly.
      */
-    private boolean replaceMethodInvocation(int offset, Clazz clazz, Method method, RefConstant refConstant)
+    private boolean replaceMethodInvocation(int offset, Clazz clazz, Method method, AnyMethodrefConstant anyMethodrefConstant)
     {
         for (MethodReplacement methodReplacement : methodReplacements)
         {
-            if (methodReplacement.matches(clazz, refConstant))
+            if (methodReplacement.matches(clazz, anyMethodrefConstant))
             {
-                methodReplacement.replaceInstruction(offset, clazz, method, refConstant);
+                methodReplacement.replaceInstruction(offset, clazz, method, anyMethodrefConstant);
                 classModified       = true;
                 instructionReplaced = true;
                 return true;
@@ -564,16 +564,16 @@ implements ClassVisitor,
      */
     private abstract class AbstractReplacement
     {
-        boolean isStatic(Member member)
+        boolean isStatic(Method method)
         {
-            return (member.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
+            return (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
         }
 
-        boolean isDefaultMethod(Clazz clazz, Member member)
+        boolean isDefaultMethod(Clazz clazz, Method method)
         {
             return
                 isInterface(clazz) &&
-                (member.getAccessFlags() & ClassConstants.ACC_ABSTRACT) == 0;
+                (method.getAccessFlags() & ClassConstants.ACC_ABSTRACT) == 0;
         }
 
         boolean isInterface(Clazz clazz)
@@ -682,17 +682,17 @@ implements ClassVisitor,
         }
 
 
-        boolean matches(Clazz clazz, RefConstant methodrefConstant)
+        boolean matches(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
         {
-            String className  = methodrefConstant.getClassName(clazz);
-            String methodName = methodrefConstant.getName(clazz);
-            String methodDesc = methodrefConstant.getType(clazz);
+            String className  = anyMethodrefConstant.getClassName(clazz);
+            String methodName = anyMethodrefConstant.getName(clazz);
+            String methodDesc = anyMethodrefConstant.getType(clazz);
 
             // Get the referenced class for the matching className.
             // Might be null for wildcard classNames.
             Clazz referencedMatchingClass = findReferencedClass(matchingClassName);
 
-            Clazz referencedClass = methodrefConstant.referencedClass;
+            Clazz referencedClass = anyMethodrefConstant.referencedClass;
 
             if (referencedClass == null)
             {
@@ -701,9 +701,9 @@ implements ClassVisitor,
                 return false;
             }
 
-            Member referencedMember = methodrefConstant.referencedMember;
+            Method referencedMethod = anyMethodrefConstant.referencedMethod;
 
-            if (referencedMember == null)
+            if (referencedMethod == null)
             {
                 // Might happen if the project is not setup correctly.
                 // The method to be replaced is not present.
@@ -711,7 +711,7 @@ implements ClassVisitor,
             }
 
             return classPatternMatches(className, referencedClass, referencedMatchingClass) &&
-                   methodPatternMatches(methodName, referencedClass, referencedMember)      &&
+                   methodPatternMatches(methodName, referencedClass, referencedMethod)      &&
                    descPatternMatches(methodDesc);
         }
 
@@ -723,13 +723,13 @@ implements ClassVisitor,
         }
 
 
-        private boolean methodPatternMatches(String methodName, Clazz referencedClass, Member referencedMember)
+        private boolean methodPatternMatches(String methodName, Clazz referencedClass, Method referencedMethod)
         {
             return methodNameMatcher.matches(methodName)                                                          ||
                    //  or the method is a default method and the pattern matches all default methods
-                   (matchingMethodName.equals("<default>") && isDefaultMethod(referencedClass, referencedMember)) ||
+                   (matchingMethodName.equals("<default>") && isDefaultMethod(referencedClass, referencedMethod)) ||
                    //  or the method is static and the pattern matches all static methods
-                   (matchingMethodName.equals("<static>") && isStatic(referencedMember));
+                   (matchingMethodName.equals("<static>") && isStatic(referencedMethod));
         }
 
 
@@ -739,14 +739,14 @@ implements ClassVisitor,
         }
 
 
-        void replaceInstruction(int offset, Clazz clazz, Method method, RefConstant refConstant)
+        void replaceInstruction(int offset, Clazz clazz, Method method, AnyMethodrefConstant anyMethodrefConstant)
         {
             String className  =
-                getReplacement(matchingClassName,      refConstant.getClassName(clazz), replacementClassName);
+                getReplacement(matchingClassName,      anyMethodrefConstant.getClassName(clazz), replacementClassName);
             String methodName =
-                getReplacement(matchingMethodName,     refConstant.getName(clazz),      replacementMethodName);
+                getReplacement(matchingMethodName,     anyMethodrefConstant.getName(clazz),      replacementMethodName);
             String methodDesc =
-                getDescReplacement(matchingMethodDesc, refConstant.getType(clazz),      replacementMethodDesc);
+                getDescReplacement(matchingMethodDesc, anyMethodrefConstant.getType(clazz),      replacementMethodDesc);
 
             methodDesc = replaceDescriptor(clazz, methodDesc);
 
@@ -806,9 +806,9 @@ implements ClassVisitor,
             {
                 System.out.println(String.format("Replacing instruction at offset %d: %s.%s%s -> %s.%s%s",
                                                  offset,
-                                                 refConstant.getClassName(clazz),
-                                                 refConstant.getName(clazz),
-                                                 refConstant.getType(clazz),
+                                                 anyMethodrefConstant.getClassName(clazz),
+                                                 anyMethodrefConstant.getName(clazz),
+                                                 anyMethodrefConstant.getType(clazz),
                                                  className,
                                                  methodName,
                                                  methodDesc));

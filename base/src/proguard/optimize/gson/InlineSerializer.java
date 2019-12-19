@@ -53,19 +53,17 @@ interface InlineSerializer
      * 2 jsonWriter
      * 3 optimizedJsonWriter
      *
-     * @param programClass         The domain class containing the field to
-     *                             serialize.
-     * @param programField         The field of the domain class to serialize.
-     * @param codeAttributeEditor  the code attribute editor to be used for
-     *                             injecting instructions.
-     * @param builder              the instruction sequence builder to be used
-     *                             for generating instructions.
-     * @param gsonRuntimeSettings  tracks the GSON parameters that are utilized
-     *                             in the code.
+     * @param programClass                 the domain class containing the
+     *                                     field to serialize.
+     * @param programField                 the field of the domain class to
+     *                                     serialize.
+     * @param compactCodeAttributeComposer the code attribute composer to be
+     *                                     used for generating instructions.
+     * @param gsonRuntimeSettings          tracks the GSON parameters that
+     *                                     are utilized in the code.
      */
-    void serialize(ProgramClass               programClass,
-                   ProgramField               programField,
-                   CodeAttributeEditor        codeAttributeEditor,
-                   InstructionSequenceBuilder builder,
-                   GsonRuntimeSettings        gsonRuntimeSettings);
+    void serialize(ProgramClass                 programClass,
+                   ProgramField                 programField,
+                   CompactCodeAttributeComposer compactCodeAttributeComposer,
+                   GsonRuntimeSettings          gsonRuntimeSettings);
 }

@@ -53,10 +53,10 @@ implements   AttributeVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    /*
-    private static       boolean DEBUG = true;
-    /*/
+    //*
     private static final boolean DEBUG = false;
+    /*/
+    private static       boolean DEBUG = System.getProperty("dmri") != null;
     //*/
 
     private static final int CLASS_INDEX       = InstructionSequenceMatcher.A;

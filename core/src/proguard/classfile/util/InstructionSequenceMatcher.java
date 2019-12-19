@@ -835,25 +835,24 @@ implements   InstructionVisitor,
      */
     public static void main(String[] args)
     {
-        // Create a class with a method with code.
-        SimplifiedClassEditor editor =
-            new SimplifiedClassEditor(ClassConstants.ACC_PUBLIC,
-                                      "Test",
-                                      0);
+        // Create a class with a method with some code.
+        ProgramClass programClass =
+            new ClassBuilder(ClassConstants.ACC_PUBLIC,
+                             "Test",
+                             ClassConstants.NAME_JAVA_LANG_OBJECT)
 
-        ProgramClass programClass = editor.getProgramClass();
+                .addMethod(ClassConstants.ACC_PUBLIC,
+                           "getAnswer",
+                           "()I",
+                           50,
+                           code -> code
+                               .nop()
+                               .iconst_2()
+                               .bipush(40)
+                               .iadd()
+                               .ireturn())
 
-        editor.addMethod(ClassConstants.ACC_PUBLIC,
-                         "getAnswer",
-                         "()I",
-                         0,
-                         new InstructionSequenceBuilder(programClass)
-                             .nop()
-                             .iconst_2()
-                             .bipush(40)
-                             .iadd()
-                             .ireturn()
-                             .instructions());
+                .getProgramClass();
 
         // Create a matcher.
         InstructionSequenceBuilder builder =
@@ -868,7 +867,7 @@ implements   InstructionVisitor,
             new InstructionSequenceMatcher(builder.constants(),
                                            builder.instructions());
 
-        // Find the match in the code.
+        // Find the match in the code and print it out.
         class MatchPrinter extends SimplifiedVisitor implements InstructionVisitor
         {
             public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)

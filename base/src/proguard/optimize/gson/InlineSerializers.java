@@ -47,11 +47,10 @@ class InlineSerializers
 
 
         @Override
-        public void serialize(ProgramClass               programClass,
-                              ProgramField               programField,
-                              CodeAttributeEditor        codeAttributeEditor,
-                              InstructionSequenceBuilder ____,
-                              GsonRuntimeSettings        gsonRuntimeSettings)
+        public void serialize(ProgramClass                 programClass,
+                              ProgramField                 programField,
+                              CompactCodeAttributeComposer ____,
+                              GsonRuntimeSettings          gsonRuntimeSettings)
         {
             ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .aload(OptimizedClassConstants.ToJsonLocals.THIS)
@@ -86,11 +85,10 @@ class InlineSerializers
 
 
         @Override
-        public void serialize(ProgramClass               programClass,
-                              ProgramField               programField,
-                              CodeAttributeEditor        codeAttributeEditor,
-                              InstructionSequenceBuilder ____,
-                              GsonRuntimeSettings        gsonRuntimeSettings)
+        public void serialize(ProgramClass                 programClass,
+                              ProgramField                 programField,
+                              CompactCodeAttributeComposer ____,
+                              GsonRuntimeSettings          gsonRuntimeSettings)
         {
             ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .aload(OptimizedClassConstants.ToJsonLocals.THIS)
@@ -118,19 +116,18 @@ class InlineSerializers
 
 
         @Override
-        public void serialize(ProgramClass               programClass,
-                              ProgramField               programField,
-                              CodeAttributeEditor        codeAttributeEditor,
-                              InstructionSequenceBuilder ____,
-                              GsonRuntimeSettings        gsonRuntimeSettings)
+        public void serialize(ProgramClass                 programClass,
+                              ProgramField                 programField,
+                              CompactCodeAttributeComposer ____,
+                              GsonRuntimeSettings          gsonRuntimeSettings)
         {
             ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .aload(OptimizedClassConstants.ToJsonLocals.THIS)
-                .getfield(programClass, programField);
-            ____.invokestatic(ClassConstants.NAME_JAVA_LANG_INTEGER,
+                .getfield(programClass, programField)
+                .invokestatic(ClassConstants.NAME_JAVA_LANG_INTEGER,
                               ClassConstants.METHOD_NAME_VALUE_OF,
-                              ClassConstants.METHOD_TYPE_VALUE_OF_INT);
-            ____.invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
+                              ClassConstants.METHOD_TYPE_VALUE_OF_INT)
+                .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
                                GsonClassConstants.METHOD_NAME_VALUE_NUMBER,
                                GsonClassConstants.METHOD_TYPE_VALUE_NUMBER)
                 .pop();
@@ -153,11 +150,10 @@ class InlineSerializers
 
 
         @Override
-        public void serialize(ProgramClass               programClass,
-                              ProgramField               programField,
-                              CodeAttributeEditor        codeAttributeEditor,
-                              InstructionSequenceBuilder ____,
-                              GsonRuntimeSettings        gsonRuntimeSettings)
+        public void serialize(ProgramClass                 programClass,
+                              ProgramField                 programField,
+                              CompactCodeAttributeComposer ____,
+                              GsonRuntimeSettings          gsonRuntimeSettings)
         {
             ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .aload(OptimizedClassConstants.ToJsonLocals.THIS)

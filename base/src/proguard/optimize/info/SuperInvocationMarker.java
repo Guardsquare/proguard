@@ -22,7 +22,7 @@ package proguard.optimize.info;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.constant.RefConstant;
+import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
@@ -65,11 +65,11 @@ implements   InstructionVisitor,
 
     // Implementations for ConstantVisitor.
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
         invokesSuperMethods =
-            !clazz.equals(refConstant.referencedClass) &&
-            !refConstant.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT);
+            !clazz.equals(anyMethodrefConstant.referencedClass) &&
+            !anyMethodrefConstant.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT);
     }
 
 

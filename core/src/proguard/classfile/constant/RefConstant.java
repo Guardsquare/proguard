@@ -38,15 +38,15 @@ public abstract class RefConstant extends Constant
      */
     public Clazz referencedClass;
 
-    /**
-     * An extra field optionally pointing to the referenced Member object.
-     * This field is typically filled out by the <code>{@link
-     * proguard.classfile.util.ClassReferenceInitializer
-     * ClassReferenceInitializer}</code>.
+    /*
+     * The subclasses contain the properly typed referenced
+     * member objects/
      */
-    public Member referencedMember;
 
 
+    /**
+     * Creates an uninitialized RefConstant.
+     */
     protected RefConstant()
     {
     }
@@ -116,12 +116,5 @@ public abstract class RefConstant extends Constant
     /**
      * Lets the referenced class member accept the given visitor.
      */
-    public void referencedMemberAccept(MemberVisitor memberVisitor)
-    {
-        if (referencedMember != null)
-        {
-            referencedMember.accept(referencedClass,
-                                    memberVisitor);
-        }
-    }
+    public abstract void referencedMemberAccept(MemberVisitor memberVisitor);
 }

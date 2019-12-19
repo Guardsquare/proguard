@@ -40,10 +40,10 @@ implements   ElementValueVisitor,
              InstructionVisitor,
              ConstantVisitor
 {
-    /*
-    private static       boolean DEBUG = true;
-    /*/
+    //*
     private static final boolean DEBUG = false;
+    /*/
+    private static       boolean DEBUG = System.getProperty("efri") != null;
     //*/
 
     private MemberVisitor enumFieldFinder = new AllAttributeVisitor(
@@ -136,7 +136,7 @@ implements   ElementValueVisitor,
         {
             if (enumTypeName.equals(fieldrefConstant.getType(clazz)))
             {
-                referencedEnumField = (Field)fieldrefConstant.referencedMember;
+                referencedEnumField = (Field)fieldrefConstant.referencedField;
             }
 
             enumConstantNameFound = false;

@@ -70,21 +70,21 @@ implements   InvocationUnit,
     }
 
 
-    public void setFieldClassValue(Clazz          clazz,
-                                   RefConstant    refConstant,
-                                   ReferenceValue value)
+    public void setFieldClassValue(Clazz            clazz,
+                                   FieldrefConstant fieldrefConstant,
+                                   ReferenceValue   value)
     {
         // We don't care about the new value.
     }
 
 
-    public Value getFieldClassValue(Clazz       clazz,
-                                    RefConstant refConstant,
-                                    String      type)
+    public Value getFieldClassValue(Clazz            clazz,
+                                    FieldrefConstant fieldrefConstant,
+                                    String           type)
     {
         // Try to figure out the class of the return type.
         returnTypeClass = null;
-        refConstant.referencedMemberAccept(this);
+        fieldrefConstant.referencedFieldAccept(this);
 
         return valueFactory.createValue(type,
                                         returnTypeClass,
@@ -93,21 +93,21 @@ implements   InvocationUnit,
     }
 
 
-    public void setFieldValue(Clazz       clazz,
-                              RefConstant refConstant,
-                              Value       value)
+    public void setFieldValue(Clazz            clazz,
+                              FieldrefConstant fieldrefConstant,
+                              Value            value)
     {
         // We don't care about the new field value.
     }
 
 
-    public Value getFieldValue(Clazz       clazz,
-                               RefConstant refConstant,
-                               String      type)
+    public Value getFieldValue(Clazz            clazz,
+                               FieldrefConstant fieldrefConstant,
+                               String           type)
     {
         // Try to figure out the class of the return type.
         returnTypeClass = null;
-        refConstant.referencedMemberAccept(this);
+        fieldrefConstant.referencedFieldAccept(this);
 
         return valueFactory.createValue(type,
                                         returnTypeClass,
@@ -116,10 +116,10 @@ implements   InvocationUnit,
     }
 
 
-    public void setMethodParameterValue(Clazz       clazz,
-                                        RefConstant refConstant,
-                                        int         parameterIndex,
-                                        Value       value)
+    public void setMethodParameterValue(Clazz                clazz,
+                                        AnyMethodrefConstant anyMethodrefConstant,
+                                        int                  parameterIndex,
+                                        Value                value)
     {
         // We don't care about the parameter value.
     }
@@ -151,13 +151,13 @@ implements   InvocationUnit,
     }
 
 
-    public Value getMethodReturnValue(Clazz       clazz,
-                                      RefConstant refConstant,
-                                      String      type)
+    public Value getMethodReturnValue(Clazz                clazz,
+                                      AnyMethodrefConstant anyMethodrefConstant,
+                                      String               type)
     {
         // Try to figure out the class of the return type.
         returnTypeClass = null;
-        refConstant.referencedMemberAccept(this);
+        anyMethodrefConstant.referencedMethodAccept(this);
 
         return valueFactory.createValue(type,
                                         returnTypeClass,

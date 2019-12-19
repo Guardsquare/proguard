@@ -18,7 +18,7 @@
 package proguard.classfile.kotlin;
 
 import proguard.classfile.*;
-import proguard.classfile.editor.SimplifiedClassEditor;
+import proguard.classfile.editor.ClassBuilder;
 import proguard.util.ProcessingFlags;
 
 import java.util.*;
@@ -199,12 +199,13 @@ public class KotlinConstants
 
     private static ProgramClass createDummyClass(String name)
     {
-        SimplifiedClassEditor editor = new SimplifiedClassEditor(
+        return new ClassBuilder(
             ACC_PUBLIC,
             name,
-            ProcessingFlags.DONT_OBFUSCATE | ProcessingFlags.DONT_OPTIMIZE | ProcessingFlags.DONT_SHRINK
-        );
-        editor.finishEditing();
-        return editor.getProgramClass();
+            null,
+            ProcessingFlags.DONT_OBFUSCATE |
+            ProcessingFlags.DONT_OPTIMIZE |
+            ProcessingFlags.DONT_SHRINK)
+            .getProgramClass();
     }
 }

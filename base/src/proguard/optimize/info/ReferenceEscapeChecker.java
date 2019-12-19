@@ -291,9 +291,9 @@ implements   AttributeVisitor,
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        Method referencedMethod = (Method)refConstant.referencedMember;
+        Method referencedMethod = anyMethodrefConstant.referencedMethod;
 
         // Mark reference reference values that are passed to the method.
         for (int index = 0; index < referencingPopCount; index++)
@@ -325,7 +325,7 @@ implements   AttributeVisitor,
 
         // Is the return value from the referenced method external?
         String returnType =
-            ClassUtil.internalMethodReturnType(refConstant.getType(clazz));
+            ClassUtil.internalMethodReturnType(anyMethodrefConstant.getType(clazz));
 
         if (referencedMethod == null ||
             ((ClassUtil.isInternalClassType(returnType) ||

@@ -365,16 +365,16 @@ implements   MemberVisitor,
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        Method referencedMethod = (Method)refConstant.referencedMember;
+        Method referencedMethod = anyMethodrefConstant.referencedMethod;
 
         // If the referenced method or a static initializer may modify anything,
         // so does the referencing method.
         if (referencedMethod == null ||
             modifiesAnything(referencedMethod) ||
             SideEffectClassChecker.mayHaveSideEffects(clazz,
-                                                      refConstant.referencedClass,
+                                                      anyMethodrefConstant.referencedClass,
                                                       referencedMethod))
         {
             markAnythingModified(referencingMethod);
@@ -411,7 +411,7 @@ implements   MemberVisitor,
 
             // Mark parameters of the invoking method that are passed to the
             // invoked method and escaping or modified there.
-            refConstant.referencedMemberAccept(parameterMarker);
+            anyMethodrefConstant.referencedMethodAccept(parameterMarker);
         }
     }
 

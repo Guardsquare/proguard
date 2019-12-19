@@ -21,7 +21,6 @@
 package proguard.optimize.gson;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
@@ -29,7 +28,6 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
-import proguard.util.MultiValueMap;
 
 import java.util.*;
 
@@ -57,12 +55,9 @@ implements   MemberVisitor,
     private final ClassPool             programClassPool;
     private final ClassPool             libraryClassPool;
     private final GsonRuntimeSettings   gsonRuntimeSettings;
-    private final CodeAttributeEditor   codeAttributeEditor;
     private final OptimizedJsonInfo     serializationInfo;
     private final boolean               supportExposeAnnotation;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
-
-    private InstructionSequenceBuilder ____;
 
     static
     {
@@ -87,11 +82,7 @@ implements   MemberVisitor,
      *                              added references.
      * @param libraryClassPool      the library class pool to initialize
      *                              added references.
-     * @param gsonRuntimeSettings   keeps track of all GsonBuilder
- *                                  invocations.
-     * @param codeAttributeEditor   the code editor that is used to
-     *                              inject optimized code into the domain
-     *                              classes.
+     * @param gsonRuntimeSettings   keeps track of all GsonBuilder invocations.
      * @param serializationInfo     contains information on which class
      *                              and fields need to be optimized and how.
      * @param extraDataEntryNameMap the map that keeps track of injected
@@ -100,14 +91,12 @@ implements   MemberVisitor,
     public GsonSerializationOptimizer(ClassPool             programClassPool,
                                       ClassPool             libraryClassPool,
                                       GsonRuntimeSettings   gsonRuntimeSettings,
-                                      CodeAttributeEditor   codeAttributeEditor,
                                       OptimizedJsonInfo     serializationInfo,
                                       ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool        = programClassPool;
         this.libraryClassPool        = libraryClassPool;
         this.gsonRuntimeSettings     = gsonRuntimeSettings;
-        this.codeAttributeEditor     = codeAttributeEditor;
         this.serializationInfo       = serializationInfo;
         this.supportExposeAnnotation = gsonRuntimeSettings.excludeFieldsWithoutExposeAnnotation;
         this.extraDataEntryNameMap   = extraDataEntryNameMap;
@@ -126,17 +115,14 @@ implements   MemberVisitor,
         programClass.u2accessFlags |= ClassConstants.ACC_PUBLIC;
 
         // Start adding new serialization methods.
-        SimplifiedClassEditor classEditor =
-            new SimplifiedClassEditor(programClass);
-
-        ____ = new InstructionSequenceBuilder(programClass,
-                                              programClassPool,
-                                              libraryClassPool);
+        ClassBuilder classBuilder = new ClassBuilder(programClass,
+                                                     programClassPool,
+                                                     libraryClassPool);
 
         // Add toJson$ method.
         Integer classIndex           = serializationInfo.classIndices.get(programClass.getName());
-        String  methodNameToJson     = METHOD_NAME_TO_JSON             + classIndex;
-        String  methodNameToJsonBody = METHOD_NAME_TO_JSON_BODY        + classIndex;
+        String  methodNameToJson     = METHOD_NAME_TO_JSON      + classIndex;
+        String  methodNameToJsonBody = METHOD_NAME_TO_JSON_BODY + classIndex;
 
         if (DEBUG)
         {
@@ -146,58 +132,38 @@ implements   MemberVisitor,
                 " method to " + programClass.getName());
         }
 
-        ProgramMethod toJsonMethod = classEditor.addMethod(
+        classBuilder.addMethod(
             ClassConstants.ACC_PUBLIC | ClassConstants.ACC_SYNTHETIC,
             methodNameToJson,
             METHOD_TYPE_TO_JSON,
-            ____.return_()
-                .instructions());
+            20,
+            code -> code
 
-        toJsonMethod.accept(programClass,
-                            new ProgramMemberOptimizationInfoSetter());
+                // Begin Json object.
+                .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
+                .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
+                               GsonClassConstants.METHOD_NAME_WRITER_BEGIN_OBJECT,
+                               GsonClassConstants.METHOD_TYPE_WRITER_BEGIN_OBJECT)
 
-        // Create new CodeAttributeEditor for the toJson$ method.
-        codeAttributeEditor.reset(1);
+                // Invoke toJsonBody$.
+                .aload(OptimizedClassConstants.ToJsonLocals.THIS)
+                .aload(OptimizedClassConstants.ToJsonLocals.GSON)
+                .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
+                .aload(OptimizedClassConstants.ToJsonLocals.OPTIMIZED_JSON_WRITER)
+                .invokevirtual(programClass.getName(),
+                               methodNameToJsonBody,
+                               METHOD_TYPE_TO_JSON_BODY)
 
-        // Begin Json object.
-        ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
-            .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
-                           GsonClassConstants.METHOD_NAME_WRITER_BEGIN_OBJECT,
-                           GsonClassConstants.METHOD_TYPE_WRITER_BEGIN_OBJECT);
+                // End Json object.
+                .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
+                .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
+                               GsonClassConstants.METHOD_NAME_WRITER_END_OBJECT,
+                               GsonClassConstants.METHOD_TYPE_WRITER_END_OBJECT)
+                .return_(),
 
-        // Invoke toJsonBody$.
-        ____.aload(OptimizedClassConstants.ToJsonLocals.THIS)
-            .aload(OptimizedClassConstants.ToJsonLocals.GSON)
-            .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
-            .aload(OptimizedClassConstants.ToJsonLocals.OPTIMIZED_JSON_WRITER)
-            .invokevirtual(programClass.getName(),
-                           methodNameToJsonBody,
-                           METHOD_TYPE_TO_JSON_BODY);
+            // Add optimization info to the new method.
+            new ProgramMemberOptimizationInfoSetter());
 
-        // End Json object.
-        ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
-            .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
-                           GsonClassConstants.METHOD_NAME_WRITER_END_OBJECT,
-                           GsonClassConstants.METHOD_TYPE_WRITER_END_OBJECT)
-            .return_();
-
-        // Add all toJson$ instructions.
-        codeAttributeEditor.replaceInstruction(0, ____.instructions());
-        toJsonMethod.attributesAccept(programClass, codeAttributeEditor);
-
-        addToJsonBodyMethod(programClass, classEditor);
-
-        programClass.accept(new MethodLinker());
-
-        classEditor.finishEditing(programClassPool,
-                                  libraryClassPool);
-    }
-
-
-    private void addToJsonBodyMethod(ProgramClass          programClass,
-                                     SimplifiedClassEditor classEditor)
-    {
-        Integer classIndex = serializationInfo.classIndices.get(programClass.getName());
         String  methodName = METHOD_NAME_TO_JSON_BODY + classIndex;
 
         // Add toJsonBody$ method.
@@ -209,71 +175,64 @@ implements   MemberVisitor,
                 " method to " + programClass.getName());
         }
 
-
-        ProgramMethod toJsonBodyMethod = classEditor.addMethod(
+        classBuilder.addMethod(
             ClassConstants.ACC_PROTECTED | ClassConstants.ACC_SYNTHETIC,
             methodName,
             METHOD_TYPE_TO_JSON_BODY,
-            ____.return_()
-                .instructions());
+            50,
+            new ToJsonFieldCodeBuilder(),
 
-        // Add optimization info to new method.
-        toJsonBodyMethod.accept(programClass,
-                                new ProgramMemberOptimizationInfoSetter());
+            // Add optimization info to the new method.
+            new ProgramMemberOptimizationInfoSetter());
 
-        // Edit code attribute of fromJson$.
-        toJsonBodyMethod.attributesAccept(programClass,
-                                        new ToJsonCodeAttributeVisitor());
+        // Link related methods in the class hierarchy.
+        programClass.accept(new MethodLinker());
     }
 
 
-    private class ToJsonCodeAttributeVisitor
+    private class ToJsonFieldCodeBuilder
     extends       SimplifiedVisitor
-    implements    AttributeVisitor,
+    implements    ClassBuilder.CodeBuilder,
                   MemberVisitor
     {
-        private int valueLocalIndex;
+        private CompactCodeAttributeComposer ____;
+        private int                          valueLocalIndex;
 
-        // Implementations for AttributeVisitor.
+        // Implementations for ClassBuilder.CodeBuilder.
 
-        @Override
-        public void visitCodeAttribute(Clazz         clazz,
-                                       Method        method,
-                                       CodeAttribute codeAttribute)
+        public void compose(CompactCodeAttributeComposer ____)
         {
-            // Create new CodeAttributeEditor for the toJsonBody$ method.
-            codeAttributeEditor.reset(1);
+            // Remember the composer.
+            this.____ = ____;
+
+            Clazz clazz = ____.getTargetClass();
 
             // Assign locals for nextFieldIndex and isNull.
-            valueLocalIndex = codeAttribute.u2maxLocals;
+            valueLocalIndex = 0;
 
             // Apply non static member visitor to all fields to visit.
             clazz.fieldsAccept(new MemberAccessFilter(0,
-                                                             ClassConstants.ACC_SYNTHETIC |
-                                                             ClassConstants.ACC_STATIC,
-                                                             this));
+                                                      ClassConstants.ACC_SYNTHETIC |
+                                                      ClassConstants.ACC_STATIC,
+                                                      this));
 
             // Call the superclass toJsonBody$ if there is one.
-            if (!clazz.getSuperClass().getName().equals(ClassConstants.NAME_JAVA_LANG_OBJECT))
+            if (!clazz.getSuperName().equals(ClassConstants.NAME_JAVA_LANG_OBJECT))
             {
                 Integer superClassIndex =
-                    serializationInfo.classIndices.get(clazz.getSuperClass().getName());
+                    serializationInfo.classIndices.get(clazz.getSuperName());
                 String superMethodNameToJsonBody = METHOD_NAME_TO_JSON_BODY + superClassIndex;
 
                 ____.aload(OptimizedClassConstants.ToJsonLocals.THIS)
                     .aload(OptimizedClassConstants.ToJsonLocals.GSON)
                     .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                     .aload(OptimizedClassConstants.ToJsonLocals.OPTIMIZED_JSON_WRITER)
-                    .invokevirtual(clazz.getSuperClass().getName(),
+                    .invokevirtual(clazz.getSuperName(),
                                    superMethodNameToJsonBody,
                                    METHOD_TYPE_TO_JSON_BODY);
             }
 
             ____.return_();
-
-            // Add all toJsonBody$ instructions.
-            codeAttributeEditor.replaceInstruction(0, ____.instructions());
-            codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
         }
 
 
@@ -296,15 +255,17 @@ implements   MemberVisitor,
                 boolean retrieveAdapterByTypeToken = false;
 
                 // Check for recursion first if it is an object
-                CodeAttributeEditor.Label end = codeAttributeEditor.label();
+                CompactCodeAttributeComposer.Label end = ____.createLabel();
+
                 if(ClassUtil.isInternalClassType(fieldDescriptor))
                 {
-                    CodeAttributeEditor.Label noRecursion = codeAttributeEditor.label();
+                    CompactCodeAttributeComposer.Label noRecursion = ____.createLabel();
+
                     ____.aload(OptimizedClassConstants.ToJsonLocals.THIS)
                         .aload(OptimizedClassConstants.ToJsonLocals.THIS)
                         .getfield(programClass, programField)
-                        .ifacmpne(noRecursion.offset())
-                        .goto_(end.offset())
+                        .ifacmpne(noRecursion)
+                        .goto_(end)
                         .label(noRecursion);
                 }
 
@@ -314,7 +275,7 @@ implements   MemberVisitor,
                     ____.aload(ToJsonLocals.GSON)
                         .getfield(GsonClassConstants.NAME_GSON,     FIELD_NAME_EXCLUDER,       FIELD_TYPE_EXCLUDER)
                         .getfield(GsonClassConstants.NAME_EXCLUDER, FIELD_NAME_REQUIRE_EXPOSE, FIELD_TYPE_REQUIRE_EXPOSE)
-                        .ifne(end.offset());
+                        .ifne(end);
                 }
 
 
@@ -334,7 +295,6 @@ implements   MemberVisitor,
                 {
                     inlineSerializer.serialize(programClass,
                                                programField,
-                                               codeAttributeEditor,
                                                ____,
                                                gsonRuntimeSettings);
                 }
@@ -372,15 +332,25 @@ implements   MemberVisitor,
                             }
                             else
                             {
-                                // Add type token sub-class that has the appropriate type parameter.
+                                // Create a new token sub-class that has the appropriate type parameter.
                                 ProgramClass typeTokenClass =
                                     new TypeTokenClassBuilder(programClass,
                                                               programField,
                                                               signatureAttributeCollector.getFieldSignature())
-                                        .build(programClassPool);
+                                        .build();
+
+                                // Add it to the class pool.
                                 programClassPool.addClass(typeTokenClass);
-                                typeTokenClass.accept(new ClassReferenceInitializer(programClassPool,
-                                                                                    libraryClassPool));
+
+                                // Initialize it.
+                                typeTokenClass.accept(
+                                    new MultiClassVisitor(
+                                        new ClassSuperHierarchyInitializer(programClassPool, libraryClassPool),
+                                        new ClassSubHierarchyInitializer(),
+                                        new ClassReferenceInitializer(programClassPool, libraryClassPool)
+                                    ));
+
+                                // Attach it to the original class.
                                 extraDataEntryNameMap.addExtraClassToClass(programClass, typeTokenClass);
 
                                 // Instantiate type token.

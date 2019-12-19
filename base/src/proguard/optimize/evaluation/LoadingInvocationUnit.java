@@ -21,7 +21,7 @@
 package proguard.optimize.evaluation;
 
 import proguard.classfile.*;
-import proguard.classfile.constant.RefConstant;
+import proguard.classfile.constant.*;
 import proguard.evaluation.BasicInvocationUnit;
 import proguard.evaluation.value.*;
 
@@ -69,17 +69,17 @@ extends      BasicInvocationUnit
     // Implementations for BasicInvocationUnit.
 
     public Value getFieldClassValue(Clazz       clazz,
-                                    RefConstant refConstant,
+                                    FieldrefConstant fieldrefConstant,
                                     String      type)
     {
         if (loadFieldValues)
         {
             // Do we know this field?
-            Member referencedMember = refConstant.referencedMember;
-            if (referencedMember != null)
+            Field referencedField = fieldrefConstant.referencedField;
+            if (referencedField != null)
             {
                 // Retrieve the stored field class value.
-                ReferenceValue value = StoringInvocationUnit.getFieldClassValue((Field)referencedMember);
+                ReferenceValue value = StoringInvocationUnit.getFieldClassValue((Field)referencedField);
                 if (value != null)
                 {
                     return value;
@@ -87,22 +87,22 @@ extends      BasicInvocationUnit
             }
         }
 
-        return super.getFieldClassValue(clazz, refConstant, type);
+        return super.getFieldClassValue(clazz, fieldrefConstant, type);
     }
 
 
-    public Value getFieldValue(Clazz       clazz,
-                               RefConstant refConstant,
-                               String      type)
+    public Value getFieldValue(Clazz            clazz,
+                               FieldrefConstant fieldrefConstant,
+                               String           type)
     {
         if (loadFieldValues)
         {
             // Do we know this field?
-            Member referencedMember = refConstant.referencedMember;
-            if (referencedMember != null)
+            Field referencedField = fieldrefConstant.referencedField;
+            if (referencedField != null)
             {
                 // Retrieve the stored field value.
-                Value value = StoringInvocationUnit.getFieldValue((Field)referencedMember);
+                Value value = StoringInvocationUnit.getFieldValue((Field)referencedField);
                 if (value != null)
                 {
                     return value;
@@ -110,7 +110,7 @@ extends      BasicInvocationUnit
             }
         }
 
-        return super.getFieldValue(clazz, refConstant, type);
+        return super.getFieldValue(clazz, fieldrefConstant, type);
     }
 
 
@@ -138,18 +138,18 @@ extends      BasicInvocationUnit
     }
 
 
-    public Value getMethodReturnValue(Clazz       clazz,
-                                      RefConstant refConstant,
-                                      String      type)
+    public Value getMethodReturnValue(Clazz                clazz,
+                                      AnyMethodrefConstant anyMethodrefConstant,
+                                      String               type)
     {
         if (loadMethodReturnValues)
         {
             // Do we know this method?
-            Member referencedMember = refConstant.referencedMember;
-            if (referencedMember != null)
+            Method referencedMethod = anyMethodrefConstant.referencedMethod;
+            if (referencedMethod != null)
             {
                 // Retrieve the stored method return value.
-                Value value = StoringInvocationUnit.getMethodReturnValue((Method)referencedMember);
+                Value value = StoringInvocationUnit.getMethodReturnValue((Method)referencedMethod);
                 if (value != null)
                 {
                     return value;
@@ -158,7 +158,7 @@ extends      BasicInvocationUnit
         }
 
         return super.getMethodReturnValue(clazz,
-                                          refConstant,
+                                          anyMethodrefConstant,
                                           type);
     }
 }

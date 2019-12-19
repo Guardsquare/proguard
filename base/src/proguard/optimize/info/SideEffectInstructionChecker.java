@@ -281,11 +281,11 @@ implements   InstructionVisitor,
         hasSideEffects = true;
 
         // Check the referenced field, if known.
-        fieldrefConstant.referencedMemberAccept(this);
+        fieldrefConstant.referencedFieldAccept(this);
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
         // Pass the referencing class.
         referencingClass = clazz;
@@ -294,7 +294,7 @@ implements   InstructionVisitor,
         hasSideEffects = true;
 
         // Check the referenced method, if known.
-        refConstant.referencedMemberAccept(this);
+        anyMethodrefConstant.referencedMethodAccept(this);
     }
 
 

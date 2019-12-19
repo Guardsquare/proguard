@@ -463,14 +463,14 @@ public class ConstantPoolEditor
      * class and field.
      * @return the constant pool index of the FieldrefConstant.
      */
-    public int addFieldrefConstant(Clazz  referencedClass,
-                                   Member referencedMember)
+    public int addFieldrefConstant(Clazz referencedClass,
+                                   Field referencedField)
     {
         return addFieldrefConstant(referencedClass.getName(),
-                                   referencedMember.getName(referencedClass),
-                                   referencedMember.getDescriptor(referencedClass),
+                                   referencedField.getName(referencedClass),
+                                   referencedField.getDescriptor(referencedClass),
                                    referencedClass,
-                                   referencedMember);
+                                   referencedField);
     }
 
 
@@ -483,12 +483,12 @@ public class ConstantPoolEditor
                                    String name,
                                    String descriptor,
                                    Clazz  referencedClass,
-                                   Member referencedMember)
+                                   Field  referencedField)
     {
         return addFieldrefConstant(className,
                                    addNameAndTypeConstant(name, descriptor),
                                    referencedClass,
-                                   referencedMember);
+                                   referencedField);
     }
 
 
@@ -500,12 +500,12 @@ public class ConstantPoolEditor
     public int addFieldrefConstant(String className,
                                    int    nameAndTypeIndex,
                                    Clazz  referencedClass,
-                                   Member referencedMember)
+                                   Field  referencedField)
     {
         return addFieldrefConstant(addClassConstant(className, referencedClass),
                                    nameAndTypeIndex,
                                    referencedClass,
-                                   referencedMember);
+                                   referencedField);
     }
 
 
@@ -518,12 +518,12 @@ public class ConstantPoolEditor
                                    String name,
                                    String descriptor,
                                    Clazz  referencedClass,
-                                   Member referencedMember)
+                                   Field  referencedField)
     {
         return addFieldrefConstant(classIndex,
                                    addNameAndTypeConstant(name, descriptor),
                                    referencedClass,
-                                   referencedMember);
+                                   referencedField);
     }
 
 
@@ -533,10 +533,10 @@ public class ConstantPoolEditor
      * index.
      * @return the constant pool index of the FieldrefConstant.
      */
-    public int addFieldrefConstant(int    classIndex,
-                                   int    nameAndTypeIndex,
-                                   Clazz  referencedClass,
-                                   Member referencedMember)
+    public int addFieldrefConstant(int   classIndex,
+                                   int   nameAndTypeIndex,
+                                   Clazz referencedClass,
+                                   Field referencedField)
     {
         int        constantPoolCount = targetClass.u2constantPoolCount;
         Constant[] constantPool      = targetClass.constantPool;
@@ -561,7 +561,7 @@ public class ConstantPoolEditor
         return addConstant(new FieldrefConstant(classIndex,
                                                 nameAndTypeIndex,
                                                 referencedClass,
-                                                referencedMember));
+                                                referencedField));
     }
 
 
@@ -574,12 +574,12 @@ public class ConstantPoolEditor
                                              String name,
                                              String descriptor,
                                              Clazz  referencedClass,
-                                             Member referencedMember)
+                                             Method referencedMethod)
     {
         return addInterfaceMethodrefConstant(className,
                                              addNameAndTypeConstant(name, descriptor),
                                              referencedClass,
-                                             referencedMember);
+                                             referencedMethod);
     }
 
 
@@ -591,12 +591,12 @@ public class ConstantPoolEditor
     public int addInterfaceMethodrefConstant(String className,
                                              int    nameAndTypeIndex,
                                              Clazz  referencedClass,
-                                             Member referencedMember)
+                                             Method referencedMethod)
     {
         return addInterfaceMethodrefConstant(addClassConstant(className, referencedClass),
                                              nameAndTypeIndex,
                                              referencedClass,
-                                             referencedMember);
+                                             referencedMethod);
     }
 
 
@@ -606,13 +606,13 @@ public class ConstantPoolEditor
      * @return the constant pool index of the InterfaceMethodrefConstant.
      */
     public int addInterfaceMethodrefConstant(Clazz  referencedClass,
-                                             Member referencedMember)
+                                             Method referencedMethod)
     {
         return addInterfaceMethodrefConstant(referencedClass.getName(),
-                                             referencedMember.getName(referencedClass),
-                                             referencedMember.getDescriptor(referencedClass),
+                                             referencedMethod.getName(referencedClass),
+                                             referencedMethod.getDescriptor(referencedClass),
                                              referencedClass,
-                                             referencedMember);
+                                             referencedMethod);
     }
 
 
@@ -625,12 +625,12 @@ public class ConstantPoolEditor
                                              String name,
                                              String descriptor,
                                              Clazz  referencedClass,
-                                             Member referencedMember)
+                                             Method referencedMethod)
     {
         return addInterfaceMethodrefConstant(classIndex,
                                              addNameAndTypeConstant(name, descriptor),
                                              referencedClass,
-                                             referencedMember);
+                                             referencedMethod);
     }
 
 
@@ -643,7 +643,7 @@ public class ConstantPoolEditor
     public int addInterfaceMethodrefConstant(int    classIndex,
                                              int    nameAndTypeIndex,
                                              Clazz  referencedClass,
-                                             Member referencedMember)
+                                             Method referencedMethod)
     {
         int        constantPoolCount = targetClass.u2constantPoolCount;
         Constant[] constantPool      = targetClass.constantPool;
@@ -668,7 +668,7 @@ public class ConstantPoolEditor
         return addConstant(new InterfaceMethodrefConstant(classIndex,
                                                           nameAndTypeIndex,
                                                           referencedClass,
-                                                          referencedMember));
+                                                          referencedMethod));
     }
 
 
@@ -678,13 +678,13 @@ public class ConstantPoolEditor
      * @return the constant pool index of the MethodrefConstant.
      */
     public int addMethodrefConstant(Clazz  referencedClass,
-                                    Member referencedMember)
+                                    Method referencedMethod)
     {
         return addMethodrefConstant(referencedClass.getName(),
-                                    referencedMember.getName(referencedClass),
-                                    referencedMember.getDescriptor(referencedClass),
+                                    referencedMethod.getName(referencedClass),
+                                    referencedMethod.getDescriptor(referencedClass),
                                     referencedClass,
-                                    referencedMember);
+                                    referencedMethod);
     }
 
 
@@ -697,12 +697,12 @@ public class ConstantPoolEditor
                                     String name,
                                     String descriptor,
                                     Clazz  referencedClass,
-                                    Member referencedMember)
+                                    Method referencedMethod)
     {
         return addMethodrefConstant(className,
                                     addNameAndTypeConstant(name, descriptor),
                                     referencedClass,
-                                    referencedMember);
+                                    referencedMethod);
     }
 
 
@@ -714,12 +714,12 @@ public class ConstantPoolEditor
     public int addMethodrefConstant(String className,
                                     int    nameAndTypeIndex,
                                     Clazz  referencedClass,
-                                    Member referencedMember)
+                                    Method referencedMethod)
     {
         return addMethodrefConstant(addClassConstant(className, referencedClass),
                                     nameAndTypeIndex,
                                     referencedClass,
-                                    referencedMember);
+                                    referencedMethod);
     }
 
 
@@ -732,12 +732,12 @@ public class ConstantPoolEditor
                                     String name,
                                     String descriptor,
                                     Clazz  referencedClass,
-                                    Member referencedMember)
+                                    Method referencedMethod)
     {
         return addMethodrefConstant(classIndex,
                                     addNameAndTypeConstant(name, descriptor),
                                     referencedClass,
-                                    referencedMember);
+                                    referencedMethod);
     }
 
 
@@ -750,7 +750,7 @@ public class ConstantPoolEditor
     public int addMethodrefConstant(int    classIndex,
                                     int    nameAndTypeIndex,
                                     Clazz  referencedClass,
-                                    Member referencedMember)
+                                    Method referencedMethod)
     {
         int        constantPoolCount = targetClass.u2constantPoolCount;
         Constant[] constantPool      = targetClass.constantPool;
@@ -775,7 +775,7 @@ public class ConstantPoolEditor
         return addConstant(new MethodrefConstant(classIndex,
                                                  nameAndTypeIndex,
                                                  referencedClass,
-                                                 referencedMember));
+                                                 referencedMethod));
     }
 
 

@@ -213,31 +213,61 @@ implements   ClassVisitor,
     }
 
 
-    public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
-        Clazz referencedClass    = refConstant.referencedClass;
+        Clazz referencedClass    = fieldrefConstant.referencedClass;
         Clazz newReferencedClass = updateReferencedClass(referencedClass);
         if (referencedClass != newReferencedClass)
         {
             if (DEBUG)
             {
                 System.out.println("TargetClassChanger:");
-                System.out.println("  ["+clazz.getName()+"] changing reference from ["+refConstant.referencedClass+"."+refConstant.referencedMember.getName(refConstant.referencedClass)+refConstant.referencedMember.getDescriptor(refConstant.referencedClass)+"]");
+                System.out.println("  ["+clazz.getName()+"] changing reference from ["+fieldrefConstant.referencedClass+"."+fieldrefConstant.referencedField.getName(fieldrefConstant.referencedClass)+fieldrefConstant.referencedField.getDescriptor(fieldrefConstant.referencedClass)+"]");
             }
 
             // Change the referenced class.
-            refConstant.referencedClass  = newReferencedClass;
+            fieldrefConstant.referencedClass  = newReferencedClass;
 
             // Change the referenced class member.
-            refConstant.referencedMember =
-                updateReferencedMember(refConstant.referencedMember,
-                                       refConstant.getName(clazz),
-                                       refConstant.getType(clazz),
+            fieldrefConstant.referencedField =
+                updateReferencedField(fieldrefConstant.referencedField,
+                                      fieldrefConstant.getName(clazz),
+                                      fieldrefConstant.getType(clazz),
+                                      newReferencedClass);
+
+            if (DEBUG)
+            {
+                System.out.println("  ["+clazz.getName()+"]                    to   ["+fieldrefConstant.referencedClass+"."+fieldrefConstant.referencedField.getName(fieldrefConstant.referencedClass)+fieldrefConstant.referencedField.getDescriptor(fieldrefConstant.referencedClass)+"]");
+            }
+        }
+    }
+
+
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
+    {
+        Clazz referencedClass    = anyMethodrefConstant.referencedClass;
+        Clazz newReferencedClass = updateReferencedClass(referencedClass);
+        if (referencedClass != newReferencedClass)
+        {
+            if (DEBUG)
+            {
+                System.out.println("TargetClassChanger:");
+                System.out.println("  ["+clazz.getName()+"] changing reference from ["+anyMethodrefConstant.referencedClass+"."+anyMethodrefConstant.referencedMethod.getName(anyMethodrefConstant.referencedClass)+anyMethodrefConstant.referencedMethod.getDescriptor(anyMethodrefConstant.referencedClass)+"]");
+            }
+
+            // Change the referenced class.
+            anyMethodrefConstant.referencedClass  = newReferencedClass;
+
+            // Change the referenced class member.
+            anyMethodrefConstant.referencedMethod =
+                updateReferencedMethod(anyMethodrefConstant.referencedMethod,
+                                       anyMethodrefConstant.getName(clazz),
+                                       anyMethodrefConstant.getType(clazz),
                                        newReferencedClass);
 
             if (DEBUG)
             {
-                System.out.println("  ["+clazz.getName()+"]                    to   ["+refConstant.referencedClass+"."+refConstant.referencedMember.getName(refConstant.referencedClass)+refConstant.referencedMember.getDescriptor(refConstant.referencedClass)+"]");
+                System.out.println("  ["+clazz.getName()+"]                    to   ["+anyMethodrefConstant.referencedClass+"."+anyMethodrefConstant.referencedMethod.getName(anyMethodrefConstant.referencedClass)+anyMethodrefConstant.referencedMethod.getDescriptor(anyMethodrefConstant.referencedClass)+"]");
             }
         }
     }
@@ -355,10 +385,10 @@ implements   ClassVisitor,
 
             // Change the referenced method.
             elementValue.referencedMethod =
-                (Method)updateReferencedMember(elementValue.referencedMethod,
-                                               elementValue.getMethodName(clazz),
-                                               null,
-                                               newReferencedClass);
+                updateReferencedMethod(elementValue.referencedMethod,
+                                       elementValue.getMethodName(clazz),
+                                       null,
+                                       newReferencedClass);
         }
     }
 
@@ -475,14 +505,50 @@ implements   ClassVisitor,
                                           String type,
                                           Clazz  newReferencedClass)
     {
-        if (referencedMember == null)
+        return referencedMember instanceof  Field ?
+            updateReferencedField((Field)referencedMember,
+                                  name,
+                                  type,
+                                  newReferencedClass) :
+            updateReferencedMethod((Method)referencedMember,
+                                   name,
+                                   type,
+                                   newReferencedClass);
+    }
+
+
+
+    /**
+     * Returns the retargeted field of the given field.
+     */
+    private Field updateReferencedField(Field  referencedField,
+                                        String name,
+                                        String type,
+                                        Clazz  newReferencedClass)
+    {
+        if (referencedField == null)
         {
             return null;
         }
 
-        return referencedMember instanceof Field ?
-            (Member)newReferencedClass.findField(name, type) :
-            (Member)newReferencedClass.findMethod(name, type);
+        return newReferencedClass.findField(name, type);
+    }
+
+
+    /**
+     * Returns the retargeted method of the given method.
+     */
+    private Method updateReferencedMethod(Method referencedMethod,
+                                          String name,
+                                          String type,
+                                          Clazz  newReferencedClass)
+    {
+        if (referencedMethod == null)
+        {
+            return null;
+        }
+
+        return newReferencedClass.findMethod(name, type);
     }
 
 

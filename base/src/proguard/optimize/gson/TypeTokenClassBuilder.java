@@ -62,42 +62,38 @@ class TypeTokenClassBuilder
      * Builds and returns a new TypeToken subclass that contains all necessary
      * type information in its signature.
      *
-     * @param programClassPool the program class pool used to look up class
-     *                         references.
      * @return the TypeToken class with the correct signature.
      */
-    public ProgramClass build(ClassPool programClassPool)
+    public ProgramClass build()
     {
         String typeTokenClassName = programClass.getName() +
                                     programField.getName(programClass) +
                                     "TypeToken";
 
         // Create sub-class of TypeToken with default constructor.
-        SimplifiedClassEditor classEditor =
-            new SimplifiedClassEditor(ClassConstants.ACC_PUBLIC,
-                                      typeTokenClassName,
-                                      GsonClassConstants.NAME_TYPE_TOKEN,
-                                      0);
-        classEditor.addMethod(ACC_PUBLIC,
-                              ClassConstants.METHOD_NAME_INIT,
-                              ClassConstants.METHOD_TYPE_INIT,
-                              10)
-                   .aload_0()
-                   .invokespecial(GsonClassConstants.NAME_TYPE_TOKEN,
-                                  ClassConstants.METHOD_NAME_INIT,
-                                  ClassConstants.METHOD_TYPE_INIT)
-                   .return_();
-
-        classEditor.finishEditing();
-
-        ProgramClass subClass = classEditor.getProgramClass();
-        subClass.accept(new ProgramClassOptimizationInfoSetter(true));
-        programClassPool.classAccept(GsonClassConstants.NAME_TYPE_TOKEN,
-                                     new SubclassAdder(subClass));
-
         // Class version 1.5 is required to make the Java runtime even consider
         // the Signature attribute.
-        subClass.u4version = CLASS_VERSION_1_5;
+        ProgramClass subClass = new ClassBuilder(
+            CLASS_VERSION_1_5,
+            ClassConstants.ACC_PUBLIC,
+            typeTokenClassName,
+            GsonClassConstants.NAME_TYPE_TOKEN)
+
+            .addMethod(
+                ACC_PUBLIC,
+                ClassConstants.METHOD_NAME_INIT,
+                ClassConstants.METHOD_TYPE_INIT,
+                10,
+                code -> code
+                    .aload_0()
+                    .invokespecial(GsonClassConstants.NAME_TYPE_TOKEN,
+                                   ClassConstants.METHOD_NAME_INIT,
+                                   ClassConstants.METHOD_TYPE_INIT)
+                    .return_())
+
+            .getProgramClass();
+
+        subClass.accept(new ProgramClassOptimizationInfoSetter(true));
 
         // Add signature attribute with full generic type.
         ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor(subClass);

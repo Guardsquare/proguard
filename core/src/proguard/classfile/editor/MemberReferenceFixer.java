@@ -132,21 +132,21 @@ implements   ClassVisitor,
     public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
         // Do we know the referenced field?
-        Member referencedMember = fieldrefConstant.referencedMember;
-        if (referencedMember != null)
+        Field referencedField = fieldrefConstant.referencedField;
+        if (referencedField != null)
         {
             Clazz referencedClass = fieldrefConstant.referencedClass;
 
             // Does it have a new name or type?
-            String newName = referencedMember.getName(referencedClass);
-            String newType = referencedMember.getDescriptor(referencedClass);
+            String newName = referencedField.getName(referencedClass);
+            String newType = referencedField.getDescriptor(referencedClass);
 
             if (!fieldrefConstant.getName(clazz).equals(newName) ||
                 !fieldrefConstant.getType(clazz).equals(newType))
             {
                 if (DEBUG)
                 {
-                    debug(clazz, fieldrefConstant, referencedClass, referencedMember);
+                    debug(clazz, fieldrefConstant, referencedClass, referencedField);
                 }
 
                 // Update the name and type index.
@@ -160,21 +160,21 @@ implements   ClassVisitor,
     public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant)
     {
         // Do we know the referenced interface method?
-        Member referencedMember = interfaceMethodrefConstant.referencedMember;
-        if (referencedMember != null)
+        Method referencedMethod = interfaceMethodrefConstant.referencedMethod;
+        if (referencedMethod != null)
         {
             Clazz referencedClass = interfaceMethodrefConstant.referencedClass;
 
             // Does it have a new name or type?
-            String newName = referencedMember.getName(referencedClass);
-            String newType = referencedMember.getDescriptor(referencedClass);
+            String newName = referencedMethod.getName(referencedClass);
+            String newType = referencedMethod.getDescriptor(referencedClass);
 
             if (!interfaceMethodrefConstant.getName(clazz).equals(newName) ||
                 !interfaceMethodrefConstant.getType(clazz).equals(newType))
             {
                 if (DEBUG)
                 {
-                    debug(clazz, interfaceMethodrefConstant, referencedClass, referencedMember);
+                    debug(clazz, interfaceMethodrefConstant, referencedClass, referencedMethod);
                 }
 
                 // Update the name and type index.
@@ -207,7 +207,7 @@ implements   ClassVisitor,
                     new MethodrefConstant(interfaceMethodrefConstant.u2classIndex,
                                           interfaceMethodrefConstant.u2nameAndTypeIndex,
                                           referencedClass,
-                                          referencedMember);
+                                          referencedMethod);
             }
         }
     }
@@ -216,21 +216,21 @@ implements   ClassVisitor,
     public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant)
     {
         // Do we know the referenced method?
-        Member referencedMember = methodrefConstant.referencedMember;
-        if (referencedMember != null)
+        Method referencedMethod = methodrefConstant.referencedMethod;
+        if (referencedMethod != null)
         {
             Clazz referencedClass = methodrefConstant.referencedClass;
 
             // Does it have a new name or type?
-            String newName = referencedMember.getName(referencedClass);
-            String newType = referencedMember.getDescriptor(referencedClass);
+            String newName = referencedMethod.getName(referencedClass);
+            String newType = referencedMethod.getDescriptor(referencedClass);
 
             if (!methodrefConstant.getName(clazz).equals(newName) ||
                 !methodrefConstant.getType(clazz).equals(newType))
             {
                 if (DEBUG)
                 {
-                    debug(clazz, methodrefConstant, referencedClass, referencedMember);
+                    debug(clazz, methodrefConstant, referencedClass, referencedMethod);
                 }
 
                 // Update the name and type index.
@@ -263,7 +263,7 @@ implements   ClassVisitor,
                     new InterfaceMethodrefConstant(methodrefConstant.u2classIndex,
                                                    methodrefConstant.u2nameAndTypeIndex,
                                                    referencedClass,
-                                                   referencedMember);
+                                                   referencedMethod);
             }
         }
     }

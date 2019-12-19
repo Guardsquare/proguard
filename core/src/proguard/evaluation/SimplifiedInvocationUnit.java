@@ -176,9 +176,9 @@ implements            InvocationUnit,
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant methodrefConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        String type = methodrefConstant.getType(clazz);
+        String type = anyMethodrefConstant.getType(clazz);
 
         // Count the number of parameters.
         int parameterCount = ClassUtil.internalMethodParameterCount(type, isStatic);
@@ -186,14 +186,14 @@ implements            InvocationUnit,
         // Pop the parameters and the class reference, in reverse order.
         for (int parameterIndex = parameterCount-1; parameterIndex >= 0; parameterIndex--)
         {
-            setMethodParameterValue(clazz, methodrefConstant, parameterIndex, stack.pop());
+            setMethodParameterValue(clazz, anyMethodrefConstant, parameterIndex, stack.pop());
         }
 
         // Push the return value, if applicable.
         String returnType = ClassUtil.internalMethodReturnType(type);
         if (returnType.charAt(0) != ClassConstants.TYPE_VOID)
         {
-            stack.push(getMethodReturnValue(clazz, methodrefConstant, returnType));
+            stack.push(getMethodReturnValue(clazz, anyMethodrefConstant, returnType));
         }
     }
 
@@ -230,42 +230,42 @@ implements            InvocationUnit,
     /**
      * Sets the class through which the specified field is accessed.
      */
-    public abstract void setFieldClassValue(Clazz          clazz,
-                                            RefConstant    refConstant,
-                                            ReferenceValue value);
+    public abstract void setFieldClassValue(Clazz            clazz,
+                                            FieldrefConstant fieldrefConstant,
+                                            ReferenceValue   value);
 
 
     /**
      * Returns the class though which the specified field is accessed.
      */
-    public abstract Value getFieldClassValue(Clazz       clazz,
-                                             RefConstant refConstant,
-                                             String      type);
+    public abstract Value getFieldClassValue(Clazz            clazz,
+                                             FieldrefConstant fieldrefConstant,
+                                             String           type);
 
 
     /**
      * Sets the value of the specified field.
      */
-    public abstract void setFieldValue(Clazz       clazz,
-                                       RefConstant refConstant,
-                                       Value       value);
+    public abstract void setFieldValue(Clazz            clazz,
+                                       FieldrefConstant fieldrefConstant,
+                                       Value            value);
 
 
     /**
      * Returns the value of the specified field.
      */
-    public abstract Value getFieldValue(Clazz       clazz,
-                                        RefConstant refConstant,
-                                        String      type);
+    public abstract Value getFieldValue(Clazz            clazz,
+                                        FieldrefConstant fieldrefConstant,
+                                        String           type);
 
 
     /**
      * Sets the value of the specified method parameter.
      */
-    public abstract void setMethodParameterValue(Clazz       clazz,
-                                                 RefConstant refConstant,
-                                                 int         parameterIndex,
-                                                 Value       value);
+    public abstract void setMethodParameterValue(Clazz                clazz,
+                                                 AnyMethodrefConstant anyMethodrefConstant,
+                                                 int                  parameterIndex,
+                                                 Value                value);
 
 
     /**
@@ -289,9 +289,9 @@ implements            InvocationUnit,
     /**
      * Returns the return value of the specified method.
      */
-    public abstract Value getMethodReturnValue(Clazz       clazz,
-                                               RefConstant refConstant,
-                                               String      type);
+    public abstract Value getMethodReturnValue(Clazz                clazz,
+                                               AnyMethodrefConstant anyMethodrefConstant,
+                                               String               type);
 
 
     /**

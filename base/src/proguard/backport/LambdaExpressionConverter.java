@@ -23,14 +23,13 @@ package proguard.backport;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
+import proguard.classfile.constant.InvokeDynamicConstant;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
-import proguard.classfile.instruction.visitor.*;
+import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
-import proguard.util.MultiValueMap;
 
 import java.util.*;
 
@@ -49,6 +48,13 @@ implements ClassVisitor,
            AttributeVisitor,
            InstructionVisitor
 {
+    /*
+    private static final boolean DEBUG = false;
+    /*/
+    public  static       boolean DEBUG = System.getProperty("lec") != null;
+    //*/
+
+
     private static final String LAMBDA_SINGLETON_FIELD_NAME = "INSTANCE";
 
     private final ClassPool                      programClassPool;
@@ -89,23 +95,28 @@ implements ClassVisitor,
         lambdaExpressionMap.clear();
         programClass.accept(new LambdaExpressionCollector(lambdaExpressionMap));
 
-        for (LambdaExpression lambdaExpression : lambdaExpressionMap.values())
-        {
-            ProgramClass lambdaClass = createLambdaClass(lambdaExpression);
-
-            // Add the converted lambda class to the program class pool
-            // and the injected class name map.
-            programClassPool.addClass(lambdaClass);
-            extraDataEntryNameMap.addExtraClassToClass(programClass, lambdaClass);
-
-            if (extraClassVisitor != null)
-            {
-                extraClassVisitor.visitProgramClass(lambdaClass);
-            }
-        }
-
         if (!lambdaExpressionMap.isEmpty())
         {
+            if (DEBUG)
+            {
+                System.out.println("LambdaExpressionConverter: converting lambda expressions in ["+programClass.getName()+"]");
+            }
+
+            for (LambdaExpression lambdaExpression : lambdaExpressionMap.values())
+            {
+                ProgramClass lambdaClass = createLambdaClass(lambdaExpression);
+
+                // Add the converted lambda class to the program class pool
+                // and the injected class name map.
+                programClassPool.addClass(lambdaClass);
+                extraDataEntryNameMap.addExtraClassToClass(programClass, lambdaClass);
+
+                if (extraClassVisitor != null)
+                {
+                    extraClassVisitor.visitProgramClass(lambdaClass);
+                }
+            }
+
             // Replace all InvokeDynamic instructions.
             programClass.accept(
                 new AllMethodVisitor(
@@ -177,12 +188,22 @@ implements ClassVisitor,
 
                 if (lambdaExpression.isStateless())
                 {
+                    if (DEBUG)
+                    {
+                        System.out.println("LambdaExpressionConverter:   "+constantInstruction.toString(offset)+" -> getting static "+lambdaClassName+"."+LAMBDA_SINGLETON_FIELD_NAME);
+                    }
+
                     builder.getstatic(lambdaClassName,
                                       LAMBDA_SINGLETON_FIELD_NAME,
                                       ClassUtil.internalTypeFromClassName(lambdaClassName));
                 }
                 else
                 {
+                    if (DEBUG)
+                    {
+                        System.out.println("LambdaExpressionConverter:   "+constantInstruction.toString(offset)+" -> new instance of "+lambdaClassName);
+                    }
+
                     int maxLocals = codeAttribute.u2maxLocals;
 
                     String methodDescriptor =
@@ -303,30 +324,26 @@ implements ClassVisitor,
     {
         String lambdaClassName = lambdaExpression.getLambdaClassName();
 
-        ProgramClass lambdaClass =
-            new ProgramClass(ClassConstants.CLASS_VERSION_1_5,
-                             1,
-                             new Constant[10],
-                             0,
-                             0,
-                             0);
+        if (DEBUG)
+        {
+            System.out.println("LambdaExpressionConverter:   creating lambda class ["+lambdaClassName+"]");
+        }
 
-        ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor(lambdaClass);
+        // Start creating the lambda class.
+        ClassBuilder classBuilder =
+            new ClassBuilder(0,
+                             lambdaClassName,
+                             ClassConstants.NAME_JAVA_LANG_OBJECT);
 
-        lambdaClass.u2thisClass =
-            constantPoolEditor.addClassConstant(lambdaClassName, lambdaClass);
-        lambdaClass.u2superClass =
-            constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_OBJECT,
-                                                null);
-
-        ClassEditor classEditor = new ClassEditor(lambdaClass);
-
+        // Add its interfaces.
         String[] interfaces = lambdaExpression.interfaces;
         for (String interfaceName : interfaces)
         {
-            classEditor.addInterface(constantPoolEditor.addClassConstant(interfaceName,
-                                                                         null));
+            classBuilder.addInterface(interfaceName);
         }
+
+        ProgramClass lambdaClass =
+            classBuilder.getProgramClass();
 
         // Store the created lambda class in the LambdaExpression
         // data structure for later use.
@@ -347,7 +364,6 @@ implements ClassVisitor,
         {
             // In case the invoked method can not be accessed directly
             // by the lambda class, add a synthetic accessor method.
-
             addAccessorMethod(lambdaExpression.referencedClass,
                               lambdaExpression);
         }
@@ -390,7 +406,7 @@ implements ClassVisitor,
                                                    ClassUtil.internalTypeFromClassType(programClass.getName()));
 
             programMethod.u2descriptorIndex =
-                (new ConstantPoolEditor(programClass).addUtf8Constant(newDescriptor));
+                new ConstantPoolEditor(programClass).addUtf8Constant(newDescriptor);
 
             // Update the lambda expression accordingly.
             lambdaExpression.invokedMethodDesc    = newDescriptor;
@@ -402,7 +418,9 @@ implements ClassVisitor,
     private void addAccessorMethod(ProgramClass     programClass,
                                    LambdaExpression lambdaExpression)
     {
-        SimplifiedClassEditor classEditor = new SimplifiedClassEditor(programClass);
+        ClassBuilder classBuilder = new ClassBuilder(programClass,
+                                                     programClassPool,
+                                                     libraryClassPool);
 
         String className = programClass.getName();
 
@@ -420,6 +438,11 @@ implements ClassVisitor,
             lambdaExpression.invokedMethodDesc;
         int accessFlags =
             lambdaExpression.referencedInvokedMethod.getAccessFlags();
+
+        if (DEBUG)
+        {
+           System.out.println("LambdaExpressionConverter:     creating accessor method ["+className+"."+accessorMethodName+accessorMethodDescriptor+"]");
+        }
 
         // Method reference to a constructor.
         if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
@@ -452,32 +475,33 @@ implements ClassVisitor,
                                                    ClassUtil.internalTypeFromClassType(className));
         }
 
-        CompactCodeAttributeComposer composer =
-            classEditor.addMethod(ClassConstants.ACC_STATIC |
-                                  ClassConstants.ACC_SYNTHETIC,
-                                  accessorMethodName,
-                                  accessorMethodDescriptor,
-                                  50);
+        final String methodDescriptor = accessorMethodDescriptor;
 
-        // If the lambda expression is a method reference to a constructor,
-        // we need to create the object first.
-        if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
-        {
-            composer.new_(lambdaExpression.invokedClassName)
-                .dup();
-        }
+        classBuilder.addMethod(
+            ClassConstants.ACC_STATIC |
+            ClassConstants.ACC_SYNTHETIC,
+            accessorMethodName,
+            accessorMethodDescriptor,
+            50,
+            ____ ->
+            {
+                // If the lambda expression is a method reference to a constructor,
+                // we need to create the object first.
+                if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+                {
+                    ____.new_(lambdaExpression.invokedClassName)
+                        .dup();
+                }
 
-        // Load the parameters next.
-        InternalTypeEnumeration typeEnumeration =
-            new InternalTypeEnumeration(accessorMethodDescriptor);
-
-        completeInterfaceMethod(lambdaExpression,
-                                composer,
-                                0,
-                                typeEnumeration,
-                                null);
-
-        classEditor.finishEditing();
+                // Load the parameters next.
+                completeInterfaceMethod(lambdaExpression,
+                                        null,
+                                        methodDescriptor,
+                                        null,
+                                        false,
+                                        0,
+                                        ____);
+            });
 
         // Update the lambda expression to point to the created
         // accessor method instead.
@@ -497,36 +521,39 @@ implements ClassVisitor,
     {
         String lambdaClassType = ClassUtil.internalTypeFromClassName(lambdaClass.getName());
 
-        SimplifiedClassEditor classEditor = new SimplifiedClassEditor(lambdaClass);
+        ClassBuilder classBuilder = new ClassBuilder(lambdaClass,
+                                                     programClassPool,
+                                                     libraryClassPool);
 
         // Add singleton field
-        classEditor.addField(ClassConstants.ACC_PUBLIC |
-                             ClassConstants.ACC_STATIC |
-                             ClassConstants.ACC_FINAL,
-                             LAMBDA_SINGLETON_FIELD_NAME,
-                             lambdaClassType);
+        classBuilder.addField(
+            ClassConstants.ACC_PUBLIC |
+            ClassConstants.ACC_STATIC |
+            ClassConstants.ACC_FINAL,
+            LAMBDA_SINGLETON_FIELD_NAME,
+            lambdaClassType);
 
         // Add the constructor.
-        CompactCodeAttributeComposer composer =
-            classEditor.addMethod(ClassConstants.ACC_PUBLIC,
-                                  ClassConstants.METHOD_NAME_INIT,
-                                  ClassConstants.METHOD_TYPE_INIT,
-                                  10);
-
-        composer.aload_0()
+        classBuilder.addMethod(
+            ClassConstants.ACC_PUBLIC,
+            ClassConstants.METHOD_NAME_INIT,
+            ClassConstants.METHOD_TYPE_INIT,
+            10,
+            code -> code
+                .aload_0()
                 .invokespecial(ClassConstants.NAME_JAVA_LANG_OBJECT,
                                ClassConstants.METHOD_NAME_INIT,
                                ClassConstants.METHOD_TYPE_INIT)
-                .return_();
+                .return_());
 
         // Add static initializer.
-        composer =
-            classEditor.addMethod(ClassConstants.ACC_STATIC,
-                                  ClassConstants.METHOD_NAME_CLINIT,
-                                  ClassConstants.METHOD_TYPE_CLINIT,
-                                  30);
-
-        composer.new_(lambdaClass.getName())
+        classBuilder.addMethod(
+            ClassConstants.ACC_STATIC,
+            ClassConstants.METHOD_NAME_CLINIT,
+            ClassConstants.METHOD_TYPE_CLINIT,
+            30,
+            code -> code
+                .new_(lambdaClass)
                 .dup()
                 .invokespecial(lambdaClass.getName(),
                                ClassConstants.METHOD_NAME_INIT,
@@ -534,185 +561,223 @@ implements ClassVisitor,
                 .putstatic(lambdaClass.getName(),
                            LAMBDA_SINGLETON_FIELD_NAME,
                            lambdaClassType)
-                .return_();
+                .return_());
 
         // If the lambda expression is serializable, create a readResolve method
         // to return the singleton field.
         if (lambdaExpression.isSerializable())
         {
-            composer =
-                classEditor.addMethod(ClassConstants.ACC_PRIVATE,
-                                      ClassConstants.METHOD_NAME_READ_RESOLVE,
-                                      ClassConstants.METHOD_TYPE_READ_RESOLVE,
-                                      10);
-
-            composer.getstatic(lambdaClass.getName(),
+            classBuilder.addMethod(
+                ClassConstants.ACC_PRIVATE,
+                ClassConstants.METHOD_NAME_READ_RESOLVE,
+                ClassConstants.METHOD_TYPE_READ_RESOLVE,
+                10,
+                code -> code
+                    .getstatic(lambdaClass.getName(),
                                LAMBDA_SINGLETON_FIELD_NAME,
                                lambdaClassType)
-                    .areturn();
+                    .areturn());
+        }
+
+        if (DEBUG)
+        {
+           System.out.println("LambdaExpressionConverter:     creating interface method ["+lambdaClass.getName()+"."+lambdaExpression.interfaceMethod+lambdaExpression.interfaceMethodDescriptor+"]");
         }
 
         // Add the interface method.
-        composer =
-            classEditor.addMethod(ClassConstants.ACC_PUBLIC,
-                                  lambdaExpression.interfaceMethod,
-                                  lambdaExpression.interfaceMethodDescriptor,
-                                  50);
-
-        if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
-        {
-            InternalTypeEnumeration typeEnumeration =
-                new InternalTypeEnumeration(lambdaExpression.interfaceMethodDescriptor);
-
-            InternalTypeEnumeration invokedTypeEnumeration =
-                new InternalTypeEnumeration(lambdaExpression.invokedMethodDesc);
-
-            composer.new_(lambdaExpression.invokedClassName)
-                    .dup();
-
-            // Convert the remaining parameters if they are present.
-            completeInterfaceMethod(lambdaExpression,
-                                    composer,
-                                    1,
-                                    typeEnumeration,
-                                    invokedTypeEnumeration);
-        }
-        else
-        {
-            InternalTypeEnumeration typeEnumeration =
-                new InternalTypeEnumeration(lambdaExpression.interfaceMethodDescriptor);
-
-            InternalTypeEnumeration invokedTypeEnumeration =
-                new InternalTypeEnumeration(lambdaExpression.invokedMethodDesc);
-
-            boolean isInvokeVirtualOrInterface =
-                lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeVirtual ||
-                lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeInterface;
-
-            int paramIndex = 1;
-
-            // If we invoke a method on an object, we need to cast it to the invoked type.
-            if (isInvokeVirtualOrInterface)
+        classBuilder.addMethod(
+            ClassConstants.ACC_PUBLIC,
+            lambdaExpression.interfaceMethod,
+            lambdaExpression.interfaceMethodDescriptor,
+            50,
+            ____ ->
             {
-                String type = typeEnumeration.nextType();
-                String invokedType =
-                    ClassUtil.internalTypeFromClassName(lambdaExpression.invokedClassName);
+                if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+                {
+                    ____.new_(lambdaExpression.invokedClassName)
+                        .dup();
 
-                composer.load(paramIndex, type);
-                paramIndex += ClassUtil.internalTypeSize(type);
+                    // Convert the remaining parameters if they are present.
+                    completeInterfaceMethod(lambdaExpression,
+                                            null,
+                                            lambdaExpression.interfaceMethodDescriptor,
+                                            lambdaExpression.invokedMethodDesc,
+                                            false,
+                                            1,
+                                            ____);
+                }
+                else
+                {
+                    boolean isInvokeVirtualOrInterface =
+                        lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeVirtual ||
+                        lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeInterface;
 
-                convertToTargetType(type, invokedType, composer);
-            }
-
-            // Convert the remaining parameters if they are present.
-            completeInterfaceMethod(lambdaExpression,
-                                    composer,
-                                    paramIndex,
-                                    typeEnumeration,
-                                    invokedTypeEnumeration);
-        }
-
-        classEditor.finishEditing();
+                    // Convert the remaining parameters if they are present.
+                    completeInterfaceMethod(lambdaExpression,
+                                            null,
+                                            lambdaExpression.interfaceMethodDescriptor,
+                                            lambdaExpression.invokedMethodDesc,
+                                            isInvokeVirtualOrInterface,
+                                            1,
+                                            ____);
+                }
+            });
     }
 
 
     private void completeCapturingLambdaClass(ProgramClass     lambdaClass,
                                               LambdaExpression lambdaExpression)
     {
-        SimplifiedClassEditor classEditor = new SimplifiedClassEditor(lambdaClass);
+        ClassBuilder classBuilder = new ClassBuilder(lambdaClass,
+                                                     programClassPool,
+                                                     libraryClassPool);
 
-        // Create constructor.
+        String lambdaClassName = lambdaClass.getName();
+
+        // Add the constructor.
         String ctorDescriptor = lambdaExpression.getConstructorDescriptor();
-        CompactCodeAttributeComposer composer =
-            classEditor.addMethod(ClassConstants.ACC_PUBLIC,
-                                  ClassConstants.METHOD_NAME_INIT,
-                                  ctorDescriptor,
-                                  50);
 
-        composer.aload_0()
-                .invokespecial(ClassConstants.NAME_JAVA_LANG_OBJECT,
-                               ClassConstants.METHOD_NAME_INIT,
-                               ClassConstants.METHOD_TYPE_INIT);
+        if (DEBUG)
+        {
+           System.out.println("LambdaExpressionConverter:     creating constructor ["+lambdaClass+"."+ClassConstants.METHOD_NAME_INIT+ctorDescriptor+"]");
+        }
 
+        classBuilder.addMethod(
+            ClassConstants.ACC_PUBLIC,
+            ClassConstants.METHOD_NAME_INIT,
+            ctorDescriptor,
+            50,
+            ____ ->
+            {
+                ____.aload_0()
+                    .invokespecial(ClassConstants.NAME_JAVA_LANG_OBJECT,
+                                   ClassConstants.METHOD_NAME_INIT,
+                                   ClassConstants.METHOD_TYPE_INIT);
+
+                InternalTypeEnumeration ctorTypeEnumeration =
+                    new InternalTypeEnumeration(ctorDescriptor);
+
+                int ctorArgIndex      = 0;
+                int ctorVariableIndex = 1;
+                while (ctorTypeEnumeration.hasMoreTypes())
+                {
+                    String fieldName = "arg$" + ctorArgIndex++;
+                    String fieldType = ctorTypeEnumeration.nextType();
+
+                    ____.aload_0();
+                    ____.load(ctorVariableIndex, fieldType);
+                    ____.putfield(lambdaClassName, fieldName, fieldType);
+
+                    ctorVariableIndex += ClassUtil.internalTypeSize(fieldType);
+                }
+
+                ____.return_();
+            });
+
+        // Add the fields.
         InternalTypeEnumeration typeEnumeration =
             new InternalTypeEnumeration(ctorDescriptor);
 
-        int argIndex    = 0;
-        int variableIndex = 1;
+        int argIndex = 0;
         while (typeEnumeration.hasMoreTypes())
         {
             String type      = typeEnumeration.nextType();
             String fieldName = "arg$" + argIndex++;
 
-            classEditor.addField(ClassConstants.ACC_PRIVATE | ClassConstants.ACC_FINAL,
+            if (DEBUG)
+            {
+                System.out.println("LambdaExpressionConverter:     creating field ["+lambdaClass+"."+fieldName+" "+type+"]");
+            }
+
+            classBuilder.addField(ClassConstants.ACC_PRIVATE |
+                                 ClassConstants.ACC_FINAL,
                                  fieldName,
                                  type);
-
-            composer.aload_0();
-            composer.load(variableIndex, type);
-            composer.putfield(lambdaClass.getName(), fieldName, type);
-
-            variableIndex += ClassUtil.internalTypeSize(type);
         }
 
-        composer.return_();
-
-        // Create interface method.
-        composer =
-            classEditor.addMethod(ClassConstants.ACC_PUBLIC,
-                                  lambdaExpression.interfaceMethod,
-                                  lambdaExpression.interfaceMethodDescriptor,
-                                  50);
-
-        // Load the instance fields first.
-        typeEnumeration =
-            new InternalTypeEnumeration(ctorDescriptor);
-
-        InternalTypeEnumeration invokedTypeEnumeration =
-            new InternalTypeEnumeration(lambdaExpression.invokedMethodDesc);
-
-        boolean isInvokeVirtualOrInterface =
-            lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeVirtual ||
-            lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeInterface;
-
-        argIndex = 0;
-        while (typeEnumeration.hasMoreTypes())
+        if (DEBUG)
         {
-            String type        = typeEnumeration.nextType();
-            String invokedType = isInvokeVirtualOrInterface && argIndex == 0 ?
-                null : invokedTypeEnumeration.nextType();
-
-            String fieldName = "arg$" + argIndex++;
-
-            composer.aload_0()
-                    .getfield(lambdaClass.getName(), fieldName, type);
-
-            if (invokedType != null)
-            {
-                convertToTargetType(type, invokedType, composer);
-            }
+           System.out.println("LambdaExpressionConverter:     creating interface method [" + lambdaClassName + "." + lambdaExpression.interfaceMethod + lambdaExpression.interfaceMethodDescriptor + "]");
         }
 
-        // And then the method parameters.
-        typeEnumeration =
-            new InternalTypeEnumeration(lambdaExpression.interfaceMethodDescriptor);
+        // Add the interface method implementation.
+        classBuilder.addMethod(
+            ClassConstants.ACC_PUBLIC,
+            lambdaExpression.interfaceMethod,
+            lambdaExpression.interfaceMethodDescriptor,
+            50,
+            ____ ->
+            {
+                boolean isInvokeVirtualOrInterface =
+                    lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeVirtual ||
+                    lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeInterface;
 
-        completeInterfaceMethod(lambdaExpression,
-                                composer,
-                                1,
-                                typeEnumeration,
-                                invokedTypeEnumeration);
-
-        classEditor.finishEditing();
+                // Load the instance fields and the remaining parameters.
+                completeInterfaceMethod(lambdaExpression,
+                                        ctorDescriptor,
+                                        lambdaExpression.interfaceMethodDescriptor,
+                                        lambdaExpression.invokedMethodDesc,
+                                        isInvokeVirtualOrInterface,
+                                        1,
+                                        ____);
+            });
     }
 
 
     private void completeInterfaceMethod(LambdaExpression             lambdaExpression,
-                                         CompactCodeAttributeComposer composer,
+                                         String                       fieldTypes,
+                                         String                       methodDescriptor,
+                                         String                       invokedMethodDescriptor,
+                                         boolean                      isInvokeVirtualOrInterface,
                                          int                          parameterIndex,
-                                         InternalTypeEnumeration      typeEnumeration,
-                                         InternalTypeEnumeration      invokedTypeEnumeration)
+                                         CompactCodeAttributeComposer ____)
     {
+        InternalTypeEnumeration typeEnumeration =
+            new InternalTypeEnumeration(methodDescriptor);
+
+        InternalTypeEnumeration invokedTypeEnumeration = invokedMethodDescriptor == null ? null :
+            new InternalTypeEnumeration(invokedMethodDescriptor);
+
+        // Get the instance fields.
+        if (fieldTypes != null)
+        {
+            String lambdaClassName = ____.getTargetClass().getName();
+
+            InternalTypeEnumeration fieldTypeEnumeration =
+                new InternalTypeEnumeration(fieldTypes);
+
+            int fieldIndex = 0;
+            while (fieldTypeEnumeration.hasMoreTypes())
+            {
+                String fieldName = "arg$" + fieldIndex;
+                String fieldType = fieldTypeEnumeration.nextType();
+
+                ____.aload_0()
+                    .getfield(lambdaClassName, fieldName, fieldType);
+
+                if (!isInvokeVirtualOrInterface || fieldIndex > 0)
+                {
+                    convertToTargetType(fieldType, invokedTypeEnumeration.nextType(), ____);
+                }
+
+                fieldIndex++;
+            }
+        }
+
+        // If we invoke a method on an object, we need to cast it to the invoked type.
+        else if (isInvokeVirtualOrInterface)
+        {
+            String type        = typeEnumeration.nextType();
+            String invokedType =
+                ClassUtil.internalTypeFromClassName(lambdaExpression.invokedClassName);
+
+            ____.load(parameterIndex, type);
+            parameterIndex += ClassUtil.internalTypeSize(type);
+
+            convertToTargetType(type, invokedType, ____);
+        }
+
+        // Load the remaining arguments.
         while (typeEnumeration.hasMoreTypes())
         {
             String type        = typeEnumeration.nextType();
@@ -721,129 +786,136 @@ implements ClassVisitor,
                     invokedTypeEnumeration.nextType() :
                     null;
 
-            composer.load(parameterIndex, type);
+            ____.load(parameterIndex, type);
             parameterIndex += ClassUtil.internalTypeSize(type);
 
             if (invokedType != null)
             {
-                convertToTargetType(type, invokedType, composer);
+                convertToTargetType(type, invokedType, ____);
             }
         }
 
+        // Invoke the method.
         switch (lambdaExpression.invokedReferenceKind)
         {
             case ClassConstants.REF_invokeStatic:
                 if (lambdaExpression.invokesStaticInterfaceMethod())
                 {
-                    composer.invokestaticinterface(lambdaExpression.invokedClassName,
-                                                   lambdaExpression.invokedMethodName,
-                                                   lambdaExpression.invokedMethodDesc,
-                                                   lambdaExpression.referencedInvokedClass,
-                                                   lambdaExpression.referencedInvokedMethod);
+                    ____.invokestatic_interface(lambdaExpression.invokedClassName,
+                                                lambdaExpression.invokedMethodName,
+                                                lambdaExpression.invokedMethodDesc,
+                                                lambdaExpression.referencedInvokedClass,
+                                                lambdaExpression.referencedInvokedMethod);
                 }
                 else
                 {
-                    composer.invokestatic(lambdaExpression.invokedClassName,
-                                          lambdaExpression.invokedMethodName,
-                                          lambdaExpression.invokedMethodDesc,
-                                          lambdaExpression.referencedInvokedClass,
-                                          lambdaExpression.referencedInvokedMethod);
+                    ____.invokestatic(lambdaExpression.invokedClassName,
+                                      lambdaExpression.invokedMethodName,
+                                      lambdaExpression.invokedMethodDesc,
+                                      lambdaExpression.referencedInvokedClass,
+                                      lambdaExpression.referencedInvokedMethod);
                 }
                 break;
 
             case ClassConstants.REF_invokeVirtual:
-                composer.invokevirtual(lambdaExpression.invokedClassName,
-                                       lambdaExpression.invokedMethodName,
-                                       lambdaExpression.invokedMethodDesc,
-                                       lambdaExpression.referencedInvokedClass,
-                                       lambdaExpression.referencedInvokedMethod);
+                ____.invokevirtual(lambdaExpression.invokedClassName,
+                                   lambdaExpression.invokedMethodName,
+                                   lambdaExpression.invokedMethodDesc,
+                                   lambdaExpression.referencedInvokedClass,
+                                   lambdaExpression.referencedInvokedMethod);
                 break;
 
             case ClassConstants.REF_invokeInterface:
-                composer.invokeinterface(lambdaExpression.invokedClassName,
-                                         lambdaExpression.invokedMethodName,
-                                         lambdaExpression.invokedMethodDesc,
-                                         lambdaExpression.referencedInvokedClass,
-                                         lambdaExpression.referencedInvokedMethod);
+                ____.invokeinterface(lambdaExpression.invokedClassName,
+                                     lambdaExpression.invokedMethodName,
+                                     lambdaExpression.invokedMethodDesc,
+                                     lambdaExpression.referencedInvokedClass,
+                                     lambdaExpression.referencedInvokedMethod);
                 break;
 
             case ClassConstants.REF_newInvokeSpecial:
             case ClassConstants.REF_invokeSpecial:
-                composer.invokespecial(lambdaExpression.invokedClassName,
-                                       lambdaExpression.invokedMethodName,
-                                       lambdaExpression.invokedMethodDesc,
-                                       lambdaExpression.referencedInvokedClass,
-                                       lambdaExpression.referencedInvokedMethod);
+                ____.invokespecial(lambdaExpression.invokedClassName,
+                                   lambdaExpression.invokedMethodName,
+                                   lambdaExpression.invokedMethodDesc,
+                                   lambdaExpression.referencedInvokedClass,
+                                   lambdaExpression.referencedInvokedMethod);
                 break;
         }
 
+        // Cast the return type.
         String methodReturnType = typeEnumeration.returnType();
 
         if (invokedTypeEnumeration != null)
         {
             convertToTargetType(invokedTypeEnumeration.returnType(),
                                 methodReturnType,
-                                composer);
+                                ____);
         }
 
-        composer.return_(methodReturnType);
+        ____.return_(methodReturnType);
     }
 
 
     private void addBridgeMethods(ProgramClass lambdaClass, LambdaExpression lambdaExpression)
     {
-        SimplifiedClassEditor classEditor = new SimplifiedClassEditor(lambdaClass);
+        ClassBuilder classBuilder = new ClassBuilder(lambdaClass,
+                                                     programClassPool,
+                                                     libraryClassPool);
 
         String methodName = lambdaExpression.interfaceMethod;
         for (String bridgeMethodDescriptor : lambdaExpression.bridgeMethodDescriptors)
         {
             Method method = lambdaClass.findMethod(methodName, bridgeMethodDescriptor);
-            if (method != null)
+            if (method == null)
             {
-                continue;
+                if (DEBUG)
+                {
+                    System.out.println("LambdaExpressionConverter:     adding bridge method ["+lambdaClass.getName()+"."+methodName+bridgeMethodDescriptor+"]");
+                }
+
+                classBuilder.addMethod(
+                    ClassConstants.ACC_PUBLIC |
+                    ClassConstants.ACC_SYNTHETIC |
+                    ClassConstants.ACC_BRIDGE,
+                    methodName,
+                    bridgeMethodDescriptor,
+                    50,
+                    ____ ->
+                    {
+                        ____.aload_0();
+
+                        InternalTypeEnumeration interfaceTypeEnumeration =
+                            new InternalTypeEnumeration(lambdaExpression.interfaceMethodDescriptor);
+
+                        InternalTypeEnumeration bridgeTypeEnumeration =
+                            new InternalTypeEnumeration(bridgeMethodDescriptor);
+                        int variableIndex = 1;
+                        while (bridgeTypeEnumeration.hasMoreTypes())
+                        {
+                            String type = bridgeTypeEnumeration.nextType();
+                            String interfaceType = interfaceTypeEnumeration.nextType();
+
+                            ____.load(variableIndex, type);
+                            variableIndex += ClassUtil.internalTypeSize(type);
+
+                            convertToTargetType(type, interfaceType, ____);
+                        }
+
+                        ____.invokevirtual(lambdaClass.getName(),
+                                           lambdaExpression.interfaceMethod,
+                                           lambdaExpression.interfaceMethodDescriptor);
+
+                        String methodReturnType = bridgeTypeEnumeration.returnType();
+
+                        convertToTargetType(interfaceTypeEnumeration.returnType(),
+                                            methodReturnType,
+                                            ____);
+
+                        ____.return_(methodReturnType);
+                    });
             }
-
-            CompactCodeAttributeComposer composer =
-                classEditor.addMethod(ClassConstants.ACC_PUBLIC    |
-                                      ClassConstants.ACC_SYNTHETIC |
-                                      ClassConstants.ACC_BRIDGE,
-                                      methodName,
-                                      bridgeMethodDescriptor,
-                                      50);
-
-            composer.aload_0();
-
-            InternalTypeEnumeration interfaceTypeEnumeration =
-                new InternalTypeEnumeration(lambdaExpression.interfaceMethodDescriptor);
-
-            InternalTypeEnumeration bridgeTypeEnumeration =
-                new InternalTypeEnumeration(bridgeMethodDescriptor);
-            int variableIndex = 1;
-            while (bridgeTypeEnumeration.hasMoreTypes())
-            {
-                String type = bridgeTypeEnumeration.nextType();
-                String interfaceType = interfaceTypeEnumeration.nextType();
-
-                composer.load(variableIndex, type);
-                variableIndex += ClassUtil.internalTypeSize(type);
-
-                convertToTargetType(type, interfaceType, composer);
-            }
-
-            composer.invokevirtual(lambdaClass.getName(),
-                                   lambdaExpression.interfaceMethod,
-                                   lambdaExpression.interfaceMethodDescriptor);
-
-            String methodReturnType = bridgeTypeEnumeration.returnType();
-
-            convertToTargetType(interfaceTypeEnumeration.returnType(),
-                                methodReturnType,
-                                composer);
-
-            composer.return_(methodReturnType);
         }
-
-        classEditor.finishEditing();
     }
 
 

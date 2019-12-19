@@ -574,9 +574,9 @@ implements   AttributeVisitor,
 
     // Implementations for ConstantVisitor.
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        refConstant.referencedMemberAccept(this);
+        anyMethodrefConstant.referencedMethodAccept(this);
     }
 
 

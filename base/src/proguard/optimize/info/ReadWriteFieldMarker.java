@@ -143,7 +143,7 @@ implements   InstructionVisitor,
     public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
         // Mark the referenced field.
-        fieldrefConstant.referencedMemberAccept(this);
+        fieldrefConstant.referencedFieldAccept(this);
     }
 
 

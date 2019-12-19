@@ -21,15 +21,13 @@
 package proguard.optimize.gson;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.editor.CodeAttributeEditor.Label;
+import proguard.classfile.editor.CompactCodeAttributeComposer.Label;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
-import proguard.util.MultiValueMap;
 
 import java.util.*;
 
@@ -56,16 +54,14 @@ implements   ClassVisitor,
     private final ClassPool             programClassPool;
     private final ClassPool             libraryClassPool;
     private final GsonRuntimeSettings   gsonRuntimeSettings;
-    private final CodeAttributeEditor   codeAttributeEditor;
     private final OptimizedJsonInfo     deserializationInfo;
     private final boolean               supportExposeAnnotation;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
 
-    private InstructionSequenceBuilder      ____;
-    private OptimizedJsonInfo.ClassJsonInfo classDeserializationInfo;
-    private Map<String, String[]>           javaToJsonFieldNames;
-    private Map<String, Label>              caseLabelByJavaFieldName;
-    private CodeAttributeEditor.Label       endSwitch;
+    private OptimizedJsonInfo.ClassJsonInfo    classDeserializationInfo;
+    private Map<String, String[]>              javaToJsonFieldNames;
+    private Map<String, Label>                 caseLabelByJavaFieldName;
+    private CompactCodeAttributeComposer.Label endSwitch;
 
     static
     {
@@ -88,8 +84,6 @@ implements   ClassVisitor,
      * @param libraryClassPool      the library class pool to initialize added
      *                              references.
      * @param gsonRuntimeSettings   keeps track of all GsonBuilder invocations.
-     * @param codeAttributeEditor   the code editor that is be used to inject
-     *                              optimized code into the domain classes.
      * @param deserializationInfo   contains information on which class and
      *                              fields need to be optimized and how.
      * @param extraDataEntryNameMap the map that keeps track of injected
@@ -98,14 +92,12 @@ implements   ClassVisitor,
     public GsonDeserializationOptimizer(ClassPool             programClassPool,
                                         ClassPool             libraryClassPool,
                                         GsonRuntimeSettings   gsonRuntimeSettings,
-                                        CodeAttributeEditor   codeAttributeEditor,
                                         OptimizedJsonInfo     deserializationInfo,
                                         ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool        = programClassPool;
         this.libraryClassPool        = libraryClassPool;
         this.gsonRuntimeSettings     = gsonRuntimeSettings;
-        this.codeAttributeEditor     = codeAttributeEditor;
         this.deserializationInfo     = deserializationInfo;
         this.supportExposeAnnotation = gsonRuntimeSettings.excludeFieldsWithoutExposeAnnotation;
         this.extraDataEntryNameMap   = extraDataEntryNameMap;
@@ -133,37 +125,32 @@ implements   ClassVisitor,
                 constructorCounter))));
 
         // Start adding new deserialization methods.
-        SimplifiedClassEditor classEditor =
-            new SimplifiedClassEditor(programClass);
-        ____ = new InstructionSequenceBuilder(programClass,
-                                              programClassPool,
-                                              libraryClassPool);
+        ClassBuilder classBuilder = new ClassBuilder(programClass,
+                                                     programClassPool,
+                                                     libraryClassPool);
 
         if (constructorCounter.getCount() == 0)
         {
-            addDefaultConstructor(programClass,
-                                  classEditor);
+            addDefaultConstructor(classBuilder);
         }
 
         int classIndex = deserializationInfo.classIndices.get(programClass.getName());
 
-        addFromJsonMethod(programClass,
-                          classEditor,
+        addFromJsonMethod(classBuilder,
                           classIndex);
 
-        addFromJsonFieldMethod(programClass,
-                               classEditor,
+        addFromJsonFieldMethod(classBuilder,
                                classIndex);
 
-        // Update all references of the edited class.
+        // Link related methods in the class hierarchy.
         programClass.accept(new MethodLinker());
-        classEditor.finishEditing(programClassPool,
-                                  libraryClassPool);
     }
 
-    private void addDefaultConstructor(ProgramClass          programClass,
-                                       SimplifiedClassEditor classEditor)
+
+    private void addDefaultConstructor(ClassBuilder classBuilder)
     {
+        ProgramClass programClass = classBuilder.getProgramClass();
+
         if (DEBUG)
         {
             System.out.println(
@@ -171,24 +158,26 @@ implements   ClassVisitor,
                 programClass.getName());
         }
 
-        classEditor.addMethod(
+        classBuilder.addMethod(
             ClassConstants.ACC_PUBLIC |
             ClassConstants.ACC_SYNTHETIC,
             ClassConstants.METHOD_NAME_INIT,
             ClassConstants.METHOD_TYPE_INIT,
-            ____.aload_0() // this
+            10,
+            code -> code
+                .aload_0()
                 .invokespecial(programClass.getSuperName(),
                                ClassConstants.METHOD_NAME_INIT,
                                ClassConstants.METHOD_TYPE_INIT)
-                .return_()
-                .instructions()
-        ).accept(programClass, new ProgramMemberOptimizationInfoSetter());
+                .return_(),
+
+            // Add optimization info to the new method.
+            new ProgramMemberOptimizationInfoSetter());
     }
 
 
-    private void addFromJsonMethod(ProgramClass          programClass,
-                                   SimplifiedClassEditor classEditor,
-                                   int                   classIndex)
+    private void addFromJsonMethod(ClassBuilder classBuilder,
+                                   int          classIndex)
     {
         String methodNameFromJson = METHOD_NAME_FROM_JSON + classIndex;
 
@@ -197,40 +186,29 @@ implements   ClassVisitor,
             System.out.println(
                 "GsonDeserializationOptimizer: adding " +
                 methodNameFromJson +
-                " method to " + programClass.getName());
+                " method to " + classBuilder.getProgramClass().getName());
         }
 
-        ProgramMethod fromJsonMethod = classEditor.addMethod(
+        classBuilder.addMethod(
             ClassConstants.ACC_PUBLIC | ClassConstants.ACC_SYNTHETIC,
             methodNameFromJson,
             OptimizedClassConstants.METHOD_TYPE_FROM_JSON,
-            ____.return_()
-                .instructions());
+            10,
+            new FromJsonCodeAttributeVisitor(),
 
-        fromJsonMethod.accept(programClass,
-                              new ProgramMemberOptimizationInfoSetter());
-
-        // Edit code attribute of fromJson$.
-        fromJsonMethod.attributesAccept(programClass,
-                                        new FromJsonCodeAttributeVisitor());
+            // Add optimization info to the new method.
+            new ProgramMemberOptimizationInfoSetter());
     }
 
 
     private class FromJsonCodeAttributeVisitor
-    extends       SimplifiedVisitor
-    implements    AttributeVisitor
+        implements ClassBuilder.CodeBuilder
     {
+        // Implementations for ClassBuilder.CodeBuilder.
 
-        // Implementations for AttributeVisitor.
-
-
-        @Override
-        public void visitCodeAttribute(Clazz         clazz,
-                                       Method        method,
-                                       CodeAttribute codeAttribute)
+        public void compose(CompactCodeAttributeComposer ____)
         {
-            // Create new CodeAttributeEditor for the fromJson$ method.
-            codeAttributeEditor.reset(1);
+            String className = ____.getTargetClass().getName();
 
             // Begin Json object.
             ____.aload(FromJsonLocals.JSON_READER)
@@ -239,11 +217,11 @@ implements   ClassVisitor,
                                GsonClassConstants.METHOD_TYPE_READER_BEGIN_OBJECT);
 
             // Assign locals for nextFieldIndex.
-            int nextFieldIndexLocalIndex = codeAttribute.u2maxLocals;
+            int nextFieldIndexLocalIndex = 1;
 
             // Start while loop that iterates over Json fields.
-            CodeAttributeEditor.Label startWhile    = codeAttributeEditor.label();
-            CodeAttributeEditor.Label endJsonObject = codeAttributeEditor.label();
+            CompactCodeAttributeComposer.Label startWhile    = ____.createLabel();
+            CompactCodeAttributeComposer.Label endJsonObject = ____.createLabel();
 
             // Is there a next field? If not, terminate loop and end object.
             ____.label(startWhile)
@@ -251,7 +229,7 @@ implements   ClassVisitor,
                 .invokevirtual(GsonClassConstants.NAME_JSON_READER,
                                GsonClassConstants.METHOD_NAME_HAS_NEXT,
                                GsonClassConstants.METHOD_TYPE_HAS_NEXT)
-                .ifeq(endJsonObject.offset());
+                .ifeq(endJsonObject);
 
             // Get next field index and store it in a local.
             ____.aload(FromJsonLocals.OPTIMIZED_JSON_READER)
@@ -262,22 +240,21 @@ implements   ClassVisitor,
                 .istore(nextFieldIndexLocalIndex);
 
             // Invoke fromJsonField$ with the stored field index.
-            classDeserializationInfo = deserializationInfo.classJsonInfos.get(clazz.getName());
+            classDeserializationInfo = deserializationInfo.classJsonInfos.get(className);
             javaToJsonFieldNames     = classDeserializationInfo.javaToJsonFieldNames;
-            Integer classIndex       = deserializationInfo.classIndices.get(clazz.getName());
+            Integer classIndex       = deserializationInfo.classIndices.get(className);
 
             String methodNameFromJsonField = METHOD_NAME_FROM_JSON_FIELD + classIndex;
             ____.aload(FromJsonLocals.THIS)
                 .aload(FromJsonLocals.GSON)
                 .aload(FromJsonLocals.JSON_READER)
                 .iload(nextFieldIndexLocalIndex)
-                .invokevirtual(clazz.getName(),
-
+                .invokevirtual(className,
                                methodNameFromJsonField,
                                METHOD_TYPE_FROM_JSON_FIELD);
 
             // Jump to start of while loop.
-            ____.goto_(startWhile.offset());
+            ____.goto_(startWhile);
 
             // End Json object.
             ____.label(endJsonObject)
@@ -286,17 +263,12 @@ implements   ClassVisitor,
                                GsonClassConstants.METHOD_NAME_READER_END_OBJECT,
                                GsonClassConstants.METHOD_TYPE_READER_END_OBJECT)
                 .return_();
-
-            // Add all fromJson$ instructions.
-            codeAttributeEditor.replaceInstruction(0, ____.instructions());
-            codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
         }
     }
 
 
-    private void addFromJsonFieldMethod(ProgramClass          programClass,
-                                        SimplifiedClassEditor classEditor,
-                                        int                   classIndex)
+    private void addFromJsonFieldMethod(ClassBuilder classBuilder,
+                                        int          classIndex)
     {
         String methodNameFromJsonField = METHOD_NAME_FROM_JSON_FIELD + classIndex;
 
@@ -305,55 +277,49 @@ implements   ClassVisitor,
             System.out.println(
                 "GsonDeserializationOptimizer: adding " +
                 methodNameFromJsonField +
-                " method to " + programClass.getName());
+                " method to " + classBuilder.getProgramClass().getName());
         }
 
-        ProgramMethod fromJsonFieldMethod = classEditor.addMethod(
+        classBuilder.addMethod(
             ClassConstants.ACC_PROTECTED | ClassConstants.ACC_SYNTHETIC,
             methodNameFromJsonField,
             METHOD_TYPE_FROM_JSON_FIELD,
-            ____.return_()
-                .instructions());
+            50,
+            new FromJsonFieldCodeBuilder(),
 
-        fromJsonFieldMethod.accept(programClass,
-                                   new ProgramMemberOptimizationInfoSetter());
-
-        // Edit code attribute of fromJsonField$.
-        fromJsonFieldMethod.attributesAccept(programClass,
-                                             new FromJsonFieldCodeAttributeVisitor(supportExposeAnnotation));
+            // Add optimization info to the new method.
+            new ProgramMemberOptimizationInfoSetter());
     }
 
 
-    private class FromJsonFieldCodeAttributeVisitor
-    extends    SimplifiedVisitor
-    implements AttributeVisitor,
-               MemberVisitor
+    private class FromJsonFieldCodeBuilder
+    extends       SimplifiedVisitor
+    implements    ClassBuilder.CodeBuilder,
+                  MemberVisitor
     {
-        private int     isNullLocalIndex;
-        private boolean supportExposeAnnotation;
+        private CompactCodeAttributeComposer ____;
+        private int                          isNullLocalIndex;
 
-        FromJsonFieldCodeAttributeVisitor(boolean supportExposeAnnotation)
-        {
-            this.supportExposeAnnotation = supportExposeAnnotation;
-        }
 
-        @Override
-        public void visitCodeAttribute(Clazz         clazz,
-                                       Method        method,
-                                       CodeAttribute codeAttribute)
+        // Implementations for ClassBuilder.CodeBuilder.
+
+        public void compose(CompactCodeAttributeComposer ____)
         {
-            // Create new CodeAttributeEditor for the fromJsonField$ method.
-            codeAttributeEditor.reset(1);
-            endSwitch = codeAttributeEditor.label();
+            // Remember the composer.
+            this.____ = ____;
+
+            Clazz clazz = ____.getTargetClass();
+
+            endSwitch = ____.createLabel();
 
             // Are there any fields to be deserialized at the level of this class?
             if (javaToJsonFieldNames.size() > 0)
             {
                 // Check for NULL token and store result in boolean local variable.
-                CodeAttributeEditor.Label tokenNotNull = codeAttributeEditor.label();
-                CodeAttributeEditor.Label assignIsNull = codeAttributeEditor.label();
+                CompactCodeAttributeComposer.Label tokenNotNull = ____.createLabel();
+                CompactCodeAttributeComposer.Label assignIsNull = ____.createLabel();
 
-                isNullLocalIndex = codeAttribute.u2maxLocals;
+                isNullLocalIndex = 1;
                 ____.aload(FromJsonLocals.JSON_READER)
                     .invokevirtual(GsonClassConstants.NAME_JSON_READER,
                                    GsonClassConstants.METHOD_NAME_PEEK,
@@ -362,9 +328,9 @@ implements   ClassVisitor,
                                GsonClassConstants.FIELD_NAME_NULL,
                                GsonClassConstants.FIELD_TYPE_NULL);
 
-                ____.ifacmpeq(tokenNotNull.offset())
+                ____.ifacmpeq(tokenNotNull)
                     .iconst_1()
-                    .goto_(assignIsNull.offset())
+                    .goto_(assignIsNull)
                     .label(tokenNotNull)
                     .iconst_0()
                     .label(assignIsNull)
@@ -375,11 +341,11 @@ implements   ClassVisitor,
 
             // If no known field index was returned for this class and
             // field, delegate to super method if it exists or skip the value.
-            if (!clazz.getSuperClass().getName().equals(ClassConstants.NAME_JAVA_LANG_OBJECT))
+            if (!clazz.getSuperName().equals(ClassConstants.NAME_JAVA_LANG_OBJECT))
             {
                 // Call the superclass fromJsonField$.
                 Integer superClassIndex =
-                    deserializationInfo.classIndices.get(clazz.getSuperClass().getName());
+                    deserializationInfo.classIndices.get(clazz.getSuperName());
                 String superMethodNameFromJsonField =
                     METHOD_NAME_FROM_JSON_FIELD + superClassIndex;
 
@@ -387,7 +353,7 @@ implements   ClassVisitor,
                     .aload(FromJsonFieldLocals.GSON)
                     .aload(FromJsonFieldLocals.JSON_READER)
                     .iload(FromJsonFieldLocals.FIELD_INDEX)
-                    .invokevirtual(clazz.getSuperClass().getName(),
+                    .invokevirtual(clazz.getSuperName(),
                                    superMethodNameFromJsonField,
                                    METHOD_TYPE_FROM_JSON_FIELD);
             }
@@ -403,10 +369,6 @@ implements   ClassVisitor,
             // End of switch.
             ____.label(endSwitch)
                 .return_();
-
-            // Add all fromJsonField$ instructions.
-            codeAttributeEditor.replaceInstruction(0, ____.instructions());
-            codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
         }
 
 
@@ -425,11 +387,12 @@ implements   ClassVisitor,
             {
                 // Runtime check whether excludeFieldsWithoutExposeAnnotation is enabled.
                 // If so, skip this switch statement.
-                Label nonExposedCasesEnd = codeAttributeEditor.label();
+                CompactCodeAttributeComposer.Label nonExposedCasesEnd = ____.createLabel();
+
                 ____.aload(ToJsonLocals.GSON)
                     .getfield(GsonClassConstants.NAME_GSON,     FIELD_NAME_EXCLUDER,       FIELD_TYPE_EXCLUDER)
                     .getfield(GsonClassConstants.NAME_EXCLUDER, FIELD_NAME_REQUIRE_EXPOSE, FIELD_TYPE_REQUIRE_EXPOSE)
-                    .ifne(nonExposedCasesEnd.offset());
+                    .ifne(nonExposedCasesEnd);
 
                 Set<String> nonExposedJavaFieldNames = new HashSet<String>();
                 for (String javaFieldName: javaToJsonFieldNames.keySet())
@@ -457,8 +420,9 @@ implements   ClassVisitor,
                 if (javaFieldNamesToProcess.contains(javaToJsonFieldNameEntry.getKey()))
                 {
                     // Add cases for the alternative Json names with the same label.
-                    String[] jsonFieldNames = javaToJsonFieldNameEntry.getValue();
-                    Label    caseLabel      = codeAttributeEditor.label();
+                    String[]                           jsonFieldNames = javaToJsonFieldNameEntry.getValue();
+                    CompactCodeAttributeComposer.Label caseLabel      = ____.createLabel();
+
                     for (String jsonFieldName : jsonFieldNames)
                     {
                         fromJsonFieldCases.add(new FromJsonFieldCase(javaToJsonFieldNameEntry.getKey(),
@@ -469,20 +433,23 @@ implements   ClassVisitor,
             }
             Collections.sort(fromJsonFieldCases);
 
-            int[] cases          = new int[fromJsonFieldCases.size()];
-            int[] jumpOffsets    = new int[fromJsonFieldCases.size()];
+            int[] cases                                      = new int[fromJsonFieldCases.size()];
+            CompactCodeAttributeComposer.Label[] jumpOffsets = new CompactCodeAttributeComposer.Label[fromJsonFieldCases.size()];
+
             caseLabelByJavaFieldName = new HashMap<String, Label>();
+
             for (int caseIndex = 0; caseIndex < fromJsonFieldCases.size(); caseIndex++)
             {
                 FromJsonFieldCase fromJsonFieldCase = fromJsonFieldCases.get(caseIndex);
                 cases[caseIndex]                    = fromJsonFieldCase.fieldIndex;
-                jumpOffsets[caseIndex]              = fromJsonFieldCase.label.offset();
+                jumpOffsets[caseIndex]              = fromJsonFieldCase.label;
                 caseLabelByJavaFieldName.put(fromJsonFieldCase.javaFieldName, fromJsonFieldCase.label);
             }
 
-            Label defaultCase = codeAttributeEditor.label();
+            CompactCodeAttributeComposer.Label defaultCase = ____.createLabel();
+
             ____.iload(FromJsonFieldLocals.FIELD_INDEX)
-                .lookupswitch(defaultCase.offset(),
+                .lookupswitch(defaultCase,
                               cases,
                               jumpOffsets);
 
@@ -507,10 +474,11 @@ implements   ClassVisitor,
                 programField.accept(programClass, new MemberAccessFlagCleaner(ClassConstants.ACC_FINAL));
 
                 // Check if value is null
-                CodeAttributeEditor.Label isNull = codeAttributeEditor.label();
+                CompactCodeAttributeComposer.Label isNull = ____.createLabel();
+
                 ____.label(fromJsonFieldCaseLabel)
                     .iload(isNullLocalIndex)
-                    .ifeq(isNull.offset());
+                    .ifeq(isNull);
 
                 String fieldDescriptor = programField.getDescriptor(programClass);
                 FieldSignatureCollector signatureAttributeCollector = new FieldSignatureCollector();
@@ -522,7 +490,6 @@ implements   ClassVisitor,
                 {
                     inlineDeserializer.deserialize(programClass,
                                                    programField,
-                                                   codeAttributeEditor,
                                                    ____,
                                                    gsonRuntimeSettings);
                 }
@@ -546,17 +513,26 @@ implements   ClassVisitor,
                     String typeTokenClassName = null;
                     if (signatureAttributeCollector.getFieldSignature() != null)
                     {
-                        // Add type token sub-class that has the appropriate type parameter.
+                        // Create a new token sub-class that has the appropriate type parameter.
                         ProgramClass typeTokenClass =
                             new TypeTokenClassBuilder(programClass,
                                                       programField,
                                                       signatureAttributeCollector.getFieldSignature())
-                                .build(programClassPool);
+                                .build();
+
+                        // Add it to the class pool.
                         programClassPool.addClass(typeTokenClass);
-                        typeTokenClass.accept(new ClassReferenceInitializer(programClassPool,
-                                                                            libraryClassPool));
-                        typeTokenClassName = typeTokenClass.getName();
-                        extraDataEntryNameMap.addExtraClassToClass(programClass, typeTokenClassName);
+
+                        // Initialize it.
+                        typeTokenClass.accept(
+                            new MultiClassVisitor(
+                                new ClassSuperHierarchyInitializer(programClassPool, libraryClassPool),
+                                new ClassSubHierarchyInitializer(),
+                                new ClassReferenceInitializer(programClassPool, libraryClassPool)
+                            ));
+
+                        // Attach it to the original class.
+                        extraDataEntryNameMap.addExtraClassToClass(programClass, typeTokenClass);
                     }
 
                     // Retrieve type adapter and deserialize value from Json.
@@ -639,7 +615,7 @@ implements   ClassVisitor,
                 }
 
                 // Jump to the end of the switch.
-                ____.goto_(endSwitch.offset());
+                ____.goto_(endSwitch);
 
                 // Either skip the null (in case of a primitive) or assign the null
                 // (in case of an object) and jump to the end of the switch.
@@ -656,7 +632,7 @@ implements   ClassVisitor,
                     .invokevirtual(GsonClassConstants.NAME_JSON_READER,
                                    GsonClassConstants.METHOD_NAME_NEXT_NULL,
                                    GsonClassConstants.METHOD_TYPE_NEXT_NULL)
-                    .goto_(endSwitch.offset());
+                    .goto_(endSwitch);
             }
         }
     }
@@ -664,13 +640,13 @@ implements   ClassVisitor,
 
     public static class FromJsonFieldCase implements Comparable<FromJsonFieldCase>
     {
-        private String javaFieldName;
-        private Label  label;
-        private int    fieldIndex;
+        private String                             javaFieldName;
+        private CompactCodeAttributeComposer.Label label;
+        private int                                fieldIndex;
 
-        public FromJsonFieldCase(String javaFieldName,
-                                 Label  label,
-                                 int    fieldIndex)
+        public FromJsonFieldCase(String                             javaFieldName,
+                                 CompactCodeAttributeComposer.Label label,
+                                 int                                fieldIndex)
         {
             this.javaFieldName = javaFieldName;
             this.label         = label;

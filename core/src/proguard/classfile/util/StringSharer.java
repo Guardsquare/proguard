@@ -101,18 +101,34 @@ implements   ClassVisitor,
     }
 
 
-    public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
-        Member referencedMember = refConstant.referencedMember;
-        if (referencedMember != null)
+        Field referencedField = fieldrefConstant.referencedField;
+        if (referencedField != null)
         {
-            Clazz referencedClass = refConstant.referencedClass;
+            Clazz referencedClass = fieldrefConstant.referencedClass;
 
-            // Put the actual class member's name and type strings in the class
+            // Put the actual class field's name and type strings in the class
             // pool.
-            name = referencedMember.getName(referencedClass);
-            type = referencedMember.getDescriptor(referencedClass);
-            clazz.constantPoolEntryAccept(refConstant.u2nameAndTypeIndex, this);
+            name = referencedField.getName(referencedClass);
+            type = referencedField.getDescriptor(referencedClass);
+            clazz.constantPoolEntryAccept(fieldrefConstant.u2nameAndTypeIndex, this);
+        }
+    }
+
+
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
+    {
+        Method referencedMethod = anyMethodrefConstant.referencedMethod;
+        if (referencedMethod != null)
+        {
+            Clazz referencedClass = anyMethodrefConstant.referencedClass;
+
+            // Put the actual class method's name and type strings in the class
+            // pool.
+            name = referencedMethod.getName(referencedClass);
+            type = referencedMethod.getDescriptor(referencedClass);
+            clazz.constantPoolEntryAccept(anyMethodrefConstant.u2nameAndTypeIndex, this);
         }
     }
 

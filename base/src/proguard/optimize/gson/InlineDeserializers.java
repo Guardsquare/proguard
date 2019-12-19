@@ -60,25 +60,15 @@ class InlineDeserializers
         }
 
         @Override
-        public void deserialize(ProgramClass               programClass,
-                                ProgramField               programField,
-                                CodeAttributeEditor        codeAttributeEditor,
-                                InstructionSequenceBuilder ____,
-                                GsonRuntimeSettings        gsonRuntimeSettings)
+        public void deserialize(ProgramClass                 programClass,
+                                ProgramField                 programField,
+                                CompactCodeAttributeComposer ____,
+                                GsonRuntimeSettings          gsonRuntimeSettings)
         {
-            // Create labels for exception table.
-            ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor(programClass);
-            int exceptionClassConstant =
-                constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_NUMBER_FORMAT_EXCEPTION,
-                                                    null);
-
-            CodeAttributeEditor.Label tryStart   = codeAttributeEditor.label();
-            CodeAttributeEditor.Label tryEnd     = codeAttributeEditor.label();
-            CodeAttributeEditor.Label catchStart =
-                codeAttributeEditor.catch_(tryStart.offset(),
-                                           tryEnd.offset(),
-                                           exceptionClassConstant);
-            CodeAttributeEditor.Label catchEnd   = codeAttributeEditor.label();
+            // Create labels for the exception.
+            CompactCodeAttributeComposer.Label tryStart = ____.createLabel();
+            CompactCodeAttributeComposer.Label tryEnd   = ____.createLabel();
+            CompactCodeAttributeComposer.Label catchEnd = ____.createLabel();
 
             // Try to read and parse integer.
             ____.label(tryStart)
@@ -100,12 +90,12 @@ class InlineDeserializers
 
             //  Assign it to the field
             ____.putfield(programClass, programField)
-                .goto_(catchEnd.offset())
+                .goto_(catchEnd)
                 .label(tryEnd);
 
             // Throw JsonSyntaxException if reading and parsing the integer failed.
             int throwableLocal = OptimizedClassConstants.FromJsonLocals.MAX_LOCALS + 1;
-            ____.label(catchStart)
+            ____.catch_(tryStart, tryEnd, ClassConstants.NAME_JAVA_LANG_NUMBER_FORMAT_EXCEPTION, null)
                 .astore(throwableLocal)
                 .new_(GsonClassConstants.NAME_JSON_SYNTAX_EXCEPTION)
                 .dup()
@@ -133,14 +123,13 @@ class InlineDeserializers
         }
 
         @Override
-        public void deserialize(ProgramClass               programClass,
-                                ProgramField               programField,
-                                CodeAttributeEditor        codeAttributeEditor,
-                                InstructionSequenceBuilder ____,
-                                GsonRuntimeSettings        gsonRuntimeSettings)
+        public void deserialize(ProgramClass                 programClass,
+                                ProgramField                 programField,
+                                CompactCodeAttributeComposer ____,
+                                GsonRuntimeSettings          gsonRuntimeSettings)
         {
-            CodeAttributeEditor.Label isBoolean = codeAttributeEditor.label();
-            CodeAttributeEditor.Label end       = codeAttributeEditor.label();
+            CompactCodeAttributeComposer.Label isBoolean = ____.createLabel();
+            CompactCodeAttributeComposer.Label end       = ____.createLabel();
 
             // Peek value and check whether it is a boolean.
             ____.aload(OptimizedClassConstants.FromJsonLocals.JSON_READER)
@@ -150,7 +139,7 @@ class InlineDeserializers
                 .getstatic(GsonClassConstants.NAME_JSON_TOKEN,
                            GsonClassConstants.FIELD_NAME_BOOLEAN,
                            GsonClassConstants.FIELD_TYPE_BOOLEAN)
-                .ifacmpeq(isBoolean.offset());
+                .ifacmpeq(isBoolean);
 
             // It's not a boolean, just read the String and assign it to the
             // field.
@@ -160,7 +149,7 @@ class InlineDeserializers
                                GsonClassConstants.METHOD_NAME_NEXT_STRING,
                                GsonClassConstants.METHOD_TYPE_NEXT_STRING)
                 .putfield(programClass, programField)
-                .goto_(end.offset());
+                .goto_(end);
 
             // It's a boolean, convert it to a String first and then assign it
             // to the field.

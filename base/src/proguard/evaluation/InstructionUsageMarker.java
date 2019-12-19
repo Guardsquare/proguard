@@ -29,7 +29,6 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.info.*;
 import proguard.util.ArrayUtil;
@@ -799,9 +798,9 @@ implements   AttributeVisitor
         }
 
 
-        public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+        public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
         {
-            Method referencedMethod = (Method)refConstant.referencedMember;
+            Method referencedMethod = anyMethodrefConstant.referencedMethod;
 
 //            if (referencedMethod != null)
 //            {
@@ -828,7 +827,7 @@ implements   AttributeVisitor
                 ParameterEscapeMarker.getEscapingParameters(referencedMethod) != 0L ||
                 ParameterEscapeMarker.modifiesAnything(referencedMethod)            ||
                 SideEffectClassChecker.mayHaveSideEffects(clazz,
-                                                          refConstant.referencedClass,
+                                                          anyMethodrefConstant.referencedClass,
                                                           referencedMethod))
             {
 //                System.out.println("  -> mark ["+referencingOffset+"]");
@@ -839,12 +838,12 @@ implements   AttributeVisitor
             {
                 if (DEBUG)
                 {
-                    System.out.println("  ["+referencingOffset+"] Checking parameters of ["+refConstant.getClassName(clazz)+"."+refConstant.getName(clazz)+refConstant.getType(clazz)+"] (pop count = "+referencingPopCount+")");
+                    System.out.println("  [" + referencingOffset + "] Checking parameters of [" + anyMethodrefConstant.getClassName(clazz) + "." + anyMethodrefConstant.getName(clazz) + anyMethodrefConstant.getType(clazz) + "] (pop count = " + referencingPopCount + ")");
                 }
 
                 // Create reverse dependencies for reference parameters that
                 // are modified.
-                refConstant.referencedMemberAccept(reverseDependencyCreator);
+                anyMethodrefConstant.referencedMethodAccept(reverseDependencyCreator);
             }
         }
 

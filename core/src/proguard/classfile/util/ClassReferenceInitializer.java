@@ -264,9 +264,9 @@ implements   ClassVisitor,
     }
 
 
-    public void visitAnyRefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
-        String className = refConstant.getClassName(clazz);
+        String className = fieldrefConstant.getClassName(clazz);
 
         // Methods for array types should be found in the Object class.
         if (ClassUtil.isInternalArrayType(className))
@@ -281,23 +281,20 @@ implements   ClassVisitor,
 
         if (referencedClass != null)
         {
-            String name = refConstant.getName(clazz);
-            String type = refConstant.getType(clazz);
-
-            boolean isFieldRef = refConstant.getTag() == ClassConstants.CONSTANT_Fieldref;
+            String name = fieldrefConstant.getName(clazz);
+            String type = fieldrefConstant.getType(clazz);
 
             // See if we can find the referenced class member somewhere in the
             // hierarchy.
             Clazz referencingClass = checkAccessRules ? clazz : null;
 
-            refConstant.referencedMember = memberFinder.findMember(referencingClass,
-                                                                   referencedClass,
-                                                                   name,
-                                                                   type,
-                                                                   isFieldRef);
-            refConstant.referencedClass  = memberFinder.correspondingClass();
+            fieldrefConstant.referencedField = memberFinder.findField(referencingClass,
+                                                                      referencedClass,
+                                                                      name,
+                                                                      type);
+            fieldrefConstant.referencedClass = memberFinder.correspondingClass();
 
-            if (refConstant.referencedMember == null)
+            if (fieldrefConstant.referencedField == null)
             {
                 // We haven't found the class member anywhere in the hierarchy.
                 boolean isProgramClass = referencedClass instanceof ProgramClass;
@@ -312,10 +309,69 @@ implements   ClassVisitor,
                                                       className,
                                                       "Warning: " +
                                                       ClassUtil.externalClassName(clazz.getName()) +
-                                                      ": can't find referenced " +
-                                                      (isFieldRef ?
-                                                          "field '"  + ClassUtil.externalFullFieldDescription(0, name, type) :
-                                                          "method '" + ClassUtil.externalFullMethodDescription(className, 0, name, type)) +
+                                                      ": can't find referenced field '"  +
+                                                      ClassUtil.externalFullFieldDescription(0, name, type) +
+                                                      "' in " +
+                                                      (isProgramClass ?
+                                                          "program" :
+                                                          "library") +
+                                                      " class " +
+                                                      ClassUtil.externalClassName(className));
+                }
+            }
+        }
+    }
+
+
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
+    {
+        String className = anyMethodrefConstant.getClassName(clazz);
+
+        // Methods for array types should be found in the Object class.
+        if (ClassUtil.isInternalArrayType(className))
+        {
+            className = ClassConstants.NAME_JAVA_LANG_OBJECT;
+        }
+
+        // See if we can find the referenced class.
+        // Unresolved references are assumed to refer to library classes
+        // that will not change anyway.
+        Clazz referencedClass = findClass(clazz, className);
+
+        if (referencedClass != null)
+        {
+            String name = anyMethodrefConstant.getName(clazz);
+            String type = anyMethodrefConstant.getType(clazz);
+
+            boolean isFieldRef = anyMethodrefConstant.getTag() == ClassConstants.CONSTANT_Fieldref;
+
+            // See if we can find the referenced class member somewhere in the
+            // hierarchy.
+            Clazz referencingClass = checkAccessRules ? clazz : null;
+
+            anyMethodrefConstant.referencedMethod = memberFinder.findMethod(referencingClass,
+                                                                            referencedClass,
+                                                                            name,
+                                                                            type);
+            anyMethodrefConstant.referencedClass  = memberFinder.correspondingClass();
+
+            if (anyMethodrefConstant.referencedMethod == null)
+            {
+                // We haven't found the class member anywhere in the hierarchy.
+                boolean isProgramClass = referencedClass instanceof ProgramClass;
+
+                WarningPrinter missingMemberWarningPrinter = isProgramClass ?
+                    missingProgramMemberWarningPrinter :
+                    missingLibraryMemberWarningPrinter;
+
+                if (missingMemberWarningPrinter != null)
+                {
+                    missingMemberWarningPrinter.print(clazz.getName(),
+                                                      className,
+                                                      "Warning: " +
+                                                      ClassUtil.externalClassName(clazz.getName()) +
+                                                      ": can't find referenced method '" +
+                                                      ClassUtil.externalFullMethodDescription(className, 0, name, type) +
                                                       "' in " +
                                                       (isProgramClass ?
                                                           "program" :

@@ -40,9 +40,18 @@ import java.util.*;
  * The class also supports labels ({@link #label()}) and exception handlers
  * ({@link #catch_(int,int,int)}) in replacement sequences. They provide
  * local branch offsets inside the replacement sequences
- * ({@link Label#offset()}). For example, creating a replacement sequence
- * with the help of {@link InstructionSequenceBuilder}:
- * <code>
+ * ({@link Label#offset()}). For example, replacing a specified instruction
+ * in a method by a sequence of instructions, with the help of
+ * {@link InstructionSequenceBuilder}:
+ * <pre>
+ *     Clazz         clazz         = ...
+ *     Method        method        = ...
+ *     CodeAttribute codeAttribute = ...
+ *     int           offset        = ...
+ *
+ *     CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
+ *
+ *     // Create labels and instructions.
  *     final CodeAttributeEditor.Label TRY_START = codeAttributeEditor.label();
  *     final CodeAttributeEditor.Label TRY_END   = codeAttributeEditor.label();
  *     final CodeAttributeEditor.Label CATCH_END = codeAttributeEditor.label();
@@ -63,7 +72,16 @@ import java.util.*;
  *         .label(CATCH_END)
  *         ......
  *         .instructions();
- * </code>
+ *
+ *     // Prepare the editor for this code.
+ *     codeAttributeEditor.reset(codeAttribute.u4codeLength);
+ *
+ *     // Edit the code -- in this case, replace an instruction.
+ *     codeAttributeEditor.replaceInstruction(offset, replacementInstructions);
+ *
+ *     // Apply the changes.
+ *     codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
+ * </pre>
  *
  * @author Eric Lafortune
  */

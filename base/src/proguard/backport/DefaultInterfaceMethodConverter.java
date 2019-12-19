@@ -335,7 +335,7 @@ implements ClassVisitor,
         public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant)
         {
             if (interfaceMethodrefConstant.referencedClass  == referencedClass &&
-                interfaceMethodrefConstant.referencedMember == referencedMethod)
+                interfaceMethodrefConstant.referencedMethod == referencedMethod)
             {
                 matchingInvocation = true;
             }

@@ -22,57 +22,57 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This Constant represents a field reference constant in the constant pool.
+ * This Constant represents a method reference constant in the constant pool.
  *
  * @author Eric Lafortune
  */
-public class FieldrefConstant extends RefConstant
+public abstract class AnyMethodrefConstant extends RefConstant
 {
     /**
-     * An extra field optionally pointing to the referenced Field object.
+     * An extra field optionally pointing to the referenced Method object.
      * This field is typically filled out by the <code>{@link
      * proguard.classfile.util.ClassReferenceInitializer
      * ClassReferenceInitializer}</code>.
      */
-    public Field referencedField;
+    public Method referencedMethod;
 
 
     /**
-     * Creates an uninitialized FieldrefConstant.
+     * Creates an uninitialized AnyMethodrefConstant.
      */
-    public FieldrefConstant()
+    public AnyMethodrefConstant()
     {
     }
 
 
     /**
-     * Creates a new FieldrefConstant with the given name and type indices.
+     * Creates a new AnyMethodrefConstant with the given name and type indices.
      * @param u2classIndex       the index of the class in the constant pool.
      * @param u2nameAndTypeIndex the index of the name and type entry in the constant pool.
      * @param referencedClass    the referenced class.
-     * @param referencedField    the referenced field.
+     * @param referencedMethod   the referenced method.
      */
-    public FieldrefConstant(int    u2classIndex,
-                            int    u2nameAndTypeIndex,
-                            Clazz  referencedClass,
-                            Field  referencedField)
+    public AnyMethodrefConstant(int    u2classIndex,
+                                int    u2nameAndTypeIndex,
+                                Clazz  referencedClass,
+                                Method referencedMethod)
     {
         this.u2classIndex       = u2classIndex;
         this.u2nameAndTypeIndex = u2nameAndTypeIndex;
         this.referencedClass    = referencedClass;
-        this.referencedField    = referencedField;
+        this.referencedMethod   = referencedMethod;
     }
 
 
     /**
-     * Lets the referenced class field accept the given visitor.
+     * Lets the referenced class method accept the given visitor.
      */
-    public void referencedFieldAccept(MemberVisitor memberVisitor)
+    public void referencedMethodAccept(MemberVisitor memberVisitor)
     {
-        if (referencedField != null)
+        if (referencedMethod != null)
         {
-            referencedField.accept(referencedClass,
-                                   memberVisitor);
+            referencedMethod.accept(referencedClass,
+                                    memberVisitor);
         }
     }
 
@@ -84,23 +84,10 @@ public class FieldrefConstant extends RefConstant
      */
     public void referencedMemberAccept(MemberVisitor memberVisitor)
     {
-        if (referencedField != null)
+        if (referencedMethod != null)
         {
-            referencedField.accept(referencedClass,
-                                   memberVisitor);
+            referencedMethod.accept(referencedClass,
+                                    memberVisitor);
         }
-    }
-
-
-    // Implementations for Constant.
-
-    public int getTag()
-    {
-        return ClassConstants.CONSTANT_Fieldref;
-    }
-
-    public void accept(Clazz clazz, ConstantVisitor constantVisitor)
-    {
-        constantVisitor.visitFieldrefConstant(clazz, this);
     }
 }

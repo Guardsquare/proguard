@@ -68,10 +68,10 @@ implements   InstructionVisitor,
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
         // Mark the referenced method.
-        refConstant.referencedMemberAccept(filteredMethodMarker);
+        anyMethodrefConstant.referencedMethodAccept(filteredMethodMarker);
     }
 
 

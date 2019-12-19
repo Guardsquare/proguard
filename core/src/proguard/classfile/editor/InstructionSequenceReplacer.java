@@ -36,7 +36,7 @@ import proguard.classfile.util.*;
  * local branch offsets inside the replacement sequences
  * ({@link Label#offset()}). For example, creating a replacement sequence
  * with the help of {@link InstructionSequenceBuilder}:
- * <code>
+ * <pre>
  *     final InstructionSequenceReplacer.Label TRY_START = InstructionSequenceReplacer.label();
  *     final InstructionSequenceReplacer.Label TRY_END   = InstructionSequenceReplacer.label();
  *     final InstructionSequenceReplacer.Label CATCH_END = InstructionSequenceReplacer.label();
@@ -57,7 +57,7 @@ import proguard.classfile.util.*;
  *         .label(CATCH_END)
  *         ......
  *         .instructions();
- * </code>
+ * </pre>
  *
  * @see InstructionSequenceMatcher
  * @author Eric Lafortune

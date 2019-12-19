@@ -19,7 +19,6 @@ package proguard.classfile.editor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.constant.*;
 import proguard.classfile.io.*;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
@@ -347,21 +346,11 @@ implements   MemberVisitor
 
                 // Create an empty output class.
                 ProgramClass outputProgramClass =
-                    new ProgramClass(inputProgramClass.u4version,
-                                     1,
-                                     new Constant[1],
-                                     inputProgramClass.u2accessFlags,
-                                     0,
-                                     0);
-
-                ConstantPoolEditor constantPoolEditor =
-                    new ConstantPoolEditor(outputProgramClass);
-
-                outputProgramClass.u2thisClass =
-                    constantPoolEditor.addClassConstant(inputProgramClass.getName()+"Copy", null);
-
-                outputProgramClass.u2superClass =
-                    constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_OBJECT, null);
+                    new ClassBuilder(
+                        ClassConstants.CLASS_VERSION_1_8,
+                        ClassConstants.ACC_PUBLIC,
+                        "com/example/Test",
+                        ClassConstants.NAME_JAVA_LANG_OBJECT).getProgramClass();
 
                 // Copy over the class members.
                 MemberAdder memberAdder =
@@ -370,6 +359,7 @@ implements   MemberVisitor
                 inputProgramClass.fieldsAccept(memberAdder);
                 inputProgramClass.methodsAccept(memberAdder);
 
+                // Print out the output class.
                 //outputProgramClass.accept(new ClassPrinter());
 
                 // Write out the output class.

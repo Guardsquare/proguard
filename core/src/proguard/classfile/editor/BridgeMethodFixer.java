@@ -20,7 +20,7 @@ package proguard.classfile.editor;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.RefConstant;
+import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
@@ -107,8 +107,8 @@ implements   MemberVisitor,
 
     // Implementations for ConstantVisitor.
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        bridgedMethodName = refConstant.getName(clazz);
+        bridgedMethodName = anyMethodrefConstant.getName(clazz);
     }
 }

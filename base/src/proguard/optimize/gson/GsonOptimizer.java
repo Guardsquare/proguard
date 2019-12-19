@@ -225,7 +225,6 @@ public class GsonOptimizer
                                new GsonSerializationOptimizer(programClassPool,
                                                               libraryClassPool,
                                                               gsonContext.gsonRuntimeSettings,
-                                                              codeAttributeEditor,
                                                               serializationInfo,
                                                               extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool
@@ -233,7 +232,6 @@ public class GsonOptimizer
                                new GsonDeserializationOptimizer(programClassPool,
                                                                 libraryClassPool,
                                                                 gsonContext.gsonRuntimeSettings,
-                                                                codeAttributeEditor,
                                                                 deserializationInfo,
                                                                 extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool

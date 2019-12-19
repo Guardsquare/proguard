@@ -249,7 +249,7 @@ implements   ConstantVisitor
                                                    fieldrefConstant.getName(clazz),
                                                    fieldrefConstant.getType(clazz),
                                                    fieldrefConstant.referencedClass,
-                                                   fieldrefConstant.referencedMember);
+                                                   fieldrefConstant.referencedField);
     }
 
 
@@ -265,7 +265,7 @@ implements   ConstantVisitor
                                                              interfaceMethodrefConstant.getName(clazz),
                                                              interfaceMethodrefConstant.getType(clazz),
                                                              interfaceMethodrefConstant.referencedClass,
-                                                             interfaceMethodrefConstant.referencedMember);
+                                                             interfaceMethodrefConstant.referencedMethod);
     }
 
 
@@ -281,7 +281,7 @@ implements   ConstantVisitor
                                                     methodrefConstant.getName(clazz),
                                                     methodrefConstant.getType(clazz),
                                                     methodrefConstant.referencedClass,
-                                                    methodrefConstant.referencedMember);
+                                                    methodrefConstant.referencedMethod);
     }
 
 

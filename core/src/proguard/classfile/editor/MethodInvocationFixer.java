@@ -47,7 +47,7 @@ implements   AttributeVisitor,
     // Return values for the visitor methods.
     private Clazz  referencedClass;
     private Clazz  referencedMethodClass;
-    private Member referencedMethod;
+    private Method referencedMethod;
 
 
     // Implementations for AttributeVisitor.
@@ -198,24 +198,24 @@ implements   AttributeVisitor,
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
         // Remember the referenced class. Note that we're interested in the
         // class of the method reference, not in the class in which the
         // method was actually found, unless it is an array type.
-        if (ClassUtil.isInternalArrayType(refConstant.getClassName(clazz)))
+        if (ClassUtil.isInternalArrayType(anyMethodrefConstant.getClassName(clazz)))
         {
             // For an array type, the class will be java.lang.Object.
-            referencedClass = refConstant.referencedClass;
+            referencedClass = anyMethodrefConstant.referencedClass;
         }
         else
         {
-            clazz.constantPoolEntryAccept(refConstant.u2classIndex, this);
+            clazz.constantPoolEntryAccept(anyMethodrefConstant.u2classIndex, this);
         }
 
         // Remember the referenced method.
-        referencedMethodClass = refConstant.referencedClass;
-        referencedMethod      = refConstant.referencedMember;
+        referencedMethodClass = anyMethodrefConstant.referencedClass;
+        referencedMethod      = anyMethodrefConstant.referencedMethod;
     }
 
 
