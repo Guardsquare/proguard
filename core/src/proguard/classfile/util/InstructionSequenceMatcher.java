@@ -837,11 +837,11 @@ implements   InstructionVisitor,
     {
         // Create a class with a method with some code.
         ProgramClass programClass =
-            new ClassBuilder(ClassConstants.ACC_PUBLIC,
+            new ClassBuilder(AccessConstants.PUBLIC,
                              "Test",
                              ClassConstants.NAME_JAVA_LANG_OBJECT)
 
-                .addMethod(ClassConstants.ACC_PUBLIC,
+                .addMethod(AccessConstants.PUBLIC,
                            "getAnswer",
                            "()I",
                            50,

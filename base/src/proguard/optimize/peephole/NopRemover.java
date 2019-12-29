@@ -74,7 +74,7 @@ implements   InstructionVisitor
     public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction)
     {
         // Check if the instruction is a nop instruction.
-        if (simpleInstruction.opcode == InstructionConstants.OP_NOP &&
+        if (simpleInstruction.opcode == Instruction.OP_NOP &&
             !codeAttributeEditor.isModified(offset))
         {
             codeAttributeEditor.deleteInstruction(offset);

@@ -61,15 +61,15 @@ implements   MemberVisitor,
 
     static
     {
-        inlineSerializers.put(ClassConstants.TYPE_BOOLEAN + "",
+        inlineSerializers.put(TypeConstants.BOOLEAN + "",
                               new InlineSerializers.InlinePrimitiveBooleanSerializer());
         inlineSerializers.put(ClassConstants.TYPE_JAVA_LANG_BOOLEAN,
                               new InlineSerializers.InlineBooleanSerializer());
-        inlineSerializers.put(ClassConstants.TYPE_BYTE + "",
+        inlineSerializers.put(TypeConstants.BYTE + "",
                               new InlineSerializers.InlinePrimitiveIntegerSerializer());
-        inlineSerializers.put(ClassConstants.TYPE_SHORT + "",
+        inlineSerializers.put(TypeConstants.SHORT + "",
                               new InlineSerializers.InlinePrimitiveIntegerSerializer());
-        inlineSerializers.put(ClassConstants.TYPE_INT + "",
+        inlineSerializers.put(TypeConstants.INT + "",
                               new InlineSerializers.InlinePrimitiveIntegerSerializer());
         inlineSerializers.put(ClassConstants.TYPE_JAVA_LANG_STRING,
                               new InlineSerializers.InlineStringSerializer());
@@ -111,8 +111,8 @@ implements   MemberVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         // Make access public for _OptimizedTypeAdapterFactory.
-        programClass.u2accessFlags &= ~ClassConstants.ACC_PRIVATE;
-        programClass.u2accessFlags |= ClassConstants.ACC_PUBLIC;
+        programClass.u2accessFlags &= ~AccessConstants.PRIVATE;
+        programClass.u2accessFlags |= AccessConstants.PUBLIC;
 
         // Start adding new serialization methods.
         ClassBuilder classBuilder = new ClassBuilder(programClass,
@@ -133,7 +133,7 @@ implements   MemberVisitor,
         }
 
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC | ClassConstants.ACC_SYNTHETIC,
+            AccessConstants.PUBLIC | AccessConstants.SYNTHETIC,
             methodNameToJson,
             METHOD_TYPE_TO_JSON,
             20,
@@ -176,7 +176,7 @@ implements   MemberVisitor,
         }
 
         classBuilder.addMethod(
-            ClassConstants.ACC_PROTECTED | ClassConstants.ACC_SYNTHETIC,
+            AccessConstants.PROTECTED | AccessConstants.SYNTHETIC,
             methodName,
             METHOD_TYPE_TO_JSON_BODY,
             50,
@@ -212,8 +212,8 @@ implements   MemberVisitor,
 
             // Apply non static member visitor to all fields to visit.
             clazz.fieldsAccept(new MemberAccessFilter(0,
-                                                      ClassConstants.ACC_SYNTHETIC |
-                                                      ClassConstants.ACC_STATIC,
+                                                      AccessConstants.SYNTHETIC |
+                                                      AccessConstants.STATIC,
                                                       this));
 
             // Call the superclass toJsonBody$ if there is one.
@@ -305,20 +305,20 @@ implements   MemberVisitor,
 
                     switch (fieldDescriptor.charAt(0))
                     {
-                        case ClassConstants.TYPE_BOOLEAN:
-                        case ClassConstants.TYPE_CHAR:
-                        case ClassConstants.TYPE_BYTE:
-                        case ClassConstants.TYPE_SHORT:
-                        case ClassConstants.TYPE_INT:
-                        case ClassConstants.TYPE_FLOAT:
-                        case ClassConstants.TYPE_LONG:
-                        case ClassConstants.TYPE_DOUBLE:
+                        case TypeConstants.BOOLEAN:
+                        case TypeConstants.CHAR:
+                        case TypeConstants.BYTE:
+                        case TypeConstants.SHORT:
+                        case TypeConstants.INT:
+                        case TypeConstants.FLOAT:
+                        case TypeConstants.LONG:
+                        case TypeConstants.DOUBLE:
                         {
                             String className = ClassUtil.internalNumericClassNameFromPrimitiveType(fieldDescriptor.charAt(0));
                             ____.getstatic(className, ClassConstants.FIELD_NAME_TYPE, ClassConstants.FIELD_TYPE_TYPE);
                             break;
                         }
-                        case ClassConstants.TYPE_CLASS_START:
+                        case TypeConstants.CLASS_START:
                         {
                             if (signatureAttributeCollector.getFieldSignature() == null)
                             {
@@ -363,10 +363,10 @@ implements   MemberVisitor,
                             }
                             break;
                         }
-                        case ClassConstants.TYPE_ARRAY:
+                        case TypeConstants.ARRAY:
                         {
                             int fieldDescriptorIndex = 1;
-                            while (fieldDescriptor.charAt(fieldDescriptorIndex) == ClassConstants.TYPE_ARRAY)
+                            while (fieldDescriptor.charAt(fieldDescriptorIndex) == TypeConstants.ARRAY)
                             {
                                 fieldDescriptorIndex++;
                             }
@@ -374,21 +374,21 @@ implements   MemberVisitor,
                             Clazz fieldClass;
                             switch (fieldDescriptor.charAt(fieldDescriptorIndex))
                             {
-                                case ClassConstants.TYPE_BOOLEAN:
-                                case ClassConstants.TYPE_CHAR:
-                                case ClassConstants.TYPE_BYTE:
-                                case ClassConstants.TYPE_SHORT:
-                                case ClassConstants.TYPE_INT:
-                                case ClassConstants.TYPE_FLOAT:
-                                case ClassConstants.TYPE_LONG:
-                                case ClassConstants.TYPE_DOUBLE:
+                                case TypeConstants.BOOLEAN:
+                                case TypeConstants.CHAR:
+                                case TypeConstants.BYTE:
+                                case TypeConstants.SHORT:
+                                case TypeConstants.INT:
+                                case TypeConstants.FLOAT:
+                                case TypeConstants.LONG:
+                                case TypeConstants.DOUBLE:
                                 {
                                     String className = ClassUtil.internalNumericClassNameFromPrimitiveType(fieldDescriptor.charAt(0));
                                     fieldClass = libraryClassPool.getClass(className);
                                     ____.ldc(fieldDescriptor, fieldClass);
                                     break;
                                 }
-                                case ClassConstants.TYPE_CLASS_START:
+                                case TypeConstants.CLASS_START:
                                 {
                                     String fieldClassName = fieldDescriptor.substring(2, fieldDescriptor.length() - 1);
                                     fieldClass = programClassPool.getClass(fieldClassName);
@@ -410,42 +410,42 @@ implements   MemberVisitor,
                     // Box primitive value before passing it to type adapter.
                     switch (fieldDescriptor.charAt(0))
                     {
-                        case ClassConstants.TYPE_BOOLEAN:
+                        case TypeConstants.BOOLEAN:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_BOOLEAN,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_BOOLEAN);
                             break;
-                        case ClassConstants.TYPE_CHAR:
+                        case TypeConstants.CHAR:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_CHARACTER,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_CHAR);
                             break;
-                        case ClassConstants.TYPE_BYTE:
+                        case TypeConstants.BYTE:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_BYTE,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_BYTE);
                             break;
-                        case ClassConstants.TYPE_SHORT:
+                        case TypeConstants.SHORT:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_SHORT,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_SHORT);
                             break;
-                        case ClassConstants.TYPE_INT:
+                        case TypeConstants.INT:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_INTEGER,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_INT);
                             break;
-                        case ClassConstants.TYPE_FLOAT:
+                        case TypeConstants.FLOAT:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_FLOAT,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_FLOAT);
                             break;
-                        case ClassConstants.TYPE_LONG:
+                        case TypeConstants.LONG:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_LONG,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_LONG);
                             break;
-                        case ClassConstants.TYPE_DOUBLE:
+                        case TypeConstants.DOUBLE:
                             ____.invokestatic(ClassConstants.NAME_JAVA_LANG_DOUBLE,
                                               ClassConstants.METHOD_NAME_VALUE_OF,
                                               ClassConstants.METHOD_TYPE_VALUE_OF_DOUBLE);

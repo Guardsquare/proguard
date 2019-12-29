@@ -162,12 +162,12 @@ implements   ClassVisitor
 
             // Strip "/class" or replace the package name by a wildcard.
             int lastSeparatorIndex =
-                className.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR);
+                className.lastIndexOf(TypeConstants.PACKAGE_SEPARATOR);
 
             String fullyQualifiedClassName =
                 className.endsWith(INVALID_CLASS_EXTENSION) ?
                     className.substring(0, lastSeparatorIndex) :
-                    "**" + ClassConstants.PACKAGE_SEPARATOR + className.substring(lastSeparatorIndex + 1);
+                    "**" + TypeConstants.PACKAGE_SEPARATOR + className.substring(lastSeparatorIndex + 1);
 
             // Suggest matching classes.
             ClassNameFilter classNameFilter =

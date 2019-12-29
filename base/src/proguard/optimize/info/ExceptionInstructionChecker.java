@@ -238,30 +238,30 @@ implements   InstructionVisitor
         // additional benefit of avoiding a bug in the JVM in JDK 1.1.
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_IDIV:
-            case InstructionConstants.OP_LDIV:
-            case InstructionConstants.OP_IREM:
-            case InstructionConstants.OP_LREM:
-            case InstructionConstants.OP_IALOAD:
-            case InstructionConstants.OP_LALOAD:
-            case InstructionConstants.OP_FALOAD:
-            case InstructionConstants.OP_DALOAD:
-            case InstructionConstants.OP_AALOAD:
-            case InstructionConstants.OP_BALOAD:
-            case InstructionConstants.OP_CALOAD:
-            case InstructionConstants.OP_SALOAD:
-            case InstructionConstants.OP_IASTORE:
-            case InstructionConstants.OP_LASTORE:
-            case InstructionConstants.OP_FASTORE:
-            case InstructionConstants.OP_DASTORE:
-            case InstructionConstants.OP_AASTORE:
-            case InstructionConstants.OP_BASTORE:
-            case InstructionConstants.OP_CASTORE:
-            case InstructionConstants.OP_SASTORE:
-            case InstructionConstants.OP_NEWARRAY:
-            case InstructionConstants.OP_ARRAYLENGTH:
-            case InstructionConstants.OP_ATHROW:
-            case InstructionConstants.OP_MONITORENTER:
+            case Instruction.OP_IDIV:
+            case Instruction.OP_LDIV:
+            case Instruction.OP_IREM:
+            case Instruction.OP_LREM:
+            case Instruction.OP_IALOAD:
+            case Instruction.OP_LALOAD:
+            case Instruction.OP_FALOAD:
+            case Instruction.OP_DALOAD:
+            case Instruction.OP_AALOAD:
+            case Instruction.OP_BALOAD:
+            case Instruction.OP_CALOAD:
+            case Instruction.OP_SALOAD:
+            case Instruction.OP_IASTORE:
+            case Instruction.OP_LASTORE:
+            case Instruction.OP_FASTORE:
+            case Instruction.OP_DASTORE:
+            case Instruction.OP_AASTORE:
+            case Instruction.OP_BASTORE:
+            case Instruction.OP_CASTORE:
+            case Instruction.OP_SASTORE:
+            case Instruction.OP_NEWARRAY:
+            case Instruction.OP_ARRAYLENGTH:
+            case Instruction.OP_ATHROW:
+            case Instruction.OP_MONITORENTER:
                 // These instructions may throw exceptions.
                 mayThrowExceptions = true;
         }
@@ -273,27 +273,27 @@ implements   InstructionVisitor
         // Check for instructions that may throw exceptions.
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_GETFIELD:
-            case InstructionConstants.OP_PUTFIELD:
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
-            case InstructionConstants.OP_NEW:
-            case InstructionConstants.OP_ANEWARRAY:
-            case InstructionConstants.OP_CHECKCAST:
-            case InstructionConstants.OP_INSTANCEOF:
-            case InstructionConstants.OP_MULTIANEWARRAY:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_GETFIELD:
+            case Instruction.OP_PUTFIELD:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEDYNAMIC:
+            case Instruction.OP_NEW:
+            case Instruction.OP_ANEWARRAY:
+            case Instruction.OP_CHECKCAST:
+            case Instruction.OP_INSTANCEOF:
+            case Instruction.OP_MULTIANEWARRAY:
                 // These instructions may throw exceptions.
                 mayThrowExceptions = true;
 
-//          case InstructionConstants.OP_INVOKEVIRTUAL:
-//          case InstructionConstants.OP_INVOKESPECIAL:
-//          case InstructionConstants.OP_INVOKESTATIC:
-//          case InstructionConstants.OP_INVOKEINTERFACE:
+//          case Instruction.OP_INVOKEVIRTUAL:
+//          case Instruction.OP_INVOKESPECIAL:
+//          case Instruction.OP_INVOKESTATIC:
+//          case Instruction.OP_INVOKEINTERFACE:
 //            // Check if the invoking the method may throw an exception.
 //            clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
         }

@@ -63,7 +63,7 @@ public class AnnotationElementValue extends ElementValue
 
     public char getTag()
     {
-        return ClassConstants.ELEMENT_VALUE_ANNOTATION;
+        return ElementValue.TAG_ANNOTATION;
     }
 
     public void accept(Clazz clazz, Annotation annotation, ElementValueVisitor elementValueVisitor)

@@ -52,7 +52,7 @@ implements   AttributeVisitor
         int accessFlags = field.getAccessFlags();
 
         isWritten =
-        isRead    = (accessFlags & ClassConstants.ACC_VOLATILE) != 0;
+        isRead    = (accessFlags & AccessConstants.VOLATILE) != 0;
 
         resetValue(clazz, field);
     }
@@ -131,7 +131,7 @@ implements   AttributeVisitor
         value = null;
 
         // See if we can initialize the static field with a constant value.
-        if ((accessFlags & ClassConstants.ACC_STATIC) != 0)
+        if ((accessFlags & AccessConstants.STATIC) != 0)
         {
             field.accept(clazz, new AllAttributeVisitor(this));
         }
@@ -141,7 +141,7 @@ implements   AttributeVisitor
         // default value, because it may be accessed before it is set.
         if (value == null &&
             (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY ||
-             (accessFlags & ClassConstants.ACC_FINAL) == 0))
+             (accessFlags & AccessConstants.FINAL) == 0))
         {
             // Otherwise initialize the non-final field with the default value.
             value = INITIAL_VALUE_FACTORY.createValue(field.getDescriptor(clazz));

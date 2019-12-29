@@ -52,7 +52,7 @@ implements   InstructionVisitor,
 
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_NEW)
+        if (constantInstruction.opcode == Instruction.OP_NEW)
         {
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
         }

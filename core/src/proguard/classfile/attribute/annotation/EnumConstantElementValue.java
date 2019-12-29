@@ -125,7 +125,7 @@ public class EnumConstantElementValue extends ElementValue
 
     public char getTag()
     {
-        return ClassConstants.ELEMENT_VALUE_ENUM_CONSTANT;
+        return ElementValue.TAG_ENUM_CONSTANT;
     }
 
     public void accept(Clazz clazz, Annotation annotation, ElementValueVisitor elementValueVisitor)

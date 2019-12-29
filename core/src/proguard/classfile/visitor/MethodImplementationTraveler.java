@@ -83,8 +83,8 @@ implements   MemberVisitor
                                          new NamedMethodVisitor(programMethod.getName(programClass),
                                                                 programMethod.getDescriptor(programClass),
                                          new MemberAccessFilter(0,
-                                                                ClassConstants.ACC_PRIVATE |
-                                                                ClassConstants.ACC_STATIC,
+                                                                AccessConstants.PRIVATE |
+                                                                AccessConstants.STATIC,
                                          memberVisitor)));
         }
     }
@@ -106,8 +106,8 @@ implements   MemberVisitor
                                          new NamedMethodVisitor(libraryMethod.getName(libraryClass),
                                                                 libraryMethod.getDescriptor(libraryClass),
                                          new MemberAccessFilter(0,
-                                                                ClassConstants.ACC_PRIVATE |
-                                                                ClassConstants.ACC_STATIC,
+                                                                AccessConstants.PRIVATE |
+                                                                AccessConstants.STATIC,
                                          memberVisitor)));
         }
     }
@@ -118,8 +118,8 @@ implements   MemberVisitor
     private boolean isSpecial(Clazz clazz, Method method)
     {
         return (method.getAccessFlags() &
-                (ClassConstants.ACC_PRIVATE |
-                 ClassConstants.ACC_STATIC)) != 0 ||
+                (AccessConstants.PRIVATE |
+                 AccessConstants.STATIC)) != 0 ||
                method.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT);
     }
 }

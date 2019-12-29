@@ -54,7 +54,7 @@ implements   MemberVisitor,
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        if ((programMethod.getAccessFlags() & ClassConstants.ACC_BRIDGE) != 0)
+        if ((programMethod.getAccessFlags() & AccessConstants.BRIDGE) != 0)
         {
             programMethod.attributesAccept(programClass, this);
         }
@@ -82,10 +82,10 @@ implements   MemberVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
                 // Get the name of the bridged method.
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
 
@@ -98,7 +98,7 @@ implements   MemberVisitor,
                     }
 
                     // Clear the bridge flag.
-                    ((ProgramMethod)method).u2accessFlags &= ~ClassConstants.ACC_BRIDGE;
+                    ((ProgramMethod)method).u2accessFlags &= ~AccessConstants.BRIDGE;
                 }
                 break;
         }

@@ -20,7 +20,7 @@
  */
 package proguard;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.visitor.*;
 import proguard.util.WildcardManager;
@@ -179,7 +179,7 @@ extends      ClassSpecificationVisitorFactory
         {
             // Don't visit the code attributes if not specified.
             attributeVisitor = keepClassSpecification.markCodeAttributes ?
-                new AttributeNameFilter(ClassConstants.ATTR_Code, attributeVisitor) :
+                new AttributeNameFilter(Attribute.CODE, attributeVisitor) :
                 null;
         }
 

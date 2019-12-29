@@ -343,7 +343,7 @@ implements   ClassVisitor,
             String name = anyMethodrefConstant.getName(clazz);
             String type = anyMethodrefConstant.getType(clazz);
 
-            boolean isFieldRef = anyMethodrefConstant.getTag() == ClassConstants.CONSTANT_Fieldref;
+            boolean isFieldRef = anyMethodrefConstant.getTag() == Constant.FIELDREF;
 
             // See if we can find the referenced class member somewhere in the
             // hierarchy.

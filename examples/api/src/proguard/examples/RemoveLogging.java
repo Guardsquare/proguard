@@ -83,7 +83,7 @@ public class RemoveLogging
             directoryPump.pumpDataEntries(
                 new JarReader(
                 new ClassFilter(
-                new ClassReader(false, false, false, null,
+                new ClassReader(false, false, false, false, null,
                 new MultiClassVisitor(
                     // Modify the methods of the class.
                     new AllMethodVisitor(

@@ -76,8 +76,8 @@ implements   InstructionVisitor
     {
         // Check if the instruction is an unconditional goto instruction.
         byte opcode = branchInstruction.opcode;
-        if (opcode == InstructionConstants.OP_GOTO ||
-            opcode == InstructionConstants.OP_GOTO_W)
+        if (opcode == Instruction.OP_GOTO ||
+            opcode == Instruction.OP_GOTO_W)
         {
             // Check if the goto instruction points to another simple goto
             // instruction.
@@ -92,7 +92,7 @@ implements   InstructionVisitor
                 Instruction targetInstruction =
                     InstructionFactory.create(codeAttribute.code, targetOffset);
 
-                if (targetInstruction.opcode == InstructionConstants.OP_GOTO)
+                if (targetInstruction.opcode == Instruction.OP_GOTO)
                 {
                     // Simplify the goto instruction.
                     int targetBranchOffset = ((BranchInstruction)targetInstruction).branchOffset;

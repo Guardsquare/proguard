@@ -91,7 +91,7 @@ public class ClassElementValue extends ElementValue
 
     public char getTag()
     {
-        return ClassConstants.ELEMENT_VALUE_CLASS;
+        return ElementValue.TAG_CLASS;
     }
 
     public void accept(Clazz clazz, Annotation annotation, ElementValueVisitor elementValueVisitor)

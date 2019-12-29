@@ -39,7 +39,7 @@ public class ClassUtil
      */
     public static void checkMagicNumber(int magicNumber) throws UnsupportedOperationException
     {
-        if (magicNumber != ClassConstants.MAGIC)
+        if (magicNumber != VersionConstants.MAGIC)
         {
             throw new UnsupportedOperationException("Invalid magic number ["+Integer.toHexString(magicNumber)+"] in class");
         }
@@ -88,26 +88,26 @@ public class ClassUtil
     public static int internalClassVersion(String externalClassVersion)
     {
         return
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_0) ||
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_1) ? ClassConstants.CLASS_VERSION_1_0 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_2) ? ClassConstants.CLASS_VERSION_1_2 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_3) ? ClassConstants.CLASS_VERSION_1_3 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_4) ? ClassConstants.CLASS_VERSION_1_4 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_5_ALIAS) ||
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_5) ? ClassConstants.CLASS_VERSION_1_5 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_6_ALIAS) ||
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_6) ? ClassConstants.CLASS_VERSION_1_6 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_7_ALIAS) ||
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_7) ? ClassConstants.CLASS_VERSION_1_7 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_8_ALIAS) ||
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_8) ? ClassConstants.CLASS_VERSION_1_8 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_9_ALIAS) ||
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_1_9) ? ClassConstants.CLASS_VERSION_1_9 :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_10)  ? ClassConstants.CLASS_VERSION_10  :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_11)  ? ClassConstants.CLASS_VERSION_11  :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_12)  ? ClassConstants.CLASS_VERSION_12  :
-            externalClassVersion.equals(JavaConstants.CLASS_VERSION_13)  ? ClassConstants.CLASS_VERSION_13  :
-                                                                           0;
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_0) ||
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_1) ? VersionConstants.CLASS_VERSION_1_0 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_2) ? VersionConstants.CLASS_VERSION_1_2 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_3) ? VersionConstants.CLASS_VERSION_1_3 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_4) ? VersionConstants.CLASS_VERSION_1_4 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_5_ALIAS) ||
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_5) ? VersionConstants.CLASS_VERSION_1_5 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_6_ALIAS) ||
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_6) ? VersionConstants.CLASS_VERSION_1_6 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_7_ALIAS) ||
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_7) ? VersionConstants.CLASS_VERSION_1_7 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_8_ALIAS) ||
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_8) ? VersionConstants.CLASS_VERSION_1_8 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_9_ALIAS) ||
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_1_9) ? VersionConstants.CLASS_VERSION_1_9 :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_10)  ? VersionConstants.CLASS_VERSION_10  :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_11)  ? VersionConstants.CLASS_VERSION_11  :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_12)  ? VersionConstants.CLASS_VERSION_12  :
+            externalClassVersion.equals(JavaVersionConstants.CLASS_VERSION_13)  ? VersionConstants.CLASS_VERSION_13  :
+                                                                                  0;
     }
 
 
@@ -120,20 +120,20 @@ public class ClassUtil
     {
         switch (internalClassVersion)
         {
-            case ClassConstants.CLASS_VERSION_1_0: return JavaConstants.CLASS_VERSION_1_0;
-            case ClassConstants.CLASS_VERSION_1_2: return JavaConstants.CLASS_VERSION_1_2;
-            case ClassConstants.CLASS_VERSION_1_3: return JavaConstants.CLASS_VERSION_1_3;
-            case ClassConstants.CLASS_VERSION_1_4: return JavaConstants.CLASS_VERSION_1_4;
-            case ClassConstants.CLASS_VERSION_1_5: return JavaConstants.CLASS_VERSION_1_5;
-            case ClassConstants.CLASS_VERSION_1_6: return JavaConstants.CLASS_VERSION_1_6;
-            case ClassConstants.CLASS_VERSION_1_7: return JavaConstants.CLASS_VERSION_1_7;
-            case ClassConstants.CLASS_VERSION_1_8: return JavaConstants.CLASS_VERSION_1_8;
-            case ClassConstants.CLASS_VERSION_1_9: return JavaConstants.CLASS_VERSION_1_9;
-            case ClassConstants.CLASS_VERSION_10:  return JavaConstants.CLASS_VERSION_10;
-            case ClassConstants.CLASS_VERSION_11:  return JavaConstants.CLASS_VERSION_11;
-            case ClassConstants.CLASS_VERSION_12:  return JavaConstants.CLASS_VERSION_12;
-            case ClassConstants.CLASS_VERSION_13:  return JavaConstants.CLASS_VERSION_13;
-            default:                               return null;
+            case VersionConstants.CLASS_VERSION_1_0: return JavaVersionConstants.CLASS_VERSION_1_0;
+            case VersionConstants.CLASS_VERSION_1_2: return JavaVersionConstants.CLASS_VERSION_1_2;
+            case VersionConstants.CLASS_VERSION_1_3: return JavaVersionConstants.CLASS_VERSION_1_3;
+            case VersionConstants.CLASS_VERSION_1_4: return JavaVersionConstants.CLASS_VERSION_1_4;
+            case VersionConstants.CLASS_VERSION_1_5: return JavaVersionConstants.CLASS_VERSION_1_5;
+            case VersionConstants.CLASS_VERSION_1_6: return JavaVersionConstants.CLASS_VERSION_1_6;
+            case VersionConstants.CLASS_VERSION_1_7: return JavaVersionConstants.CLASS_VERSION_1_7;
+            case VersionConstants.CLASS_VERSION_1_8: return JavaVersionConstants.CLASS_VERSION_1_8;
+            case VersionConstants.CLASS_VERSION_1_9: return JavaVersionConstants.CLASS_VERSION_1_9;
+            case VersionConstants.CLASS_VERSION_10:  return JavaVersionConstants.CLASS_VERSION_10;
+            case VersionConstants.CLASS_VERSION_11:  return JavaVersionConstants.CLASS_VERSION_11;
+            case VersionConstants.CLASS_VERSION_12:  return JavaVersionConstants.CLASS_VERSION_12;
+            case VersionConstants.CLASS_VERSION_13:  return JavaVersionConstants.CLASS_VERSION_13;
+            default:                                 return null;
         }
     }
 
@@ -145,15 +145,15 @@ public class ClassUtil
      */
     public static void checkVersionNumbers(int internalClassVersion) throws UnsupportedOperationException
     {
-        if (internalClassVersion < ClassConstants.CLASS_VERSION_1_0 ||
-            internalClassVersion > ClassConstants.CLASS_VERSION_13)
+        if (internalClassVersion < VersionConstants.CLASS_VERSION_1_0 ||
+            internalClassVersion > VersionConstants.CLASS_VERSION_13)
         {
             throw new UnsupportedOperationException("Unsupported version number ["+
                                                     internalMajorClassVersion(internalClassVersion)+"."+
                                                     internalMinorClassVersion(internalClassVersion)+"] (maximum "+
-                                                    ClassConstants.CLASS_VERSION_13_MAJOR+"."+
-                                                    ClassConstants.CLASS_VERSION_13_MINOR+", Java "+
-                                                    JavaConstants.CLASS_VERSION_13+")");
+                                                    VersionConstants.CLASS_VERSION_13_MAJOR+"."+
+                                                    VersionConstants.CLASS_VERSION_13_MINOR+", Java "+
+                                                    JavaVersionConstants.CLASS_VERSION_13+")");
         }
     }
 
@@ -167,8 +167,8 @@ public class ClassUtil
      */
     public static String internalClassName(String externalClassName)
     {
-        return externalClassName.replace(JavaConstants.PACKAGE_SEPARATOR,
-                                         ClassConstants.PACKAGE_SEPARATOR);
+        return externalClassName.replace(JavaTypeConstants.PACKAGE_SEPARATOR,
+                                         TypeConstants.PACKAGE_SEPARATOR);
     }
 
 
@@ -198,10 +198,10 @@ public class ClassUtil
     public static String externalClassName(String internalClassName)
     {
         return //internalClassName.startsWith(ClassConstants.PACKAGE_JAVA_LANG) &&
-               //internalClassName.indexOf(ClassConstants.PACKAGE_SEPARATOR, ClassConstants.PACKAGE_JAVA_LANG.length() + 1) < 0 ?
+               //internalClassName.indexOf(TypeConstants.PACKAGE_SEPARATOR, ClassConstants.PACKAGE_JAVA_LANG.length() + 1) < 0 ?
                //internalClassName.substring(ClassConstants.PACKAGE_JAVA_LANG.length()) :
-               internalClassName.replace(ClassConstants.PACKAGE_SEPARATOR,
-                                         JavaConstants.PACKAGE_SEPARATOR);
+               internalClassName.replace(TypeConstants.PACKAGE_SEPARATOR,
+                                         JavaTypeConstants.PACKAGE_SEPARATOR);
     }
 
 
@@ -215,7 +215,7 @@ public class ClassUtil
      */
     public static String externalBaseType(String externalArrayType)
     {
-        int index = externalArrayType.indexOf(JavaConstants.TYPE_ARRAY);
+        int index = externalArrayType.indexOf(JavaTypeConstants.ARRAY);
         return index >= 0 ?
             externalArrayType.substring(0, index) :
             externalArrayType;
@@ -232,7 +232,7 @@ public class ClassUtil
      */
     public static String externalShortClassName(String externalClassName)
     {
-        int index = externalClassName.lastIndexOf(JavaConstants.PACKAGE_SEPARATOR);
+        int index = externalClassName.lastIndexOf(JavaTypeConstants.PACKAGE_SEPARATOR);
         return externalClassName.substring(index+1);
     }
 
@@ -247,7 +247,7 @@ public class ClassUtil
      */
     public static String internalShortClassName(String internalClassName)
     {
-        int index = internalClassName.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR);
+        int index = internalClassName.lastIndexOf(TypeConstants.PACKAGE_SEPARATOR);
         return internalClassName.substring(index+1);
     }
 
@@ -262,7 +262,7 @@ public class ClassUtil
     public static boolean isInternalArrayType(String internalType)
     {
         return internalType.length() > 1 &&
-               internalType.charAt(0) == ClassConstants.TYPE_ARRAY;
+               internalType.charAt(0) == TypeConstants.ARRAY;
     }
 
 
@@ -275,7 +275,7 @@ public class ClassUtil
     public static int internalArrayTypeDimensionCount(String internalType)
     {
         int dimensions = 0;
-        while (internalType.charAt(dimensions) == ClassConstants.TYPE_ARRAY)
+        while (internalType.charAt(dimensions) == TypeConstants.ARRAY)
         {
             dimensions++;
         }
@@ -312,14 +312,14 @@ public class ClassUtil
      */
     public static boolean isInternalPrimitiveType(char internalType)
     {
-        return internalType == ClassConstants.TYPE_BOOLEAN ||
-               internalType == ClassConstants.TYPE_BYTE    ||
-               internalType == ClassConstants.TYPE_CHAR    ||
-               internalType == ClassConstants.TYPE_SHORT   ||
-               internalType == ClassConstants.TYPE_INT     ||
-               internalType == ClassConstants.TYPE_FLOAT   ||
-               internalType == ClassConstants.TYPE_LONG    ||
-               internalType == ClassConstants.TYPE_DOUBLE;
+        return internalType == TypeConstants.BOOLEAN ||
+               internalType == TypeConstants.BYTE    ||
+               internalType == TypeConstants.CHAR    ||
+               internalType == TypeConstants.SHORT   ||
+               internalType == TypeConstants.INT     ||
+               internalType == TypeConstants.FLOAT   ||
+               internalType == TypeConstants.LONG    ||
+               internalType == TypeConstants.DOUBLE;
     }
 
 
@@ -347,8 +347,8 @@ public class ClassUtil
     public static boolean isInternalCategory2Type(String internalType)
     {
         return internalType.length() == 1 &&
-               (internalType.charAt(0) == ClassConstants.TYPE_LONG ||
-                internalType.charAt(0) == ClassConstants.TYPE_DOUBLE);
+               (internalType.charAt(0) == TypeConstants.LONG ||
+                internalType.charAt(0) == TypeConstants.DOUBLE);
     }
 
 
@@ -364,8 +364,8 @@ public class ClassUtil
     {
         int length = internalType.length();
         return length > 1 &&
-//             internalType.charAt(0)        == ClassConstants.TYPE_CLASS_START &&
-               internalType.charAt(length-1) == ClassConstants.TYPE_CLASS_END;
+//             internalType.charAt(0)        == TypeConstants.CLASS_START &&
+               internalType.charAt(length-1) == TypeConstants.CLASS_END;
     }
 
 
@@ -399,12 +399,12 @@ public class ClassUtil
 
         for (int dimension = 0; dimension < dimensionCount; dimension++)
         {
-            buffer.append(ClassConstants.TYPE_ARRAY);
+            buffer.append(TypeConstants.ARRAY);
         }
 
-        return buffer.append(ClassConstants.TYPE_CLASS_START)
+        return buffer.append(TypeConstants.CLASS_START)
                      .append(internalClassName)
-                     .append(ClassConstants.TYPE_CLASS_END)
+                     .append(TypeConstants.CLASS_END)
                      .toString();
     }
 
@@ -426,7 +426,7 @@ public class ClassUtil
 
         for (int dimension = 0; dimension < dimensionDelta; dimension++)
         {
-            buffer.append(ClassConstants.TYPE_ARRAY);
+            buffer.append(TypeConstants.ARRAY);
         }
 
         return buffer.append(internalType).toString();
@@ -444,7 +444,7 @@ public class ClassUtil
      */
     public static String internalTypeFromArrayType(String internalArrayType)
     {
-        int index = internalArrayType.lastIndexOf(ClassConstants.TYPE_ARRAY);
+        int index = internalArrayType.lastIndexOf(TypeConstants.ARRAY);
         return internalArrayType.substring(index + 1);
     }
 
@@ -504,7 +504,7 @@ public class ClassUtil
     public static String internalClassNameFromClassType(String internalClassType)
     {
         return isInternalClassType(internalClassType) ?
-            internalClassType.substring(internalClassType.indexOf(ClassConstants.TYPE_CLASS_START)+1,
+            internalClassType.substring(internalClassType.indexOf(TypeConstants.CLASS_START)+1,
                                         internalClassType.length()-1) :
             internalClassType;
     }
@@ -551,16 +551,16 @@ public class ClassUtil
     {
         switch (internalPrimitiveType)
         {
-            case ClassConstants.TYPE_VOID:    return ClassConstants.NAME_JAVA_LANG_VOID;
-            case ClassConstants.TYPE_BOOLEAN: return ClassConstants.NAME_JAVA_LANG_BOOLEAN;
-            case ClassConstants.TYPE_BYTE:    return ClassConstants.NAME_JAVA_LANG_BYTE;
-            case ClassConstants.TYPE_CHAR:    return ClassConstants.NAME_JAVA_LANG_CHARACTER;
-            case ClassConstants.TYPE_SHORT:   return ClassConstants.NAME_JAVA_LANG_SHORT;
-            case ClassConstants.TYPE_INT:     return ClassConstants.NAME_JAVA_LANG_INTEGER;
-            case ClassConstants.TYPE_LONG:    return ClassConstants.NAME_JAVA_LANG_LONG;
-            case ClassConstants.TYPE_FLOAT:   return ClassConstants.NAME_JAVA_LANG_FLOAT;
-            case ClassConstants.TYPE_DOUBLE:  return ClassConstants.NAME_JAVA_LANG_DOUBLE;
-            case ClassConstants.TYPE_ARRAY:   return ClassConstants.NAME_JAVA_LANG_REFLECT_ARRAY;
+            case TypeConstants.VOID:    return ClassConstants.NAME_JAVA_LANG_VOID;
+            case TypeConstants.BOOLEAN: return ClassConstants.NAME_JAVA_LANG_BOOLEAN;
+            case TypeConstants.BYTE:    return ClassConstants.NAME_JAVA_LANG_BYTE;
+            case TypeConstants.CHAR:    return ClassConstants.NAME_JAVA_LANG_CHARACTER;
+            case TypeConstants.SHORT:   return ClassConstants.NAME_JAVA_LANG_SHORT;
+            case TypeConstants.INT:     return ClassConstants.NAME_JAVA_LANG_INTEGER;
+            case TypeConstants.LONG:    return ClassConstants.NAME_JAVA_LANG_LONG;
+            case TypeConstants.FLOAT:   return ClassConstants.NAME_JAVA_LANG_FLOAT;
+            case TypeConstants.DOUBLE:  return ClassConstants.NAME_JAVA_LANG_DOUBLE;
+            case TypeConstants.ARRAY:   return ClassConstants.NAME_JAVA_LANG_REFLECT_ARRAY;
             default:
                 throw new IllegalArgumentException("Unexpected primitive type ["+internalPrimitiveType+"]");
         }
@@ -579,16 +579,16 @@ public class ClassUtil
      */
     public static char internalPrimitiveTypeFromNumericClassName(String internalPrimitiveClassName)
     {
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_VOID))          return ClassConstants.TYPE_VOID;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_BOOLEAN))       return ClassConstants.TYPE_BOOLEAN;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_BYTE))          return ClassConstants.TYPE_BYTE;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_CHARACTER))     return ClassConstants.TYPE_CHAR;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_SHORT))         return ClassConstants.TYPE_SHORT;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_INTEGER))       return ClassConstants.TYPE_INT;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_LONG))          return ClassConstants.TYPE_LONG;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_FLOAT))         return ClassConstants.TYPE_FLOAT;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_DOUBLE))        return ClassConstants.TYPE_DOUBLE;
-        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_REFLECT_ARRAY)) return ClassConstants.TYPE_ARRAY;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_VOID))          return TypeConstants.VOID;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_BOOLEAN))       return TypeConstants.BOOLEAN;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_BYTE))          return TypeConstants.BYTE;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_CHARACTER))     return TypeConstants.CHAR;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_SHORT))         return TypeConstants.SHORT;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_INTEGER))       return TypeConstants.INT;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_LONG))          return TypeConstants.LONG;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_FLOAT))         return TypeConstants.FLOAT;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_DOUBLE))        return TypeConstants.DOUBLE;
+        if (internalPrimitiveClassName.equals(ClassConstants.NAME_JAVA_LANG_REFLECT_ARRAY)) return TypeConstants.ARRAY;
 
         throw new IllegalArgumentException("Unexpected primitive class name ["+internalPrimitiveClassName+"]");
     }
@@ -604,8 +604,8 @@ public class ClassUtil
      */
     public static String internalSimpleClassName(String internalClassName)
     {
-        int index1 = internalClassName.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR);
-        int index2 = internalClassName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR);
+        int index1 = internalClassName.lastIndexOf(TypeConstants.PACKAGE_SEPARATOR);
+        int index2 = internalClassName.lastIndexOf(TypeConstants.INNER_CLASS_SEPARATOR);
 
         return internalClassName.substring(Math.max(index1, index2) + 1);
     }
@@ -635,7 +635,7 @@ public class ClassUtil
      */
     public static String internalMethodReturnType(String internalMethodDescriptor)
     {
-        int index = internalMethodDescriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        int index = internalMethodDescriptor.indexOf(TypeConstants.METHOD_ARGUMENTS_CLOSE);
         return internalMethodDescriptor.substring(index + 1);
     }
 
@@ -666,7 +666,7 @@ public class ClassUtil
                                                    int    accessFlags)
     {
         return internalMethodParameterCount(internalMethodDescriptor,
-                                            (accessFlags & ClassConstants.ACC_STATIC) != 0);
+                                            (accessFlags & AccessConstants.STATIC) != 0);
     }
 
 
@@ -690,17 +690,17 @@ public class ClassUtil
             char c = internalMethodDescriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.TYPE_ARRAY:
+                case TypeConstants.ARRAY:
                 {
                     // Just ignore all array characters.
                     break;
                 }
-                case ClassConstants.TYPE_CLASS_START:
+                case TypeConstants.CLASS_START:
                 {
                     counter++;
 
                     // Skip the class name.
-                    index = internalMethodDescriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
+                    index = internalMethodDescriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
                     break;
                 }
                 default:
@@ -708,7 +708,7 @@ public class ClassUtil
                     counter++;
                     break;
                 }
-                case ClassConstants.METHOD_ARGUMENTS_CLOSE:
+                case TypeConstants.METHOD_ARGUMENTS_CLOSE:
                 {
                     return counter;
                 }
@@ -748,7 +748,7 @@ public class ClassUtil
                                                   int    accessFlags)
     {
         return internalMethodParameterSize(internalMethodDescriptor,
-                                           (accessFlags & ClassConstants.ACC_STATIC) != 0);
+                                           (accessFlags & AccessConstants.STATIC) != 0);
     }
 
 
@@ -775,31 +775,31 @@ public class ClassUtil
             char c = internalMethodDescriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.TYPE_LONG:
-                case ClassConstants.TYPE_DOUBLE:
+                case TypeConstants.LONG:
+                case TypeConstants.DOUBLE:
                 {
                     size += 2;
                     break;
                 }
-                case ClassConstants.TYPE_CLASS_START:
+                case TypeConstants.CLASS_START:
                 {
                     size++;
 
                     // Skip the class name.
-                    index = internalMethodDescriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
+                    index = internalMethodDescriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
                     break;
                 }
-                case ClassConstants.TYPE_ARRAY:
+                case TypeConstants.ARRAY:
                 {
                     size++;
 
                     // Skip all array characters.
-                    while ((c = internalMethodDescriptor.charAt(index++)) == ClassConstants.TYPE_ARRAY) {}
+                    while ((c = internalMethodDescriptor.charAt(index++)) == TypeConstants.ARRAY) {}
 
-                    if (c == ClassConstants.TYPE_CLASS_START)
+                    if (c == TypeConstants.CLASS_START)
                     {
                         // Skip the class type.
-                        index = internalMethodDescriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
+                        index = internalMethodDescriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
                     }
                     break;
                 }
@@ -808,7 +808,7 @@ public class ClassUtil
                     size++;
                     break;
                 }
-                case ClassConstants.METHOD_ARGUMENTS_CLOSE:
+                case TypeConstants.METHOD_ARGUMENTS_CLOSE:
                 {
                     return size;
                 }
@@ -838,7 +838,7 @@ public class ClassUtil
                                                     int    variableIndex)
     {
         return internalMethodParameterNumber(internalMethodDescriptor,
-                                             (accessFlags & ClassConstants.ACC_STATIC) != 0,
+                                             (accessFlags & AccessConstants.STATIC) != 0,
                                              variableIndex);
     }
 
@@ -920,7 +920,7 @@ public class ClassUtil
                                                   int    parameterNumber)
     {
         return internalMethodVariableIndex(internalMethodDescriptor,
-                                           (accessFlags & ClassConstants.ACC_STATIC) != 0,
+                                           (accessFlags & AccessConstants.STATIC) != 0,
                                            parameterNumber);
     }
 
@@ -999,12 +999,12 @@ public class ClassUtil
         if (internalType.length() == 1)
         {
             char internalPrimitiveType = internalType.charAt(0);
-            if      (internalPrimitiveType == ClassConstants.TYPE_LONG ||
-                     internalPrimitiveType == ClassConstants.TYPE_DOUBLE)
+            if      (internalPrimitiveType == TypeConstants.LONG ||
+                     internalPrimitiveType == TypeConstants.DOUBLE)
             {
                 return 2;
             }
-            else if (internalPrimitiveType == ClassConstants.TYPE_VOID)
+            else if (internalPrimitiveType == TypeConstants.VOID)
             {
                 return 0;
             }
@@ -1029,33 +1029,33 @@ public class ClassUtil
         int dimensionCount = externalArrayTypeDimensionCount(externalType);
         if (dimensionCount > 0)
         {
-            externalType = externalType.substring(0, externalType.length() - dimensionCount * JavaConstants.TYPE_ARRAY.length());
+            externalType = externalType.substring(0, externalType.length() - dimensionCount * JavaTypeConstants.ARRAY.length());
         }
 
         // Analyze the actual type part.
         char internalTypeChar =
-            externalType.equals(JavaConstants.TYPE_VOID   ) ? ClassConstants.TYPE_VOID    :
-            externalType.equals(JavaConstants.TYPE_BOOLEAN) ? ClassConstants.TYPE_BOOLEAN :
-            externalType.equals(JavaConstants.TYPE_BYTE   ) ? ClassConstants.TYPE_BYTE    :
-            externalType.equals(JavaConstants.TYPE_CHAR   ) ? ClassConstants.TYPE_CHAR    :
-            externalType.equals(JavaConstants.TYPE_SHORT  ) ? ClassConstants.TYPE_SHORT   :
-            externalType.equals(JavaConstants.TYPE_INT    ) ? ClassConstants.TYPE_INT     :
-            externalType.equals(JavaConstants.TYPE_FLOAT  ) ? ClassConstants.TYPE_FLOAT   :
-            externalType.equals(JavaConstants.TYPE_LONG   ) ? ClassConstants.TYPE_LONG    :
-            externalType.equals(JavaConstants.TYPE_DOUBLE ) ? ClassConstants.TYPE_DOUBLE  :
+            externalType.equals(JavaTypeConstants.VOID   ) ? TypeConstants.VOID    :
+            externalType.equals(JavaTypeConstants.BOOLEAN) ? TypeConstants.BOOLEAN :
+            externalType.equals(JavaTypeConstants.BYTE   ) ? TypeConstants.BYTE    :
+            externalType.equals(JavaTypeConstants.CHAR   ) ? TypeConstants.CHAR    :
+            externalType.equals(JavaTypeConstants.SHORT  ) ? TypeConstants.SHORT   :
+            externalType.equals(JavaTypeConstants.INT    ) ? TypeConstants.INT     :
+            externalType.equals(JavaTypeConstants.FLOAT  ) ? TypeConstants.FLOAT   :
+            externalType.equals(JavaTypeConstants.LONG   ) ? TypeConstants.LONG    :
+            externalType.equals(JavaTypeConstants.DOUBLE ) ? TypeConstants.DOUBLE  :
             externalType.equals("%"                       ) ? '%'                         :
                                                               (char)0;
 
         String internalType =
             internalTypeChar != 0 ? String.valueOf(internalTypeChar) :
-                                    ClassConstants.TYPE_CLASS_START +
+                                    TypeConstants.CLASS_START +
                                     internalClassName(externalType) +
-                                    ClassConstants.TYPE_CLASS_END;
+                                    TypeConstants.CLASS_END;
 
         // Prepend the array part, if any.
         for (int count = 0; count < dimensionCount; count++)
         {
-            internalType = ClassConstants.TYPE_ARRAY + internalType;
+            internalType = TypeConstants.ARRAY + internalType;
         }
 
         return internalType;
@@ -1071,10 +1071,10 @@ public class ClassUtil
     public static int externalArrayTypeDimensionCount(String externalType)
     {
         int dimensions = 0;
-        int length = JavaConstants.TYPE_ARRAY.length();
+        int length = JavaTypeConstants.ARRAY.length();
         int offset = externalType.length() - length;
         while (externalType.regionMatches(offset,
-                                          JavaConstants.TYPE_ARRAY,
+                                          JavaTypeConstants.ARRAY,
                                           0,
                                           length))
         {
@@ -1110,18 +1110,18 @@ public class ClassUtil
         char internalTypeChar = internalType.charAt(0);
 
         String externalType =
-            internalTypeChar == ClassConstants.TYPE_VOID        ? JavaConstants.TYPE_VOID    :
-            internalTypeChar == ClassConstants.TYPE_BOOLEAN     ? JavaConstants.TYPE_BOOLEAN :
-            internalTypeChar == ClassConstants.TYPE_BYTE        ? JavaConstants.TYPE_BYTE    :
-            internalTypeChar == ClassConstants.TYPE_CHAR        ? JavaConstants.TYPE_CHAR    :
-            internalTypeChar == ClassConstants.TYPE_SHORT       ? JavaConstants.TYPE_SHORT   :
-            internalTypeChar == ClassConstants.TYPE_INT         ? JavaConstants.TYPE_INT     :
-            internalTypeChar == ClassConstants.TYPE_FLOAT       ? JavaConstants.TYPE_FLOAT   :
-            internalTypeChar == ClassConstants.TYPE_LONG        ? JavaConstants.TYPE_LONG    :
-            internalTypeChar == ClassConstants.TYPE_DOUBLE      ? JavaConstants.TYPE_DOUBLE  :
-            internalTypeChar == '%'                             ? "%"                        :
-            internalTypeChar == ClassConstants.TYPE_CLASS_START ? externalClassName(internalType.substring(1, internalType.indexOf(ClassConstants.TYPE_CLASS_END))) :
-                                                                  null;
+            internalTypeChar == TypeConstants.VOID        ? JavaTypeConstants.VOID    :
+            internalTypeChar == TypeConstants.BOOLEAN     ? JavaTypeConstants.BOOLEAN :
+            internalTypeChar == TypeConstants.BYTE        ? JavaTypeConstants.BYTE    :
+            internalTypeChar == TypeConstants.CHAR        ? JavaTypeConstants.CHAR    :
+            internalTypeChar == TypeConstants.SHORT       ? JavaTypeConstants.SHORT   :
+            internalTypeChar == TypeConstants.INT         ? JavaTypeConstants.INT     :
+            internalTypeChar == TypeConstants.FLOAT       ? JavaTypeConstants.FLOAT   :
+            internalTypeChar == TypeConstants.LONG        ? JavaTypeConstants.LONG    :
+            internalTypeChar == TypeConstants.DOUBLE      ? JavaTypeConstants.DOUBLE  :
+            internalTypeChar == '%'                       ? "%"                       :
+            internalTypeChar == TypeConstants.CLASS_START ? externalClassName(internalType.substring(1, internalType.indexOf(TypeConstants.CLASS_END))) :
+                                                            null;
 
         if (externalType == null)
         {
@@ -1131,7 +1131,7 @@ public class ClassUtil
         // Append the array part, if any.
         for (int count = 0; count < dimensionCount; count++)
         {
-            externalType += JavaConstants.TYPE_ARRAY;
+            externalType += JavaTypeConstants.ARRAY;
         }
 
         return externalType;
@@ -1168,7 +1168,7 @@ public class ClassUtil
      */
     public static boolean isInternalMethodDescriptor(String internalDescriptor)
     {
-        return internalDescriptor.charAt(0) == ClassConstants.METHOD_ARGUMENTS_OPEN;
+        return internalDescriptor.charAt(0) == TypeConstants.METHOD_ARGUMENTS_OPEN;
     }
 
 
@@ -1183,7 +1183,7 @@ public class ClassUtil
      */
     public static boolean isExternalMethodNameAndArguments(String externalMemberNameAndArguments)
     {
-        return externalMemberNameAndArguments.indexOf(JavaConstants.METHOD_ARGUMENTS_OPEN) > 0;
+        return externalMemberNameAndArguments.indexOf(JavaTypeConstants.METHOD_ARGUMENTS_OPEN) > 0;
     }
 
 
@@ -1216,7 +1216,7 @@ public class ClassUtil
                                                   String externalMethodNameAndArguments)
     {
         StringBuffer internalMethodDescriptor = new StringBuffer();
-        internalMethodDescriptor.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+        internalMethodDescriptor.append(TypeConstants.METHOD_ARGUMENTS_OPEN);
 
         ExternalTypeEnumeration externalTypeEnumeration =
             new ExternalTypeEnumeration(externalMethodNameAndArguments);
@@ -1226,7 +1226,7 @@ public class ClassUtil
             internalMethodDescriptor.append(internalType(externalTypeEnumeration.nextType()));
         }
 
-        internalMethodDescriptor.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        internalMethodDescriptor.append(TypeConstants.METHOD_ARGUMENTS_CLOSE);
         internalMethodDescriptor.append(internalType(externalReturnType));
 
         return internalMethodDescriptor.toString();
@@ -1247,14 +1247,14 @@ public class ClassUtil
                                                   List   externalArguments)
     {
         StringBuffer internalMethodDescriptor = new StringBuffer();
-        internalMethodDescriptor.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+        internalMethodDescriptor.append(TypeConstants.METHOD_ARGUMENTS_OPEN);
 
         for (int index = 0; index < externalArguments.size(); index++)
         {
             internalMethodDescriptor.append(internalType((String)externalArguments.get(index)));
         }
 
-        internalMethodDescriptor.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        internalMethodDescriptor.append(TypeConstants.METHOD_ARGUMENTS_CLOSE);
         internalMethodDescriptor.append(internalType(externalReturnType));
 
         return internalMethodDescriptor.toString();
@@ -1275,14 +1275,14 @@ public class ClassUtil
                                                                    List<String> internalArguments)
     {
         StringBuilder internalMethodDescriptor = new StringBuilder();
-        internalMethodDescriptor.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+        internalMethodDescriptor.append(TypeConstants.METHOD_ARGUMENTS_OPEN);
 
         for (String argument : internalArguments)
         {
             internalMethodDescriptor.append(argument);
         }
 
-        internalMethodDescriptor.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        internalMethodDescriptor.append(TypeConstants.METHOD_ARGUMENTS_CLOSE);
         internalMethodDescriptor.append(internalReturnType);
 
         return internalMethodDescriptor.toString();
@@ -1333,9 +1333,9 @@ public class ClassUtil
                externalMethodReturnTypeAndName(internalClassName,
                                                internalMethodName,
                                                internalMethodDescriptor) +
-               JavaConstants.METHOD_ARGUMENTS_OPEN +
+               JavaTypeConstants.METHOD_ARGUMENTS_OPEN +
                externalMethodArguments(internalMethodDescriptor) +
-               JavaConstants.METHOD_ARGUMENTS_CLOSE;
+               JavaTypeConstants.METHOD_ARGUMENTS_CLOSE;
     }
 
 
@@ -1367,52 +1367,52 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_PUBLIC) != 0)
+        if ((accessFlags & AccessConstants.PUBLIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PUBLIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PUBLIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_PRIVATE) != 0)
+        if ((accessFlags & AccessConstants.PRIVATE) != 0)
         {
             // Only in InnerClasses attributes.
-            string.append(prefix).append(JavaConstants.ACC_PRIVATE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PRIVATE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_PROTECTED) != 0)
+        if ((accessFlags & AccessConstants.PROTECTED) != 0)
         {
             // Only in InnerClasses attributes.
-            string.append(prefix).append(JavaConstants.ACC_PROTECTED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PROTECTED).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_STATIC) != 0)
+        if ((accessFlags & AccessConstants.STATIC) != 0)
         {
             // Only in InnerClasses attributes.
-            string.append(prefix).append(JavaConstants.ACC_STATIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.STATIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_FINAL) != 0)
+        if ((accessFlags & AccessConstants.FINAL) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_FINAL).append(' ');
+            string.append(prefix).append(JavaAccessConstants.FINAL).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_ANNOTATION) != 0)
+        if ((accessFlags & AccessConstants.ANNOTATION) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_ANNOTATION);
+            string.append(prefix).append(JavaAccessConstants.ANNOTATION);
         }
-        if ((accessFlags & ClassConstants.ACC_INTERFACE) != 0)
+        if ((accessFlags & AccessConstants.INTERFACE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_INTERFACE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.INTERFACE).append(' ');
         }
-        else if ((accessFlags & ClassConstants.ACC_ENUM) != 0)
+        else if ((accessFlags & AccessConstants.ENUM) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_ENUM).append(' ');
+            string.append(prefix).append(JavaAccessConstants.ENUM).append(' ');
         }
-        else if ((accessFlags & ClassConstants.ACC_ABSTRACT) != 0)
+        else if ((accessFlags & AccessConstants.ABSTRACT) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_ABSTRACT).append(' ');
+            string.append(prefix).append(JavaAccessConstants.ABSTRACT).append(' ');
         }
-        else if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        else if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
-        else if ((accessFlags & ClassConstants.ACC_MODULE) != 0)
+        else if ((accessFlags & AccessConstants.MODULE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_MODULE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.MODULE).append(' ');
         }
 
         return string.toString();
@@ -1447,37 +1447,37 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_PUBLIC) != 0)
+        if ((accessFlags & AccessConstants.PUBLIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PUBLIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PUBLIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_PRIVATE) != 0)
+        if ((accessFlags & AccessConstants.PRIVATE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PRIVATE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PRIVATE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_PROTECTED) != 0)
+        if ((accessFlags & AccessConstants.PROTECTED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PROTECTED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PROTECTED).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_STATIC) != 0)
+        if ((accessFlags & AccessConstants.STATIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_STATIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.STATIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_FINAL) != 0)
+        if ((accessFlags & AccessConstants.FINAL) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_FINAL).append(' ');
+            string.append(prefix).append(JavaAccessConstants.FINAL).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_VOLATILE) != 0)
+        if ((accessFlags & AccessConstants.VOLATILE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_VOLATILE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.VOLATILE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_TRANSIENT) != 0)
+        if ((accessFlags & AccessConstants.TRANSIENT) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_TRANSIENT).append(' ');
+            string.append(prefix).append(JavaAccessConstants.TRANSIENT).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
 
         return string.toString();
@@ -1512,53 +1512,53 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_PUBLIC) != 0)
+        if ((accessFlags & AccessConstants.PUBLIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PUBLIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PUBLIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_PRIVATE) != 0)
+        if ((accessFlags & AccessConstants.PRIVATE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PRIVATE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PRIVATE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_PROTECTED) != 0)
+        if ((accessFlags & AccessConstants.PROTECTED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_PROTECTED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.PROTECTED).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_STATIC) != 0)
+        if ((accessFlags & AccessConstants.STATIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_STATIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.STATIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_FINAL) != 0)
+        if ((accessFlags & AccessConstants.FINAL) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_FINAL).append(' ');
+            string.append(prefix).append(JavaAccessConstants.FINAL).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_SYNCHRONIZED) != 0)
+        if ((accessFlags & AccessConstants.SYNCHRONIZED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNCHRONIZED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNCHRONIZED).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_BRIDGE) != 0)
+        if ((accessFlags & AccessConstants.BRIDGE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_BRIDGE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.BRIDGE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_VARARGS) != 0)
+        if ((accessFlags & AccessConstants.VARARGS) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_VARARGS).append(' ');
+            string.append(prefix).append(JavaAccessConstants.VARARGS).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_NATIVE) != 0)
+        if ((accessFlags & AccessConstants.NATIVE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_NATIVE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.NATIVE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_ABSTRACT) != 0)
+        if ((accessFlags & AccessConstants.ABSTRACT) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_ABSTRACT).append(' ');
+            string.append(prefix).append(JavaAccessConstants.ABSTRACT).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_STRICT) != 0)
+        if ((accessFlags & AccessConstants.STRICT) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_STRICT).append(' ');
+            string.append(prefix).append(JavaAccessConstants.STRICT).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
 
         return string.toString();
@@ -1595,17 +1595,17 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_FINAL) != 0)
+        if ((accessFlags & AccessConstants.FINAL) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_FINAL).append(' ');
+            string.append(prefix).append(JavaAccessConstants.FINAL).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_MANDATED) != 0)
+        if ((accessFlags & AccessConstants.MANDATED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_MANDATED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.MANDATED).append(' ');
         }
 
         return string.toString();
@@ -1655,17 +1655,17 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_OPEN) != 0)
+        if ((accessFlags & AccessConstants.OPEN) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_OPEN).append(' ');
+            string.append(prefix).append(JavaAccessConstants.OPEN).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_MANDATED) != 0)
+        if ((accessFlags & AccessConstants.MANDATED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_MANDATED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.MANDATED).append(' ');
         }
 
         return string.toString();
@@ -1702,21 +1702,21 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_TRANSITIVE) != 0)
+        if ((accessFlags & AccessConstants.TRANSITIVE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_TRANSITIVE).append(' ');
+            string.append(prefix).append(JavaAccessConstants.TRANSITIVE).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_STATIC_PHASE) != 0)
+        if ((accessFlags & AccessConstants.STATIC_PHASE) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_STATIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.STATIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_MANDATED) != 0)
+        if ((accessFlags & AccessConstants.MANDATED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_MANDATED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.MANDATED).append(' ');
         }
 
         return string.toString();
@@ -1753,13 +1753,13 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_MANDATED) != 0)
+        if ((accessFlags & AccessConstants.MANDATED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_MANDATED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.MANDATED).append(' ');
         }
 
         return string.toString();
@@ -1796,13 +1796,13 @@ public class ClassUtil
 
         StringBuffer string = new StringBuffer(50);
 
-        if ((accessFlags & ClassConstants.ACC_SYNTHETIC) != 0)
+        if ((accessFlags & AccessConstants.SYNTHETIC) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_SYNTHETIC).append(' ');
+            string.append(prefix).append(JavaAccessConstants.SYNTHETIC).append(' ');
         }
-        if ((accessFlags & ClassConstants.ACC_MANDATED) != 0)
+        if ((accessFlags & AccessConstants.MANDATED) != 0)
         {
-            string.append(prefix).append(JavaConstants.ACC_MANDATED).append(' ');
+            string.append(prefix).append(JavaAccessConstants.MANDATED).append(' ');
         }
 
         return string.toString();
@@ -1855,7 +1855,7 @@ public class ClassUtil
             externalMethodNameAndArguments.append(externalType(internalTypeEnumeration.nextType()));
             if (internalTypeEnumeration.hasMoreTypes())
             {
-                externalMethodNameAndArguments.append(JavaConstants.METHOD_ARGUMENTS_SEPARATOR);
+                externalMethodNameAndArguments.append(JavaTypeConstants.METHOD_ARGUMENTS_SEPARATOR);
             }
         }
 
@@ -1889,7 +1889,7 @@ public class ClassUtil
      */
     public static String internalPackagePrefix(String internalClassName)
     {
-        return internalClassName.substring(0, internalClassName.lastIndexOf(ClassConstants.PACKAGE_SEPARATOR,
+        return internalClassName.substring(0, internalClassName.lastIndexOf(TypeConstants.PACKAGE_SEPARATOR,
                                                                             internalClassName.length() - 2) + 1);
     }
 
@@ -1920,7 +1920,7 @@ public class ClassUtil
      */
     public static String externalPackagePrefix(String externalClassName)
     {
-        return externalClassName.substring(0, externalClassName.lastIndexOf(JavaConstants.PACKAGE_SEPARATOR,
+        return externalClassName.substring(0, externalClassName.lastIndexOf(JavaTypeConstants.PACKAGE_SEPARATOR,
                                                                             externalClassName.length() - 2) + 1);
     }
 }

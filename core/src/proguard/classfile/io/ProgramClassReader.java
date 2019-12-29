@@ -124,8 +124,8 @@ implements   ClassVisitor,
             // Long constants and double constants take up two entries in the
             // constant pool.
             int tag = constant.getTag();
-            if (tag == ClassConstants.CONSTANT_Long ||
-                tag == ClassConstants.CONSTANT_Double)
+            if (tag == Constant.LONG ||
+                tag == Constant.DOUBLE)
             {
                 programClass.constantPool[++index] = null;
             }
@@ -260,7 +260,7 @@ implements   ClassVisitor,
 
         switch (u2primitiveType)
         {
-            case ClassConstants.TYPE_BOOLEAN:
+            case TypeConstants.BOOLEAN:
             {
                 boolean[] values = new boolean[u4length];
 
@@ -272,7 +272,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_BYTE:
+            case TypeConstants.BYTE:
             {
                 byte[] values = new byte[u4length];
                 dataInput.readFully(values);
@@ -280,7 +280,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_CHAR:
+            case TypeConstants.CHAR:
             {
                 char[] values = new char[u4length];
 
@@ -292,7 +292,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_SHORT:
+            case TypeConstants.SHORT:
             {
                 short[] values = new short[u4length];
 
@@ -304,7 +304,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_INT:
+            case TypeConstants.INT:
             {
                 int[] values = new int[u4length];
 
@@ -316,7 +316,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_FLOAT:
+            case TypeConstants.FLOAT:
             {
                 float[] values = new float[u4length];
 
@@ -328,7 +328,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_LONG:
+            case TypeConstants.LONG:
             {
                 long[] values = new long[u4length];
 
@@ -340,7 +340,7 @@ implements   ClassVisitor,
                 primitiveArrayConstant.values = values;
                 break;
             }
-            case ClassConstants.TYPE_DOUBLE:
+            case TypeConstants.DOUBLE:
             {
                 double[] values = new double[u4length];
 
@@ -1218,24 +1218,24 @@ implements   ClassVisitor,
 
         switch (u1tag)
         {
-            case ClassConstants.CONSTANT_Integer:            return new IntegerConstant();
-            case ClassConstants.CONSTANT_Float:              return new FloatConstant();
-            case ClassConstants.CONSTANT_Long:               return new LongConstant();
-            case ClassConstants.CONSTANT_Double:             return new DoubleConstant();
-            case ClassConstants.CONSTANT_PrimitiveArray:     return new PrimitiveArrayConstant();
-            case ClassConstants.CONSTANT_String:             return new StringConstant();
-            case ClassConstants.CONSTANT_Utf8:               return new Utf8Constant();
-            case ClassConstants.CONSTANT_Dynamic:            return new DynamicConstant();
-            case ClassConstants.CONSTANT_InvokeDynamic:      return new InvokeDynamicConstant();
-            case ClassConstants.CONSTANT_MethodHandle:       return new MethodHandleConstant();
-            case ClassConstants.CONSTANT_Fieldref:           return new FieldrefConstant();
-            case ClassConstants.CONSTANT_Methodref:          return new MethodrefConstant();
-            case ClassConstants.CONSTANT_InterfaceMethodref: return new InterfaceMethodrefConstant();
-            case ClassConstants.CONSTANT_Class:              return new ClassConstant();
-            case ClassConstants.CONSTANT_MethodType:         return new MethodTypeConstant();
-            case ClassConstants.CONSTANT_NameAndType:        return new NameAndTypeConstant();
-            case ClassConstants.CONSTANT_Module:             return new ModuleConstant();
-            case ClassConstants.CONSTANT_Package:            return new PackageConstant();
+            case Constant.INTEGER:             return new IntegerConstant();
+            case Constant.FLOAT:               return new FloatConstant();
+            case Constant.LONG:                return new LongConstant();
+            case Constant.DOUBLE:              return new DoubleConstant();
+            case Constant.PRIMITIVE_ARRAY:     return new PrimitiveArrayConstant();
+            case Constant.STRING:              return new StringConstant();
+            case Constant.UTF8:                return new Utf8Constant();
+            case Constant.DYNAMIC:             return new DynamicConstant();
+            case Constant.INVOKE_DYNAMIC:      return new InvokeDynamicConstant();
+            case Constant.METHOD_HANDLE:       return new MethodHandleConstant();
+            case Constant.FIELDREF:            return new FieldrefConstant();
+            case Constant.METHODREF:           return new MethodrefConstant();
+            case Constant.INTERFACE_METHODREF: return new InterfaceMethodrefConstant();
+            case Constant.CLASS:               return new ClassConstant();
+            case Constant.METHOD_TYPE:         return new MethodTypeConstant();
+            case Constant.NAME_AND_TYPE:       return new NameAndTypeConstant();
+            case Constant.MODULE:              return new ModuleConstant();
+            case Constant.PACKAGE:             return new PackageConstant();
 
             default: throw new RuntimeException("Unknown constant type ["+u1tag+"] in constant pool");
         }
@@ -1249,37 +1249,37 @@ implements   ClassVisitor,
         String attributeName     = clazz.getString(u2attributeNameIndex);
 
         Attribute attribute =
-            attributeName.equals(ClassConstants.ATTR_BootstrapMethods)                           ? new BootstrapMethodsAttribute()                               :
-            attributeName.equals(ClassConstants.ATTR_SourceFile)                                 ? new SourceFileAttribute()                                     :
-            attributeName.equals(ClassConstants.ATTR_SourceDir)                                  ? new SourceDirAttribute()                                      :
-            attributeName.equals(ClassConstants.ATTR_SourceDebugExtension)                       ? new SourceDebugExtensionAttribute(0, u4attributeLength, null) :
-            attributeName.equals(ClassConstants.ATTR_InnerClasses)                               ? new InnerClassesAttribute()                                   :
-            attributeName.equals(ClassConstants.ATTR_EnclosingMethod)                            ? new EnclosingMethodAttribute()                                :
-            attributeName.equals(ClassConstants.ATTR_NestHost)                                   ? new NestHostAttribute()                                       :
-            attributeName.equals(ClassConstants.ATTR_NestMembers)                                ? new NestMembersAttribute()                                    :
-            attributeName.equals(ClassConstants.ATTR_Deprecated)                                 ? new DeprecatedAttribute()                                     :
-            attributeName.equals(ClassConstants.ATTR_Synthetic)                                  ? new SyntheticAttribute()                                      :
-            attributeName.equals(ClassConstants.ATTR_Signature)                                  ? new SignatureAttribute()                                      :
-            attributeName.equals(ClassConstants.ATTR_ConstantValue)                              ? new ConstantValueAttribute()                                  :
-            attributeName.equals(ClassConstants.ATTR_MethodParameters)                           ? new MethodParametersAttribute()                               :
-            attributeName.equals(ClassConstants.ATTR_Exceptions)                                 ? new ExceptionsAttribute()                                     :
-            attributeName.equals(ClassConstants.ATTR_Code)                                       ? new CodeAttribute()                                           :
-            attributeName.equals(ClassConstants.ATTR_StackMap)      && !ignoreStackMapAttributes ? new StackMapAttribute()                                       :
-            attributeName.equals(ClassConstants.ATTR_StackMapTable) && !ignoreStackMapAttributes ? new StackMapTableAttribute()                                  :
-            attributeName.equals(ClassConstants.ATTR_LineNumberTable)                            ? new LineNumberTableAttribute()                                :
-            attributeName.equals(ClassConstants.ATTR_LocalVariableTable)                         ? new LocalVariableTableAttribute()                             :
-            attributeName.equals(ClassConstants.ATTR_LocalVariableTypeTable)                     ? new LocalVariableTypeTableAttribute()                         :
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleAnnotations)                  ? new RuntimeVisibleAnnotationsAttribute()                      :
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleAnnotations)                ? new RuntimeInvisibleAnnotationsAttribute()                    :
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleParameterAnnotations)         ? new RuntimeVisibleParameterAnnotationsAttribute()             :
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations)       ? new RuntimeInvisibleParameterAnnotationsAttribute()           :
-            attributeName.equals(ClassConstants.ATTR_RuntimeVisibleTypeAnnotations)              ? new RuntimeVisibleTypeAnnotationsAttribute()                  :
-            attributeName.equals(ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations)            ? new RuntimeInvisibleTypeAnnotationsAttribute()                :
-            attributeName.equals(ClassConstants.ATTR_AnnotationDefault)                          ? new AnnotationDefaultAttribute()                              :
-            attributeName.equals(ClassConstants.ATTR_Module)                                     ? new ModuleAttribute()                                         :
-            attributeName.equals(ClassConstants.ATTR_ModuleMainClass)                            ? new ModuleMainClassAttribute()                                :
-            attributeName.equals(ClassConstants.ATTR_ModulePackages)                             ? new ModulePackagesAttribute()                                 :
-                                                                                                   new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
+            attributeName.equals(Attribute.BOOTSTRAP_METHODS)                            ? new BootstrapMethodsAttribute()                               :
+            attributeName.equals(Attribute.SOURCE_FILE)                                  ? new SourceFileAttribute()                                     :
+            attributeName.equals(Attribute.SOURCE_DIR)                                   ? new SourceDirAttribute()                                      :
+            attributeName.equals(Attribute.SOURCE_DEBUG_EXTENSION)                       ? new SourceDebugExtensionAttribute(0, u4attributeLength, null) :
+            attributeName.equals(Attribute.INNER_CLASSES)                                ? new InnerClassesAttribute()                                   :
+            attributeName.equals(Attribute.ENCLOSING_METHOD)                             ? new EnclosingMethodAttribute()                                :
+            attributeName.equals(Attribute.NEST_HOST)                                    ? new NestHostAttribute()                                       :
+            attributeName.equals(Attribute.NEST_MEMBERS)                                 ? new NestMembersAttribute()                                    :
+            attributeName.equals(Attribute.DEPRECATED)                                   ? new DeprecatedAttribute()                                     :
+            attributeName.equals(Attribute.SYNTHETIC)                                    ? new SyntheticAttribute()                                      :
+            attributeName.equals(Attribute.SIGNATURE)                                    ? new SignatureAttribute()                                      :
+            attributeName.equals(Attribute.CONSTANT_VALUE)                               ? new ConstantValueAttribute()                                  :
+            attributeName.equals(Attribute.METHOD_PARAMETERS)                            ? new MethodParametersAttribute()                               :
+            attributeName.equals(Attribute.EXCEPTIONS)                                   ? new ExceptionsAttribute()                                     :
+            attributeName.equals(Attribute.CODE)                                         ? new CodeAttribute()                                           :
+            attributeName.equals(Attribute.STACK_MAP)       && !ignoreStackMapAttributes ? new StackMapAttribute()                                       :
+            attributeName.equals(Attribute.STACK_MAP_TABLE) && !ignoreStackMapAttributes ? new StackMapTableAttribute()                                  :
+            attributeName.equals(Attribute.LINE_NUMBER_TABLE)                            ? new LineNumberTableAttribute()                                :
+            attributeName.equals(Attribute.LOCAL_VARIABLE_TABLE)                         ? new LocalVariableTableAttribute()                             :
+            attributeName.equals(Attribute.LOCAL_VARIABLE_TYPETable)                     ? new LocalVariableTypeTableAttribute()                         :
+            attributeName.equals(Attribute.RUNTIME_VISIBLE_ANNOTATIONS)                  ? new RuntimeVisibleAnnotationsAttribute()                      :
+            attributeName.equals(Attribute.RUNTIME_INVISIBLE_ANNOTATIONS)                ? new RuntimeInvisibleAnnotationsAttribute()                    :
+            attributeName.equals(Attribute.RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS)        ? new RuntimeVisibleParameterAnnotationsAttribute()             :
+            attributeName.equals(Attribute.RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS)      ? new RuntimeInvisibleParameterAnnotationsAttribute()           :
+            attributeName.equals(Attribute.RUNTIME_VISIBLE_TYPE_ANNOTATIONS)             ? new RuntimeVisibleTypeAnnotationsAttribute()                  :
+            attributeName.equals(Attribute.RUNTIME_INVISIBLE_TYPE_ANNOTATIONS)           ? new RuntimeInvisibleTypeAnnotationsAttribute()                :
+            attributeName.equals(Attribute.ANNOTATION_DEFAULT)                           ? new AnnotationDefaultAttribute()                              :
+            attributeName.equals(Attribute.MODULE)                                       ? new ModuleAttribute()                                         :
+            attributeName.equals(Attribute.MODULE_MAIN_CLASS)                            ? new ModuleMainClassAttribute()                                :
+            attributeName.equals(Attribute.MODULE_PACKAGES)                              ? new ModulePackagesAttribute()                                 :
+                                                                                           new UnknownAttribute(u2attributeNameIndex, u4attributeLength);
         attribute.u2attributeNameIndex = u2attributeNameIndex;
 
         return attribute;
@@ -1328,28 +1328,28 @@ implements   ClassVisitor,
 
         switch (u1targetType)
         {
-            case ClassConstants.ANNOTATION_TARGET_ParameterGenericClass:
-            case ClassConstants.ANNOTATION_TARGET_ParameterGenericMethod:            return new TypeParameterTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_Extends:                           return new SuperTypeTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_BoundGenericClass:
-            case ClassConstants.ANNOTATION_TARGET_BoundGenericMethod:                return new TypeParameterBoundTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_Field:
-            case ClassConstants.ANNOTATION_TARGET_Return:
-            case ClassConstants.ANNOTATION_TARGET_Receiver:                          return new EmptyTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_Parameter:                         return new FormalParameterTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_Throws:                            return new ThrowsTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_LocalVariable:
-            case ClassConstants.ANNOTATION_TARGET_ResourceVariable:                  return new LocalVariableTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_Catch:                             return new CatchTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_InstanceOf:
-            case ClassConstants.ANNOTATION_TARGET_New:
-            case ClassConstants.ANNOTATION_TARGET_MethodReferenceNew:
-            case ClassConstants.ANNOTATION_TARGET_MethodReference:                   return new OffsetTargetInfo(u1targetType);
-            case ClassConstants.ANNOTATION_TARGET_Cast:
-            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethodNew:
-            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethod:
-            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethodReferenceNew:
-            case ClassConstants.ANNOTATION_TARGET_ArgumentGenericMethodReference:    return new TypeArgumentTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_PARAMETER_GENERIC_CLASS:
+            case TargetInfo.TARGET_TYPE_PARAMETER_GENERIC_METHOD:            return new TypeParameterTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_EXTENDS:                             return new SuperTypeTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_BOUND_GENERIC_CLASS:
+            case TargetInfo.TARGET_TYPE_BOUND_GENERIC_METHOD:                return new TypeParameterBoundTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_FIELD:
+            case TargetInfo.TARGET_TYPE_RETURN:
+            case TargetInfo.TARGET_TYPE_RECEIVER:                            return new EmptyTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_PARAMETER:                           return new FormalParameterTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_THROWS:                              return new ThrowsTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_LOCAL_VARIABLE:
+            case TargetInfo.TARGET_TYPE_RESOURCE_VARIABLE:                   return new LocalVariableTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_CATCH:                               return new CatchTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_INSTANCE_OF:
+            case TargetInfo.TARGET_TYPE_NEW:
+            case TargetInfo.TARGET_TYPE_METHOD_REFERENCE_NEW:
+            case TargetInfo.TARGET_TYPE_METHOD_REFERENCE:                    return new OffsetTargetInfo(u1targetType);
+            case TargetInfo.TARGET_TYPE_CAST:
+            case TargetInfo.TARGET_TYPE_ARGUMENT_GENERIC_METHODNew:
+            case TargetInfo.TARGET_TYPE_ARGUMENT_GENERIC_METHOD:
+            case TargetInfo.TARGET_TYPE_ARGUMENT_GENERIC_METHODReferenceNew:
+            case TargetInfo.TARGET_TYPE_ARGUMENT_GENERIC_METHODReference:    return new TypeArgumentTargetInfo(u1targetType);
 
             default: throw new RuntimeException("Unknown annotation target type ["+u1targetType+"]");
         }
@@ -1362,19 +1362,19 @@ implements   ClassVisitor,
 
         switch (u1tag)
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:
-            case ClassConstants.TYPE_CHAR:
-            case ClassConstants.TYPE_SHORT:
-            case ClassConstants.TYPE_INT:
-            case ClassConstants.TYPE_FLOAT:
-            case ClassConstants.TYPE_LONG:
-            case ClassConstants.TYPE_DOUBLE:
-            case ClassConstants.ELEMENT_VALUE_STRING_CONSTANT: return new ConstantElementValue((char)u1tag);
-            case ClassConstants.ELEMENT_VALUE_ENUM_CONSTANT:   return new EnumConstantElementValue();
-            case ClassConstants.ELEMENT_VALUE_CLASS:           return new ClassElementValue();
-            case ClassConstants.ELEMENT_VALUE_ANNOTATION:      return new AnnotationElementValue();
-            case ClassConstants.ELEMENT_VALUE_ARRAY:           return new ArrayElementValue();
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:
+            case TypeConstants.FLOAT:
+            case TypeConstants.LONG:
+            case TypeConstants.DOUBLE:
+            case ElementValue.TAG_STRING_CONSTANT: return new ConstantElementValue((char)u1tag);
+            case ElementValue.TAG_ENUM_CONSTANT:   return new EnumConstantElementValue();
+            case ElementValue.TAG_CLASS:           return new ClassElementValue();
+            case ElementValue.TAG_ANNOTATION:      return new AnnotationElementValue();
+            case ElementValue.TAG_ARRAY:           return new ArrayElementValue();
 
             default: throw new IllegalArgumentException("Unknown element value tag ["+u1tag+"]");
         }

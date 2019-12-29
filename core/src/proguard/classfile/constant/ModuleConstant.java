@@ -61,7 +61,7 @@ public class ModuleConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Module;
+        return Constant.MODULE;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

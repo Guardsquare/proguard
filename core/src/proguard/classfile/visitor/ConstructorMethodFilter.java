@@ -49,7 +49,7 @@ implements   MemberVisitor,
 
     private static final Instruction[] INVOKE_INSTRUCTIONS = new Instruction[]
     {
-        new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, FIELD_INDEX),
+        new ConstantInstruction(Instruction.OP_INVOKESPECIAL, FIELD_INDEX),
     };
 
     private final InstructionSequenceMatcher invokeMatcher = new InstructionSequenceMatcher(CONSTANTS, INVOKE_INSTRUCTIONS);

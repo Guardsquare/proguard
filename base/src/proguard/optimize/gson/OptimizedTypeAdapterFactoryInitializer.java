@@ -81,7 +81,7 @@ implements   InstructionVisitor
     {
         if (method.getName(clazz).equals(OptimizedClassConstants.METHOD_NAME_CREATE)       &&
             method.getDescriptor(clazz).equals(OptimizedClassConstants.METHOD_TYPE_CREATE) &&
-            instruction.actualOpcode() == InstructionConstants.OP_ACONST_NULL)
+            instruction.actualOpcode() == Instruction.OP_ACONST_NULL)
         {
             InstructionSequenceBuilder ____ =
                 new InstructionSequenceBuilder((ProgramClass)clazz);

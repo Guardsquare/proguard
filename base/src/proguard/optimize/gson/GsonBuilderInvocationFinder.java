@@ -21,7 +21,7 @@
 package proguard.optimize.gson;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.InstructionSequenceBuilder;
@@ -67,9 +67,8 @@ implements   InstructionVisitor
                              new BasicInvocationUnit(new TypedReferenceValueFactory()),
                              true);
     private final AttributeVisitor           lazyPartialEvaluator =
-        new AttributeNameFilter(ClassConstants.ATTR_Code,
-                                new SingleTimeAttributeVisitor(
-                                             partialEvaluator));
+        new AttributeNameFilter(Attribute.CODE,
+        new SingleTimeAttributeVisitor(partialEvaluator));
     private final ClassPool                  programClassPool;
     private final ClassPool                  libraryClassPool;
     private final GsonRuntimeSettings        gsonRuntimeSettings;

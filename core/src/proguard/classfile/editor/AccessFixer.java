@@ -56,12 +56,12 @@ implements   ClassVisitor
 
     private final ClassVisitor methodHierarchyFixer =
         new AllMethodVisitor(
-        new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE |
-                                  ClassConstants.ACC_STATIC,
+        new MemberAccessFilter(0, AccessConstants.PRIVATE |
+                                  AccessConstants.STATIC,
         new InitializerMethodFilter(null,
         new SimilarMemberVisitor(false, true, false, true,
-        new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE |
-                                  ClassConstants.ACC_STATIC,
+        new MemberAccessFilter(0, AccessConstants.PRIVATE |
+                                  AccessConstants.STATIC,
         new MyReferencedMemberAccessFixer())))));
 
 
@@ -165,7 +165,7 @@ implements   ClassVisitor
         public void visitAnyElementValue(Clazz clazz, Annotation annotation, ElementValue elementValue)
         {
             // Set the referencing access flags and set the referenced class.
-            referencingMethodAccessFlags = ClassConstants.ACC_STATIC;
+            referencingMethodAccessFlags = AccessConstants.STATIC;
             referencedClass              = elementValue.referencedClass;
 
             // Fix the access flags of referenced annotation method.
@@ -296,7 +296,7 @@ implements   ClassVisitor
                 int requiredAccessLevel =
                     programClass.equals(referencingClass)         ? AccessUtil.PRIVATE         :
                     inSamePackage(programClass, referencingClass) ? AccessUtil.PACKAGE_VISIBLE :
-                    (referencingMethodAccessFlags & ClassConstants.ACC_STATIC) == 0 &&
+                    (referencingMethodAccessFlags & AccessConstants.STATIC) == 0 &&
                     (referencedClass == null ||
                      referencedClass.extends_(referencingClass))                    &&
                     referencingClass.extends_(programClass)       ? AccessUtil.PROTECTED       :

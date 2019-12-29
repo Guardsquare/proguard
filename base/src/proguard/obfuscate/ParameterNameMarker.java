@@ -123,6 +123,6 @@ implements   AttributeVisitor
 
     private boolean hasParameters(Clazz clazz, Method method)
     {
-        return method.getDescriptor(clazz).charAt(1) != ClassConstants.METHOD_ARGUMENTS_CLOSE;
+        return method.getDescriptor(clazz).charAt(1) != TypeConstants.METHOD_ARGUMENTS_CLOSE;
     }
 }

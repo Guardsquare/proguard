@@ -17,7 +17,7 @@
  */
 package proguard.evaluation.value;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 /**
  * This class represents a partially evaluated long value.
@@ -546,6 +546,6 @@ public abstract class LongValue extends Category2Value
 
     public final String internalType()
     {
-        return String.valueOf(ClassConstants.TYPE_LONG);
+        return String.valueOf(TypeConstants.LONG);
     }
 }

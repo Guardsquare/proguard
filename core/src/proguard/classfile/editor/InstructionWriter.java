@@ -162,7 +162,7 @@ implements   InstructionVisitor,
         {
             // Create a new unconditional branch that will fit.
             Instruction replacementInstruction =
-                new BranchInstruction(InstructionConstants.OP_GOTO_W,
+                new BranchInstruction(Instruction.OP_GOTO_W,
                                       branchInstruction.branchOffset);
 
             // Create a new instruction that will fit.
@@ -179,20 +179,20 @@ implements   InstructionVisitor,
                 }
 
                 // Some special cases, for which a wide branch doesn't exist.
-                case InstructionConstants.OP_IFEQ:
-                case InstructionConstants.OP_IFNE:
-                case InstructionConstants.OP_IFLT:
-                case InstructionConstants.OP_IFGE:
-                case InstructionConstants.OP_IFGT:
-                case InstructionConstants.OP_IFLE:
-                case InstructionConstants.OP_IFICMPEQ:
-                case InstructionConstants.OP_IFICMPNE:
-                case InstructionConstants.OP_IFICMPLT:
-                case InstructionConstants.OP_IFICMPGE:
-                case InstructionConstants.OP_IFICMPGT:
-                case InstructionConstants.OP_IFICMPLE:
-                case InstructionConstants.OP_IFACMPEQ:
-                case InstructionConstants.OP_IFACMPNE:
+                case Instruction.OP_IFEQ:
+                case Instruction.OP_IFNE:
+                case Instruction.OP_IFLT:
+                case Instruction.OP_IFGE:
+                case Instruction.OP_IFGT:
+                case Instruction.OP_IFLE:
+                case Instruction.OP_IFICMPEQ:
+                case Instruction.OP_IFICMPNE:
+                case Instruction.OP_IFICMPLT:
+                case Instruction.OP_IFICMPGE:
+                case Instruction.OP_IFICMPGT:
+                case Instruction.OP_IFICMPLE:
+                case Instruction.OP_IFACMPEQ:
+                case Instruction.OP_IFACMPNE:
                 {
                     // Insert the complementary conditional branch.
                     Instruction complementaryConditionalBranch =
@@ -205,8 +205,8 @@ implements   InstructionVisitor,
                     break;
                 }
 
-                case InstructionConstants.OP_IFNULL:
-                case InstructionConstants.OP_IFNONNULL:
+                case Instruction.OP_IFNULL:
+                case Instruction.OP_IFNONNULL:
                 {
                     // Insert the complementary conditional branch.
                     Instruction complementaryConditionalBranch =

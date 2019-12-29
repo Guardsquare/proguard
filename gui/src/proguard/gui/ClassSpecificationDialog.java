@@ -21,7 +21,7 @@
 package proguard.gui;
 
 import proguard.*;
-import proguard.classfile.ClassConstants;
+import proguard.classfile.AccessConstants;
 import proguard.classfile.util.ClassUtil;
 
 import javax.swing.*;
@@ -455,13 +455,13 @@ final class ClassSpecificationDialog extends JDialog
         commentsTextArea.setText(comments == null ? "" : comments);
 
         // Set the access radio buttons.
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_PUBLIC,      publicRadioButtons);
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_FINAL,       finalRadioButtons);
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_ABSTRACT,    abstractRadioButtons);
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_INTERFACE,   interfaceRadioButtons);
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_ANNOTATION,  annotationRadioButtons);
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_ENUM,        enumRadioButtons);
-        setClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_SYNTHETIC,   syntheticRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.PUBLIC,     publicRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.FINAL,      finalRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.ABSTRACT,   abstractRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.INTERFACE,  interfaceRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.ANNOTATION, annotationRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.ENUM,       enumRadioButtons);
+        setClassSpecificationRadioButtons(classSpecification, AccessConstants.SYNTHETIC,  syntheticRadioButtons);
 
         // Set the class and annotation text fields.
         annotationTypeTextField       .setText(annotationType        == null ? ""  : ClassUtil.externalType(annotationType));
@@ -524,13 +524,13 @@ final class ClassSpecificationDialog extends JDialog
                                    extendsClassName.equals("")      ? null : ClassUtil.internalClassName(extendsClassName));
 
         // Also get the access radio button settings.
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_PUBLIC,      publicRadioButtons);
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_FINAL,       finalRadioButtons);
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_ABSTRACT,    abstractRadioButtons);
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_INTERFACE,   interfaceRadioButtons);
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_ANNOTATION, annotationRadioButtons);
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_ENUM,        enumRadioButtons);
-        getClassSpecificationRadioButtons(classSpecification, ClassConstants.ACC_SYNTHETIC,   syntheticRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.PUBLIC,     publicRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.FINAL,      finalRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.ABSTRACT,   abstractRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.INTERFACE,  interfaceRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.ANNOTATION, annotationRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.ENUM,       enumRadioButtons);
+        getClassSpecificationRadioButtons(classSpecification, AccessConstants.SYNTHETIC,  syntheticRadioButtons);
 
         // Get the keep class member option lists.
         classSpecification.fieldSpecifications  = memberSpecificationsPanel.getMemberSpecifications(true);

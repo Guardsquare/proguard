@@ -694,8 +694,8 @@ public class ConfigurationParser
         while (true)
         {
             readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
-                         "', '"      + JavaConstants.ACC_INTERFACE +
-                         "', or '"   + JavaConstants.ACC_ENUM + "'",
+                         "', '"      + JavaAccessConstants.INTERFACE +
+                         "', or '"   + JavaAccessConstants.ENUM + "'",
                          false, false, true);
 
             if (!ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD.equals(nextWord))
@@ -807,7 +807,7 @@ public class ConfigurationParser
     public ClassSpecification parseClassSpecificationArguments()
     throws ParseException, IOException
     {
-        return parseClassSpecificationArguments(false);
+        return parseClassSpecificationArguments(false, true, false);
     }
 
 
@@ -826,8 +826,8 @@ public class ConfigurationParser
         if (readFirstWord)
         {
             readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
-                         "', '"      + JavaConstants.ACC_INTERFACE +
-                         "', or '"   + JavaConstants.ACC_ENUM + "'",
+                         "', '"      + JavaAccessConstants.INTERFACE +
+                         "', or '"   + JavaAccessConstants.ENUM + "'",
                          false, false, true);
         }
 
@@ -851,24 +851,24 @@ public class ConfigurationParser
 
             // Parse the class access modifiers.
             int accessFlag =
-                strippedWord.equals(JavaConstants.ACC_PUBLIC)     ? ClassConstants.ACC_PUBLIC      :
-                strippedWord.equals(JavaConstants.ACC_FINAL)      ? ClassConstants.ACC_FINAL       :
-                strippedWord.equals(JavaConstants.ACC_INTERFACE)  ? ClassConstants.ACC_INTERFACE   :
-                strippedWord.equals(JavaConstants.ACC_ABSTRACT)   ? ClassConstants.ACC_ABSTRACT    :
-                strippedWord.equals(JavaConstants.ACC_SYNTHETIC)  ? ClassConstants.ACC_SYNTHETIC   :
-                strippedWord.equals(JavaConstants.ACC_ANNOTATION) ? ClassConstants.ACC_ANNOTATION  :
-                strippedWord.equals(JavaConstants.ACC_ENUM)       ? ClassConstants.ACC_ENUM        :
-                                                                    unknownAccessFlag();
+                strippedWord.equals(JavaAccessConstants.PUBLIC)     ? AccessConstants.PUBLIC      :
+                strippedWord.equals(JavaAccessConstants.FINAL)      ? AccessConstants.FINAL       :
+                strippedWord.equals(JavaAccessConstants.INTERFACE)  ? AccessConstants.INTERFACE   :
+                strippedWord.equals(JavaAccessConstants.ABSTRACT)   ? AccessConstants.ABSTRACT    :
+                strippedWord.equals(JavaAccessConstants.SYNTHETIC)  ? AccessConstants.SYNTHETIC   :
+                strippedWord.equals(JavaAccessConstants.ANNOTATION) ? AccessConstants.ANNOTATION  :
+                strippedWord.equals(JavaAccessConstants.ENUM)       ? AccessConstants.ENUM        :
+                                                                      unknownAccessFlag();
 
             // Is it an annotation modifier?
-            if (accessFlag == ClassConstants.ACC_ANNOTATION)
+            if (accessFlag == AccessConstants.ANNOTATION)
             {
-                readNextWord("annotation type or keyword '" + JavaConstants.ACC_INTERFACE + "'",
+                readNextWord("annotation type or keyword '" + JavaAccessConstants.INTERFACE + "'",
                              false, false, false);
 
                 // Is the next word actually an annotation type?
-                if (!nextWord.equals(JavaConstants.ACC_INTERFACE) &&
-                    !nextWord.equals(JavaConstants.ACC_ENUM)      &&
+                if (!nextWord.equals(JavaAccessConstants.INTERFACE) &&
+                    !nextWord.equals(JavaAccessConstants.ENUM)      &&
                     !nextWord.equals(ConfigurationConstants.CLASS_KEYWORD))
                 {
                     // Parse the annotation type.
@@ -901,8 +901,8 @@ public class ConfigurationParser
                                          "' before " + reader.locationDescription());
             }
 
-            if (strippedWord.equals(JavaConstants.ACC_INTERFACE) ||
-                strippedWord.equals(JavaConstants.ACC_ENUM)      ||
+            if (strippedWord.equals(JavaAccessConstants.INTERFACE) ||
+                strippedWord.equals(JavaAccessConstants.ENUM)      ||
                 strippedWord.equals(ConfigurationConstants.CLASS_KEYWORD))
             {
                 // The interface or enum keyword. Stop parsing the class flags.
@@ -910,11 +910,11 @@ public class ConfigurationParser
             }
 
             // Should we read the next word?
-            if (accessFlag != ClassConstants.ACC_ANNOTATION)
+            if (accessFlag != AccessConstants.ANNOTATION)
             {
                 readNextWord("keyword '" + ConfigurationConstants.CLASS_KEYWORD +
-                             "', '"      + JavaConstants.ACC_INTERFACE +
-                             "', or '"   + JavaConstants.ACC_ENUM + "'",
+                             "', '"      + JavaAccessConstants.INTERFACE +
+                             "', or '"   + JavaAccessConstants.ENUM + "'",
                              false, false, true);
             }
         }
@@ -1048,21 +1048,21 @@ public class ConfigurationParser
 
             // Parse the class member access modifiers.
             int accessFlag =
-                strippedWord.equals(JavaConstants.ACC_PUBLIC)       ? ClassConstants.ACC_PUBLIC       :
-                strippedWord.equals(JavaConstants.ACC_PRIVATE)      ? ClassConstants.ACC_PRIVATE      :
-                strippedWord.equals(JavaConstants.ACC_PROTECTED)    ? ClassConstants.ACC_PROTECTED    :
-                strippedWord.equals(JavaConstants.ACC_STATIC)       ? ClassConstants.ACC_STATIC       :
-                strippedWord.equals(JavaConstants.ACC_FINAL)        ? ClassConstants.ACC_FINAL        :
-                strippedWord.equals(JavaConstants.ACC_SYNCHRONIZED) ? ClassConstants.ACC_SYNCHRONIZED :
-                strippedWord.equals(JavaConstants.ACC_VOLATILE)     ? ClassConstants.ACC_VOLATILE     :
-                strippedWord.equals(JavaConstants.ACC_TRANSIENT)    ? ClassConstants.ACC_TRANSIENT    :
-                strippedWord.equals(JavaConstants.ACC_BRIDGE)       ? ClassConstants.ACC_BRIDGE       :
-                strippedWord.equals(JavaConstants.ACC_VARARGS)      ? ClassConstants.ACC_VARARGS      :
-                strippedWord.equals(JavaConstants.ACC_NATIVE)       ? ClassConstants.ACC_NATIVE       :
-                strippedWord.equals(JavaConstants.ACC_ABSTRACT)     ? ClassConstants.ACC_ABSTRACT     :
-                strippedWord.equals(JavaConstants.ACC_STRICT)       ? ClassConstants.ACC_STRICT       :
-                strippedWord.equals(JavaConstants.ACC_SYNTHETIC)    ? ClassConstants.ACC_SYNTHETIC    :
-                                                                      0;
+                strippedWord.equals(JavaAccessConstants.PUBLIC)       ? AccessConstants.PUBLIC       :
+                strippedWord.equals(JavaAccessConstants.PRIVATE)      ? AccessConstants.PRIVATE      :
+                strippedWord.equals(JavaAccessConstants.PROTECTED)    ? AccessConstants.PROTECTED    :
+                strippedWord.equals(JavaAccessConstants.STATIC)       ? AccessConstants.STATIC       :
+                strippedWord.equals(JavaAccessConstants.FINAL)        ? AccessConstants.FINAL        :
+                strippedWord.equals(JavaAccessConstants.SYNCHRONIZED) ? AccessConstants.SYNCHRONIZED :
+                strippedWord.equals(JavaAccessConstants.VOLATILE)     ? AccessConstants.VOLATILE     :
+                strippedWord.equals(JavaAccessConstants.TRANSIENT)    ? AccessConstants.TRANSIENT    :
+                strippedWord.equals(JavaAccessConstants.BRIDGE)       ? AccessConstants.BRIDGE       :
+                strippedWord.equals(JavaAccessConstants.VARARGS)      ? AccessConstants.VARARGS      :
+                strippedWord.equals(JavaAccessConstants.NATIVE)       ? AccessConstants.NATIVE       :
+                strippedWord.equals(JavaAccessConstants.ABSTRACT)     ? AccessConstants.ABSTRACT     :
+                strippedWord.equals(JavaAccessConstants.STRICT)       ? AccessConstants.STRICT       :
+                strippedWord.equals(JavaAccessConstants.SYNTHETIC)    ? AccessConstants.SYNTHETIC    :
+                                                                        0;
             if (accessFlag == 0)
             {
                 // Not a class member access modifier. Stop parsing them.
@@ -1177,7 +1177,7 @@ public class ConfigurationParser
                 }
 
                 // Assign the fixed constructor type and name.
-                type = JavaConstants.TYPE_VOID;
+                type = JavaTypeConstants.VOID;
                 name = ClassConstants.METHOD_NAME_INIT;
             }
             else
@@ -1381,26 +1381,26 @@ public class ConfigurationParser
 
             switch (internalType.charAt(0))
             {
-                case ClassConstants.TYPE_BOOLEAN:
+                case TypeConstants.BOOLEAN:
                 {
                     return parseBoolean(string);
                 }
-                case ClassConstants.TYPE_BYTE:
-                case ClassConstants.TYPE_CHAR:
-                case ClassConstants.TYPE_SHORT:
-                case ClassConstants.TYPE_INT:
+                case TypeConstants.BYTE:
+                case TypeConstants.CHAR:
+                case TypeConstants.SHORT:
+                case TypeConstants.INT:
                 {
                     return Integer.decode(string);
                 }
-                //case ClassConstants.TYPE_LONG:
+                //case TypeConstants.LONG:
                 //{
                 //    return Long.decode(string);
                 //}
-                //case ClassConstants.TYPE_FLOAT:
+                //case TypeConstants.FLOAT:
                 //{
                 //    return Float.valueOf(string);
                 //}
-                //case ClassConstants.TYPE_DOUBLE:
+                //case TypeConstants.DOUBLE:
                 //{
                 //    return Double.valueOf(string);
                 //}
@@ -1942,14 +1942,14 @@ public class ConfigurationParser
         while (true)
         {
             // Can we find an opening angular bracket?
-            int openIndex = word.indexOf(ClassConstants.TYPE_GENERIC_START, index);
+            int openIndex = word.indexOf(TypeConstants.GENERIC_START, index);
             if (openIndex < 0)
             {
                 return false;
             }
 
             // Can we find a corresponding closing angular bracket?
-            int closeIndex = word.indexOf(ClassConstants.TYPE_GENERIC_END, openIndex + 1);
+            int closeIndex = word.indexOf(TypeConstants.GENERIC_END, openIndex + 1);
             if (closeIndex < 0)
             {
                 return false;
@@ -1981,7 +1981,7 @@ public class ConfigurationParser
     {
         if (((requiredSetMemberAccessFlags |
               requiredUnsetMemberAccessFlags) &
-            ~ClassConstants.VALID_ACC_FIELD) != 0)
+            ~AccessConstants.VALID_FLAGS_FIELD) != 0)
         {
             throw new ParseException("Invalid method access modifier for field before " +
                                      reader.locationDescription());
@@ -1999,7 +1999,7 @@ public class ConfigurationParser
     {
         if (((requiredSetMemberAccessFlags |
               requiredUnsetMemberAccessFlags) &
-            ~ClassConstants.VALID_ACC_METHOD) != 0)
+            ~AccessConstants.VALID_FLAGS_METHOD) != 0)
         {
             throw new ParseException("Invalid field access modifier for method before " +
                                      reader.locationDescription());

@@ -71,17 +71,17 @@ implements   MemberVisitor
         // and its class is final,
         //     or it is not being kept and it is not overridden,
         // then make it final.
-        if ((programMethod.u2accessFlags & (ClassConstants.ACC_PRIVATE |
-                                            ClassConstants.ACC_STATIC  |
-                                            ClassConstants.ACC_FINAL   |
-                                            ClassConstants.ACC_ABSTRACT)) == 0 &&
+        if ((programMethod.u2accessFlags & (AccessConstants.PRIVATE |
+                                            AccessConstants.STATIC  |
+                                            AccessConstants.FINAL   |
+                                            AccessConstants.ABSTRACT)) == 0 &&
             !name.equals(ClassConstants.METHOD_NAME_INIT)                      &&
-            ((programClass.u2accessFlags & ClassConstants.ACC_FINAL) != 0 ||
+            ((programClass.u2accessFlags & AccessConstants.FINAL) != 0 ||
              (!KeepMarker.isKept(programMethod) &&
               (programClass.subClasses == null ||
                !memberFinder.isOverriden(programClass, programMethod)))))
         {
-            programMethod.u2accessFlags |= ClassConstants.ACC_FINAL;
+            programMethod.u2accessFlags |= AccessConstants.FINAL;
 
             // Visit the method, if required.
             if (extraMemberVisitor != null)

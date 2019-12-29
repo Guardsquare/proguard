@@ -70,9 +70,9 @@ public class BranchInstruction extends Instruction
         // Remove the _w extension, if any.
         switch (opcode)
         {
-            case InstructionConstants.OP_GOTO_W: return InstructionConstants.OP_GOTO;
+            case Instruction.OP_GOTO_W: return Instruction.OP_GOTO;
 
-            case InstructionConstants.OP_JSR_W: return InstructionConstants.OP_JSR;
+            case Instruction.OP_JSR_W: return Instruction.OP_JSR;
 
             default: return opcode;
         }
@@ -84,26 +84,26 @@ public class BranchInstruction extends Instruction
         if (requiredBranchOffsetSize() == 2)
         {
             // Can we replace the wide branch by an ordinary branch?
-            if      (opcode == InstructionConstants.OP_GOTO_W)
+            if      (opcode == Instruction.OP_GOTO_W)
             {
-                opcode = InstructionConstants.OP_GOTO;
+                opcode = Instruction.OP_GOTO;
             }
-            else if (opcode == InstructionConstants.OP_JSR_W)
+            else if (opcode == Instruction.OP_JSR_W)
             {
-                opcode = InstructionConstants.OP_JSR;
+                opcode = Instruction.OP_JSR;
             }
         }
         else
         {
             // Can we provide a wide branch?
-            if      (opcode == InstructionConstants.OP_GOTO ||
-                     opcode == InstructionConstants.OP_GOTO_W)
+            if      (opcode == Instruction.OP_GOTO ||
+                     opcode == Instruction.OP_GOTO_W)
             {
-                opcode = InstructionConstants.OP_GOTO_W;
+                opcode = Instruction.OP_GOTO_W;
             }
-            else if (opcode == InstructionConstants.OP_JSR)
+            else if (opcode == Instruction.OP_JSR)
             {
-                opcode = InstructionConstants.OP_JSR_W;
+                opcode = Instruction.OP_JSR_W;
             }
             else
             {
@@ -164,8 +164,8 @@ public class BranchInstruction extends Instruction
      */
     private int branchOffsetSize()
     {
-        return opcode == InstructionConstants.OP_GOTO_W ||
-               opcode == InstructionConstants.OP_JSR_W  ? 4 :
+        return opcode == Instruction.OP_GOTO_W ||
+               opcode == Instruction.OP_JSR_W  ? 4 :
                                                           2;
     }
 

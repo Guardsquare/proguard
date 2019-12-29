@@ -99,7 +99,7 @@ implements   MemberVisitor,
             // Append a code, if the method isn't a class instance initializer.
             if (!name.equals(ClassConstants.METHOD_NAME_INIT))
             {
-                newName += ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
+                newName += TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
             }
 
             ConstantPoolEditor constantPoolEditor =
@@ -207,7 +207,7 @@ implements   MemberVisitor,
         // variable frame.
         int parameterIndex =
             syntheticParametersSize +
-            ((method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
+            ((method.getAccessFlags() & AccessConstants.STATIC) != 0 ?
                  0 : 1);
 
         int annotationIndex    = 0;
@@ -264,7 +264,7 @@ implements   MemberVisitor,
         // variable frame.
         int parameterIndex =
             syntheticParametersSize +
-            ((method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
+            ((method.getAccessFlags() & AccessConstants.STATIC) != 0 ?
                  0 : 1);
 
         InternalTypeEnumeration internalTypeEnumeration =
@@ -275,7 +275,7 @@ implements   MemberVisitor,
 
         // Copy the formal type parameters.
         newDescriptorBuffer.append(internalTypeEnumeration.formalTypeParameters());
-        newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+        newDescriptorBuffer.append(TypeConstants.METHOD_ARGUMENTS_OPEN);
 
         // Go over the parameters.
         while (internalTypeEnumeration.hasMoreTypes())
@@ -294,7 +294,7 @@ implements   MemberVisitor,
         }
 
         // Copy the return type.
-        newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        newDescriptorBuffer.append(TypeConstants.METHOD_ARGUMENTS_CLOSE);
         newDescriptorBuffer.append(internalTypeEnumeration.returnType());
 
         return newDescriptorBuffer.toString();
@@ -316,7 +316,7 @@ implements   MemberVisitor,
             // variable frame.
             int parameterIndex =
                 syntheticParametersSize +
-                ((method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ?
+                ((method.getAccessFlags() & AccessConstants.STATIC) != 0 ?
                      0 : 1);
 
             InternalTypeEnumeration internalTypeEnumeration =

@@ -40,7 +40,7 @@ public class EvaluateCode
             directoryPump.pumpDataEntries(
                 new JarReader(
                 new ClassFilter(
-                new ClassReader(false, false, false, null,
+                new ClassReader(false, false, false, false, null,
                 new AllMethodVisitor(
                 new AllAttributeVisitor(
                 new MyMethodAnalyzer()))))));
@@ -98,11 +98,11 @@ public class EvaluateCode
                 // Does the instruction return a value?
                 switch (simpleInstruction.opcode)
                 {
-                    case InstructionConstants.OP_IRETURN:
-                    case InstructionConstants.OP_LRETURN:
-                    case InstructionConstants.OP_FRETURN:
-                    case InstructionConstants.OP_DRETURN:
-                    case InstructionConstants.OP_ARETURN:
+                    case Instruction.OP_IRETURN:
+                    case Instruction.OP_LRETURN:
+                    case Instruction.OP_FRETURN:
+                    case Instruction.OP_DRETURN:
+                    case Instruction.OP_ARETURN:
                     {
                         // Print our the return value.
                         System.out.println(

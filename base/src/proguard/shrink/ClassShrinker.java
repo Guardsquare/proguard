@@ -52,8 +52,8 @@ implements   ClassVisitor,
 {
     private final SimpleUsageMarker usageMarker;
 
-    private       int[]                   constantIndexMap        = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
-    private       int[]                   bootstrapMethodIndexMap = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private       int[]                   constantIndexMap        = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
+    private       int[]                   bootstrapMethodIndexMap = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
     private final MyNestmemberShrinker    nestMemberShrinker      = new MyNestmemberShrinker();
     private final ConstantPoolRemapper    constantPoolRemapper    = new ConstantPoolRemapper();
     private final BootstrapMethodRemapper bootstrapMethodRemapper = new BootstrapMethodRemapper();
@@ -80,7 +80,7 @@ implements   ClassVisitor,
         // (used for configuration debugging).
         programClass.fieldsAccept(
             new UsedMemberFilter(usageMarker, null,
-            new MemberAccessFilter(ClassConstants.ACC_PUBLIC, 0,
+            new MemberAccessFilter(AccessConstants.PUBLIC, 0,
             new MemberToClassVisitor(
             new MultiClassVisitor(
                 new ProcessingFlagSetter(ProcessingFlags.REMOVED_FIELDS),
@@ -93,7 +93,7 @@ implements   ClassVisitor,
             new UsedMemberFilter(usageMarker, null,
             new ConstructorMethodFilter(
 
-            new MemberAccessFilter(ClassConstants.ACC_PUBLIC, 0,
+            new MemberAccessFilter(AccessConstants.PUBLIC, 0,
             new MemberToClassVisitor(
             new MultiClassVisitor(
                 new ProcessingFlagSetter(ProcessingFlags.REMOVED_CONSTRUCTORS),
@@ -102,7 +102,7 @@ implements   ClassVisitor,
             new MemberToClassVisitor(
             new ProcessingFlagSetter(ProcessingFlags.REMOVED_CONSTRUCTORS))),
 
-            new MemberAccessFilter(ClassConstants.ACC_PUBLIC, 0,
+            new MemberAccessFilter(AccessConstants.PUBLIC, 0,
             new MemberToClassVisitor(
             new MultiClassVisitor(
                 new ProcessingFlagSetter(ProcessingFlags.REMOVED_METHODS),
@@ -392,7 +392,7 @@ implements   ClassVisitor,
                     // separator.
                     else if (classEnumeration.isInnerClassName())
                     {
-                        className = className.substring(className.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                        className = className.substring(className.lastIndexOf(TypeConstants.INNER_CLASS_SEPARATOR)+1);
                     }
 
                     referencedClassIndex++;
@@ -533,7 +533,7 @@ implements   ClassVisitor,
                 new ClassHierarchyTraveler(false, true, true, false,
                 new ProgramClassFilter(
                 new UsedClassFilter(usageMarker,
-                new ClassAccessFilter(ClassConstants.ACC_INTERFACE, 0,
+                new ClassAccessFilter(AccessConstants.INTERFACE, 0,
                 new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_SHRINK,
                 new ClassNameCollector(indirectlyImplementedInterfaces))))))));
 

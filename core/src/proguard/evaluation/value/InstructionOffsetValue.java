@@ -17,7 +17,7 @@
  */
 package proguard.evaluation.value;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 /**
  * This class represents a partially evaluated instruction offset. It can
@@ -360,7 +360,7 @@ public class InstructionOffsetValue extends Category1Value
 
     public final String internalType()
     {
-        return String.valueOf(ClassConstants.TYPE_INT);
+        return String.valueOf(TypeConstants.INT);
     }
 
 

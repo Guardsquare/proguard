@@ -83,7 +83,7 @@ extends      ParticularValueFactory
     {
         return type == null ?
             TypedReferenceValueFactory.REFERENCE_VALUE_NULL :
-            new IdentifiedArrayReferenceValue(ClassConstants.TYPE_ARRAY + type,
+            new IdentifiedArrayReferenceValue(TypeConstants.ARRAY + type,
                                               referencedClass,
                                               false,
                                               arrayLength,

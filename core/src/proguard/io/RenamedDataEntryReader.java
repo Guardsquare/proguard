@@ -17,7 +17,7 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 import proguard.util.StringFunction;
 
 import java.io.IOException;
@@ -81,7 +81,7 @@ public class RenamedDataEntryReader implements DataEntryReader
         if (dataEntry.isDirectory() &&
             name.length() > 0)
         {
-            name += ClassConstants.PACKAGE_SEPARATOR;
+            name += TypeConstants.PACKAGE_SEPARATOR;
         }
 
         String newName = nameFunction.transform(name);

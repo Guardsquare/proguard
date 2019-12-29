@@ -128,7 +128,7 @@ implements AttributeVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_NEW:
+            case Instruction.OP_NEW:
             {
                 // Is it instantiating a wrapper class?
                 if (isReferencingWrapperClass(clazz, constantInstruction.constantIndex))
@@ -138,7 +138,7 @@ implements AttributeVisitor,
                     popInstruction = InstructionFactory.create(codeAttribute.code, nextOffset);
                     switch (popInstruction.canonicalOpcode())
                     {
-                        case InstructionConstants.OP_DUP:
+                        case Instruction.OP_DUP:
                         {
                             // Delete the new and dup instructions:
                             //     new Wrapper
@@ -148,14 +148,14 @@ implements AttributeVisitor,
                             popInstruction = null;
                             break;
                         }
-                        case InstructionConstants.OP_ASTORE:
+                        case Instruction.OP_ASTORE:
                         {
                             // Replace the new instance by a dummy null
                             // and remember to store the target instance:
                             //     new Wrapper -> aconst_null
                             //     astore x    -> remember
                             //     aload x
-                            codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(InstructionConstants.OP_ACONST_NULL));
+                            codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(Instruction.OP_ACONST_NULL));
                             break;
                         }
                         default:
@@ -163,8 +163,8 @@ implements AttributeVisitor,
                             // Replace the new instance by a dummy null
                             // and remember to pop the target instance:
                             //     new Wrapper -> aconst_null
-                            codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(InstructionConstants.OP_ACONST_NULL));
-                            popInstruction = new SimpleInstruction(InstructionConstants.OP_POP);
+                            codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(Instruction.OP_ACONST_NULL));
+                            popInstruction = new SimpleInstruction(Instruction.OP_POP);
                         }
                     }
 
@@ -175,7 +175,7 @@ implements AttributeVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESPECIAL:
             {
                 // Is it initializing a wrapper class?
                 if (isReferencingWrapperClass(clazz, constantInstruction.constantIndex))
@@ -197,13 +197,13 @@ implements AttributeVisitor,
                         codeAttributeEditor.replaceInstruction(offset, new Instruction[]
                         {
                             popInstruction,
-                            new SimpleInstruction(InstructionConstants.OP_POP),
+                            new SimpleInstruction(Instruction.OP_POP),
                         });
                     }
                 }
                 break;
             }
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETFIELD:
             {
                 // Is it retrieving the field of the wrapper class?
                 if (isReferencingWrapperClass(clazz, constantInstruction.constantIndex))

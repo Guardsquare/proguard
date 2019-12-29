@@ -69,7 +69,7 @@ public class IntegerConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Integer;
+        return Constant.INTEGER;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

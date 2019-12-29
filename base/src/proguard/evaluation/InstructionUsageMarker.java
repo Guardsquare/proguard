@@ -25,6 +25,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
@@ -72,12 +73,12 @@ implements   AttributeVisitor
     private final MyStackConsistencyMarker        stackConsistencyMarker        = new MyStackConsistencyMarker();
     private final MyExtraPushPopInstructionMarker extraPushPopInstructionMarker = new MyExtraPushPopInstructionMarker();
 
-    private InstructionOffsetValue[] reverseDependencies = new InstructionOffsetValue[ClassConstants.TYPICAL_CODE_LENGTH];
+    private InstructionOffsetValue[] reverseDependencies = new InstructionOffsetValue[ClassEstimates.TYPICAL_CODE_LENGTH];
 
-    private boolean[][] stacksNecessaryAfter              = new boolean[ClassConstants.TYPICAL_CODE_LENGTH][ClassConstants.TYPICAL_STACK_SIZE];
-    private boolean[][] stacksUnwantedBefore              = new boolean[ClassConstants.TYPICAL_CODE_LENGTH][ClassConstants.TYPICAL_STACK_SIZE];
-    private boolean[]   instructionsNecessary             = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private boolean[]   extraPushPopInstructionsNecessary = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
+    private boolean[][] stacksNecessaryAfter              = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH][ClassEstimates.TYPICAL_STACK_SIZE];
+    private boolean[][] stacksUnwantedBefore              = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH][ClassEstimates.TYPICAL_STACK_SIZE];
+    private boolean[]   instructionsNecessary             = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private boolean[]   extraPushPopInstructionsNecessary = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
 
     private int maxMarkedOffset;
 
@@ -573,10 +574,10 @@ implements   AttributeVisitor
         {
             switch (constantInstruction.opcode)
             {
-                case InstructionConstants.OP_INVOKEVIRTUAL:
-                case InstructionConstants.OP_INVOKESPECIAL:
-                case InstructionConstants.OP_INVOKESTATIC:
-                case InstructionConstants.OP_INVOKEINTERFACE:
+                case Instruction.OP_INVOKEVIRTUAL:
+                case Instruction.OP_INVOKESPECIAL:
+                case Instruction.OP_INVOKESTATIC:
+                case Instruction.OP_INVOKEINTERFACE:
                 {
                     parameterSize = 0;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -666,14 +667,14 @@ implements   AttributeVisitor
         {
             switch (simpleInstruction.opcode)
             {
-                case InstructionConstants.OP_IASTORE:
-                case InstructionConstants.OP_LASTORE:
-                case InstructionConstants.OP_FASTORE:
-                case InstructionConstants.OP_DASTORE:
-                case InstructionConstants.OP_AASTORE:
-                case InstructionConstants.OP_BASTORE:
-                case InstructionConstants.OP_CASTORE:
-                case InstructionConstants.OP_SASTORE:
+                case Instruction.OP_IASTORE:
+                case Instruction.OP_LASTORE:
+                case Instruction.OP_FASTORE:
+                case Instruction.OP_DASTORE:
+                case Instruction.OP_AASTORE:
+                case Instruction.OP_BASTORE:
+                case Instruction.OP_CASTORE:
+                case Instruction.OP_SASTORE:
                     createReverseDependencies(clazz, offset, simpleInstruction);
 
                     // Also check for side-effects of the instruction itself.
@@ -691,8 +692,8 @@ implements   AttributeVisitor
         {
             switch (constantInstruction.opcode)
             {
-                case InstructionConstants.OP_ANEWARRAY:
-                case InstructionConstants.OP_MULTIANEWARRAY:
+                case Instruction.OP_ANEWARRAY:
+                case Instruction.OP_MULTIANEWARRAY:
                     // We may have to mark the instruction due to initializers.
                     referencingOffset = offset;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -701,16 +702,16 @@ implements   AttributeVisitor
                     visitAnyInstruction(clazz, method, codeAttribute, offset, constantInstruction);
                     break;
 
-                case InstructionConstants.OP_LDC:
-                case InstructionConstants.OP_LDC_W:
-                case InstructionConstants.OP_NEW:
-                case InstructionConstants.OP_GETSTATIC:
+                case Instruction.OP_LDC:
+                case Instruction.OP_LDC_W:
+                case Instruction.OP_NEW:
+                case Instruction.OP_GETSTATIC:
                     // We may have to mark the instruction due to initializers.
                     referencingOffset = offset;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                     break;
 
-                case InstructionConstants.OP_PUTFIELD:
+                case Instruction.OP_PUTFIELD:
                     // We generally have to mark the putfield instruction,
                     // unless it's never read. We can reverse the dependencies
                     // if it's a field of a recently created instance.
@@ -724,10 +725,10 @@ implements   AttributeVisitor
                     }
                     break;
 
-                case InstructionConstants.OP_INVOKEVIRTUAL:
-                case InstructionConstants.OP_INVOKESPECIAL:
-                case InstructionConstants.OP_INVOKESTATIC:
-                case InstructionConstants.OP_INVOKEINTERFACE:
+                case Instruction.OP_INVOKEVIRTUAL:
+                case Instruction.OP_INVOKESPECIAL:
+                case Instruction.OP_INVOKESTATIC:
+                case Instruction.OP_INVOKEINTERFACE:
                     referencingOffset   = offset;
                     referencingPopCount = constantInstruction.stackPopCount(clazz);
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -742,7 +743,7 @@ implements   AttributeVisitor
 
         public void visitBranchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, BranchInstruction branchInstruction)
         {
-            if (branchInstruction.opcode == InstructionConstants.OP_GOTO &&
+            if (branchInstruction.opcode == Instruction.OP_GOTO &&
                 branchInstruction.branchOffset == 0)
             {
                 if (DEBUG) System.out.print("(infinite loop)");
@@ -987,35 +988,35 @@ implements   AttributeVisitor
         {
             switch (simpleInstruction.opcode)
             {
-                case InstructionConstants.OP_DUP:
+                case Instruction.OP_DUP:
                     conditionallyMarkStackEntryProducers(offset, 0, 0);
                     conditionallyMarkStackEntryProducers(offset, 1, 0);
                     break;
-                case InstructionConstants.OP_DUP_X1:
+                case Instruction.OP_DUP_X1:
                     conditionallyMarkStackEntryProducers(offset, 0, 0);
                     conditionallyMarkStackEntryProducers(offset, 1, 1);
                     conditionallyMarkStackEntryProducers(offset, 2, 0);
                     break;
-                case InstructionConstants.OP_DUP_X2:
+                case Instruction.OP_DUP_X2:
                     conditionallyMarkStackEntryProducers(offset, 0, 0);
                     conditionallyMarkStackEntryProducers(offset, 1, 1);
                     conditionallyMarkStackEntryProducers(offset, 2, 2);
                     conditionallyMarkStackEntryProducers(offset, 3, 0);
                     break;
-                case InstructionConstants.OP_DUP2:
+                case Instruction.OP_DUP2:
                     conditionallyMarkStackEntryProducers(offset, 0, 0);
                     conditionallyMarkStackEntryProducers(offset, 1, 1);
                     conditionallyMarkStackEntryProducers(offset, 2, 0);
                     conditionallyMarkStackEntryProducers(offset, 3, 1);
                     break;
-                case InstructionConstants.OP_DUP2_X1:
+                case Instruction.OP_DUP2_X1:
                     conditionallyMarkStackEntryProducers(offset, 0, 0);
                     conditionallyMarkStackEntryProducers(offset, 1, 1);
                     conditionallyMarkStackEntryProducers(offset, 2, 2);
                     conditionallyMarkStackEntryProducers(offset, 3, 0);
                     conditionallyMarkStackEntryProducers(offset, 4, 1);
                     break;
-                case InstructionConstants.OP_DUP2_X2:
+                case Instruction.OP_DUP2_X2:
                     conditionallyMarkStackEntryProducers(offset, 0, 0);
                     conditionallyMarkStackEntryProducers(offset, 1, 1);
                     conditionallyMarkStackEntryProducers(offset, 2, 2);
@@ -1023,7 +1024,7 @@ implements   AttributeVisitor
                     conditionallyMarkStackEntryProducers(offset, 4, 0);
                     conditionallyMarkStackEntryProducers(offset, 5, 1);
                     break;
-                case InstructionConstants.OP_SWAP:
+                case Instruction.OP_SWAP:
                     conditionallyMarkStackEntryProducers(offset, 0, 1);
                     conditionallyMarkStackEntryProducers(offset, 1, 0);
                     break;
@@ -1059,8 +1060,8 @@ implements   AttributeVisitor
             // Explicitly mark the produced stack entry of a 'jsr' instruction,
             // because the consuming 'astore' instruction of the subroutine is
             // cleared every time it is traced.
-            if (branchInstruction.opcode == InstructionConstants.OP_JSR ||
-                branchInstruction.opcode == InstructionConstants.OP_JSR_W)
+            if (branchInstruction.opcode == Instruction.OP_JSR ||
+                branchInstruction.opcode == Instruction.OP_JSR_W)
             {
                 markStackEntryAfter(offset, 0);
             }

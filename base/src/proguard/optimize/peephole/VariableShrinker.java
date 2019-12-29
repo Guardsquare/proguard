@@ -82,7 +82,7 @@ implements   AttributeVisitor
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if ((method.getAccessFlags() & ClassConstants.ACC_ABSTRACT) == 0)
+        if ((method.getAccessFlags() & AccessConstants.ABSTRACT) == 0)
         {
             // Compute the parameter size.
             int parameterSize =

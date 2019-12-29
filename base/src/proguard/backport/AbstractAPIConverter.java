@@ -165,12 +165,12 @@ implements ClassVisitor,
         // We need to update the code attributes first.
         programClass.methodsAccept(
             new AllAttributeVisitor(
-            new AttributeNameFilter(ClassConstants.ATTR_Code,
+            new AttributeNameFilter(Attribute.CODE,
             this)));
 
         // Update the class constants directly.
         programClass.constantPoolEntriesAccept(
-            new ConstantTagFilter(ClassConstants.CONSTANT_Class,
+            new ConstantTagFilter(Constant.CLASS,
             this));
 
         // Update descriptors and attributes of fields and methods.
@@ -217,7 +217,7 @@ implements ClassVisitor,
         // Update the remaining attributes, except for the code attribute,
         // which has already been updated.
         programMethod.attributesAccept(programClass,
-            new AttributeNameFilter("!" + ClassConstants.ATTR_Code,
+            new AttributeNameFilter("!" + Attribute.CODE,
             this));
     }
 
@@ -367,10 +367,10 @@ implements ClassVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKESTATIC:
                 this.referencingOffset   = offset;
                 this.referencingMethod   = method;
                 this.instructionReplaced = false;
@@ -383,10 +383,10 @@ implements ClassVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_PUTFIELD:
-            case InstructionConstants.OP_GETFIELD:
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_GETSTATIC:
+            case Instruction.OP_PUTFIELD:
+            case Instruction.OP_GETFIELD:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_GETSTATIC:
                 this.referencingOffset   = offset;
                 this.referencingMethod   = method;
                 this.instructionReplaced = false;
@@ -505,7 +505,7 @@ implements ClassVisitor,
             if (isInnerClassName)
             {
                 className =
-                    className.substring(className.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                    className.substring(className.lastIndexOf(TypeConstants.INNER_CLASS_SEPARATOR)+1);
             }
 
             newDescriptorBuilder.append(replaceClassName(clazz, className));
@@ -566,19 +566,19 @@ implements ClassVisitor,
     {
         boolean isStatic(Method method)
         {
-            return (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
+            return (method.getAccessFlags() & AccessConstants.STATIC) != 0;
         }
 
         boolean isDefaultMethod(Clazz clazz, Method method)
         {
             return
                 isInterface(clazz) &&
-                (method.getAccessFlags() & ClassConstants.ACC_ABSTRACT) == 0;
+                (method.getAccessFlags() & AccessConstants.ABSTRACT) == 0;
         }
 
         boolean isInterface(Clazz clazz)
         {
-            return (clazz.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0;
+            return (clazz.getAccessFlags() & AccessConstants.INTERFACE) != 0;
         }
 
         Clazz findReferencedClass(String className)
@@ -780,10 +780,10 @@ implements ClassVisitor,
 
             boolean isInterfaceMethod         = isInterface(referencedClass);
             byte replacementInstructionOpcode = isStatic(referencedMethod) ?
-                InstructionConstants.OP_INVOKESTATIC :
+                Instruction.OP_INVOKESTATIC :
                 isInterfaceMethod ?
-                    InstructionConstants.OP_INVOKEINTERFACE :
-                    InstructionConstants.OP_INVOKEVIRTUAL;
+                    Instruction.OP_INVOKEINTERFACE :
+                    Instruction.OP_INVOKEVIRTUAL;
 
             int methodConstant =
                 isInterfaceMethod ?

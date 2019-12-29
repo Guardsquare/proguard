@@ -109,7 +109,7 @@ implements   AttributeVisitor,
 
         // Skip the non-static methods of simple enum classes.
         if (SimpleEnumMarker.isSimpleEnum(clazz) &&
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0)
+            (method.getAccessFlags() & AccessConstants.STATIC) == 0)
         {
             return;
         }
@@ -145,7 +145,7 @@ implements   AttributeVisitor,
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_AALOAD:
+            case Instruction.OP_AALOAD:
             {
                 if (isPushingSimpleEnum(offset))
                 {
@@ -153,11 +153,11 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        simpleInstruction,
-                                       new SimpleInstruction(InstructionConstants.OP_IALOAD));
+                                       new SimpleInstruction(Instruction.OP_IALOAD));
                 }
                 break;
             }
-            case InstructionConstants.OP_AASTORE:
+            case Instruction.OP_AASTORE:
             {
                 if (isPoppingSimpleEnumArray(offset, 2))
                 {
@@ -165,14 +165,14 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        simpleInstruction,
-                                       new SimpleInstruction(InstructionConstants.OP_IASTORE));
+                                       new SimpleInstruction(Instruction.OP_IASTORE));
 
                     // Replace any producers of null constants.
                     replaceNullStackEntryProducers(clazz, method, codeAttribute, offset);
                 }
                 break;
             }
-            case InstructionConstants.OP_ARETURN:
+            case Instruction.OP_ARETURN:
             {
                 if (isReturningSimpleEnum(clazz, method))
                 {
@@ -180,7 +180,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        simpleInstruction,
-                                       new SimpleInstruction(InstructionConstants.OP_IRETURN));
+                                       new SimpleInstruction(Instruction.OP_IRETURN));
 
                     // Replace any producers of null constants.
                     replaceNullStackEntryProducers(clazz, method, codeAttribute, offset);
@@ -197,11 +197,11 @@ implements   AttributeVisitor,
 
         switch (variableInstruction.opcode)
         {
-            case InstructionConstants.OP_ALOAD:
-            case InstructionConstants.OP_ALOAD_0:
-            case InstructionConstants.OP_ALOAD_1:
-            case InstructionConstants.OP_ALOAD_2:
-            case InstructionConstants.OP_ALOAD_3:
+            case Instruction.OP_ALOAD:
+            case Instruction.OP_ALOAD_0:
+            case Instruction.OP_ALOAD_1:
+            case Instruction.OP_ALOAD_2:
+            case Instruction.OP_ALOAD_3:
             {
                 if (isPushingSimpleEnum(offset))
                 {
@@ -209,7 +209,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        variableInstruction,
-                                       new VariableInstruction(InstructionConstants.OP_ILOAD,
+                                       new VariableInstruction(Instruction.OP_ILOAD,
                                                                variableIndex));
 
                     // Replace any producers of null constants.
@@ -221,11 +221,11 @@ implements   AttributeVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_ASTORE:
-            case InstructionConstants.OP_ASTORE_0:
-            case InstructionConstants.OP_ASTORE_1:
-            case InstructionConstants.OP_ASTORE_2:
-            case InstructionConstants.OP_ASTORE_3:
+            case Instruction.OP_ASTORE:
+            case Instruction.OP_ASTORE_0:
+            case Instruction.OP_ASTORE_1:
+            case Instruction.OP_ASTORE_2:
+            case Instruction.OP_ASTORE_3:
             {
                 if (!partialEvaluator.isSubroutineStart(offset) &&
                     isPoppingSimpleEnum(offset))
@@ -234,7 +234,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        variableInstruction,
-                                       new VariableInstruction(InstructionConstants.OP_ISTORE,
+                                       new VariableInstruction(Instruction.OP_ISTORE,
                                                                variableIndex));
 
                     // Replace any producers of null constants.
@@ -250,8 +250,8 @@ implements   AttributeVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_PUTFIELD:
             {
                 // Replace any producers of null constants.
                 invocationClazz         = clazz;
@@ -262,7 +262,7 @@ implements   AttributeVisitor,
                                               nullParameterFixer);
                 break;
             }
-            case InstructionConstants.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKEVIRTUAL:
             {
                 // Check if the instruction is calling a simple enum.
                 String invokedMethodName =
@@ -282,9 +282,9 @@ implements   AttributeVisitor,
 
                 // Fall through to check the parameters.
             }
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
             {
                 // Replace any producers of null constants.
                 invocationClazz         = clazz;
@@ -295,7 +295,7 @@ implements   AttributeVisitor,
                                               nullParameterFixer);
                 break;
             }
-            case InstructionConstants.OP_ANEWARRAY:
+            case Instruction.OP_ANEWARRAY:
             {
                 int constantIndex = constantInstruction.constantIndex;
 
@@ -306,12 +306,12 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        constantInstruction,
-                                       new SimpleInstruction(InstructionConstants.OP_NEWARRAY,
-                                                             InstructionConstants.ARRAY_T_INT));
+                                       new SimpleInstruction(Instruction.OP_NEWARRAY,
+                                                             Instruction.ARRAY_T_INT));
                 }
                 break;
             }
-            case InstructionConstants.OP_CHECKCAST:
+            case Instruction.OP_CHECKCAST:
             {
                 if (isPoppingSimpleEnum(offset))
                 {
@@ -326,7 +326,7 @@ implements   AttributeVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_INSTANCEOF:
+            case Instruction.OP_INSTANCEOF:
             {
                 if (isPoppingSimpleEnum(offset))
                 {
@@ -335,7 +335,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        constantInstruction,
-                                       new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+                                       new SimpleInstruction(Instruction.OP_ICONST_1));
 
                     // Replace any producers of null constants.
                     replaceNullStackEntryProducers(clazz, method, codeAttribute, offset);
@@ -350,7 +350,7 @@ implements   AttributeVisitor,
     {
         switch (branchInstruction.opcode)
         {
-            case InstructionConstants.OP_IFACMPEQ:
+            case Instruction.OP_IFACMPEQ:
             {
                 if (isPoppingSimpleEnum(offset))
                 {
@@ -358,7 +358,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        branchInstruction,
-                                       new BranchInstruction(InstructionConstants.OP_IFICMPEQ,
+                                       new BranchInstruction(Instruction.OP_IFICMPEQ,
                                                              branchInstruction.branchOffset));
 
                     // Replace any producers of null constants.
@@ -367,7 +367,7 @@ implements   AttributeVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_IFACMPNE:
+            case Instruction.OP_IFACMPNE:
             {
                 if (isPoppingSimpleEnum(offset))
                 {
@@ -375,7 +375,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        branchInstruction,
-                                       new BranchInstruction(InstructionConstants.OP_IFICMPNE,
+                                       new BranchInstruction(Instruction.OP_IFICMPNE,
                                                              branchInstruction.branchOffset));
 
                     // Replace any producers of null constants.
@@ -384,7 +384,7 @@ implements   AttributeVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_IFNULL:
+            case Instruction.OP_IFNULL:
             {
                 if (isPoppingSimpleEnum(offset))
                 {
@@ -393,12 +393,12 @@ implements   AttributeVisitor,
                                        offset,
                                        branchInstruction,
                                        new BranchInstruction(
-                                           InstructionConstants.OP_IFEQ,
+                                           Instruction.OP_IFEQ,
                                            branchInstruction.branchOffset));
                 }
                 break;
             }
-            case InstructionConstants.OP_IFNONNULL:
+            case Instruction.OP_IFNONNULL:
             {
                 if (isPoppingSimpleEnum(offset))
                 {
@@ -406,7 +406,7 @@ implements   AttributeVisitor,
                     replaceInstruction(clazz,
                                        offset,
                                        branchInstruction,
-                                       new BranchInstruction(InstructionConstants.OP_IFNE,
+                                       new BranchInstruction(Instruction.OP_IFNE,
                                                              branchInstruction.branchOffset));
                 }
                 break;
@@ -594,8 +594,8 @@ implements   AttributeVisitor,
         {
             Instruction[] replacementInstructions = new Instruction[]
             {
-                new SimpleInstruction(InstructionConstants.OP_ICONST_1),
-                new SimpleInstruction(InstructionConstants.OP_ISUB),
+                new SimpleInstruction(Instruction.OP_ICONST_1),
+                new SimpleInstruction(Instruction.OP_ISUB),
             };
 
             replaceInstructions(clazz,
@@ -703,7 +703,7 @@ implements   AttributeVisitor,
             {
                 // Insert a single pop instruction.
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP);
+                    new SimpleInstruction(Instruction.OP_POP);
 
                 codeAttributeEditor.insertBeforeInstruction(offset,
                                                             popInstruction);
@@ -713,7 +713,7 @@ implements   AttributeVisitor,
             {
                 // Insert a single pop2 instruction.
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP2);
+                    new SimpleInstruction(Instruction.OP_POP2);
 
                 codeAttributeEditor.insertBeforeInstruction(offset,
                                                             popInstruction);
@@ -726,7 +726,7 @@ implements   AttributeVisitor,
                     new Instruction[popCount / 2 + popCount % 2];
 
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP2);
+                    new SimpleInstruction(Instruction.OP_POP2);
 
                 for (int index = 0; index < popCount / 2; index++)
                 {
@@ -736,7 +736,7 @@ implements   AttributeVisitor,
                 if (popCount % 2 == 1)
                 {
                     popInstruction =
-                        new SimpleInstruction(InstructionConstants.OP_POP);
+                        new SimpleInstruction(Instruction.OP_POP);
 
                     popInstructions[popCount / 2] = popInstruction;
                 }
@@ -789,18 +789,18 @@ implements   AttributeVisitor,
                 // Is it a simple case?
                 switch (producerInstruction.opcode)
                 {
-                    case InstructionConstants.OP_ACONST_NULL:
-                    case InstructionConstants.OP_ALOAD:
-                    case InstructionConstants.OP_ALOAD_0:
-                    case InstructionConstants.OP_ALOAD_1:
-                    case InstructionConstants.OP_ALOAD_2:
-                    case InstructionConstants.OP_ALOAD_3:
+                    case Instruction.OP_ACONST_NULL:
+                    case Instruction.OP_ALOAD:
+                    case Instruction.OP_ALOAD_0:
+                    case Instruction.OP_ALOAD_1:
+                    case Instruction.OP_ALOAD_2:
+                    case Instruction.OP_ALOAD_3:
                     {
                         // Replace pushing null by pushing 0.
                         replaceInstruction(clazz,
                                            producerOffset,
                                            producerInstruction,
-                                           new SimpleInstruction(InstructionConstants.OP_ICONST_0));
+                                           new SimpleInstruction(Instruction.OP_ICONST_0));
                         break;
                     }
                     default:
@@ -812,8 +812,8 @@ implements   AttributeVisitor,
                                             new Instruction[]
                                             {
                                                 producerInstruction,
-                                                new SimpleInstruction(InstructionConstants.OP_POP),
-                                                new SimpleInstruction(InstructionConstants.OP_ICONST_0)
+                                                new SimpleInstruction(Instruction.OP_POP),
+                                                new SimpleInstruction(Instruction.OP_ICONST_0)
                                             });
                         break;
                     }
@@ -850,8 +850,8 @@ implements   AttributeVisitor,
                     // int value.
                     replaceInstruction(clazz,
                                        producerOffset,
-                                       new VariableInstruction(InstructionConstants.OP_ASTORE, variableIndex),
-                                       new VariableInstruction(InstructionConstants.OP_ISTORE, variableIndex));
+                                       new VariableInstruction(Instruction.OP_ASTORE, variableIndex),
+                                       new VariableInstruction(Instruction.OP_ISTORE, variableIndex));
 
                     // Replace pushing null by pushing 0.
                     replaceNullStackEntryProducers(clazz, method, codeAttribute, producerOffset);

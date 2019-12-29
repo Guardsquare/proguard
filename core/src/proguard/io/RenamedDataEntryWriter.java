@@ -17,8 +17,8 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
-import proguard.util.*;
+import proguard.classfile.TypeConstants;
+import proguard.util.StringFunction;
 
 import java.io.*;
 
@@ -54,7 +54,7 @@ public class RenamedDataEntryWriter implements DataEntryWriter
     public boolean createDirectory(DataEntry dataEntry) throws IOException
     {
         // Add the directory separator.
-        String name    = dataEntry.getName() + ClassConstants.PACKAGE_SEPARATOR;
+        String name    = dataEntry.getName() + TypeConstants.PACKAGE_SEPARATOR;
         String newName = nameFunction.transform(name);
 
         boolean result = newName != null && newName.length() > 0;

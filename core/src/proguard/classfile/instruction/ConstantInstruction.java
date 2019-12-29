@@ -91,7 +91,7 @@ implements   ConstantVisitor
     {
         // Remove the _w extension, if any.
         return
-            opcode == InstructionConstants.OP_LDC_W ? InstructionConstants.OP_LDC :
+            opcode == Instruction.OP_LDC_W ? Instruction.OP_LDC :
                                                       opcode;
     }
 
@@ -101,17 +101,17 @@ implements   ConstantVisitor
         if (requiredConstantIndexSize() == 1)
         {
             // Can we replace the long instruction by a short instruction?
-            if (opcode == InstructionConstants.OP_LDC_W)
+            if (opcode == Instruction.OP_LDC_W)
             {
-                opcode = InstructionConstants.OP_LDC;
+                opcode = Instruction.OP_LDC;
             }
         }
         else
         {
             // Should we replace the short instruction by a long instruction?
-            if (opcode == InstructionConstants.OP_LDC)
+            if (opcode == Instruction.OP_LDC)
             {
-                opcode = InstructionConstants.OP_LDC_W;
+                opcode = Instruction.OP_LDC_W;
             }
         }
 
@@ -162,23 +162,23 @@ implements   ConstantVisitor
         // Some special cases.
         switch (opcode)
         {
-            case InstructionConstants.OP_MULTIANEWARRAY:
+            case Instruction.OP_MULTIANEWARRAY:
                 // For each dimension, an integer size is popped from the stack.
                 stackPopCount += constant;
                 break;
 
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_PUTFIELD:
                 // The field value is be popped from the stack.
                 clazz.constantPoolEntryAccept(constantIndex, this);
                 stackPopCount += typeStackDelta;
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEDYNAMIC:
                 // Some parameters may be popped from the stack.
                 clazz.constantPoolEntryAccept(constantIndex, this);
                 stackPopCount += parameterStackDelta;
@@ -196,13 +196,13 @@ implements   ConstantVisitor
         // Some special cases.
         switch (opcode)
         {
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_GETFIELD:
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_GETFIELD:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEDYNAMIC:
                 // The field value or a return value may be pushed onto the stack.
                 clazz.constantPoolEntryAccept(constantIndex, this);
                 stackPushCount += typeStackDelta;
@@ -285,7 +285,7 @@ implements   ConstantVisitor
      */
     private int constantIndexSize()
     {
-        return opcode == InstructionConstants.OP_LDC ? 1 :
+        return opcode == Instruction.OP_LDC ? 1 :
                                                        2;
     }
 
@@ -295,9 +295,9 @@ implements   ConstantVisitor
      */
     private int constantSize()
     {
-        return opcode == InstructionConstants.OP_MULTIANEWARRAY  ? 1 :
-               opcode == InstructionConstants.OP_INVOKEDYNAMIC ||
-               opcode == InstructionConstants.OP_INVOKEINTERFACE ? 2 :
+        return opcode == Instruction.OP_MULTIANEWARRAY  ? 1 :
+               opcode == Instruction.OP_INVOKEDYNAMIC ||
+               opcode == Instruction.OP_INVOKEINTERFACE ? 2 :
                                                                    0;
     }
 

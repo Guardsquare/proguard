@@ -223,112 +223,112 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder nop()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_NOP));
+        return add(new SimpleInstruction(Instruction.OP_NOP));
     }
 
     public InstructionSequenceBuilder aconst_null()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ACONST_NULL));
+        return add(new SimpleInstruction(Instruction.OP_ACONST_NULL));
     }
 
     public InstructionSequenceBuilder iconst(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_0, constant));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_0, constant));
     }
 
     public InstructionSequenceBuilder iconst_m1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_M1));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_M1));
     }
 
     public InstructionSequenceBuilder iconst_0()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_0));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_0));
     }
 
     public InstructionSequenceBuilder iconst_1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_1));
     }
 
     public InstructionSequenceBuilder iconst_2()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_2));
     }
 
     public InstructionSequenceBuilder iconst_3()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_3));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_3));
     }
 
     public InstructionSequenceBuilder iconst_4()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_4));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_4));
     }
 
     public InstructionSequenceBuilder iconst_5()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ICONST_5));
+        return add(new SimpleInstruction(Instruction.OP_ICONST_5));
     }
 
     public InstructionSequenceBuilder lconst(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LCONST_0, constant));
+        return add(new SimpleInstruction(Instruction.OP_LCONST_0, constant));
     }
 
     public InstructionSequenceBuilder lconst_0()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LCONST_0));
+        return add(new SimpleInstruction(Instruction.OP_LCONST_0));
     }
 
     public InstructionSequenceBuilder lconst_1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LCONST_1));
+        return add(new SimpleInstruction(Instruction.OP_LCONST_1));
     }
 
     public InstructionSequenceBuilder fconst(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FCONST_0, constant));
+        return add(new SimpleInstruction(Instruction.OP_FCONST_0, constant));
     }
 
     public InstructionSequenceBuilder fconst_0()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FCONST_0));
+        return add(new SimpleInstruction(Instruction.OP_FCONST_0));
     }
 
     public InstructionSequenceBuilder fconst_1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FCONST_1));
+        return add(new SimpleInstruction(Instruction.OP_FCONST_1));
     }
 
     public InstructionSequenceBuilder fconst_2()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FCONST_2));
+        return add(new SimpleInstruction(Instruction.OP_FCONST_2));
     }
 
     public InstructionSequenceBuilder dconst(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DCONST_0, constant));
+        return add(new SimpleInstruction(Instruction.OP_DCONST_0, constant));
     }
 
     public InstructionSequenceBuilder dconst_0()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DCONST_0));
+        return add(new SimpleInstruction(Instruction.OP_DCONST_0));
     }
 
     public InstructionSequenceBuilder dconst_1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DCONST_1));
+        return add(new SimpleInstruction(Instruction.OP_DCONST_1));
     }
 
     public InstructionSequenceBuilder bipush(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_BIPUSH, constant));
+        return add(new SimpleInstruction(Instruction.OP_BIPUSH, constant));
     }
 
     public InstructionSequenceBuilder sipush(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_SIPUSH, constant));
+        return add(new SimpleInstruction(Instruction.OP_SIPUSH, constant));
     }
 
     public InstructionSequenceBuilder ldc(int value)
@@ -368,7 +368,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder ldc_(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_LDC, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_LDC, constantIndex));
     }
 
     public InstructionSequenceBuilder ldc_w(int value)
@@ -399,7 +399,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder ldc_w_(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_LDC_W, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_LDC_W, constantIndex));
     }
 
     public InstructionSequenceBuilder ldc2_w(long value)
@@ -416,753 +416,753 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder ldc2_w(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_LDC2_W, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_LDC2_W, constantIndex));
     }
 
     public InstructionSequenceBuilder iload(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ILOAD, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_ILOAD, variableIndex));
     }
 
     public InstructionSequenceBuilder lload(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LLOAD, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_LLOAD, variableIndex));
     }
 
     public InstructionSequenceBuilder fload(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FLOAD, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_FLOAD, variableIndex));
     }
 
     public InstructionSequenceBuilder dload(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DLOAD, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_DLOAD, variableIndex));
     }
 
     public InstructionSequenceBuilder aload(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ALOAD, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_ALOAD, variableIndex));
     }
 
     public InstructionSequenceBuilder iload_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ILOAD_0));
+        return add(new VariableInstruction(Instruction.OP_ILOAD_0));
     }
 
     public InstructionSequenceBuilder iload_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ILOAD_1));
+        return add(new VariableInstruction(Instruction.OP_ILOAD_1));
     }
 
     public InstructionSequenceBuilder iload_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ILOAD_2));
+        return add(new VariableInstruction(Instruction.OP_ILOAD_2));
     }
 
     public InstructionSequenceBuilder iload_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ILOAD_3));
+        return add(new VariableInstruction(Instruction.OP_ILOAD_3));
     }
 
     public InstructionSequenceBuilder lload_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LLOAD_0));
+        return add(new VariableInstruction(Instruction.OP_LLOAD_0));
     }
 
     public InstructionSequenceBuilder lload_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LLOAD_1));
+        return add(new VariableInstruction(Instruction.OP_LLOAD_1));
     }
 
     public InstructionSequenceBuilder lload_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LLOAD_2));
+        return add(new VariableInstruction(Instruction.OP_LLOAD_2));
     }
 
     public InstructionSequenceBuilder lload_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LLOAD_3));
+        return add(new VariableInstruction(Instruction.OP_LLOAD_3));
     }
 
     public InstructionSequenceBuilder fload_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FLOAD_0));
+        return add(new VariableInstruction(Instruction.OP_FLOAD_0));
     }
 
     public InstructionSequenceBuilder fload_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FLOAD_1));
+        return add(new VariableInstruction(Instruction.OP_FLOAD_1));
     }
 
     public InstructionSequenceBuilder fload_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FLOAD_2));
+        return add(new VariableInstruction(Instruction.OP_FLOAD_2));
     }
 
     public InstructionSequenceBuilder fload_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FLOAD_3));
+        return add(new VariableInstruction(Instruction.OP_FLOAD_3));
     }
 
     public InstructionSequenceBuilder dload_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DLOAD_0));
+        return add(new VariableInstruction(Instruction.OP_DLOAD_0));
     }
 
     public InstructionSequenceBuilder dload_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DLOAD_1));
+        return add(new VariableInstruction(Instruction.OP_DLOAD_1));
     }
 
     public InstructionSequenceBuilder dload_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DLOAD_2));
+        return add(new VariableInstruction(Instruction.OP_DLOAD_2));
     }
 
     public InstructionSequenceBuilder dload_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DLOAD_3));
+        return add(new VariableInstruction(Instruction.OP_DLOAD_3));
     }
 
     public InstructionSequenceBuilder aload_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ALOAD_0));
+        return add(new VariableInstruction(Instruction.OP_ALOAD_0));
     }
 
     public InstructionSequenceBuilder aload_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ALOAD_1));
+        return add(new VariableInstruction(Instruction.OP_ALOAD_1));
     }
 
     public InstructionSequenceBuilder aload_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ALOAD_2));
+        return add(new VariableInstruction(Instruction.OP_ALOAD_2));
     }
 
     public InstructionSequenceBuilder aload_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ALOAD_3));
+        return add(new VariableInstruction(Instruction.OP_ALOAD_3));
     }
 
     public InstructionSequenceBuilder iaload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IALOAD));
+        return add(new SimpleInstruction(Instruction.OP_IALOAD));
     }
 
     public InstructionSequenceBuilder laload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LALOAD));
+        return add(new SimpleInstruction(Instruction.OP_LALOAD));
     }
 
     public InstructionSequenceBuilder faload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FALOAD));
+        return add(new SimpleInstruction(Instruction.OP_FALOAD));
     }
 
     public InstructionSequenceBuilder daload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DALOAD));
+        return add(new SimpleInstruction(Instruction.OP_DALOAD));
     }
 
     public InstructionSequenceBuilder aaload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_AALOAD));
+        return add(new SimpleInstruction(Instruction.OP_AALOAD));
     }
 
     public InstructionSequenceBuilder baload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_BALOAD));
+        return add(new SimpleInstruction(Instruction.OP_BALOAD));
     }
 
     public InstructionSequenceBuilder caload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_CALOAD));
+        return add(new SimpleInstruction(Instruction.OP_CALOAD));
     }
 
     public InstructionSequenceBuilder saload()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_SALOAD));
+        return add(new SimpleInstruction(Instruction.OP_SALOAD));
     }
 
     public InstructionSequenceBuilder istore(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ISTORE, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_ISTORE, variableIndex));
     }
 
     public InstructionSequenceBuilder lstore(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LSTORE, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_LSTORE, variableIndex));
     }
 
     public InstructionSequenceBuilder fstore(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FSTORE, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_FSTORE, variableIndex));
     }
 
     public InstructionSequenceBuilder dstore(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DSTORE, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_DSTORE, variableIndex));
     }
 
     public InstructionSequenceBuilder astore(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ASTORE, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_ASTORE, variableIndex));
     }
 
     public InstructionSequenceBuilder istore_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ISTORE_0));
+        return add(new VariableInstruction(Instruction.OP_ISTORE_0));
     }
 
     public InstructionSequenceBuilder istore_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ISTORE_1));
+        return add(new VariableInstruction(Instruction.OP_ISTORE_1));
     }
 
     public InstructionSequenceBuilder istore_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ISTORE_2));
+        return add(new VariableInstruction(Instruction.OP_ISTORE_2));
     }
 
     public InstructionSequenceBuilder istore_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ISTORE_3));
+        return add(new VariableInstruction(Instruction.OP_ISTORE_3));
     }
 
     public InstructionSequenceBuilder lstore_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LSTORE_0));
+        return add(new VariableInstruction(Instruction.OP_LSTORE_0));
     }
 
     public InstructionSequenceBuilder lstore_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LSTORE_1));
+        return add(new VariableInstruction(Instruction.OP_LSTORE_1));
     }
 
     public InstructionSequenceBuilder lstore_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LSTORE_2));
+        return add(new VariableInstruction(Instruction.OP_LSTORE_2));
     }
 
     public InstructionSequenceBuilder lstore_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_LSTORE_3));
+        return add(new VariableInstruction(Instruction.OP_LSTORE_3));
     }
 
     public InstructionSequenceBuilder fstore_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FSTORE_0));
+        return add(new VariableInstruction(Instruction.OP_FSTORE_0));
     }
 
     public InstructionSequenceBuilder fstore_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FSTORE_1));
+        return add(new VariableInstruction(Instruction.OP_FSTORE_1));
     }
 
     public InstructionSequenceBuilder fstore_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FSTORE_2));
+        return add(new VariableInstruction(Instruction.OP_FSTORE_2));
     }
 
     public InstructionSequenceBuilder fstore_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_FSTORE_3));
+        return add(new VariableInstruction(Instruction.OP_FSTORE_3));
     }
 
     public InstructionSequenceBuilder dstore_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DSTORE_0));
+        return add(new VariableInstruction(Instruction.OP_DSTORE_0));
     }
 
     public InstructionSequenceBuilder dstore_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DSTORE_1));
+        return add(new VariableInstruction(Instruction.OP_DSTORE_1));
     }
 
     public InstructionSequenceBuilder dstore_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DSTORE_2));
+        return add(new VariableInstruction(Instruction.OP_DSTORE_2));
     }
 
     public InstructionSequenceBuilder dstore_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_DSTORE_3));
+        return add(new VariableInstruction(Instruction.OP_DSTORE_3));
     }
 
     public InstructionSequenceBuilder astore_0()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ASTORE_0));
+        return add(new VariableInstruction(Instruction.OP_ASTORE_0));
     }
 
     public InstructionSequenceBuilder astore_1()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ASTORE_1));
+        return add(new VariableInstruction(Instruction.OP_ASTORE_1));
     }
 
     public InstructionSequenceBuilder astore_2()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ASTORE_2));
+        return add(new VariableInstruction(Instruction.OP_ASTORE_2));
     }
 
     public InstructionSequenceBuilder astore_3()
     {
-        return add(new VariableInstruction(InstructionConstants.OP_ASTORE_3));
+        return add(new VariableInstruction(Instruction.OP_ASTORE_3));
     }
 
     public InstructionSequenceBuilder iastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IASTORE));
+        return add(new SimpleInstruction(Instruction.OP_IASTORE));
     }
 
     public InstructionSequenceBuilder lastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LASTORE));
+        return add(new SimpleInstruction(Instruction.OP_LASTORE));
     }
 
     public InstructionSequenceBuilder fastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FASTORE));
+        return add(new SimpleInstruction(Instruction.OP_FASTORE));
     }
 
     public InstructionSequenceBuilder dastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DASTORE));
+        return add(new SimpleInstruction(Instruction.OP_DASTORE));
     }
 
     public InstructionSequenceBuilder aastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_AASTORE));
+        return add(new SimpleInstruction(Instruction.OP_AASTORE));
     }
 
     public InstructionSequenceBuilder bastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_BASTORE));
+        return add(new SimpleInstruction(Instruction.OP_BASTORE));
     }
 
     public InstructionSequenceBuilder castore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_CASTORE));
+        return add(new SimpleInstruction(Instruction.OP_CASTORE));
     }
 
     public InstructionSequenceBuilder sastore()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_SASTORE));
+        return add(new SimpleInstruction(Instruction.OP_SASTORE));
     }
 
     public InstructionSequenceBuilder pop()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_POP));
+        return add(new SimpleInstruction(Instruction.OP_POP));
     }
 
     public InstructionSequenceBuilder pop2()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_POP2));
+        return add(new SimpleInstruction(Instruction.OP_POP2));
     }
 
     public InstructionSequenceBuilder dup()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DUP));
+        return add(new SimpleInstruction(Instruction.OP_DUP));
     }
 
     public InstructionSequenceBuilder dup_x1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DUP_X1));
+        return add(new SimpleInstruction(Instruction.OP_DUP_X1));
     }
 
     public InstructionSequenceBuilder dup_x2()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DUP_X2));
+        return add(new SimpleInstruction(Instruction.OP_DUP_X2));
     }
 
     public InstructionSequenceBuilder dup2()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DUP2));
+        return add(new SimpleInstruction(Instruction.OP_DUP2));
     }
 
     public InstructionSequenceBuilder dup2_x1()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DUP2_X1));
+        return add(new SimpleInstruction(Instruction.OP_DUP2_X1));
     }
 
     public InstructionSequenceBuilder dup2_x2()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DUP2_X2));
+        return add(new SimpleInstruction(Instruction.OP_DUP2_X2));
     }
 
     public InstructionSequenceBuilder swap()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_SWAP));
+        return add(new SimpleInstruction(Instruction.OP_SWAP));
     }
 
     public InstructionSequenceBuilder iadd()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IADD));
+        return add(new SimpleInstruction(Instruction.OP_IADD));
     }
 
     public InstructionSequenceBuilder ladd()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LADD));
+        return add(new SimpleInstruction(Instruction.OP_LADD));
     }
 
     public InstructionSequenceBuilder fadd()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FADD));
+        return add(new SimpleInstruction(Instruction.OP_FADD));
     }
 
     public InstructionSequenceBuilder dadd()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DADD));
+        return add(new SimpleInstruction(Instruction.OP_DADD));
     }
 
     public InstructionSequenceBuilder isub()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ISUB));
+        return add(new SimpleInstruction(Instruction.OP_ISUB));
     }
 
     public InstructionSequenceBuilder lsub()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LSUB));
+        return add(new SimpleInstruction(Instruction.OP_LSUB));
     }
 
     public InstructionSequenceBuilder fsub()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FSUB));
+        return add(new SimpleInstruction(Instruction.OP_FSUB));
     }
 
     public InstructionSequenceBuilder dsub()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DSUB));
+        return add(new SimpleInstruction(Instruction.OP_DSUB));
     }
 
     public InstructionSequenceBuilder imul()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IMUL));
+        return add(new SimpleInstruction(Instruction.OP_IMUL));
     }
 
     public InstructionSequenceBuilder lmul()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LMUL));
+        return add(new SimpleInstruction(Instruction.OP_LMUL));
     }
 
     public InstructionSequenceBuilder fmul()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FMUL));
+        return add(new SimpleInstruction(Instruction.OP_FMUL));
     }
 
     public InstructionSequenceBuilder dmul()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DMUL));
+        return add(new SimpleInstruction(Instruction.OP_DMUL));
     }
 
     public InstructionSequenceBuilder idiv()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IDIV));
+        return add(new SimpleInstruction(Instruction.OP_IDIV));
     }
 
     public InstructionSequenceBuilder ldiv()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LDIV));
+        return add(new SimpleInstruction(Instruction.OP_LDIV));
     }
 
     public InstructionSequenceBuilder fdiv()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FDIV));
+        return add(new SimpleInstruction(Instruction.OP_FDIV));
     }
 
     public InstructionSequenceBuilder ddiv()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DDIV));
+        return add(new SimpleInstruction(Instruction.OP_DDIV));
     }
 
     public InstructionSequenceBuilder irem()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IREM));
+        return add(new SimpleInstruction(Instruction.OP_IREM));
     }
 
     public InstructionSequenceBuilder lrem()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LREM));
+        return add(new SimpleInstruction(Instruction.OP_LREM));
     }
 
     public InstructionSequenceBuilder frem()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FREM));
+        return add(new SimpleInstruction(Instruction.OP_FREM));
     }
 
     public InstructionSequenceBuilder drem()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DREM));
+        return add(new SimpleInstruction(Instruction.OP_DREM));
     }
 
     public InstructionSequenceBuilder ineg()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_INEG));
+        return add(new SimpleInstruction(Instruction.OP_INEG));
     }
 
     public InstructionSequenceBuilder lneg()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LNEG));
+        return add(new SimpleInstruction(Instruction.OP_LNEG));
     }
 
     public InstructionSequenceBuilder fneg()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FNEG));
+        return add(new SimpleInstruction(Instruction.OP_FNEG));
     }
 
     public InstructionSequenceBuilder dneg()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DNEG));
+        return add(new SimpleInstruction(Instruction.OP_DNEG));
     }
 
     public InstructionSequenceBuilder ishl()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ISHL));
+        return add(new SimpleInstruction(Instruction.OP_ISHL));
     }
 
     public InstructionSequenceBuilder lshl()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LSHL));
+        return add(new SimpleInstruction(Instruction.OP_LSHL));
     }
 
     public InstructionSequenceBuilder ishr()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ISHR));
+        return add(new SimpleInstruction(Instruction.OP_ISHR));
     }
 
     public InstructionSequenceBuilder lshr()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LSHR));
+        return add(new SimpleInstruction(Instruction.OP_LSHR));
     }
 
     public InstructionSequenceBuilder iushr()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IUSHR));
+        return add(new SimpleInstruction(Instruction.OP_IUSHR));
     }
 
     public InstructionSequenceBuilder lushr()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LUSHR));
+        return add(new SimpleInstruction(Instruction.OP_LUSHR));
     }
 
     public InstructionSequenceBuilder iand()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IAND));
+        return add(new SimpleInstruction(Instruction.OP_IAND));
     }
 
     public InstructionSequenceBuilder land()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LAND));
+        return add(new SimpleInstruction(Instruction.OP_LAND));
     }
 
     public InstructionSequenceBuilder ior()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IOR));
+        return add(new SimpleInstruction(Instruction.OP_IOR));
     }
 
     public InstructionSequenceBuilder lor()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LOR));
+        return add(new SimpleInstruction(Instruction.OP_LOR));
     }
 
     public InstructionSequenceBuilder ixor()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IXOR));
+        return add(new SimpleInstruction(Instruction.OP_IXOR));
     }
 
     public InstructionSequenceBuilder lxor()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LXOR));
+        return add(new SimpleInstruction(Instruction.OP_LXOR));
     }
 
     public InstructionSequenceBuilder iinc(int variableIndex,
                                            int constant)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_IINC, variableIndex, constant));
+        return add(new VariableInstruction(Instruction.OP_IINC, variableIndex, constant));
     }
 
     public InstructionSequenceBuilder i2l()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_I2L));
+        return add(new SimpleInstruction(Instruction.OP_I2L));
     }
 
     public InstructionSequenceBuilder i2f()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_I2F));
+        return add(new SimpleInstruction(Instruction.OP_I2F));
     }
 
     public InstructionSequenceBuilder i2d()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_I2D));
+        return add(new SimpleInstruction(Instruction.OP_I2D));
     }
 
     public InstructionSequenceBuilder l2i()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_L2I));
+        return add(new SimpleInstruction(Instruction.OP_L2I));
     }
 
     public InstructionSequenceBuilder l2f()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_L2F));
+        return add(new SimpleInstruction(Instruction.OP_L2F));
     }
 
     public InstructionSequenceBuilder l2d()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_L2D));
+        return add(new SimpleInstruction(Instruction.OP_L2D));
     }
 
     public InstructionSequenceBuilder f2i()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_F2I));
+        return add(new SimpleInstruction(Instruction.OP_F2I));
     }
 
     public InstructionSequenceBuilder f2l()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_F2L));
+        return add(new SimpleInstruction(Instruction.OP_F2L));
     }
 
     public InstructionSequenceBuilder f2d()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_F2D));
+        return add(new SimpleInstruction(Instruction.OP_F2D));
     }
 
     public InstructionSequenceBuilder d2i()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_D2I));
+        return add(new SimpleInstruction(Instruction.OP_D2I));
     }
 
     public InstructionSequenceBuilder d2l()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_D2L));
+        return add(new SimpleInstruction(Instruction.OP_D2L));
     }
 
     public InstructionSequenceBuilder d2f()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_D2F));
+        return add(new SimpleInstruction(Instruction.OP_D2F));
     }
 
     public InstructionSequenceBuilder i2b()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_I2B));
+        return add(new SimpleInstruction(Instruction.OP_I2B));
     }
 
     public InstructionSequenceBuilder i2c()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_I2C));
+        return add(new SimpleInstruction(Instruction.OP_I2C));
     }
 
     public InstructionSequenceBuilder i2s()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_I2S));
+        return add(new SimpleInstruction(Instruction.OP_I2S));
     }
 
     public InstructionSequenceBuilder lcmp()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LCMP));
+        return add(new SimpleInstruction(Instruction.OP_LCMP));
     }
 
     public InstructionSequenceBuilder fcmpl()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FCMPL));
+        return add(new SimpleInstruction(Instruction.OP_FCMPL));
     }
 
     public InstructionSequenceBuilder fcmpg()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FCMPG));
+        return add(new SimpleInstruction(Instruction.OP_FCMPG));
     }
 
     public InstructionSequenceBuilder dcmpl()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DCMPL));
+        return add(new SimpleInstruction(Instruction.OP_DCMPL));
     }
 
     public InstructionSequenceBuilder dcmpg()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DCMPG));
+        return add(new SimpleInstruction(Instruction.OP_DCMPG));
     }
 
     public InstructionSequenceBuilder ifeq(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFEQ, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFEQ, branchOffset));
     }
 
     public InstructionSequenceBuilder ifne(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFNE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFNE, branchOffset));
     }
 
     public InstructionSequenceBuilder iflt(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFLT, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFLT, branchOffset));
     }
 
     public InstructionSequenceBuilder ifge(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFGE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFGE, branchOffset));
     }
 
     public InstructionSequenceBuilder ifgt(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFGT, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFGT, branchOffset));
     }
 
     public InstructionSequenceBuilder ifle(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFLE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFLE, branchOffset));
     }
 
     public InstructionSequenceBuilder ificmpeq(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFICMPEQ, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFICMPEQ, branchOffset));
     }
 
     public InstructionSequenceBuilder ificmpne(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFICMPNE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFICMPNE, branchOffset));
     }
 
     public InstructionSequenceBuilder ificmplt(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFICMPLT, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFICMPLT, branchOffset));
     }
 
     public InstructionSequenceBuilder ificmpge(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFICMPGE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFICMPGE, branchOffset));
     }
 
     public InstructionSequenceBuilder ificmpgt(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFICMPGT, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFICMPGT, branchOffset));
     }
 
     public InstructionSequenceBuilder ificmple(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFICMPLE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFICMPLE, branchOffset));
     }
 
     public InstructionSequenceBuilder ifacmpeq(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFACMPEQ, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFACMPEQ, branchOffset));
     }
 
     public InstructionSequenceBuilder ifacmpne(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFACMPNE, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFACMPNE, branchOffset));
     }
 
     public InstructionSequenceBuilder goto_(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_GOTO, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_GOTO, branchOffset));
     }
 
     public InstructionSequenceBuilder jsr(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_JSR, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_JSR, branchOffset));
     }
 
     public InstructionSequenceBuilder ret(int variableIndex)
     {
-        return add(new VariableInstruction(InstructionConstants.OP_RET, variableIndex));
+        return add(new VariableInstruction(Instruction.OP_RET, variableIndex));
     }
 
     public InstructionSequenceBuilder tableswitch(int   defaultOffset,
@@ -1170,7 +1170,7 @@ public class InstructionSequenceBuilder
                                                     int   highCase,
                                                     int[] jumpOffsets)
     {
-        return add(new TableSwitchInstruction(InstructionConstants.OP_TABLESWITCH,
+        return add(new TableSwitchInstruction(Instruction.OP_TABLESWITCH,
                                                     defaultOffset,
                                                     lowCase,
                                                     highCase,
@@ -1181,7 +1181,7 @@ public class InstructionSequenceBuilder
                                                     int[] cases,
                                                     int[] jumpOffsets)
     {
-        return add(new LookUpSwitchInstruction(InstructionConstants.OP_LOOKUPSWITCH,
+        return add(new LookUpSwitchInstruction(Instruction.OP_LOOKUPSWITCH,
                                                      defaultOffset,
                                                      cases,
                                                      jumpOffsets));
@@ -1189,32 +1189,32 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder ireturn()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+        return add(new SimpleInstruction(Instruction.OP_IRETURN));
     }
 
     public InstructionSequenceBuilder lreturn()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_LRETURN));
+        return add(new SimpleInstruction(Instruction.OP_LRETURN));
     }
 
     public InstructionSequenceBuilder freturn()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_FRETURN));
+        return add(new SimpleInstruction(Instruction.OP_FRETURN));
     }
 
     public InstructionSequenceBuilder dreturn()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_DRETURN));
+        return add(new SimpleInstruction(Instruction.OP_DRETURN));
     }
 
     public InstructionSequenceBuilder areturn()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ARETURN));
+        return add(new SimpleInstruction(Instruction.OP_ARETURN));
     }
 
     public InstructionSequenceBuilder return_()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_RETURN));
+        return add(new SimpleInstruction(Instruction.OP_RETURN));
     }
 
     public InstructionSequenceBuilder getstatic(Clazz clazz,
@@ -1249,7 +1249,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder getstatic(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_GETSTATIC, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_GETSTATIC, constantIndex));
     }
 
     public InstructionSequenceBuilder putstatic(Clazz clazz,
@@ -1284,7 +1284,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder putstatic(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_PUTSTATIC, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_PUTSTATIC, constantIndex));
     }
 
     public InstructionSequenceBuilder getfield(Clazz clazz,
@@ -1319,7 +1319,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder getfield(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_GETFIELD, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_GETFIELD, constantIndex));
     }
 
     public InstructionSequenceBuilder putfield(Clazz clazz,
@@ -1354,7 +1354,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder putfield(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_PUTFIELD, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_PUTFIELD, constantIndex));
     }
 
     public InstructionSequenceBuilder invokevirtual(Clazz  clazz,
@@ -1400,7 +1400,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder invokevirtual(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, constantIndex));
     }
 
     public InstructionSequenceBuilder invokespecial(Clazz  clazz,
@@ -1465,7 +1465,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder invokespecial(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_INVOKESPECIAL, constantIndex));
     }
 
     public InstructionSequenceBuilder invokestatic(Clazz  clazz,
@@ -1530,7 +1530,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder invokestatic(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_INVOKESTATIC, constantIndex));
     }
 
     public InstructionSequenceBuilder invokeinterface(Clazz  clazz,
@@ -1569,7 +1569,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder invokeinterface(int constantIndex, int constant)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_INVOKEINTERFACE, constantIndex, constant));
+        return add(new ConstantInstruction(Instruction.OP_INVOKEINTERFACE, constantIndex, constant));
     }
 
     public InstructionSequenceBuilder invokedynamic(int    bootStrapMethodIndex,
@@ -1592,7 +1592,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder invokedynamic(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_INVOKEDYNAMIC, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_INVOKEDYNAMIC, constantIndex));
     }
 
     public InstructionSequenceBuilder new_(Clazz clazz)
@@ -1613,12 +1613,12 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder new_(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_NEW, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_NEW, constantIndex));
     }
 
     public InstructionSequenceBuilder newarray(int constant)
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_NEWARRAY, constant));
+        return add(new SimpleInstruction(Instruction.OP_NEWARRAY, constant));
     }
 
     public InstructionSequenceBuilder anewarray(Clazz elementType)
@@ -1634,17 +1634,17 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder anewarray(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_ANEWARRAY, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_ANEWARRAY, constantIndex));
     }
 
     public InstructionSequenceBuilder arraylength()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ARRAYLENGTH));
+        return add(new SimpleInstruction(Instruction.OP_ARRAYLENGTH));
     }
 
     public InstructionSequenceBuilder athrow()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_ATHROW));
+        return add(new SimpleInstruction(Instruction.OP_ATHROW));
     }
 
     public InstructionSequenceBuilder checkcast(Clazz type)
@@ -1664,7 +1664,7 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder checkcast(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_CHECKCAST, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_CHECKCAST, constantIndex));
     }
 
     public InstructionSequenceBuilder instanceof_(Clazz type)
@@ -1679,22 +1679,22 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder instanceof_(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_INSTANCEOF, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_INSTANCEOF, constantIndex));
     }
 
     public InstructionSequenceBuilder monitorenter()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_MONITORENTER));
+        return add(new SimpleInstruction(Instruction.OP_MONITORENTER));
     }
 
     public InstructionSequenceBuilder monitorexit()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_MONITOREXIT));
+        return add(new SimpleInstruction(Instruction.OP_MONITOREXIT));
     }
 
     public InstructionSequenceBuilder wide()
     {
-        return add(new SimpleInstruction(InstructionConstants.OP_WIDE));
+        return add(new SimpleInstruction(Instruction.OP_WIDE));
     }
 
     public InstructionSequenceBuilder multianewarray(Clazz type)
@@ -1714,27 +1714,27 @@ public class InstructionSequenceBuilder
 
     public InstructionSequenceBuilder multianewarray(int constantIndex)
     {
-        return add(new ConstantInstruction(InstructionConstants.OP_MULTIANEWARRAY, constantIndex));
+        return add(new ConstantInstruction(Instruction.OP_MULTIANEWARRAY, constantIndex));
     }
 
     public InstructionSequenceBuilder ifnull(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFNULL, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFNULL, branchOffset));
     }
 
     public InstructionSequenceBuilder ifnonnull(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_IFNONNULL, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_IFNONNULL, branchOffset));
     }
 
     public InstructionSequenceBuilder goto_w(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_GOTO_W, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_GOTO_W, branchOffset));
     }
 
     public InstructionSequenceBuilder jsr_w(int branchOffset)
     {
-        return add(new BranchInstruction(InstructionConstants.OP_JSR_W, branchOffset));
+        return add(new BranchInstruction(Instruction.OP_JSR_W, branchOffset));
     }
 
 
@@ -1754,14 +1754,14 @@ public class InstructionSequenceBuilder
     {
         switch (type)
         {
-            case ClassConstants.TYPE_BOOLEAN: return ((Boolean)value).booleanValue() ? iconst_1() : iconst_0();
-            case ClassConstants.TYPE_BYTE:
-            case ClassConstants.TYPE_SHORT:
-            case ClassConstants.TYPE_INT:     return pushInt(((Number)value).intValue());
-            case ClassConstants.TYPE_CHAR:    return ldc(((Character)value).charValue());
-            case ClassConstants.TYPE_LONG:    return ldc2_w((Long)value);
-            case ClassConstants.TYPE_FLOAT:   return ldc(((Float)value).floatValue());
-            case ClassConstants.TYPE_DOUBLE:  return ldc2_w((Double)value);
+            case TypeConstants.BOOLEAN: return ((Boolean)value).booleanValue() ? iconst_1() : iconst_0();
+            case TypeConstants.BYTE:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:     return pushInt(((Number)value).intValue());
+            case TypeConstants.CHAR:    return ldc(((Character)value).charValue());
+            case TypeConstants.LONG:    return ldc2_w((Long)value);
+            case TypeConstants.FLOAT:   return ldc(((Float)value).floatValue());
+            case TypeConstants.DOUBLE:  return ldc2_w((Double)value);
             default: throw new IllegalArgumentException("" + type);
         }
     }
@@ -1880,14 +1880,14 @@ public class InstructionSequenceBuilder
     {
         switch (type)
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:
-            case ClassConstants.TYPE_CHAR:
-            case ClassConstants.TYPE_SHORT:
-            case ClassConstants.TYPE_INT:    return iload(variableIndex);
-            case ClassConstants.TYPE_LONG:   return lload(variableIndex);
-            case ClassConstants.TYPE_FLOAT:  return fload(variableIndex);
-            case ClassConstants.TYPE_DOUBLE: return dload(variableIndex);
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:    return iload(variableIndex);
+            case TypeConstants.LONG:   return lload(variableIndex);
+            case TypeConstants.FLOAT:  return fload(variableIndex);
+            case TypeConstants.DOUBLE: return dload(variableIndex);
             default:                         return aload(variableIndex);
         }
     }
@@ -1926,14 +1926,14 @@ public class InstructionSequenceBuilder
     {
         switch (type)
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:
-            case ClassConstants.TYPE_CHAR:
-            case ClassConstants.TYPE_SHORT:
-            case ClassConstants.TYPE_INT:    return istore(variableIndex);
-            case ClassConstants.TYPE_LONG:   return lstore(variableIndex);
-            case ClassConstants.TYPE_FLOAT:  return fstore(variableIndex);
-            case ClassConstants.TYPE_DOUBLE: return dstore(variableIndex);
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:    return istore(variableIndex);
+            case TypeConstants.LONG:   return lstore(variableIndex);
+            case TypeConstants.FLOAT:  return fstore(variableIndex);
+            case TypeConstants.DOUBLE: return dstore(variableIndex);
             default:                         return astore(variableIndex);
         }
     }
@@ -1952,14 +1952,14 @@ public class InstructionSequenceBuilder
         // Store element on stack in array.
         switch (elementType.charAt(0))
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:   return bastore();
-            case ClassConstants.TYPE_CHAR:   return castore();
-            case ClassConstants.TYPE_SHORT:  return sastore();
-            case ClassConstants.TYPE_INT:    return iastore();
-            case ClassConstants.TYPE_LONG:   return lastore();
-            case ClassConstants.TYPE_FLOAT:  return fastore();
-            case ClassConstants.TYPE_DOUBLE: return dastore();
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:   return bastore();
+            case TypeConstants.CHAR:   return castore();
+            case TypeConstants.SHORT:  return sastore();
+            case TypeConstants.INT:    return iastore();
+            case TypeConstants.LONG:   return lastore();
+            case TypeConstants.FLOAT:  return fastore();
+            case TypeConstants.DOUBLE: return dastore();
             default:                         return aastore();
         }
     }
@@ -1978,14 +1978,14 @@ public class InstructionSequenceBuilder
         // Load element from array on stack.
         switch (elementType.charAt(0))
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:   return baload();
-            case ClassConstants.TYPE_CHAR:   return caload();
-            case ClassConstants.TYPE_SHORT:  return saload();
-            case ClassConstants.TYPE_INT:    return iaload();
-            case ClassConstants.TYPE_LONG:   return laload();
-            case ClassConstants.TYPE_FLOAT:  return faload();
-            case ClassConstants.TYPE_DOUBLE: return daload();
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:   return baload();
+            case TypeConstants.CHAR:   return caload();
+            case TypeConstants.SHORT:  return saload();
+            case TypeConstants.INT:    return iaload();
+            case TypeConstants.LONG:   return laload();
+            case TypeConstants.FLOAT:  return faload();
+            case TypeConstants.DOUBLE: return daload();
             default:                         return aaload();
         }
     }
@@ -2047,7 +2047,7 @@ public class InstructionSequenceBuilder
     {
         public MyDummyClass()
         {
-            super(ClassConstants.CLASS_VERSION_1_0, 1, new Constant[256], 0, 0, 0);
+            super(VersionConstants.CLASS_VERSION_1_0, 1, new Constant[256], 0, 0, 0);
         }
 
 

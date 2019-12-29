@@ -38,6 +38,9 @@ import java.io.*;
  */
 public class ClassReader implements DataEntryReader
 {
+    private static final String MODULE_INFO_CLASS  = "module-info.class";
+
+
     private final boolean        isLibrary;
     private final boolean        skipNonPublicLibraryClasses;
     private final boolean        skipNonPublicLibraryClassMembers;
@@ -97,8 +100,8 @@ public class ClassReader implements DataEntryReader
             if (className != null)
             {
                 String dataEntryName = dataEntry.getName();
-                if (!dataEntryName.equals(ClassConstants.MODULE_INFO_CLASS) &&
-                    !dataEntryName.replace(File.pathSeparatorChar, ClassConstants.PACKAGE_SEPARATOR).equals(className + ClassConstants.CLASS_FILE_EXTENSION) &&
+                if (!dataEntryName.equals(MODULE_INFO_CLASS) &&
+                    !dataEntryName.replace(File.pathSeparatorChar, TypeConstants.PACKAGE_SEPARATOR).equals(className + ClassConstants.CLASS_FILE_EXTENSION) &&
                     warningPrinter != null)
                 {
                     warningPrinter.print(className,

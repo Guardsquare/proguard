@@ -99,8 +99,8 @@ implements   AttributeVisitor,
         // Check if the instruction is an unconditional goto instruction that
         // isn't the target of a branch itself.
         byte opcode = branchInstruction.opcode;
-        if ((opcode == InstructionConstants.OP_GOTO ||
-             opcode == InstructionConstants.OP_GOTO_W) &&
+        if ((opcode == Instruction.OP_GOTO ||
+             opcode == Instruction.OP_GOTO_W) &&
             !branchTargetFinder.isBranchTarget(offset))
         {
             int branchOffset = branchInstruction.branchOffset;
@@ -228,9 +228,9 @@ implements   AttributeVisitor,
      */
     private boolean isPop(byte opcode)
     {
-        return opcode == InstructionConstants.OP_POP  ||
-               opcode == InstructionConstants.OP_POP2 ||
-               opcode == InstructionConstants.OP_ARRAYLENGTH;
+        return opcode == Instruction.OP_POP  ||
+               opcode == Instruction.OP_POP2 ||
+               opcode == Instruction.OP_ARRAYLENGTH;
     }
 
 

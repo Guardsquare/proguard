@@ -35,9 +35,9 @@ public class ConstantPoolSorter
 extends      SimplifiedVisitor
 implements   ClassVisitor
 {
-    private int[]                constantIndexMap       = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
-    private ComparableConstant[] comparableConstantPool = new ComparableConstant[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
-    private Constant[]           newConstantPool        = new Constant[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private int[]                constantIndexMap       = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
+    private ComparableConstant[] comparableConstantPool = new ComparableConstant[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
+    private Constant[]           newConstantPool        = new Constant[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
 
     private final ConstantPoolRemapper constantPoolRemapper = new ConstantPoolRemapper();
 
@@ -92,8 +92,8 @@ implements   ClassVisitor
 
                 // Long entries take up two slots, the second of which is null.
                 int tag = constant.getTag();
-                if (tag == ClassConstants.CONSTANT_Long ||
-                    tag == ClassConstants.CONSTANT_Double)
+                if (tag == Constant.LONG ||
+                    tag == Constant.DOUBLE)
                 {
                     newConstantPool[newLength++] = null;
                 }

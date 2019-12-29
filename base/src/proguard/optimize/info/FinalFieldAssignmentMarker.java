@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2019 Guardsquare NV
+ * Copyright (c) 2002-2020 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -50,8 +50,8 @@ implements   InstructionVisitor,
     @Override
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_PUTSTATIC ||
-            constantInstruction.opcode == InstructionConstants.OP_PUTFIELD)
+        if (constantInstruction.opcode == Instruction.OP_PUTSTATIC ||
+            constantInstruction.opcode == Instruction.OP_PUTFIELD)
         {
             referencedMethod = method;
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -61,15 +61,14 @@ implements   InstructionVisitor,
 
     // Implementations for ConstantVisitor.
 
-    @Override
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
     @Override
     public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
-        if (fieldrefConstant.referencedMember != null &&
-            (fieldrefConstant.referencedMember.getAccessFlags() & ClassConstants.ACC_FINAL) != 0)
+        if (fieldrefConstant.referencedField != null &&
+            (fieldrefConstant.referencedField.getAccessFlags() & AccessConstants.FINAL) != 0)
         {
             setAssignsFinalField(referencedMethod);
         }

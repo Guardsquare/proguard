@@ -112,7 +112,7 @@ implements   MemberVisitor,
 
             // Must we mark the 'this' parameter?
             if (markThisParameter &&
-                (accessFlags & ClassConstants.ACC_STATIC) == 0)
+                (accessFlags & AccessConstants.STATIC) == 0)
             {
                 // Mark the 'this' parameter.
                 markParameterUsed(programMethod, 0);
@@ -123,19 +123,19 @@ implements   MemberVisitor,
             {
                 // Mark all parameters, without the 'this' parameter.
                 markUsedParameters(programMethod,
-                                   (accessFlags & ClassConstants.ACC_STATIC) != 0 ?
+                                   (accessFlags & AccessConstants.STATIC) != 0 ?
                                        -1L : -2L);
             }
 
             // Is it a native method?
-            if ((accessFlags & ClassConstants.ACC_NATIVE) != 0)
+            if ((accessFlags & AccessConstants.NATIVE) != 0)
             {
                 // Mark all parameters.
                 markUsedParameters(programMethod, -1L);
             }
 
             // Is it an abstract method?
-            else if ((accessFlags & ClassConstants.ACC_ABSTRACT) != 0)
+            else if ((accessFlags & AccessConstants.ABSTRACT) != 0)
             {
                 // Mark the 'this' parameter.
                 markParameterUsed(programMethod, 0);
@@ -146,8 +146,8 @@ implements   MemberVisitor,
             {
                 // Is the method not static, but synchronized, or can it have
                 // other implementations, or is it a class instance initializer?
-                if ((accessFlags & ClassConstants.ACC_STATIC) == 0 &&
-                    ((accessFlags & ClassConstants.ACC_SYNCHRONIZED) != 0 ||
+                if ((accessFlags & AccessConstants.STATIC) == 0 &&
+                    ((accessFlags & AccessConstants.SYNCHRONIZED) != 0 ||
                      programClass.mayHaveImplementations(programMethod)   ||
                      programMethod.getName(programClass).equals(ClassConstants.METHOD_NAME_INIT)))
                 {

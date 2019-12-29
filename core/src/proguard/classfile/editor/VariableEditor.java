@@ -36,8 +36,8 @@ implements   AttributeVisitor
 {
     private boolean   modified;
 
-    private boolean[] deleted     = new boolean[ClassConstants.TYPICAL_VARIABLES_SIZE];
-    private int[]     variableMap = new int[ClassConstants.TYPICAL_VARIABLES_SIZE];
+    private boolean[] deleted     = new boolean[ClassEstimates.TYPICAL_VARIABLES_SIZE];
+    private int[]     variableMap = new int[ClassEstimates.TYPICAL_VARIABLES_SIZE];
 
     private final VariableRemapper variableRemapper = new VariableRemapper();
 

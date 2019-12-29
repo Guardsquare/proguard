@@ -60,7 +60,7 @@ public class MethodrefConstant extends AnyMethodrefConstant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Methodref;
+        return Constant.METHODREF;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

@@ -106,7 +106,7 @@ public class Utf8Constant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Utf8;
+        return Constant.UTF8;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

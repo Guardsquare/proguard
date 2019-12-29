@@ -333,20 +333,20 @@ final class MemberSpecificationDialog extends JDialog
         annotationTypeTextField.setText(annotationType == null ? "" : ClassUtil.externalType(annotationType));
 
         // Set the access radio buttons.
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_PUBLIC,       publicRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_PRIVATE,      privateRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_PROTECTED,    protectedRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_STATIC,       staticRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_FINAL,        finalRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_SYNTHETIC,    syntheticRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_VOLATILE,     volatileRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_TRANSIENT,    transientRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_SYNCHRONIZED, synchronizedRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_NATIVE,       nativeRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_ABSTRACT,     abstractRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_STRICT,       strictRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_BRIDGE,       bridgeRadioButtons);
-        setMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_VARARGS,      varargsRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.PUBLIC,       publicRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.PRIVATE,      privateRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.PROTECTED,    protectedRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.STATIC,       staticRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.FINAL,        finalRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.SYNTHETIC,    syntheticRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.VOLATILE,     volatileRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.TRANSIENT,    transientRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.SYNCHRONIZED, synchronizedRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.NATIVE,       nativeRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.ABSTRACT,     abstractRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.STRICT,       strictRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.BRIDGE,       bridgeRadioButtons);
+        setMemberSpecificationRadioButtons(memberSpecification, AccessConstants.VARARGS,      varargsRadioButtons);
 
         // Set the class name text fields.
         nameTextField.setText(name == null ? "*" : name);
@@ -394,7 +394,7 @@ final class MemberSpecificationDialog extends JDialog
         {
             if (type.equals(""))
             {
-                type = JavaConstants.TYPE_VOID;
+                type = JavaTypeConstants.VOID;
             }
 
             type =
@@ -407,20 +407,20 @@ final class MemberSpecificationDialog extends JDialog
             new MemberSpecification(0, 0, annotationType, name, type);
 
         // Also get the access radio button settings.
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_PUBLIC,       publicRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_PRIVATE,      privateRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_PROTECTED,    protectedRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_STATIC,       staticRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_FINAL,        finalRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_SYNTHETIC,    syntheticRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_VOLATILE,     volatileRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_TRANSIENT,    transientRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_SYNCHRONIZED, synchronizedRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_NATIVE,       nativeRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_ABSTRACT,     abstractRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_STRICT,       strictRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_BRIDGE,       bridgeRadioButtons);
-        getMemberSpecificationRadioButtons(memberSpecification, ClassConstants.ACC_VARARGS,      varargsRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.PUBLIC,       publicRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.PRIVATE,      privateRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.PROTECTED,    protectedRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.STATIC,       staticRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.FINAL,        finalRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.SYNTHETIC,    syntheticRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.VOLATILE,     volatileRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.TRANSIENT,    transientRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.SYNCHRONIZED, synchronizedRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.NATIVE,       nativeRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.ABSTRACT,     abstractRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.STRICT,       strictRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.BRIDGE,       bridgeRadioButtons);
+        getMemberSpecificationRadioButtons(memberSpecification, AccessConstants.VARARGS,      varargsRadioButtons);
 
         return memberSpecification;
     }

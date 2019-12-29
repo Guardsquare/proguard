@@ -49,7 +49,7 @@ implements   ClassVisitor,
         // Collect all non-private members in this class hierarchy.
         clazz.hierarchyAccept(true, true, true, false,
             new AllMethodVisitor(
-            new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE | ClassConstants.ACC_STATIC,
+            new MemberAccessFilter(0, AccessConstants.PRIVATE | AccessConstants.STATIC,
             this)));
 
         // Clean up for the next class hierarchy.

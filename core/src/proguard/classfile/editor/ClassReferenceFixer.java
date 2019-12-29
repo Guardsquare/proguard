@@ -34,7 +34,6 @@ import proguard.classfile.visitor.*;
 
 import java.util.*;
 
-import static proguard.classfile.ClassConstants.ATTR_RuntimeInvisibleAnnotations;
 import static proguard.classfile.kotlin.KotlinConstants.TYPE_KOTLIN_JVM_JVMNAME;
 
 /**
@@ -208,7 +207,7 @@ implements   ClassVisitor,
                 // Only convert to an external class name if the original was
                 // an external class name too.
                 String newExternalClassName =
-                    externalClassName.indexOf(JavaConstants.PACKAGE_SEPARATOR) >= 0 ?
+                    externalClassName.indexOf(JavaTypeConstants.PACKAGE_SEPARATOR) >= 0 ?
                         ClassUtil.externalClassName(newInternalClassName) :
                         newInternalClassName;
 
@@ -372,7 +371,7 @@ implements   ClassVisitor,
             innerNameIndex  != 0)
         {
             String newInnerName = clazz.getClassName(innerClassIndex);
-            int index = newInnerName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR);
+            int index = newInnerName.lastIndexOf(TypeConstants.INNER_CLASS_SEPARATOR);
             if (index >= 0)
             {
                 innerClassesInfo.u2innerNameIndex =
@@ -848,7 +847,7 @@ implements   ClassVisitor,
                 if (isInnerClassName)
                 {
                     newClassName =
-                        newClassName.substring(newClassName.lastIndexOf(ClassConstants.INNER_CLASS_SEPARATOR)+1);
+                        newClassName.substring(newClassName.lastIndexOf(TypeConstants.INNER_CLASS_SEPARATOR)+1);
                 }
 
                 newDescriptorBuffer.append(newClassName);
@@ -883,7 +882,7 @@ implements   ClassVisitor,
     {
         return name.equals(ClassConstants.METHOD_NAME_INIT) ?
             ClassConstants.METHOD_NAME_INIT :
-            name + ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
+            name + TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
     }
 
 
@@ -905,13 +904,13 @@ implements   ClassVisitor,
         String newClassName = referencedClass.getName();
 
         // Is it an array type?
-        if (className.charAt(0) == ClassConstants.TYPE_ARRAY)
+        if (className.charAt(0) == TypeConstants.ARRAY)
         {
             // Add the array prefixes and suffix "[L...;".
             newClassName =
-                 className.substring(0, className.indexOf(ClassConstants.TYPE_CLASS_START)+1) +
+                 className.substring(0, className.indexOf(TypeConstants.CLASS_START)+1) +
                  newClassName +
-                 ClassConstants.TYPE_CLASS_END;
+                 TypeConstants.CLASS_END;
         }
 
         return newClassName;
@@ -991,7 +990,7 @@ implements   ClassVisitor,
                                             });
 
         RuntimeInvisibleAnnotationsAttribute attribute =
-            new RuntimeInvisibleAnnotationsAttribute(editor.addUtf8Constant(ATTR_RuntimeInvisibleAnnotations),
+            new RuntimeInvisibleAnnotationsAttribute(editor.addUtf8Constant(Attribute.RUNTIME_INVISIBLE_ANNOTATIONS),
                                                      1,
                                                      new Annotation[] { jvmName });
 

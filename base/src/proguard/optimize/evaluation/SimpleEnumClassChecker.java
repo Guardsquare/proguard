@@ -44,8 +44,8 @@ implements   ClassVisitor
     private final ClassVisitor  simpleEnumMarker     = new OptimizationInfoClassFilter(
                                                        new SimpleEnumMarker(true));
     private final MemberVisitor virtualMemberChecker = new MemberAccessFilter(0,
-                                                                              ClassConstants.ACC_PRIVATE |
-                                                                              ClassConstants.ACC_STATIC,
+                                                                              AccessConstants.PRIVATE |
+                                                                              AccessConstants.STATIC,
                                                        new MemberToClassVisitor(
                                                        new SimpleEnumMarker(false)));
 

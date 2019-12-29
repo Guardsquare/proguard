@@ -48,6 +48,19 @@ implements InstructionVisitor,
            BootstrapMethodInfoVisitor,
            ConstantVisitor
 {
+    private static final int MAXIMUM_BOOLEAN_AS_STRING_LENGTH =  5;  // "false"
+    private static final int MAXIMUM_CHAR_AS_STRING_LENGTH    =  1;  // "any char"
+    private static final int MAXIMUM_BYTE_AS_STRING_LENGTH    =  3;  // "255"
+    private static final int MAXIMUM_SHORT_AS_STRING_LENGTH   =  6;  // "-32768"
+    private static final int MAXIMUM_INT_AS_STRING_LENGTH     = 11; // "-2147483648"
+    private static final int MAXIMUM_LONG_AS_STRING_LENGTH    = 20; // "-9223372036854775808"
+    private static final int MAXIMUM_FLOAT_AS_STRING_LENGTH   = 13; // "-3.4028235E38"
+    private static final int MAXIMUM_DOUBLE_AS_STRING_LENGTH  = 23; // "-1.7976931348623157E308"
+    private static final int MAXIMUM_AT_HASHCODE_LENGTH       = MAXIMUM_CHAR_AS_STRING_LENGTH +
+                                                                MAXIMUM_INT_AS_STRING_LENGTH;
+
+    private static final int DEFAULT_STRINGBUILDER_INIT_SIZE  = 16;
+
     // Constants as per specification
     private static final char C_VARIABLE_ARGUMENT = '\u0001';
     private static final char C_CONSTANT_ARGUMENT = '\u0002';
@@ -77,7 +90,7 @@ implements InstructionVisitor,
     @Override
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_INVOKEDYNAMIC)
+        if (constantInstruction.opcode == Instruction.OP_INVOKEDYNAMIC)
         {
             ProgramClass programClass = (ProgramClass) clazz;
 
@@ -277,29 +290,29 @@ implements InstructionVisitor,
 
     private static int typicalStringLengthFromType(String internalTypeName)
     {
-        return internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BOOLEAN)) ? ClassConstants.MAXIMUM_BOOLEAN_AS_STRING_LENGTH :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_CHAR))    ? ClassConstants.MAXIMUM_CHAR_AS_STRING_LENGTH    :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BYTE))    ? ClassConstants.MAXIMUM_BYTE_AS_STRING_LENGTH    :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_SHORT))   ? ClassConstants.MAXIMUM_SHORT_AS_STRING_LENGTH   :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_INT))     ? ClassConstants.MAXIMUM_INT_AS_STRING_LENGTH     :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_LONG))    ? ClassConstants.MAXIMUM_LONG_AS_STRING_LENGTH    :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_FLOAT))   ? ClassConstants.MAXIMUM_FLOAT_AS_STRING_LENGTH   :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_DOUBLE))  ? ClassConstants.MAXIMUM_DOUBLE_AS_STRING_LENGTH  :
-                                                                                      ClassConstants.DEFAULT_STRINGBUILDER_INIT_SIZE  ;
+        return internalTypeName.equals(String.valueOf(TypeConstants.BOOLEAN)) ? MAXIMUM_BOOLEAN_AS_STRING_LENGTH :
+               internalTypeName.equals(String.valueOf(TypeConstants.CHAR))    ? MAXIMUM_CHAR_AS_STRING_LENGTH    :
+               internalTypeName.equals(String.valueOf(TypeConstants.BYTE))    ? MAXIMUM_BYTE_AS_STRING_LENGTH    :
+               internalTypeName.equals(String.valueOf(TypeConstants.SHORT))   ? MAXIMUM_SHORT_AS_STRING_LENGTH   :
+               internalTypeName.equals(String.valueOf(TypeConstants.INT))     ? MAXIMUM_INT_AS_STRING_LENGTH     :
+               internalTypeName.equals(String.valueOf(TypeConstants.LONG))    ? MAXIMUM_LONG_AS_STRING_LENGTH    :
+               internalTypeName.equals(String.valueOf(TypeConstants.FLOAT))   ? MAXIMUM_FLOAT_AS_STRING_LENGTH   :
+               internalTypeName.equals(String.valueOf(TypeConstants.DOUBLE))  ? MAXIMUM_DOUBLE_AS_STRING_LENGTH  :
+                                                                                DEFAULT_STRINGBUILDER_INIT_SIZE  ;
     }
 
     private static String appendDescriptorFromInternalType(String internalTypeName)
     {
-        return internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BOOLEAN)) ? ClassConstants.METHOD_TYPE_BOOLEAN_STRING_BUILDER :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_CHAR))    ? ClassConstants.METHOD_TYPE_CHAR_STRING_BUILDER    :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_BYTE))  ||
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_SHORT)) ||
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_INT))     ? ClassConstants.METHOD_TYPE_INT_STRING_BUILDER     :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_LONG))    ? ClassConstants.METHOD_TYPE_LONG_STRING_BUILDER    :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_FLOAT))   ? ClassConstants.METHOD_TYPE_FLOAT_STRING_BUILDER   :
-               internalTypeName.equals(String.valueOf(ClassConstants.TYPE_DOUBLE))  ? ClassConstants.METHOD_TYPE_DOUBLE_STRING_BUILDER  :
-               internalTypeName.equals(ClassConstants.TYPE_JAVA_LANG_STRING)        ? ClassConstants.METHOD_TYPE_STRING_STRING_BUILDER  :
-                                                                                      ClassConstants.METHOD_TYPE_OBJECT_STRING_BUILDER  ;
+        return internalTypeName.equals(String.valueOf(TypeConstants.BOOLEAN)) ? ClassConstants.METHOD_TYPE_BOOLEAN_STRING_BUILDER :
+               internalTypeName.equals(String.valueOf(TypeConstants.CHAR))    ? ClassConstants.METHOD_TYPE_CHAR_STRING_BUILDER    :
+               internalTypeName.equals(String.valueOf(TypeConstants.BYTE))  ||
+               internalTypeName.equals(String.valueOf(TypeConstants.SHORT)) ||
+               internalTypeName.equals(String.valueOf(TypeConstants.INT))     ? ClassConstants.METHOD_TYPE_INT_STRING_BUILDER     :
+               internalTypeName.equals(String.valueOf(TypeConstants.LONG))    ? ClassConstants.METHOD_TYPE_LONG_STRING_BUILDER    :
+               internalTypeName.equals(String.valueOf(TypeConstants.FLOAT))   ? ClassConstants.METHOD_TYPE_FLOAT_STRING_BUILDER   :
+               internalTypeName.equals(String.valueOf(TypeConstants.DOUBLE))  ? ClassConstants.METHOD_TYPE_DOUBLE_STRING_BUILDER  :
+               internalTypeName.equals(ClassConstants.NAME_JAVA_LANG_STRING)  ? ClassConstants.METHOD_TYPE_STRING_STRING_BUILDER  :
+                                                                                ClassConstants.METHOD_TYPE_OBJECT_STRING_BUILDER;
     }
 
     private static int nextArgIndex(String recipe, int fromIndex)

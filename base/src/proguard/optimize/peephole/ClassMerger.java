@@ -21,6 +21,7 @@
 package proguard.optimize.peephole;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
@@ -162,7 +163,7 @@ implements   ClassVisitor,
 
             // Don't merge annotation classes, with all their reflection and
             // infinite recursion.
-            (programClass.getAccessFlags() & ClassConstants.ACC_ANNOTATION) == 0 &&
+            (programClass.getAccessFlags() & AccessConstants.ANNOTATION) == 0 &&
 
             (!DETAILS || print(programClass, "Version?")) &&
 
@@ -178,7 +179,7 @@ implements   ClassVisitor,
             (allowAccessModification                                                        ||
              ((programClass.getAccessFlags() &
                targetClass.getAccessFlags()  &
-               ClassConstants.ACC_PUBLIC) != 0 &&
+               AccessConstants.PUBLIC) != 0 &&
               !PackageVisibleMemberContainingClassMarker.containsPackageVisibleMembers(programClass) &&
               !PackageVisibleMemberInvokingClassMarker.invokesPackageVisibleMembers(programClass)) ||
              ClassUtil.internalPackageName(programClass.getName()).equals(
@@ -189,11 +190,11 @@ implements   ClassVisitor,
             // Only merge two classes or two interfaces or two abstract classes,
             // or a single implementation into its interface.
             ((programClass.getAccessFlags() &
-              (ClassConstants.ACC_INTERFACE |
-               ClassConstants.ACC_ABSTRACT)) ==
+              (AccessConstants.INTERFACE |
+               AccessConstants.ABSTRACT)) ==
              (targetClass.getAccessFlags()  &
-              (ClassConstants.ACC_INTERFACE |
-               ClassConstants.ACC_ABSTRACT)) ||
+              (AccessConstants.INTERFACE |
+               AccessConstants.ABSTRACT)) ||
              (isOnlySubClass(programClass, targetClass) &&
               programClass.getSuperClass() != null      &&
               (programClass.getSuperClass().equals(targetClass) ||
@@ -210,8 +211,8 @@ implements   ClassVisitor,
             // Interfaces must have exactly the same subinterfaces, not
             // counting themselves, to avoid any loops in the interface
             // hierarchy.
-            ((programClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) == 0 ||
-             (targetClass.getAccessFlags()  & ClassConstants.ACC_INTERFACE) == 0 ||
+            ((programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 ||
+             (targetClass.getAccessFlags()  & AccessConstants.INTERFACE) == 0 ||
              subInterfaces(programClass, targetClass).equals(subInterfaces(targetClass, programClass))) &&
 
             (!DETAILS || print(programClass, "Same initialized superclasses?")) &&
@@ -296,7 +297,7 @@ implements   ClassVisitor,
             // non-copiable attributes (InnerClass, EnclosingMethod),
             // unless it is a synthetic class.
             (mergeWrapperClasses                                                 ||
-             (programClass.getAccessFlags() & ClassConstants.ACC_SYNTHETIC) != 0 ||
+             (programClass.getAccessFlags() & AccessConstants.SYNTHETIC) != 0 ||
              !hasNonCopiableAttributes(programClass)))
         {
             // We're not actually merging the classes, but only copying the
@@ -306,8 +307,8 @@ implements   ClassVisitor,
             if (DEBUG)
             {
                 System.out.println("ClassMerger ["+programClass.getName()+"] -> ["+targetClass.getName()+"]");
-                System.out.println("  Source interface? ["+((programClass.getAccessFlags() & ClassConstants.ACC_INTERFACE)!=0)+"]");
-                System.out.println("  Target interface? ["+((targetClass.getAccessFlags() & ClassConstants.ACC_INTERFACE)!=0)+"]");
+                System.out.println("  Source interface? ["+((programClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
+                System.out.println("  Target interface? ["+((targetClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
                 System.out.println("  Source subclasses ["+programClass.subClasses+"]");
                 System.out.println("  Target subclasses ["+targetClass.subClasses+"]");
                 System.out.println("  Source superclass ["+programClass.getSuperClass().getName()+"]");
@@ -325,21 +326,21 @@ implements   ClassVisitor,
             targetClass.u2accessFlags =
                 ((targetAccessFlags &
                   sourceAccessFlags) &
-                 (ClassConstants.ACC_INTERFACE |
-                  ClassConstants.ACC_ABSTRACT)) |
+                 (AccessConstants.INTERFACE |
+                  AccessConstants.ABSTRACT)) |
                 ((targetAccessFlags |
                   sourceAccessFlags) &
-                 (ClassConstants.ACC_PUBLIC      |
-                  ClassConstants.ACC_SUPER       |
-                  ClassConstants.ACC_ANNOTATION  |
-                  ClassConstants.ACC_ENUM));
+                 (AccessConstants.PUBLIC      |
+                  AccessConstants.SUPER       |
+                  AccessConstants.ANNOTATION  |
+                  AccessConstants.ENUM));
 
             // Copy over the superclass, if it's a non-interface class being
             // merged into an interface class.
             // However, we're currently never merging in a way that changes the
             // superclass.
-            //if ((programClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) == 0 &&
-            //    (targetClass.getAccessFlags()  & ClassConstants.ACC_INTERFACE) != 0)
+            //if ((programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 &&
+            //    (targetClass.getAccessFlags()  & AccessConstants.INTERFACE) != 0)
             //{
             //    targetClass.u2superClass =
             //        new ConstantAdder(targetClass).addConstant(programClass, programClass.u2superClass);
@@ -361,7 +362,7 @@ implements   ClassVisitor,
                 new MemberAdder(targetClass, fieldOptimizationInfoCopier);
 
             programClass.fieldsAccept(mergeWrapperClasses ?
-                new MemberAccessFilter(ClassConstants.ACC_STATIC, 0, memberAdder) :
+                new MemberAccessFilter(AccessConstants.STATIC, 0, memberAdder) :
                 memberAdder);
 
             programClass.methodsAccept(mergeWrapperClasses ?
@@ -371,10 +372,10 @@ implements   ClassVisitor,
             // Copy over the other attributes.
             programClass.attributesAccept(
                 new AttributeNameFilter(new NotMatcher(
-                    new OrMatcher(new FixedStringMatcher(ClassConstants.ATTR_BootstrapMethods),
-                    new OrMatcher(new FixedStringMatcher(ClassConstants.ATTR_SourceFile),
-                    new OrMatcher(new FixedStringMatcher(ClassConstants.ATTR_InnerClasses),
-                                  new FixedStringMatcher(ClassConstants.ATTR_EnclosingMethod))))),
+                    new OrMatcher(new FixedStringMatcher(Attribute.BOOTSTRAP_METHODS),
+                    new OrMatcher(new FixedStringMatcher(Attribute.SOURCE_FILE),
+                    new OrMatcher(new FixedStringMatcher(Attribute.INNER_CLASSES),
+                                  new FixedStringMatcher(Attribute.ENCLOSING_METHOD))))),
                 new AttributeAdder(targetClass, true)));
 
             // Update the optimization information of the target class.
@@ -459,7 +460,7 @@ implements   ClassVisitor,
 
         // Visit all subclasses, collecting the interface classes.
         clazz.hierarchyAccept(false, false, false, true,
-            new ClassAccessFilter(ClassConstants.ACC_INTERFACE, 0,
+            new ClassAccessFilter(AccessConstants.INTERFACE, 0,
             new ExceptClassesFilter(new Clazz[] { exceptClass },
             new ClassCollector(set))));
 
@@ -535,7 +536,7 @@ implements   ClassVisitor,
 
         clazz.attributesAccept(
             new AttributeNameFilter(
-            new FixedStringMatcher(ClassConstants.ATTR_Signature),
+            new FixedStringMatcher(Attribute.SIGNATURE),
                 counter));
 
         return counter.getCount() > 0;
@@ -578,7 +579,7 @@ implements   ClassVisitor,
         MemberCounter counter = new MemberCounter();
 
         // Count all non-static fields in the the source class.
-        programClass.fieldsAccept(new MemberAccessFilter(0, ClassConstants.ACC_STATIC,
+        programClass.fieldsAccept(new MemberAccessFilter(0, AccessConstants.STATIC,
                                   counter));
 
         return counter.getCount() > 0;
@@ -599,7 +600,7 @@ implements   ClassVisitor,
         clazz.hierarchyAccept(true, false, false, true,
                               new AllFieldVisitor(
                               new SimilarMemberVisitor(targetClass, true, true, true, false,
-                              new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
+                              new MemberAccessFilter(0, AccessConstants.PRIVATE,
                               counter))));
 
         return counter.getCount() > 0;
@@ -617,9 +618,9 @@ implements   ClassVisitor,
 
         // Visit all non-abstract methods, counting the ones that are also
         // present in the target class.
-        clazz.methodsAccept(new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
+        clazz.methodsAccept(new MemberAccessFilter(0, AccessConstants.ABSTRACT,
                             new SimilarMemberVisitor(targetClass, true, false, false, false,
-                            new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
+                            new MemberAccessFilter(0, AccessConstants.ABSTRACT,
                             counter))));
 
         return counter.getCount() > 0;
@@ -636,8 +637,8 @@ implements   ClassVisitor,
         // It's ok if the target class is already abstract and does not
         // have any subclasses except for maybe the source class.
         if ((targetClass.getAccessFlags() &
-             (ClassConstants.ACC_ABSTRACT |
-              ClassConstants.ACC_INTERFACE)) != 0 &&
+             (AccessConstants.ABSTRACT |
+              AccessConstants.INTERFACE)) != 0 &&
             (targetClass.subClasses == null ||
              isOnlySubClass(clazz, targetClass)))
         {
@@ -649,12 +650,12 @@ implements   ClassVisitor,
 
         // Collect all abstract methods, and similar abstract methods in the
         // class hierarchy of the target class.
-        clazz.methodsAccept(new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+        clazz.methodsAccept(new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
                             new MultiMemberVisitor(
                                 counter,
 
                                 new SimilarMemberVisitor(targetClass, true, true, true, false,
-                                new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                                new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
                                 new MemberCollector(false, true, true, targetSet)))
                             )));
 
@@ -682,10 +683,10 @@ implements   ClassVisitor,
 
         // Visit all non-abstract methods, counting the ones that are
         // overriding methods in the class hierarchy of the target class.
-        clazz.methodsAccept(new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
+        clazz.methodsAccept(new MemberAccessFilter(0, AccessConstants.ABSTRACT,
                             new InitializerMethodFilter(null,
                             new SimilarMemberVisitor(targetClass, true, true, false, false,
-                            new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE | ClassConstants.ACC_STATIC | ClassConstants.ACC_ABSTRACT,
+                            new MemberAccessFilter(0, AccessConstants.PRIVATE | AccessConstants.STATIC | AccessConstants.ABSTRACT,
                             counter)))));
 
         return counter.getCount() > 0;
@@ -715,7 +716,7 @@ implements   ClassVisitor,
                               new AllMethodVisitor(
                               new InitializerMethodFilter(null,
                               new SimilarMemberVisitor(targetClass, true, true, false, false,
-                              new MemberAccessFilter(ClassConstants.ACC_FINAL, 0,
+                              new MemberAccessFilter(AccessConstants.FINAL, 0,
                                                      counter)))));
         if (counter.getCount() > 0)
         {
@@ -726,10 +727,10 @@ implements   ClassVisitor,
         // non-private methods in the class hierarchy of the target class.
         clazz.hierarchyAccept(true, false, false, true,
                               new AllMethodVisitor(
-                              new MemberAccessFilter(ClassConstants.ACC_PRIVATE, 0,
+                              new MemberAccessFilter(AccessConstants.PRIVATE, 0,
                               new InitializerMethodFilter(null,
                               new SimilarMemberVisitor(targetClass, true, true, true, false,
-                              new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
+                              new MemberAccessFilter(0, AccessConstants.PRIVATE,
                                                      counter))))));
         if (counter.getCount() > 0)
         {
@@ -740,10 +741,10 @@ implements   ClassVisitor,
         // non-private methods in the class hierarchy of the target class.
         clazz.hierarchyAccept(true, false, false, true,
                               new AllMethodVisitor(
-                              new MemberAccessFilter(ClassConstants.ACC_STATIC, 0,
+                              new MemberAccessFilter(AccessConstants.STATIC, 0,
                               new InitializerMethodFilter(null,
                               new SimilarMemberVisitor(targetClass, true, true, true, false,
-                              new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
+                              new MemberAccessFilter(0, AccessConstants.PRIVATE,
                               counter))))));
 
         return counter.getCount() > 0;
@@ -761,8 +762,8 @@ implements   ClassVisitor,
         // Copy over the other attributes.
         clazz.attributesAccept(
             new AttributeNameFilter(
-                new OrMatcher(new FixedStringMatcher(ClassConstants.ATTR_InnerClasses),
-                              new FixedStringMatcher(ClassConstants.ATTR_EnclosingMethod)),
+                new OrMatcher(new FixedStringMatcher(Attribute.INNER_CLASSES),
+                              new FixedStringMatcher(Attribute.ENCLOSING_METHOD)),
             counter));
 
         return counter.getCount() > 0;

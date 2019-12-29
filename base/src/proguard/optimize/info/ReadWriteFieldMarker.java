@@ -101,24 +101,24 @@ implements   InstructionVisitor,
         // Check for instructions that involve fields.
         switch (opcode)
         {
-            case InstructionConstants.OP_LDC:
-            case InstructionConstants.OP_LDC_W:
+            case Instruction.OP_LDC:
+            case Instruction.OP_LDC_W:
                 // Mark the field, if any, as being read from and written to.
                 reading = true;
                 writing = true;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
 
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_GETFIELD:
                 // Mark the field as being read from.
                 reading = true;
                 writing = false;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
 
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_PUTFIELD:
                 // Mark the field as being written to.
                 reading = false;
                 writing = true;

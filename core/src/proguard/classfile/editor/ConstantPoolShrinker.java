@@ -69,7 +69,7 @@ implements   ClassVisitor,
     // Don't make a static instance, so we don't need to clear any old flags.
     private final Object USED = new Object();
 
-    private       int[]                constantIndexMap     = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private       int[]                constantIndexMap     = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
     private final ConstantPoolRemapper constantPoolRemapper = new ConstantPoolRemapper();
 
 

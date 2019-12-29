@@ -59,8 +59,8 @@ public class Preverifier
         // Classes for JSE 7 or higher must be preverified.
         programClassPool.classesAccept(
             new ClassVersionFilter(configuration.microEdition ?
-                                       ClassConstants.CLASS_VERSION_1_0 :
-                                       ClassConstants.CLASS_VERSION_1_6,
+                                       VersionConstants.CLASS_VERSION_1_0 :
+                                       VersionConstants.CLASS_VERSION_1_6,
             new AllMethodVisitor(
             new AllAttributeVisitor(
             new CodePreverifier(configuration.microEdition)))));

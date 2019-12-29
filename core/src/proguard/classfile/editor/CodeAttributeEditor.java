@@ -117,14 +117,14 @@ implements   AttributeVisitor,
 
     private Map labels = new HashMap();
 
-    /*private*/public Instruction[]    preOffsetInsertions = new Instruction[ClassConstants.TYPICAL_CODE_LENGTH];
-    /*private*/public Instruction[]    preInsertions       = new Instruction[ClassConstants.TYPICAL_CODE_LENGTH];
-    /*private*/public Instruction[]    replacements        = new Instruction[ClassConstants.TYPICAL_CODE_LENGTH];
-    /*private*/public Instruction[]    postInsertions      = new Instruction[ClassConstants.TYPICAL_CODE_LENGTH];
-    /*private*/public boolean[]        deleted             = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
+    /*private*/public Instruction[]    preOffsetInsertions = new Instruction[ClassEstimates.TYPICAL_CODE_LENGTH];
+    /*private*/public Instruction[]    preInsertions       = new Instruction[ClassEstimates.TYPICAL_CODE_LENGTH];
+    /*private*/public Instruction[]    replacements        = new Instruction[ClassEstimates.TYPICAL_CODE_LENGTH];
+    /*private*/public Instruction[]    postInsertions      = new Instruction[ClassEstimates.TYPICAL_CODE_LENGTH];
+    /*private*/public boolean[]        deleted             = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
 
 
-    private int[]   newInstructionOffsets = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private int[]   newInstructionOffsets = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
     private int     newOffset;
     private boolean lengthIncreased;
 

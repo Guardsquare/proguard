@@ -65,7 +65,7 @@ public class SubroutineInliner
             !configuration.android)
         {
             inliner =
-                new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_6,
+                new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_6,
                                        inliner);
         }
 

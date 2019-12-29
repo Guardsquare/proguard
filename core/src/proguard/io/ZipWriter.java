@@ -17,7 +17,7 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 import proguard.util.StringMatcher;
 
 import java.io.*;
@@ -174,7 +174,7 @@ public class ZipWriter implements DataEntryWriter
         }
 
         // Get the directory entry name.
-        String name = dataEntry.getName() + ClassConstants.PACKAGE_SEPARATOR;
+        String name = dataEntry.getName() + TypeConstants.PACKAGE_SEPARATOR;
 
         // Create a new directory entry.
         OutputStream outputStream =

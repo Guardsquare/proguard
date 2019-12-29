@@ -26,12 +26,13 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.evaluation.*;
+import proguard.optimize.evaluation.ParameterTracingInvocationUnit;
 import proguard.util.ArrayUtil;
 
 /**
@@ -54,13 +55,13 @@ implements   AttributeVisitor,
     //*/
 
 
-    private boolean[] instanceEscaping  = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private boolean[] instanceReturned  = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private boolean[] instanceModified  = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private boolean[] externalInstance  = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-//    private boolean[] exceptionEscaping = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-//    private boolean[] exceptionReturned = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-//    private boolean[] exceptionModified = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
+    private boolean[] instanceEscaping  = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private boolean[] instanceReturned  = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private boolean[] instanceModified  = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private boolean[] externalInstance  = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+//    private boolean[] exceptionEscaping = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+//    private boolean[] exceptionReturned = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+//    private boolean[] exceptionModified = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
 
     private final PartialEvaluator partialEvaluator;
     private final boolean          runPartialEvaluator;
@@ -204,7 +205,7 @@ implements   AttributeVisitor,
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_AASTORE:
+            case Instruction.OP_AASTORE:
                 // Mark array reference values whose element is modified.
                 markModifiedReferenceValues(offset,
                                             simpleInstruction.stackPopCount(clazz) - 1);
@@ -213,24 +214,24 @@ implements   AttributeVisitor,
                 markEscapingReferenceValues(offset, 0);
                 break;
 
-            case InstructionConstants.OP_IASTORE:
-            case InstructionConstants.OP_LASTORE:
-            case InstructionConstants.OP_FASTORE:
-            case InstructionConstants.OP_DASTORE:
-            case InstructionConstants.OP_BASTORE:
-            case InstructionConstants.OP_CASTORE:
-            case InstructionConstants.OP_SASTORE:
+            case Instruction.OP_IASTORE:
+            case Instruction.OP_LASTORE:
+            case Instruction.OP_FASTORE:
+            case Instruction.OP_DASTORE:
+            case Instruction.OP_BASTORE:
+            case Instruction.OP_CASTORE:
+            case Instruction.OP_SASTORE:
                 // Mark array reference values whose element is modified.
                 markModifiedReferenceValues(offset,
                                             simpleInstruction.stackPopCount(clazz) - 1);
                 break;
 
-            case InstructionConstants.OP_ARETURN:
+            case Instruction.OP_ARETURN:
                 // Mark the returned reference values.
                 markReturnedReferenceValues(offset, 0);
                 break;
 
-            case InstructionConstants.OP_ATHROW:
+            case Instruction.OP_ATHROW:
                 // Mark the escaping reference values.
                 markEscapingReferenceValues(offset, 0);
                 break;
@@ -242,18 +243,18 @@ implements   AttributeVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_GETFIELD:
                 // Mark external reference values.
                 markExternalReferenceValue(offset);
                 break;
 
-            case InstructionConstants.OP_PUTSTATIC:
+            case Instruction.OP_PUTSTATIC:
                 // Mark reference values that are put in the field.
                 markEscapingReferenceValues(offset, 0);
                 break;
 
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTFIELD:
                 // Mark reference reference values whose field is modified.
                 markModifiedReferenceValues(offset,
                                             constantInstruction.stackPopCount(clazz) - 1);
@@ -262,10 +263,10 @@ implements   AttributeVisitor,
                 markEscapingReferenceValues(offset, 0);
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
                 // Mark reference reference values that are modified as parameters
                 // of the invoked method.
                 // Mark reference values that are escaping as parameters

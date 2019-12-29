@@ -107,7 +107,7 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
         String externalClassName            = ClassUtil.externalClassName(programClass.getName());
         String packageName                  = ClassUtil.externalPackageName(externalClassName);
         String shortClassName               = ClassUtil.externalShortClassName(externalClassName);
-        String externalTypeAdapterClassName = packageName + JavaConstants.PACKAGE_SEPARATOR +
+        String externalTypeAdapterClassName = packageName + JavaTypeConstants.PACKAGE_SEPARATOR +
                                               "Optimized" + shortClassName + "TypeAdapter";
         String typeAdapterClassName         = ClassUtil.internalClassName(externalTypeAdapterClassName);
 

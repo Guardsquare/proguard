@@ -54,8 +54,8 @@ public class ArrayInitializationMatcher
     //
     private final Instruction[] ARRAY_PRESTORE_INSTRUCTIONS = new Instruction[]
         {
-            new VariableInstruction(InstructionConstants.OP_ASTORE, X),
-            new VariableInstruction(InstructionConstants.OP_ALOAD, X)
+            new VariableInstruction(Instruction.OP_ASTORE, X),
+            new VariableInstruction(Instruction.OP_ALOAD, X)
         };
 
     private final InstructionSequenceMatcher arrayPreStoreMatcher =
@@ -274,14 +274,14 @@ public class ArrayInitializationMatcher
     {
         switch (newArrayType)
         {
-            case InstructionConstants.ARRAY_T_BOOLEAN:
-            case InstructionConstants.ARRAY_T_BYTE:
-            case InstructionConstants.ARRAY_T_CHAR:
-            case InstructionConstants.ARRAY_T_SHORT:
-            case InstructionConstants.ARRAY_T_INT:     return Value.TYPE_INTEGER;
-            case InstructionConstants.ARRAY_T_LONG:    return Value.TYPE_LONG;
-            case InstructionConstants.ARRAY_T_FLOAT:   return Value.TYPE_FLOAT;
-            case InstructionConstants.ARRAY_T_DOUBLE:  return Value.TYPE_DOUBLE;
+            case Instruction.ARRAY_T_BOOLEAN:
+            case Instruction.ARRAY_T_BYTE:
+            case Instruction.ARRAY_T_CHAR:
+            case Instruction.ARRAY_T_SHORT:
+            case Instruction.ARRAY_T_INT:     return Value.TYPE_INTEGER;
+            case Instruction.ARRAY_T_LONG:    return Value.TYPE_LONG;
+            case Instruction.ARRAY_T_FLOAT:   return Value.TYPE_FLOAT;
+            case Instruction.ARRAY_T_DOUBLE:  return Value.TYPE_DOUBLE;
             default:
                 throw new IllegalArgumentException("Unexpected new array type ["+newArrayType+"]");
         }
@@ -292,14 +292,14 @@ public class ArrayInitializationMatcher
     {
         switch (newArrayType)
         {
-            case InstructionConstants.ARRAY_T_BOOLEAN:
-            case InstructionConstants.ARRAY_T_BYTE:    return InstructionConstants.OP_BASTORE;
-            case InstructionConstants.ARRAY_T_CHAR:    return InstructionConstants.OP_CASTORE;
-            case InstructionConstants.ARRAY_T_SHORT:   return InstructionConstants.OP_SASTORE;
-            case InstructionConstants.ARRAY_T_INT:     return InstructionConstants.OP_IASTORE;
-            case InstructionConstants.ARRAY_T_LONG:    return InstructionConstants.OP_LASTORE;
-            case InstructionConstants.ARRAY_T_FLOAT:   return InstructionConstants.OP_FASTORE;
-            case InstructionConstants.ARRAY_T_DOUBLE:  return InstructionConstants.OP_DASTORE;
+            case Instruction.ARRAY_T_BOOLEAN:
+            case Instruction.ARRAY_T_BYTE:    return Instruction.OP_BASTORE;
+            case Instruction.ARRAY_T_CHAR:    return Instruction.OP_CASTORE;
+            case Instruction.ARRAY_T_SHORT:   return Instruction.OP_SASTORE;
+            case Instruction.ARRAY_T_INT:     return Instruction.OP_IASTORE;
+            case Instruction.ARRAY_T_LONG:    return Instruction.OP_LASTORE;
+            case Instruction.ARRAY_T_FLOAT:   return Instruction.OP_FASTORE;
+            case Instruction.ARRAY_T_DOUBLE:  return Instruction.OP_DASTORE;
             default:
                 throw new IllegalArgumentException("Unexpected new array type ["+newArrayType+"]");
         }
@@ -310,14 +310,14 @@ public class ArrayInitializationMatcher
     {
         switch (newArrayType)
         {
-            case InstructionConstants.ARRAY_T_BOOLEAN: return new boolean[arrayLength];
-            case InstructionConstants.ARRAY_T_BYTE:    return new byte[arrayLength];
-            case InstructionConstants.ARRAY_T_CHAR:    return new char[arrayLength];
-            case InstructionConstants.ARRAY_T_SHORT:   return new short[arrayLength];
-            case InstructionConstants.ARRAY_T_INT:     return new int[arrayLength];
-            case InstructionConstants.ARRAY_T_LONG:    return new long[arrayLength];
-            case InstructionConstants.ARRAY_T_FLOAT:   return new float[arrayLength];
-            case InstructionConstants.ARRAY_T_DOUBLE:  return new double[arrayLength];
+            case Instruction.ARRAY_T_BOOLEAN: return new boolean[arrayLength];
+            case Instruction.ARRAY_T_BYTE:    return new byte[arrayLength];
+            case Instruction.ARRAY_T_CHAR:    return new char[arrayLength];
+            case Instruction.ARRAY_T_SHORT:   return new short[arrayLength];
+            case Instruction.ARRAY_T_INT:     return new int[arrayLength];
+            case Instruction.ARRAY_T_LONG:    return new long[arrayLength];
+            case Instruction.ARRAY_T_FLOAT:   return new float[arrayLength];
+            case Instruction.ARRAY_T_DOUBLE:  return new double[arrayLength];
             default:
                 throw new IllegalArgumentException("Unexpected new array type ["+newArrayType+"]");
         }
@@ -328,14 +328,14 @@ public class ArrayInitializationMatcher
     {
         switch (newArrayType)
         {
-            case InstructionConstants.ARRAY_T_BOOLEAN: ((boolean[])array)[index] = 0 !=   value.integerValue().value(); break;
-            case InstructionConstants.ARRAY_T_BYTE:    ((byte   [])array)[index] = (byte) value.integerValue().value(); break;
-            case InstructionConstants.ARRAY_T_CHAR:    ((char   [])array)[index] = (char) value.integerValue().value(); break;
-            case InstructionConstants.ARRAY_T_SHORT:   ((short  [])array)[index] = (short)value.integerValue().value(); break;
-            case InstructionConstants.ARRAY_T_INT:     ((int    [])array)[index] =        value.integerValue().value(); break;
-            case InstructionConstants.ARRAY_T_LONG:    ((long   [])array)[index] =        value.longValue().value();    break;
-            case InstructionConstants.ARRAY_T_FLOAT:   ((float  [])array)[index] =        value.floatValue().value();   break;
-            case InstructionConstants.ARRAY_T_DOUBLE:  ((double [])array)[index] =        value.doubleValue().value();  break;
+            case Instruction.ARRAY_T_BOOLEAN: ((boolean[])array)[index] = 0 !=   value.integerValue().value(); break;
+            case Instruction.ARRAY_T_BYTE:    ((byte   [])array)[index] = (byte) value.integerValue().value(); break;
+            case Instruction.ARRAY_T_CHAR:    ((char   [])array)[index] = (char) value.integerValue().value(); break;
+            case Instruction.ARRAY_T_SHORT:   ((short  [])array)[index] = (short)value.integerValue().value(); break;
+            case Instruction.ARRAY_T_INT:     ((int    [])array)[index] =        value.integerValue().value(); break;
+            case Instruction.ARRAY_T_LONG:    ((long   [])array)[index] =        value.longValue().value();    break;
+            case Instruction.ARRAY_T_FLOAT:   ((float  [])array)[index] =        value.floatValue().value();   break;
+            case Instruction.ARRAY_T_DOUBLE:  ((double [])array)[index] =        value.doubleValue().value();  break;
             default:
                 throw new IllegalArgumentException("Unexpected new array type ["+newArrayType+"]");
         }

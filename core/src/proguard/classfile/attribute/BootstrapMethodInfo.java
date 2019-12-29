@@ -28,6 +28,11 @@ import proguard.util.VisitorAccepter;
  */
 public class BootstrapMethodInfo implements VisitorAccepter
 {
+    public static final int FLAG_BRIDGES      = 4;
+    public static final int FLAG_MARKERS      = 2;
+    public static final int FLAG_SERIALIZABLE = 1;
+
+
     public int   u2methodHandleIndex;
     public int   u2methodArgumentCount;
     public int[] u2methodArguments;

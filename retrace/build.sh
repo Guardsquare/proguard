@@ -9,10 +9,11 @@ source ../buildscripts/functions.sh
 MAIN_CLASS=proguard.retrace.ReTrace
 
 # Make sure ProGuard has been compiled.
-if [[ ! -d ../core/$OUT ||
+if [[ ! -d ../base/$OUT ||
+      ! -d ../core/$OUT || 
       ! -f "$PROGUARD_JAR" ]]; then
-  ../core/build.sh || exit 1
+  ../base/build.sh || exit 1
 fi
 
-compile   $MAIN_CLASS "../core/$OUT" && \
+compile   $MAIN_CLASS "../base/$OUT:../core/$OUT" && \
 createjar "$RETRACE_JAR" || exit 1

@@ -20,10 +20,10 @@ package proguard.evaluation;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.evaluation.BasicInvocationUnit;
 import proguard.evaluation.value.*;
 import proguard.util.ArrayUtil;
 
@@ -50,8 +50,8 @@ implements   AttributeVisitor,
     private final boolean          runPartialEvaluator;
 
     private int                      superInitializationOffset;
-    private int[]                    initializationOffsets = new int[ClassConstants.TYPICAL_CODE_LENGTH];
-    private InstructionOffsetValue[] uninitializedOffsets  = new InstructionOffsetValue[ClassConstants.TYPICAL_CODE_LENGTH];
+    private int[]                    initializationOffsets = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private InstructionOffsetValue[] uninitializedOffsets  = new InstructionOffsetValue[ClassEstimates.TYPICAL_CODE_LENGTH];
 
 
     /**

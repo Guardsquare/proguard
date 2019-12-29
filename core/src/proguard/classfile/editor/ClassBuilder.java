@@ -18,7 +18,7 @@
 package proguard.classfile.editor;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.io.ProgramClassWriter;
 import proguard.classfile.visitor.MemberVisitor;
@@ -84,7 +84,7 @@ public class ClassBuilder
                         String superclassName,
                         int    processingFlags)
     {
-        this(ClassConstants.CLASS_VERSION_1_2,
+        this(VersionConstants.CLASS_VERSION_1_2,
              u2accessFlags,
              className,
              superclassName,
@@ -136,7 +136,7 @@ public class ClassBuilder
     {
         this(new ProgramClass(u4version,
                               1,
-                              new Constant[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE],
+                              new Constant[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE],
                               u2accessFlags,
                               0,
                               0,
@@ -343,14 +343,14 @@ public class ClassBuilder
      * @param methodName            the name of the new method.
      * @param methodDescriptor      the descriptor of the new method.
      * @param maxCodeFragmentLength the maximum length for the code fragment.
-     * @param codeBuilder          the provider of a composer to create code
+     * @param codeBuilder           the provider of a composer to create code
      *                              attributes.
      * @return this instance of ClassBuilder.
      */
-    public ClassBuilder addMethod(int          u2accessFlags,
-                                  String       methodName,
-                                  String       methodDescriptor,
-                                  int          maxCodeFragmentLength,
+    public ClassBuilder addMethod(int         u2accessFlags,
+                                  String      methodName,
+                                  String      methodDescriptor,
+                                  int         maxCodeFragmentLength,
                                   CodeBuilder codeBuilder)
     {
         return addMethod(u2accessFlags,
@@ -369,7 +369,7 @@ public class ClassBuilder
      * @param methodName            the name of the new method.
      * @param methodDescriptor      the descriptor of the new method.
      * @param maxCodeFragmentLength the maximum length for the code fragment.
-     * @param codeBuilder          the provider of a composer to create code
+     * @param codeBuilder           the provider of a composer to create code
      *                              attributes.
      * @param extraMemberVisitor    an optional visitor for the method after
      *                              it has been created and added to the class.
@@ -379,7 +379,7 @@ public class ClassBuilder
                                   String        methodName,
                                   String        methodDescriptor,
                                   int           maxCodeFragmentLength,
-                                  CodeBuilder codeBuilder,
+                                  CodeBuilder   codeBuilder,
                                   MemberVisitor extraMemberVisitor)
     {
         // Create an empty method.
@@ -393,7 +393,7 @@ public class ClassBuilder
         {
             // Create an empty code attribute.
             CodeAttribute codeAttribute =
-                new CodeAttribute(constantPoolEditor.addUtf8Constant(ClassConstants.ATTR_Code));
+                new CodeAttribute(constantPoolEditor.addUtf8Constant(Attribute.CODE));
 
             // Create and set up a composer for the caller.
             CompactCodeAttributeComposer compactCodeAttributeComposer =
@@ -452,7 +452,7 @@ public class ClassBuilder
 //                      0,
 //                      instructions,
 //                      null,
-//                      new SimpleInstruction(InstructionConstants.OP_RETURN));
+//                      new SimpleInstruction(Instruction.OP_RETURN));
 //        }
 //        else
 //        {
@@ -468,7 +468,7 @@ public class ClassBuilder
 //                              ProcessingFlags.DONT_OPTIMIZE,
 //                              instructions,
 //                              null,
-//                              new SimpleInstruction(InstructionConstants.OP_RETURN));
+//                              new SimpleInstruction(Instruction.OP_RETURN));
 //
 //                // Call the new initializer from the existing one.
 //                InstructionSequenceBuilder builder = new InstructionSequenceBuilder(programClass);
@@ -512,9 +512,9 @@ public class ClassBuilder
 //            // First call the super constructor.
 //            Instruction[] firstInstruction =
 //            {
-//                new VariableInstruction(InstructionConstants.OP_ALOAD_0),
+//                new VariableInstruction(Instruction.OP_ALOAD_0),
 //                new ConstantInstruction(
-//                    InstructionConstants.OP_INVOKESPECIAL,
+//                    Instruction.OP_INVOKESPECIAL,
 //                    constantPoolEditor.addMethodrefConstant(programClass.getSuperName(),
 //                                                            METHOD_NAME_INIT,
 //                                                            METHOD_TYPE_INIT,
@@ -524,7 +524,7 @@ public class ClassBuilder
 //
 //            // End by calling return.
 //            SimpleInstruction lastInstruction =
-//                new SimpleInstruction(InstructionConstants.OP_RETURN);
+//                new SimpleInstruction(Instruction.OP_RETURN);
 //
 //            addMethod(ACC_PUBLIC,
 //                      METHOD_NAME_INIT,
@@ -570,7 +570,7 @@ public class ClassBuilder
 //                                           ProcessingFlags.DONT_OPTIMIZE,
 //                                           instructions,
 //                                           null,
-//                                           new SimpleInstruction(InstructionConstants.OP_RETURN));
+//                                           new SimpleInstruction(Instruction.OP_RETURN));
 //
 //                    // Insert a call to the new init$ method in all super-calling constructors.
 //                    InstructionSequenceBuilder builder = new InstructionSequenceBuilder(programClass);
@@ -616,14 +616,14 @@ public class ClassBuilder
         // Create a class with a simple main method.
         ProgramClass programClass =
             new ClassBuilder(
-                ClassConstants.CLASS_VERSION_1_8,
-                ClassConstants.ACC_PUBLIC,
+                VersionConstants.CLASS_VERSION_1_8,
+                AccessConstants.PUBLIC,
                 "com/example/Test",
                 ClassConstants.NAME_JAVA_LANG_OBJECT)
 
                 .addMethod(
-                    ClassConstants.ACC_PUBLIC |
-                    ClassConstants.ACC_STATIC,
+                    AccessConstants.PUBLIC |
+                    AccessConstants.STATIC,
                     "main",
                     "([Ljava/lang/String;)V",
                     50,

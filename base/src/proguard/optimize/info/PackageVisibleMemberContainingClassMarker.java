@@ -39,7 +39,7 @@ implements   ClassVisitor,
     public void visitAnyClass(Clazz clazz)
     {
         // Check the class itself.
-        if ((clazz.getAccessFlags() & ClassConstants.ACC_PUBLIC) == 0)
+        if ((clazz.getAccessFlags() & AccessConstants.PUBLIC) == 0)
         {
             setPackageVisibleMembers(clazz);
         }
@@ -57,8 +57,8 @@ implements   ClassVisitor,
     public void visitAnyMember(Clazz clazz, Member member)
     {
         if ((member.getAccessFlags() &
-             (ClassConstants.ACC_PRIVATE |
-              ClassConstants.ACC_PUBLIC)) == 0)
+             (AccessConstants.PRIVATE |
+              AccessConstants.PUBLIC)) == 0)
         {
             setPackageVisibleMembers(clazz);
         }

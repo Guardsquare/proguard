@@ -19,7 +19,7 @@ package proguard.classfile.kotlin.initialize;
 
 import kotlinx.metadata.jvm.JvmMethodSignature;
 import proguard.classfile.*;
-import proguard.classfile.attribute.EnclosingMethodAttribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitors.*;
@@ -110,7 +110,7 @@ implements   KotlinMetadataVisitor
             if (kotlinFunctionMetadata.referencedMethod == null)
             {
                 this.currentFunction = kotlinFunctionMetadata;
-                clazz.attributeAccept(ClassConstants.ATTR_EnclosingMethod, this);
+                clazz.attributeAccept(Attribute.ENCLOSING_METHOD, this);
             }
         }
 

@@ -40,7 +40,7 @@ public class AddLogging
             directoryPump.pumpDataEntries(
                 new JarReader(
                 new ClassFilter(
-                new ClassReader(false, false, false, null,
+                new ClassReader(false, false, false, false, null,
                 new MultiClassVisitor(
                     // Modify the class.
                     new AllMethodVisitor(

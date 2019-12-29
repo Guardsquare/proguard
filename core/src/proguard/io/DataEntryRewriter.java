@@ -104,7 +104,7 @@ public class DataEntryRewriter extends DataEntryCopier
 
         // Replace dots by forward slashes.
         String className = containsDots ?
-            word.replace('.', ClassConstants.PACKAGE_SEPARATOR) :
+            word.replace('.', TypeConstants.PACKAGE_SEPARATOR) :
             word;
 
         // Find the class corresponding to the word.
@@ -117,7 +117,7 @@ public class DataEntryRewriter extends DataEntryCopier
             {
                 // Replace forward slashes by dots.
                 word = containsDots ?
-                    newClassName.replace(ClassConstants.PACKAGE_SEPARATOR, '.') :
+                    newClassName.replace(TypeConstants.PACKAGE_SEPARATOR, '.') :
                     newClassName;
             }
         }

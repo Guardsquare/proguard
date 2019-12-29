@@ -135,7 +135,7 @@ public class DynamicConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Dynamic;
+        return Constant.DYNAMIC;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

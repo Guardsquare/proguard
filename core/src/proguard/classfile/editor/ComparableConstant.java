@@ -40,24 +40,24 @@ implements Comparable, ConstantVisitor
     private static final int[] PRIORITIES = new int[22];
     static
     {
-        PRIORITIES[ClassConstants.CONSTANT_Integer]            =  0; // Possibly byte index (ldc).
-        PRIORITIES[ClassConstants.CONSTANT_Float]              =  1;
-        PRIORITIES[ClassConstants.CONSTANT_String]             =  2;
-        PRIORITIES[ClassConstants.CONSTANT_Class]              =  3;
-        PRIORITIES[ClassConstants.CONSTANT_Long]               =  4; // Always wide index (ldc2_w).
-        PRIORITIES[ClassConstants.CONSTANT_Double]             =  5; // Always wide index (ldc2_w).
-        PRIORITIES[ClassConstants.CONSTANT_Fieldref]           =  6; // Always wide index (getfield,...).
-        PRIORITIES[ClassConstants.CONSTANT_Methodref]          =  7; // Always wide index (invokespecial,...).
-        PRIORITIES[ClassConstants.CONSTANT_InterfaceMethodref] =  8; // Always wide index (invokeinterface).
-        PRIORITIES[ClassConstants.CONSTANT_Dynamic]            =  9; // Always wide index (invokedynamic).
-        PRIORITIES[ClassConstants.CONSTANT_InvokeDynamic]      = 10; // Always wide index (invokedynamic).
-        PRIORITIES[ClassConstants.CONSTANT_MethodHandle]       = 11;
-        PRIORITIES[ClassConstants.CONSTANT_NameAndType]        = 12;
-        PRIORITIES[ClassConstants.CONSTANT_MethodType]         = 13;
-        PRIORITIES[ClassConstants.CONSTANT_Module]             = 14;
-        PRIORITIES[ClassConstants.CONSTANT_Package]            = 15;
-        PRIORITIES[ClassConstants.CONSTANT_Utf8]               = 16;
-        PRIORITIES[ClassConstants.CONSTANT_PrimitiveArray]     = 17;
+        PRIORITIES[Constant.INTEGER]            =  0; // Possibly byte index (ldc).
+        PRIORITIES[Constant.FLOAT]              =  1;
+        PRIORITIES[Constant.STRING]             =  2;
+        PRIORITIES[Constant.CLASS]              =  3;
+        PRIORITIES[Constant.LONG]               =  4; // Always wide index (ldc2_w).
+        PRIORITIES[Constant.DOUBLE]             =  5; // Always wide index (ldc2_w).
+        PRIORITIES[Constant.FIELDREF]           =  6; // Always wide index (getfield,...).
+        PRIORITIES[Constant.METHODREF]          =  7; // Always wide index (invokespecial,...).
+        PRIORITIES[Constant.INTERFACE_METHODREF] =  8; // Always wide index (invokeinterface).
+        PRIORITIES[Constant.DYNAMIC]            =  9; // Always wide index (invokedynamic).
+        PRIORITIES[Constant.INVOKE_DYNAMIC]      = 10; // Always wide index (invokedynamic).
+        PRIORITIES[Constant.METHOD_HANDLE]       = 11;
+        PRIORITIES[Constant.NAME_AND_TYPE]        = 12;
+        PRIORITIES[Constant.METHOD_TYPE]         = 13;
+        PRIORITIES[Constant.MODULE]             = 14;
+        PRIORITIES[Constant.PACKAGE]            = 15;
+        PRIORITIES[Constant.UTF8]               = 16;
+        PRIORITIES[Constant.PRIMITIVE_ARRAY]     = 17;
     }
 
     private final Clazz    clazz;

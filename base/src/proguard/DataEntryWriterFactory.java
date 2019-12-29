@@ -22,48 +22,104 @@ package proguard;
 
 import proguard.classfile.*;
 import proguard.io.*;
+import proguard.resources.file.ResourceFilePool;
 import proguard.util.*;
 
-import static proguard.DataEntryReaderFactory.getFilterExcludingVersionedClasses;
-
-import java.util.List;
+import java.io.File;
+import java.security.KeyStore;
+import java.util.*;
 
 /**
  * This class can create DataEntryWriter instances based on class paths. The
- * writers will wrap the output in the proper apks, jars, wars, ears, jmods,
+ * writers will wrap the output in the proper apks, jars, aars, wars, ears,
  * and zips.
  *
  * @author Eric Lafortune
  */
 public class DataEntryWriterFactory
 {
-    private final ClassPool                              programClassPool;
-    private final MultiValueMap                          extraClassNameMap;
+    private static final String CLASS_FILE_PATTERN = "**.class";
+    private static final String CLASS_FILE_PREFIX  = "classes/";
+
+    private static final byte[] JMOD_HEADER = new byte[] { 'J', 'M', 1, 0 };
+
+    private static final int PAGE_ALIGNMENT = 4096;
+
+    private /*static*/ final String[][] JMOD_PREFIXES = new String[][]
+    {
+        { CLASS_FILE_PATTERN, CLASS_FILE_PREFIX }
+    };
+
+    private /*static*/ final String[][] WAR_PREFIXES = new String[][]
+    {
+        { CLASS_FILE_PATTERN, CLASS_FILE_PREFIX }
+    };
+
+
+    private final ClassPool                  programClassPool;
+    private final ResourceFilePool           resourceFilePool;
+    private final int                        modificationTime;
+    private final StringMatcher              uncompressedFilter;
+    private final int                        uncompressedAlignment;
+    private final boolean                    pageAlignNativeLibs;
+    private final boolean                    mergeBundleJars;
+    private final KeyStore.PrivateKeyEntry[] privateKeyEntries;
+
+    private Map<File,DataEntryWriter> jarWriterCache = new HashMap();
 
 
     /**
-     * Creates a new DataEntryWriterFactory with the given parameters.
-     * @param programClassPool      the program classpool to process.
+     * Creates a new DataEntryWriterFactory.
+     *
+     * @param programClassPool      the program class pool to process.
+     * @param resourceFilePool      the resource file pool to process.
+     * @param modificationTime      the modification date and time of
+     *                              the zip entries, in DOS
+     *                              format.
+     * @param uncompressedFilter    an optional filter for files that
+     *                              should not be compressed.
+     * @param uncompressedAlignment the desired alignment for the data
+     *                              of uncompressed entries.
+     * @param pageAlignNativeLibs   specifies whether to align native
+     *                              libraries at page boundaries.
+     * @param mergeBundleJars       specifies whether to merge all jars
+     *                              in an Android app bundle into a
+     *                              single jar.
+     * @param privateKeyEntries     optional private keys to sign jars.
      */
-    public DataEntryWriterFactory(ClassPool                              programClassPool,
-                                  MultiValueMap<String, String>          extraClassNamemap)
+    public DataEntryWriterFactory(ClassPool                  programClassPool,
+                                  ResourceFilePool           resourceFilePool,
+                                  int                        modificationTime,
+                                  StringMatcher              uncompressedFilter,
+                                  int                        uncompressedAlignment,
+                                  boolean                    pageAlignNativeLibs,
+                                  boolean                    mergeBundleJars,
+                                  KeyStore.PrivateKeyEntry[] privateKeyEntries)
     {
-        this.programClassPool                 = programClassPool;
-        this.extraClassNameMap                = extraClassNamemap;
+        this.programClassPool      = programClassPool;
+        this.resourceFilePool      = resourceFilePool;
+        this.modificationTime      = modificationTime;
+        this.uncompressedFilter    = uncompressedFilter;
+        this.uncompressedAlignment = uncompressedAlignment;
+        this.pageAlignNativeLibs   = pageAlignNativeLibs;
+        this.mergeBundleJars       = mergeBundleJars;
+        this.privateKeyEntries     = privateKeyEntries;
     }
 
 
     /**
      * Creates a DataEntryWriter that can write to the given class path entries.
      *
-     * @param classPath the output class path.
-     * @param fromIndex the start index in the class path.
-     * @param toIndex   the end index in the class path.
+     * @param classPath            the output class path.
+     * @param fromIndex            the start index in the class path.
+     * @param toIndex              the end index in the class path.
+     * @param extraDataEntryWriter a writer to which extra injected files can be written.
      * @return a DataEntryWriter for writing to the given class path entries.
      */
-    public DataEntryWriter createDataEntryWriter(ClassPath classPath,
-                                                 int       fromIndex,
-                                                 int       toIndex)
+    public DataEntryWriter createDataEntryWriter(ClassPath       classPath,
+                                                 int             fromIndex,
+                                                 int             toIndex,
+                                                 DataEntryWriter extraDataEntryWriter)
     {
         DataEntryWriter writer = null;
 
@@ -143,7 +199,7 @@ public class DataEntryWriterFactory
         boolean isJmod = classPathEntry.isJmod();
         boolean isZip  = classPathEntry.isZip();
 
-        List filter     = getFilterExcludingVersionedClasses(classPathEntry);
+        List filter     = DataEntryReaderFactory.getFilterExcludingVersionedClasses(classPathEntry);
         List apkFilter  = classPathEntry.getApkFilter();
         List aabFilter  = classPathEntry.getAabFilter();
         List jarFilter  = classPathEntry.getJarFilter();
@@ -202,11 +258,11 @@ public class DataEntryWriterFactory
         boolean flattenZips  = flattenJmods || isJmod;
 
         // Set up the filtered jar writers.
-        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenZips,  isZip,  false, ".zip",  zipFilter,  null,                       false,               null);
-        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJmods, isJmod, false, ".jmod", jmodFilter, ClassConstants.JMOD_HEADER, false,               JMOD_PREFIXES);
-        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenEars,  isEar,  false, ".ear",  earFilter,  null,                       false,               null);
-        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenWars,  isWar,  false, ".war",  warFilter,  null,                       false,               WAR_PREFIXES);
-        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenAars,  isAar,  false, ".aar",  aarFilter,  null,                       false,               null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenZips,  isZip,  false, ".zip",  zipFilter,  null,        false, null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJmods, isJmod, false, ".jmod", jmodFilter, JMOD_HEADER, false, JMOD_PREFIXES);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenEars,  isEar,  false, ".ear",  earFilter,  null,        false, null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenWars,  isWar,  false, ".war",  warFilter,  null,        false, WAR_PREFIXES);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenAars,  isAar,  false, ".aar",  aarFilter,  null,        false, null);
 
         if (isAar && mergeBundleJars)
         {
@@ -218,7 +274,7 @@ public class DataEntryWriterFactory
                     writer);
         }
 
-        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJars,  isJar,  false, ".jar",  jarFilter,  null,                       false,               null);
+        writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJars,  isJar,  false, ".jar",  jarFilter,  null,        false, null);
 
         // Either we create an aab or apk; they can not be nested.
         writer = isAab ?

@@ -82,12 +82,12 @@ implements ClassVisitor,
         programClass.hierarchyAccept(false, false, false, true,
             new ProgramClassFilter(
             // Ignore other interfaces that extend this one.
-            new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
+            new ClassAccessFilter(0, AccessConstants.INTERFACE,
             new ClassCollector(implClasses))));
 
         programClass.accept(
             new AllMethodVisitor(
-            new MemberAccessFilter(0, ClassConstants.ACC_STATIC,
+            new MemberAccessFilter(0, AccessConstants.STATIC,
             new AllAttributeVisitor(this))));
 
         if (hasDefaultMethods)
@@ -146,9 +146,9 @@ implements ClassVisitor,
         // add make it abstract.
         defaultMethod.accept(interfaceClass,
             new MultiMemberVisitor(
-                new NamedAttributeDeleter(ClassConstants.ATTR_Code),
+                new NamedAttributeDeleter(Attribute.CODE),
 
-                new MemberAccessFlagSetter(ClassConstants.ACC_ABSTRACT)
+                new MemberAccessFlagSetter(AccessConstants.ABSTRACT)
             ));
 
         // Call extra visitor for each visited default method.
@@ -247,7 +247,7 @@ implements ClassVisitor,
                                             CodeAttributeEditor codeAttributeEditor)
                 {
                     Instruction instruction =
-                        new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL,
+                        new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL,
                                                 constantIndex);
 
                     codeAttributeEditor.replaceInstruction(offset, instruction);
@@ -312,7 +312,7 @@ implements ClassVisitor,
         {
             switch (constantInstruction.opcode)
             {
-                case InstructionConstants.OP_INVOKESPECIAL:
+                case Instruction.OP_INVOKESPECIAL:
                     matchingInvocation = false;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
 

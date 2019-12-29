@@ -135,7 +135,7 @@ public class InvokeDynamicConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_InvokeDynamic;
+        return Constant.INVOKE_DYNAMIC;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

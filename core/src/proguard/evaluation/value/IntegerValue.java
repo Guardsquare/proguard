@@ -17,7 +17,7 @@
  */
 package proguard.evaluation.value;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 /**
  * This class represents a partially evaluated integer value.
@@ -1213,6 +1213,6 @@ public abstract class IntegerValue extends Category1Value
 
     public final String internalType()
     {
-        return String.valueOf(ClassConstants.TYPE_INT);
+        return String.valueOf(TypeConstants.INT);
     }
 }

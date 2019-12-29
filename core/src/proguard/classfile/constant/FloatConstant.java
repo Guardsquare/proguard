@@ -69,7 +69,7 @@ public class FloatConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Float;
+        return Constant.FLOAT;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

@@ -46,11 +46,11 @@ implements   MemberVisitor,
 
     private static final char[] TYPES = new char[]
     {
-        ClassConstants.TYPE_BYTE,
-        ClassConstants.TYPE_CHAR,
-        ClassConstants.TYPE_SHORT,
-        ClassConstants.TYPE_INT,
-        ClassConstants.TYPE_BOOLEAN
+        TypeConstants.BYTE,
+        TypeConstants.CHAR,
+        TypeConstants.SHORT,
+        TypeConstants.INT,
+        TypeConstants.BOOLEAN
     };
 
 
@@ -99,7 +99,7 @@ implements   MemberVisitor,
                     programMethod = (ProgramMethod)similarMethod;
                 }
 
-                int index = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+                int index = descriptor.indexOf(TypeConstants.METHOD_ARGUMENTS_CLOSE);
 
                 // Try to find a new, unique descriptor.
                 int typeCounter = 0;
@@ -112,7 +112,7 @@ implements   MemberVisitor,
 
                     for (int arrayDimension = 0; arrayDimension < typeCounter / TYPES.length; arrayDimension++)
                     {
-                        newDescriptorBuffer.append(ClassConstants.TYPE_ARRAY);
+                        newDescriptorBuffer.append(TypeConstants.ARRAY);
                     }
 
                     newDescriptorBuffer.append(TYPES[typeCounter % TYPES.length]);
@@ -197,9 +197,9 @@ implements   MemberVisitor,
     public void visitSignatureAttribute(Clazz clazz, Method method, SignatureAttribute signatureAttribute)
     {
         String descriptor      = method.getDescriptor(clazz);
-        int    descriptorIndex = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        int    descriptorIndex = descriptor.indexOf(TypeConstants.METHOD_ARGUMENTS_CLOSE);
         String signature       = signatureAttribute.getSignature(clazz);
-        int    signatureIndex  = signature.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+        int    signatureIndex  = signature.indexOf(TypeConstants.METHOD_ARGUMENTS_CLOSE);
 
         String newSignature = signature.substring(0, signatureIndex) +
                               descriptor.charAt(descriptorIndex - 1) +

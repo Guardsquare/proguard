@@ -212,7 +212,7 @@ implements   MemberVisitor
 
             clazz.hierarchyAccept(false, false, false, true,
                 new NamedMethodVisitor(name, descriptor,
-                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE, this)));
+                new MemberAccessFilter(0, AccessConstants.PRIVATE, this)));
         }
         catch (MemberFoundException ex)
         {
@@ -241,7 +241,7 @@ implements   MemberVisitor
             this.member = null;
             clazz.hierarchyAccept(false, false, false, true,
                 new NamedFieldVisitor(name, descriptor,
-                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE, this)));
+                new MemberAccessFilter(0, AccessConstants.PRIVATE, this)));
         }
         catch (MemberFoundException ex)
         {

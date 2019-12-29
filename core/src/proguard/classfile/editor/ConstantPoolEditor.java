@@ -93,7 +93,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Integer)
+                constant.getTag() == Constant.INTEGER)
             {
                 IntegerConstant integerConstant = (IntegerConstant)constant;
                 if (integerConstant.getValue() == value)
@@ -122,7 +122,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Long)
+                constant.getTag() == Constant.LONG)
             {
                 LongConstant longConstant = (LongConstant)constant;
                 if (longConstant.getValue() == value)
@@ -152,7 +152,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Float)
+                constant.getTag() == Constant.FLOAT)
             {
                 FloatConstant floatConstant = (FloatConstant)constant;
                 if (floatConstant.getValue() == value)
@@ -182,7 +182,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Double)
+                constant.getTag() == Constant.DOUBLE)
             {
                 DoubleConstant doubleConstant = (DoubleConstant)constant;
                 if (doubleConstant.getValue() == value)
@@ -252,7 +252,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_String)
+                constant.getTag() == Constant.STRING)
             {
                 StringConstant stringConstant = (StringConstant)constant;
                 if (stringConstant.u2stringIndex < constantPoolCount          &&
@@ -311,7 +311,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Dynamic)
+                constant.getTag() == Constant.DYNAMIC)
             {
                 DynamicConstant dynamicConstant = (DynamicConstant)constant;
                 if (dynamicConstant.u2bootstrapMethodAttributeIndex == bootstrapMethodIndex &&
@@ -347,7 +347,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_InvokeDynamic)
+                constant.getTag() == Constant.INVOKE_DYNAMIC)
             {
                 InvokeDynamicConstant invokeDynamicConstant = (InvokeDynamicConstant)constant;
                 if (invokeDynamicConstant.u2bootstrapMethodAttributeIndex == bootstrapMethodIndex &&
@@ -382,7 +382,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_MethodHandle)
+                constant.getTag() == Constant.METHOD_HANDLE)
             {
                 MethodHandleConstant methodHandleConstant = (MethodHandleConstant)constant;
                 if (methodHandleConstant.u1referenceKind  == referenceKind &&
@@ -412,7 +412,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Module)
+                constant.getTag() == Constant.MODULE)
             {
                 ModuleConstant moduleConstant = (ModuleConstant)constant;
                 if (moduleConstant.getName(targetClass).equals(name))
@@ -442,7 +442,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Package)
+                constant.getTag() == Constant.PACKAGE)
             {
                 PackageConstant packageConstant = (PackageConstant)constant;
                 if (packageConstant.getName(targetClass).equals(name))
@@ -547,7 +547,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Fieldref)
+                constant.getTag() == Constant.FIELDREF)
             {
                 FieldrefConstant fieldrefConstant = (FieldrefConstant)constant;
                 if (fieldrefConstant.u2classIndex       == classIndex &&
@@ -654,7 +654,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_InterfaceMethodref)
+                constant.getTag() == Constant.INTERFACE_METHODREF)
             {
                 InterfaceMethodrefConstant methodrefConstant = (InterfaceMethodrefConstant)constant;
                 if (methodrefConstant.u2classIndex       == classIndex &&
@@ -761,7 +761,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Methodref)
+                constant.getTag() == Constant.METHODREF)
             {
                 MethodrefConstant methodrefConstant = (MethodrefConstant)constant;
                 if (methodrefConstant.u2classIndex       == classIndex &&
@@ -806,7 +806,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Class)
+                constant.getTag() == Constant.CLASS)
             {
                 ClassConstant classConstant = (ClassConstant)constant;
                 if (classConstant.u2nameIndex < constantPoolCount &&
@@ -840,7 +840,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_MethodType)
+                constant.getTag() == Constant.METHOD_TYPE)
             {
                 MethodTypeConstant methodTypeConstant = (MethodTypeConstant)constant;
                 if (methodTypeConstant.u2descriptorIndex < constantPoolCount &&
@@ -873,7 +873,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_NameAndType)
+                constant.getTag() == Constant.NAME_AND_TYPE)
             {
                 NameAndTypeConstant nameAndTypeConstant = (NameAndTypeConstant)constant;
                 if (nameAndTypeConstant.u2nameIndex       < constantPoolCount &&
@@ -906,7 +906,7 @@ public class ConstantPoolEditor
             Constant constant = constantPool[index];
 
             if (constant != null &&
-                constant.getTag() == ClassConstants.CONSTANT_Utf8)
+                constant.getTag() == Constant.UTF8)
             {
                 Utf8Constant utf8Constant = (Utf8Constant)constant;
                 if (utf8Constant.getString().equals(string))
@@ -954,8 +954,8 @@ public class ConstantPoolEditor
         // Long constants and double constants take up two entries in the
         // constant pool.
         int tag = constant.getTag();
-        if (tag == ClassConstants.CONSTANT_Long ||
-            tag == ClassConstants.CONSTANT_Double)
+        if (tag == Constant.LONG ||
+            tag == Constant.DOUBLE)
         {
             constantPool[targetClass.u2constantPoolCount++] = null;
         }

@@ -116,11 +116,11 @@ implements   DataEntryWriter,
             builder.append(ClassUtil.externalClassName(clazz.getName()));
             builder.append(",");
 
-            boolean hasRemovedMethods = (clazz.u2accessFlags & ClassConstants.ACC_REMOVED_METHODS) != 0;
+            boolean hasRemovedMethods = (clazz.u2accessFlags & AccessConstants.REMOVED_METHODS) != 0;
             builder.append(hasRemovedMethods || hasObfuscatedMethods(clazz) ? 1 : 0);
             builder.append(",");
 
-            boolean hasRemovedFields = (clazz.u2accessFlags & ClassConstants.ACC_REMOVED_FIELDS) != 0;
+            boolean hasRemovedFields = (clazz.u2accessFlags & AccessConstants.REMOVED_FIELDS) != 0;
             builder.append(hasRemovedFields || hasObfuscatedFields(clazz) ? 1 : 0);
             writer.println(builder.toString());
         }
@@ -150,12 +150,12 @@ implements   DataEntryWriter,
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        obfuscatedMethods |= (programMethod.getAccessFlags() & ClassConstants.ACC_RENAMED) != 0;
+        obfuscatedMethods |= (programMethod.getAccessFlags() & AccessConstants.RENAMED) != 0;
     }
 
 
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
-        obfuscatedFields |= (programField.getAccessFlags() & ClassConstants.ACC_RENAMED) != 0;
+        obfuscatedFields |= (programField.getAccessFlags() & AccessConstants.RENAMED) != 0;
     }
 }

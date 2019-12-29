@@ -22,7 +22,9 @@ package proguard.optimize;
 
 import proguard.*;
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.constant.Constant;
 import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.visitor.*;
@@ -333,14 +335,14 @@ public class Optimizer
         programClassPool.classesAccept(
             new AllMemberVisitor(
             new AllAttributeVisitor(
-            new AttributeNameFilter(ClassConstants.ATTR_Code,
+            new AttributeNameFilter(Attribute.CODE,
             new AttributeProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0,
             new CodeAttributeToMethodVisitor(keepMarker))))));
 
         // We also keep all classes that are involved in .class constructs.
         // We're not looking at enum classes though, so they can be simplified.
         programClassPool.classesAccept(
-            new ClassAccessFilter(0, ClassConstants.ACC_ENUM,
+            new ClassAccessFilter(0, AccessConstants.ENUM,
             new AllMethodVisitor(
             new AllAttributeVisitor(
             new AllInstructionVisitor(
@@ -349,20 +351,20 @@ public class Optimizer
         // We also keep all classes that are accessed dynamically.
         programClassPool.classesAccept(
             new AllConstantVisitor(
-            new ConstantTagFilter(ClassConstants.CONSTANT_String,
+            new ConstantTagFilter(Constant.STRING,
             new ReferencedClassVisitor(keepMarker))));
 
         // We also keep all class members that are accessed dynamically.
         programClassPool.classesAccept(
             new AllConstantVisitor(
-            new ConstantTagFilter(ClassConstants.CONSTANT_String,
+            new ConstantTagFilter(Constant.STRING,
             new ReferencedMemberVisitor(keepMarker))));
 
         // We also keep all bootstrap method signatures.
         programClassPool.classesAccept(
-            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
+            new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_7,
             new AllAttributeVisitor(
-            new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
+            new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS,
             new AllBootstrapMethodInfoVisitor(
             new BootstrapMethodHandleTraveler(
             new MethodrefTraveler(
@@ -371,22 +373,22 @@ public class Optimizer
         // We also keep classes and methods referenced from bootstrap
         // method arguments.
         programClassPool.classesAccept(
-            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
+            new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_7,
             new AllAttributeVisitor(
-            new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
+            new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS,
             new AllBootstrapMethodInfoVisitor(
             new AllBootstrapMethodArgumentVisitor(
             new MultiConstantVisitor(
                 // Class constants refer to additional functional
                 // interfaces (with LambdaMetafactory.altMetafactory).
-                new ConstantTagFilter(ClassConstants.CONSTANT_Class,
+                new ConstantTagFilter(Constant.CLASS,
                 new ReferencedClassVisitor(
                 new FunctionalInterfaceFilter(
                 new ClassHierarchyTraveler(true, false, true, false,
                 new MultiClassVisitor(
                     keepMarker,
                     new AllMethodVisitor(
-                    new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                    new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
                     keepMarker))
                 ))))),
 
@@ -401,7 +403,7 @@ public class Optimizer
         // These functional interfaces have to remain suitable for the
         // dynamic method invocations with LambdaMetafactory.
         programClassPool.classesAccept(
-            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_7,
+            new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_7,
             new AllConstantVisitor(
             new DynamicReturnedClassVisitor(
             new FunctionalInterfaceFilter(
@@ -409,7 +411,7 @@ public class Optimizer
             new MultiClassVisitor(
                 keepMarker,
                 new AllMethodVisitor(
-                new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
                 keepMarker))
             )))))));
 
@@ -497,7 +499,7 @@ public class Optimizer
         {
             // Make methods final, whereever possible.
             programClassPool.classesAccept(
-                new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
+                new ClassAccessFilter(0, AccessConstants.INTERFACE,
                 new AllMethodVisitor(
                 new MethodFinalizer(methodMarkingFinalCounter))));
         }
@@ -647,9 +649,9 @@ public class Optimizer
                 new EscapingClassFilter(null,
                 new AllMethodVisitor(
                 new OptimizationInfoMemberFilter(
-                new MemberAccessFilter(ClassConstants.ACC_SYNCHRONIZED, ClassConstants.ACC_STATIC,
+                new MemberAccessFilter(AccessConstants.SYNCHRONIZED, AccessConstants.STATIC,
                 new MultiMemberVisitor(
-                    new MemberAccessFlagCleaner(ClassConstants.ACC_SYNCHRONIZED),
+                    new MemberAccessFlagCleaner(AccessConstants.SYNCHRONIZED),
                     methodMarkingSynchronizedCounter
                 ))))));
         }
@@ -668,8 +670,8 @@ public class Optimizer
 
             // Mark all final enums that qualify as simple enums.
             programClassPool.classesAccept(
-                new ClassAccessFilter(ClassConstants.ACC_FINAL |
-                                      ClassConstants.ACC_ENUM, 0,
+                new ClassAccessFilter(AccessConstants.FINAL |
+                                      AccessConstants.ENUM, 0,
                 new OptimizationInfoClassFilter(
                 new SimpleEnumClassChecker())));
 
@@ -761,8 +763,8 @@ public class Optimizer
                     // visit all code attributes that are kept
                     new AllInstructionVisitor(
                     new InstructionConstantVisitor(
-                    new ConstantTagFilter(new int[] { ClassConstants.CONSTANT_Methodref,
-                                                      ClassConstants.CONSTANT_InterfaceMethodref },
+                    new ConstantTagFilter(new int[] { Constant.METHODREF,
+                                                      Constant.INTERFACE_METHODREF },
                     new ReferencedMemberVisitor(
                     new OptimizationInfoMemberFilter(
                     // Mark all parameters including "this" of referenced methods
@@ -793,7 +795,7 @@ public class Optimizer
             // Evaluate synthetic classes in more detail, notably to propagate
             // the arrays of the classes generated for enum switch statements.
             programClassPool.classesAccept(
-                new ClassAccessFilter(ClassConstants.ACC_SYNTHETIC, 0,
+                new ClassAccessFilter(AccessConstants.SYNTHETIC, 0,
                 new AllMethodVisitor(
                 new AllAttributeVisitor(
                 new DebugAttributeVisitor("Filling out fields, method parameters, and return values in synthetic classes",
@@ -816,7 +818,7 @@ public class Optimizer
                                                       methodPropagationReturnvalue);
 
                         return
-                            new ClassAccessFilter(0, ClassConstants.ACC_SYNTHETIC,
+                            new ClassAccessFilter(0, AccessConstants.SYNTHETIC,
                             new AllMethodVisitor(
                             new AllAttributeVisitor(
                             new DebugAttributeVisitor("Filling out fields, method parameters, and return values",
@@ -888,7 +890,7 @@ public class Optimizer
                                               methodPropagationReturnvalue);
 
                 programClassPool.classesAccept(
-                    new ClassAccessFilter(ClassConstants.ACC_SYNTHETIC, 0,
+                    new ClassAccessFilter(AccessConstants.SYNTHETIC, 0,
                     new AllMethodVisitor(
                     new AllAttributeVisitor(
                     new PartialEvaluator(valueFactory, loadingInvocationUnit, false)))));
@@ -993,7 +995,7 @@ public class Optimizer
             programClassPool.classesAccept(
                 new AllMethodVisitor(
                 new OptimizationInfoMemberFilter(
-                new MemberAccessFilter(0, ClassConstants.ACC_STATIC,
+                new MemberAccessFilter(0, AccessConstants.STATIC,
                 new MethodStaticizer(methodMarkingStaticCounter)))));
         }
 
@@ -1274,9 +1276,9 @@ public class Optimizer
         {
             // Make all non-private fields private, whereever possible.
             programClassPool.classesAccept(
-                new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
+                new ClassAccessFilter(0, AccessConstants.INTERFACE,
                 new AllFieldVisitor(
-                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
+                new MemberAccessFilter(0, AccessConstants.PRIVATE,
                 new MemberPrivatizer(fieldMarkingPrivateCounter)))));
         }
 
@@ -1284,9 +1286,9 @@ public class Optimizer
         {
             // Make all non-private methods private, whereever possible.
             programClassPool.classesAccept(
-                new ClassAccessFilter(0, ClassConstants.ACC_INTERFACE,
+                new ClassAccessFilter(0, AccessConstants.INTERFACE,
                 new AllMethodVisitor(
-                new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
+                new MemberAccessFilter(0, AccessConstants.PRIVATE,
                 new MemberPrivatizer(methodMarkingPrivateCounter)))));
         }
 

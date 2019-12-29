@@ -66,13 +66,13 @@ implements   ClassVisitor
         // and it is not being kept,
         // and it doesn't have any subclasses,
         // then make it final.
-        if ((programClass.u2accessFlags & (ClassConstants.ACC_FINAL     |
-                                           ClassConstants.ACC_INTERFACE |
-                                           ClassConstants.ACC_ABSTRACT)) == 0 &&
+        if ((programClass.u2accessFlags & (AccessConstants.FINAL     |
+                                           AccessConstants.INTERFACE |
+                                           AccessConstants.ABSTRACT)) == 0 &&
             !KeepMarker.isKept(programClass)                                           &&
             programClass.subClasses == null)
         {
-            programClass.u2accessFlags |= ClassConstants.ACC_FINAL;
+            programClass.u2accessFlags |= AccessConstants.FINAL;
 
             // Visit the class, if required.
             if (extraClassVisitor != null)

@@ -166,7 +166,7 @@ implements   ClassVisitor,
             // second half of a long entry.
             if (constant != null)
             {
-                isUsed = constant.getTag() != ClassConstants.CONSTANT_NameAndType ||
+                isUsed = constant.getTag() != Constant.NAME_AND_TYPE ||
                          isUsed(constant);
             }
 

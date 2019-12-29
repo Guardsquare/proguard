@@ -245,7 +245,7 @@ implements   AttributeVisitor,
     public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction)
     {
         byte opcode = variableInstruction.opcode;
-        if (opcode == InstructionConstants.OP_RET)
+        if (opcode == Instruction.OP_RET)
         {
             // Is the return instruction the last instruction of the subroutine?
             if (branchTargetFinder.subroutineEnd(offset) == offset + variableInstruction.length(offset))
@@ -267,7 +267,7 @@ implements   AttributeVisitor,
 
                 // Replace the instruction by a branch.
                 Instruction replacementInstruction =
-                    new BranchInstruction(InstructionConstants.OP_GOTO,
+                    new BranchInstruction(Instruction.OP_GOTO,
                                           branchTargetFinder.subroutineEnd(offset) - offset);
 
                 codeAttributeComposer.appendInstruction(offset, replacementInstruction);
@@ -295,8 +295,8 @@ implements   AttributeVisitor,
     public void visitBranchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, BranchInstruction branchInstruction)
     {
         byte opcode = branchInstruction.opcode;
-        if (opcode == InstructionConstants.OP_JSR ||
-            opcode == InstructionConstants.OP_JSR_W)
+        if (opcode == Instruction.OP_JSR ||
+            opcode == Instruction.OP_JSR_W)
         {
             int branchOffset = branchInstruction.branchOffset;
             int branchTarget = offset + branchOffset;
@@ -323,7 +323,7 @@ implements   AttributeVisitor,
 
                 // Replace the subroutine invocation by a simple branch.
                 Instruction replacementInstruction =
-                    new BranchInstruction(InstructionConstants.OP_GOTO,
+                    new BranchInstruction(Instruction.OP_GOTO,
                                           branchOffset);
 
                 codeAttributeComposer.appendInstruction(offset, replacementInstruction);

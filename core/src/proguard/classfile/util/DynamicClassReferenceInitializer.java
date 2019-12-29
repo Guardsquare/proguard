@@ -83,16 +83,16 @@ implements   InstructionVisitor,
     // Class.forName("SomeClass").
     private final Instruction[] CONSTANT_CLASS_FOR_NAME_INSTRUCTIONS = new Instruction[]
     {
-        new ConstantInstruction(InstructionConstants.OP_LDC, X),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
+        new ConstantInstruction(Instruction.OP_LDC, X),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
     };
 
     // (SomeClass)Class.forName(someName).newInstance().
     private final Instruction[] CLASS_FOR_NAME_CAST_INSTRUCTIONS = new Instruction[]
     {
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL, 6),
-        new ConstantInstruction(InstructionConstants.OP_CHECKCAST, X),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
+        new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, 6),
+        new ConstantInstruction(Instruction.OP_CHECKCAST, X),
     };
 
 
@@ -114,8 +114,8 @@ implements   InstructionVisitor,
     // SomeClass.class = class$("SomeClass") (javac).
     private final Instruction[] DOT_CLASS_JAVAC_INSTRUCTIONS = new Instruction[]
     {
-        new ConstantInstruction(InstructionConstants.OP_LDC, X),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
+        new ConstantInstruction(Instruction.OP_LDC, X),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
     };
 
 
@@ -137,37 +137,37 @@ implements   InstructionVisitor,
     // SomeClass.class = class("SomeClass", false) (jikes).
     private final Instruction[] DOT_CLASS_JIKES_INSTRUCTIONS = new Instruction[]
     {
-        new ConstantInstruction(InstructionConstants.OP_LDC, X),
-        new SimpleInstruction(InstructionConstants.OP_ICONST_0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
+        new ConstantInstruction(Instruction.OP_LDC, X),
+        new SimpleInstruction(Instruction.OP_ICONST_0),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
     };
 
     // return Class.forName(v0).
     private final Instruction[] DOT_CLASS_JAVAC_IMPLEMENTATION_INSTRUCTIONS = new Instruction[]
     {
-        new VariableInstruction(InstructionConstants.OP_ALOAD_0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
-        new SimpleInstruction(InstructionConstants.OP_ARETURN),
+        new VariableInstruction(Instruction.OP_ALOAD_0),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
+        new SimpleInstruction(Instruction.OP_ARETURN),
     };
 
     // return Class.forName(v0), if (!v1) .getComponentType().
     private final Instruction[] DOT_CLASS_JIKES_IMPLEMENTATION_INSTRUCTIONS = new Instruction[]
     {
-        new VariableInstruction(InstructionConstants.OP_ALOAD_0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
-        new VariableInstruction(InstructionConstants.OP_ALOAD_1),
-        new BranchInstruction(InstructionConstants.OP_IFNE, +6),
-        new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL, 10),
-        new SimpleInstruction(InstructionConstants.OP_ARETURN),
+        new VariableInstruction(Instruction.OP_ALOAD_0),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
+        new VariableInstruction(Instruction.OP_ALOAD_1),
+        new BranchInstruction(Instruction.OP_IFNE, +6),
+        new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, 10),
+        new SimpleInstruction(Instruction.OP_ARETURN),
     };
 
     // return Class.forName(v0).getComponentType().
     private final Instruction[] DOT_CLASS_JIKES_IMPLEMENTATION_INSTRUCTIONS2 = new Instruction[]
     {
-        new VariableInstruction(InstructionConstants.OP_ALOAD_0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, 0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL, 10),
-        new SimpleInstruction(InstructionConstants.OP_ARETURN),
+        new VariableInstruction(Instruction.OP_ALOAD_0),
+        new ConstantInstruction(Instruction.OP_INVOKESTATIC, 0),
+        new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, 10),
+        new SimpleInstruction(Instruction.OP_ARETURN),
     };
 
 

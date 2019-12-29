@@ -109,9 +109,9 @@ implements   ElementValueVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_LDC:
-            case InstructionConstants.OP_LDC_W:
-            case InstructionConstants.OP_PUTSTATIC:
+            case Instruction.OP_LDC:
+            case Instruction.OP_LDC_W:
+            case Instruction.OP_PUTSTATIC:
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
         }

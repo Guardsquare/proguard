@@ -104,7 +104,7 @@ public class Marker
         // because they would always be marked, due to "SomeEnum[] values()".
         MemberVisitor descriptorClassMarker =
             new MemberDescriptorReferencedClassVisitor(
-            new ClassAccessFilter(0, ClassConstants.ACC_ENUM,
+            new ClassAccessFilter(0, AccessConstants.ENUM,
             marker));
 
         return new MultiClassPoolVisitor(

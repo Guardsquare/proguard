@@ -34,7 +34,7 @@ public class PrintClasses
             directoryPump.pumpDataEntries(
                 new JarReader(
                 new ClassFilter(
-                new ClassReader(false, false, false, null,
+                new ClassReader(false, false, false, false, null,
                 new ClassPrinter()))));
         }
         catch (IOException e)

@@ -71,7 +71,7 @@ implements AttributeVisitor
         cleanAnnotationsAttribute(clazz,
                                   member,
                                   runtimeVisibleAnnotationsAttribute,
-                                  ClassConstants.ATTR_RuntimeVisibleAnnotations);
+                                  Attribute.RUNTIME_VISIBLE_ANNOTATIONS);
     }
 
 
@@ -83,7 +83,7 @@ implements AttributeVisitor
         cleanAnnotationsAttribute(clazz,
                                   member,
                                   runtimeInvisibleAnnotationsAttribute,
-                                  ClassConstants.ATTR_RuntimeInvisibleAnnotations);
+                                  Attribute.RUNTIME_INVISIBLE_ANNOTATIONS);
     }
 
 
@@ -95,7 +95,7 @@ implements AttributeVisitor
         cleanParameterAnnotationsAttribute(clazz,
                                            method,
                                            runtimeVisibleParameterAnnotationsAttribute,
-                                           ClassConstants.ATTR_RuntimeVisibleParameterAnnotations);
+                                           Attribute.RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS);
     }
 
 
@@ -107,7 +107,7 @@ implements AttributeVisitor
         cleanParameterAnnotationsAttribute(clazz,
                                            method,
                                            runtimeInvisibleParameterAnnotationsAttribute,
-                                           ClassConstants.ATTR_RuntimeInvisibleParameterAnnotations);
+                                           Attribute.RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS);
     }
 
 
@@ -119,7 +119,7 @@ implements AttributeVisitor
         cleanAnnotationsAttribute(clazz,
                                   member,
                                   runtimeVisibleTypeAnnotationsAttribute,
-                                  ClassConstants.ATTR_RuntimeVisibleTypeAnnotations);
+                                  Attribute.RUNTIME_VISIBLE_TYPE_ANNOTATIONS);
     }
 
 
@@ -131,7 +131,7 @@ implements AttributeVisitor
         cleanAnnotationsAttribute(clazz,
                                   member,
                                   runtimeInvisibleTypeAnnotationsAttribute,
-                                  ClassConstants.ATTR_RuntimeInvisibleTypeAnnotations);
+                                  Attribute.RUNTIME_INVISIBLE_TYPE_ANNOTATIONS);
     }
 
 

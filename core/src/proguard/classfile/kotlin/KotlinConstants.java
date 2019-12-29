@@ -23,7 +23,7 @@ import proguard.util.ProcessingFlags;
 
 import java.util.*;
 
-import static proguard.classfile.ClassConstants.ACC_PUBLIC;
+import static proguard.classfile.AccessConstants.PUBLIC;
 
 public class KotlinConstants
 {
@@ -200,7 +200,7 @@ public class KotlinConstants
     private static ProgramClass createDummyClass(String name)
     {
         return new ClassBuilder(
-            ACC_PUBLIC,
+            PUBLIC,
             name,
             null,
             ProcessingFlags.DONT_OBFUSCATE |

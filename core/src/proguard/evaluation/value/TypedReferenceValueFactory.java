@@ -73,7 +73,7 @@ extends      BasicValueFactory
                                                     IntegerValue arrayLength,
                                                     Value        elementValue)
     {
-        return createReferenceValue(ClassConstants.TYPE_ARRAY + type,
+        return createReferenceValue(TypeConstants.ARRAY + type,
                                     referencedClass,
                                     false,
                                     false);

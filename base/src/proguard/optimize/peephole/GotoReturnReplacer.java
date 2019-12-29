@@ -76,8 +76,8 @@ implements   InstructionVisitor
     {
         // Check if the instruction is an unconditional goto instruction.
         byte opcode = branchInstruction.opcode;
-        if (opcode == InstructionConstants.OP_GOTO ||
-            opcode == InstructionConstants.OP_GOTO_W)
+        if (opcode == Instruction.OP_GOTO ||
+            opcode == Instruction.OP_GOTO_W)
         {
             // Check if the goto instruction points to a return instruction.
             int targetOffset = offset + branchInstruction.branchOffset;
@@ -89,12 +89,12 @@ implements   InstructionVisitor
                                                                           targetOffset);
                 switch (targetInstruction.opcode)
                 {
-                    case InstructionConstants.OP_IRETURN:
-                    case InstructionConstants.OP_LRETURN:
-                    case InstructionConstants.OP_FRETURN:
-                    case InstructionConstants.OP_DRETURN:
-                    case InstructionConstants.OP_ARETURN:
-                    case InstructionConstants.OP_RETURN:
+                    case Instruction.OP_IRETURN:
+                    case Instruction.OP_LRETURN:
+                    case Instruction.OP_FRETURN:
+                    case Instruction.OP_DRETURN:
+                    case Instruction.OP_ARETURN:
+                    case Instruction.OP_RETURN:
                         // Replace the goto instruction by the return instruction.
                         Instruction returnInstruction =
                              new SimpleInstruction(targetInstruction.opcode);

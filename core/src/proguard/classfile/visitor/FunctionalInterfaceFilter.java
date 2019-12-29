@@ -71,7 +71,7 @@ public class FunctionalInterfaceFilter implements ClassVisitor
     private boolean isFunctionalInterface(Clazz clazz)
     {
         // Is it an interface?
-        if ((clazz.getAccessFlags() & ClassConstants.ACC_INTERFACE) == 0)
+        if ((clazz.getAccessFlags() & AccessConstants.INTERFACE) == 0)
         {
             return false;
         }
@@ -84,10 +84,10 @@ public class FunctionalInterfaceFilter implements ClassVisitor
         clazz.hierarchyAccept(true, false, true, false,
                               new AllMethodVisitor(
                               new MultiMemberVisitor(
-                                  new MemberAccessFilter(ClassConstants.ACC_ABSTRACT, 0,
+                                  new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
                                   new MemberCollector(false, true, true, abstractMethods)),
 
-                                  new MemberAccessFilter(0, ClassConstants.ACC_ABSTRACT,
+                                  new MemberAccessFilter(0, AccessConstants.ABSTRACT,
                                   new MemberCollector(false, true, true, defaultMethods))
                               )));
 

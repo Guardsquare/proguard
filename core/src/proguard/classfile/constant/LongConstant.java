@@ -69,7 +69,7 @@ public class LongConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Long;
+        return Constant.LONG;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

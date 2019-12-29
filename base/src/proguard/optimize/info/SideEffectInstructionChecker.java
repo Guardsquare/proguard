@@ -95,55 +95,55 @@ implements   InstructionVisitor,
         // Check for instructions that might cause side effects.
         switch (opcode)
         {
-            case InstructionConstants.OP_IDIV:
-            case InstructionConstants.OP_LDIV:
-            case InstructionConstants.OP_IREM:
-            case InstructionConstants.OP_LREM:
-            case InstructionConstants.OP_FDIV:
-            case InstructionConstants.OP_FREM:
-            case InstructionConstants.OP_DDIV:
-            case InstructionConstants.OP_DREM:
-            case InstructionConstants.OP_IALOAD:
-            case InstructionConstants.OP_LALOAD:
-            case InstructionConstants.OP_FALOAD:
-            case InstructionConstants.OP_DALOAD:
-            case InstructionConstants.OP_AALOAD:
-            case InstructionConstants.OP_BALOAD:
-            case InstructionConstants.OP_CALOAD:
-            case InstructionConstants.OP_SALOAD:
-            case InstructionConstants.OP_NEWARRAY:
-            case InstructionConstants.OP_ARRAYLENGTH:
+            case Instruction.OP_IDIV:
+            case Instruction.OP_LDIV:
+            case Instruction.OP_IREM:
+            case Instruction.OP_LREM:
+            case Instruction.OP_FDIV:
+            case Instruction.OP_FREM:
+            case Instruction.OP_DDIV:
+            case Instruction.OP_DREM:
+            case Instruction.OP_IALOAD:
+            case Instruction.OP_LALOAD:
+            case Instruction.OP_FALOAD:
+            case Instruction.OP_DALOAD:
+            case Instruction.OP_AALOAD:
+            case Instruction.OP_BALOAD:
+            case Instruction.OP_CALOAD:
+            case Instruction.OP_SALOAD:
+            case Instruction.OP_NEWARRAY:
+            case Instruction.OP_ARRAYLENGTH:
                 // These instructions strictly taken may cause a side effect
                 // (ArithmeticException, NullPointerException,
                 // ArrayIndexOutOfBoundsException, NegativeArraySizeException).
                 hasSideEffects = OPTIMIZE_CONSERVATIVELY;
                 break;
 
-            case InstructionConstants.OP_IASTORE:
-            case InstructionConstants.OP_LASTORE:
-            case InstructionConstants.OP_FASTORE:
-            case InstructionConstants.OP_DASTORE:
-            case InstructionConstants.OP_AASTORE:
-            case InstructionConstants.OP_BASTORE:
-            case InstructionConstants.OP_CASTORE:
-            case InstructionConstants.OP_SASTORE:
+            case Instruction.OP_IASTORE:
+            case Instruction.OP_LASTORE:
+            case Instruction.OP_FASTORE:
+            case Instruction.OP_DASTORE:
+            case Instruction.OP_AASTORE:
+            case Instruction.OP_BASTORE:
+            case Instruction.OP_CASTORE:
+            case Instruction.OP_SASTORE:
                 // These instructions may cause a side effect.
                 hasSideEffects = includeArrayStoreInstructions;
                 break;
 
-            case InstructionConstants.OP_ATHROW :
-            case InstructionConstants.OP_MONITORENTER:
-            case InstructionConstants.OP_MONITOREXIT:
+            case Instruction.OP_ATHROW :
+            case Instruction.OP_MONITORENTER:
+            case Instruction.OP_MONITOREXIT:
                 // These instructions always cause a side effect.
                 hasSideEffects = true;
                 break;
 
-            case InstructionConstants.OP_IRETURN:
-            case InstructionConstants.OP_LRETURN:
-            case InstructionConstants.OP_FRETURN:
-            case InstructionConstants.OP_DRETURN:
-            case InstructionConstants.OP_ARETURN:
-            case InstructionConstants.OP_RETURN:
+            case Instruction.OP_IRETURN:
+            case Instruction.OP_LRETURN:
+            case Instruction.OP_FRETURN:
+            case Instruction.OP_DRETURN:
+            case Instruction.OP_ARETURN:
+            case Instruction.OP_RETURN:
                 // These instructions may have a side effect.
                 hasSideEffects = includeReturnInstructions;
                 break;
@@ -158,7 +158,7 @@ implements   InstructionVisitor,
         // Check for instructions that might cause side effects.
         switch (opcode)
         {
-            case InstructionConstants.OP_RET:
+            case Instruction.OP_RET:
                 // This instruction may have a side effect.
                 hasSideEffects = includeReturnInstructions;
                 break;
@@ -173,19 +173,19 @@ implements   InstructionVisitor,
         // Check for instructions that might cause side effects.
         switch (opcode)
         {
-            case InstructionConstants.OP_GETSTATIC:
+            case Instruction.OP_GETSTATIC:
                 // Check if accessing the field might cause any side effects.
                 writingField = false;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
 
-            case InstructionConstants.OP_PUTSTATIC:
+            case Instruction.OP_PUTSTATIC:
                 // Check if accessing the field might cause any side effects.
                 writingField = true;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
 
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETFIELD:
                 if (OPTIMIZE_CONSERVATIVELY)
                 {
                     // These instructions strictly taken may cause a side effect
@@ -200,7 +200,7 @@ implements   InstructionVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTFIELD:
                 if (OPTIMIZE_CONSERVATIVELY)
                 {
                     // These instructions strictly taken may cause a side effect
@@ -215,15 +215,15 @@ implements   InstructionVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
                 // Check if the invoked method is causing any side effects.
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEDYNAMIC:
                 if (OPTIMIZE_CONSERVATIVELY)
                 {
                     // These instructions strictly taken may cause a side effect
@@ -237,9 +237,9 @@ implements   InstructionVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_ANEWARRAY:
-            case InstructionConstants.OP_MULTIANEWARRAY:
-            case InstructionConstants.OP_CHECKCAST:
+            case Instruction.OP_ANEWARRAY:
+            case Instruction.OP_MULTIANEWARRAY:
+            case Instruction.OP_CHECKCAST:
                 // This instructions strictly taken may cause a side effect
                 // (ClassCastException, NegativeArraySizeException).
                 hasSideEffects = OPTIMIZE_CONSERVATIVELY;
@@ -255,8 +255,8 @@ implements   InstructionVisitor,
         // Check for instructions that might cause side effects.
         switch (opcode)
         {
-            case InstructionConstants.OP_JSR:
-            case InstructionConstants.OP_JSR_W:
+            case Instruction.OP_JSR:
+            case Instruction.OP_JSR_W:
                 hasSideEffects = includeReturnInstructions;
                 break;
         }
@@ -304,7 +304,7 @@ implements   InstructionVisitor,
     {
         hasSideEffects =
             (writingField && ReadWriteFieldMarker.isRead(programField))        ||
-            (programField.getAccessFlags() & ClassConstants.ACC_VOLATILE) != 0 ||
+            (programField.getAccessFlags() & AccessConstants.VOLATILE) != 0 ||
             SideEffectClassChecker.mayHaveSideEffects(referencingClass,
                                                       programClass,
                                                       programField);

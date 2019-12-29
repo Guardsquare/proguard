@@ -54,16 +54,16 @@ implements   AttributeVisitor,
     //*/
 
     private static final int UNSUPPORTED         = -1;
-    private static final int NOP                 = InstructionConstants.OP_NOP     & 0xff;
-    private static final int POP                 = InstructionConstants.OP_POP     & 0xff;
-    private static final int POP2                = InstructionConstants.OP_POP2    & 0xff;
-    private static final int DUP                 = InstructionConstants.OP_DUP     & 0xff;
-    private static final int DUP_X1              = InstructionConstants.OP_DUP_X1  & 0xff;
-    private static final int DUP_X2              = InstructionConstants.OP_DUP_X2  & 0xff;
-    private static final int DUP2                = InstructionConstants.OP_DUP2    & 0xff;
-    private static final int DUP2_X1             = InstructionConstants.OP_DUP2_X1 & 0xff;
-    private static final int DUP2_X2             = InstructionConstants.OP_DUP2_X2 & 0xff;
-    private static final int SWAP                = InstructionConstants.OP_SWAP    & 0xff;
+    private static final int NOP                 = Instruction.OP_NOP     & 0xff;
+    private static final int POP                 = Instruction.OP_POP     & 0xff;
+    private static final int POP2                = Instruction.OP_POP2    & 0xff;
+    private static final int DUP                 = Instruction.OP_DUP     & 0xff;
+    private static final int DUP_X1              = Instruction.OP_DUP_X1  & 0xff;
+    private static final int DUP_X2              = Instruction.OP_DUP_X2  & 0xff;
+    private static final int DUP2                = Instruction.OP_DUP2    & 0xff;
+    private static final int DUP2_X1             = Instruction.OP_DUP2_X1 & 0xff;
+    private static final int DUP2_X2             = Instruction.OP_DUP2_X2 & 0xff;
+    private static final int SWAP                = Instruction.OP_SWAP    & 0xff;
     private static final int MOV_X2              = DUP_X2  | (POP     << 8);
     private static final int MOV2_X1             = DUP2_X1 | (POP2    << 8);
     private static final int MOV2_X2             = DUP2_X2 | (POP2    << 8);
@@ -367,9 +367,9 @@ implements   AttributeVisitor,
         {
             switch (constantInstruction.opcode)
             {
-                case InstructionConstants.OP_INVOKEVIRTUAL:
-                case InstructionConstants.OP_INVOKESPECIAL:
-                case InstructionConstants.OP_INVOKEINTERFACE:
+                case Instruction.OP_INVOKEVIRTUAL:
+                case Instruction.OP_INVOKESPECIAL:
+                case Instruction.OP_INVOKEINTERFACE:
                     this.invocationOffset      = offset;
                     this.invocationInstruction = constantInstruction;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -394,7 +394,7 @@ implements   AttributeVisitor,
         public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
         {
             // Make the method invocation static, if possible.
-            if ((programMethod.getAccessFlags() & ClassConstants.ACC_STATIC) == 0 &&
+            if ((programMethod.getAccessFlags() & AccessConstants.STATIC) == 0 &&
                 !ParameterUsageMarker.isParameterUsed(programMethod, 0))
             {
                 replaceByStaticInvocation(programClass,
@@ -496,7 +496,7 @@ implements   AttributeVisitor,
         public void visitBranchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, BranchInstruction branchInstruction)
         {
             // Is it a necessary subroutine invocation?
-            if (branchInstruction.canonicalOpcode() == InstructionConstants.OP_JSR)
+            if (branchInstruction.canonicalOpcode() == Instruction.OP_JSR)
             {
                 int nextOffset = offset + branchInstruction.length(offset);
                 if (!instructionUsageMarker.isInstructionNecessary(nextOffset))
@@ -737,7 +737,7 @@ implements   AttributeVisitor,
                 {
                     byte newOpcode = (byte)newOpcodes;
 
-                    if      (newOpcode == InstructionConstants.OP_NOP)
+                    if      (newOpcode == Instruction.OP_NOP)
                     {
                         // Delete the instruction.
                         codeAttributeEditor.deleteInstruction(offset);
@@ -809,7 +809,7 @@ implements   AttributeVisitor,
                     !instructionUsageMarker.isStackEntryPresentBefore(offset, instructionUsageMarker.getStackBefore(offset).size() - 1))
                 {
                     // Replace the branch instruction by a simple goto.
-                    Instruction replacementInstruction = new BranchInstruction(InstructionConstants.OP_GOTO,
+                    Instruction replacementInstruction = new BranchInstruction(Instruction.OP_GOTO,
                                                                                branchInstruction.branchOffset);
                     codeAttributeEditor.replaceInstruction(offset,
                                                            replacementInstruction);
@@ -832,7 +832,7 @@ implements   AttributeVisitor,
                     !instructionUsageMarker.isStackEntryPresentBefore(offset, instructionUsageMarker.getStackBefore(offset).size() - 1))
                 {
                     // Replace the switch instruction by a simple goto.
-                    Instruction replacementInstruction = new BranchInstruction(InstructionConstants.OP_GOTO,
+                    Instruction replacementInstruction = new BranchInstruction(Instruction.OP_GOTO,
                                                                                switchInstruction.defaultOffset);
                     codeAttributeEditor.replaceInstruction(offset,
                                                            replacementInstruction);
@@ -853,8 +853,8 @@ implements   AttributeVisitor,
          */
         private boolean isDupOrSwap(Instruction instruction)
         {
-            return instruction.opcode >= InstructionConstants.OP_DUP &&
-                   instruction.opcode <= InstructionConstants.OP_SWAP;
+            return instruction.opcode >= Instruction.OP_DUP &&
+                   instruction.opcode <= Instruction.OP_SWAP;
         }
 
 
@@ -878,13 +878,13 @@ implements   AttributeVisitor,
         {
             switch (dupSwapOpcode)
             {
-                case InstructionConstants.OP_DUP:     return fixedDup    (instructionOffset, topBefore, topAfter);
-                case InstructionConstants.OP_DUP_X1:  return fixedDup_x1 (instructionOffset, topBefore, topAfter);
-                case InstructionConstants.OP_DUP_X2:  return fixedDup_x2 (instructionOffset, topBefore, topAfter);
-                case InstructionConstants.OP_DUP2:    return fixedDup2   (instructionOffset, topBefore, topAfter);
-                case InstructionConstants.OP_DUP2_X1: return fixedDup2_x1(instructionOffset, topBefore, topAfter);
-                case InstructionConstants.OP_DUP2_X2: return fixedDup2_x2(instructionOffset, topBefore, topAfter);
-                case InstructionConstants.OP_SWAP:    return fixedSwap   (instructionOffset, topBefore, topAfter);
+                case Instruction.OP_DUP:     return fixedDup    (instructionOffset, topBefore, topAfter);
+                case Instruction.OP_DUP_X1:  return fixedDup_x1 (instructionOffset, topBefore, topAfter);
+                case Instruction.OP_DUP_X2:  return fixedDup_x2 (instructionOffset, topBefore, topAfter);
+                case Instruction.OP_DUP2:    return fixedDup2   (instructionOffset, topBefore, topAfter);
+                case Instruction.OP_DUP2_X1: return fixedDup2_x1(instructionOffset, topBefore, topAfter);
+                case Instruction.OP_DUP2_X2: return fixedDup2_x2(instructionOffset, topBefore, topAfter);
+                case Instruction.OP_SWAP:    return fixedSwap   (instructionOffset, topBefore, topAfter);
                 default: throw new IllegalArgumentException("Not a dup/swap opcode ["+dupSwapOpcode+"]");
             }
         }
@@ -1479,12 +1479,12 @@ implements   AttributeVisitor,
     {
         switch (computationalType)
         {
-            case Value.TYPE_INTEGER:            return InstructionConstants.OP_ICONST_0;
-            case Value.TYPE_LONG:               return InstructionConstants.OP_LCONST_0;
-            case Value.TYPE_FLOAT:              return InstructionConstants.OP_FCONST_0;
-            case Value.TYPE_DOUBLE:             return InstructionConstants.OP_DCONST_0;
+            case Value.TYPE_INTEGER:            return Instruction.OP_ICONST_0;
+            case Value.TYPE_LONG:               return Instruction.OP_LCONST_0;
+            case Value.TYPE_FLOAT:              return Instruction.OP_FCONST_0;
+            case Value.TYPE_DOUBLE:             return Instruction.OP_DCONST_0;
             case Value.TYPE_REFERENCE:
-            case Value.TYPE_INSTRUCTION_OFFSET: return InstructionConstants.OP_ACONST_NULL;
+            case Value.TYPE_INSTRUCTION_OFFSET: return Instruction.OP_ACONST_NULL;
         }
 
         throw new IllegalArgumentException("No push opcode for computational type ["+computationalType+"]");
@@ -1509,7 +1509,7 @@ implements   AttributeVisitor,
             {
                 // Replace or insert a single pop instruction.
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP);
+                    new SimpleInstruction(Instruction.OP_POP);
 
                 insertInstruction(offset, replace, before, popInstruction);
                 break;
@@ -1518,7 +1518,7 @@ implements   AttributeVisitor,
             {
                 // Replace or insert a single pop2 instruction.
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP2);
+                    new SimpleInstruction(Instruction.OP_POP2);
 
                 insertInstruction(offset, replace, before, popInstruction);
                 break;
@@ -1530,7 +1530,7 @@ implements   AttributeVisitor,
                     new Instruction[popCount / 2 + popCount % 2];
 
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP2);
+                    new SimpleInstruction(Instruction.OP_POP2);
 
                 for (int index = 0; index < popCount / 2; index++)
                 {
@@ -1540,7 +1540,7 @@ implements   AttributeVisitor,
                 if (popCount % 2 == 1)
                 {
                     popInstruction =
-                        new SimpleInstruction(InstructionConstants.OP_POP);
+                        new SimpleInstruction(Instruction.OP_POP);
 
                     popInstructions[popCount / 2] = popInstruction;
                 }
@@ -1650,7 +1650,7 @@ implements   AttributeVisitor,
     {
         // Remember the replacement instruction.
         Instruction replacementInstruction =
-             new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC,
+             new ConstantInstruction(Instruction.OP_INVOKESTATIC,
                                      constantInstruction.constantIndex);
 
         if (DEBUG) System.out.println("  Replacing by static invocation "+constantInstruction.toString(offset)+" -> "+replacementInstruction.toString());
@@ -1672,7 +1672,7 @@ implements   AttributeVisitor,
 
         // Replace the instruction by an infinite loop.
         Instruction replacementInstruction =
-            new BranchInstruction(InstructionConstants.OP_GOTO, 0);
+            new BranchInstruction(Instruction.OP_GOTO, 0);
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
     }

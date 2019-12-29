@@ -17,7 +17,7 @@
  */
 package proguard.classfile.util;
 
-import proguard.classfile.JavaConstants;
+import proguard.classfile.JavaTypeConstants;
 
 /**
  * An <code>ExternalTypeEnumeration</code> provides an enumeration of all
@@ -57,7 +57,7 @@ public class ExternalTypeEnumeration
 
     public void reset()
     {
-        index = descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_OPEN) + 1;
+        index = descriptor.indexOf(JavaTypeConstants.METHOD_ARGUMENTS_OPEN) + 1;
 
         if (index < 1)
         {
@@ -77,13 +77,13 @@ public class ExternalTypeEnumeration
         int startIndex = index;
 
         // Find the next separating comma.
-        index = descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_SEPARATOR,
+        index = descriptor.indexOf(JavaTypeConstants.METHOD_ARGUMENTS_SEPARATOR,
                                    startIndex);
 
         // Otherwise find the closing parenthesis.
         if (index < 0)
         {
-            index = descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_CLOSE,
+            index = descriptor.indexOf(JavaTypeConstants.METHOD_ARGUMENTS_CLOSE,
                                        startIndex);
             if (index < 0)
             {
@@ -97,6 +97,6 @@ public class ExternalTypeEnumeration
 
     public String methodName()
     {
-        return descriptor.substring(0, descriptor.indexOf(JavaConstants.METHOD_ARGUMENTS_OPEN)).trim();
+        return descriptor.substring(0, descriptor.indexOf(JavaTypeConstants.METHOD_ARGUMENTS_OPEN)).trim();
     }
 }

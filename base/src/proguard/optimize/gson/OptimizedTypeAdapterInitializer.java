@@ -115,13 +115,13 @@ implements   ClassVisitor
             new AllAttributeVisitor(
             new LocalVariableTypeRenamer())));
 
-        boolean isEnumAdapter = (objectProgramClass.getAccessFlags() & ClassConstants.ACC_ENUM) != 0;
+        boolean isEnumAdapter = (objectProgramClass.getAccessFlags() & AccessConstants.ENUM) != 0;
 
         if (isEnumAdapter)
         {
             // Make sure the enum is accessible from the type adapter.
-            objectProgramClass.u2accessFlags &= ~ClassConstants.ACC_PRIVATE;
-            objectProgramClass.u2accessFlags |= ClassConstants.ACC_PUBLIC;
+            objectProgramClass.u2accessFlags &= ~AccessConstants.PRIVATE;
+            objectProgramClass.u2accessFlags |= AccessConstants.PUBLIC;
         }
 
         AttributeVisitor readImplementer  = isEnumAdapter ? new EnumReadImplementer():

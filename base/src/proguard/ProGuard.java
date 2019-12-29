@@ -22,6 +22,7 @@ package proguard;
 
 import proguard.backport.Backporter;
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
@@ -517,10 +518,10 @@ public class ProGuard
     private void clearPreverification()
     {
         programClassPool.classesAccept(
-            new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_6,
+            new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_6,
             new AllMethodVisitor(
             new AllAttributeVisitor(
-            new NamedAttributeDeleter(ClassConstants.ATTR_StackMapTable)))));
+            new NamedAttributeDeleter(Attribute.STACK_MAP_TABLE)))));
     }
 
 

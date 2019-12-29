@@ -17,7 +17,7 @@
  */
 package proguard.classfile.util;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 
 
 /**
@@ -37,63 +37,76 @@ public class AccessUtil
 
     // The mask of access flags.
     private static final int ACCESS_MASK =
-        ClassConstants.ACC_PUBLIC  |
-        ClassConstants.ACC_PRIVATE |
-        ClassConstants.ACC_PROTECTED;
+        AccessConstants.PUBLIC  |
+        AccessConstants.PRIVATE |
+        AccessConstants.PROTECTED;
 
 
     /**
      * Returns the corresponding access level of the given access flags.
-     * @param accessFlags the internal access flags.
-     * @return the corresponding access level: <code>PRIVATE</code>,
-     *         <code>PACKAGE_VISIBLE</code>, <code>PROTECTED</code>, or
-     *         <code>PUBLIC</code>.
+     * @param accessFlags the internal access flags as a logical bit mask of
+     *                    {@link AccessConstants#PRIVATE},
+     *                    {@link AccessConstants#PROTECTED}, and
+     *                    {@link AccessConstants#PUBLIC}.
+     * @return the corresponding access level:
+     *         {@link #PRIVATE},
+     *         {@link #PACKAGE_VISIBLE},
+     *         {@link #PROTECTED}, or
+     *         {@link #PUBLIC}.
      */
     public static int accessLevel(int accessFlags)
     {
         switch (accessFlags & ACCESS_MASK)
         {
-            case ClassConstants.ACC_PRIVATE:   return PRIVATE;
-            default:                           return PACKAGE_VISIBLE;
-            case ClassConstants.ACC_PROTECTED: return PROTECTED;
-            case ClassConstants.ACC_PUBLIC:    return PUBLIC;
+            case AccessConstants.PRIVATE:   return PRIVATE;
+            default:                        return PACKAGE_VISIBLE;
+            case AccessConstants.PROTECTED: return PROTECTED;
+            case AccessConstants.PUBLIC:    return PUBLIC;
         }
     }
 
 
     /**
      * Returns the corresponding access flags of the given access level.
-     * @param accessLevel the access level: <code>PRIVATE</code>,
-     *                    <code>PACKAGE_VISIBLE</code>, <code>PROTECTED</code>,
-     *                    or <code>PUBLIC</code>.
-     * @return the corresponding internal access flags,  the internal access
-     *         flags as a logical bit mask of <code>ACC_PRIVATE</code>,
-     *         <code>ACC_PROTECTED</code>, and
-     *         <code>ACC_PUBLIC</code>.
+     * @param accessLevel the access level:
+     *                    {@link #PRIVATE},
+     *                    {@link #PACKAGE_VISIBLE},
+     *                    {@link #PROTECTED}, or
+     *                    {@link #PUBLIC}.
+     * @return the corresponding internal access flags as a logical bit mask of
+     *         {@link AccessConstants#PRIVATE},
+     *         {@link AccessConstants#PROTECTED}, and
+     *         {@link AccessConstants#PUBLIC}.
      */
     public static int accessFlags(int accessLevel)
     {
         switch (accessLevel)
         {
-            case PRIVATE:   return ClassConstants.ACC_PRIVATE;
+            case PRIVATE:   return AccessConstants.PRIVATE;
             default:        return 0;
-            case PROTECTED: return ClassConstants.ACC_PROTECTED;
-            case PUBLIC:    return ClassConstants.ACC_PUBLIC;
+            case PROTECTED: return AccessConstants.PROTECTED;
+            case PUBLIC:    return AccessConstants.PUBLIC;
         }
     }
 
 
     /**
      * Replaces the access part of the given access flags.
-     * @param accessFlags    the internal access flags.
-     * @param newAccessFlags the new internal access flags.
+     * @param accessFlags    the internal access flags as a logical bit mask of
+     *                       {@link AccessConstants#PRIVATE},
+     *                       {@link AccessConstants#PROTECTED}, and
+     *                       {@link AccessConstants#PUBLIC}.
+     * @param newAccessFlags the new access flags as a logical bit mask of
+     *                       {@link AccessConstants#PRIVATE},
+     *                       {@link AccessConstants#PROTECTED}, and
+     *                       {@link AccessConstants#PUBLIC}.
      */
     public static int replaceAccessFlags(int accessFlags, int newAccessFlags)
     {
         // A private class member should not be explicitly final.
-        if (newAccessFlags == ClassConstants.ACC_PRIVATE)
+        if (newAccessFlags == AccessConstants.PRIVATE)
         {
-            accessFlags &= ~ClassConstants.ACC_FINAL;
+            accessFlags &= ~AccessConstants.FINAL;
         }
 
         return (accessFlags    & ~ACCESS_MASK) |
@@ -104,6 +117,21 @@ public class AccessUtil
     /**
      * Returns whether the given access flags match the required set and unset
      * access flags.
+     * @param accessFlags              the internal access flags as a logical
+     *                                 bit mask of
+     *                                 {@link AccessConstants#PRIVATE},
+     *                                 {@link AccessConstants#PROTECTED}, and
+     *                                 {@link AccessConstants#PUBLIC}.
+     * @param requiredSetAccessFlags   the internal access flags that should be
+     *                                 set, as a logical bit mask of
+     *                                 {@link AccessConstants#PRIVATE},
+     *                                 {@link AccessConstants#PROTECTED}, and
+     *                                 {@link AccessConstants#PUBLIC}.
+     * @param requiredUnsetAccessFlags the internal access flags that should be
+     *                                 unset, as a logical bit mask of
+     *                                 {@link AccessConstants#PRIVATE},
+     *                                 {@link AccessConstants#PROTECTED}, and
+     *                                 {@link AccessConstants#PUBLIC}.
      */
     public static boolean accepted(int accessFlags,
                                    int requiredSetAccessFlags,

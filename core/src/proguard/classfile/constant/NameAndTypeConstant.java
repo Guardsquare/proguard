@@ -106,7 +106,7 @@ public class NameAndTypeConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_NameAndType;
+        return Constant.NAME_AND_TYPE;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

@@ -72,7 +72,7 @@ implements   ClassVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         // Write the magic number.
-        dataOutput.writeInt(ClassConstants.MAGIC);
+        dataOutput.writeInt(VersionConstants.MAGIC);
 
         // Write the version numbers.
         dataOutput.writeShort(ClassUtil.internalMinorClassVersion(programClass.u4version));

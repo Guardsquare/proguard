@@ -49,7 +49,7 @@ implements   ClassVisitor,
 
         if (newName != null && !oldName.equals(newName))
         {
-            programClass.u2accessFlags |= ClassConstants.ACC_RENAMED;
+            programClass.u2accessFlags |= AccessConstants.RENAMED;
         }
 
         // Print out the class members.
@@ -67,7 +67,7 @@ implements   ClassVisitor,
 
         if (newName != null && !newName.equals(oldName))
         {
-            programMember.u2accessFlags |= ClassConstants.ACC_RENAMED;
+            programMember.u2accessFlags |= AccessConstants.RENAMED;
         }
     }
 }

@@ -79,21 +79,21 @@ public class SimpleInstruction extends Instruction
     {
         switch (opcode)
         {
-            case InstructionConstants.OP_ICONST_M1: return -1;
+            case Instruction.OP_ICONST_M1: return -1;
 
-            case InstructionConstants.OP_ICONST_1:
-            case InstructionConstants.OP_LCONST_1:
-            case InstructionConstants.OP_FCONST_1:
-            case InstructionConstants.OP_DCONST_1: return 1;
+            case Instruction.OP_ICONST_1:
+            case Instruction.OP_LCONST_1:
+            case Instruction.OP_FCONST_1:
+            case Instruction.OP_DCONST_1: return 1;
 
-            case InstructionConstants.OP_ICONST_2:
-            case InstructionConstants.OP_FCONST_2: return 2;
+            case Instruction.OP_ICONST_2:
+            case Instruction.OP_FCONST_2: return 2;
 
-            case InstructionConstants.OP_ICONST_3: return 3;
+            case Instruction.OP_ICONST_3: return 3;
 
-            case InstructionConstants.OP_ICONST_4: return 4;
+            case Instruction.OP_ICONST_4: return 4;
 
-            case InstructionConstants.OP_ICONST_5: return 5;
+            case Instruction.OP_ICONST_5: return 5;
 
             default: return 0;
         }
@@ -107,25 +107,25 @@ public class SimpleInstruction extends Instruction
         // Replace any _1, _2, _3,... extension by _0.
         switch (opcode)
         {
-            case InstructionConstants.OP_ICONST_M1:
-            case InstructionConstants.OP_ICONST_0:
-            case InstructionConstants.OP_ICONST_1:
-            case InstructionConstants.OP_ICONST_2:
-            case InstructionConstants.OP_ICONST_3:
-            case InstructionConstants.OP_ICONST_4:
-            case InstructionConstants.OP_ICONST_5:
-            case InstructionConstants.OP_BIPUSH:
-            case InstructionConstants.OP_SIPUSH:   return InstructionConstants.OP_ICONST_0;
+            case Instruction.OP_ICONST_M1:
+            case Instruction.OP_ICONST_0:
+            case Instruction.OP_ICONST_1:
+            case Instruction.OP_ICONST_2:
+            case Instruction.OP_ICONST_3:
+            case Instruction.OP_ICONST_4:
+            case Instruction.OP_ICONST_5:
+            case Instruction.OP_BIPUSH:
+            case Instruction.OP_SIPUSH:   return Instruction.OP_ICONST_0;
 
-            case InstructionConstants.OP_LCONST_0:
-            case InstructionConstants.OP_LCONST_1: return InstructionConstants.OP_LCONST_0;
+            case Instruction.OP_LCONST_0:
+            case Instruction.OP_LCONST_1: return Instruction.OP_LCONST_0;
 
-            case InstructionConstants.OP_FCONST_0:
-            case InstructionConstants.OP_FCONST_1:
-            case InstructionConstants.OP_FCONST_2: return InstructionConstants.OP_FCONST_0;
+            case Instruction.OP_FCONST_0:
+            case Instruction.OP_FCONST_1:
+            case Instruction.OP_FCONST_2: return Instruction.OP_FCONST_0;
 
-            case InstructionConstants.OP_DCONST_0:
-            case InstructionConstants.OP_DCONST_1: return InstructionConstants.OP_DCONST_0;
+            case Instruction.OP_DCONST_0:
+            case Instruction.OP_DCONST_1: return Instruction.OP_DCONST_0;
 
             default: return opcode;
         }
@@ -137,43 +137,43 @@ public class SimpleInstruction extends Instruction
         // any alternatives.
         switch (opcode)
         {
-            case InstructionConstants.OP_ICONST_M1:
-            case InstructionConstants.OP_ICONST_0:
-            case InstructionConstants.OP_ICONST_1:
-            case InstructionConstants.OP_ICONST_2:
-            case InstructionConstants.OP_ICONST_3:
-            case InstructionConstants.OP_ICONST_4:
-            case InstructionConstants.OP_ICONST_5:
-            case InstructionConstants.OP_BIPUSH:
-            case InstructionConstants.OP_SIPUSH:
+            case Instruction.OP_ICONST_M1:
+            case Instruction.OP_ICONST_0:
+            case Instruction.OP_ICONST_1:
+            case Instruction.OP_ICONST_2:
+            case Instruction.OP_ICONST_3:
+            case Instruction.OP_ICONST_4:
+            case Instruction.OP_ICONST_5:
+            case Instruction.OP_BIPUSH:
+            case Instruction.OP_SIPUSH:
                 switch (requiredConstantSize())
                 {
                     case 0:
-                        opcode = (byte)(InstructionConstants.OP_ICONST_0 + constant);
+                        opcode = (byte)(Instruction.OP_ICONST_0 + constant);
                         break;
                     case 1:
-                        opcode = InstructionConstants.OP_BIPUSH;
+                        opcode = Instruction.OP_BIPUSH;
                         break;
                     case 2:
-                        opcode = InstructionConstants.OP_SIPUSH;
+                        opcode = Instruction.OP_SIPUSH;
                         break;
                 }
                 break;
 
-            case InstructionConstants.OP_LCONST_0:
-            case InstructionConstants.OP_LCONST_1:
-                opcode = (byte)(InstructionConstants.OP_LCONST_0 + constant);
+            case Instruction.OP_LCONST_0:
+            case Instruction.OP_LCONST_1:
+                opcode = (byte)(Instruction.OP_LCONST_0 + constant);
                 break;
 
-            case InstructionConstants.OP_FCONST_0:
-            case InstructionConstants.OP_FCONST_1:
-            case InstructionConstants.OP_FCONST_2:
-                opcode = (byte)(InstructionConstants.OP_FCONST_0 + constant);
+            case Instruction.OP_FCONST_0:
+            case Instruction.OP_FCONST_1:
+            case Instruction.OP_FCONST_2:
+                opcode = (byte)(Instruction.OP_FCONST_0 + constant);
                 break;
 
-            case InstructionConstants.OP_DCONST_0:
-            case InstructionConstants.OP_DCONST_1:
-                opcode = (byte)(InstructionConstants.OP_DCONST_0 + constant);
+            case Instruction.OP_DCONST_0:
+            case Instruction.OP_DCONST_1:
+                opcode = (byte)(Instruction.OP_DCONST_0 + constant);
                 break;
         }
 
@@ -232,9 +232,9 @@ public class SimpleInstruction extends Instruction
      */
     private int constantSize()
     {
-        return opcode == InstructionConstants.OP_BIPUSH ||
-               opcode == InstructionConstants.OP_NEWARRAY ? 1 :
-               opcode == InstructionConstants.OP_SIPUSH   ? 2 :
+        return opcode == Instruction.OP_BIPUSH ||
+               opcode == Instruction.OP_NEWARRAY ? 1 :
+               opcode == Instruction.OP_SIPUSH   ? 2 :
                                                             0;
     }
 

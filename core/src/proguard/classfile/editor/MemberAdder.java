@@ -130,8 +130,8 @@ implements   MemberVisitor
         //    // Is the field private or static?
         //    int targetAccessFlags = targetField.getAccessFlags();
         //    if ((targetAccessFlags &
-        //         (ClassConstants.ACC_PRIVATE |
-        //          ClassConstants.ACC_STATIC)) != 0)
+        //         (AccessConstants.PRIVATE |
+        //          AccessConstants.STATIC)) != 0)
         //    {
         //        // Rename the private or static field.
         //        String newName = newUniqueMemberName(name, targetClass.getName());
@@ -219,7 +219,7 @@ implements   MemberVisitor
         if (targetMethod != null)
         {
             // is this source method abstract?
-            if ((accessFlags & ClassConstants.ACC_ABSTRACT) != 0)
+            if ((accessFlags & AccessConstants.ABSTRACT) != 0)
             {
                 // Keep the target method.
                 if (DEBUG)
@@ -233,7 +233,7 @@ implements   MemberVisitor
 
             // Is the target method abstract?
             int targetAccessFlags = targetMethod.getAccessFlags();
-            if ((targetAccessFlags & ClassConstants.ACC_ABSTRACT) != 0)
+            if ((targetAccessFlags & AccessConstants.ABSTRACT) != 0)
             {
                 // Keep the abstract method, but update its contents, in order
                 // to keep any references to it valid.
@@ -244,7 +244,7 @@ implements   MemberVisitor
 
                 // Replace the access flags.
                 targetMethod.u2accessFlags =
-                    accessFlags & ~ClassConstants.ACC_FINAL;
+                    accessFlags & ~AccessConstants.FINAL;
 
                 // Add and replace the attributes.
                 programMethod.attributesAccept(programClass,
@@ -276,7 +276,7 @@ implements   MemberVisitor
 
         // Create a copy of the method.
         ProgramMethod newProgramMethod =
-            new ProgramMethod(accessFlags & ~ClassConstants.ACC_FINAL,
+            new ProgramMethod(accessFlags & ~AccessConstants.FINAL,
                               constantPoolEditor.addUtf8Constant(name),
                               constantPoolEditor.addUtf8Constant(descriptor),
                               0,
@@ -315,7 +315,7 @@ implements   MemberVisitor
     {
         return name.equals(ClassConstants.METHOD_NAME_INIT) ?
             ClassConstants.METHOD_NAME_INIT :
-            name + ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
+            name + TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
     }
 
 
@@ -347,8 +347,8 @@ implements   MemberVisitor
                 // Create an empty output class.
                 ProgramClass outputProgramClass =
                     new ClassBuilder(
-                        ClassConstants.CLASS_VERSION_1_8,
-                        ClassConstants.ACC_PUBLIC,
+                        VersionConstants.CLASS_VERSION_1_8,
+                        AccessConstants.PUBLIC,
                         "com/example/Test",
                         ClassConstants.NAME_JAVA_LANG_OBJECT).getProgramClass();
 

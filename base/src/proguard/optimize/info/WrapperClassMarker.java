@@ -68,12 +68,12 @@ implements   ClassVisitor,
     //   return;
     private final Instruction[] INITIALIZER_INSTRUCTIONS = new Instruction[]
     {
-        new VariableInstruction(InstructionConstants.OP_ALOAD_0, 0),
-        new VariableInstruction(InstructionConstants.OP_ALOAD_1, 1),
-        new ConstantInstruction(InstructionConstants.OP_PUTFIELD, 0),
-        new VariableInstruction(InstructionConstants.OP_ALOAD_0, 0),
-        new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, InstructionSequenceMatcher.X),
-        new SimpleInstruction(InstructionConstants.OP_RETURN),
+        new VariableInstruction(Instruction.OP_ALOAD_0, 0),
+        new VariableInstruction(Instruction.OP_ALOAD_1, 1),
+        new ConstantInstruction(Instruction.OP_PUTFIELD, 0),
+        new VariableInstruction(Instruction.OP_ALOAD_0, 0),
+        new ConstantInstruction(Instruction.OP_INVOKESPECIAL, InstructionSequenceMatcher.X),
+        new SimpleInstruction(Instruction.OP_RETURN),
     };
 
     private final InstructionSequenceMatcher INITIALIZER_MATCHER = new InstructionSequenceMatcher(INITIALIZER_CONSTANTS, INITIALIZER_INSTRUCTIONS);
@@ -115,7 +115,7 @@ implements   ClassVisitor,
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
         // Is the field non-static and of a class type?
-        if ((programField.getAccessFlags() & ClassConstants.ACC_STATIC) == 0 &&
+        if ((programField.getAccessFlags() & AccessConstants.STATIC) == 0 &&
             ClassUtil.isInternalClassType(programField.getDescriptor(programClass)) &&
             !ClassUtil.isInternalArrayType(programField.getDescriptor(programClass)))
         {

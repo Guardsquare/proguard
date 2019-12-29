@@ -69,7 +69,7 @@ public class DoubleConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Double;
+        return Constant.DOUBLE;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

@@ -116,7 +116,7 @@ implements   InstructionVisitor,
     {
         int accessFlags = clazz.getAccessFlags();
 
-        if ((accessFlags & ClassConstants.ACC_PUBLIC) == 0)
+        if ((accessFlags & AccessConstants.PUBLIC) == 0)
         {
             setAccessesPackageCode(invokingMethod);
         }
@@ -129,15 +129,15 @@ implements   InstructionVisitor,
     {
         int accessFlags = member.getAccessFlags();
 
-        if      ((accessFlags & ClassConstants.ACC_PRIVATE)   != 0)
+        if      ((accessFlags & AccessConstants.PRIVATE)   != 0)
         {
             setAccessesPrivateCode(invokingMethod);
         }
-        else if ((accessFlags & ClassConstants.ACC_PROTECTED) != 0)
+        else if ((accessFlags & AccessConstants.PROTECTED) != 0)
         {
             setAccessesProtectedCode(invokingMethod);
         }
-        else if ((accessFlags & ClassConstants.ACC_PUBLIC)    == 0)
+        else if ((accessFlags & AccessConstants.PUBLIC)    == 0)
         {
             setAccessesPackageCode(invokingMethod);
         }

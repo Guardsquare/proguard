@@ -65,11 +65,11 @@ implements   ClassVisitor,
 
     static
     {
-        inlineDeserializers.put(ClassConstants.TYPE_BYTE + "",
+        inlineDeserializers.put(TypeConstants.BYTE + "",
                                 new InlineDeserializers.InlinePrimitiveIntegerDeserializer(byte.class));
-        inlineDeserializers.put(ClassConstants.TYPE_SHORT + "",
+        inlineDeserializers.put(TypeConstants.SHORT + "",
                                 new InlineDeserializers.InlinePrimitiveIntegerDeserializer(short.class));
-        inlineDeserializers.put(ClassConstants.TYPE_INT + "",
+        inlineDeserializers.put(TypeConstants.INT + "",
                                 new InlineDeserializers.InlinePrimitiveIntegerDeserializer());
         inlineDeserializers.put(ClassConstants.TYPE_JAVA_LANG_STRING,
                                 new InlineDeserializers.InlineStringDeserializer());
@@ -112,8 +112,8 @@ implements   ClassVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         // Make access public for _OptimizedTypeAdapterFactory and _OptimizedTypeAdapterImpl.
-        programClass.u2accessFlags &= ~ClassConstants.ACC_PRIVATE;
-        programClass.u2accessFlags |=  ClassConstants.ACC_PUBLIC;
+        programClass.u2accessFlags &= ~AccessConstants.PRIVATE;
+        programClass.u2accessFlags |=  AccessConstants.PUBLIC;
 
         // Make default constructor public for _OptimizedTypeAdapterImpl.
         MemberCounter constructorCounter = new MemberCounter();
@@ -121,7 +121,7 @@ implements   ClassVisitor,
             new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
             new MemberDescriptorFilter(ClassConstants.METHOD_TYPE_INIT,
             new MultiMemberVisitor(
-                new MemberAccessSetter(ClassConstants.ACC_PUBLIC),
+                new MemberAccessSetter(AccessConstants.PUBLIC),
                 constructorCounter))));
 
         // Start adding new deserialization methods.
@@ -159,8 +159,8 @@ implements   ClassVisitor,
         }
 
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC |
-            ClassConstants.ACC_SYNTHETIC,
+            AccessConstants.PUBLIC |
+            AccessConstants.SYNTHETIC,
             ClassConstants.METHOD_NAME_INIT,
             ClassConstants.METHOD_TYPE_INIT,
             10,
@@ -190,7 +190,7 @@ implements   ClassVisitor,
         }
 
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC | ClassConstants.ACC_SYNTHETIC,
+            AccessConstants.PUBLIC | AccessConstants.SYNTHETIC,
             methodNameFromJson,
             OptimizedClassConstants.METHOD_TYPE_FROM_JSON,
             10,
@@ -281,7 +281,7 @@ implements   ClassVisitor,
         }
 
         classBuilder.addMethod(
-            ClassConstants.ACC_PROTECTED | ClassConstants.ACC_SYNTHETIC,
+            AccessConstants.PROTECTED | AccessConstants.SYNTHETIC,
             methodNameFromJsonField,
             METHOD_TYPE_FROM_JSON_FIELD,
             50,
@@ -455,8 +455,8 @@ implements   ClassVisitor,
 
             // Apply non static member visitor to all fields to visit.
             clazz.fieldsAccept(new MemberAccessFilter(0,
-                                                      ClassConstants.ACC_SYNTHETIC |
-                                                      ClassConstants.ACC_STATIC,
+                                                      AccessConstants.SYNTHETIC |
+                                                      AccessConstants.STATIC,
                                                       this));
             ____.label(defaultCase);
         }
@@ -471,7 +471,7 @@ implements   ClassVisitor,
             if (fromJsonFieldCaseLabel != null)
             {
                 // Make sure the field is not final anymore so we can safely write it from the injected method.
-                programField.accept(programClass, new MemberAccessFlagCleaner(ClassConstants.ACC_FINAL));
+                programField.accept(programClass, new MemberAccessFlagCleaner(AccessConstants.FINAL));
 
                 // Check if value is null
                 CompactCodeAttributeComposer.Label isNull = ____.createLabel();
@@ -568,42 +568,42 @@ implements   ClassVisitor,
                     // If the field is primitive, unbox the value before assigning it.
                     switch (fieldDescriptor.charAt(0))
                     {
-                        case ClassConstants.TYPE_BOOLEAN:
+                        case TypeConstants.BOOLEAN:
                             ____.invokevirtual(NAME_JAVA_LANG_BOOLEAN,
                                                METHOD_NAME_BOOLEAN_VALUE,
                                                METHOD_TYPE_BOOLEAN_VALUE);
                             break;
-                        case ClassConstants.TYPE_BYTE:
+                        case TypeConstants.BYTE:
                             ____.invokevirtual(NAME_JAVA_LANG_BYTE,
                                                METHOD_NAME_BYTE_VALUE,
                                                METHOD_TYPE_BYTE_VALUE);
                             break;
-                        case ClassConstants.TYPE_CHAR:
+                        case TypeConstants.CHAR:
                             ____.invokevirtual(NAME_JAVA_LANG_CHARACTER,
                                                METHOD_NAME_CHAR_VALUE,
                                                METHOD_TYPE_CHAR_VALUE);
                             break;
-                        case ClassConstants.TYPE_SHORT:
+                        case TypeConstants.SHORT:
                             ____.invokevirtual(NAME_JAVA_LANG_SHORT,
                                                METHOD_NAME_SHORT_VALUE,
                                                METHOD_TYPE_SHORT_VALUE);
                             break;
-                        case ClassConstants.TYPE_INT:
+                        case TypeConstants.INT:
                             ____.invokevirtual(NAME_JAVA_LANG_INTEGER,
                                                METHOD_NAME_INT_VALUE,
                                                METHOD_TYPE_INT_VALUE);
                             break;
-                        case ClassConstants.TYPE_LONG:
+                        case TypeConstants.LONG:
                             ____.invokevirtual(NAME_JAVA_LANG_LONG,
                                                METHOD_NAME_LONG_VALUE,
                                                METHOD_TYPE_LONG_VALUE);
                             break;
-                        case ClassConstants.TYPE_FLOAT:
+                        case TypeConstants.FLOAT:
                             ____.invokevirtual(NAME_JAVA_LANG_FLOAT,
                                                METHOD_NAME_FLOAT_VALUE,
                                                METHOD_TYPE_FLOAT_VALUE);
                             break;
-                        case ClassConstants.TYPE_DOUBLE:
+                        case TypeConstants.DOUBLE:
                             ____.invokevirtual(NAME_JAVA_LANG_DOUBLE,
                                                METHOD_NAME_DOUBLE_VALUE,
                                                METHOD_TYPE_DOUBLE_VALUE);

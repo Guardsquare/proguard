@@ -20,7 +20,7 @@
  */
 package proguard;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.*;
 
@@ -542,9 +542,9 @@ public class ConfigurationWriter
         // keyword earlier.
         if (((classSpecification.requiredSetAccessFlags |
               classSpecification.requiredUnsetAccessFlags) &
-             (ClassConstants.ACC_INTERFACE |
-              ClassConstants.ACC_ENUM      |
-              ClassConstants.ACC_MODULE)) == 0)
+             (AccessConstants.INTERFACE |
+              AccessConstants.ENUM      |
+              AccessConstants.MODULE)) == 0)
         {
             writer.print(ConfigurationConstants.CLASS_KEYWORD);
         }
@@ -738,7 +738,7 @@ public class ConfigurationWriter
                 // Is it a boolean?
                 String descriptor = memberSpecification.descriptor;
                 if (descriptor != null &&
-                    ClassUtil.internalMethodReturnType(descriptor).equals("" + ClassConstants.TYPE_BOOLEAN))
+                    ClassUtil.internalMethodReturnType(descriptor).equals("" + TypeConstants.BOOLEAN))
                 {
                     // It's a boolean (represented as an integer).
                     writer.print(values[0].intValue() != 0);

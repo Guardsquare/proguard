@@ -363,7 +363,7 @@ implements   AttributeVisitor
 
         // Add a line number if there wasn't a line number table before,
         // so we keep track of the source.
-        if (codeAttribute.getAttribute(clazz, ClassConstants.ATTR_LineNumberTable) == null)
+        if (codeAttribute.getAttribute(clazz, Attribute.LINE_NUMBER_TABLE) == null)
         {
             String source =
                 clazz.getName()             + '.' +

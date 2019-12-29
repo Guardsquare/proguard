@@ -158,7 +158,7 @@ implements   MemberVisitor,
         int accessFlags = programMethod.getAccessFlags();
 
         // Is it a native method?
-        if ((accessFlags & ClassConstants.ACC_NATIVE) != 0)
+        if ((accessFlags & AccessConstants.NATIVE) != 0)
         {
             // Mark all parameters.
             markModifiedParameters(programMethod, -1L);
@@ -223,7 +223,7 @@ implements   MemberVisitor,
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_AASTORE:
+            case Instruction.OP_AASTORE:
                 // Mark array parameters whose element is modified.
                 markModifiedParameters(method,
                                        offset,
@@ -233,25 +233,25 @@ implements   MemberVisitor,
                 markEscapingParameters(method, offset, 0);
                 break;
 
-            case InstructionConstants.OP_IASTORE:
-            case InstructionConstants.OP_LASTORE:
-            case InstructionConstants.OP_FASTORE:
-            case InstructionConstants.OP_DASTORE:
-            case InstructionConstants.OP_BASTORE:
-            case InstructionConstants.OP_CASTORE:
-            case InstructionConstants.OP_SASTORE:
+            case Instruction.OP_IASTORE:
+            case Instruction.OP_LASTORE:
+            case Instruction.OP_FASTORE:
+            case Instruction.OP_DASTORE:
+            case Instruction.OP_BASTORE:
+            case Instruction.OP_CASTORE:
+            case Instruction.OP_SASTORE:
                 // Mark array parameters whose element is modified.
                 markModifiedParameters(method,
                                        offset,
                                        simpleInstruction.stackPopCount(clazz) - 1);
                 break;
 
-            case InstructionConstants.OP_ARETURN:
+            case Instruction.OP_ARETURN:
                 // Mark returned reference values.
                 markReturnedParameters(clazz, method, offset, 0);
                 break;
 
-            case InstructionConstants.OP_ATHROW:
+            case Instruction.OP_ATHROW:
                 // Mark the escaping reference values.
                 markEscapingParameters(method, offset, 0);
                 break;
@@ -263,19 +263,19 @@ implements   MemberVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_LDC:
-            case InstructionConstants.OP_LDC_W:
-            case InstructionConstants.OP_NEW:
-            case InstructionConstants.OP_ANEWARRAY:
-            case InstructionConstants.OP_MULTIANEWARRAY:
-            case InstructionConstants.OP_GETSTATIC:
+            case Instruction.OP_LDC:
+            case Instruction.OP_LDC_W:
+            case Instruction.OP_NEW:
+            case Instruction.OP_ANEWARRAY:
+            case Instruction.OP_MULTIANEWARRAY:
+            case Instruction.OP_GETSTATIC:
                 // Mark possible modifications due to initializers.
                 referencingMethod = method;
                 referencingOffset = offset;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                 break;
 
-            case InstructionConstants.OP_PUTSTATIC:
+            case Instruction.OP_PUTSTATIC:
                 // Mark some global modification.
                 markAnythingModified(method);
 
@@ -283,13 +283,13 @@ implements   MemberVisitor,
                 markEscapingParameters(method, offset, 0);
                 break;
 
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETFIELD:
                 // Mark the owner of the field. The owner sort of escapes when
                 // the field is retrieved. [DGD-1279] (test2181)
                 markEscapingParameters(method, offset, 0);
                 break;
 
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTFIELD:
                 // Mark reference parameters whose field is modified.
                 markModifiedParameters(method,
                                        offset,
@@ -299,11 +299,11 @@ implements   MemberVisitor,
                 markEscapingParameters(method, offset, 0);
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEDYNAMIC:
                 // Mark reference parameters that are modified as parameters
                 // of the invoked method.
                 // Mark reference values that are escaping as parameters

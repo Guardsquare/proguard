@@ -19,6 +19,7 @@ package proguard.classfile.attribute.visitor;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
@@ -44,9 +45,9 @@ implements   AttributeVisitor,
     //*/
 
 
-    private boolean[] evaluated        = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private int[]     stackSizesBefore = new int[ClassConstants.TYPICAL_CODE_LENGTH];
-    private int[]     stackSizesAfter  = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private boolean[] evaluated        = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private int[]     stackSizesBefore = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private int[]     stackSizesAfter  = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
 
     private boolean exitInstructionBlock;
 
@@ -172,13 +173,13 @@ implements   AttributeVisitor,
 
         // Some simple instructions exit from the current instruction block.
         exitInstructionBlock =
-            opcode == InstructionConstants.OP_IRETURN ||
-            opcode == InstructionConstants.OP_LRETURN ||
-            opcode == InstructionConstants.OP_FRETURN ||
-            opcode == InstructionConstants.OP_DRETURN ||
-            opcode == InstructionConstants.OP_ARETURN ||
-            opcode == InstructionConstants.OP_RETURN  ||
-            opcode == InstructionConstants.OP_ATHROW;
+            opcode == Instruction.OP_IRETURN ||
+            opcode == Instruction.OP_LRETURN ||
+            opcode == Instruction.OP_FRETURN ||
+            opcode == Instruction.OP_DRETURN ||
+            opcode == Instruction.OP_ARETURN ||
+            opcode == Instruction.OP_RETURN  ||
+            opcode == Instruction.OP_ATHROW;
     }
 
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
@@ -193,7 +194,7 @@ implements   AttributeVisitor,
 
         // The ret instruction end the current instruction block.
         exitInstructionBlock =
-            opcode == InstructionConstants.OP_RET;
+            opcode == Instruction.OP_RET;
     }
 
     public void visitBranchInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, BranchInstruction branchInstruction)
@@ -208,8 +209,8 @@ implements   AttributeVisitor,
                                  branchInstruction.branchOffset);
 
         // Evaluate the instructions after a subroutine branch.
-        if (opcode == InstructionConstants.OP_JSR ||
-            opcode == InstructionConstants.OP_JSR_W)
+        if (opcode == Instruction.OP_JSR ||
+            opcode == Instruction.OP_JSR_W)
         {
             // We assume subroutine calls (jsr and jsr_w instructions) don't
             // change the stack, other than popping the return value.
@@ -223,10 +224,10 @@ implements   AttributeVisitor,
 
         // Some branch instructions always end the current instruction block.
         exitInstructionBlock =
-            opcode == InstructionConstants.OP_GOTO   ||
-            opcode == InstructionConstants.OP_GOTO_W ||
-            opcode == InstructionConstants.OP_JSR    ||
-            opcode == InstructionConstants.OP_JSR_W;
+            opcode == Instruction.OP_GOTO   ||
+            opcode == Instruction.OP_GOTO_W ||
+            opcode == Instruction.OP_JSR    ||
+            opcode == Instruction.OP_JSR_W;
     }
 
 

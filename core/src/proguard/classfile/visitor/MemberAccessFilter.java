@@ -40,9 +40,9 @@ implements   MemberVisitor
     // way if more of them are required at the same time. In that case, one
     // of them being set is sufficient.
     private static final int ACCESS_MASK =
-        ClassConstants.ACC_PUBLIC  |
-        ClassConstants.ACC_PRIVATE |
-        ClassConstants.ACC_PROTECTED;
+        AccessConstants.PUBLIC  |
+        AccessConstants.PRIVATE |
+        AccessConstants.PROTECTED;
 
     private final int           requiredSetAccessFlags;
     private final int           requiredUnsetAccessFlags;

@@ -77,7 +77,7 @@ implements   ClassVisitor,
     private final MyPossiblyUsedMemberUsageMarker possiblyUsedMemberUsageMarker  = new MyPossiblyUsedMemberUsageMarker();
     private final MemberVisitor                   nonEmptyMethodUsageMarker      = new AllAttributeVisitor(
                                                                                    new MyNonEmptyMethodUsageMarker());
-    private final ConstantVisitor                 parameterlessConstructorMarker = new ConstantTagFilter(new int[] { ClassConstants.CONSTANT_String, ClassConstants.CONSTANT_Class },
+    private final ConstantVisitor                 parameterlessConstructorMarker = new ConstantTagFilter(new int[] { Constant.STRING, Constant.CLASS },
                                                                                    new ReferencedClassVisitor(
                                                                                    new NamedMethodVisitor(ClassConstants.METHOD_NAME_INIT,
                                                                                                           ClassConstants.METHOD_TYPE_INIT,
@@ -474,26 +474,26 @@ implements   ClassVisitor,
         // an initializer.
         int accessFlags = method.getAccessFlags();
         if ((accessFlags &
-             (ClassConstants.ACC_PRIVATE |
-              ClassConstants.ACC_STATIC)) == 0 &&
+             (AccessConstants.PRIVATE |
+              AccessConstants.STATIC)) == 0 &&
             !ClassUtil.isInitializer(method.getName(clazz)))
         {
             // We can skip private and static methods in the hierarchy, and
             // also abstract methods, unless they might widen a current
             // non-public access.
             int requiredUnsetAccessFlags =
-                ClassConstants.ACC_PRIVATE |
-                ClassConstants.ACC_STATIC  |
-                ((accessFlags & ClassConstants.ACC_PUBLIC) == 0 ? 0 :
-                     ClassConstants.ACC_ABSTRACT);
+                AccessConstants.PRIVATE |
+                AccessConstants.STATIC  |
+                ((accessFlags & AccessConstants.PUBLIC) == 0 ? 0 :
+                     AccessConstants.ABSTRACT);
 
             // Mark default implementations in interfaces down the hierarchy,
             // if this is an interface itself.
             // TODO: This may be premature if there aren't any concrete implementing classes.
-            clazz.accept(new ClassAccessFilter(ClassConstants.ACC_INTERFACE, 0,
+            clazz.accept(new ClassAccessFilter(AccessConstants.INTERFACE, 0,
                          new ClassHierarchyTraveler(false, false, false, true,
                          new ProgramClassFilter(
-                         new ClassAccessFilter(ClassConstants.ACC_INTERFACE, 0,
+                         new ClassAccessFilter(AccessConstants.INTERFACE, 0,
                          new NamedMethodVisitor(method.getName(clazz),
                                                 method.getDescriptor(clazz),
                          new MemberAccessFilter(0, requiredUnsetAccessFlags,

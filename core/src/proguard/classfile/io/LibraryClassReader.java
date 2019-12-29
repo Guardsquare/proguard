@@ -98,16 +98,16 @@ implements   ClassVisitor,
             constant.accept(libraryClass, this);
 
             int tag = constant.getTag();
-            if (tag == ClassConstants.CONSTANT_Class ||
-                tag == ClassConstants.CONSTANT_Utf8)
+            if (tag == Constant.CLASS ||
+                tag == Constant.UTF8)
             {
                 constantPool[index] = constant;
             }
 
             // Long constants and double constants take up two entries in the
             // constant pool.
-            if (tag == ClassConstants.CONSTANT_Long ||
-                tag == ClassConstants.CONSTANT_Double)
+            if (tag == Constant.LONG ||
+                tag == Constant.DOUBLE)
             {
                 index++;
             }
@@ -367,23 +367,23 @@ implements   ClassVisitor,
 
         switch (u1tag)
         {
-            case ClassConstants.CONSTANT_Integer:            return new IntegerConstant();
-            case ClassConstants.CONSTANT_Float:              return new FloatConstant();
-            case ClassConstants.CONSTANT_Long:               return new LongConstant();
-            case ClassConstants.CONSTANT_Double:             return new DoubleConstant();
-            case ClassConstants.CONSTANT_String:             return new StringConstant();
-            case ClassConstants.CONSTANT_Utf8:               return new Utf8Constant();
-            case ClassConstants.CONSTANT_Dynamic:            return new DynamicConstant();
-            case ClassConstants.CONSTANT_InvokeDynamic:      return new InvokeDynamicConstant();
-            case ClassConstants.CONSTANT_MethodHandle:       return new MethodHandleConstant();
-            case ClassConstants.CONSTANT_Fieldref:           return new FieldrefConstant();
-            case ClassConstants.CONSTANT_Methodref:          return new MethodrefConstant();
-            case ClassConstants.CONSTANT_InterfaceMethodref: return new InterfaceMethodrefConstant();
-            case ClassConstants.CONSTANT_Class:              return new ClassConstant();
-            case ClassConstants.CONSTANT_MethodType:         return new MethodTypeConstant();
-            case ClassConstants.CONSTANT_NameAndType:        return new NameAndTypeConstant();
-            case ClassConstants.CONSTANT_Module:             return new ModuleConstant();
-            case ClassConstants.CONSTANT_Package:            return new PackageConstant();
+            case Constant.INTEGER:             return new IntegerConstant();
+            case Constant.FLOAT:               return new FloatConstant();
+            case Constant.LONG:                return new LongConstant();
+            case Constant.DOUBLE:              return new DoubleConstant();
+            case Constant.STRING:              return new StringConstant();
+            case Constant.UTF8:                return new Utf8Constant();
+            case Constant.DYNAMIC:             return new DynamicConstant();
+            case Constant.INVOKE_DYNAMIC:      return new InvokeDynamicConstant();
+            case Constant.METHOD_HANDLE:       return new MethodHandleConstant();
+            case Constant.FIELDREF:            return new FieldrefConstant();
+            case Constant.METHODREF:           return new MethodrefConstant();
+            case Constant.INTERFACE_METHODREF: return new InterfaceMethodrefConstant();
+            case Constant.CLASS:               return new ClassConstant();
+            case Constant.METHOD_TYPE:         return new MethodTypeConstant();
+            case Constant.NAME_AND_TYPE:       return new NameAndTypeConstant();
+            case Constant.MODULE:              return new ModuleConstant();
+            case Constant.PACKAGE:             return new PackageConstant();
 
             default: throw new RuntimeException("Unknown constant type ["+u1tag+"] in constant pool");
         }
@@ -416,14 +416,14 @@ implements   ClassVisitor,
     {
         switch (primitiveType)
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:    return 1;
-            case ClassConstants.TYPE_CHAR:
-            case ClassConstants.TYPE_SHORT:   return 2;
-            case ClassConstants.TYPE_INT:
-            case ClassConstants.TYPE_FLOAT:   return 4;
-            case ClassConstants.TYPE_LONG:
-            case ClassConstants.TYPE_DOUBLE:  return 8;
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:    return 1;
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:   return 2;
+            case TypeConstants.INT:
+            case TypeConstants.FLOAT:   return 4;
+            case TypeConstants.LONG:
+            case TypeConstants.DOUBLE:  return 8;
         }
 
         return 0;

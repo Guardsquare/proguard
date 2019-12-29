@@ -209,14 +209,14 @@ implements   AttributeVisitor,
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        knownIntegerUpdaterMatcher,
                        unknownIntegerUpdaterMatcher, true, false, false,
-                       "" + ClassConstants.TYPE_INT);
+                       "" + TypeConstants.INT);
 
         // Try to match the AtomicLongFieldUpdater.newUpdater(
         // SomeClass.class, "someField") construct.
         matchGetMember(clazz, method, codeAttribute, offset, instruction,
                        knownLongUpdaterMatcher,
                        unknownLongUpdaterMatcher, true, false, false,
-                       "" + ClassConstants.TYPE_LONG);
+                       "" + TypeConstants.LONG);
 
         // Try to match the AtomicReferenceFieldUpdater.newUpdater(
         // SomeClass.class, SomeClass.class, "someField") construct.
@@ -375,7 +375,7 @@ implements   AttributeVisitor,
 
             // Update the instruction.
             codeAttributeEditor.replaceInstruction(memberNameInstructionOffset,
-                                                   new ConstantInstruction(InstructionConstants.OP_LDC,
+                                                   new ConstantInstruction(Instruction.OP_LDC,
                                                                            stringConstantIndex));
         }
     }
@@ -405,9 +405,9 @@ implements   AttributeVisitor,
                                   (isDeclared    ? "declared " : "") +
                                   "constructor '" +
                                   ClassConstants.METHOD_NAME_INIT +
-                                  JavaConstants.METHOD_ARGUMENTS_OPEN +
+                                  JavaTypeConstants.METHOD_ARGUMENTS_OPEN +
                                   ClassUtil.externalMethodArguments(memberDescriptor) +
-                                  JavaConstants.METHOD_ARGUMENTS_CLOSE +
+                                  JavaTypeConstants.METHOD_ARGUMENTS_CLOSE +
                                   "' dynamically");
 
                 // Print out notes about potential candidates.
@@ -459,9 +459,9 @@ implements   AttributeVisitor,
                 if (!isField)
                 {
                     externalMemberDescription +=
-                        JavaConstants.METHOD_ARGUMENTS_OPEN +
+                        JavaTypeConstants.METHOD_ARGUMENTS_OPEN +
                         ClassUtil.externalMethodArguments(memberDescriptor) +
-                        JavaConstants.METHOD_ARGUMENTS_CLOSE;
+                        JavaTypeConstants.METHOD_ARGUMENTS_CLOSE;
                 }
 
                 // Print out the actual note.
@@ -621,8 +621,8 @@ implements   AttributeVisitor,
 
             switch (variableInstruction.canonicalOpcode())
             {
-                case InstructionConstants.OP_ASTORE:
-                case InstructionConstants.OP_ALOAD:
+                case Instruction.OP_ASTORE:
+                case Instruction.OP_ALOAD:
                     // Ignore astore/aload instructions.
                     break;
 
@@ -644,34 +644,34 @@ implements   AttributeVisitor,
 
             switch (transition)
             {
-                case LABEL_START               | InstructionConstants.OP_ICONST_0 << 8:
-                case LABEL_LOAD_MEMBER_NAME    | InstructionConstants.OP_ICONST_0 << 8:
-                case LABEL_CREATE_CLASS_ARRAY  | InstructionConstants.OP_ICONST_0 << 8:
-                case LABEL_DUP_CLASS_ARRAY     | InstructionConstants.OP_ICONST_0 << 8:
-                case LABEL_LOAD_PARAMETER_TYPE | InstructionConstants.OP_ICONST_0 << 8:
-                case LABEL_STORE_PARAMETER     | InstructionConstants.OP_ICONST_0 << 8:
-                case LABEL_GET_MEMBER          | InstructionConstants.OP_ICONST_0 << 8:
+                case LABEL_START               | Instruction.OP_ICONST_0 << 8:
+                case LABEL_LOAD_MEMBER_NAME    | Instruction.OP_ICONST_0 << 8:
+                case LABEL_CREATE_CLASS_ARRAY  | Instruction.OP_ICONST_0 << 8:
+                case LABEL_DUP_CLASS_ARRAY     | Instruction.OP_ICONST_0 << 8:
+                case LABEL_LOAD_PARAMETER_TYPE | Instruction.OP_ICONST_0 << 8:
+                case LABEL_STORE_PARAMETER     | Instruction.OP_ICONST_0 << 8:
+                case LABEL_GET_MEMBER          | Instruction.OP_ICONST_0 << 8:
                     // This could be the start of creating a class array.
                     reset();
                     parameterCount = simpleInstruction.constant;
                     label          = LABEL_CREATE_CLASS_ARRAY;
                     break;
 
-                case LABEL_LOAD_CLASS_ARRAY_SIZE | InstructionConstants.OP_ICONST_0 << 8:
+                case LABEL_LOAD_CLASS_ARRAY_SIZE | Instruction.OP_ICONST_0 << 8:
                     parameterCount = simpleInstruction.constant;
                     label          = LABEL_CREATE_CLASS_ARRAY;
                     break;
 
-                case LABEL_LOAD_CLASS_ARRAY_SIZE | InstructionConstants.OP_ACONST_NULL << 8:
+                case LABEL_LOAD_CLASS_ARRAY_SIZE | Instruction.OP_ACONST_NULL << 8:
                     parameterCount = 0;
                     label          = LABEL_GET_MEMBER;
                     break;
 
-                case LABEL_DUP_CLASS_ARRAY | InstructionConstants.OP_DUP << 8:
+                case LABEL_DUP_CLASS_ARRAY | Instruction.OP_DUP << 8:
                     label = LABEL_LOAD_PARAMETER_INDEX;
                     break;
 
-                case LABEL_LOAD_PARAMETER_INDEX | InstructionConstants.OP_ICONST_0 << 8:
+                case LABEL_LOAD_PARAMETER_INDEX | Instruction.OP_ICONST_0 << 8:
                     // Is it pushing the expected parameter index?
                     if (parameterIndex == simpleInstruction.constant)
                     {
@@ -686,7 +686,7 @@ implements   AttributeVisitor,
                     }
                     break;
 
-                case LABEL_STORE_PARAMETER | InstructionConstants.OP_AASTORE << 8:
+                case LABEL_STORE_PARAMETER | Instruction.OP_AASTORE << 8:
                     // Are we still expecting more parameters?
                     label = ++parameterIndex < parameterCount ?
                         LABEL_DUP_CLASS_ARRAY :
@@ -710,23 +710,23 @@ implements   AttributeVisitor,
             // Let the constant figure out the transition.
             switch (constantInstruction.canonicalOpcode())
             {
-                case InstructionConstants.OP_LDC:
+                case Instruction.OP_LDC:
                     instructionOffset = offset;
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                     break;
 
-                case InstructionConstants.OP_CHECKCAST:
+                case Instruction.OP_CHECKCAST:
                     // We simply ignore any casts, typically to Class[],
                     // but maybe even to Class or String.
                     break;
 
-                case InstructionConstants.OP_GETSTATIC:
-                case InstructionConstants.OP_INVOKEVIRTUAL:
-                case InstructionConstants.OP_INVOKESTATIC:
+                case Instruction.OP_GETSTATIC:
+                case Instruction.OP_INVOKEVIRTUAL:
+                case Instruction.OP_INVOKESTATIC:
                     clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
                     break;
 
-                case InstructionConstants.OP_ANEWARRAY:
+                case Instruction.OP_ANEWARRAY:
                     if (label == LABEL_CREATE_CLASS_ARRAY)
                     {
                         clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -951,9 +951,9 @@ implements   AttributeVisitor,
         {
             String memberDescriptor = isField ?
                 null :
-                ClassConstants.METHOD_ARGUMENTS_OPEN +
+                TypeConstants.METHOD_ARGUMENTS_OPEN +
                 parameterTypes.toString() +
-                ClassConstants.METHOD_ARGUMENTS_CLOSE +
+                TypeConstants.METHOD_ARGUMENTS_CLOSE +
                 "L***;";
 
             if (DEBUG)

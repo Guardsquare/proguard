@@ -22,6 +22,7 @@ package proguard.backport;
 
 import proguard.*;
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.*;
@@ -75,14 +76,14 @@ public class Backporter
         final InstructionCounter replacedStreamsMethodCallCounter = new InstructionCounter();
         final InstructionCounter replacedTimeMethodCallCounter    = new InstructionCounter();
 
-        if (targetClassVersion < ClassConstants.CLASS_VERSION_1_9)
+        if (targetClassVersion < VersionConstants.CLASS_VERSION_1_9)
         {
             // Convert indy string concatenations to StringBuilder chains
             CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor(true, true);
             programClassPool.classesAccept(
-                new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_9,
+                new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_9,
                 new AllAttributeVisitor(
-                new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
+                new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS,
                 new AttributeToClassVisitor(
                 new MultiClassVisitor(
                     new AllMethodVisitor(
@@ -101,15 +102,15 @@ public class Backporter
                 ))))));
         }
 
-        if (targetClassVersion < ClassConstants.CLASS_VERSION_1_8)
+        if (targetClassVersion < VersionConstants.CLASS_VERSION_1_8)
         {
             // Collect all classes with BootstrapMethod attributes,
             // and convert lambda expressions and method references.
             ClassPool filteredClasses = new ClassPool();
             programClassPool.classesAccept(
-                new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_8,
+                new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_8,
                 new AllAttributeVisitor(
-                new AttributeNameFilter(ClassConstants.ATTR_BootstrapMethods,
+                new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS,
                 new AttributeToClassVisitor(
                 new ClassPoolFiller(filteredClasses))))));
 
@@ -137,8 +138,8 @@ public class Backporter
             // they seem to work correctly.
             ClassPool interfaceClasses = new ClassPool();
             programClassPool.classesAccept(
-                new ClassVersionFilter(ClassConstants.CLASS_VERSION_1_8,
-                new ClassAccessFilter(ClassConstants.ACC_INTERFACE, 0,
+                new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_8,
+                new ClassAccessFilter(AccessConstants.INTERFACE, 0,
                 new ClassPoolFiller(interfaceClasses))));
 
             ClassPool modifiedClasses = new ClassPool();
@@ -163,7 +164,7 @@ public class Backporter
                                               libraryClassPool));
         }
 
-        if (targetClassVersion < ClassConstants.CLASS_VERSION_1_7)
+        if (targetClassVersion < VersionConstants.CLASS_VERSION_1_7)
         {
             // Replace / remove method calls only available in Java 7+.
             InstructionSequenceBuilder ____ =
@@ -216,7 +217,7 @@ public class Backporter
                                                  replacedMethodCallCounter)))));
         }
 
-        if (targetClassVersion < ClassConstants.CLASS_VERSION_1_8)
+        if (targetClassVersion < VersionConstants.CLASS_VERSION_1_8)
         {
             // Sanity check: if the streamsupport library is not found in the
             // classpools do not try to backport.
@@ -263,7 +264,7 @@ public class Backporter
             }
         }
 
-        if (targetClassVersion < ClassConstants.CLASS_VERSION_1_8)
+        if (targetClassVersion < VersionConstants.CLASS_VERSION_1_8)
         {
             // Sanity check: if the threetenbp library is not found in the
             // classpools do not try to backport.

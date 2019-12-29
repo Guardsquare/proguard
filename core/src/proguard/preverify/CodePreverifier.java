@@ -22,7 +22,6 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.instruction.InstructionConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.evaluation.*;
@@ -173,8 +172,8 @@ implements   AttributeVisitor
 
         // Get the proper name for the attribute to be added/replaced/deleted.
         String stackMapAttributeName = microEdition ?
-             ClassConstants.ATTR_StackMap :
-             ClassConstants.ATTR_StackMapTable;
+             Attribute.STACK_MAP :
+             Attribute.STACK_MAP_TABLE;
 
         int frameCount = stackMapFrameList.size();
 
@@ -646,29 +645,5 @@ implements   AttributeVisitor
             variableIndex == 0                   &&
             initializationFinder.isInitializer() &&
             offset <= initializationFinder.superInitializationOffset();
-    }
-
-
-    /**
-     * Returns wheter the specified variable is an uninitialized "this" at the
-     * given instruction offset.
-     */
-    private boolean isUninitalizedThis(int offset, int variableIndex)
-    {
-        return
-            variableIndex == 0                   &&
-            initializationFinder.isInitializer() &&
-            offset <= initializationFinder.superInitializationOffset();
-    }
-
-
-    /**
-     * Returns whether the given instruction opcode represents a dup or swap
-     * instruction (dup, dup_x1, dup_x2, dup2, dup2_x1, dup2_x2, swap).
-     */
-    private boolean isDupOrSwap(int opcode)
-    {
-        return opcode >= InstructionConstants.OP_DUP &&
-               opcode <= InstructionConstants.OP_SWAP;
     }
 }

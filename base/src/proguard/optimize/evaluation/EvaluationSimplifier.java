@@ -162,8 +162,8 @@ implements   AttributeVisitor,
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_IDIV:
-            case InstructionConstants.OP_IREM:
+            case Instruction.OP_IDIV:
+            case Instruction.OP_IREM:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -180,8 +180,8 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_LDIV:
-            case InstructionConstants.OP_LREM:
+            case Instruction.OP_LDIV:
+            case Instruction.OP_LREM:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -198,8 +198,8 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_FDIV:
-            case InstructionConstants.OP_FREM:
+            case Instruction.OP_FDIV:
+            case Instruction.OP_FREM:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -216,8 +216,8 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_DDIV:
-            case InstructionConstants.OP_DREM:
+            case Instruction.OP_DDIV:
+            case Instruction.OP_DREM:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -234,11 +234,11 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_IALOAD:
-            case InstructionConstants.OP_BALOAD:
-            case InstructionConstants.OP_CALOAD:
-            case InstructionConstants.OP_SALOAD:
-            case InstructionConstants.OP_ARRAYLENGTH:
+            case Instruction.OP_IALOAD:
+            case Instruction.OP_BALOAD:
+            case Instruction.OP_CALOAD:
+            case Instruction.OP_SALOAD:
+            case Instruction.OP_ARRAYLENGTH:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -255,22 +255,22 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_IADD:
-            case InstructionConstants.OP_ISUB:
-            case InstructionConstants.OP_IMUL:
-            case InstructionConstants.OP_INEG:
-            case InstructionConstants.OP_ISHL:
-            case InstructionConstants.OP_ISHR:
-            case InstructionConstants.OP_IUSHR:
-            case InstructionConstants.OP_IAND:
-            case InstructionConstants.OP_IOR:
-            case InstructionConstants.OP_IXOR:
-            case InstructionConstants.OP_L2I:
-            case InstructionConstants.OP_F2I:
-            case InstructionConstants.OP_D2I:
-            case InstructionConstants.OP_I2B:
-            case InstructionConstants.OP_I2C:
-            case InstructionConstants.OP_I2S:
+            case Instruction.OP_IADD:
+            case Instruction.OP_ISUB:
+            case Instruction.OP_IMUL:
+            case Instruction.OP_INEG:
+            case Instruction.OP_ISHL:
+            case Instruction.OP_ISHR:
+            case Instruction.OP_IUSHR:
+            case Instruction.OP_IAND:
+            case Instruction.OP_IOR:
+            case Instruction.OP_IXOR:
+            case Instruction.OP_L2I:
+            case Instruction.OP_F2I:
+            case Instruction.OP_D2I:
+            case Instruction.OP_I2B:
+            case Instruction.OP_I2C:
+            case Instruction.OP_I2S:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -281,7 +281,7 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_LALOAD:
+            case Instruction.OP_LALOAD:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -298,19 +298,19 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_LADD:
-            case InstructionConstants.OP_LSUB:
-            case InstructionConstants.OP_LMUL:
-            case InstructionConstants.OP_LNEG:
-            case InstructionConstants.OP_LSHL:
-            case InstructionConstants.OP_LSHR:
-            case InstructionConstants.OP_LUSHR:
-            case InstructionConstants.OP_LAND:
-            case InstructionConstants.OP_LOR:
-            case InstructionConstants.OP_LXOR:
-            case InstructionConstants.OP_I2L:
-            case InstructionConstants.OP_F2L:
-            case InstructionConstants.OP_D2L:
+            case Instruction.OP_LADD:
+            case Instruction.OP_LSUB:
+            case Instruction.OP_LMUL:
+            case Instruction.OP_LNEG:
+            case Instruction.OP_LSHL:
+            case Instruction.OP_LSHR:
+            case Instruction.OP_LUSHR:
+            case Instruction.OP_LAND:
+            case Instruction.OP_LOR:
+            case Instruction.OP_LXOR:
+            case Instruction.OP_I2L:
+            case Instruction.OP_F2L:
+            case Instruction.OP_D2L:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -321,7 +321,7 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_FALOAD:
+            case Instruction.OP_FALOAD:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -338,13 +338,13 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_FADD:
-            case InstructionConstants.OP_FSUB:
-            case InstructionConstants.OP_FMUL:
-            case InstructionConstants.OP_FNEG:
-            case InstructionConstants.OP_I2F:
-            case InstructionConstants.OP_L2F:
-            case InstructionConstants.OP_D2F:
+            case Instruction.OP_FADD:
+            case Instruction.OP_FSUB:
+            case Instruction.OP_FMUL:
+            case Instruction.OP_FNEG:
+            case Instruction.OP_I2F:
+            case Instruction.OP_L2F:
+            case Instruction.OP_D2F:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -355,7 +355,7 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_DALOAD:
+            case Instruction.OP_DALOAD:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -372,13 +372,13 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_DADD:
-            case InstructionConstants.OP_DSUB:
-            case InstructionConstants.OP_DMUL:
-            case InstructionConstants.OP_DNEG:
-            case InstructionConstants.OP_I2D:
-            case InstructionConstants.OP_L2D:
-            case InstructionConstants.OP_F2D:
+            case Instruction.OP_DADD:
+            case Instruction.OP_DSUB:
+            case Instruction.OP_DMUL:
+            case Instruction.OP_DNEG:
+            case Instruction.OP_I2D:
+            case Instruction.OP_L2D:
+            case Instruction.OP_F2D:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -389,7 +389,7 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_AALOAD:
+            case Instruction.OP_AALOAD:
                 if (!sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
                                                                  codeAttribute,
@@ -406,14 +406,14 @@ implements   AttributeVisitor,
                 }
                 break;
 
-            case InstructionConstants.OP_IASTORE:
-            case InstructionConstants.OP_BASTORE:
-            case InstructionConstants.OP_CASTORE:
-            case InstructionConstants.OP_SASTORE:
-            case InstructionConstants.OP_LASTORE:
-            case InstructionConstants.OP_FASTORE:
-            case InstructionConstants.OP_DASTORE:
-            case InstructionConstants.OP_AASTORE:
+            case Instruction.OP_IASTORE:
+            case Instruction.OP_BASTORE:
+            case Instruction.OP_CASTORE:
+            case Instruction.OP_SASTORE:
+            case Instruction.OP_LASTORE:
+            case Instruction.OP_FASTORE:
+            case Instruction.OP_DASTORE:
+            case Instruction.OP_AASTORE:
                 if (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY &&
                     isNullReference(offset, simpleInstruction.stackPopCount(clazz) - 1))
                 {
@@ -432,55 +432,55 @@ implements   AttributeVisitor,
 
         switch (variableInstruction.opcode)
         {
-            case InstructionConstants.OP_ILOAD:
-            case InstructionConstants.OP_ILOAD_0:
-            case InstructionConstants.OP_ILOAD_1:
-            case InstructionConstants.OP_ILOAD_2:
-            case InstructionConstants.OP_ILOAD_3:
+            case Instruction.OP_ILOAD:
+            case Instruction.OP_ILOAD_0:
+            case Instruction.OP_ILOAD_1:
+            case Instruction.OP_ILOAD_2:
+            case Instruction.OP_ILOAD_3:
                 replaceIntegerPushInstruction(clazz, offset, variableInstruction, variableIndex);
                 break;
 
-            case InstructionConstants.OP_LLOAD:
-            case InstructionConstants.OP_LLOAD_0:
-            case InstructionConstants.OP_LLOAD_1:
-            case InstructionConstants.OP_LLOAD_2:
-            case InstructionConstants.OP_LLOAD_3:
+            case Instruction.OP_LLOAD:
+            case Instruction.OP_LLOAD_0:
+            case Instruction.OP_LLOAD_1:
+            case Instruction.OP_LLOAD_2:
+            case Instruction.OP_LLOAD_3:
                 replaceLongPushInstruction(clazz, offset, variableInstruction, variableIndex);
                 break;
 
-            case InstructionConstants.OP_FLOAD:
-            case InstructionConstants.OP_FLOAD_0:
-            case InstructionConstants.OP_FLOAD_1:
-            case InstructionConstants.OP_FLOAD_2:
-            case InstructionConstants.OP_FLOAD_3:
+            case Instruction.OP_FLOAD:
+            case Instruction.OP_FLOAD_0:
+            case Instruction.OP_FLOAD_1:
+            case Instruction.OP_FLOAD_2:
+            case Instruction.OP_FLOAD_3:
                 replaceFloatPushInstruction(clazz, offset, variableInstruction, variableIndex);
                 break;
 
-            case InstructionConstants.OP_DLOAD:
-            case InstructionConstants.OP_DLOAD_0:
-            case InstructionConstants.OP_DLOAD_1:
-            case InstructionConstants.OP_DLOAD_2:
-            case InstructionConstants.OP_DLOAD_3:
+            case Instruction.OP_DLOAD:
+            case Instruction.OP_DLOAD_0:
+            case Instruction.OP_DLOAD_1:
+            case Instruction.OP_DLOAD_2:
+            case Instruction.OP_DLOAD_3:
                 replaceDoublePushInstruction(clazz, offset, variableInstruction, variableIndex);
                 break;
 
-            case InstructionConstants.OP_ALOAD:
-            case InstructionConstants.OP_ALOAD_0:
-            case InstructionConstants.OP_ALOAD_1:
-            case InstructionConstants.OP_ALOAD_2:
-            case InstructionConstants.OP_ALOAD_3:
+            case Instruction.OP_ALOAD:
+            case Instruction.OP_ALOAD_0:
+            case Instruction.OP_ALOAD_1:
+            case Instruction.OP_ALOAD_2:
+            case Instruction.OP_ALOAD_3:
                 replaceReferencePushInstruction(clazz, offset, variableInstruction);
                 break;
 
-            case InstructionConstants.OP_ASTORE:
-            case InstructionConstants.OP_ASTORE_0:
-            case InstructionConstants.OP_ASTORE_1:
-            case InstructionConstants.OP_ASTORE_2:
-            case InstructionConstants.OP_ASTORE_3:
+            case Instruction.OP_ASTORE:
+            case Instruction.OP_ASTORE_0:
+            case Instruction.OP_ASTORE_1:
+            case Instruction.OP_ASTORE_2:
+            case Instruction.OP_ASTORE_3:
                 deleteReferencePopInstruction(clazz, offset, variableInstruction);
                 break;
 
-            case InstructionConstants.OP_RET:
+            case Instruction.OP_RET:
                 replaceBranchInstruction(clazz, offset, variableInstruction);
                 break;
         }
@@ -491,9 +491,9 @@ implements   AttributeVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKEINTERFACE:
                 if (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY &&
                     isNullReference(offset, constantInstruction.stackPopCount(clazz) - 1))
                 {
@@ -509,9 +509,9 @@ implements   AttributeVisitor,
                 }
                 // intended fallthrough
 
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_GETFIELD:
-            case InstructionConstants.OP_INVOKESTATIC:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_GETFIELD:
+            case Instruction.OP_INVOKESTATIC:
                 if (constantInstruction.stackPushCount(clazz) > 0 &&
                     !sideEffectInstructionChecker.hasSideEffects(clazz,
                                                                  method,
@@ -524,7 +524,7 @@ implements   AttributeVisitor,
 
                 break;
 
-            case InstructionConstants.OP_CHECKCAST:
+            case Instruction.OP_CHECKCAST:
                 replaceReferencePushInstruction(clazz, offset, constantInstruction);
                 break;
         }
@@ -535,13 +535,13 @@ implements   AttributeVisitor,
     {
         switch (branchInstruction.opcode)
         {
-            case InstructionConstants.OP_GOTO:
-            case InstructionConstants.OP_GOTO_W:
+            case Instruction.OP_GOTO:
+            case Instruction.OP_GOTO_W:
                 // Don't replace unconditional branches.
                 break;
 
-            case InstructionConstants.OP_JSR:
-            case InstructionConstants.OP_JSR_W:
+            case Instruction.OP_JSR:
+            case Instruction.OP_JSR_W:
                 replaceJsrInstruction(clazz, offset, branchInstruction);
                 break;
 
@@ -669,7 +669,7 @@ implements   AttributeVisitor,
                 replaceConstantPushInstruction(clazz,
                                                offset,
                                                instruction,
-                                               InstructionConstants.OP_SIPUSH,
+                                               Instruction.OP_SIPUSH,
                                                value);
             }
             else
@@ -678,7 +678,7 @@ implements   AttributeVisitor,
                     new ConstantPoolEditor((ProgramClass)clazz);
 
                 Instruction replacementInstruction =
-                    new ConstantInstruction(InstructionConstants.OP_LDC,
+                    new ConstantInstruction(Instruction.OP_LDC,
                                             constantPoolEditor.addIntegerConstant(value));
 
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
@@ -695,7 +695,7 @@ implements   AttributeVisitor,
                     replaceVariablePushInstruction(clazz,
                                                    offset,
                                                    instruction,
-                                                   InstructionConstants.OP_ILOAD,
+                                                   Instruction.OP_ILOAD,
                                                    variableIndex);
                     break;
                 }
@@ -739,7 +739,7 @@ implements   AttributeVisitor,
                 replaceConstantPushInstruction(clazz,
                                        offset,
                                        instruction,
-                                       InstructionConstants.OP_LCONST_0,
+                                       Instruction.OP_LCONST_0,
                                        (int)value);
             }
             else
@@ -748,7 +748,7 @@ implements   AttributeVisitor,
                     new ConstantPoolEditor((ProgramClass)clazz);
 
                 Instruction replacementInstruction =
-                    new ConstantInstruction(InstructionConstants.OP_LDC2_W,
+                    new ConstantInstruction(Instruction.OP_LDC2_W,
                                             constantPoolEditor.addLongConstant(value));
 
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
@@ -768,7 +768,7 @@ implements   AttributeVisitor,
                     replaceVariablePushInstruction(clazz,
                                                    offset,
                                                    instruction,
-                                                   InstructionConstants.OP_LLOAD,
+                                                   Instruction.OP_LLOAD,
                                                    variableIndex);
                 }
             }
@@ -813,7 +813,7 @@ implements   AttributeVisitor,
                 replaceConstantPushInstruction(clazz,
                                                offset,
                                                instruction,
-                                               InstructionConstants.OP_FCONST_0,
+                                               Instruction.OP_FCONST_0,
                                                (int)value);
             }
             else
@@ -822,7 +822,7 @@ implements   AttributeVisitor,
                     new ConstantPoolEditor((ProgramClass)clazz);
 
                 Instruction replacementInstruction =
-                    new ConstantInstruction(InstructionConstants.OP_LDC,
+                    new ConstantInstruction(Instruction.OP_LDC,
                                             constantPoolEditor.addFloatConstant(value));
 
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
@@ -839,7 +839,7 @@ implements   AttributeVisitor,
                     replaceVariablePushInstruction(clazz,
                                                    offset,
                                                    instruction,
-                                                   InstructionConstants.OP_FLOAD,
+                                                   Instruction.OP_FLOAD,
                                                    variableIndex);
                 }
             }
@@ -883,7 +883,7 @@ implements   AttributeVisitor,
                 replaceConstantPushInstruction(clazz,
                                                offset,
                                                instruction,
-                                               InstructionConstants.OP_DCONST_0,
+                                               Instruction.OP_DCONST_0,
                                                (int)value);
             }
             else
@@ -892,7 +892,7 @@ implements   AttributeVisitor,
                     new ConstantPoolEditor((ProgramClass)clazz);
 
                 Instruction replacementInstruction =
-                    new ConstantInstruction(InstructionConstants.OP_LDC2_W,
+                    new ConstantInstruction(Instruction.OP_LDC2_W,
                                             constantPoolEditor.addDoubleConstant(value));
 
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
@@ -912,7 +912,7 @@ implements   AttributeVisitor,
                     replaceVariablePushInstruction(clazz,
                                                    offset,
                                                    instruction,
-                                                   InstructionConstants.OP_DLOAD,
+                                                   Instruction.OP_DLOAD,
                                                    variableIndex);
                 }
             }
@@ -935,7 +935,7 @@ implements   AttributeVisitor,
             replaceConstantPushInstruction(clazz,
                                            offset,
                                            instruction,
-                                           InstructionConstants.OP_ACONST_NULL,
+                                           Instruction.OP_ACONST_NULL,
                                            0);
         }
     }
@@ -1047,7 +1047,7 @@ implements   AttributeVisitor,
             {
                 // Replace the branch instruction by a simple branch instruction.
                 Instruction replacementInstruction =
-                    new BranchInstruction(InstructionConstants.OP_GOTO,
+                    new BranchInstruction(Instruction.OP_GOTO,
                                           branchOffset);
 
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
@@ -1074,7 +1074,7 @@ implements   AttributeVisitor,
         {
             int producerOffset = producerOffsets.instructionOffset(0);
 
-            if (codeAttribute.code[producerOffset] == InstructionConstants.OP_IALOAD &&
+            if (codeAttribute.code[producerOffset] == Instruction.OP_IALOAD &&
                 !codeAttributeEditor.isModified(producerOffset))
             {
                 ReferenceValue referenceValue =
@@ -1160,7 +1160,7 @@ implements   AttributeVisitor,
         {
             int producerOffset = producerOffsets.instructionOffset(0);
 
-            if (codeAttribute.code[producerOffset] == InstructionConstants.OP_IALOAD &&
+            if (codeAttribute.code[producerOffset] == Instruction.OP_IALOAD &&
                 !codeAttributeEditor.isModified(producerOffset))
             {
                 ReferenceValue referenceValue =
@@ -1214,7 +1214,7 @@ implements   AttributeVisitor,
 
         // Replace the original lookup switch with a table switch.
         TableSwitchInstruction replacementSwitchInstruction =
-            new TableSwitchInstruction(InstructionConstants.OP_TABLESWITCH,
+            new TableSwitchInstruction(Instruction.OP_TABLESWITCH,
                                        lookupSwitchInstruction.defaultOffset,
                                        0,
                                        newJumpOffsets.length - 1,
@@ -1315,7 +1315,7 @@ implements   AttributeVisitor,
             {
                 // Replace the switch instruction by a simple branch instruction.
                 Instruction replacementInstruction =
-                    new BranchInstruction(InstructionConstants.OP_GOTO,
+                    new BranchInstruction(Instruction.OP_GOTO,
                                           defaultOffset);
 
                 replaceInstruction(clazz, offset, tableSwitchInstruction,
@@ -1368,7 +1368,7 @@ implements   AttributeVisitor,
             {
                 // Replace the switch instruction by a simple branch instruction.
                 Instruction replacementInstruction =
-                    new BranchInstruction(InstructionConstants.OP_GOTO,
+                    new BranchInstruction(Instruction.OP_GOTO,
                                           defaultOffset);
 
                 replaceInstruction(clazz, offset, lookUpSwitchInstruction,
@@ -1466,12 +1466,12 @@ implements   AttributeVisitor,
         // Replace the instruction by an infinite loop.
         Instruction[] replacementInstructions = new Instruction[]
             {
-                new ConstantInstruction(InstructionConstants.OP_NEW,
+                new ConstantInstruction(Instruction.OP_NEW,
                                         constantPoolEditor.addClassConstant(exceptionClass, null)),
-                new SimpleInstruction(InstructionConstants.OP_DUP),
-                new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL,
+                new SimpleInstruction(Instruction.OP_DUP),
+                new ConstantInstruction(Instruction.OP_INVOKESPECIAL,
                                         constantPoolEditor.addMethodrefConstant(exceptionClass, "<init>", "()V", null, null)),
-                new SimpleInstruction(InstructionConstants.OP_ATHROW)
+                new SimpleInstruction(Instruction.OP_ATHROW)
             };
 
         if (DEBUG) System.out.println("  Replacing instruction by explicit exception "+exceptionClass);
@@ -1501,7 +1501,7 @@ implements   AttributeVisitor,
     {
         // Replace the instruction by an infinite loop.
         Instruction replacementInstruction =
-            new BranchInstruction(InstructionConstants.OP_GOTO, 0);
+            new BranchInstruction(Instruction.OP_GOTO, 0);
 
         if (DEBUG) System.out.println("  Replacing unreachable instruction by infinite loop "+replacementInstruction.toString(offset));
 
@@ -1566,7 +1566,7 @@ implements   AttributeVisitor,
             {
                 // Insert a single pop instruction.
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP);
+                    new SimpleInstruction(Instruction.OP_POP);
 
                 codeAttributeEditor.insertBeforeInstruction(offset,
                                                             popInstruction);
@@ -1576,7 +1576,7 @@ implements   AttributeVisitor,
             {
                 // Insert a single pop2 instruction.
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP2);
+                    new SimpleInstruction(Instruction.OP_POP2);
 
                 codeAttributeEditor.insertBeforeInstruction(offset,
                                                             popInstruction);
@@ -1589,7 +1589,7 @@ implements   AttributeVisitor,
                     new Instruction[popCount / 2 + popCount % 2];
 
                 Instruction popInstruction =
-                    new SimpleInstruction(InstructionConstants.OP_POP2);
+                    new SimpleInstruction(Instruction.OP_POP2);
 
                 for (int index = 0; index < popCount / 2; index++)
                 {
@@ -1599,7 +1599,7 @@ implements   AttributeVisitor,
                 if (popCount % 2 == 1)
                 {
                     popInstruction =
-                        new SimpleInstruction(InstructionConstants.OP_POP);
+                        new SimpleInstruction(Instruction.OP_POP);
 
                     popInstructions[popCount / 2] = popInstruction;
                 }
@@ -1626,8 +1626,8 @@ implements   AttributeVisitor,
         // Remove the array load instruction.
         codeAttributeEditor.replaceInstruction(loadOffset, new Instruction[]
             {
-                new SimpleInstruction(InstructionConstants.OP_SWAP),
-                new SimpleInstruction(InstructionConstants.OP_POP),
+                new SimpleInstruction(Instruction.OP_SWAP),
+                new SimpleInstruction(Instruction.OP_POP),
             });
 
         // Replace the switch instruction.

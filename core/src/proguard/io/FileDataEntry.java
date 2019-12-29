@@ -17,7 +17,7 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 import java.io.*;
 
@@ -74,7 +74,7 @@ public class FileDataEntry implements DataEntry
             "" :
             file.getPath()
                 .substring(directory.getPath().length() + File.separator.length())
-                .replace(File.separatorChar, ClassConstants.PACKAGE_SEPARATOR);
+                .replace(File.separatorChar, TypeConstants.PACKAGE_SEPARATOR);
     }
 
 

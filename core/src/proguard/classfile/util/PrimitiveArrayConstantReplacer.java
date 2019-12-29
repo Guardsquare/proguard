@@ -57,7 +57,7 @@ implements   ClassVisitor,
     {
         ConstantCounter counter = new ConstantCounter();
         programClass.constantPoolEntriesAccept(
-            new ConstantTagFilter(ClassConstants.CONSTANT_PrimitiveArray,
+            new ConstantTagFilter(Constant.PRIMITIVE_ARRAY,
             counter));
 
         // Replace PrimitiveArray constants if the class has any.

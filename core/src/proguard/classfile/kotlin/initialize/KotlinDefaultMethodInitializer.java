@@ -183,7 +183,7 @@ implements KotlinMetadataVisitor
             String.join("", Collections.nCopies(requiredIntParams, "I")) + "Ljava/lang/Object;)"
         );
 
-        if ((kotlinFunctionMetadata.referencedMethod.getAccessFlags() & ClassConstants.ACC_STATIC) == 0)
+        if ((kotlinFunctionMetadata.referencedMethod.getAccessFlags() & AccessConstants.STATIC) == 0)
         {
             descriptor = descriptor.replace("(", "(L" + kotlinFunctionMetadata.referencedMethodClass.getName() + ";");
         }

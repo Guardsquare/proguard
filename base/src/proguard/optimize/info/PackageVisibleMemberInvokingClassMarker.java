@@ -89,7 +89,7 @@ implements   ConstantVisitor,
     public void visitAnyClass(Clazz clazz)
     {
         if ((clazz.getAccessFlags() &
-             ClassConstants.ACC_PUBLIC) == 0)
+             AccessConstants.PUBLIC) == 0)
         {
             setInvokesPackageVisibleMembers(referencingClass);
         }
@@ -101,8 +101,8 @@ implements   ConstantVisitor,
     public void visitAnyMember(Clazz clazz, Member member)
     {
         if ((member.getAccessFlags() &
-             (ClassConstants.ACC_PUBLIC |
-              ClassConstants.ACC_PRIVATE)) == 0)
+             (AccessConstants.PUBLIC |
+              AccessConstants.PRIVATE)) == 0)
         {
             setInvokesPackageVisibleMembers(referencingClass);
         }

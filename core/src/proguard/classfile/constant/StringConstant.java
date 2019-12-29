@@ -145,7 +145,7 @@ public class StringConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_String;
+        return Constant.STRING;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

@@ -20,10 +20,11 @@ if [ ! -f "$WTK_JAR" ]; then
 fi
 
 # Make sure ProGuard has been compiled.
-if [[ ! -d ../core/$OUT ||
+if [[ ! -d ../base/$OUT ||
+      ! -d ../core/$OUT || 
       ! -f "$PROGUARD_JAR" ]]; then
-  ../core/build.sh || exit 1
+  ../base/build.sh || exit 1
 fi
 
-compile   $MAIN_CLASS "../core/$OUT:$WTK_JAR" && \
+compile   $MAIN_CLASS "../base/$OUT:../core/$OUT:$WTK_JAR" && \
 updatejar "$PROGUARD_JAR" || exit 1

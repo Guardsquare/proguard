@@ -118,8 +118,8 @@ implements   ClassVisitor,
         {
             pw.println("    " +
                        ClassUtil.externalMethodReturnType(programMethod.getDescriptor(programClass)) + " " +
-                       methodName                                                                    + JavaConstants.METHOD_ARGUMENTS_OPEN  +
-                       ClassUtil.externalMethodArguments(programMethod.getDescriptor(programClass))  + JavaConstants.METHOD_ARGUMENTS_CLOSE +
+                       methodName                                                                    + JavaTypeConstants.METHOD_ARGUMENTS_OPEN  +
+                       ClassUtil.externalMethodArguments(programMethod.getDescriptor(programClass))  + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE +
                        " -> " +
                        obfuscatedMethodName);
         }
@@ -164,8 +164,8 @@ implements   ClassVisitor,
                            lowestLineNumber                                                + ":" +
                            highestLineNumber                                               + ":" +
                            ClassUtil.externalMethodReturnType(method.getDescriptor(clazz)) + " " +
-                           methodName                                                      + JavaConstants.METHOD_ARGUMENTS_OPEN  +
-                           ClassUtil.externalMethodArguments(method.getDescriptor(clazz))  + JavaConstants.METHOD_ARGUMENTS_CLOSE +
+                           methodName                                                      + JavaTypeConstants.METHOD_ARGUMENTS_OPEN  +
+                           ClassUtil.externalMethodArguments(method.getDescriptor(clazz))  + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE +
                            " -> " +
                            obfuscatedMethodName);
             }
@@ -174,8 +174,8 @@ implements   ClassVisitor,
                 // Print out the method mapping without line numbers.
                 pw.println("    " +
                            ClassUtil.externalMethodReturnType(method.getDescriptor(clazz)) + " " +
-                           methodName                                                      + JavaConstants.METHOD_ARGUMENTS_OPEN  +
-                           ClassUtil.externalMethodArguments(method.getDescriptor(clazz))  + JavaConstants.METHOD_ARGUMENTS_CLOSE +
+                           methodName                                                      + JavaTypeConstants.METHOD_ARGUMENTS_OPEN  +
+                           ClassUtil.externalMethodArguments(method.getDescriptor(clazz))  + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE +
                            " -> " +
                            obfuscatedMethodName);
             }
@@ -284,9 +284,9 @@ implements   ClassVisitor,
                    shiftedEndLineNumber                                        + ":" +
                    ClassUtil.externalMethodReturnType(inlinedMethodDescriptor) + " " +
                    (inlinedClassName.equals(className) ? "" :
-                   ClassUtil.externalClassName(inlinedClassName)               + JavaConstants.PACKAGE_SEPARATOR)     +
-                   inlinedMethodName                                           + JavaConstants.METHOD_ARGUMENTS_OPEN  +
-                   ClassUtil.externalMethodArguments(inlinedMethodDescriptor)  + JavaConstants.METHOD_ARGUMENTS_CLOSE +
+                   ClassUtil.externalClassName(inlinedClassName)               + JavaTypeConstants.PACKAGE_SEPARATOR)     +
+                   inlinedMethodName                                           + JavaTypeConstants.METHOD_ARGUMENTS_OPEN  +
+                   ClassUtil.externalMethodArguments(inlinedMethodDescriptor)  + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE +
                    inlinedRange                                                + " -> " +
                    obfuscatedMethodName);
 
@@ -356,9 +356,9 @@ implements   ClassVisitor,
                    shiftedRange                                                  + ":" +
                    ClassUtil.externalMethodReturnType(enclosingMethodDescriptor) + " " +
                    (enclosingClassName.equals(className) ? "" :
-                   ClassUtil.externalClassName(enclosingClassName)               + JavaConstants.PACKAGE_SEPARATOR)     +
-                   enclosingMethodName                                           + JavaConstants.METHOD_ARGUMENTS_OPEN  +
-                   ClassUtil.externalMethodArguments(enclosingMethodDescriptor)  + JavaConstants.METHOD_ARGUMENTS_CLOSE + ":" +
+                   ClassUtil.externalClassName(enclosingClassName)               + JavaTypeConstants.PACKAGE_SEPARATOR)     +
+                   enclosingMethodName                                           + JavaTypeConstants.METHOD_ARGUMENTS_OPEN  +
+                   ClassUtil.externalMethodArguments(enclosingMethodDescriptor)  + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE + ":" +
                    enclosingLineNumber                                           + " -> " +
                    obfuscatedMethodName);
     }

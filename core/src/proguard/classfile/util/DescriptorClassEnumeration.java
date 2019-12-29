@@ -107,7 +107,7 @@ public class DescriptorClassEnumeration
         {
             switch (descriptor.charAt(index++))
             {
-                case ClassConstants.TYPE_GENERIC_START:
+                case TypeConstants.GENERIC_START:
                 {
                     nestingLevel++;
 
@@ -122,7 +122,7 @@ public class DescriptorClassEnumeration
 
                     break;
                 }
-                case ClassConstants.TYPE_GENERIC_END:
+                case TypeConstants.GENERIC_END:
                 {
                     nestingLevel--;
 
@@ -132,43 +132,43 @@ public class DescriptorClassEnumeration
 
                     continue loop;
                 }
-                case ClassConstants.TYPE_GENERIC_BOUND:
-                case ClassConstants.TYPE_ARRAY:
+                case TypeConstants.GENERIC_BOUND:
+                case TypeConstants.ARRAY:
                 {
                     continue loop;
                 }
-                case ClassConstants.TYPE_CLASS_START:
+                case TypeConstants.CLASS_START:
                 {
                     // We've found the start of an ordinary class name.
                     nestingLevel += 2;
                     isInnerClassName = false;
                     break loop;
                 }
-                case ClassConstants.TYPE_CLASS_END:
+                case TypeConstants.CLASS_END:
                 {
                     nestingLevel -= 2;
                     break;
                 }
-                case JavaConstants.INNER_CLASS_SEPARATOR:
+                case JavaTypeConstants.INNER_CLASS_SEPARATOR:
                 {
                     // We've found the start of an inner class name in a signature.
                     isInnerClassName = true;
                     break loop;
                 }
-                case ClassConstants.TYPE_GENERIC_VARIABLE_START:
+                case TypeConstants.GENERIC_VARIABLE_START:
                 {
                     // We've found the start of a type identifier. Skip to the end.
-                    while (descriptor.charAt(index++) != ClassConstants.TYPE_CLASS_END);
+                    while (descriptor.charAt(index++) != TypeConstants.CLASS_END);
                     break;
                 }
             }
 
             if (nestingLevel == 1 &&
-                descriptor.charAt(index) != ClassConstants.TYPE_GENERIC_END)
+                descriptor.charAt(index) != TypeConstants.GENERIC_END)
             {
                 // We're at the start of a type parameter. Skip to the start
                 // of the bounds.
-                while (descriptor.charAt(index++) != ClassConstants.TYPE_GENERIC_BOUND);
+                while (descriptor.charAt(index++) != TypeConstants.GENERIC_BOUND);
             }
         }
 
@@ -188,9 +188,9 @@ public class DescriptorClassEnumeration
         {
             switch (descriptor.charAt(index))
             {
-                case ClassConstants.TYPE_GENERIC_START:
-                case ClassConstants.TYPE_CLASS_END:
-                case JavaConstants.INNER_CLASS_SEPARATOR:
+                case TypeConstants.GENERIC_START:
+                case TypeConstants.CLASS_END:
+                case JavaTypeConstants.INNER_CLASS_SEPARATOR:
                 {
                     break loop;
                 }
@@ -203,7 +203,7 @@ public class DescriptorClassEnumeration
 
         // Recompose the inner class name if necessary.
         accumulatedClassName = isInnerClassName ?
-            accumulatedClassName + ClassConstants.INNER_CLASS_SEPARATOR + className :
+            accumulatedClassName + TypeConstants.INNER_CLASS_SEPARATOR + className :
             className;
 
         return accumulatedClassName;

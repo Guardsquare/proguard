@@ -21,6 +21,7 @@
 package proguard;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.visitor.AllConstantVisitor;
@@ -104,7 +105,7 @@ public class Initializer
 
         WarningPrinter getAnnotationNotePrinter = new WarningPrinter(out, configuration.note);
 
-        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_RuntimeVisibleAnnotations))
+        if (!keepAttributesMatcher.matches(Attribute.RUNTIME_VISIBLE_ANNOTATIONS))
         {
             programClassPool.classesAccept(
                 new AllConstantVisitor(
@@ -113,7 +114,7 @@ public class Initializer
 
         WarningPrinter getSignatureNotePrinter = new WarningPrinter(out, configuration.note);
 
-        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_Signature))
+        if (!keepAttributesMatcher.matches(Attribute.SIGNATURE))
         {
             programClassPool.classesAccept(
                 new AllConstantVisitor(
@@ -122,7 +123,7 @@ public class Initializer
 
         WarningPrinter getEnclosingClassNotePrinter = new WarningPrinter(out, configuration.note);
 
-        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_InnerClasses))
+        if (!keepAttributesMatcher.matches(Attribute.INNER_CLASSES))
         {
             programClassPool.classesAccept(
                 new AllConstantVisitor(
@@ -131,7 +132,7 @@ public class Initializer
 
         WarningPrinter getEnclosingMethodNotePrinter = new WarningPrinter(out, configuration.note);
 
-        if (!keepAttributesMatcher.matches(ClassConstants.ATTR_EnclosingMethod))
+        if (!keepAttributesMatcher.matches(Attribute.ENCLOSING_METHOD))
         {
             programClassPool.classesAccept(
                 new AllConstantVisitor(
@@ -168,7 +169,7 @@ public class Initializer
         {
             ClassVisitor kotlinMetadataInitializer =
                 new AllAttributeVisitor(
-                new AttributeNameFilter(ClassConstants.ATTR_RuntimeVisibleAnnotations,
+                new AttributeNameFilter(Attribute.RUNTIME_VISIBLE_ANNOTATIONS,
                 new AllAnnotationVisitor(
                 new AnnotationTypeFilter(KotlinConstants.TYPE_KOTLIN_METADATA,
                 new KotlinMetadataInitializer()))));

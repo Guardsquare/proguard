@@ -20,9 +20,9 @@ if [ ! -f "$ANT_JAR" ]; then
 fi
 
 # Make sure ProGuard has been compiled.
-if [[ ! -d ../core/$OUT || ! -f "$PROGUARD_JAR" ]]; then
-  ../core/build.sh || exit 1
+if [[ ! -d ../base/$OUT || ! -f "$PROGUARD_JAR" ]]; then
+  ../base/build.sh || exit 1
 fi
 
-compile   $MAIN_CLASS "../core/$OUT:$ANT_JAR" && \
+compile   $MAIN_CLASS "../base/$OUT:../core/$OUT:$ANT_JAR" && \
 updatejar "$PROGUARD_JAR" || exit 1

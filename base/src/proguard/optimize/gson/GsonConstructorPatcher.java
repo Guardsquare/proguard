@@ -55,7 +55,7 @@ implements   MemberVisitor,
                              new BasicInvocationUnit(new TypedReferenceValueFactory()),
                              true);
     private final AttributeVisitor           lazyPartialEvaluator =
-        new AttributeNameFilter(ClassConstants.ATTR_Code,
+        new AttributeNameFilter(Attribute.CODE,
                                 new SingleTimeAttributeVisitor(
                                     partialEvaluator));
     private final static int THIS_PARAMETER       = 0;
@@ -168,7 +168,7 @@ implements   MemberVisitor,
     @Override
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
     {
-        if (instruction.actualOpcode() == InstructionConstants.OP_INVOKEINTERFACE &&
+        if (instruction.actualOpcode() == Instruction.OP_INVOKEINTERFACE &&
             typeAdapterListLocal == -1)
         {
             ConstantInstruction constantInstruction = (ConstantInstruction)instruction;
@@ -197,7 +197,7 @@ implements   MemberVisitor,
                 }
             }
         }
-        else if (instruction.actualOpcode() == InstructionConstants.OP_INVOKESPECIAL &&
+        else if (instruction.actualOpcode() == Instruction.OP_INVOKESPECIAL &&
                  insertionOffset == -1)
         {
             ConstantInstruction constantInstruction = (ConstantInstruction)instruction;
@@ -226,7 +226,7 @@ implements   MemberVisitor,
         @Override
         public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
         {
-            if (instruction.canonicalOpcode() == InstructionConstants.OP_ALOAD)
+            if (instruction.canonicalOpcode() == Instruction.OP_ALOAD)
             {
                 VariableInstruction variableInstruction = (VariableInstruction)instruction;
                 typeAdapterListLocal = variableInstruction.variableIndex;

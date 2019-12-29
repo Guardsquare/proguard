@@ -22,6 +22,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
@@ -68,9 +69,9 @@ implements   AttributeVisitor,
     private static final short SUBROUTINE_RETURNING  = 1 << 10;
 
 
-    private short[] instructionMarks      = new short[ClassConstants.TYPICAL_CODE_LENGTH + 1];
-    private int[]   subroutineStarts      = new int[ClassConstants.TYPICAL_CODE_LENGTH];
-    private int[]   subroutineEnds        = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private short[] instructionMarks      = new short[ClassEstimates.TYPICAL_CODE_LENGTH + 1];
+    private int[]   subroutineStarts      = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private int[]   subroutineEnds        = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
     private boolean containsSubroutines;
 
     private boolean repeat;
@@ -435,13 +436,13 @@ implements   AttributeVisitor,
         checkSubroutine(offset);
 
         byte opcode = simpleInstruction.opcode;
-        if (opcode == InstructionConstants.OP_IRETURN ||
-            opcode == InstructionConstants.OP_LRETURN ||
-            opcode == InstructionConstants.OP_FRETURN ||
-            opcode == InstructionConstants.OP_DRETURN ||
-            opcode == InstructionConstants.OP_ARETURN ||
-            opcode == InstructionConstants.OP_RETURN  ||
-            opcode == InstructionConstants.OP_ATHROW)
+        if (opcode == Instruction.OP_IRETURN ||
+            opcode == Instruction.OP_LRETURN ||
+            opcode == Instruction.OP_FRETURN ||
+            opcode == Instruction.OP_DRETURN ||
+            opcode == Instruction.OP_ARETURN ||
+            opcode == Instruction.OP_RETURN  ||
+            opcode == Instruction.OP_ATHROW)
         {
             // Mark the branch origin.
             markBranchOrigin(offset);
@@ -461,12 +462,12 @@ implements   AttributeVisitor,
         checkSubroutine(offset);
 
         byte opcode = constantInstruction.opcode;
-        if (opcode == InstructionConstants.OP_NEW)
+        if (opcode == Instruction.OP_NEW)
         {
             // Mark the creation.
             instructionMarks[offset] |= CREATION;
         }
-        else if (opcode == InstructionConstants.OP_INVOKESPECIAL)
+        else if (opcode == Instruction.OP_INVOKESPECIAL)
         {
             // Is it calling an instance initializer?
             isInitializer = false;
@@ -488,7 +489,7 @@ implements   AttributeVisitor,
         // Check if this is an instruction of a subroutine.
         checkSubroutine(offset);
 
-        if (variableInstruction.opcode == InstructionConstants.OP_RET)
+        if (variableInstruction.opcode == Instruction.OP_RET)
         {
             // Mark the method.
             containsSubroutines = true;
@@ -520,8 +521,8 @@ implements   AttributeVisitor,
         markBranchTarget(offset, branchOffset);
 
         byte opcode = branchInstruction.opcode;
-        if (opcode == InstructionConstants.OP_JSR ||
-            opcode == InstructionConstants.OP_JSR_W)
+        if (opcode == Instruction.OP_JSR ||
+            opcode == Instruction.OP_JSR_W)
         {
             // Mark the method.
             containsSubroutines = true;
@@ -538,8 +539,8 @@ implements   AttributeVisitor,
             markBranchSubroutineStart(offset, branchOffset, currentSubroutineStart);
         }
 
-        if (opcode == InstructionConstants.OP_GOTO ||
-            opcode == InstructionConstants.OP_GOTO_W)
+        if (opcode == Instruction.OP_GOTO ||
+            opcode == Instruction.OP_GOTO_W)
         {
             // Mark the next instruction.
             markAfterBranchOrigin(offset + branchInstruction.length(offset));

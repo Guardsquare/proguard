@@ -79,83 +79,83 @@ implements   InstructionVisitor
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_NOP:
+            case Instruction.OP_NOP:
                 break;
 
-            case InstructionConstants.OP_ACONST_NULL:
+            case Instruction.OP_ACONST_NULL:
                 stack.push(valueFactory.createReferenceValueNull());
                 break;
 
-            case InstructionConstants.OP_ICONST_M1:
-            case InstructionConstants.OP_ICONST_0:
-            case InstructionConstants.OP_ICONST_1:
-            case InstructionConstants.OP_ICONST_2:
-            case InstructionConstants.OP_ICONST_3:
-            case InstructionConstants.OP_ICONST_4:
-            case InstructionConstants.OP_ICONST_5:
-            case InstructionConstants.OP_BIPUSH:
-            case InstructionConstants.OP_SIPUSH:
+            case Instruction.OP_ICONST_M1:
+            case Instruction.OP_ICONST_0:
+            case Instruction.OP_ICONST_1:
+            case Instruction.OP_ICONST_2:
+            case Instruction.OP_ICONST_3:
+            case Instruction.OP_ICONST_4:
+            case Instruction.OP_ICONST_5:
+            case Instruction.OP_BIPUSH:
+            case Instruction.OP_SIPUSH:
                 stack.push(valueFactory.createIntegerValue(simpleInstruction.constant));
                 break;
 
-            case InstructionConstants.OP_LCONST_0:
-            case InstructionConstants.OP_LCONST_1:
+            case Instruction.OP_LCONST_0:
+            case Instruction.OP_LCONST_1:
                 stack.push(valueFactory.createLongValue(simpleInstruction.constant));
                 break;
 
-            case InstructionConstants.OP_FCONST_0:
-            case InstructionConstants.OP_FCONST_1:
-            case InstructionConstants.OP_FCONST_2:
+            case Instruction.OP_FCONST_0:
+            case Instruction.OP_FCONST_1:
+            case Instruction.OP_FCONST_2:
                 stack.push(valueFactory.createFloatValue((float)simpleInstruction.constant));
                 break;
 
-            case InstructionConstants.OP_DCONST_0:
-            case InstructionConstants.OP_DCONST_1:
+            case Instruction.OP_DCONST_0:
+            case Instruction.OP_DCONST_1:
                 stack.push(valueFactory.createDoubleValue((double)simpleInstruction.constant));
                 break;
 
-            case InstructionConstants.OP_IALOAD:
-            case InstructionConstants.OP_BALOAD:
-            case InstructionConstants.OP_CALOAD:
-            case InstructionConstants.OP_SALOAD:
+            case Instruction.OP_IALOAD:
+            case Instruction.OP_BALOAD:
+            case Instruction.OP_CALOAD:
+            case Instruction.OP_SALOAD:
             {
                 IntegerValue   arrayIndex     = stack.ipop();
                 ReferenceValue arrayReference = stack.apop();
                 stack.push(arrayReference.integerArrayLoad(arrayIndex, valueFactory));
                 break;
             }
-            case InstructionConstants.OP_LALOAD:
+            case Instruction.OP_LALOAD:
             {
                 IntegerValue   arrayIndex     = stack.ipop();
                 ReferenceValue arrayReference = stack.apop();
                 stack.push(arrayReference.longArrayLoad(arrayIndex, valueFactory));
                 break;
             }
-            case InstructionConstants.OP_FALOAD:
+            case Instruction.OP_FALOAD:
             {
                 IntegerValue   arrayIndex     = stack.ipop();
                 ReferenceValue arrayReference = stack.apop();
                 stack.push(arrayReference.floatArrayLoad(arrayIndex, valueFactory));
                 break;
             }
-            case InstructionConstants.OP_DALOAD:
+            case Instruction.OP_DALOAD:
             {
                 IntegerValue   arrayIndex     = stack.ipop();
                 ReferenceValue arrayReference = stack.apop();
                 stack.push(arrayReference.doubleArrayLoad(arrayIndex, valueFactory));
                 break;
             }
-            case InstructionConstants.OP_AALOAD:
+            case Instruction.OP_AALOAD:
             {
                 IntegerValue   arrayIndex     = stack.ipop();
                 ReferenceValue arrayReference = stack.apop();
                 stack.push(arrayReference.referenceArrayLoad(arrayIndex, valueFactory));
                 break;
             }
-            case InstructionConstants.OP_IASTORE:
-            case InstructionConstants.OP_BASTORE:
-            case InstructionConstants.OP_CASTORE:
-            case InstructionConstants.OP_SASTORE:
+            case Instruction.OP_IASTORE:
+            case Instruction.OP_BASTORE:
+            case Instruction.OP_CASTORE:
+            case Instruction.OP_SASTORE:
             {
                 Value          value          = stack.ipop();
                 IntegerValue   arrayIndex     = stack.ipop();
@@ -163,7 +163,7 @@ implements   InstructionVisitor
                 arrayReference.arrayStore(arrayIndex, value);
                 break;
             }
-            case InstructionConstants.OP_LASTORE:
+            case Instruction.OP_LASTORE:
             {
                 Value          value          = stack.lpop();
                 IntegerValue   arrayIndex     = stack.ipop();
@@ -171,7 +171,7 @@ implements   InstructionVisitor
                 arrayReference.arrayStore(arrayIndex, value);
                 break;
             }
-            case InstructionConstants.OP_FASTORE:
+            case Instruction.OP_FASTORE:
             {
                 Value          value          = stack.fpop();
                 IntegerValue   arrayIndex     = stack.ipop();
@@ -179,7 +179,7 @@ implements   InstructionVisitor
                 arrayReference.arrayStore(arrayIndex, value);
                 break;
             }
-            case InstructionConstants.OP_DASTORE:
+            case Instruction.OP_DASTORE:
             {
                 Value          value          = stack.dpop();
                 IntegerValue   arrayIndex     = stack.ipop();
@@ -187,7 +187,7 @@ implements   InstructionVisitor
                 arrayReference.arrayStore(arrayIndex, value);
                 break;
             }
-            case InstructionConstants.OP_AASTORE:
+            case Instruction.OP_AASTORE:
             {
                 Value          value          = stack.apop();
                 IntegerValue   arrayIndex     = stack.ipop();
@@ -195,91 +195,91 @@ implements   InstructionVisitor
                 arrayReference.arrayStore(arrayIndex, value);
                 break;
             }
-            case InstructionConstants.OP_POP:
+            case Instruction.OP_POP:
                 stack.pop1();
                 break;
 
-            case InstructionConstants.OP_POP2:
+            case Instruction.OP_POP2:
                 stack.pop2();
                 break;
 
-            case InstructionConstants.OP_DUP:
+            case Instruction.OP_DUP:
                 stack.dup();
                 break;
 
-            case InstructionConstants.OP_DUP_X1:
+            case Instruction.OP_DUP_X1:
                 stack.dup_x1();
                 break;
 
-            case InstructionConstants.OP_DUP_X2:
+            case Instruction.OP_DUP_X2:
                 stack.dup_x2();
                 break;
 
-            case InstructionConstants.OP_DUP2:
+            case Instruction.OP_DUP2:
                 stack.dup2();
                 break;
 
-            case InstructionConstants.OP_DUP2_X1:
+            case Instruction.OP_DUP2_X1:
                 stack.dup2_x1();
                 break;
 
-            case InstructionConstants.OP_DUP2_X2:
+            case Instruction.OP_DUP2_X2:
                 stack.dup2_x2();
                 break;
 
-            case InstructionConstants.OP_SWAP:
+            case Instruction.OP_SWAP:
                 stack.swap();
                 break;
 
-            case InstructionConstants.OP_IADD:
+            case Instruction.OP_IADD:
                 stack.push(stack.ipop().add(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LADD:
+            case Instruction.OP_LADD:
                 stack.push(stack.lpop().add(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_FADD:
+            case Instruction.OP_FADD:
                 stack.push(stack.fpop().add(stack.fpop()));
                 break;
 
-            case InstructionConstants.OP_DADD:
+            case Instruction.OP_DADD:
                 stack.push(stack.dpop().add(stack.dpop()));
                 break;
 
-            case InstructionConstants.OP_ISUB:
+            case Instruction.OP_ISUB:
                 stack.push(stack.ipop().subtractFrom(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LSUB:
+            case Instruction.OP_LSUB:
                 stack.push(stack.lpop().subtractFrom(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_FSUB:
+            case Instruction.OP_FSUB:
                 stack.push(stack.fpop().subtractFrom(stack.fpop()));
                 break;
 
-            case InstructionConstants.OP_DSUB:
+            case Instruction.OP_DSUB:
                 stack.push(stack.dpop().subtractFrom(stack.dpop()));
                 break;
 
-            case InstructionConstants.OP_IMUL:
+            case Instruction.OP_IMUL:
                 stack.push(stack.ipop().multiply(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LMUL:
+            case Instruction.OP_LMUL:
                 stack.push(stack.lpop().multiply(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_FMUL:
+            case Instruction.OP_FMUL:
                 stack.push(stack.fpop().multiply(stack.fpop()));
                 break;
 
-            case InstructionConstants.OP_DMUL:
+            case Instruction.OP_DMUL:
                 stack.push(stack.dpop().multiply(stack.dpop()));
                 break;
 
-            case InstructionConstants.OP_IDIV:
+            case Instruction.OP_IDIV:
                 try
                 {
                     stack.push(stack.ipop().divideOf(stack.ipop()));
@@ -294,7 +294,7 @@ implements   InstructionVisitor
                 }
                 break;
 
-            case InstructionConstants.OP_LDIV:
+            case Instruction.OP_LDIV:
                 try
                 {
                     stack.push(stack.lpop().divideOf(stack.lpop()));
@@ -309,15 +309,15 @@ implements   InstructionVisitor
                 }
                 break;
 
-            case InstructionConstants.OP_FDIV:
+            case Instruction.OP_FDIV:
                 stack.push(stack.fpop().divideOf(stack.fpop()));
                 break;
 
-            case InstructionConstants.OP_DDIV:
+            case Instruction.OP_DDIV:
                 stack.push(stack.dpop().divideOf(stack.dpop()));
                 break;
 
-            case InstructionConstants.OP_IREM:
+            case Instruction.OP_IREM:
                 try
                 {
                     stack.push(stack.ipop().remainderOf(stack.ipop()));
@@ -332,7 +332,7 @@ implements   InstructionVisitor
                 }
                 break;
 
-            case InstructionConstants.OP_LREM:
+            case Instruction.OP_LREM:
                 try
                 {
                     stack.push(stack.lpop().remainderOf(stack.lpop()));
@@ -347,139 +347,139 @@ implements   InstructionVisitor
                 }
                 break;
 
-            case InstructionConstants.OP_FREM:
+            case Instruction.OP_FREM:
                 stack.push(stack.fpop().remainderOf(stack.fpop()));
                 break;
 
-            case InstructionConstants.OP_DREM:
+            case Instruction.OP_DREM:
                 stack.push(stack.dpop().remainderOf(stack.dpop()));
                 break;
 
-            case InstructionConstants.OP_INEG:
+            case Instruction.OP_INEG:
                 stack.push(stack.ipop().negate());
                 break;
 
-            case InstructionConstants.OP_LNEG:
+            case Instruction.OP_LNEG:
                 stack.push(stack.lpop().negate());
                 break;
 
-            case InstructionConstants.OP_FNEG:
+            case Instruction.OP_FNEG:
                 stack.push(stack.fpop().negate());
                 break;
 
-            case InstructionConstants.OP_DNEG:
+            case Instruction.OP_DNEG:
                 stack.push(stack.dpop().negate());
                 break;
 
-            case InstructionConstants.OP_ISHL:
+            case Instruction.OP_ISHL:
                 stack.push(stack.ipop().shiftLeftOf(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LSHL:
+            case Instruction.OP_LSHL:
                 stack.push(stack.ipop().shiftLeftOf(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_ISHR:
+            case Instruction.OP_ISHR:
                 stack.push(stack.ipop().shiftRightOf(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LSHR:
+            case Instruction.OP_LSHR:
                 stack.push(stack.ipop().shiftRightOf(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_IUSHR:
+            case Instruction.OP_IUSHR:
                 stack.push(stack.ipop().unsignedShiftRightOf(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LUSHR:
+            case Instruction.OP_LUSHR:
                 stack.push(stack.ipop().unsignedShiftRightOf(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_IAND:
+            case Instruction.OP_IAND:
                 stack.push(stack.ipop().and(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LAND:
+            case Instruction.OP_LAND:
                 stack.push(stack.lpop().and(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_IOR:
+            case Instruction.OP_IOR:
                 stack.push(stack.ipop().or(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LOR:
+            case Instruction.OP_LOR:
                 stack.push(stack.lpop().or(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_IXOR:
+            case Instruction.OP_IXOR:
                 stack.push(stack.ipop().xor(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_LXOR:
+            case Instruction.OP_LXOR:
                 stack.push(stack.lpop().xor(stack.lpop()));
                 break;
 
-            case InstructionConstants.OP_I2L:
+            case Instruction.OP_I2L:
                 stack.push(stack.ipop().convertToLong());
                 break;
 
-            case InstructionConstants.OP_I2F:
+            case Instruction.OP_I2F:
                 stack.push(stack.ipop().convertToFloat());
                 break;
 
-            case InstructionConstants.OP_I2D:
+            case Instruction.OP_I2D:
                 stack.push(stack.ipop().convertToDouble());
                 break;
 
-            case InstructionConstants.OP_L2I:
+            case Instruction.OP_L2I:
                 stack.push(stack.lpop().convertToInteger());
                 break;
 
-            case InstructionConstants.OP_L2F:
+            case Instruction.OP_L2F:
                 stack.push(stack.lpop().convertToFloat());
                 break;
 
-            case InstructionConstants.OP_L2D:
+            case Instruction.OP_L2D:
                 stack.push(stack.lpop().convertToDouble());
                 break;
 
-            case InstructionConstants.OP_F2I:
+            case Instruction.OP_F2I:
                 stack.push(stack.fpop().convertToInteger());
                 break;
 
-            case InstructionConstants.OP_F2L:
+            case Instruction.OP_F2L:
                 stack.push(stack.fpop().convertToLong());
                 break;
 
-            case InstructionConstants.OP_F2D:
+            case Instruction.OP_F2D:
                 stack.push(stack.fpop().convertToDouble());
                 break;
 
-            case InstructionConstants.OP_D2I:
+            case Instruction.OP_D2I:
                 stack.push(stack.dpop().convertToInteger());
                 break;
 
-            case InstructionConstants.OP_D2L:
+            case Instruction.OP_D2L:
                 stack.push(stack.dpop().convertToLong());
                 break;
 
-            case InstructionConstants.OP_D2F:
+            case Instruction.OP_D2F:
                 stack.push(stack.dpop().convertToFloat());
                 break;
 
-            case InstructionConstants.OP_I2B:
+            case Instruction.OP_I2B:
                 stack.push(stack.ipop().convertToByte());
                 break;
 
-            case InstructionConstants.OP_I2C:
+            case Instruction.OP_I2C:
                 stack.push(stack.ipop().convertToCharacter());
                 break;
 
-            case InstructionConstants.OP_I2S:
+            case Instruction.OP_I2S:
                 stack.push(stack.ipop().convertToShort());
                 break;
 
-            case InstructionConstants.OP_LCMP:
+            case Instruction.OP_LCMP:
 //                stack.push(stack.lpop().compareReverse(stack.lpop()));
 
                 LongValue longValue1 = stack.lpop();
@@ -487,68 +487,68 @@ implements   InstructionVisitor
                 stack.push(longValue2.compare(longValue1));
                 break;
 
-            case InstructionConstants.OP_FCMPL:
+            case Instruction.OP_FCMPL:
                 FloatValue floatValue1 = stack.fpop();
                 FloatValue floatValue2 = stack.fpop();
                 stack.push(floatValue2.compare(floatValue1));
                 break;
 
-            case InstructionConstants.OP_FCMPG:
+            case Instruction.OP_FCMPG:
                 stack.push(stack.fpop().compareReverse(stack.fpop()));
                 break;
 
-            case InstructionConstants.OP_DCMPL:
+            case Instruction.OP_DCMPL:
                 DoubleValue doubleValue1 = stack.dpop();
                 DoubleValue doubleValue2 = stack.dpop();
                 stack.push(doubleValue2.compare(doubleValue1));
                 break;
 
-            case InstructionConstants.OP_DCMPG:
+            case Instruction.OP_DCMPG:
                 stack.push(stack.dpop().compareReverse(stack.dpop()));
                 break;
 
-            case InstructionConstants.OP_IRETURN:
+            case Instruction.OP_IRETURN:
                 invocationUnit.exitMethod(clazz, method, stack.ipop());
                 branchUnit.returnFromMethod();
                 break;
 
-            case InstructionConstants.OP_LRETURN:
+            case Instruction.OP_LRETURN:
                 invocationUnit.exitMethod(clazz, method, stack.lpop());
                 branchUnit.returnFromMethod();
                 break;
 
-            case InstructionConstants.OP_FRETURN:
+            case Instruction.OP_FRETURN:
                 invocationUnit.exitMethod(clazz, method, stack.fpop());
                 branchUnit.returnFromMethod();
                 break;
 
-            case InstructionConstants.OP_DRETURN:
+            case Instruction.OP_DRETURN:
                 invocationUnit.exitMethod(clazz, method, stack.dpop());
                 branchUnit.returnFromMethod();
                 break;
 
-            case InstructionConstants.OP_ARETURN:
+            case Instruction.OP_ARETURN:
                 invocationUnit.exitMethod(clazz, method, stack.apop());
                 branchUnit.returnFromMethod();
                 break;
 
-            case InstructionConstants.OP_RETURN:
+            case Instruction.OP_RETURN:
                 branchUnit.returnFromMethod();
                 break;
 
-            case InstructionConstants.OP_NEWARRAY:
+            case Instruction.OP_NEWARRAY:
                 IntegerValue arrayLength = stack.ipop();
                 stack.push(valueFactory.createArrayReferenceValue(String.valueOf(InstructionUtil.internalTypeFromArrayType((byte)simpleInstruction.constant)),
                                                                   null,
                                                                   arrayLength));
                 break;
 
-            case InstructionConstants.OP_ARRAYLENGTH:
+            case Instruction.OP_ARRAYLENGTH:
                 ReferenceValue referenceValue = stack.apop();
                 stack.push(referenceValue.arrayLength(valueFactory));
                 break;
 
-            case InstructionConstants.OP_ATHROW:
+            case Instruction.OP_ATHROW:
                 ReferenceValue exceptionReferenceValue = stack.apop();
                 stack.clear();
                 // Don't push the thrown exception here; we'll consider the
@@ -559,8 +559,8 @@ implements   InstructionVisitor
                 branchUnit.throwException();
                 break;
 
-            case InstructionConstants.OP_MONITORENTER:
-            case InstructionConstants.OP_MONITOREXIT:
+            case Instruction.OP_MONITORENTER:
+            case Instruction.OP_MONITOREXIT:
                 stack.apop();
                 break;
 
@@ -576,29 +576,29 @@ implements   InstructionVisitor
 
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_LDC:
-            case InstructionConstants.OP_LDC_W:
-            case InstructionConstants.OP_LDC2_W:
+            case Instruction.OP_LDC:
+            case Instruction.OP_LDC_W:
+            case Instruction.OP_LDC2_W:
                 stack.push(classConstantValueFactory.constantValue(clazz, constantIndex));
                 break;
 
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_GETFIELD:
-            case InstructionConstants.OP_PUTFIELD:
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_GETFIELD:
+            case Instruction.OP_PUTFIELD:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEDYNAMIC:
                 invocationUnit.invokeMember(clazz, method, codeAttribute, offset, constantInstruction, stack);
                 break;
 
-            case InstructionConstants.OP_NEW:
+            case Instruction.OP_NEW:
                 stack.push(constantValueFactory.constantValue(clazz, constantIndex).referenceValue());
                 break;
 
-            case InstructionConstants.OP_ANEWARRAY:
+            case Instruction.OP_ANEWARRAY:
             {
                 ReferenceValue arrayType = constantValueFactory.constantValue(clazz, constantIndex).referenceValue();
 
@@ -608,7 +608,7 @@ implements   InstructionVisitor
                 break;
             }
 
-            case InstructionConstants.OP_CHECKCAST:
+            case Instruction.OP_CHECKCAST:
             {
                 // TODO: Check cast.
                 ReferenceValue type = constantValueFactory.constantValue(clazz, constantIndex).referenceValue();
@@ -620,7 +620,7 @@ implements   InstructionVisitor
                 break;
             }
 
-            case InstructionConstants.OP_INSTANCEOF:
+            case Instruction.OP_INSTANCEOF:
             {
                 ReferenceValue value = stack.apop();
                 ReferenceValue type  = constantValueFactory.constantValue(clazz, constantIndex).referenceValue();
@@ -635,7 +635,7 @@ implements   InstructionVisitor
                 break;
             }
 
-            case InstructionConstants.OP_MULTIANEWARRAY:
+            case Instruction.OP_MULTIANEWARRAY:
             {
                 int dimensionCount = constantInstruction.constant;
                 for (int dimension = 0; dimension < dimensionCount; dimension++)
@@ -660,96 +660,96 @@ implements   InstructionVisitor
 
         switch (variableInstruction.opcode)
         {
-            case InstructionConstants.OP_ILOAD:
-            case InstructionConstants.OP_ILOAD_0:
-            case InstructionConstants.OP_ILOAD_1:
-            case InstructionConstants.OP_ILOAD_2:
-            case InstructionConstants.OP_ILOAD_3:
+            case Instruction.OP_ILOAD:
+            case Instruction.OP_ILOAD_0:
+            case Instruction.OP_ILOAD_1:
+            case Instruction.OP_ILOAD_2:
+            case Instruction.OP_ILOAD_3:
                 stack.push(variables.iload(variableIndex));
                 break;
 
-            case InstructionConstants.OP_LLOAD:
-            case InstructionConstants.OP_LLOAD_0:
-            case InstructionConstants.OP_LLOAD_1:
-            case InstructionConstants.OP_LLOAD_2:
-            case InstructionConstants.OP_LLOAD_3:
+            case Instruction.OP_LLOAD:
+            case Instruction.OP_LLOAD_0:
+            case Instruction.OP_LLOAD_1:
+            case Instruction.OP_LLOAD_2:
+            case Instruction.OP_LLOAD_3:
                 stack.push(variables.lload(variableIndex));
                 break;
 
-            case InstructionConstants.OP_FLOAD:
-            case InstructionConstants.OP_FLOAD_0:
-            case InstructionConstants.OP_FLOAD_1:
-            case InstructionConstants.OP_FLOAD_2:
-            case InstructionConstants.OP_FLOAD_3:
+            case Instruction.OP_FLOAD:
+            case Instruction.OP_FLOAD_0:
+            case Instruction.OP_FLOAD_1:
+            case Instruction.OP_FLOAD_2:
+            case Instruction.OP_FLOAD_3:
                 stack.push(variables.fload(variableIndex));
                 break;
 
-            case InstructionConstants.OP_DLOAD:
-            case InstructionConstants.OP_DLOAD_0:
-            case InstructionConstants.OP_DLOAD_1:
-            case InstructionConstants.OP_DLOAD_2:
-            case InstructionConstants.OP_DLOAD_3:
+            case Instruction.OP_DLOAD:
+            case Instruction.OP_DLOAD_0:
+            case Instruction.OP_DLOAD_1:
+            case Instruction.OP_DLOAD_2:
+            case Instruction.OP_DLOAD_3:
                 stack.push(variables.dload(variableIndex));
                 break;
 
-            case InstructionConstants.OP_ALOAD:
-            case InstructionConstants.OP_ALOAD_0:
-            case InstructionConstants.OP_ALOAD_1:
-            case InstructionConstants.OP_ALOAD_2:
-            case InstructionConstants.OP_ALOAD_3:
+            case Instruction.OP_ALOAD:
+            case Instruction.OP_ALOAD_0:
+            case Instruction.OP_ALOAD_1:
+            case Instruction.OP_ALOAD_2:
+            case Instruction.OP_ALOAD_3:
                 stack.push(variables.aload(variableIndex));
                 break;
 
-            case InstructionConstants.OP_ISTORE:
-            case InstructionConstants.OP_ISTORE_0:
-            case InstructionConstants.OP_ISTORE_1:
-            case InstructionConstants.OP_ISTORE_2:
-            case InstructionConstants.OP_ISTORE_3:
+            case Instruction.OP_ISTORE:
+            case Instruction.OP_ISTORE_0:
+            case Instruction.OP_ISTORE_1:
+            case Instruction.OP_ISTORE_2:
+            case Instruction.OP_ISTORE_3:
                 variables.store(variableIndex, stack.ipop());
                 break;
 
-            case InstructionConstants.OP_LSTORE:
-            case InstructionConstants.OP_LSTORE_0:
-            case InstructionConstants.OP_LSTORE_1:
-            case InstructionConstants.OP_LSTORE_2:
-            case InstructionConstants.OP_LSTORE_3:
+            case Instruction.OP_LSTORE:
+            case Instruction.OP_LSTORE_0:
+            case Instruction.OP_LSTORE_1:
+            case Instruction.OP_LSTORE_2:
+            case Instruction.OP_LSTORE_3:
                 variables.store(variableIndex, stack.lpop());
                 break;
 
-            case InstructionConstants.OP_FSTORE:
-            case InstructionConstants.OP_FSTORE_0:
-            case InstructionConstants.OP_FSTORE_1:
-            case InstructionConstants.OP_FSTORE_2:
-            case InstructionConstants.OP_FSTORE_3:
+            case Instruction.OP_FSTORE:
+            case Instruction.OP_FSTORE_0:
+            case Instruction.OP_FSTORE_1:
+            case Instruction.OP_FSTORE_2:
+            case Instruction.OP_FSTORE_3:
                 variables.store(variableIndex, stack.fpop());
                 break;
 
-            case InstructionConstants.OP_DSTORE:
-            case InstructionConstants.OP_DSTORE_0:
-            case InstructionConstants.OP_DSTORE_1:
-            case InstructionConstants.OP_DSTORE_2:
-            case InstructionConstants.OP_DSTORE_3:
+            case Instruction.OP_DSTORE:
+            case Instruction.OP_DSTORE_0:
+            case Instruction.OP_DSTORE_1:
+            case Instruction.OP_DSTORE_2:
+            case Instruction.OP_DSTORE_3:
                 variables.store(variableIndex, stack.dpop());
                 break;
 
-            case InstructionConstants.OP_ASTORE:
-            case InstructionConstants.OP_ASTORE_0:
-            case InstructionConstants.OP_ASTORE_1:
-            case InstructionConstants.OP_ASTORE_2:
-            case InstructionConstants.OP_ASTORE_3:
+            case Instruction.OP_ASTORE:
+            case Instruction.OP_ASTORE_0:
+            case Instruction.OP_ASTORE_1:
+            case Instruction.OP_ASTORE_2:
+            case Instruction.OP_ASTORE_3:
                 // The operand on the stack can be a reference or a return
                 // address, so we'll relax the pop operation.
                 //variables.store(variableIndex, stack.apop());
                 variables.store(variableIndex, stack.pop());
                 break;
 
-            case InstructionConstants.OP_IINC:
+            case Instruction.OP_IINC:
                 variables.store(variableIndex,
                                 variables.iload(variableIndex).add(
                                 valueFactory.createIntegerValue(variableInstruction.constant)));
                 break;
 
-            case InstructionConstants.OP_RET:
+            case Instruction.OP_RET:
                 // The return address should be in the last offset of the
                 // given instruction offset variable (even though there may
                 // be other offsets).
@@ -779,100 +779,100 @@ implements   InstructionVisitor
 
         switch (branchInstruction.opcode)
         {
-            case InstructionConstants.OP_IFEQ:
+            case Instruction.OP_IFEQ:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().equal(valueFactory.createIntegerValue(0)));
                 break;
 
-            case InstructionConstants.OP_IFNE:
+            case Instruction.OP_IFNE:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().notEqual(valueFactory.createIntegerValue(0)));
                 break;
 
-            case InstructionConstants.OP_IFLT:
+            case Instruction.OP_IFLT:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().lessThan(valueFactory.createIntegerValue(0)));
                 break;
 
-            case InstructionConstants.OP_IFGE:
+            case Instruction.OP_IFGE:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().greaterThanOrEqual(valueFactory.createIntegerValue(0)));
                 break;
 
-            case InstructionConstants.OP_IFGT:
+            case Instruction.OP_IFGT:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().greaterThan(valueFactory.createIntegerValue(0)));
                 break;
 
-            case InstructionConstants.OP_IFLE:
+            case Instruction.OP_IFLE:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().lessThanOrEqual(valueFactory.createIntegerValue(0)));
                 break;
 
 
-            case InstructionConstants.OP_IFICMPEQ:
+            case Instruction.OP_IFICMPEQ:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().equal(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_IFICMPNE:
+            case Instruction.OP_IFICMPNE:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().notEqual(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_IFICMPLT:
+            case Instruction.OP_IFICMPLT:
                 // Note that the stack entries are popped in reverse order.
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().greaterThan(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_IFICMPGE:
+            case Instruction.OP_IFICMPGE:
                 // Note that the stack entries are popped in reverse order.
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().lessThanOrEqual(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_IFICMPGT:
+            case Instruction.OP_IFICMPGT:
                 // Note that the stack entries are popped in reverse order.
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().lessThan(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_IFICMPLE:
+            case Instruction.OP_IFICMPLE:
                 // Note that the stack entries are popped in reverse order.
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.ipop().greaterThanOrEqual(stack.ipop()));
                 break;
 
-            case InstructionConstants.OP_IFACMPEQ:
+            case Instruction.OP_IFACMPEQ:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.apop().equal(stack.apop()));
                 break;
 
-            case InstructionConstants.OP_IFACMPNE:
+            case Instruction.OP_IFACMPNE:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.apop().notEqual(stack.apop()));
                 break;
 
-            case InstructionConstants.OP_GOTO:
-            case InstructionConstants.OP_GOTO_W:
+            case Instruction.OP_GOTO:
+            case Instruction.OP_GOTO_W:
                 branchUnit.branch(clazz, codeAttribute, offset, branchTarget);
                 break;
 
 
-            case InstructionConstants.OP_JSR:
-            case InstructionConstants.OP_JSR_W:
+            case Instruction.OP_JSR:
+            case Instruction.OP_JSR_W:
                 stack.push(new InstructionOffsetValue(offset +
                                                       branchInstruction.length(offset)));
                 branchUnit.branch(clazz, codeAttribute, offset, branchTarget);
                 break;
 
-            case InstructionConstants.OP_IFNULL:
+            case Instruction.OP_IFNULL:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.apop().isNull());
                 break;
 
-            case InstructionConstants.OP_IFNONNULL:
+            case Instruction.OP_IFNONNULL:
                 branchUnit.branchConditionally(clazz, codeAttribute, offset, branchTarget,
                     stack.apop().isNotNull());
                 break;

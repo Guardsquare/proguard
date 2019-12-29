@@ -93,16 +93,16 @@ implements   ClassVisitor,
             // Replace new Enum("name", constant)
             // by      constant + 1.
             {
-                new ConstantInstruction(InstructionConstants.OP_NEW, CLASS_ENUM),
-                new SimpleInstruction(InstructionConstants.OP_DUP),
-                new ConstantInstruction(InstructionConstants.OP_LDC, STRING_ENUM_CONSTANT_NAME),
-                new SimpleInstruction(InstructionConstants.OP_ICONST_0, ENUM_CONSTANT_ORDINAL),
-                new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
+                new ConstantInstruction(Instruction.OP_NEW, CLASS_ENUM),
+                new SimpleInstruction(Instruction.OP_DUP),
+                new ConstantInstruction(Instruction.OP_LDC, STRING_ENUM_CONSTANT_NAME),
+                new SimpleInstruction(Instruction.OP_ICONST_0, ENUM_CONSTANT_ORDINAL),
+                new ConstantInstruction(Instruction.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
             },
             {
-                new SimpleInstruction(InstructionConstants.OP_SIPUSH, ENUM_CONSTANT_ORDINAL),
-                new SimpleInstruction(InstructionConstants.OP_ICONST_1),
-                new SimpleInstruction(InstructionConstants.OP_IADD),
+                new SimpleInstruction(Instruction.OP_SIPUSH, ENUM_CONSTANT_ORDINAL),
+                new SimpleInstruction(Instruction.OP_ICONST_1),
+                new SimpleInstruction(Instruction.OP_IADD),
             }
         },
         {
@@ -110,16 +110,16 @@ implements   ClassVisitor,
             // Replace <init>(..., constant)
             // by      <init>(..., 0); pop; constant + 1.
             {
-                new SimpleInstruction(InstructionConstants.OP_ICONST_0, ENUM_CONSTANT_ORDINAL),
-                new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
+                new SimpleInstruction(Instruction.OP_ICONST_0, ENUM_CONSTANT_ORDINAL),
+                new ConstantInstruction(Instruction.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
             },
             {
-                new SimpleInstruction(InstructionConstants.OP_ICONST_0),
-                new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
-                new SimpleInstruction(InstructionConstants.OP_POP),
-                new SimpleInstruction(InstructionConstants.OP_SIPUSH, ENUM_CONSTANT_ORDINAL),
-                new SimpleInstruction(InstructionConstants.OP_ICONST_1),
-                new SimpleInstruction(InstructionConstants.OP_IADD),
+                new SimpleInstruction(Instruction.OP_ICONST_0),
+                new ConstantInstruction(Instruction.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
+                new SimpleInstruction(Instruction.OP_POP),
+                new SimpleInstruction(Instruction.OP_SIPUSH, ENUM_CONSTANT_ORDINAL),
+                new SimpleInstruction(Instruction.OP_ICONST_1),
+                new SimpleInstruction(Instruction.OP_IADD),
             }
         },
     };
@@ -146,7 +146,7 @@ implements   ClassVisitor,
         }
 
         // Unmark the class as an enum.
-        programClass.u2accessFlags &= ~ClassConstants.ACC_ENUM;
+        programClass.u2accessFlags &= ~AccessConstants.ENUM;
 
         // Remove the valueOf method, if present.
         Method valueOfMethod =

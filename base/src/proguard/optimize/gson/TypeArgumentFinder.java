@@ -89,7 +89,7 @@ implements InstructionVisitor,
                                          int                 offset,
                                          VariableInstruction variableInstruction)
     {
-        if (variableInstruction.canonicalOpcode() == InstructionConstants.OP_ALOAD)
+        if (variableInstruction.canonicalOpcode() == Instruction.OP_ALOAD)
         {
             // Find the operation that stored the loaded Type.
             LastStoreFinder lastStoreFinder = new LastStoreFinder(variableInstruction.variableIndex);
@@ -183,7 +183,7 @@ implements InstructionVisitor,
         public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction)
         {
             if(variableInstruction.variableIndex == variableIndex &&
-               variableInstruction.canonicalOpcode() == InstructionConstants.OP_ASTORE){
+               variableInstruction.canonicalOpcode() == Instruction.OP_ASTORE){
                 lastStoreOffset = offset;
                 lastStore = variableInstruction;
             }

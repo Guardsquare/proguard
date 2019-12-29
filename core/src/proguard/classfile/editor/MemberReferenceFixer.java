@@ -282,7 +282,7 @@ implements   ClassVisitor,
             Clazz referencedClass = classConstant.referencedClass;
             if (referencedClass != null)
             {
-                isInterfaceMethod = (referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0;
+                isInterfaceMethod = (referencedClass.getAccessFlags() & AccessConstants.INTERFACE) != 0;
             }
         }
     }

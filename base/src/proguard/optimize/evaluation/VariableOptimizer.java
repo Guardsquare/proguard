@@ -56,7 +56,7 @@ implements   AttributeVisitor,
     private final VariableRemapper variableRemapper = new VariableRemapper();
     private       VariableCleaner  variableCleaner  = new VariableCleaner();
 
-    private int[] variableMap = new int[ClassConstants.TYPICAL_VARIABLES_SIZE];
+    private int[] variableMap = new int[ClassEstimates.TYPICAL_VARIABLES_SIZE];
 
 
     /**
@@ -111,7 +111,7 @@ implements   AttributeVisitor,
         codeAttribute.attributesAccept(clazz, method, this);
 
         int startIndex =
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ||
+            (method.getAccessFlags() & AccessConstants.STATIC) != 0 ||
             reuseThis ? 0 : 1;
 
         int parameterSize =

@@ -48,7 +48,7 @@ implements KotlinTypeVisitor
                 // Package is that of the file facade (which is a declaration container).
                 newName =
                     ClassUtil.internalPackageName(kotlinTypeMetadata.referencedTypeAlias.referencedDeclarationContainer.ownerClassName) +
-                    ClassConstants.PACKAGE_SEPARATOR +
+                    TypeConstants.PACKAGE_SEPARATOR +
                     kotlinTypeMetadata.referencedTypeAlias.name;
             }
 

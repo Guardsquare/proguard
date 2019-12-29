@@ -67,7 +67,7 @@ public class ClassNameAdapterFunction implements StringFunction
                 String className = fileName.substring(0, suffixIndex);
 
                 // Did we get to the package separator?
-                if (c == ClassConstants.PACKAGE_SEPARATOR)
+                if (c == TypeConstants.PACKAGE_SEPARATOR)
                 {
                     break;
                 }

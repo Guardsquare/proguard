@@ -17,7 +17,7 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 import java.io.*;
 
@@ -108,7 +108,7 @@ public class DirectoryWriter implements DataEntryWriter
     {
         // Use the specified file, or construct a new file.
         return new File(baseDirectory,
-                        dataEntry.getName().replace(ClassConstants.PACKAGE_SEPARATOR,
+                        dataEntry.getName().replace(TypeConstants.PACKAGE_SEPARATOR,
                                                     File.separatorChar));
     }
 }

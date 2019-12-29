@@ -54,7 +54,7 @@ implements   ClassVisitor,
     // A visitor info flag to indicate the UTF-8 constant pool entry is being used.
     private static final Object USED = new Object();
 
-    private       int[]                constantIndexMap     = new int[ClassConstants.TYPICAL_CONSTANT_POOL_SIZE];
+    private       int[]                constantIndexMap     = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
     private final ConstantPoolRemapper constantPoolRemapper = new ConstantPoolRemapper();
 
 
@@ -382,7 +382,7 @@ implements   ClassVisitor,
         }
 
         // Only the string constant element value refers to a UTF-8 entry.
-        if (constantElementValue.u1tag == ClassConstants.ELEMENT_VALUE_STRING_CONSTANT)
+        if (constantElementValue.u1tag == ElementValue.TAG_STRING_CONSTANT)
         {
             markCpUtf8Entry(clazz, constantElementValue.u2constantValueIndex);
         }
@@ -492,7 +492,7 @@ implements   ClassVisitor,
             // second half of a long entry.
             if (constant != null)
             {
-                isUsed = constant.getTag() != ClassConstants.CONSTANT_Utf8 ||
+                isUsed = constant.getTag() != Constant.UTF8 ||
                          isUsed(constant);
             }
 

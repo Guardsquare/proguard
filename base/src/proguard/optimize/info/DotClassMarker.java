@@ -52,8 +52,8 @@ implements   InstructionVisitor,
 
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_LDC ||
-            constantInstruction.opcode == InstructionConstants.OP_LDC_W)
+        if (constantInstruction.opcode == Instruction.OP_LDC ||
+            constantInstruction.opcode == Instruction.OP_LDC_W)
         {
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
         }

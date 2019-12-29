@@ -23,6 +23,7 @@ package proguard.optimize.info;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
@@ -40,7 +41,7 @@ extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor
 {
-    private boolean[] variableUsed = new boolean[ClassConstants.TYPICAL_VARIABLES_SIZE];
+    private boolean[] variableUsed = new boolean[ClassEstimates.TYPICAL_VARIABLES_SIZE];
 
 
     /**

@@ -55,14 +55,14 @@ public class PrimitiveArrayConstant extends Constant
      */
     public char getPrimitiveType()
     {
-        return values instanceof boolean[] ? ClassConstants.TYPE_BOOLEAN :
-               values instanceof byte[]    ? ClassConstants.TYPE_BYTE    :
-               values instanceof char[]    ? ClassConstants.TYPE_CHAR    :
-               values instanceof short[]   ? ClassConstants.TYPE_SHORT   :
-               values instanceof int[]     ? ClassConstants.TYPE_INT     :
-               values instanceof float[]   ? ClassConstants.TYPE_FLOAT   :
-               values instanceof long[]    ? ClassConstants.TYPE_LONG    :
-               values instanceof double[]  ? ClassConstants.TYPE_DOUBLE  :
+        return values instanceof boolean[] ? TypeConstants.BOOLEAN :
+               values instanceof byte[]    ? TypeConstants.BYTE    :
+               values instanceof char[]    ? TypeConstants.CHAR    :
+               values instanceof short[]   ? TypeConstants.SHORT   :
+               values instanceof int[]     ? TypeConstants.INT     :
+               values instanceof float[]   ? TypeConstants.FLOAT   :
+               values instanceof long[]    ? TypeConstants.LONG    :
+               values instanceof double[]  ? TypeConstants.DOUBLE  :
                                              0;
     }
 
@@ -214,7 +214,7 @@ public class PrimitiveArrayConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_PrimitiveArray;
+        return Constant.PRIMITIVE_ARRAY;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

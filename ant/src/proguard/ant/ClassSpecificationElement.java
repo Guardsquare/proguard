@@ -219,12 +219,12 @@ public class ClassSpecificationElement extends DataType
                         token;
 
                     int accessFlag =
-                        strippedToken.equals(JavaConstants.ACC_PUBLIC)     ? ClassConstants.ACC_PUBLIC     :
-                        strippedToken.equals(JavaConstants.ACC_FINAL)      ? ClassConstants.ACC_FINAL      :
-                        strippedToken.equals(JavaConstants.ACC_ABSTRACT)   ? ClassConstants.ACC_ABSTRACT   :
-                        strippedToken.equals(JavaConstants.ACC_SYNTHETIC)  ? ClassConstants.ACC_SYNTHETIC  :
-                        strippedToken.equals(JavaConstants.ACC_ANNOTATION) ? ClassConstants.ACC_ANNOTATION :
-                                                                             0;
+                        strippedToken.equals(JavaAccessConstants.PUBLIC)     ? AccessConstants.PUBLIC     :
+                        strippedToken.equals(JavaAccessConstants.FINAL)      ? AccessConstants.FINAL      :
+                        strippedToken.equals(JavaAccessConstants.ABSTRACT)   ? AccessConstants.ABSTRACT   :
+                        strippedToken.equals(JavaAccessConstants.SYNTHETIC)  ? AccessConstants.SYNTHETIC  :
+                        strippedToken.equals(JavaAccessConstants.ANNOTATION) ? AccessConstants.ANNOTATION :
+                                                                               0;
 
                     if (accessFlag == 0)
                     {
@@ -239,12 +239,12 @@ public class ClassSpecificationElement extends DataType
         if (type != null && (type.startsWith("!") ^ set))
         {
             int accessFlag =
-                type.equals("class")                           ? 0                            :
-                type.equals(      JavaConstants.ACC_INTERFACE) ||
-                type.equals("!" + JavaConstants.ACC_INTERFACE) ? ClassConstants.ACC_INTERFACE :
-                type.equals(      JavaConstants.ACC_ENUM)      ||
-                type.equals("!" + JavaConstants.ACC_ENUM)      ? ClassConstants.ACC_ENUM      :
-                                                                 -1;
+                type.equals("class")                             ? 0                         :
+                type.equals(      JavaAccessConstants.INTERFACE) ||
+                type.equals("!" + JavaAccessConstants.INTERFACE) ? AccessConstants.INTERFACE :
+                type.equals(      JavaAccessConstants.ENUM)      ||
+                type.equals("!" + JavaAccessConstants.ENUM)      ? AccessConstants.ENUM      :
+                                                                   -1;
 
             if (accessFlag == -1)
             {

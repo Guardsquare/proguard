@@ -50,8 +50,8 @@ implements   ClassVisitor
     {
         // Is this an abstract class or an interface?
         if ((programClass.getAccessFlags() &
-             (ClassConstants.ACC_INTERFACE |
-              ClassConstants.ACC_ABSTRACT)) != 0)
+             (AccessConstants.INTERFACE |
+              AccessConstants.ABSTRACT)) != 0)
         {
             // Travel down the hierarchy.
             Clazz[] subClasses = programClass.subClasses;
@@ -75,8 +75,8 @@ implements   ClassVisitor
     {
         // Is this an abstract class or interface?
         if ((libraryClass.getAccessFlags() &
-             (ClassConstants.ACC_INTERFACE |
-              ClassConstants.ACC_ABSTRACT)) != 0)
+             (AccessConstants.INTERFACE |
+              AccessConstants.ABSTRACT)) != 0)
         {
             // Travel down the hierarchy.
             Clazz[] subClasses = libraryClass.subClasses;

@@ -31,6 +31,13 @@ import proguard.util.SimpleVisitorAccepter;
  */
 public abstract class ElementValue extends SimpleVisitorAccepter
 {
+    public static final char TAG_STRING_CONSTANT = 's';
+    public static final char TAG_ENUM_CONSTANT   = 'e';
+    public static final char TAG_CLASS           = 'c';
+    public static final char TAG_ANNOTATION      = '@';
+    public static final char TAG_ARRAY           = '[';
+
+
     /**
      * An extra field for the optional element name. It is used in element value
      * pairs of annotations. Otherwise, it is 0.

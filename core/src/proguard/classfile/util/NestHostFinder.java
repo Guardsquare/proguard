@@ -79,7 +79,7 @@ implements   ClassVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         // The nest host attribute only exists since Java 10.
-        if (programClass.u4version >= ClassConstants.CLASS_VERSION_10)
+        if (programClass.u4version >= VersionConstants.CLASS_VERSION_10)
         {
             programClass.attributesAccept(this);
         }

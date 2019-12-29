@@ -24,8 +24,8 @@ import proguard.classfile.ClassConstants;
 import proguard.io.*;
 import proguard.util.*;
 
+import java.io.PrintStream;
 import java.util.*;
-
 
 /**
  * This class can create DataEntryReader instances based on class path entries.
@@ -38,6 +38,8 @@ public class DataEntryReaderFactory
 {
     private static final String VERSIONS_PATTERN = "META-INF/versions";
     private static final String VERSIONS_EXCLUDE = "!META-INF/versions/**";
+
+    private static final String CLASS_FILE_PREFIX = "classes/";
 
 
     private final boolean android;
@@ -54,6 +56,7 @@ public class DataEntryReaderFactory
     {
         this.android = android;
     }
+
 
     /**
      * Creates a DataEntryReader that can read the given class path entry.
@@ -228,7 +231,7 @@ public class DataEntryReaderFactory
         {
             reader = new FilteredDataEntryReader(
                 new DataEntryNameFilter(new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION)),
-                new PrefixStrippingDataEntryReader(ClassConstants.JMOD_CLASS_FILE_PREFIX, reader),
+                new PrefixStrippingDataEntryReader(CLASS_FILE_PREFIX, reader),
                 reader);
         }
 

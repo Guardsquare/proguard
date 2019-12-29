@@ -166,7 +166,7 @@ public class MappingKeeper implements MappingProcessor
                         warningPrinter.print(ClassUtil.internalClassName(className),
                                              "Warning: " +
                                              className +
-                                             ": method '" + methodReturnType + " " + methodName + JavaConstants.METHOD_ARGUMENTS_OPEN + methodArguments + JavaConstants.METHOD_ARGUMENTS_CLOSE +
+                                             ": method '" + methodReturnType + " " + methodName + JavaTypeConstants.METHOD_ARGUMENTS_OPEN + methodArguments + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE +
                                              "' is not being kept as '" + currentNewName +
                                              "', but remapped to '" + newMethodName + "'");
                     }

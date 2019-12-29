@@ -45,21 +45,21 @@ implements   ValueFactory
     {
         switch (type.charAt(0))
         {
-            case ClassConstants.TYPE_VOID:    return null;
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:
-            case ClassConstants.TYPE_CHAR:
-            case ClassConstants.TYPE_SHORT:
-            case ClassConstants.TYPE_INT:     return createIntegerValue();
-            case ClassConstants.TYPE_LONG:    return createLongValue();
-            case ClassConstants.TYPE_FLOAT:   return createFloatValue();
-            case ClassConstants.TYPE_DOUBLE:  return createDoubleValue();
-            default:                          return createReferenceValue(ClassUtil.isInternalArrayType(type) ?
-                                                                            type :
-                                                                            ClassUtil.internalClassNameFromClassType(type),
-                                                                          referencedClass,
-                                                                          mayBeExtension,
-                                                                          mayBeNull);
+            case TypeConstants.VOID:    return null;
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:     return createIntegerValue();
+            case TypeConstants.LONG:    return createLongValue();
+            case TypeConstants.FLOAT:   return createFloatValue();
+            case TypeConstants.DOUBLE:  return createDoubleValue();
+            default:                    return createReferenceValue(ClassUtil.isInternalArrayType(type) ?
+                                                                        type :
+                                                                        ClassUtil.internalClassNameFromClassType(type),
+                                                                        referencedClass,
+                                                                        mayBeExtension,
+                                                                        mayBeNull);
         }
     }
 

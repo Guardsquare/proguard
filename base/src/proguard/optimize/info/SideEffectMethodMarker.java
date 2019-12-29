@@ -62,8 +62,8 @@ implements   MemberVisitor,
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         if ((programMethod.getAccessFlags() &
-                 (ClassConstants.ACC_NATIVE |
-                  ClassConstants.ACC_SYNCHRONIZED)) != 0)
+                 (AccessConstants.NATIVE |
+                  AccessConstants.SYNCHRONIZED)) != 0)
         {
             markSideEffects(programClass, programMethod);
         }

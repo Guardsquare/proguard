@@ -36,7 +36,7 @@ extends      IdentifiedValueFactory
     {
         return type == null ?
             TypedReferenceValueFactory.REFERENCE_VALUE_NULL :
-            new DetailedArrayReferenceValue(ClassConstants.TYPE_ARRAY + type,
+            new DetailedArrayReferenceValue(TypeConstants.ARRAY + type,
                                             referencedClass,
                                             false,
                                             arrayLength,

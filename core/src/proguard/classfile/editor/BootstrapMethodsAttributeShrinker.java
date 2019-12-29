@@ -52,7 +52,7 @@ implements   ClassVisitor,
     // A visitor info flag to indicate the bootstrap method is being used.
     private static final Object USED = new Object();
 
-    private       int[]                   bootstrapMethodIndexMap = new int[ClassConstants.TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE];
+    private       int[]                   bootstrapMethodIndexMap = new int[ClassEstimates.TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE];
     private final BootstrapMethodRemapper bootstrapMethodRemapper = new BootstrapMethodRemapper(true);
 
     private int     referencedBootstrapMethodIndex = -1;
@@ -70,7 +70,7 @@ implements   ClassVisitor,
     {
         // Clear the fields from any previous runs.
         modified                = false;
-        bootstrapMethodIndexMap = new int[ClassConstants.TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE];
+        bootstrapMethodIndexMap = new int[ClassEstimates.TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE];
 
         // Remove any previous visitor info.
         programClass.accept(new ClassCleaner());
@@ -136,7 +136,7 @@ implements   ClassVisitor,
                 {
                     // Remove the entire attribute.
                     AttributesEditor attributesEditor = new AttributesEditor((ProgramClass)clazz, false);
-                    attributesEditor.deleteAttribute(ClassConstants.ATTR_BootstrapMethods);
+                    attributesEditor.deleteAttribute(Attribute.BOOTSTRAP_METHODS);
 
                     // Only bootstrap methods require the java/lang/MethodHandles$Lookup
                     // inner class, so we can remove it.
@@ -162,7 +162,7 @@ implements   ClassVisitor,
     @Override
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_INVOKEDYNAMIC)
+        if (constantInstruction.opcode == Instruction.OP_INVOKEDYNAMIC)
         {
             ProgramClass programClass = (ProgramClass)clazz;
 
@@ -291,7 +291,7 @@ implements   ClassVisitor,
             // Remove the attribute if it is empty.
             if (innerClassesAttribute.u2classesCount == 0)
             {
-                attributesEditor.deleteAttribute(ClassConstants.ATTR_InnerClasses);
+                attributesEditor.deleteAttribute(Attribute.INNER_CLASSES);
             }
         }
 

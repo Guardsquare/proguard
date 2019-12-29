@@ -64,8 +64,8 @@ implements   InstructionVisitor,
         byte opcode = constantInstruction.opcode;
 
         // Could this instruction be a .class construct?
-        if (opcode == InstructionConstants.OP_LDC ||
-            opcode == InstructionConstants.OP_LDC_W)
+        if (opcode == Instruction.OP_LDC ||
+            opcode == Instruction.OP_LDC_W)
         {
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex,
                                           this);

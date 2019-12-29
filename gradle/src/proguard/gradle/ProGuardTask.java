@@ -1766,12 +1766,12 @@ public class ProGuardTask extends DefaultTask
                         token;
 
                     int accessFlag =
-                        strippedToken.equals(JavaConstants.ACC_PUBLIC)     ? ClassConstants.ACC_PUBLIC      :
-                        strippedToken.equals(JavaConstants.ACC_FINAL)      ? ClassConstants.ACC_FINAL       :
-                        strippedToken.equals(JavaConstants.ACC_ABSTRACT)   ? ClassConstants.ACC_ABSTRACT    :
-                        strippedToken.equals(JavaConstants.ACC_SYNTHETIC)  ? ClassConstants.ACC_SYNTHETIC   :
-                        strippedToken.equals(JavaConstants.ACC_ANNOTATION) ? ClassConstants.ACC_ANNOTATION  :
-                                                                             0;
+                        strippedToken.equals(JavaAccessConstants.PUBLIC)     ? AccessConstants.PUBLIC      :
+                        strippedToken.equals(JavaAccessConstants.FINAL)      ? AccessConstants.FINAL       :
+                        strippedToken.equals(JavaAccessConstants.ABSTRACT)   ? AccessConstants.ABSTRACT    :
+                        strippedToken.equals(JavaAccessConstants.SYNTHETIC)  ? AccessConstants.SYNTHETIC   :
+                        strippedToken.equals(JavaAccessConstants.ANNOTATION) ? AccessConstants.ANNOTATION  :
+                                                                               0;
 
                     if (accessFlag == 0)
                     {
@@ -1786,12 +1786,12 @@ public class ProGuardTask extends DefaultTask
         if (type != null && (type.startsWith("!") ^ set))
         {
             int accessFlag =
-                type.equals("class")                           ? 0                            :
-                type.equals(      JavaConstants.ACC_INTERFACE) ||
-                type.equals("!" + JavaConstants.ACC_INTERFACE) ? ClassConstants.ACC_INTERFACE :
-                type.equals(      JavaConstants.ACC_ENUM)      ||
-                type.equals("!" + JavaConstants.ACC_ENUM)      ? ClassConstants.ACC_ENUM      :
-                                                                 -1;
+                type.equals("class")                             ? 0                         :
+                type.equals(      JavaAccessConstants.INTERFACE) ||
+                type.equals("!" + JavaAccessConstants.INTERFACE) ? AccessConstants.INTERFACE :
+                type.equals(      JavaAccessConstants.ENUM)      ||
+                type.equals("!" + JavaAccessConstants.ENUM)      ? AccessConstants.ENUM      :
+                                                                   -1;
             if (accessFlag == -1)
             {
                 throw new ParseException("Incorrect class type ["+type+"]");
@@ -1838,7 +1838,7 @@ public class ProGuardTask extends DefaultTask
 
                 if (parameters != null)
                 {
-                    type = JavaConstants.TYPE_VOID;
+                    type = JavaTypeConstants.VOID;
                 }
 
                 if (values != null)
@@ -1922,21 +1922,21 @@ public class ProGuardTask extends DefaultTask
                         token;
 
                     int accessFlag =
-                        strippedToken.equals(JavaConstants.ACC_PUBLIC)       ? ClassConstants.ACC_PUBLIC       :
-                        strippedToken.equals(JavaConstants.ACC_PRIVATE)      ? ClassConstants.ACC_PRIVATE      :
-                        strippedToken.equals(JavaConstants.ACC_PROTECTED)    ? ClassConstants.ACC_PROTECTED    :
-                        strippedToken.equals(JavaConstants.ACC_STATIC)       ? ClassConstants.ACC_STATIC       :
-                        strippedToken.equals(JavaConstants.ACC_FINAL)        ? ClassConstants.ACC_FINAL        :
-                        strippedToken.equals(JavaConstants.ACC_SYNCHRONIZED) ? ClassConstants.ACC_SYNCHRONIZED :
-                        strippedToken.equals(JavaConstants.ACC_VOLATILE)     ? ClassConstants.ACC_VOLATILE     :
-                        strippedToken.equals(JavaConstants.ACC_TRANSIENT)    ? ClassConstants.ACC_TRANSIENT    :
-                        strippedToken.equals(JavaConstants.ACC_BRIDGE)       ? ClassConstants.ACC_BRIDGE       :
-                        strippedToken.equals(JavaConstants.ACC_VARARGS)      ? ClassConstants.ACC_VARARGS      :
-                        strippedToken.equals(JavaConstants.ACC_NATIVE)       ? ClassConstants.ACC_NATIVE       :
-                        strippedToken.equals(JavaConstants.ACC_ABSTRACT)     ? ClassConstants.ACC_ABSTRACT     :
-                        strippedToken.equals(JavaConstants.ACC_STRICT)       ? ClassConstants.ACC_STRICT       :
-                        strippedToken.equals(JavaConstants.ACC_SYNTHETIC)    ? ClassConstants.ACC_SYNTHETIC    :
-                                                                               0;
+                        strippedToken.equals(JavaAccessConstants.PUBLIC)       ? AccessConstants.PUBLIC       :
+                        strippedToken.equals(JavaAccessConstants.PRIVATE)      ? AccessConstants.PRIVATE      :
+                        strippedToken.equals(JavaAccessConstants.PROTECTED)    ? AccessConstants.PROTECTED    :
+                        strippedToken.equals(JavaAccessConstants.STATIC)       ? AccessConstants.STATIC       :
+                        strippedToken.equals(JavaAccessConstants.FINAL)        ? AccessConstants.FINAL        :
+                        strippedToken.equals(JavaAccessConstants.SYNCHRONIZED) ? AccessConstants.SYNCHRONIZED :
+                        strippedToken.equals(JavaAccessConstants.VOLATILE)     ? AccessConstants.VOLATILE     :
+                        strippedToken.equals(JavaAccessConstants.TRANSIENT)    ? AccessConstants.TRANSIENT    :
+                        strippedToken.equals(JavaAccessConstants.BRIDGE)       ? AccessConstants.BRIDGE       :
+                        strippedToken.equals(JavaAccessConstants.VARARGS)      ? AccessConstants.VARARGS      :
+                        strippedToken.equals(JavaAccessConstants.NATIVE)       ? AccessConstants.NATIVE       :
+                        strippedToken.equals(JavaAccessConstants.ABSTRACT)     ? AccessConstants.ABSTRACT     :
+                        strippedToken.equals(JavaAccessConstants.STRICT)       ? AccessConstants.STRICT       :
+                        strippedToken.equals(JavaAccessConstants.SYNTHETIC)    ? AccessConstants.SYNTHETIC    :
+                                                                                 0;
 
                     if (accessFlag == 0)
                     {
@@ -2005,26 +2005,26 @@ public class ProGuardTask extends DefaultTask
         {
             switch (internalType.charAt(0))
             {
-                case ClassConstants.TYPE_BOOLEAN:
+                case TypeConstants.BOOLEAN:
                 {
                     return parseBoolean(string);
                 }
-                case ClassConstants.TYPE_BYTE:
-                case ClassConstants.TYPE_CHAR:
-                case ClassConstants.TYPE_SHORT:
-                case ClassConstants.TYPE_INT:
+                case TypeConstants.BYTE:
+                case TypeConstants.CHAR:
+                case TypeConstants.SHORT:
+                case TypeConstants.INT:
                 {
                     return Integer.decode(string);
                 }
-                //case ClassConstants.TYPE_LONG:
+                //case TypeConstants.LONG:
                 //{
                 //    return Long.decode(string);
                 //}
-                //case ClassConstants.TYPE_FLOAT:
+                //case TypeConstants.FLOAT:
                 //{
                 //    return Float.valueOf(string);
                 //}
-                //case ClassConstants.TYPE_DOUBLE:
+                //case TypeConstants.DOUBLE:
                 //{
                 //    return Double.valueOf(string);
                 //}

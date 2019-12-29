@@ -690,11 +690,11 @@ implements   Clazz
     public boolean mayHaveImplementations(Method method)
     {
         return
-            (u2accessFlags & ClassConstants.ACC_FINAL) == 0 &&
+            (u2accessFlags & AccessConstants.FINAL) == 0 &&
             (method == null ||
-             ((method.getAccessFlags() & (ClassConstants.ACC_PRIVATE |
-                                          ClassConstants.ACC_STATIC  |
-                                          ClassConstants.ACC_FINAL)) == 0 &&
+             ((method.getAccessFlags() & (AccessConstants.PRIVATE |
+                                          AccessConstants.STATIC  |
+                                          AccessConstants.FINAL)) == 0 &&
               !method.getName(this).equals(ClassConstants.METHOD_NAME_INIT)));
     }
 

@@ -17,7 +17,7 @@
  */
 package proguard.io;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 import java.io.*;
 import java.util.zip.*;
@@ -52,12 +52,12 @@ public class ZipDataEntry implements DataEntry
     {
         // Get the right separators.
         String name = zipEntry.getName()
-            .replace(File.separatorChar, ClassConstants.PACKAGE_SEPARATOR);
+            .replace(File.separatorChar, TypeConstants.PACKAGE_SEPARATOR);
 
         // Chop the trailing directory slash, if any.
         int length = name.length();
         return length > 0 &&
-               name.charAt(length-1) == ClassConstants.PACKAGE_SEPARATOR ?
+               name.charAt(length-1) == TypeConstants.PACKAGE_SEPARATOR ?
                    name.substring(0, length -1) :
                    name;
     }

@@ -17,7 +17,7 @@
  */
 package proguard.evaluation.value;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.TypeConstants;
 
 /**
  * This value factory creates initial values for fields and array elements,
@@ -49,24 +49,24 @@ public class InitialValueFactory
     {
         switch (type.charAt(0))
         {
-            case ClassConstants.TYPE_BOOLEAN:
-            case ClassConstants.TYPE_BYTE:
-            case ClassConstants.TYPE_CHAR:
-            case ClassConstants.TYPE_SHORT:
-            case ClassConstants.TYPE_INT:
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:
                 return valueFactory.createIntegerValue(0);
 
-            case ClassConstants.TYPE_LONG:
+            case TypeConstants.LONG:
                 return valueFactory.createLongValue(0L);
 
-            case ClassConstants.TYPE_FLOAT:
+            case TypeConstants.FLOAT:
                 return valueFactory.createFloatValue(0.0f);
 
-            case ClassConstants.TYPE_DOUBLE:
+            case TypeConstants.DOUBLE:
                 return valueFactory.createDoubleValue(0.0);
 
-            case ClassConstants.TYPE_CLASS_START:
-            case ClassConstants.TYPE_ARRAY:
+            case TypeConstants.CLASS_START:
+            case TypeConstants.ARRAY:
                 return valueFactory.createReferenceValueNull();
 
             default:

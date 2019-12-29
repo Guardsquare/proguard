@@ -121,8 +121,8 @@ implements   MemberVisitor
             char c = descriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.TYPE_LONG:
-                case ClassConstants.TYPE_DOUBLE:
+                case TypeConstants.LONG:
+                case TypeConstants.DOUBLE:
                 {
                     // Long and double primitive types.
                     parameterSize++;
@@ -133,27 +133,27 @@ implements   MemberVisitor
                     // All other primitive types.
                     break;
                 }
-                case ClassConstants.TYPE_CLASS_START:
+                case TypeConstants.CLASS_START:
                 {
                     // Class types.
                     // Skip the class name.
-                    index = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
+                    index = descriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
                     break;
                 }
-                case ClassConstants.TYPE_ARRAY:
+                case TypeConstants.ARRAY:
                 {
                     // Array types.
                     // Skip all array characters.
-                    while ((c = descriptor.charAt(index++)) == ClassConstants.TYPE_ARRAY) {}
+                    while ((c = descriptor.charAt(index++)) == TypeConstants.ARRAY) {}
 
-                    if (c == ClassConstants.TYPE_CLASS_START)
+                    if (c == TypeConstants.CLASS_START)
                     {
                         // Skip the class type.
-                        index = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, index) + 1;
+                        index = descriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
                     }
                     break;
                 }
-                case ClassConstants.METHOD_ARGUMENTS_CLOSE:
+                case TypeConstants.METHOD_ARGUMENTS_CLOSE:
                 {
                     break loop;
                 }
@@ -170,7 +170,7 @@ implements   MemberVisitor
 
         // Visit the 'this' parameter if applicable.
         if (includeThisParameter &&
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0)
+            (method.getAccessFlags() & AccessConstants.STATIC) == 0)
         {
             parameterVisitor.visitParameter(clazz,
                                             method,
@@ -193,8 +193,8 @@ implements   MemberVisitor
             char c = descriptor.charAt(index);
             switch (c)
             {
-                case ClassConstants.TYPE_LONG:
-                case ClassConstants.TYPE_DOUBLE:
+                case TypeConstants.LONG:
+                case TypeConstants.DOUBLE:
                 {
                     // Long and double primitive types.
                     thisParameterSize = 2;
@@ -205,31 +205,31 @@ implements   MemberVisitor
                     // All other primitive types.
                     break;
                 }
-                case ClassConstants.TYPE_CLASS_START:
+                case TypeConstants.CLASS_START:
                 {
                     // Class types.
                     // Skip the class name.
-                    newIndex = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, newIndex) + 1;
+                    newIndex = descriptor.indexOf(TypeConstants.CLASS_END, newIndex) + 1;
                     referencedClass = referencedClasses == null ? null :
                         referencedClasses[referenceClassIndex++];
                     break;
                 }
-                case ClassConstants.TYPE_ARRAY:
+                case TypeConstants.ARRAY:
                 {
                     // Array types.
                     // Skip all array characters.
-                    while ((c = descriptor.charAt(newIndex++)) == ClassConstants.TYPE_ARRAY) {}
+                    while ((c = descriptor.charAt(newIndex++)) == TypeConstants.ARRAY) {}
 
-                    if (c == ClassConstants.TYPE_CLASS_START)
+                    if (c == TypeConstants.CLASS_START)
                     {
                         // Skip the class type.
-                        newIndex = descriptor.indexOf(ClassConstants.TYPE_CLASS_END, newIndex) + 1;
+                        newIndex = descriptor.indexOf(TypeConstants.CLASS_END, newIndex) + 1;
                         referencedClass = referencedClasses == null ? null :
                             referencedClasses[referenceClassIndex++];
                     }
                     break;
                 }
-                case ClassConstants.METHOD_ARGUMENTS_CLOSE:
+                case TypeConstants.METHOD_ARGUMENTS_CLOSE:
                 {
                     // End of the method parameters.
                     return;

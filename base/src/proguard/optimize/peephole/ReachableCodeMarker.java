@@ -23,6 +23,7 @@ package proguard.optimize.peephole;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
@@ -41,7 +42,7 @@ implements   AttributeVisitor,
              InstructionVisitor,
              ExceptionInfoVisitor
 {
-    private boolean[] isReachable = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
+    private boolean[] isReachable = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
 
     private boolean next;
     private boolean evaluateExceptions;
@@ -115,13 +116,13 @@ implements   AttributeVisitor,
     public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction)
     {
         byte opcode = simpleInstruction.opcode;
-        if (opcode == InstructionConstants.OP_IRETURN ||
-            opcode == InstructionConstants.OP_LRETURN ||
-            opcode == InstructionConstants.OP_FRETURN ||
-            opcode == InstructionConstants.OP_DRETURN ||
-            opcode == InstructionConstants.OP_ARETURN ||
-            opcode == InstructionConstants.OP_RETURN  ||
-            opcode == InstructionConstants.OP_ATHROW)
+        if (opcode == Instruction.OP_IRETURN ||
+            opcode == Instruction.OP_LRETURN ||
+            opcode == Instruction.OP_FRETURN ||
+            opcode == Instruction.OP_DRETURN ||
+            opcode == Instruction.OP_ARETURN ||
+            opcode == Instruction.OP_RETURN  ||
+            opcode == Instruction.OP_ATHROW)
         {
             next = false;
         }
@@ -135,7 +136,7 @@ implements   AttributeVisitor,
 
     public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction)
     {
-        if (variableInstruction.opcode == InstructionConstants.OP_RET)
+        if (variableInstruction.opcode == Instruction.OP_RET)
         {
             next = false;
         }
@@ -151,8 +152,8 @@ implements   AttributeVisitor,
                          offset + branchInstruction.branchOffset);
 
         byte opcode = branchInstruction.opcode;
-        if (opcode == InstructionConstants.OP_GOTO ||
-            opcode == InstructionConstants.OP_GOTO_W)
+        if (opcode == Instruction.OP_GOTO ||
+            opcode == Instruction.OP_GOTO_W)
         {
             next = false;
         }

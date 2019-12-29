@@ -65,12 +65,12 @@ implements   BootstrapMethodInfoVisitor
                 new AttributesEditor(targetClass, false);
 
             BootstrapMethodsAttribute targetBootstrapMethodsAttribute =
-                (BootstrapMethodsAttribute)attributesEditor.findAttribute(ClassConstants.ATTR_BootstrapMethods);
+                (BootstrapMethodsAttribute)attributesEditor.findAttribute(Attribute.BOOTSTRAP_METHODS);
 
             if (targetBootstrapMethodsAttribute == null)
             {
                 targetBootstrapMethodsAttribute =
-                    new BootstrapMethodsAttribute(constantPoolEditor.addUtf8Constant(ClassConstants.ATTR_BootstrapMethods),
+                    new BootstrapMethodsAttribute(constantPoolEditor.addUtf8Constant(Attribute.BOOTSTRAP_METHODS),
                                                   0,
                                                   new BootstrapMethodInfo[0]);
 

@@ -25,8 +25,7 @@ import proguard.classfile.attribute.SignatureAttribute;
 import proguard.classfile.editor.*;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 
-import static proguard.classfile.ClassConstants.ACC_PUBLIC;
-import static proguard.classfile.ClassConstants.CLASS_VERSION_1_5;
+import static proguard.classfile.VersionConstants.CLASS_VERSION_1_5;
 
 /**
  * This builder builds a GSON TypeToken class based on a given field signature.
@@ -75,12 +74,12 @@ class TypeTokenClassBuilder
         // the Signature attribute.
         ProgramClass subClass = new ClassBuilder(
             CLASS_VERSION_1_5,
-            ClassConstants.ACC_PUBLIC,
+            AccessConstants.PUBLIC,
             typeTokenClassName,
             GsonClassConstants.NAME_TYPE_TOKEN)
 
             .addMethod(
-                ACC_PUBLIC,
+                AccessConstants.PUBLIC,
                 ClassConstants.METHOD_NAME_INIT,
                 ClassConstants.METHOD_TYPE_INIT,
                 10,

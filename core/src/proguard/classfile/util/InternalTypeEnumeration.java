@@ -17,8 +17,7 @@
  */
 package proguard.classfile.util;
 
-import proguard.classfile.ClassConstants;
-
+import proguard.classfile.*;
 
 /**
  * An <code>InternalTypeEnumeration</code> provides an enumeration of all
@@ -50,7 +49,7 @@ public class InternalTypeEnumeration
 
         // Find any formal type parameters.
         int formalTypeParametersIndex = 0;
-        if (descriptor.charAt(0) == ClassConstants.TYPE_GENERIC_START)
+        if (descriptor.charAt(0) == TypeConstants.GENERIC_START)
         {
             formalTypeParametersIndex = 1;
 
@@ -60,12 +59,12 @@ public class InternalTypeEnumeration
                 char c = descriptor.charAt(formalTypeParametersIndex++);
                 switch (c)
                 {
-                    case ClassConstants.TYPE_GENERIC_START:
+                    case TypeConstants.GENERIC_START:
                     {
                         nestingLevel++;
                         break;
                     }
-                    case ClassConstants.TYPE_GENERIC_END:
+                    case TypeConstants.GENERIC_END:
                     {
                         nestingLevel--;
                         break;
@@ -77,11 +76,11 @@ public class InternalTypeEnumeration
 
         this.formalTypeParametersIndex = formalTypeParametersIndex;;
 
-        this.openIndex  = descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_OPEN,
+        this.openIndex  = descriptor.indexOf(TypeConstants.METHOD_ARGUMENTS_OPEN,
                                              formalTypeParametersIndex);
 
         this.closeIndex = openIndex >= 0 ?
-            descriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE, openIndex) :
+            descriptor.indexOf(TypeConstants.METHOD_ARGUMENTS_CLOSE, openIndex) :
             descriptor.length();
 
         reset();
@@ -194,13 +193,13 @@ public class InternalTypeEnumeration
         char c = descriptor.charAt(index++);
         switch (c)
         {
-            case ClassConstants.TYPE_CLASS_START:
-            case ClassConstants.TYPE_GENERIC_VARIABLE_START:
+            case TypeConstants.CLASS_START:
+            case TypeConstants.GENERIC_VARIABLE_START:
             {
                 skipClass();
                 break;
             }
-            case ClassConstants.TYPE_GENERIC_START:
+            case TypeConstants.GENERIC_START:
             {
                 skipGeneric();
                 break;
@@ -225,7 +224,7 @@ public class InternalTypeEnumeration
 
     private void skipArray()
     {
-        while (descriptor.charAt(index) == ClassConstants.TYPE_ARRAY)
+        while (descriptor.charAt(index) == TypeConstants.ARRAY)
         {
             index++;
         }
@@ -239,11 +238,11 @@ public class InternalTypeEnumeration
             char c = descriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.TYPE_GENERIC_START:
+                case TypeConstants.GENERIC_START:
                     skipGeneric();
                     break;
 
-                case ClassConstants.TYPE_CLASS_END:
+                case TypeConstants.CLASS_END:
                     return;
             }
         }
@@ -259,11 +258,11 @@ public class InternalTypeEnumeration
             char c = descriptor.charAt(index++);
             switch (c)
             {
-                case ClassConstants.TYPE_GENERIC_START:
+                case TypeConstants.GENERIC_START:
                     nestingLevel++;
                     break;
 
-                case ClassConstants.TYPE_GENERIC_END:
+                case TypeConstants.GENERIC_END:
                     nestingLevel--;
                     break;
             }

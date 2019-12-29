@@ -57,7 +57,7 @@ public class ArrayElementValue extends ElementValue
 
     public char getTag()
     {
-        return ClassConstants.ELEMENT_VALUE_ARRAY;
+        return ElementValue.TAG_ARRAY;
     }
 
     public void accept(Clazz clazz, Annotation annotation, ElementValueVisitor elementValueVisitor)

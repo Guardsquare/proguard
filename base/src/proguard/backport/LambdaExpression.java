@@ -22,6 +22,7 @@ package proguard.backport;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.BootstrapMethodInfo;
+import proguard.classfile.constant.MethodHandleConstant;
 import proguard.classfile.util.*;
 
 /**
@@ -120,9 +121,9 @@ public class LambdaExpression
         }
         else
         {
-            int endIndex = factoryMethodDescriptor.indexOf(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+            int endIndex = factoryMethodDescriptor.indexOf(TypeConstants.METHOD_ARGUMENTS_CLOSE);
 
-            return factoryMethodDescriptor.substring(0, endIndex + 1) + ClassConstants.TYPE_VOID;
+            return factoryMethodDescriptor.substring(0, endIndex + 1) + TypeConstants.VOID;
         }
     }
 
@@ -170,9 +171,9 @@ public class LambdaExpression
     public boolean invokesStaticInterfaceMethod()
     {
         // We assume unknown classes are not interfaces.
-        return invokedReferenceKind == ClassConstants.REF_invokeStatic &&
+        return invokedReferenceKind == MethodHandleConstant.REF_INVOKE_STATIC &&
                referencedInvokedClass != null                          &&
-               (referencedInvokedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0;
+               (referencedInvokedClass.getAccessFlags() & AccessConstants.INTERFACE) != 0;
     }
 
 
@@ -182,9 +183,9 @@ public class LambdaExpression
      */
      boolean referencesPrivateSyntheticInterfaceMethod()
      {
-         return (referencedInvokedClass .getAccessFlags() &  ClassConstants.ACC_INTERFACE)  != 0 &&
-                (referencedInvokedMethod.getAccessFlags() & (ClassConstants.ACC_PRIVATE |
-                                                             ClassConstants.ACC_SYNTHETIC)) != 0 ;
+         return (referencedInvokedClass .getAccessFlags() &  AccessConstants.INTERFACE)  != 0 &&
+                (referencedInvokedMethod.getAccessFlags() & (AccessConstants.PRIVATE |
+                                                             AccessConstants.SYNTHETIC)) != 0 ;
      }
 
 
@@ -209,9 +210,9 @@ public class LambdaExpression
      */
     public boolean referencesPrivateConstructor()
     {
-        return invokedReferenceKind == ClassConstants.REF_newInvokeSpecial &&
-               ClassConstants.METHOD_NAME_INIT.equals(invokedMethodName)   &&
-               (referencedInvokedMethod.getAccessFlags() & ClassConstants.ACC_PRIVATE) != 0;
+        return invokedReferenceKind == MethodHandleConstant.REF_NEW_INVOKE_SPECIAL &&
+               ClassConstants.METHOD_NAME_INIT.equals(invokedMethodName) &&
+               (referencedInvokedMethod.getAccessFlags() & AccessConstants.PRIVATE) != 0;
     }
 
 

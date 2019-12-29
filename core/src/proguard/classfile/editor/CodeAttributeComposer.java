@@ -80,23 +80,23 @@ import java.util.Arrays;
  *
  *     composer.beginCodeFragment(50);
  *     composer.appendLabel(TRY_LABEL);
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_1));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_2));
  *     composer.appendLabel(IF_LABEL);
- *     composer.appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPLT, 20-1));
+ *     composer.appendInstruction(new BranchInstruction(Instruction.OP_IFICMPLT, 20-1));
  *
  *     composer.appendLabel(THEN_LABEL);
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_1));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
  *
  *     composer.appendLabel(ELSE_LABEL);
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_2));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
  *
  *     composer.appendLabel(CATCH_LABEL);
  *     composer.appendException(new ExceptionInfo(TRY_LABEL, CATCH_LABEL, CATCH_LABEL, exceptionType));
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_M1));
- *     composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_M1));
+ *     composer.appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
  *     composer.endCodeFragment();
  *
  *     // Put the code in the given code attribute.
@@ -145,15 +145,15 @@ implements   AttributeVisitor,
     private int lineNumberTableLength;
     private int level = -1;
 
-    private byte[]  code                  = new byte[ClassConstants.TYPICAL_CODE_LENGTH];
-    private int[]   oldInstructionOffsets = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private byte[]  code                  = new byte[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private int[]   oldInstructionOffsets = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
 
     private final int[]   codeFragmentOffsets  = new int[MAXIMUM_LEVELS];
     private final int[]   codeFragmentLengths  = new int[MAXIMUM_LEVELS];
-    private final int[][] instructionOffsetMap = new int[MAXIMUM_LEVELS][ClassConstants.TYPICAL_CODE_LENGTH + 1];
+    private final int[][] instructionOffsetMap = new int[MAXIMUM_LEVELS][ClassEstimates.TYPICAL_CODE_LENGTH + 1];
 
-    private ExceptionInfo[]  exceptionTable  = new ExceptionInfo[ClassConstants.TYPICAL_EXCEPTION_TABLE_LENGTH];
-    private LineNumberInfo[] lineNumberTable = new LineNumberInfo[ClassConstants.TYPICAL_LINE_NUMBER_TABLE_LENGTH];
+    private ExceptionInfo[]  exceptionTable  = new ExceptionInfo[ClassEstimates.TYPICAL_EXCEPTION_TABLE_LENGTH];
+    private LineNumberInfo[] lineNumberTable = new LineNumberInfo[ClassEstimates.TYPICAL_LINE_NUMBER_TABLE_LENGTH];
 
     private int expectedStackMapFrameOffset;
 
@@ -630,11 +630,11 @@ implements   AttributeVisitor,
 
         // Add a new line number table for the line numbers, if necessary.
         if (lineNumberTableLength > 0 &&
-            codeAttribute.getAttribute(clazz, ClassConstants.ATTR_LineNumberTable) == null)
+            codeAttribute.getAttribute(clazz, Attribute.LINE_NUMBER_TABLE) == null)
         {
             int attributeNameIndex =
                 new ConstantPoolEditor((ProgramClass)clazz)
-                    .addUtf8Constant(ClassConstants.ATTR_LineNumberTable);
+                    .addUtf8Constant(Attribute.LINE_NUMBER_TABLE);
 
             new AttributesEditor((ProgramClass)clazz, (ProgramMember)method, codeAttribute, false)
                 .addAttribute(new LineNumberTableAttribute(attributeNameIndex, 0, null));
@@ -727,12 +727,6 @@ implements   AttributeVisitor,
             removeEmptyLocalVariableTypes(localVariableTypeTableAttribute.localVariableTypeTable,
                                           localVariableTypeTableAttribute.u2localVariableTypeTableLength,
                                           codeAttribute.u2maxLocals);
-    }
-
-
-    public void visitAnyTypeAnnotationsAttribute(Clazz clazz, TypeAnnotationsAttribute typeAnnotationsAttribute)
-    {
-        typeAnnotationsAttribute.typeAnnotationsAccept(clazz, this);
     }
 
 
@@ -956,44 +950,6 @@ implements   AttributeVisitor,
 
         localVariableTargetElement.u2startPC = startPC;
         localVariableTargetElement.u2length  = endPC - startPC;
-    }
-
-    // Implementations for TypeAnnotationVisitor.
-
-    public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
-    {
-        // Update all local variable targets.
-        typeAnnotation.targetInfoAccept(clazz, this);
-    }
-
-
-    // Implementations for TargetInfoVisitor.
-
-    public void visitAnyTargetInfo(Clazz clazz, TypeAnnotation typeAnnotation, TargetInfo targetInfo) {}
-
-
-    public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
-    {
-        // Update the offsets of the variables.
-        localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
-    }
-
-
-    public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
-    {
-        // Update the offset.
-        offsetTargetInfo.u2offset = newInstructionOffset(offsetTargetInfo.u2offset);
-    }
-
-
-    // Implementations for LocalVariableTargetElementVisitor.
-
-    public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
-    {
-        // Update the variable start offset and length.
-        // Be careful to update the length first.
-        localVariableTargetElement.u2length  = newBranchOffset(localVariableTargetElement.u2startPC, localVariableTargetElement.u2length);
-        localVariableTargetElement.u2startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
     }
 
     // Small utility methods.
@@ -1228,10 +1184,10 @@ implements   AttributeVisitor,
     {
         // Create an empty class.
         ProgramClass programClass =
-            new ProgramClass(ClassConstants.CLASS_VERSION_1_8,
+            new ProgramClass(VersionConstants.CLASS_VERSION_1_8,
                              1,
                              new Constant[10],
-                             ClassConstants.ACC_PUBLIC,
+                             AccessConstants.PUBLIC,
                              0,
                              0);
 
@@ -1244,14 +1200,14 @@ implements   AttributeVisitor,
 
         // Create an empty method.
         ProgramMethod programMethod =
-            new ProgramMethod(ClassConstants.ACC_PUBLIC,
+            new ProgramMethod(AccessConstants.PUBLIC,
                               constantPoolEditor.addUtf8Constant("test"),
                               constantPoolEditor.addUtf8Constant("()I"),
                               null);
 
         // Create an empty code attribute.
         CodeAttribute codeAttribute =
-            new CodeAttribute(constantPoolEditor.addUtf8Constant(ClassConstants.ATTR_Code));
+            new CodeAttribute(constantPoolEditor.addUtf8Constant(Attribute.CODE));
 
         // Add the code attribute to the method.
         AttributesEditor attributesEditor =
@@ -1289,23 +1245,23 @@ implements   AttributeVisitor,
 
         composer.beginCodeFragment(50);
         composer.appendLabel(TRY_LABEL);
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_1));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_2));
         composer.appendLabel(IF_LABEL);
-        composer.appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPLT, 20-1));
+        composer.appendInstruction(new BranchInstruction(Instruction.OP_IFICMPLT, 20-1));
 
         composer.appendLabel(THEN_LABEL);
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_1));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
 
         composer.appendLabel(ELSE_LABEL);
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_2));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
 
         composer.appendLabel(CATCH_LABEL);
         composer.appendException(new ExceptionInfo(TRY_LABEL, CATCH_LABEL, CATCH_LABEL, exceptionType));
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_M1));
-        composer.appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_M1));
+        composer.appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
         composer.endCodeFragment();
 
         // Put the code in the given code attribute.

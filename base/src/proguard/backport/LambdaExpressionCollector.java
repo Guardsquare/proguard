@@ -71,7 +71,7 @@ implements ClassVisitor,
     {
         // Visit any InvokeDynamic constant.
         programClass.constantPoolEntriesAccept(
-            new ConstantTagFilter(ClassConstants.CONSTANT_InvokeDynamic,
+            new ConstantTagFilter(Constant.INVOKE_DYNAMIC,
             this));
     }
 
@@ -166,7 +166,7 @@ implements ClassVisitor,
                 // at index 4.
                 int argumentIndex = 4;
 
-                if ((flags & ClassConstants.FLAG_MARKERS) != 0)
+                if ((flags & BootstrapMethodInfo.FLAG_MARKERS) != 0)
                 {
                     int markerInterfaceCount =
                         getIntegerConstant(programClass,
@@ -184,7 +184,7 @@ implements ClassVisitor,
                     }
                 }
 
-                if ((flags & ClassConstants.FLAG_BRIDGES) != 0)
+                if ((flags & BootstrapMethodInfo.FLAG_BRIDGES) != 0)
                 {
                     int bridgeMethodCount =
                         getIntegerConstant(programClass,
@@ -203,7 +203,7 @@ implements ClassVisitor,
                     }
                 }
 
-                if ((flags & ClassConstants.FLAG_SERIALIZABLE) != 0)
+                if ((flags & BootstrapMethodInfo.FLAG_SERIALIZABLE) != 0)
                 {
                     lambdaExpression.interfaces =
                         ArrayUtil.add(lambdaExpression.interfaces,

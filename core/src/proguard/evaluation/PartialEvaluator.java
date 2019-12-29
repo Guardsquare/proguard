@@ -20,6 +20,7 @@ package proguard.evaluation;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
@@ -58,14 +59,14 @@ implements   AttributeVisitor,
     private final boolean            evaluateAllCode;
     private final InstructionVisitor extraInstructionVisitor;
 
-    private InstructionOffsetValue[] branchOriginValues  = new InstructionOffsetValue[ClassConstants.TYPICAL_CODE_LENGTH];
-    private InstructionOffsetValue[] branchTargetValues  = new InstructionOffsetValue[ClassConstants.TYPICAL_CODE_LENGTH];
-    private TracedVariables[]        variablesBefore     = new TracedVariables[ClassConstants.TYPICAL_CODE_LENGTH];
-    private TracedStack[]            stacksBefore        = new TracedStack[ClassConstants.TYPICAL_CODE_LENGTH];
-    private TracedVariables[]        variablesAfter      = new TracedVariables[ClassConstants.TYPICAL_CODE_LENGTH];
-    private TracedStack[]            stacksAfter         = new TracedStack[ClassConstants.TYPICAL_CODE_LENGTH];
-    private boolean[]                generalizedContexts = new boolean[ClassConstants.TYPICAL_CODE_LENGTH];
-    private int[]                    evaluationCounts    = new int[ClassConstants.TYPICAL_CODE_LENGTH];
+    private InstructionOffsetValue[] branchOriginValues  = new InstructionOffsetValue[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private InstructionOffsetValue[] branchTargetValues  = new InstructionOffsetValue[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private TracedVariables[]        variablesBefore     = new TracedVariables[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private TracedStack[]            stacksBefore        = new TracedStack[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private TracedVariables[]        variablesAfter      = new TracedVariables[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private TracedStack[]            stacksAfter         = new TracedStack[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private boolean[]                generalizedContexts = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private int[]                    evaluationCounts    = new int[ClassEstimates.TYPICAL_CODE_LENGTH];
     private boolean                  evaluateExceptions;
     private int                      codeLength;
 
@@ -983,8 +984,8 @@ implements   AttributeVisitor,
             }
 
             // Is this a subroutine invocation?
-            if (instruction.opcode == InstructionConstants.OP_JSR ||
-                instruction.opcode == InstructionConstants.OP_JSR_W)
+            if (instruction.opcode == Instruction.OP_JSR ||
+                instruction.opcode == Instruction.OP_JSR_W)
             {
                 // Evaluate the subroutine in another partial evaluator.
                 evaluateSubroutine(clazz,
@@ -996,7 +997,7 @@ implements   AttributeVisitor,
 
                 break;
             }
-            else if (instruction.opcode == InstructionConstants.OP_RET)
+            else if (instruction.opcode == Instruction.OP_RET)
             {
                 // Let the partial evaluator that has called the subroutine
                 // handle the evaluation after the return.

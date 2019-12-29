@@ -134,7 +134,7 @@ implements   InvocationUnit,
         // A "this" parameter can never be null.
         boolean isThis =
             parameterIndex == 0 &&
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0;
+            (method.getAccessFlags() & AccessConstants.STATIC) == 0;
 
         return valueFactory.createValue(type,
                                         referencedClass,

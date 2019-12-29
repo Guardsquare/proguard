@@ -96,7 +96,7 @@ implements   ClassVisitor,
         // Unmark the simple enum classes in bootstrap methods attributes.
         programClass.attributesAccept(this);
 
-        if ((programClass.getAccessFlags() & ClassConstants.ACC_ANNOTATION) != 0)
+        if ((programClass.getAccessFlags() & AccessConstants.ANNOTATION) != 0)
         {
             // Unmark the simple enum classes in annotations.
             programClass.methodsAccept(referencedComplexEnumMarker);
@@ -174,16 +174,6 @@ implements   ClassVisitor,
     }
 
 
-    public void visitAnyConstant(Clazz clazz, Constant constant) {}
-
-
-    public void visitStringConstant(Clazz clazz, StringConstant stringConstant)
-    {
-        // Unmark any simple enum class referenced in the string constant.
-        stringConstant.referencedClassAccept(complexEnumMarker);
-    }
-
-
     public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)
     {
         // Unmark the simple enum classes referenced in the method handle
@@ -213,20 +203,13 @@ implements   ClassVisitor,
     }
 
 
-    public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
-    {
-        // Unmark any simple enum class referenced in the class constant.
-        classConstant.referencedClassAccept(complexEnumMarker);
-    }
-
-
     // Implementations for InstructionVisitor.
 
     public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction)
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_AASTORE:
+            case Instruction.OP_AASTORE:
             {
                 // Check if the instruction is storing a simple enum in a
                 // more general array.
@@ -246,7 +229,7 @@ implements   ClassVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_ARETURN:
+            case Instruction.OP_ARETURN:
             {
                 // Check if the instruction is returning a simple enum as a
                 // more general type.
@@ -265,8 +248,8 @@ implements   ClassVisitor,
                 }
                 break;
             }
-            case InstructionConstants.OP_MONITORENTER:
-            case InstructionConstants.OP_MONITOREXIT:
+            case Instruction.OP_MONITORENTER:
+            case Instruction.OP_MONITOREXIT:
             {
                 // Make sure the popped type is not a simple enum type.
                 if (DEBUG)
@@ -295,8 +278,8 @@ implements   ClassVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_PUTSTATIC:
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTSTATIC:
+            case Instruction.OP_PUTFIELD:
             {
                 // Check if the instruction is generalizing a simple enum to a
                 // different type.
@@ -305,7 +288,7 @@ implements   ClassVisitor,
                                               parameterChecker);
                 break;
             }
-            case InstructionConstants.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKEVIRTUAL:
             {
                 // Check if the instruction is calling a simple enum.
                 String invokedMethodName =
@@ -333,9 +316,9 @@ implements   ClassVisitor,
                                               parameterChecker);
                 break;
             }
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
             {
                 // Check if it is calling a method that we can't simplify.
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex,
@@ -348,8 +331,8 @@ implements   ClassVisitor,
                                               parameterChecker);
                 break;
             }
-            case InstructionConstants.OP_CHECKCAST:
-            case InstructionConstants.OP_INSTANCEOF:
+            case Instruction.OP_CHECKCAST:
+            case Instruction.OP_INSTANCEOF:
             {
                 // Check if the instruction is popping a different type.
                 if (!isPoppingExpectedType(offset,
@@ -371,9 +354,9 @@ implements   ClassVisitor,
 
                     // Make sure the checked type is not a simple enum type.
                     // Casts in values() and valueOf(String) are ok.
-                    if (constantInstruction.opcode != InstructionConstants.OP_CHECKCAST ||
+                    if (constantInstruction.opcode != Instruction.OP_CHECKCAST ||
                         !isSimpleEnum(clazz)                                            ||
-                        (method.getAccessFlags() & ClassConstants.ACC_STATIC) == 0      ||
+                        (method.getAccessFlags() & AccessConstants.STATIC) == 0      ||
                         !isMethodSkippedForCheckcast(method.getName(clazz),
                                                      method.getDescriptor(clazz)))
                     {
@@ -400,8 +383,8 @@ implements   ClassVisitor,
     {
         switch (branchInstruction.opcode)
         {
-            case InstructionConstants.OP_IFACMPEQ:
-            case InstructionConstants.OP_IFACMPNE:
+            case Instruction.OP_IFACMPEQ:
+            case Instruction.OP_IFACMPNE:
             {
                 // Check if the instruction is comparing different types.
                 if (!isPoppingIdenticalTypes(offset, 0, 1))

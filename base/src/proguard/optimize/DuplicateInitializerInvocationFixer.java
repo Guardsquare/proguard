@@ -100,7 +100,7 @@ implements   AttributeVisitor,
 
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_INVOKESPECIAL)
+        if (constantInstruction.opcode == Instruction.OP_INVOKESPECIAL)
         {
             descriptorLengthDelta = 0;
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -109,8 +109,8 @@ implements   AttributeVisitor,
             {
                 Instruction extraInstruction =
                     new SimpleInstruction(descriptorLengthDelta == 1 ?
-                                              InstructionConstants.OP_ICONST_0 :
-                                              InstructionConstants.OP_ACONST_NULL);
+                                              Instruction.OP_ICONST_0 :
+                                              Instruction.OP_ACONST_NULL);
 
                 codeAttributeEditor.insertBeforeInstruction(offset,
                                                             extraInstruction);

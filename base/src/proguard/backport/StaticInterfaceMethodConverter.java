@@ -78,7 +78,7 @@ implements   ClassVisitor
         Set<String> staticMethods = new HashSet<String>();
         programClass.accept(
             new AllMethodVisitor(
-            new MemberAccessFilter(ClassConstants.ACC_STATIC, 0,
+            new MemberAccessFilter(AccessConstants.STATIC, 0,
             new InitializerMethodFilter(null,
             new MemberCollector(false, true, true, staticMethods)))));
 
@@ -86,14 +86,14 @@ implements   ClassVisitor
         {
             // Create a new utility class.
             ProgramClass utilityClass = new ClassBuilder(
-                ClassConstants.ACC_PUBLIC |
-                ClassConstants.ACC_SYNTHETIC,
+                AccessConstants.PUBLIC |
+                AccessConstants.SYNTHETIC,
                 programClass.getName() + "$$Util",
                 ClassConstants.NAME_JAVA_LANG_OBJECT)
 
                 // Add a private constructor.
                 .addMethod(
-                    ClassConstants.ACC_PRIVATE,
+                    AccessConstants.PRIVATE,
                     ClassConstants.METHOD_NAME_INIT,
                     ClassConstants.METHOD_TYPE_INIT,
                     10,
@@ -121,7 +121,7 @@ implements   ClassVisitor
 
             programClass.accept(
                 new AllMethodVisitor(
-                new MemberAccessFilter(ClassConstants.ACC_STATIC, 0,
+                new MemberAccessFilter(AccessConstants.STATIC, 0,
                 new InitializerMethodFilter(null,
                 new MultiMemberVisitor(
                     // Add the method to the utility class.

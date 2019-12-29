@@ -95,38 +95,38 @@ public class VariableInstruction extends Instruction
     {
         switch (opcode)
         {
-            case InstructionConstants.OP_ILOAD_1:
-            case InstructionConstants.OP_LLOAD_1:
-            case InstructionConstants.OP_FLOAD_1:
-            case InstructionConstants.OP_DLOAD_1:
-            case InstructionConstants.OP_ALOAD_1:
-            case InstructionConstants.OP_ISTORE_1:
-            case InstructionConstants.OP_LSTORE_1:
-            case InstructionConstants.OP_FSTORE_1:
-            case InstructionConstants.OP_DSTORE_1:
-            case InstructionConstants.OP_ASTORE_1: return 1;
+            case Instruction.OP_ILOAD_1:
+            case Instruction.OP_LLOAD_1:
+            case Instruction.OP_FLOAD_1:
+            case Instruction.OP_DLOAD_1:
+            case Instruction.OP_ALOAD_1:
+            case Instruction.OP_ISTORE_1:
+            case Instruction.OP_LSTORE_1:
+            case Instruction.OP_FSTORE_1:
+            case Instruction.OP_DSTORE_1:
+            case Instruction.OP_ASTORE_1: return 1;
 
-            case InstructionConstants.OP_ILOAD_2:
-            case InstructionConstants.OP_LLOAD_2:
-            case InstructionConstants.OP_FLOAD_2:
-            case InstructionConstants.OP_DLOAD_2:
-            case InstructionConstants.OP_ALOAD_2:
-            case InstructionConstants.OP_ISTORE_2:
-            case InstructionConstants.OP_LSTORE_2:
-            case InstructionConstants.OP_FSTORE_2:
-            case InstructionConstants.OP_DSTORE_2:
-            case InstructionConstants.OP_ASTORE_2: return 2;
+            case Instruction.OP_ILOAD_2:
+            case Instruction.OP_LLOAD_2:
+            case Instruction.OP_FLOAD_2:
+            case Instruction.OP_DLOAD_2:
+            case Instruction.OP_ALOAD_2:
+            case Instruction.OP_ISTORE_2:
+            case Instruction.OP_LSTORE_2:
+            case Instruction.OP_FSTORE_2:
+            case Instruction.OP_DSTORE_2:
+            case Instruction.OP_ASTORE_2: return 2;
 
-            case InstructionConstants.OP_ILOAD_3:
-            case InstructionConstants.OP_LLOAD_3:
-            case InstructionConstants.OP_FLOAD_3:
-            case InstructionConstants.OP_DLOAD_3:
-            case InstructionConstants.OP_ALOAD_3:
-            case InstructionConstants.OP_ISTORE_3:
-            case InstructionConstants.OP_LSTORE_3:
-            case InstructionConstants.OP_FSTORE_3:
-            case InstructionConstants.OP_DSTORE_3:
-            case InstructionConstants.OP_ASTORE_3: return 3;
+            case Instruction.OP_ILOAD_3:
+            case Instruction.OP_LLOAD_3:
+            case Instruction.OP_FLOAD_3:
+            case Instruction.OP_DLOAD_3:
+            case Instruction.OP_ALOAD_3:
+            case Instruction.OP_ISTORE_3:
+            case Instruction.OP_LSTORE_3:
+            case Instruction.OP_FSTORE_3:
+            case Instruction.OP_DSTORE_3:
+            case Instruction.OP_ASTORE_3: return 3;
 
             default: return 0;
         }
@@ -142,8 +142,8 @@ public class VariableInstruction extends Instruction
     {
         // A store instruction can be recognized as follows. Note that this
         // excludes the ret instruction, which has a negative opcode.
-        return opcode >= InstructionConstants.OP_ISTORE ||
-               opcode == InstructionConstants.OP_IINC;
+        return opcode >= Instruction.OP_ISTORE ||
+               opcode == Instruction.OP_IINC;
     }
 
 
@@ -156,7 +156,7 @@ public class VariableInstruction extends Instruction
     {
         // A load instruction can be recognized as follows. Note that this
         // includes the ret instruction, which has a negative opcode.
-        return opcode < InstructionConstants.OP_ISTORE;
+        return opcode < Instruction.OP_ISTORE;
     }
 
 
@@ -167,47 +167,47 @@ public class VariableInstruction extends Instruction
         // Remove the _0, _1, _2, _3 extension, if any.
         switch (opcode)
         {
-            case InstructionConstants.OP_ILOAD_0:
-            case InstructionConstants.OP_ILOAD_1:
-            case InstructionConstants.OP_ILOAD_2:
-            case InstructionConstants.OP_ILOAD_3: return InstructionConstants.OP_ILOAD;
-            case InstructionConstants.OP_LLOAD_0:
-            case InstructionConstants.OP_LLOAD_1:
-            case InstructionConstants.OP_LLOAD_2:
-            case InstructionConstants.OP_LLOAD_3: return InstructionConstants.OP_LLOAD;
-            case InstructionConstants.OP_FLOAD_0:
-            case InstructionConstants.OP_FLOAD_1:
-            case InstructionConstants.OP_FLOAD_2:
-            case InstructionConstants.OP_FLOAD_3: return InstructionConstants.OP_FLOAD;
-            case InstructionConstants.OP_DLOAD_0:
-            case InstructionConstants.OP_DLOAD_1:
-            case InstructionConstants.OP_DLOAD_2:
-            case InstructionConstants.OP_DLOAD_3: return InstructionConstants.OP_DLOAD;
-            case InstructionConstants.OP_ALOAD_0:
-            case InstructionConstants.OP_ALOAD_1:
-            case InstructionConstants.OP_ALOAD_2:
-            case InstructionConstants.OP_ALOAD_3: return InstructionConstants.OP_ALOAD;
+            case Instruction.OP_ILOAD_0:
+            case Instruction.OP_ILOAD_1:
+            case Instruction.OP_ILOAD_2:
+            case Instruction.OP_ILOAD_3: return Instruction.OP_ILOAD;
+            case Instruction.OP_LLOAD_0:
+            case Instruction.OP_LLOAD_1:
+            case Instruction.OP_LLOAD_2:
+            case Instruction.OP_LLOAD_3: return Instruction.OP_LLOAD;
+            case Instruction.OP_FLOAD_0:
+            case Instruction.OP_FLOAD_1:
+            case Instruction.OP_FLOAD_2:
+            case Instruction.OP_FLOAD_3: return Instruction.OP_FLOAD;
+            case Instruction.OP_DLOAD_0:
+            case Instruction.OP_DLOAD_1:
+            case Instruction.OP_DLOAD_2:
+            case Instruction.OP_DLOAD_3: return Instruction.OP_DLOAD;
+            case Instruction.OP_ALOAD_0:
+            case Instruction.OP_ALOAD_1:
+            case Instruction.OP_ALOAD_2:
+            case Instruction.OP_ALOAD_3: return Instruction.OP_ALOAD;
 
-            case InstructionConstants.OP_ISTORE_0:
-            case InstructionConstants.OP_ISTORE_1:
-            case InstructionConstants.OP_ISTORE_2:
-            case InstructionConstants.OP_ISTORE_3: return InstructionConstants.OP_ISTORE;
-            case InstructionConstants.OP_LSTORE_0:
-            case InstructionConstants.OP_LSTORE_1:
-            case InstructionConstants.OP_LSTORE_2:
-            case InstructionConstants.OP_LSTORE_3: return InstructionConstants.OP_LSTORE;
-            case InstructionConstants.OP_FSTORE_0:
-            case InstructionConstants.OP_FSTORE_1:
-            case InstructionConstants.OP_FSTORE_2:
-            case InstructionConstants.OP_FSTORE_3: return InstructionConstants.OP_FSTORE;
-            case InstructionConstants.OP_DSTORE_0:
-            case InstructionConstants.OP_DSTORE_1:
-            case InstructionConstants.OP_DSTORE_2:
-            case InstructionConstants.OP_DSTORE_3: return InstructionConstants.OP_DSTORE;
-            case InstructionConstants.OP_ASTORE_0:
-            case InstructionConstants.OP_ASTORE_1:
-            case InstructionConstants.OP_ASTORE_2:
-            case InstructionConstants.OP_ASTORE_3: return InstructionConstants.OP_ASTORE;
+            case Instruction.OP_ISTORE_0:
+            case Instruction.OP_ISTORE_1:
+            case Instruction.OP_ISTORE_2:
+            case Instruction.OP_ISTORE_3: return Instruction.OP_ISTORE;
+            case Instruction.OP_LSTORE_0:
+            case Instruction.OP_LSTORE_1:
+            case Instruction.OP_LSTORE_2:
+            case Instruction.OP_LSTORE_3: return Instruction.OP_LSTORE;
+            case Instruction.OP_FSTORE_0:
+            case Instruction.OP_FSTORE_1:
+            case Instruction.OP_FSTORE_2:
+            case Instruction.OP_FSTORE_3: return Instruction.OP_FSTORE;
+            case Instruction.OP_DSTORE_0:
+            case Instruction.OP_DSTORE_1:
+            case Instruction.OP_DSTORE_2:
+            case Instruction.OP_DSTORE_3: return Instruction.OP_DSTORE;
+            case Instruction.OP_ASTORE_0:
+            case Instruction.OP_ASTORE_1:
+            case Instruction.OP_ASTORE_2:
+            case Instruction.OP_ASTORE_3: return Instruction.OP_ASTORE;
 
             default: return opcode;
         }
@@ -222,17 +222,17 @@ public class VariableInstruction extends Instruction
         {
             switch (opcode)
             {
-                case InstructionConstants.OP_ILOAD: opcode = (byte)(InstructionConstants.OP_ILOAD_0 + variableIndex); break;
-                case InstructionConstants.OP_LLOAD: opcode = (byte)(InstructionConstants.OP_LLOAD_0 + variableIndex); break;
-                case InstructionConstants.OP_FLOAD: opcode = (byte)(InstructionConstants.OP_FLOAD_0 + variableIndex); break;
-                case InstructionConstants.OP_DLOAD: opcode = (byte)(InstructionConstants.OP_DLOAD_0 + variableIndex); break;
-                case InstructionConstants.OP_ALOAD: opcode = (byte)(InstructionConstants.OP_ALOAD_0 + variableIndex); break;
+                case Instruction.OP_ILOAD: opcode = (byte)(Instruction.OP_ILOAD_0 + variableIndex); break;
+                case Instruction.OP_LLOAD: opcode = (byte)(Instruction.OP_LLOAD_0 + variableIndex); break;
+                case Instruction.OP_FLOAD: opcode = (byte)(Instruction.OP_FLOAD_0 + variableIndex); break;
+                case Instruction.OP_DLOAD: opcode = (byte)(Instruction.OP_DLOAD_0 + variableIndex); break;
+                case Instruction.OP_ALOAD: opcode = (byte)(Instruction.OP_ALOAD_0 + variableIndex); break;
 
-                case InstructionConstants.OP_ISTORE: opcode = (byte)(InstructionConstants.OP_ISTORE_0 + variableIndex); break;
-                case InstructionConstants.OP_LSTORE: opcode = (byte)(InstructionConstants.OP_LSTORE_0 + variableIndex); break;
-                case InstructionConstants.OP_FSTORE: opcode = (byte)(InstructionConstants.OP_FSTORE_0 + variableIndex); break;
-                case InstructionConstants.OP_DSTORE: opcode = (byte)(InstructionConstants.OP_DSTORE_0 + variableIndex); break;
-                case InstructionConstants.OP_ASTORE: opcode = (byte)(InstructionConstants.OP_ASTORE_0 + variableIndex); break;
+                case Instruction.OP_ISTORE: opcode = (byte)(Instruction.OP_ISTORE_0 + variableIndex); break;
+                case Instruction.OP_LSTORE: opcode = (byte)(Instruction.OP_LSTORE_0 + variableIndex); break;
+                case Instruction.OP_FSTORE: opcode = (byte)(Instruction.OP_FSTORE_0 + variableIndex); break;
+                case Instruction.OP_DSTORE: opcode = (byte)(Instruction.OP_DSTORE_0 + variableIndex); break;
+                case Instruction.OP_ASTORE: opcode = (byte)(Instruction.OP_ASTORE_0 + variableIndex); break;
             }
         }
 
@@ -259,9 +259,9 @@ public class VariableInstruction extends Instruction
         if (variableIndexSize == 0)
         {
             // An embedded variable index can be decoded as follows.
-            variableIndex = opcode < InstructionConstants.OP_ISTORE_0 ?
-                (opcode - InstructionConstants.OP_ILOAD_0 ) & 3 :
-                (opcode - InstructionConstants.OP_ISTORE_0) & 3;
+            variableIndex = opcode < Instruction.OP_ISTORE_0 ?
+                (opcode - Instruction.OP_ILOAD_0 ) & 3 :
+                (opcode - Instruction.OP_ISTORE_0) & 3;
         }
         else
         {
@@ -322,10 +322,10 @@ public class VariableInstruction extends Instruction
      */
     private int variableIndexSize()
     {
-        return (opcode >= InstructionConstants.OP_ILOAD_0 &&
-                opcode <= InstructionConstants.OP_ALOAD_3) ||
-               (opcode >= InstructionConstants.OP_ISTORE_0 &&
-                opcode <= InstructionConstants.OP_ASTORE_3) ? 0 :
+        return (opcode >= Instruction.OP_ILOAD_0 &&
+                opcode <= Instruction.OP_ALOAD_3) ||
+               (opcode >= Instruction.OP_ISTORE_0 &&
+                opcode <= Instruction.OP_ASTORE_3) ? 0 :
                wide                                         ? 2 :
                                                               1;
     }
@@ -349,7 +349,7 @@ public class VariableInstruction extends Instruction
      */
     private int constantSize()
     {
-        return opcode != InstructionConstants.OP_IINC ? 0 :
+        return opcode != Instruction.OP_IINC ? 0 :
                wide                                   ? 2 :
                                                         1;
     }
@@ -360,7 +360,7 @@ public class VariableInstruction extends Instruction
      */
     private int requiredConstantSize()
     {
-        return opcode != InstructionConstants.OP_IINC ? 0 :
+        return opcode != Instruction.OP_IINC ? 0 :
                (byte)constant  == constant            ? 1 :
                (short)constant == constant            ? 2 :
                                                         4;

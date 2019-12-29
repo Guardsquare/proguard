@@ -114,13 +114,13 @@ implements   InstructionVisitor,
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_ACONST_NULL:
-            case InstructionConstants.OP_NEWARRAY:
-            case InstructionConstants.OP_ATHROW:
+            case Instruction.OP_ACONST_NULL:
+            case Instruction.OP_NEWARRAY:
+            case Instruction.OP_ATHROW:
                 traceValue = new InstructionOffsetValue(offset | InstructionOffsetValue.NEW_INSTANCE);
                 break;
 
-            case InstructionConstants.OP_AALOAD:
+            case Instruction.OP_AALOAD:
                 traceValue = new InstructionOffsetValue(offset);
                 break;
 
@@ -135,27 +135,27 @@ implements   InstructionVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_LDC:
-            case InstructionConstants.OP_LDC_W:
-            case InstructionConstants.OP_NEW:
-            case InstructionConstants.OP_ANEWARRAY:
-            case InstructionConstants.OP_MULTIANEWARRAY:
+            case Instruction.OP_LDC:
+            case Instruction.OP_LDC_W:
+            case Instruction.OP_NEW:
+            case Instruction.OP_ANEWARRAY:
+            case Instruction.OP_MULTIANEWARRAY:
                 traceValue = new InstructionOffsetValue(offset | InstructionOffsetValue.NEW_INSTANCE);
                 break;
 
-            case InstructionConstants.OP_GETSTATIC:
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETSTATIC:
+            case Instruction.OP_GETFIELD:
                 traceValue = new InstructionOffsetValue(offset | InstructionOffsetValue.FIELD_VALUE);
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
                 traceValue = new InstructionOffsetValue(offset | InstructionOffsetValue.METHOD_RETURN_VALUE);
                 break;
 
-            case InstructionConstants.OP_CHECKCAST:
+            case Instruction.OP_CHECKCAST:
                 traceValue = new InstructionOffsetValue(offset | InstructionOffsetValue.CAST);
                 break;
 

@@ -113,9 +113,9 @@ implements   ClassVisitor,
         println("Access flags:  0x" + Integer.toHexString(programClass.u2accessFlags));
         println("  = " +
                 ClassUtil.externalClassAccessFlags(programClass.u2accessFlags) +
-                ((programClass.u2accessFlags & (ClassConstants.ACC_ENUM      |
-                                                ClassConstants.ACC_INTERFACE |
-                                                ClassConstants.ACC_MODULE)) == 0 ? "class " : "") +
+                ((programClass.u2accessFlags & (AccessConstants.ENUM      |
+                                                AccessConstants.INTERFACE |
+                                                AccessConstants.MODULE)) == 0 ? "class " : "") +
                 ClassUtil.externalClassName(programClass.getName()) +
                 (programClass.u2superClass == 0 ? "" : " extends " +
                 ClassUtil.externalClassName(programClass.getSuperName())));
@@ -164,9 +164,9 @@ implements   ClassVisitor,
         println("Access flags:  0x" + Integer.toHexString(libraryClass.u2accessFlags));
         println("  = " +
                 ClassUtil.externalClassAccessFlags(libraryClass.u2accessFlags) +
-                ((libraryClass.u2accessFlags & (ClassConstants.ACC_ENUM      |
-                                                ClassConstants.ACC_INTERFACE |
-                                                ClassConstants.ACC_MODULE)) == 0 ? "class " : "") +
+                ((libraryClass.u2accessFlags & (AccessConstants.ENUM      |
+                                                AccessConstants.INTERFACE |
+                                                AccessConstants.MODULE)) == 0 ? "class " : "") +
                 ClassUtil.externalClassName(libraryClass.getName()) +
                 (libraryClass.getSuperName() == null ? "" : " extends "  +
                 ClassUtil.externalClassName(libraryClass.getSuperName())));

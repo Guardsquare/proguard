@@ -57,92 +57,29 @@ public class CreateHelloWorldClass
      */
     private static ProgramClass createClass()
     {
-        // Create an empty class.
-        ProgramClass programClass =
-            new ProgramClass(ClassConstants.CLASS_VERSION_1_8,
-                             1,
-                             new Constant[1],
-                             ClassConstants.ACC_PUBLIC,
-                             0,
-                             0);
+        return
+            new ClassBuilder(
+                VersionConstants.CLASS_VERSION_1_8,
+                AccessConstants.PUBLIC,
+                CLASS_NAME,
+                ClassConstants.NAME_JAVA_LANG_OBJECT)
 
-        ConstantPoolEditor constantPoolEditor =
-            new ConstantPoolEditor(programClass);
+                // Add the main method.
+                .addMethod(
+                    AccessConstants.PUBLIC |
+                    AccessConstants.STATIC,
+                    "main",
+                    "([Ljava/lang/String;)V",
+                    50,
 
-        programClass.u2thisClass =
-            constantPoolEditor.addClassConstant(CLASS_NAME,
-                                                programClass);
+                    // Compose the equivalent of this java code:
+                    //     System.out.println("Hello, world!");
+                    code -> code
+                        .getstatic("java/lang/System", "out", "Ljava/io/PrintStream;")
+                        .ldc(MESSAGE)
+                        .invokevirtual("java/io/PrintStream", "println", "(Ljava/lang/String;)V")
+                        .return_())
 
-        programClass.u2superClass =
-            constantPoolEditor.addClassConstant(ClassConstants.NAME_JAVA_LANG_OBJECT,
-                                                null);
-
-        // Add the main method to the class.
-        new ClassEditor(programClass)
-            .addMethod(createMethod(programClass));
-
-        return programClass;
-    }
-
-
-    /**
-     * Creates a HelloWorld method in the given class.
-     */
-    private static Method createMethod(ProgramClass programClass)
-    {
-        ConstantPoolEditor constantPoolEditor =
-            new ConstantPoolEditor(programClass);
-
-        // Create an empty main method.
-        ProgramMethod programMethod =
-            new ProgramMethod(ClassConstants.ACC_PUBLIC |
-                              ClassConstants.ACC_STATIC,
-                              constantPoolEditor.addUtf8Constant("main"),
-                              constantPoolEditor.addUtf8Constant("([Ljava/lang/String;)V"),
-                              null);
-
-        // Add the method body to the method.
-        new AttributesEditor(programClass, programMethod, true)
-            .addAttribute(createCodeAttribute(programClass, programMethod));
-
-        return programMethod;
-    }
-
-
-    /**
-     * Creates a HelloWorld method body in the given method.
-     */
-    private static CodeAttribute createCodeAttribute(ProgramClass  programClass,
-                                                     ProgramMethod programMethod)
-    {
-        ConstantPoolEditor constantPoolEditor =
-            new ConstantPoolEditor(programClass);
-
-        // Create an empty code attribute.
-        CodeAttribute codeAtribute =
-            new CodeAttribute(constantPoolEditor.addUtf8Constant(ClassConstants.ATTR_Code));
-
-        // Add instructions to the code attribute.
-        CodeAttributeComposer codeAttributeComposer =
-            new CodeAttributeComposer();
-
-        codeAttributeComposer.appendInstructions(
-            new InstructionSequenceBuilder(constantPoolEditor)
-                .getstatic("java/lang/System", "out", "Ljava/io/PrintStream;")
-                .ldc(MESSAGE)
-                .invokevirtual("java/io/PrintStream", "println", "(Ljava/lang/String;)V")
-                .return_()
-                .instructions());
-
-        codeAttributeComposer.visitCodeAttribute(programClass,
-                                                 programMethod,
-                                                 codeAtribute);
-
-        // Preverify the code.
-        new CodePreverifier(false).visitCodeAttribute(programClass,
-                                                      programMethod,
-                                                      codeAtribute);
-
-        return codeAtribute;
+                .getProgramClass();
     }
 }

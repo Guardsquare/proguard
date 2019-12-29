@@ -58,7 +58,7 @@ extends      BasicValueFactory
     {
         return type == null ?
             REFERENCE_VALUE_NULL :
-            new ArrayReferenceValue(ClassConstants.TYPE_ARRAY + type,
+            new ArrayReferenceValue(TypeConstants.ARRAY + type,
                                     referencedClass,
                                     false,
                                     arrayLength);

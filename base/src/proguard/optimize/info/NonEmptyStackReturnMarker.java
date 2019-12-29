@@ -61,18 +61,18 @@ implements   InstructionVisitor
     {
         switch (simpleInstruction.opcode)
         {
-            case InstructionConstants.OP_LRETURN:
-            case InstructionConstants.OP_DRETURN:
+            case Instruction.OP_LRETURN:
+            case Instruction.OP_DRETURN:
                 markReturnWithNonEmptyStack(method, offset, 2);
                 break;
 
-            case InstructionConstants.OP_IRETURN:
-            case InstructionConstants.OP_FRETURN:
-            case InstructionConstants.OP_ARETURN:
+            case Instruction.OP_IRETURN:
+            case Instruction.OP_FRETURN:
+            case Instruction.OP_ARETURN:
                 markReturnWithNonEmptyStack(method, offset, 1);
                 break;
 
-            case InstructionConstants.OP_RETURN:
+            case Instruction.OP_RETURN:
                 markReturnWithNonEmptyStack(method, offset, 0);
                 break;
         }

@@ -17,9 +17,7 @@
  */
 package proguard.util;
 
-import proguard.classfile.ClassConstants;
-
-import java.util.*;
+import proguard.classfile.TypeConstants;
 
 /**
  * This StringParser can create StringMatcher instances for regular expressions
@@ -43,15 +41,15 @@ public class ClassNameParser implements StringParser
 {
     private static final char[] PRIMITIVE_TYPES = new char[]
     {
-        ClassConstants.TYPE_VOID,
-        ClassConstants.TYPE_BOOLEAN,
-        ClassConstants.TYPE_BYTE,
-        ClassConstants.TYPE_CHAR,
-        ClassConstants.TYPE_SHORT,
-        ClassConstants.TYPE_INT,
-        ClassConstants.TYPE_LONG,
-        ClassConstants.TYPE_FLOAT,
-        ClassConstants.TYPE_DOUBLE,
+        TypeConstants.VOID,
+        TypeConstants.BOOLEAN,
+        TypeConstants.BYTE,
+        TypeConstants.CHAR,
+        TypeConstants.SHORT,
+        TypeConstants.INT,
+        TypeConstants.LONG,
+        TypeConstants.FLOAT,
+        TypeConstants.DOUBLE,
     };
 
 
@@ -100,7 +98,7 @@ public class ClassNameParser implements StringParser
                 // Create a matcher for the wildcard.
                 VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.METHOD_ARGUMENTS_CLOSE },
+                                              new char[] { TypeConstants.METHOD_ARGUMENTS_CLOSE },
                                               0,
                                               Integer.MAX_VALUE,
                                               settableMatcher);
@@ -155,7 +153,7 @@ public class ClassNameParser implements StringParser
                 // Create a matcher for the wildcard.
                 VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.TYPE_CLASS_END },
+                                              new char[] { TypeConstants.CLASS_END },
                                               0,
                                               Integer.MAX_VALUE,
                                               settableMatcher);
@@ -186,7 +184,7 @@ public class ClassNameParser implements StringParser
                 // Create a matcher for the wildcard.
                 VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.TYPE_CLASS_END, ClassConstants.PACKAGE_SEPARATOR },
+                                              new char[] { TypeConstants.CLASS_END, TypeConstants.PACKAGE_SEPARATOR },
                                               0,
                                               Integer.MAX_VALUE,
                                               settableMatcher);
@@ -214,7 +212,7 @@ public class ClassNameParser implements StringParser
                 // Create a matcher for the wildcard.
                 VariableStringMatcher variableStringMatcher =
                     new VariableStringMatcher(null,
-                                              new char[] { ClassConstants.TYPE_CLASS_END, ClassConstants.PACKAGE_SEPARATOR },
+                                              new char[] { TypeConstants.CLASS_END, TypeConstants.PACKAGE_SEPARATOR },
                                               1,
                                               1,
                                               settableMatcher);
@@ -298,7 +296,7 @@ public class ClassNameParser implements StringParser
     {
         return
             // Any number of '['.
-            new VariableStringMatcher(new char[] { ClassConstants.TYPE_ARRAY },
+            new VariableStringMatcher(new char[] { TypeConstants.ARRAY },
                                       null,
                                       0,
                                       255,
@@ -312,15 +310,15 @@ public class ClassNameParser implements StringParser
                                           nextMatcher),
 
                 // Or a class type.
-                new VariableStringMatcher(new char[] { ClassConstants.TYPE_CLASS_START },
+                new VariableStringMatcher(new char[] { TypeConstants.CLASS_START },
                                                                     null,
                                                                     1,
                                                                     1,
                 new VariableStringMatcher(null,
-                                          new char[] { ClassConstants.TYPE_CLASS_END },
+                                          new char[] { TypeConstants.CLASS_END },
                                           0,
                                           Integer.MAX_VALUE,
-                new VariableStringMatcher(new char[] { ClassConstants.TYPE_CLASS_END },
+                new VariableStringMatcher(new char[] { TypeConstants.CLASS_END },
                                           null,
                                           1,
                                           1,

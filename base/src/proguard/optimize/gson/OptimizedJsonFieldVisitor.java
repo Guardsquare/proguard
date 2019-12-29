@@ -68,15 +68,15 @@ implements   ClassVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         programClass.accept(classVisitor);
-        programClass.accept(new ClassAccessFilter(0, ClassConstants.ACC_ENUM,
+        programClass.accept(new ClassAccessFilter(0, AccessConstants.ENUM,
                             new AllFieldVisitor(
-                            new MemberAccessFilter(0, ClassConstants.ACC_TRANSIENT,
+                            new MemberAccessFilter(0, AccessConstants.TRANSIENT,
                             this))));
 
         // For enums, only visit the enum constant fields.
-        programClass.accept(new ClassAccessFilter(ClassConstants.ACC_ENUM, 0,
+        programClass.accept(new ClassAccessFilter(AccessConstants.ENUM, 0,
                             new AllFieldVisitor(
-                            new MemberAccessFilter(0, ClassConstants.ACC_TRANSIENT,
+                            new MemberAccessFilter(0, AccessConstants.TRANSIENT,
                             new MemberDescriptorFilter(ClassUtil.internalTypeFromClassName(programClass.getName()),
                             this)))));
     }

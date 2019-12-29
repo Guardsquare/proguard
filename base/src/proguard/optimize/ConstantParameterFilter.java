@@ -59,7 +59,7 @@ implements   MemberVisitor
         // All parameters of non-static methods are shifted by one in the local
         // variable frame.
         boolean isStatic =
-            (programMethod.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
+            (programMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
 
         int parameterStart = isStatic ? 0 : 1;
         int parameterCount =

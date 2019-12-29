@@ -192,7 +192,7 @@ implements   ClassVisitor,
         if (!descriptor.equals(newDescriptor))
         {
             String name    = programField.getName(programClass);
-            String newName = name + ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
+            String newName = name + TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
 
             if (DEBUG)
             {
@@ -214,7 +214,7 @@ implements   ClassVisitor,
             programField.referencedClass = null;
 
             // Clear the enum flag.
-            programField.u2accessFlags &= ~ClassConstants.ACC_ENUM;
+            programField.u2accessFlags &= ~AccessConstants.ENUM;
 
             // Clear the field value.
             if (!KeepMarker.isKept(programField))
@@ -252,7 +252,7 @@ implements   ClassVisitor,
             // Append a code, if the method isn't a class instance initializer.
             if (!name.equals(ClassConstants.METHOD_NAME_INIT))
             {
-                newName += ClassConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
+                newName += TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
             }
 
             if (DEBUG)
@@ -382,7 +382,7 @@ implements   ClassVisitor,
                                       Clazz  referencedClass)
     {
         return isSimpleEnum(referencedClass) ?
-                   descriptor.substring(0, ClassUtil.internalArrayTypeDimensionCount(descriptor)) + ClassConstants.TYPE_INT :
+                   descriptor.substring(0, ClassUtil.internalArrayTypeDimensionCount(descriptor)) + TypeConstants.INT :
                    descriptor;
     }
 
@@ -444,7 +444,7 @@ implements   ClassVisitor,
 
             if (typeEnumeration.isMethodSignature())
             {
-                newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_OPEN);
+                newDescriptorBuffer.append(TypeConstants.METHOD_ARGUMENTS_OPEN);
             }
 
             // Go over the main types (class types or parameter types).
@@ -473,7 +473,7 @@ implements   ClassVisitor,
                         // Replace it by a primitive int, with any array
                         // prefix.
                         newDescriptorBuffer.append(type.substring(0, ClassUtil.internalArrayTypeDimensionCount(type)));
-                        newDescriptorBuffer.append(ClassConstants.TYPE_INT);
+                        newDescriptorBuffer.append(TypeConstants.INT);
 
                         // Skip any other classes of this type.
                         classEnumeration.nextFluff();
@@ -521,7 +521,7 @@ implements   ClassVisitor,
 
             if (typeEnumeration.isMethodSignature())
             {
-                newDescriptorBuffer.append(ClassConstants.METHOD_ARGUMENTS_CLOSE);
+                newDescriptorBuffer.append(TypeConstants.METHOD_ARGUMENTS_CLOSE);
 
                 // Consider the classes referenced by the return type.
                 String type = typeEnumeration.returnType();
@@ -546,7 +546,7 @@ implements   ClassVisitor,
                         // Replace it by a primitive int, with any array
                         // prefix.
                         newDescriptorBuffer.append(type.substring(0, ClassUtil.internalArrayTypeDimensionCount(type)));
-                        newDescriptorBuffer.append(ClassConstants.TYPE_INT);
+                        newDescriptorBuffer.append(TypeConstants.INT);
                     }
                     else
                     {

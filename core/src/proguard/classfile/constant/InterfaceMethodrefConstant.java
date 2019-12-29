@@ -59,7 +59,7 @@ public class InterfaceMethodrefConstant extends AnyMethodrefConstant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_InterfaceMethodref;
+        return Constant.INTERFACE_METHODREF;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

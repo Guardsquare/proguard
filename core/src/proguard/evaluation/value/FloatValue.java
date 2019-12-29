@@ -17,7 +17,7 @@
  */
 package proguard.evaluation.value;
 
-import proguard.classfile.ClassConstants;
+import proguard.classfile.*;
 
 /**
  * This class represents a partially evaluated float value.
@@ -351,6 +351,6 @@ public abstract class FloatValue extends Category1Value
 
     public final String internalType()
     {
-        return String.valueOf(ClassConstants.TYPE_FLOAT);
+        return String.valueOf(TypeConstants.FLOAT);
     }
 }

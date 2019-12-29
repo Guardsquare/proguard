@@ -23,7 +23,7 @@ package proguard.backport;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.InvokeDynamicConstant;
+import proguard.classfile.constant.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
@@ -170,7 +170,7 @@ implements ClassVisitor,
     @Override
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction)
     {
-        if (constantInstruction.opcode == InstructionConstants.OP_INVOKEDYNAMIC)
+        if (constantInstruction.opcode == Instruction.OP_INVOKEDYNAMIC)
         {
             ProgramClass programClass = (ProgramClass) clazz;
 
@@ -310,9 +310,9 @@ implements ClassVisitor,
     {
         return method.getName(clazz)      .equals(METHOD_NAME_DESERIALIZE_LAMBDA) &&
                method.getDescriptor(clazz).equals(METHOD_TYPE_DESERIALIZE_LAMBDA) &&
-               hasFlag(method, ClassConstants.ACC_PRIVATE |
-                               ClassConstants.ACC_STATIC  |
-                               ClassConstants.ACC_SYNTHETIC);
+               hasFlag(method, AccessConstants.PRIVATE |
+                               AccessConstants.STATIC  |
+                               AccessConstants.SYNTHETIC);
     }
 
     private static boolean hasFlag(Member member, int flag)
@@ -396,10 +396,10 @@ implements ClassVisitor,
 
         // If the method is not yet static, make it static
         // by updating its access flags / descriptor.
-        if ((programMethod.getAccessFlags() & (ClassConstants.ACC_STATIC)) == 0)
+        if ((programMethod.getAccessFlags() & (AccessConstants.STATIC)) == 0)
         {
             programMethod.accept(programClass,
-                new MemberAccessFlagSetter(ClassConstants.ACC_STATIC));
+                new MemberAccessFlagSetter(AccessConstants.STATIC));
 
             String newDescriptor =
                 prependParameterToMethodDescriptor(lambdaExpression.invokedMethodDesc,
@@ -410,7 +410,7 @@ implements ClassVisitor,
 
             // Update the lambda expression accordingly.
             lambdaExpression.invokedMethodDesc    = newDescriptor;
-            lambdaExpression.invokedReferenceKind = ClassConstants.REF_invokeStatic;
+            lambdaExpression.invokedReferenceKind = MethodHandleConstant.REF_INVOKE_STATIC;
         }
     }
 
@@ -445,7 +445,7 @@ implements ClassVisitor,
         }
 
         // Method reference to a constructor.
-        if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+        if (lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_NEW_INVOKE_SPECIAL)
         {
             // Replace the return type of the accessor method -> change to created type.
 
@@ -468,7 +468,7 @@ implements ClassVisitor,
                 ClassUtil.internalMethodDescriptorFromInternalTypes(invokedClassType,
                                                                     invokedParameterTypes);
         }
-        else if ((accessFlags & ClassConstants.ACC_STATIC) == 0)
+        else if ((accessFlags & AccessConstants.STATIC) == 0)
         {
             accessorMethodDescriptor =
                 prependParameterToMethodDescriptor(accessorMethodDescriptor,
@@ -478,8 +478,8 @@ implements ClassVisitor,
         final String methodDescriptor = accessorMethodDescriptor;
 
         classBuilder.addMethod(
-            ClassConstants.ACC_STATIC |
-            ClassConstants.ACC_SYNTHETIC,
+            AccessConstants.STATIC |
+            AccessConstants.SYNTHETIC,
             accessorMethodName,
             accessorMethodDescriptor,
             50,
@@ -487,7 +487,7 @@ implements ClassVisitor,
             {
                 // If the lambda expression is a method reference to a constructor,
                 // we need to create the object first.
-                if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+                if (lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_NEW_INVOKE_SPECIAL)
                 {
                     ____.new_(lambdaExpression.invokedClassName)
                         .dup();
@@ -508,7 +508,7 @@ implements ClassVisitor,
         lambdaExpression.invokedClassName     = programClass.getName();
         lambdaExpression.invokedMethodName    = accessorMethodName;
         lambdaExpression.invokedMethodDesc    = accessorMethodDescriptor;
-        lambdaExpression.invokedReferenceKind = ClassConstants.REF_invokeStatic;
+        lambdaExpression.invokedReferenceKind = MethodHandleConstant.REF_INVOKE_STATIC;
 
         lambdaExpression.referencedInvokedClass  = programClass;
         lambdaExpression.referencedInvokedMethod = programClass.findMethod(accessorMethodName,
@@ -527,15 +527,15 @@ implements ClassVisitor,
 
         // Add singleton field
         classBuilder.addField(
-            ClassConstants.ACC_PUBLIC |
-            ClassConstants.ACC_STATIC |
-            ClassConstants.ACC_FINAL,
+            AccessConstants.PUBLIC |
+            AccessConstants.STATIC |
+            AccessConstants.FINAL,
             LAMBDA_SINGLETON_FIELD_NAME,
             lambdaClassType);
 
         // Add the constructor.
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC,
+            AccessConstants.PUBLIC,
             ClassConstants.METHOD_NAME_INIT,
             ClassConstants.METHOD_TYPE_INIT,
             10,
@@ -548,7 +548,7 @@ implements ClassVisitor,
 
         // Add static initializer.
         classBuilder.addMethod(
-            ClassConstants.ACC_STATIC,
+            AccessConstants.STATIC,
             ClassConstants.METHOD_NAME_CLINIT,
             ClassConstants.METHOD_TYPE_CLINIT,
             30,
@@ -568,7 +568,7 @@ implements ClassVisitor,
         if (lambdaExpression.isSerializable())
         {
             classBuilder.addMethod(
-                ClassConstants.ACC_PRIVATE,
+                AccessConstants.PRIVATE,
                 ClassConstants.METHOD_NAME_READ_RESOLVE,
                 ClassConstants.METHOD_TYPE_READ_RESOLVE,
                 10,
@@ -586,13 +586,13 @@ implements ClassVisitor,
 
         // Add the interface method.
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC,
+            AccessConstants.PUBLIC,
             lambdaExpression.interfaceMethod,
             lambdaExpression.interfaceMethodDescriptor,
             50,
             ____ ->
             {
-                if (lambdaExpression.invokedReferenceKind == ClassConstants.REF_newInvokeSpecial)
+                if (lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_NEW_INVOKE_SPECIAL)
                 {
                     ____.new_(lambdaExpression.invokedClassName)
                         .dup();
@@ -609,8 +609,8 @@ implements ClassVisitor,
                 else
                 {
                     boolean isInvokeVirtualOrInterface =
-                        lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeVirtual ||
-                        lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeInterface;
+                        lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_INVOKE_VIRTUAL ||
+                        lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_INVOKE_INTERFACE;
 
                     // Convert the remaining parameters if they are present.
                     completeInterfaceMethod(lambdaExpression,
@@ -643,7 +643,7 @@ implements ClassVisitor,
         }
 
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC,
+            AccessConstants.PUBLIC,
             ClassConstants.METHOD_NAME_INIT,
             ctorDescriptor,
             50,
@@ -689,8 +689,8 @@ implements ClassVisitor,
                 System.out.println("LambdaExpressionConverter:     creating field ["+lambdaClass+"."+fieldName+" "+type+"]");
             }
 
-            classBuilder.addField(ClassConstants.ACC_PRIVATE |
-                                 ClassConstants.ACC_FINAL,
+            classBuilder.addField(AccessConstants.PRIVATE |
+                                 AccessConstants.FINAL,
                                  fieldName,
                                  type);
         }
@@ -702,15 +702,15 @@ implements ClassVisitor,
 
         // Add the interface method implementation.
         classBuilder.addMethod(
-            ClassConstants.ACC_PUBLIC,
+            AccessConstants.PUBLIC,
             lambdaExpression.interfaceMethod,
             lambdaExpression.interfaceMethodDescriptor,
             50,
             ____ ->
             {
                 boolean isInvokeVirtualOrInterface =
-                    lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeVirtual ||
-                    lambdaExpression.invokedReferenceKind == ClassConstants.REF_invokeInterface;
+                    lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_INVOKE_VIRTUAL ||
+                    lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_INVOKE_INTERFACE;
 
                 // Load the instance fields and the remaining parameters.
                 completeInterfaceMethod(lambdaExpression,
@@ -798,7 +798,7 @@ implements ClassVisitor,
         // Invoke the method.
         switch (lambdaExpression.invokedReferenceKind)
         {
-            case ClassConstants.REF_invokeStatic:
+            case MethodHandleConstant.REF_INVOKE_STATIC:
                 if (lambdaExpression.invokesStaticInterfaceMethod())
                 {
                     ____.invokestatic_interface(lambdaExpression.invokedClassName,
@@ -817,7 +817,7 @@ implements ClassVisitor,
                 }
                 break;
 
-            case ClassConstants.REF_invokeVirtual:
+            case MethodHandleConstant.REF_INVOKE_VIRTUAL:
                 ____.invokevirtual(lambdaExpression.invokedClassName,
                                    lambdaExpression.invokedMethodName,
                                    lambdaExpression.invokedMethodDesc,
@@ -825,7 +825,7 @@ implements ClassVisitor,
                                    lambdaExpression.referencedInvokedMethod);
                 break;
 
-            case ClassConstants.REF_invokeInterface:
+            case MethodHandleConstant.REF_INVOKE_INTERFACE:
                 ____.invokeinterface(lambdaExpression.invokedClassName,
                                      lambdaExpression.invokedMethodName,
                                      lambdaExpression.invokedMethodDesc,
@@ -833,8 +833,8 @@ implements ClassVisitor,
                                      lambdaExpression.referencedInvokedMethod);
                 break;
 
-            case ClassConstants.REF_newInvokeSpecial:
-            case ClassConstants.REF_invokeSpecial:
+            case MethodHandleConstant.REF_NEW_INVOKE_SPECIAL:
+            case MethodHandleConstant.REF_INVOKE_SPECIAL:
                 ____.invokespecial(lambdaExpression.invokedClassName,
                                    lambdaExpression.invokedMethodName,
                                    lambdaExpression.invokedMethodDesc,
@@ -875,9 +875,9 @@ implements ClassVisitor,
                 }
 
                 classBuilder.addMethod(
-                    ClassConstants.ACC_PUBLIC |
-                    ClassConstants.ACC_SYNTHETIC |
-                    ClassConstants.ACC_BRIDGE,
+                    AccessConstants.PUBLIC |
+                    AccessConstants.SYNTHETIC |
+                    AccessConstants.BRIDGE,
                     methodName,
                     bridgeMethodDescriptor,
                     50,
@@ -955,49 +955,49 @@ implements ClassVisitor,
             // Perform auto-boxing.
             switch (sourceType.charAt(0))
             {
-                case ClassConstants.TYPE_INT:
+                case TypeConstants.INT:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_INTEGER,
                                           "valueOf",
                                           "(I)Ljava/lang/Integer;");
                     break;
 
-                case ClassConstants.TYPE_BYTE:
+                case TypeConstants.BYTE:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_BYTE,
                                           "valueOf",
                                           "(B)Ljava/lang/Byte;");
                     break;
 
-                case ClassConstants.TYPE_CHAR:
+                case TypeConstants.CHAR:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_CHARACTER,
                                           "valueOf",
                                           "(C)Ljava/lang/Character;");
                     break;
 
-                case ClassConstants.TYPE_SHORT:
+                case TypeConstants.SHORT:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_SHORT,
                                           "valueOf",
                                           "(S)Ljava/lang/Short;");
                     break;
 
-                case ClassConstants.TYPE_BOOLEAN:
+                case TypeConstants.BOOLEAN:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_BOOLEAN,
                                           "valueOf",
                                           "(Z)Ljava/lang/Boolean;");
                     break;
 
-                case ClassConstants.TYPE_LONG:
+                case TypeConstants.LONG:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_LONG,
                                           "valueOf",
                                           "(J)Ljava/lang/Long;");
                     break;
 
-                case ClassConstants.TYPE_FLOAT:
+                case TypeConstants.FLOAT:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_FLOAT,
                                           "valueOf",
                                           "(F)Ljava/lang/Float;");
                     break;
 
-                case ClassConstants.TYPE_DOUBLE:
+                case TypeConstants.DOUBLE:
                     composer.invokestatic(ClassConstants.NAME_JAVA_LANG_DOUBLE,
                                           "valueOf",
                                           "(D)Ljava/lang/Double;");
@@ -1012,7 +1012,7 @@ implements ClassVisitor,
             // Perform auto-unboxing.
             switch (targetType.charAt(0))
             {
-                case ClassConstants.TYPE_INT:
+                case TypeConstants.INT:
                     if (castRequired)
                     {
                         composer.checkcast("java/lang/Number");
@@ -1022,7 +1022,7 @@ implements ClassVisitor,
                                            "()I");
                     break;
 
-                case ClassConstants.TYPE_BYTE:
+                case TypeConstants.BYTE:
                     if (castRequired)
                     {
                         composer.checkcast(ClassConstants.NAME_JAVA_LANG_BYTE);
@@ -1032,7 +1032,7 @@ implements ClassVisitor,
                                            "()B");
                     break;
 
-                case ClassConstants.TYPE_CHAR:
+                case TypeConstants.CHAR:
                     if (castRequired)
                     {
                         composer.checkcast(ClassConstants.NAME_JAVA_LANG_CHARACTER);
@@ -1042,7 +1042,7 @@ implements ClassVisitor,
                                            "()C");
                     break;
 
-                case ClassConstants.TYPE_SHORT:
+                case TypeConstants.SHORT:
                     if (castRequired)
                     {
                         composer.checkcast(ClassConstants.NAME_JAVA_LANG_SHORT);
@@ -1052,7 +1052,7 @@ implements ClassVisitor,
                                            "()S");
                     break;
 
-                case ClassConstants.TYPE_BOOLEAN:
+                case TypeConstants.BOOLEAN:
                     if (castRequired)
                     {
                         composer.checkcast(ClassConstants.NAME_JAVA_LANG_BOOLEAN);
@@ -1062,7 +1062,7 @@ implements ClassVisitor,
                                            "()Z");
                     break;
 
-                case ClassConstants.TYPE_LONG:
+                case TypeConstants.LONG:
                     if (castRequired)
                     {
                         composer.checkcast("java/lang/Number");
@@ -1072,7 +1072,7 @@ implements ClassVisitor,
                                            "()J");
                     break;
 
-                case ClassConstants.TYPE_FLOAT:
+                case TypeConstants.FLOAT:
                     if (castRequired)
                     {
                         composer.checkcast("java/lang/Number");
@@ -1082,7 +1082,7 @@ implements ClassVisitor,
                                            "()F");
                     break;
 
-                case ClassConstants.TYPE_DOUBLE:
+                case TypeConstants.DOUBLE:
                     if (castRequired)
                     {
                         composer.checkcast("java/lang/Number");

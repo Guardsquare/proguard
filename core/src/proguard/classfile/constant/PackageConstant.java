@@ -61,7 +61,7 @@ public class PackageConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Package;
+        return Constant.PACKAGE;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

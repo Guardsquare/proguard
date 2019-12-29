@@ -27,6 +27,17 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
  */
 public class MethodHandleConstant extends Constant
 {
+    public static final int REF_GET_FIELD          = 1;
+    public static final int REF_GET_STATIC         = 2;
+    public static final int REF_PUT_FIELD          = 3;
+    public static final int REF_PUT_STATIC         = 4;
+    public static final int REF_INVOKE_VIRTUAL     = 5;
+    public static final int REF_INVOKE_STATIC      = 6;
+    public static final int REF_INVOKE_SPECIAL     = 7;
+    public static final int REF_NEW_INVOKE_SPECIAL = 8;
+    public static final int REF_INVOKE_INTERFACE   = 9;
+
+
     public int u1referenceKind;
     public int u2referenceIndex;
 
@@ -66,15 +77,15 @@ public class MethodHandleConstant extends Constant
     /**
      * Returns the kind of reference to which this constant is pointing.
      * @return One of
-     *         {@link ClassConstants#REF_getField        },
-     *         {@link ClassConstants#REF_getStatic       },
-     *         {@link ClassConstants#REF_putField        },
-     *         {@link ClassConstants#REF_putStatic       },
-     *         {@link ClassConstants#REF_invokeVirtual   },
-     *         {@link ClassConstants#REF_invokeStatic    },
-     *         {@link ClassConstants#REF_invokeSpecial   },
-     *         {@link ClassConstants#REF_newInvokeSpecial}, or
-     *         {@link ClassConstants#REF_invokeInterface }.
+     *         {@link #REF_GET_FIELD         },
+     *         {@link #REF_GET_STATIC        },
+     *         {@link #REF_PUT_FIELD         },
+     *         {@link #REF_PUT_STATIC        },
+     *         {@link #REF_INVOKE_VIRTUAL    },
+     *         {@link #REF_INVOKE_STATIC     },
+     *         {@link #REF_INVOKE_SPECIAL    },
+     *         {@link #REF_NEW_INVOKE_SPECIAL}, or
+     *         {@link #REF_INVOKE_INTERFACE  }.
      */
     public int getReferenceKind()
     {
@@ -129,7 +140,7 @@ public class MethodHandleConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_MethodHandle;
+        return Constant.METHOD_HANDLE;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

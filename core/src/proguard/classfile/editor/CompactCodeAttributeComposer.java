@@ -24,8 +24,6 @@ import proguard.classfile.constant.Constant;
 import proguard.classfile.instruction.*;
 import proguard.classfile.util.*;
 
-import static proguard.classfile.ClassConstants.*;
-
 /**
  * This AttributeVisitor accumulates instructions, exceptions and line numbers,
  * in a compact and fluent style, and then copies them into code attributes
@@ -348,112 +346,112 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer nop()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_NOP));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_NOP));
     }
 
     public CompactCodeAttributeComposer aconst_null()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ACONST_NULL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ACONST_NULL));
     }
 
     public CompactCodeAttributeComposer iconst(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_0, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_0, constant));
     }
 
     public CompactCodeAttributeComposer iconst_m1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_M1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_M1));
     }
 
     public CompactCodeAttributeComposer iconst_0()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_0));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_0));
     }
 
     public CompactCodeAttributeComposer iconst_1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_1));
     }
 
     public CompactCodeAttributeComposer iconst_2()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_2));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_2));
     }
 
     public CompactCodeAttributeComposer iconst_3()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_3));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_3));
     }
 
     public CompactCodeAttributeComposer iconst_4()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_4));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_4));
     }
 
     public CompactCodeAttributeComposer iconst_5()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ICONST_5));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ICONST_5));
     }
 
     public CompactCodeAttributeComposer lconst(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LCONST_0, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LCONST_0, constant));
     }
 
     public CompactCodeAttributeComposer lconst_0()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LCONST_0));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LCONST_0));
     }
 
     public CompactCodeAttributeComposer lconst_1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LCONST_1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LCONST_1));
     }
 
     public CompactCodeAttributeComposer fconst(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FCONST_0, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FCONST_0, constant));
     }
 
     public CompactCodeAttributeComposer fconst_0()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FCONST_0));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FCONST_0));
     }
 
     public CompactCodeAttributeComposer fconst_1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FCONST_1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FCONST_1));
     }
 
     public CompactCodeAttributeComposer fconst_2()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FCONST_2));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FCONST_2));
     }
 
     public CompactCodeAttributeComposer dconst(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DCONST_0, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DCONST_0, constant));
     }
 
     public CompactCodeAttributeComposer dconst_0()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DCONST_0));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DCONST_0));
     }
 
     public CompactCodeAttributeComposer dconst_1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DCONST_1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DCONST_1));
     }
 
     public CompactCodeAttributeComposer bipush(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_BIPUSH, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_BIPUSH, constant));
     }
 
     public CompactCodeAttributeComposer sipush(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_SIPUSH, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_SIPUSH, constant));
     }
 
     public CompactCodeAttributeComposer ldc(int value)
@@ -502,7 +500,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer ldc_(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_LDC, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_LDC, constantIndex));
     }
 
     public CompactCodeAttributeComposer ldc_w(int value)
@@ -532,7 +530,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer ldc_w_(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_LDC_W, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_LDC_W, constantIndex));
     }
 
     public CompactCodeAttributeComposer ldc2_w(long value)
@@ -547,753 +545,753 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer ldc2_w(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_LDC2_W, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_LDC2_W, constantIndex));
     }
 
     public CompactCodeAttributeComposer iload(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ILOAD, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ILOAD, variableIndex));
     }
 
     public CompactCodeAttributeComposer lload(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LLOAD, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LLOAD, variableIndex));
     }
 
     public CompactCodeAttributeComposer fload(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FLOAD, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FLOAD, variableIndex));
     }
 
     public CompactCodeAttributeComposer dload(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DLOAD, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DLOAD, variableIndex));
     }
 
     public CompactCodeAttributeComposer aload(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ALOAD, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ALOAD, variableIndex));
     }
 
     public CompactCodeAttributeComposer iload_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ILOAD_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ILOAD_0));
     }
 
     public CompactCodeAttributeComposer iload_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ILOAD_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ILOAD_1));
     }
 
     public CompactCodeAttributeComposer iload_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ILOAD_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ILOAD_2));
     }
 
     public CompactCodeAttributeComposer iload_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ILOAD_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ILOAD_3));
     }
 
     public CompactCodeAttributeComposer lload_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LLOAD_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LLOAD_0));
     }
 
     public CompactCodeAttributeComposer lload_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LLOAD_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LLOAD_1));
     }
 
     public CompactCodeAttributeComposer lload_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LLOAD_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LLOAD_2));
     }
 
     public CompactCodeAttributeComposer lload_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LLOAD_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LLOAD_3));
     }
 
     public CompactCodeAttributeComposer fload_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FLOAD_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FLOAD_0));
     }
 
     public CompactCodeAttributeComposer fload_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FLOAD_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FLOAD_1));
     }
 
     public CompactCodeAttributeComposer fload_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FLOAD_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FLOAD_2));
     }
 
     public CompactCodeAttributeComposer fload_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FLOAD_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FLOAD_3));
     }
 
     public CompactCodeAttributeComposer dload_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DLOAD_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DLOAD_0));
     }
 
     public CompactCodeAttributeComposer dload_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DLOAD_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DLOAD_1));
     }
 
     public CompactCodeAttributeComposer dload_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DLOAD_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DLOAD_2));
     }
 
     public CompactCodeAttributeComposer dload_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DLOAD_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DLOAD_3));
     }
 
     public CompactCodeAttributeComposer aload_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ALOAD_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ALOAD_0));
     }
 
     public CompactCodeAttributeComposer aload_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ALOAD_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ALOAD_1));
     }
 
     public CompactCodeAttributeComposer aload_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ALOAD_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ALOAD_2));
     }
 
     public CompactCodeAttributeComposer aload_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ALOAD_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ALOAD_3));
     }
 
     public CompactCodeAttributeComposer iaload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IALOAD));
     }
 
     public CompactCodeAttributeComposer laload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LALOAD));
     }
 
     public CompactCodeAttributeComposer faload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FALOAD));
     }
 
     public CompactCodeAttributeComposer daload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DALOAD));
     }
 
     public CompactCodeAttributeComposer aaload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_AALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_AALOAD));
     }
 
     public CompactCodeAttributeComposer baload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_BALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_BALOAD));
     }
 
     public CompactCodeAttributeComposer caload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_CALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_CALOAD));
     }
 
     public CompactCodeAttributeComposer saload()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_SALOAD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_SALOAD));
     }
 
     public CompactCodeAttributeComposer istore(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ISTORE, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ISTORE, variableIndex));
     }
 
     public CompactCodeAttributeComposer lstore(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LSTORE, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LSTORE, variableIndex));
     }
 
     public CompactCodeAttributeComposer fstore(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FSTORE, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FSTORE, variableIndex));
     }
 
     public CompactCodeAttributeComposer dstore(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DSTORE, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DSTORE, variableIndex));
     }
 
     public CompactCodeAttributeComposer astore(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ASTORE, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ASTORE, variableIndex));
     }
 
     public CompactCodeAttributeComposer istore_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ISTORE_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ISTORE_0));
     }
 
     public CompactCodeAttributeComposer istore_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ISTORE_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ISTORE_1));
     }
 
     public CompactCodeAttributeComposer istore_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ISTORE_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ISTORE_2));
     }
 
     public CompactCodeAttributeComposer istore_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ISTORE_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ISTORE_3));
     }
 
     public CompactCodeAttributeComposer lstore_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LSTORE_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LSTORE_0));
     }
 
     public CompactCodeAttributeComposer lstore_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LSTORE_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LSTORE_1));
     }
 
     public CompactCodeAttributeComposer lstore_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LSTORE_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LSTORE_2));
     }
 
     public CompactCodeAttributeComposer lstore_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_LSTORE_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_LSTORE_3));
     }
 
     public CompactCodeAttributeComposer fstore_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FSTORE_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FSTORE_0));
     }
 
     public CompactCodeAttributeComposer fstore_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FSTORE_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FSTORE_1));
     }
 
     public CompactCodeAttributeComposer fstore_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FSTORE_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FSTORE_2));
     }
 
     public CompactCodeAttributeComposer fstore_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_FSTORE_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_FSTORE_3));
     }
 
     public CompactCodeAttributeComposer dstore_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DSTORE_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DSTORE_0));
     }
 
     public CompactCodeAttributeComposer dstore_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DSTORE_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DSTORE_1));
     }
 
     public CompactCodeAttributeComposer dstore_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DSTORE_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DSTORE_2));
     }
 
     public CompactCodeAttributeComposer dstore_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_DSTORE_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_DSTORE_3));
     }
 
     public CompactCodeAttributeComposer astore_0()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ASTORE_0));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ASTORE_0));
     }
 
     public CompactCodeAttributeComposer astore_1()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ASTORE_1));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ASTORE_1));
     }
 
     public CompactCodeAttributeComposer astore_2()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ASTORE_2));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ASTORE_2));
     }
 
     public CompactCodeAttributeComposer astore_3()
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_ASTORE_3));
+        return appendInstruction(new VariableInstruction(Instruction.OP_ASTORE_3));
     }
 
     public CompactCodeAttributeComposer iastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IASTORE));
     }
 
     public CompactCodeAttributeComposer lastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LASTORE));
     }
 
     public CompactCodeAttributeComposer fastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FASTORE));
     }
 
     public CompactCodeAttributeComposer dastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DASTORE));
     }
 
     public CompactCodeAttributeComposer aastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_AASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_AASTORE));
     }
 
     public CompactCodeAttributeComposer bastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_BASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_BASTORE));
     }
 
     public CompactCodeAttributeComposer castore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_CASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_CASTORE));
     }
 
     public CompactCodeAttributeComposer sastore()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_SASTORE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_SASTORE));
     }
 
     public CompactCodeAttributeComposer pop()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_POP));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_POP));
     }
 
     public CompactCodeAttributeComposer pop2()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_POP2));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_POP2));
     }
 
     public CompactCodeAttributeComposer dup()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DUP));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DUP));
     }
 
     public CompactCodeAttributeComposer dup_x1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DUP_X1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DUP_X1));
     }
 
     public CompactCodeAttributeComposer dup_x2()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DUP_X2));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DUP_X2));
     }
 
     public CompactCodeAttributeComposer dup2()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DUP2));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DUP2));
     }
 
     public CompactCodeAttributeComposer dup2_x1()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DUP2_X1));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DUP2_X1));
     }
 
     public CompactCodeAttributeComposer dup2_x2()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DUP2_X2));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DUP2_X2));
     }
 
     public CompactCodeAttributeComposer swap()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_SWAP));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_SWAP));
     }
 
     public CompactCodeAttributeComposer iadd()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IADD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IADD));
     }
 
     public CompactCodeAttributeComposer ladd()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LADD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LADD));
     }
 
     public CompactCodeAttributeComposer fadd()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FADD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FADD));
     }
 
     public CompactCodeAttributeComposer dadd()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DADD));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DADD));
     }
 
     public CompactCodeAttributeComposer isub()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ISUB));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ISUB));
     }
 
     public CompactCodeAttributeComposer lsub()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LSUB));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LSUB));
     }
 
     public CompactCodeAttributeComposer fsub()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FSUB));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FSUB));
     }
 
     public CompactCodeAttributeComposer dsub()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DSUB));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DSUB));
     }
 
     public CompactCodeAttributeComposer imul()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IMUL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IMUL));
     }
 
     public CompactCodeAttributeComposer lmul()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LMUL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LMUL));
     }
 
     public CompactCodeAttributeComposer fmul()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FMUL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FMUL));
     }
 
     public CompactCodeAttributeComposer dmul()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DMUL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DMUL));
     }
 
     public CompactCodeAttributeComposer idiv()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IDIV));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IDIV));
     }
 
     public CompactCodeAttributeComposer ldiv()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LDIV));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LDIV));
     }
 
     public CompactCodeAttributeComposer fdiv()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FDIV));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FDIV));
     }
 
     public CompactCodeAttributeComposer ddiv()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DDIV));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DDIV));
     }
 
     public CompactCodeAttributeComposer irem()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IREM));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IREM));
     }
 
     public CompactCodeAttributeComposer lrem()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LREM));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LREM));
     }
 
     public CompactCodeAttributeComposer frem()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FREM));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FREM));
     }
 
     public CompactCodeAttributeComposer drem()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DREM));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DREM));
     }
 
     public CompactCodeAttributeComposer ineg()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_INEG));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_INEG));
     }
 
     public CompactCodeAttributeComposer lneg()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LNEG));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LNEG));
     }
 
     public CompactCodeAttributeComposer fneg()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FNEG));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FNEG));
     }
 
     public CompactCodeAttributeComposer dneg()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DNEG));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DNEG));
     }
 
     public CompactCodeAttributeComposer ishl()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ISHL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ISHL));
     }
 
     public CompactCodeAttributeComposer lshl()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LSHL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LSHL));
     }
 
     public CompactCodeAttributeComposer ishr()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ISHR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ISHR));
     }
 
     public CompactCodeAttributeComposer lshr()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LSHR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LSHR));
     }
 
     public CompactCodeAttributeComposer iushr()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IUSHR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IUSHR));
     }
 
     public CompactCodeAttributeComposer lushr()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LUSHR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LUSHR));
     }
 
     public CompactCodeAttributeComposer iand()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IAND));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IAND));
     }
 
     public CompactCodeAttributeComposer land()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LAND));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LAND));
     }
 
     public CompactCodeAttributeComposer ior()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IOR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IOR));
     }
 
     public CompactCodeAttributeComposer lor()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LOR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LOR));
     }
 
     public CompactCodeAttributeComposer ixor()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IXOR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IXOR));
     }
 
     public CompactCodeAttributeComposer lxor()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LXOR));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LXOR));
     }
 
     public CompactCodeAttributeComposer iinc(int variableIndex,
                                                int constant)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_IINC, variableIndex, constant));
+        return appendInstruction(new VariableInstruction(Instruction.OP_IINC, variableIndex, constant));
     }
 
     public CompactCodeAttributeComposer i2l()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_I2L));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_I2L));
     }
 
     public CompactCodeAttributeComposer i2f()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_I2F));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_I2F));
     }
 
     public CompactCodeAttributeComposer i2d()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_I2D));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_I2D));
     }
 
     public CompactCodeAttributeComposer l2i()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_L2I));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_L2I));
     }
 
     public CompactCodeAttributeComposer l2f()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_L2F));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_L2F));
     }
 
     public CompactCodeAttributeComposer l2d()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_L2D));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_L2D));
     }
 
     public CompactCodeAttributeComposer f2i()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_F2I));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_F2I));
     }
 
     public CompactCodeAttributeComposer f2l()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_F2L));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_F2L));
     }
 
     public CompactCodeAttributeComposer f2d()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_F2D));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_F2D));
     }
 
     public CompactCodeAttributeComposer d2i()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_D2I));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_D2I));
     }
 
     public CompactCodeAttributeComposer d2l()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_D2L));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_D2L));
     }
 
     public CompactCodeAttributeComposer d2f()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_D2F));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_D2F));
     }
 
     public CompactCodeAttributeComposer i2b()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_I2B));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_I2B));
     }
 
     public CompactCodeAttributeComposer i2c()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_I2C));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_I2C));
     }
 
     public CompactCodeAttributeComposer i2s()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_I2S));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_I2S));
     }
 
     public CompactCodeAttributeComposer lcmp()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LCMP));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LCMP));
     }
 
     public CompactCodeAttributeComposer fcmpl()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FCMPL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FCMPL));
     }
 
     public CompactCodeAttributeComposer fcmpg()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FCMPG));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FCMPG));
     }
 
     public CompactCodeAttributeComposer dcmpl()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DCMPL));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DCMPL));
     }
 
     public CompactCodeAttributeComposer dcmpg()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DCMPG));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DCMPG));
     }
 
     public CompactCodeAttributeComposer ifeq(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFEQ, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFEQ, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifne(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFNE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFNE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer iflt(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFLT, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFLT, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifge(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFGE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFGE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifgt(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFGT, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFGT, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifle(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFLE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFLE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ificmpeq(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPEQ, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFICMPEQ, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ificmpne(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPNE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFICMPNE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ificmplt(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPLT, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFICMPLT, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ificmpge(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPGE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFICMPGE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ificmpgt(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPGT, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFICMPGT, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ificmple(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFICMPLE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFICMPLE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifacmpeq(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFACMPEQ, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFACMPEQ, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifacmpne(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFACMPNE, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFACMPNE, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer goto_(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_GOTO, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_GOTO, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer jsr(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_JSR, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_JSR, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ret(int variableIndex)
     {
-        return appendInstruction(new VariableInstruction(InstructionConstants.OP_RET, variableIndex));
+        return appendInstruction(new VariableInstruction(Instruction.OP_RET, variableIndex));
     }
 
     public CompactCodeAttributeComposer tableswitch(Label   defaultLabel,
@@ -1301,7 +1299,7 @@ implements   AttributeVisitor
                                                     int     highCase,
                                                     Label[] jumpLabels)
     {
-        return appendInstruction(new TableSwitchInstruction(InstructionConstants.OP_TABLESWITCH,
+        return appendInstruction(new TableSwitchInstruction(Instruction.OP_TABLESWITCH,
                                                             defaultLabel.offset,
                                                             lowCase,
                                                             highCase,
@@ -1312,7 +1310,7 @@ implements   AttributeVisitor
                                                      int[]   cases,
                                                      Label[] jumpLabels)
     {
-        return appendInstruction(new LookUpSwitchInstruction(InstructionConstants.OP_LOOKUPSWITCH,
+        return appendInstruction(new LookUpSwitchInstruction(Instruction.OP_LOOKUPSWITCH,
                                                              defaultLabel.offset,
                                                              cases,
                                                              offsets(jumpLabels)));
@@ -1320,32 +1318,32 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer ireturn()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_IRETURN));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_IRETURN));
     }
 
     public CompactCodeAttributeComposer lreturn()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_LRETURN));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_LRETURN));
     }
 
     public CompactCodeAttributeComposer freturn()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_FRETURN));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_FRETURN));
     }
 
     public CompactCodeAttributeComposer dreturn()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_DRETURN));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_DRETURN));
     }
 
     public CompactCodeAttributeComposer areturn()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ARETURN));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ARETURN));
     }
 
     public CompactCodeAttributeComposer return_()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_RETURN));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_RETURN));
     }
 
     public CompactCodeAttributeComposer getstatic(Clazz clazz,
@@ -1380,7 +1378,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer getstatic(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_GETSTATIC, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_GETSTATIC, constantIndex));
     }
 
     public CompactCodeAttributeComposer putstatic(Clazz referencedClass,
@@ -1415,7 +1413,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer putstatic(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_PUTSTATIC, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_PUTSTATIC, constantIndex));
     }
 
     public CompactCodeAttributeComposer getfield(Clazz clazz,
@@ -1450,7 +1448,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer getfield(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_GETFIELD, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_GETFIELD, constantIndex));
     }
 
     public CompactCodeAttributeComposer putfield(Clazz clazz,
@@ -1485,7 +1483,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer putfield(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_PUTFIELD, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_PUTFIELD, constantIndex));
     }
 
     public CompactCodeAttributeComposer invokevirtual(Clazz  clazz,
@@ -1520,7 +1518,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer invokevirtual(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, constantIndex));
     }
 
     public CompactCodeAttributeComposer invokespecial(Clazz  clazz,
@@ -1555,7 +1553,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer invokespecial(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_INVOKESPECIAL, constantIndex));
     }
 
     public CompactCodeAttributeComposer invokestatic(Clazz  clazz,
@@ -1620,7 +1618,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer invokestatic(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_INVOKESTATIC, constantIndex));
     }
 
     public CompactCodeAttributeComposer invokeinterface(Clazz  clazz,
@@ -1660,7 +1658,7 @@ implements   AttributeVisitor
     public CompactCodeAttributeComposer invokeinterface(int constantIndex,
                                                         int constant)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_INVOKEINTERFACE, constantIndex, constant));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_INVOKEINTERFACE, constantIndex, constant));
     }
 
     public CompactCodeAttributeComposer invokedynamic(int     bootStrapMethodIndex,
@@ -1676,7 +1674,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer invokedynamic(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_INVOKEDYNAMIC, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_INVOKEDYNAMIC, constantIndex));
     }
 
     public CompactCodeAttributeComposer new_(Clazz clazz)
@@ -1696,12 +1694,12 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer new_(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_NEW, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_NEW, constantIndex));
     }
 
     public CompactCodeAttributeComposer newarray(int constant)
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_NEWARRAY, constant));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_NEWARRAY, constant));
     }
 
     public CompactCodeAttributeComposer anewarray(String className, Clazz referencedClass)
@@ -1711,17 +1709,17 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer anewarray(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_ANEWARRAY, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_ANEWARRAY, constantIndex));
     }
 
     public CompactCodeAttributeComposer arraylength()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ARRAYLENGTH));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ARRAYLENGTH));
     }
 
     public CompactCodeAttributeComposer athrow()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_ATHROW));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_ATHROW));
     }
 
     public CompactCodeAttributeComposer checkcast(String className)
@@ -1736,7 +1734,7 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer checkcast(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_CHECKCAST, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_CHECKCAST, constantIndex));
     }
 
     public CompactCodeAttributeComposer instanceof_(String className, Clazz referencedClass)
@@ -1746,22 +1744,22 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer instanceof_(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_INSTANCEOF, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_INSTANCEOF, constantIndex));
     }
 
     public CompactCodeAttributeComposer monitorenter()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_MONITORENTER));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_MONITORENTER));
     }
 
     public CompactCodeAttributeComposer monitorexit()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_MONITOREXIT));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_MONITOREXIT));
     }
 
     public CompactCodeAttributeComposer wide()
     {
-        return appendInstruction(new SimpleInstruction(InstructionConstants.OP_WIDE));
+        return appendInstruction(new SimpleInstruction(Instruction.OP_WIDE));
     }
 
     public CompactCodeAttributeComposer multianewarray(String className, Clazz referencedClass)
@@ -1771,27 +1769,27 @@ implements   AttributeVisitor
 
     public CompactCodeAttributeComposer multianewarray(int constantIndex)
     {
-        return appendInstruction(new ConstantInstruction(InstructionConstants.OP_MULTIANEWARRAY, constantIndex));
+        return appendInstruction(new ConstantInstruction(Instruction.OP_MULTIANEWARRAY, constantIndex));
     }
 
     public CompactCodeAttributeComposer ifnull(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFNULL, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFNULL, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer ifnonnull(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_IFNONNULL, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_IFNONNULL, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer goto_w(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_GOTO_W, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_GOTO_W, branchLabel.offset));
     }
 
     public CompactCodeAttributeComposer jsr_w(Label branchLabel)
     {
-        return appendInstruction(new BranchInstruction(InstructionConstants.OP_JSR_W, branchLabel.offset));
+        return appendInstruction(new BranchInstruction(Instruction.OP_JSR_W, branchLabel.offset));
     }
 
 
@@ -1811,14 +1809,14 @@ implements   AttributeVisitor
     {
         switch (internalType)
         {
-            case TYPE_BOOLEAN: return ((Boolean)primitive).booleanValue() ? iconst_1() : iconst_0();
-            case TYPE_BYTE:    return bipush((Byte)primitive);
-            case TYPE_CHAR:    return ldc(((Character)primitive).charValue());
-            case TYPE_SHORT:   return sipush((Short)primitive);
-            case TYPE_INT:     return ldc(((Integer)primitive).intValue());
-            case TYPE_LONG:    return ldc2_w((Long)primitive);
-            case TYPE_FLOAT:   return ldc(((Float)primitive).floatValue());
-            case TYPE_DOUBLE:  return ldc2_w((Double)primitive);
+            case TypeConstants.BOOLEAN: return ((Boolean)primitive).booleanValue() ? iconst_1() : iconst_0();
+            case TypeConstants.BYTE:    return bipush((Byte)primitive);
+            case TypeConstants.CHAR:    return ldc(((Character)primitive).charValue());
+            case TypeConstants.SHORT:   return sipush((Short)primitive);
+            case TypeConstants.INT:     return ldc(((Integer)primitive).intValue());
+            case TypeConstants.LONG:    return ldc2_w((Long)primitive);
+            case TypeConstants.FLOAT:   return ldc(((Float)primitive).floatValue());
+            case TypeConstants.DOUBLE:  return ldc2_w((Double)primitive);
             default: throw new IllegalArgumentException(primitive.toString());
         }
     }
@@ -1937,14 +1935,14 @@ implements   AttributeVisitor
     {
         switch (internalType)
         {
-            case TYPE_BOOLEAN:
-            case TYPE_BYTE:
-            case TYPE_CHAR:
-            case TYPE_SHORT:
-            case TYPE_INT:    return iload(variableIndex);
-            case TYPE_LONG:   return lload(variableIndex);
-            case TYPE_FLOAT:  return fload(variableIndex);
-            case TYPE_DOUBLE: return dload(variableIndex);
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:    return iload(variableIndex);
+            case TypeConstants.LONG:   return lload(variableIndex);
+            case TypeConstants.FLOAT:  return fload(variableIndex);
+            case TypeConstants.DOUBLE: return dload(variableIndex);
             default:          return aload(variableIndex);
         }
     }
@@ -1983,14 +1981,14 @@ implements   AttributeVisitor
     {
         switch (internalType)
         {
-            case TYPE_BOOLEAN:
-            case TYPE_BYTE:
-            case TYPE_CHAR:
-            case TYPE_SHORT:
-            case TYPE_INT:    return istore(variableIndex);
-            case TYPE_LONG:   return lstore(variableIndex);
-            case TYPE_FLOAT:  return fstore(variableIndex);
-            case TYPE_DOUBLE: return dstore(variableIndex);
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:    return istore(variableIndex);
+            case TypeConstants.LONG:   return lstore(variableIndex);
+            case TypeConstants.FLOAT:  return fstore(variableIndex);
+            case TypeConstants.DOUBLE: return dstore(variableIndex);
             default:          return astore(variableIndex);
         }
     }
@@ -2008,14 +2006,14 @@ implements   AttributeVisitor
     {
         switch (elementType.charAt(0))
         {
-            case TYPE_BOOLEAN:
-            case TYPE_BYTE:   return bastore();
-            case TYPE_CHAR:   return castore();
-            case TYPE_SHORT:  return sastore();
-            case TYPE_INT:    return iastore();
-            case TYPE_LONG:   return lastore();
-            case TYPE_FLOAT:  return fastore();
-            case TYPE_DOUBLE: return dastore();
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:   return bastore();
+            case TypeConstants.CHAR:   return castore();
+            case TypeConstants.SHORT:  return sastore();
+            case TypeConstants.INT:    return iastore();
+            case TypeConstants.LONG:   return lastore();
+            case TypeConstants.FLOAT:  return fastore();
+            case TypeConstants.DOUBLE: return dastore();
             default:          return aastore();
         }
     }
@@ -2030,15 +2028,15 @@ implements   AttributeVisitor
     {
         switch (internalType.charAt(0))
         {
-            case TYPE_BOOLEAN:
-            case TYPE_BYTE:
-            case TYPE_CHAR:
-            case TYPE_SHORT:
-            case TYPE_INT:    return ireturn();
-            case TYPE_LONG:   return lreturn();
-            case TYPE_FLOAT:  return freturn();
-            case TYPE_DOUBLE: return dreturn();
-            case TYPE_VOID:   return return_();
+            case TypeConstants.BOOLEAN:
+            case TypeConstants.BYTE:
+            case TypeConstants.CHAR:
+            case TypeConstants.SHORT:
+            case TypeConstants.INT:    return ireturn();
+            case TypeConstants.LONG:   return lreturn();
+            case TypeConstants.FLOAT:  return freturn();
+            case TypeConstants.DOUBLE: return dreturn();
+            case TypeConstants.VOID:   return return_();
             default:          return areturn();
         }
     }
@@ -2248,10 +2246,10 @@ implements   AttributeVisitor
     {
         // Create an empty class.
         ProgramClass programClass =
-            new ProgramClass(ClassConstants.CLASS_VERSION_1_8,
+            new ProgramClass(VersionConstants.CLASS_VERSION_1_8,
                              1,
                              new Constant[10],
-                             ClassConstants.ACC_PUBLIC,
+                             AccessConstants.PUBLIC,
                              0,
                              0);
 
@@ -2264,14 +2262,14 @@ implements   AttributeVisitor
 
         // Create an empty method.
         ProgramMethod programMethod =
-            new ProgramMethod(ClassConstants.ACC_PUBLIC,
+            new ProgramMethod(AccessConstants.PUBLIC,
                               constantPoolEditor.addUtf8Constant("test"),
                               constantPoolEditor.addUtf8Constant("()I"),
                               null);
 
         // Create an empty code attribute.
         CodeAttribute codeAttribute =
-            new CodeAttribute(constantPoolEditor.addUtf8Constant(ClassConstants.ATTR_Code));
+            new CodeAttribute(constantPoolEditor.addUtf8Constant(Attribute.CODE));
 
         // Add the code attribute to the method.
         AttributesEditor attributesEditor =

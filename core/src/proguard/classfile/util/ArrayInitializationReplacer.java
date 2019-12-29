@@ -108,7 +108,7 @@ implements   ClassVisitor,
         // Verify that the previous instruction pushed the array size on the
         // stack: the java compiler will always do so, but obfuscators may
         // have reordered the instructions.
-        if (instruction.opcode == InstructionConstants.OP_NEWARRAY &&
+        if (instruction.opcode == Instruction.OP_NEWARRAY &&
             lastInstructionStackPushCount == 1)
         {
             if (arrayInitializationMatcher.matchesArrayInitialization(clazz,
@@ -123,7 +123,7 @@ implements   ClassVisitor,
                 // We need to replace the previous instruction, which pushes
                 // the array length onto the stack.
                 codeAttributeEditor.replaceInstruction(lastInstructionOffset,
-                                                       new ConstantInstruction(InstructionConstants.OP_LDC,
+                                                       new ConstantInstruction(Instruction.OP_LDC,
                                                                                constantIndex));
 
                 // Remove the newarray instruction itself.
@@ -178,7 +178,7 @@ implements   ClassVisitor,
             for (int offset = 0; offset < codeAttribute.u4codeLength;)
             {
                 Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
-                if (instruction.opcode == InstructionConstants.OP_NEWARRAY)
+                if (instruction.opcode == Instruction.OP_NEWARRAY)
                 {
                     delegateVisit = true;
                     break;

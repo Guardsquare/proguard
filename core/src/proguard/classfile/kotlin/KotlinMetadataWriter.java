@@ -20,6 +20,7 @@ package proguard.classfile.kotlin;
 import kotlinx.metadata.*;
 import kotlinx.metadata.jvm.*;
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.*;
@@ -108,8 +109,8 @@ implements KotlinMetadataVisitor,
 
         this.constantPoolEditor = new ConstantPoolEditor((ProgramClass) clazz);
         clazz.accept(new AllAttributeVisitor(
-                     new AttributeNameFilter(ClassConstants.ATTR_RuntimeVisibleAnnotations,
-                     new AllAnnotationVisitor(
+                     new AttributeNameFilter(Attribute.RUNTIME_VISIBLE_ANNOTATIONS,
+                                             new AllAnnotationVisitor(
                      new AnnotationTypeFilter(TYPE_KOTLIN_METADATA,
                                               new AllElementValueVisitor(this))))));
 

@@ -151,15 +151,15 @@ public abstract class Value
 
     /**
      * Returns the internal type of this Value.
-     * @return <code>ClassConstants.TYPE_BOOLEAN</code>,
-     *         <code>ClassConstants.TYPE_BYTE</code>,
-     *         <code>ClassConstants.TYPE_CHAR</code>,
-     *         <code>ClassConstants.TYPE_SHORT</code>,
-     *         <code>ClassConstants.TYPE_INT</code>,
-     *         <code>ClassConstants.TYPE_LONG</code>,
-     *         <code>ClassConstants.TYPE_FLOAT</code>,
-     *         <code>ClassConstants.TYPE_DOUBLE</code>,
-     *         <code>ClassConstants.TYPE_CLASS_START ... ClassConstants.TYPE_CLASS_END</code>, or
+     * @return <code>TypeConstants.BOOLEAN</code>,
+     *         <code>TypeConstants.BYTE</code>,
+     *         <code>TypeConstants.CHAR</code>,
+     *         <code>TypeConstants.SHORT</code>,
+     *         <code>TypeConstants.INT</code>,
+     *         <code>TypeConstants.LONG</code>,
+     *         <code>TypeConstants.FLOAT</code>,
+     *         <code>TypeConstants.DOUBLE</code>,
+     *         <code>TypeConstants.CLASS_START ... TypeConstants.CLASS_END</code>, or
      *         an array type containing any of these types (always as String).
      */
     public abstract String internalType();

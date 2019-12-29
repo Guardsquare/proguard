@@ -72,8 +72,8 @@ implements   MemberVisitor
         {
             // Make the method static.
             programMethod.u2accessFlags =
-                (programMethod.getAccessFlags() & ~ClassConstants.ACC_FINAL) |
-                ClassConstants.ACC_STATIC;
+                (programMethod.getAccessFlags() & ~AccessConstants.FINAL) |
+                AccessConstants.STATIC;
 
             // Visit the method, if required.
             if (extraStaticMemberVisitor != null)

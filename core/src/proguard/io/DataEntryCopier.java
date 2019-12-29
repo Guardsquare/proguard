@@ -30,6 +30,8 @@ import java.io.*;
  */
 public class DataEntryCopier implements DataEntryReader
 {
+    private static final byte[] JMOD_HEADER = new byte[] { 'J', 'M', 1, 0 };
+
     private static final int BUFFER_SIZE = 1024;
 
     private final DataEntryWriter dataEntryWriter;
@@ -177,7 +179,7 @@ public class DataEntryCopier implements DataEntryReader
             DataEntryWriter jmodWriter = new ZipWriter(null,
                                                        1,
                                                        0,
-                                                       ClassConstants.JMOD_HEADER,
+                                                       JMOD_HEADER,
                                                        writer);
             if (outputIsJmod)
             {

@@ -46,7 +46,7 @@ public class SideEffectClassChecker
         // Is the referenced class member static or an initializer method?
         // Does accessing the referenced class then have side effects?
         return
-            ((referencedMember.getAccessFlags() & ClassConstants.ACC_STATIC) != 0 ||
+            ((referencedMember.getAccessFlags() & AccessConstants.STATIC) != 0 ||
              referencedMember.getName(referencedClass).equals(ClassConstants.METHOD_NAME_INIT)) &&
             mayHaveSideEffects(referencingClass, referencedClass);
     }

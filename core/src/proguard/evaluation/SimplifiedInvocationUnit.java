@@ -111,34 +111,34 @@ implements            InvocationUnit,
 
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_GETSTATIC:
+            case Instruction.OP_GETSTATIC:
                 isStatic = true;
                 isLoad   = true;
                 break;
 
-            case InstructionConstants.OP_PUTSTATIC:
+            case Instruction.OP_PUTSTATIC:
                 isStatic = true;
                 isLoad   = false;
                 break;
 
-            case InstructionConstants.OP_GETFIELD:
+            case Instruction.OP_GETFIELD:
                 isStatic = false;
                 isLoad   = true;
                 break;
 
-            case InstructionConstants.OP_PUTFIELD:
+            case Instruction.OP_PUTFIELD:
                 isStatic = false;
                 isLoad   = false;
                 break;
 
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEDYNAMIC:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEDYNAMIC:
                 isStatic = true;
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKEINTERFACE:
                 isStatic = false;
                 break;
         }
@@ -191,7 +191,7 @@ implements            InvocationUnit,
 
         // Push the return value, if applicable.
         String returnType = ClassUtil.internalMethodReturnType(type);
-        if (returnType.charAt(0) != ClassConstants.TYPE_VOID)
+        if (returnType.charAt(0) != TypeConstants.VOID)
         {
             stack.push(getMethodReturnValue(clazz, anyMethodrefConstant, returnType));
         }
@@ -213,7 +213,7 @@ implements            InvocationUnit,
 
         // Push the return value, if applicable.
         String returnType = ClassUtil.internalMethodReturnType(type);
-        if (returnType.charAt(0) != ClassConstants.TYPE_VOID)
+        if (returnType.charAt(0) != TypeConstants.VOID)
         {
             stack.push(getMethodReturnValue(clazz, invokeDynamicConstant, returnType));
         }

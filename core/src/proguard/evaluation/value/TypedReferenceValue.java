@@ -171,9 +171,9 @@ public class TypedReferenceValue extends ReferenceValue
         return referencedClass      == null ||
                otherReferencedClass == null                                       ? MAYBE :
                referencedClass.extendsOrImplements(otherReferencedClass)          ? mayBeNull ? MAYBE : ALWAYS :
-               (referencedClass.getAccessFlags() & ClassConstants.ACC_FINAL) != 0 ? NEVER :
-               (referencedClass.getAccessFlags()      & ClassConstants.ACC_INTERFACE) == 0 &&
-               (otherReferencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) == 0 &&
+               (referencedClass.getAccessFlags() & AccessConstants.FINAL) != 0 ? NEVER :
+               (referencedClass.getAccessFlags()      & AccessConstants.INTERFACE) == 0 &&
+               (otherReferencedClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 &&
                !otherReferencedClass.extendsOrImplements(referencedClass)         ? NEVER :
                                                                                     MAYBE;
     }
@@ -508,7 +508,7 @@ public class TypedReferenceValue extends ReferenceValue
                     commonClass = clazz;
                     break;
                 }
-                else if ((clazz.getAccessFlags() & ClassConstants.ACC_FINAL) != 0 &&
+                else if ((clazz.getAccessFlags() & AccessConstants.FINAL) != 0 &&
                          ClassConstants.NAME_JAVA_LANG_OBJECT.equals(clazz.getSuperName()))
                 {
                     commonClass = clazz.getSuperClass();
@@ -679,9 +679,9 @@ public class TypedReferenceValue extends ReferenceValue
         return
             type == null                        ? ClassConstants.TYPE_JAVA_LANG_OBJECT :
             ClassUtil.isInternalArrayType(type) ? type                                          :
-                                                  ClassConstants.TYPE_CLASS_START +
+                                                  TypeConstants.CLASS_START +
                                                   type +
-                                                  ClassConstants.TYPE_CLASS_END;
+                                                  TypeConstants.CLASS_END;
     }
 
 

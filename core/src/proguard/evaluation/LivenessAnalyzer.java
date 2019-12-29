@@ -20,10 +20,10 @@ package proguard.evaluation;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.evaluation.BasicInvocationUnit;
 import proguard.evaluation.value.*;
 import proguard.util.ArrayUtil;
 
@@ -52,9 +52,9 @@ implements   AttributeVisitor,
     private final InitializationFinder initializationFinder;
     private final boolean              runInitializationFinder;
 
-    private long[] isAliveBefore = new long[ClassConstants.TYPICAL_CODE_LENGTH];
-    private long[] isAliveAfter  = new long[ClassConstants.TYPICAL_CODE_LENGTH];
-    private long[] isCategory2   = new long[ClassConstants.TYPICAL_CODE_LENGTH];
+    private long[] isAliveBefore = new long[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private long[] isAliveAfter  = new long[ClassEstimates.TYPICAL_CODE_LENGTH];
+    private long[] isCategory2   = new long[ClassEstimates.TYPICAL_CODE_LENGTH];
 
     // Fields acting as global temporary variables.
     private boolean checkAgain;

@@ -27,8 +27,8 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 
-import static proguard.classfile.instruction.InstructionConstants.OP_ARETURN;
-import static proguard.classfile.instruction.InstructionConstants.OP_RETURN;
+import static proguard.classfile.instruction.Instruction.OP_ARETURN;
+import static proguard.classfile.instruction.Instruction.OP_RETURN;
 
 /**
  * Instruction visitor that adds some instrumentation code to the Gson.toJson()

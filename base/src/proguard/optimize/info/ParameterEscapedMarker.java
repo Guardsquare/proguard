@@ -158,10 +158,10 @@ implements   ClassPoolVisitor,
     {
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
                 // Mark escaped reference parameters in the invoked method.
                 referencingMethod   = method;
                 referencingOffset   = offset;

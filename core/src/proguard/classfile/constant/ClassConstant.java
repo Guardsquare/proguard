@@ -80,7 +80,7 @@ public class ClassConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Class;
+        return Constant.CLASS;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

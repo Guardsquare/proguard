@@ -90,14 +90,14 @@ implements   AttributeVisitor,
             byte opcode = constantInstruction.opcode;
 
             // Is the method static?
-            if ((referencedMethod.getAccessFlags() & ClassConstants.ACC_STATIC) != 0)
+            if ((referencedMethod.getAccessFlags() & AccessConstants.STATIC) != 0)
             {
                 // But is it not a static invocation?
-                if (opcode != InstructionConstants.OP_INVOKESTATIC)
+                if (opcode != Instruction.OP_INVOKESTATIC)
                 {
                     // Replace the invocation by an invokestatic instruction.
                     Instruction replacementInstruction =
-                        new ConstantInstruction(InstructionConstants.OP_INVOKESTATIC,
+                        new ConstantInstruction(Instruction.OP_INVOKESTATIC,
                                                 constantIndex);
 
                     codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
@@ -110,17 +110,17 @@ implements   AttributeVisitor,
             }
 
             // Is the method private, or an instance initializer?
-            else if ((referencedMethod.getAccessFlags() & ClassConstants.ACC_PRIVATE) != 0 ||
+            else if ((referencedMethod.getAccessFlags() & AccessConstants.PRIVATE) != 0 ||
                      referencedMethod.getName(referencedMethodClass).equals(ClassConstants.METHOD_NAME_INIT))
             {
                 // But is it not a special invocation?
-                if (opcode != InstructionConstants.OP_INVOKESPECIAL &&
+                if (opcode != Instruction.OP_INVOKESPECIAL &&
                     // Check if the two classes are in the same nest.
                     !nestHostFinder.inSameNest(clazz, referencedClass))
                 {
                     // Replace the invocation by an invokespecial instruction.
                     Instruction replacementInstruction =
-                        new ConstantInstruction(InstructionConstants.OP_INVOKESPECIAL,
+                        new ConstantInstruction(Instruction.OP_INVOKESPECIAL,
                                                 constantIndex);
 
                     codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
@@ -133,24 +133,24 @@ implements   AttributeVisitor,
             }
 
             // Is the method an interface method?
-            else if ((referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0)
+            else if ((referencedClass.getAccessFlags() & AccessConstants.INTERFACE) != 0)
             {
                 int invokeinterfaceConstant =
                     (ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)) << 8;
 
-                if (opcode == InstructionConstants.OP_INVOKESPECIAL &&
-                    (referencedMethod.getAccessFlags() & ClassConstants.ACC_ABSTRACT) == 0)
+                if (opcode == Instruction.OP_INVOKESPECIAL &&
+                    (referencedMethod.getAccessFlags() & AccessConstants.ABSTRACT) == 0)
                 {
                     // Explicit calls to default interface methods *must* be preserved.
                 }
                 // But is it not an interface invocation, or is the parameter
                 // size incorrect?
-                else if (opcode != InstructionConstants.OP_INVOKEINTERFACE ||
+                else if (opcode != Instruction.OP_INVOKEINTERFACE ||
                          constantInstruction.constant != invokeinterfaceConstant)
                 {
                     // Fix the parameter size of the interface invocation.
                     Instruction replacementInstruction =
-                        new ConstantInstruction(InstructionConstants.OP_INVOKEINTERFACE,
+                        new ConstantInstruction(Instruction.OP_INVOKEINTERFACE,
                                                 constantIndex,
                                                 invokeinterfaceConstant);
 
@@ -168,9 +168,9 @@ implements   AttributeVisitor,
             else
             {
                 // But is it not a virtual invocation?
-                if (opcode != InstructionConstants.OP_INVOKEVIRTUAL &&
+                if (opcode != Instruction.OP_INVOKEVIRTUAL &&
                     (// Replace any non-invokespecial.
-                     opcode != InstructionConstants.OP_INVOKESPECIAL ||
+                     opcode != Instruction.OP_INVOKESPECIAL ||
                      // For invokespecial, replace invocations from the same
                      // class, and invocations to non-superclasses.
                      clazz.equals(referencedClass)                   ||
@@ -178,7 +178,7 @@ implements   AttributeVisitor,
                 {
                     // Replace the invocation by an invokevirtual instruction.
                     Instruction replacementInstruction =
-                        new ConstantInstruction(InstructionConstants.OP_INVOKEVIRTUAL,
+                        new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL,
                                                 constantIndex);
 
                     codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
@@ -240,7 +240,7 @@ implements   AttributeVisitor,
         System.out.println("  Instruction = "+constantInstruction.toString(offset));
         System.out.println("  -> Class    = "+referencedClass);
         System.out.println("     Method   = "+referencedMethod);
-        if ((referencedClass.getAccessFlags() & ClassConstants.ACC_INTERFACE) != 0)
+        if ((referencedClass.getAccessFlags() & AccessConstants.INTERFACE) != 0)
         {
             System.out.println("     Parameter size   = "+(ClassUtil.internalMethodParameterSize(referencedMethod.getDescriptor(referencedMethodClass), false)));
         }

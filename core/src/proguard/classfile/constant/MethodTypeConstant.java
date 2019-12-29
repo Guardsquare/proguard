@@ -112,7 +112,7 @@ public class MethodTypeConstant extends Constant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_MethodType;
+        return Constant.METHOD_TYPE;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

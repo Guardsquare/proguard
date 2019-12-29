@@ -306,7 +306,7 @@ implements   AttributeVisitor,
         String descriptor = method.getDescriptor(clazz);
 
         boolean isStatic =
-            (method.getAccessFlags() & ClassConstants.ACC_STATIC) != 0;
+            (method.getAccessFlags() & AccessConstants.STATIC) != 0;
 
         // Count the number of parameters, taking into account their categories.
         int parameterSize   = ClassUtil.internalMethodParameterSize(descriptor);
@@ -340,28 +340,28 @@ implements   AttributeVisitor,
                 byte opcode;
                 switch (parameterType.charAt(0))
                 {
-                    case ClassConstants.TYPE_BOOLEAN:
-                    case ClassConstants.TYPE_BYTE:
-                    case ClassConstants.TYPE_CHAR:
-                    case ClassConstants.TYPE_SHORT:
-                    case ClassConstants.TYPE_INT:
-                        opcode = InstructionConstants.OP_ISTORE;
+                    case TypeConstants.BOOLEAN:
+                    case TypeConstants.BYTE:
+                    case TypeConstants.CHAR:
+                    case TypeConstants.SHORT:
+                    case TypeConstants.INT:
+                        opcode = Instruction.OP_ISTORE;
                         break;
 
-                    case ClassConstants.TYPE_LONG:
-                        opcode = InstructionConstants.OP_LSTORE;
+                    case TypeConstants.LONG:
+                        opcode = Instruction.OP_LSTORE;
                         break;
 
-                    case ClassConstants.TYPE_FLOAT:
-                        opcode = InstructionConstants.OP_FSTORE;
+                    case TypeConstants.FLOAT:
+                        opcode = Instruction.OP_FSTORE;
                         break;
 
-                    case ClassConstants.TYPE_DOUBLE:
-                        opcode = InstructionConstants.OP_DSTORE;
+                    case TypeConstants.DOUBLE:
+                        opcode = Instruction.OP_DSTORE;
                         break;
 
                     default:
-                        opcode = InstructionConstants.OP_ASTORE;
+                        opcode = Instruction.OP_ASTORE;
                         break;
                 }
 
@@ -374,7 +374,7 @@ implements   AttributeVisitor,
         if (!isStatic)
         {
             codeAttributeComposer.appendInstruction(parameterSize,
-                                                    new VariableInstruction(InstructionConstants.OP_ASTORE, variableOffset));
+                                                    new VariableInstruction(Instruction.OP_ASTORE, variableOffset));
         }
 
         codeAttributeComposer.endCodeFragment();
@@ -462,18 +462,18 @@ implements   AttributeVisitor,
             // Replace any return instructions by branches to the end of the code.
             switch (simpleInstruction.opcode)
             {
-                case InstructionConstants.OP_IRETURN:
-                case InstructionConstants.OP_LRETURN:
-                case InstructionConstants.OP_FRETURN:
-                case InstructionConstants.OP_DRETURN:
-                case InstructionConstants.OP_ARETURN:
-                case InstructionConstants.OP_RETURN:
+                case Instruction.OP_IRETURN:
+                case Instruction.OP_LRETURN:
+                case Instruction.OP_FRETURN:
+                case Instruction.OP_DRETURN:
+                case Instruction.OP_ARETURN:
+                case Instruction.OP_RETURN:
                     // Are we not at the last instruction?
                     if (offset < codeAttribute.u4codeLength-1)
                     {
                         // Replace the return instruction by a branch instruction.
                         Instruction branchInstruction =
-                            new BranchInstruction(InstructionConstants.OP_GOTO_W,
+                            new BranchInstruction(Instruction.OP_GOTO_W,
                                                   codeAttribute.u4codeLength - offset);
 
                         codeAttributeComposer.appendInstruction(offset,
@@ -512,14 +512,14 @@ implements   AttributeVisitor,
         // Is it a method invocation?
         switch (constantInstruction.opcode)
         {
-            case InstructionConstants.OP_NEW:
+            case Instruction.OP_NEW:
                 uninitializedObjectCount++;
                 break;
 
-            case InstructionConstants.OP_INVOKEVIRTUAL:
-            case InstructionConstants.OP_INVOKESPECIAL:
-            case InstructionConstants.OP_INVOKESTATIC:
-            case InstructionConstants.OP_INVOKEINTERFACE:
+            case Instruction.OP_INVOKEVIRTUAL:
+            case Instruction.OP_INVOKESPECIAL:
+            case Instruction.OP_INVOKESTATIC:
+            case Instruction.OP_INVOKEINTERFACE:
                 // See if we can inline it.
                 inlined = false;
 
@@ -604,16 +604,16 @@ implements   AttributeVisitor,
             // Only inline the method if it is private, static, or final.
             // This currently precludes default interface methods, because
             // they can't be final.
-            (accessFlags & (ClassConstants.ACC_PRIVATE |
-                            ClassConstants.ACC_STATIC  |
-                            ClassConstants.ACC_FINAL)) != 0                                       &&
+            (accessFlags & (AccessConstants.PRIVATE |
+                            AccessConstants.STATIC  |
+                            AccessConstants.FINAL)) != 0                                       &&
 
             DEBUG("Synchronized?")                                                                &&
 
             // Only inline the method if it is not synchronized, etc.
-            (accessFlags & (ClassConstants.ACC_SYNCHRONIZED  |
-                            ClassConstants.ACC_NATIVE        |
-                            ClassConstants.ACC_ABSTRACT)) == 0                                    &&
+            (accessFlags & (AccessConstants.SYNCHRONIZED  |
+                            AccessConstants.NATIVE        |
+                            AccessConstants.ABSTRACT)) == 0                                    &&
 
             DEBUG("Init?")                                                                        &&
 

@@ -32,7 +32,6 @@ import proguard.util.*;
 import java.io.*;
 import java.util.*;
 
-import static proguard.classfile.ClassConstants.ACC_ENUM;
 import static proguard.classfile.ClassConstants.CLASS_FILE_EXTENSION;
 import static proguard.optimize.gson.GsonClassConstants.NAME_EXCLUDER;
 import static proguard.optimize.gson.GsonClassConstants.NAME_GSON;
@@ -124,13 +123,13 @@ public class GsonOptimizer
                                                 NAME_GSON,
                                                 NAME_EXCLUDER),
             new AllFieldVisitor(
-            new MemberAccessSetter(ClassConstants.ACC_PUBLIC))));
+            new MemberAccessSetter(AccessConstants.PUBLIC))));
 
         // To allow mocking Gson instances in unit tests, we remove the
         // final qualifier from the Gson class.
         programClassPool.classesAccept(
             new ClassNameFilter(NAME_GSON,
-            new MemberAccessFlagCleaner(ClassConstants.ACC_FINAL)));
+            new MemberAccessFlagCleaner(AccessConstants.FINAL)));
 
         // Setup Gson context that represents how Gson is used in program
         // class pool.
@@ -221,14 +220,14 @@ public class GsonOptimizer
 
             // Inject serialization and deserialization code in domain classes.
             gsonContext.gsonDomainClassPool
-                .classesAccept(new ClassAccessFilter(0, ACC_ENUM,
+                .classesAccept(new ClassAccessFilter(0, AccessConstants.ENUM,
                                new GsonSerializationOptimizer(programClassPool,
                                                               libraryClassPool,
                                                               gsonContext.gsonRuntimeSettings,
                                                               serializationInfo,
                                                               extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool
-                .classesAccept(new ClassAccessFilter(0, ACC_ENUM,
+                .classesAccept(new ClassAccessFilter(0, AccessConstants.ENUM,
                                new GsonDeserializationOptimizer(programClassPool,
                                                                 libraryClassPool,
                                                                 gsonContext.gsonRuntimeSettings,
@@ -280,7 +279,7 @@ public class GsonOptimizer
 
                 int          nameIndex       = constantPoolEditor.addUtf8Constant(FIELD_NAME_EXCLUDER);
                 int          descriptorIndex = constantPoolEditor.addUtf8Constant(FIELD_TYPE_EXCLUDER);
-                ProgramField field           = new ProgramField(ClassConstants.ACC_PUBLIC,
+                ProgramField field           = new ProgramField(AccessConstants.PUBLIC,
                                                                 nameIndex,
                                                                 descriptorIndex,
                                                                 null);

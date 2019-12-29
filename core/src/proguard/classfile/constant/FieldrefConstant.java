@@ -96,7 +96,7 @@ public class FieldrefConstant extends RefConstant
 
     public int getTag()
     {
-        return ClassConstants.CONSTANT_Fieldref;
+        return Constant.FIELDREF;
     }
 
     public void accept(Clazz clazz, ConstantVisitor constantVisitor)

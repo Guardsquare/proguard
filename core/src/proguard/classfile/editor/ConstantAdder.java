@@ -147,7 +147,7 @@ implements   ConstantVisitor
             new AttributesEditor((ProgramClass)clazz, false);
 
         BootstrapMethodsAttribute bootstrapMethodsAttribute =
-            (BootstrapMethodsAttribute)attributesEditor.findAttribute(ClassConstants.ATTR_BootstrapMethods);
+            (BootstrapMethodsAttribute)attributesEditor.findAttribute(Attribute.BOOTSTRAP_METHODS);
 
         // Add the name and type constant.
         clazz.constantPoolEntryAccept(dynamicConstant.u2nameAndTypeIndex, this);
@@ -182,7 +182,7 @@ implements   ConstantVisitor
             new AttributesEditor((ProgramClass)clazz, false);
 
         BootstrapMethodsAttribute bootstrapMethodsAttribute =
-            (BootstrapMethodsAttribute)attributesEditor.findAttribute(ClassConstants.ATTR_BootstrapMethods);
+            (BootstrapMethodsAttribute)attributesEditor.findAttribute(Attribute.BOOTSTRAP_METHODS);
 
         // Add the name and type constant.
         clazz.constantPoolEntryAccept(invokeDynamicConstant.u2nameAndTypeIndex, this);

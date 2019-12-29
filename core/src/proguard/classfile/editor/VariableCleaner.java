@@ -79,7 +79,7 @@ implements   AttributeVisitor
                                      codeAttribute,
                                      true);
 
-            editor.deleteAttribute(ClassConstants.ATTR_LocalVariableTable);
+            editor.deleteAttribute(Attribute.LOCAL_VARIABLE_TABLE);
         }
 
         // Delete the local variable type table if it ended up empty.
@@ -91,7 +91,7 @@ implements   AttributeVisitor
                                      codeAttribute,
                                      true);
 
-            editor.deleteAttribute(ClassConstants.ATTR_LocalVariableTypeTable);
+            editor.deleteAttribute(Attribute.LOCAL_VARIABLE_TYPETable);
         }
     }
 

@@ -43,8 +43,8 @@ implements   InstructionVisitor
 
     public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction)
     {
-        if (simpleInstruction.opcode == InstructionConstants.OP_MONITORENTER ||
-            simpleInstruction.opcode == InstructionConstants.OP_MONITOREXIT)
+        if (simpleInstruction.opcode == Instruction.OP_MONITORENTER ||
+            simpleInstruction.opcode == Instruction.OP_MONITOREXIT)
         {
             setHasSynchronizedBlock(method);
         }
