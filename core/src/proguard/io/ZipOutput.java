@@ -55,9 +55,6 @@ public class ZipOutput
     protected     DataOutputStream outputStream;
     private final int              uncompressedAlignment;
 
-    private final StringMatcher    extraUncompressedAlignmentFilter;
-    private final int              extraUncompressedAlignment;
-
     private final String           comment;
 
     private List zipEntries    = new ArrayList();
@@ -79,39 +76,33 @@ public class ZipOutput
 
     /**
      * Creates a new ZipOutput that aligns uncompressed entries.
-     * @param outputStream          the output stream to which the zip data will
-     *                              be written.
-     * @param uncompressedAlignment the requested alignment of uncompressed data.
+     * @param outputStream           the output stream to which the zip data will
+     *                               be written.
+     * @param uncompressedAlignment the default alignment of uncompressed data.
      */
     public ZipOutput(OutputStream outputStream,
                      int          uncompressedAlignment)
     {
-        this(outputStream, uncompressedAlignment, null, 1, null);
+        this(outputStream,
+             uncompressedAlignment,
+             null);
     }
 
 
     /**
      * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
      *
-     * @param outputStream                        the output stream to which the zip data will
-     *                                            be written.
-     * @param uncompressedAlignment               the requested alignment of uncompressed data.
-     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
-     *                                            that should use a different alignment.
-     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
-     *                                            that match the extraUncompressedAlignmentFilter.
-     * @param comment                             optional comment for the entire zip file.
+     * @param outputStream          the output stream to which the zip data will
+     *                              be written.
+     * @param uncompressedAlignment the default alignment of uncompressed data.
+     * @param comment               optional comment for the entire zip file.
      */
-    public ZipOutput(OutputStream  outputStream,
-                     int           uncompressedAlignment,
-                     StringMatcher extraUncompressedAlignmentFilter,
-                     int           extraUncompressedAlignment,
-                     String        comment)
+    public ZipOutput(OutputStream outputStream,
+                     int          uncompressedAlignment,
+                     String       comment)
     {
         this(new DataOutputStream(outputStream),
              uncompressedAlignment,
-             extraUncompressedAlignmentFilter,
-             extraUncompressedAlignment,
              comment);
     }
 
@@ -119,27 +110,20 @@ public class ZipOutput
     /**
      * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
      *
-     * @param outputStream                        the output stream to which the zip data will
-     *                                            be written.
-     * @param uncompressedAlignment               the requested alignment of uncompressed data.
-     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
-     *                                            that should use a different alignment.
-     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
-     *                                            that match the extraUncompressedAlignmentFilter.
-     * @param comment                             optional comment for the entire zip file.
+     * @param outputStream          the output stream to which the zip data will
+     *                              be written.
+     * @param uncompressedAlignment the default alignment of uncompressed data.
+     * @param comment               optional comment for the entire zip file.
      */
     public ZipOutput(DataOutputStream outputStream,
                      int              uncompressedAlignment,
-                     StringMatcher    extraUncompressedAlignmentFilter,
-                     int              extraUncompressedAlignment,
                      String           comment)
     {
-        this.outputStream                     = outputStream;
-        this.uncompressedAlignment            = uncompressedAlignment;
-        this.extraUncompressedAlignmentFilter = extraUncompressedAlignmentFilter;
-        this.extraUncompressedAlignment       = extraUncompressedAlignment;
-        this.comment                          = comment;
+        this.outputStream          = outputStream;
+        this.uncompressedAlignment = uncompressedAlignment;
+        this.comment               = comment;
     }
+
 
     // These constructors write out a header immediately.
 
@@ -147,7 +131,7 @@ public class ZipOutput
      * Creates a new ZipOutput that aligns uncompressed entries.
      * @param outputStream          the output stream to which the zip data will
      *                              be written.
-     * @param header                              an optional header for the zip file.
+     * @param header                an optional header for the zip file.
      * @param uncompressedAlignment the requested alignment of uncompressed data.
      */
     public ZipOutput(OutputStream outputStream,
@@ -155,36 +139,30 @@ public class ZipOutput
                      int          uncompressedAlignment)
     throws IOException
     {
-        this(outputStream, header, uncompressedAlignment, null, 1, null);
+        this(outputStream,
+             header,
+             uncompressedAlignment,
+             null);
     }
 
 
     /**
      * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
      *
-     * @param outputStream                        the output stream to which the zip data will
-     *                                            be written.
-     * @param header                              an optional header for the zip file.
-     * @param uncompressedAlignment               the requested alignment of uncompressed data.
-     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
-     *                                            that should use a different alignment.
-     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
-     *                                            that match the extraUncompressedAlignmentFilter.
-     * @param comment                             optional comment for the entire zip file.
+     * @param outputStream          the output stream to which the zip data will be written.
+     * @param header                an optional header for the zip file.
+     * @param uncompressedAlignment the requested alignment of uncompressed data.
+     * @param comment               optional comment for the entire zip file.
      */
     public ZipOutput(OutputStream  outputStream,
                      byte[]        header,
                      int           uncompressedAlignment,
-                     StringMatcher extraUncompressedAlignmentFilter,
-                     int           extraUncompressedAlignment,
                      String        comment)
     throws IOException
     {
         this(new DataOutputStream(outputStream),
              header,
              uncompressedAlignment,
-             extraUncompressedAlignmentFilter,
-             extraUncompressedAlignment,
              comment);
     }
 
@@ -192,29 +170,20 @@ public class ZipOutput
     /**
      * Creates a new ZipOutput that aligns uncompressed entries and contains a comment.
      *
-     * @param outputStream                        the output stream to which the zip data will
-     *                                            be written.
-     * @param header                              an optional header for the zip file.
-     * @param uncompressedAlignment               the requested alignment of uncompressed data.
-     * @param extraUncompressedAlignmentFilter    an optional filter for uncompressed files
-     *                                            that should use a different alignment.
-     * @param extraUncompressedAlignment          the alignment to use for uncompressed files
-     *                                            that match the extraUncompressedAlignmentFilter.
-     * @param comment                             optional comment for the entire zip file.
+     * @param outputStream          the output stream to which the zip data will be written.
+     * @param header                an optional header for the zip file.
+     * @param uncompressedAlignment the requested alignment of uncompressed data.
+     * @param comment               optional comment for the entire zip file.
      */
     public ZipOutput(DataOutputStream outputStream,
                      byte[]           header,
                      int              uncompressedAlignment,
-                     StringMatcher    extraUncompressedAlignmentFilter,
-                     int              extraUncompressedAlignment,
                      String           comment)
     throws IOException
     {
-        this.outputStream                     = outputStream;
-        this.uncompressedAlignment            = uncompressedAlignment;
-        this.extraUncompressedAlignmentFilter = extraUncompressedAlignmentFilter;
-        this.extraUncompressedAlignment       = extraUncompressedAlignment;
-        this.comment                          = comment;
+        this.outputStream          = outputStream;
+        this.uncompressedAlignment = uncompressedAlignment;
+        this.comment               = comment;
         if (header != null)
         {
             outputStream.write(header);
@@ -226,11 +195,12 @@ public class ZipOutput
      * Creates a new zip entry, returning an output stream to write its data.
      * It is the caller's responsibility to close the output stream.
      * @param name             the name of the zip entry.
-     * @param compress         specifies whether the entry should be compressed.
-     * @param modificationTime the modification date and time of the zip entry,
-     *                         in DOS format.
-     * @return                 an output stream for writing the data of the
-     *                         zip entry.
+     * @param compress         specifies whether the entry should be
+     *                         compressed with the default
+     *                         alignment.
+     * @param modificationTime the modification date and time of the zip
+     *                         entry, in DOS format.
+     * @return an output stream for writing the data of the zip entry.
      */
     public OutputStream createOutputStream(String  name,
                                            boolean compress,
@@ -239,6 +209,7 @@ public class ZipOutput
     {
         return createOutputStream(name,
                                   compress,
+                                  uncompressedAlignment,
                                   modificationTime,
                                   null,
                                   null);
@@ -248,22 +219,52 @@ public class ZipOutput
     /**
      * Creates a new zip entry, returning an output stream to write its data.
      * It is the caller's responsibility to close the output stream.
-     * @param name             the name of the zip entry.
-     * @param compress         specifies whether the entry should be compressed.
-     * @param modificationTime the modification date and time of the zip entry,
-     *                         in DOS format.
-     * @param extraField       optional extra field data. These should contain
-     *                         chunks, each with a short ID, a short length
-     *                         (little endian), and their corresponding data.
-     *                         The IDs 0-31 are reserved for Pkware.
-     *                         Java's jar tool just specifies an ID 0xcafe on
-     *                         its first entry.
-     * @param comment          optional comment.
-     * @return                 an output stream for writing the data of the
-     *                         zip entry.
+     * @param name                  the name of the zip entry.
+     * @param compress              specifies whether the entry should be
+     *                              compressed.
+     * @param uncompressedAlignment the requested alignment of uncompressed
+     *                              data.
+     * @param modificationTime      the modification date and time of the zip
+     *                              entry, in DOS format.
+     * @return an output stream for writing the data of the zip entry.
      */
     public OutputStream createOutputStream(String  name,
                                            boolean compress,
+                                           int     uncompressedAlignment,
+                                           int     modificationTime)
+    throws IOException
+    {
+        return createOutputStream(name,
+                                  compress,
+                                  uncompressedAlignment,
+                                  modificationTime,
+                                  null,
+                                  null);
+    }
+
+
+    /**
+     * Creates a new zip entry, returning an output stream to write its data.
+     * It is the caller's responsibility to close the output stream.
+     * @param name                  the name of the zip entry.
+     * @param compress              specifies whether the entry should be
+     *                              compressed.
+     * @param uncompressedAlignment the requested alignment of uncompressed
+     *                              data.
+     * @param modificationTime      the modification date and time of the zip
+     *                              entry, in DOS format.
+     * @param extraField            optional extra field data. These should
+     *                              contain chunks, each with a short ID, a
+     *                              short length (little endian), and their
+     *                              corresponding data. The IDs 0-31 are
+     *                              reserved for Pkware. Java's jar tool just
+     *                              specifies an ID 0xcafe on its first entry.
+     * @param comment               an optional comment.
+     * @return an output stream for writing the data of the zip entry.
+     */
+    public OutputStream createOutputStream(String  name,
+                                           boolean compress,
+                                           int     uncompressedAlignment,
                                            int     modificationTime,
                                            byte[]  extraField,
                                            String  comment)
@@ -277,6 +278,7 @@ public class ZipOutput
 
         ZipEntry entry = new ZipEntry(name,
                                       compress,
+                                      uncompressedAlignment,
                                       modificationTime,
                                       extraField,
                                       comment);
@@ -417,8 +419,8 @@ public class ZipOutput
     private class ZipEntry
     {
         private boolean compressed;
+        private int     uncompressedAlignment;
         private int     modificationTime;
-        private int     watermark;
         private int     crc;
         private long    compressedSize;
         private long    uncompressedSize;
@@ -431,31 +433,36 @@ public class ZipOutput
         /**
          * Creates a new zip entry, returning output stream to write its data.
          * It is the caller's responsibility to close the output stream.
-         * @param name             the name of the zip entry.
-         * @param compressed       specifies whether the entry should be
-         *                         compressed.
-         * @param modificationTime the modification date and time of the zip
-         *                         entry, in DOS format.
-         * @param extraField       optional extra field data. These should
-         *                         contain chunks, each with a short ID, a short
-         *                         length (little endian), and their
-         *                         corresponding data. The IDs 0-31 are reserved
-         *                         for Pkware. Java's jar tool just specifies an
-         *                         ID 0xcafe on its first entry.
-         * @param comment          optional comment.
-         * @return                 an output stream for writing the zip data.
+         * @param name                  the name of the zip entry.
+         * @param compressed            specifies whether the entry should be
+         *                              compressed.
+         * @param uncompressedAlignment the requested alignment of uncompressed
+         *                              data.
+         * @param modificationTime      the modification date and time of the
+         *                              zip entry, in DOS format.
+         * @param extraField            optional extra field data. These should
+         *                              contain chunks, each with a short ID,
+         *                              a short length (little endian), and
+         *                              their corresponding data. The IDs 0-31
+         *                              are reserved for Pkware. Java's jar tool
+         *                              just specifies an ID 0xcafe on its first
+         *                              entry.
+         * @param comment               an optional comment.
+         * @return an output stream for writing the zip data.
          */
         private ZipEntry(String  name,
                          boolean compressed,
+                         int     uncompressedAlignment,
                          int     modificationTime,
                          byte[]  extraField,
                          String  comment)
         {
-            this.name             = name;
-            this.compressed       = compressed;
-            this.modificationTime = modificationTime;
-            this.extraField       = extraField;
-            this.comment          = comment;
+            this.name                  = name;
+            this.compressed            = compressed;
+            this.uncompressedAlignment = uncompressedAlignment;
+            this.modificationTime      = modificationTime;
+            this.extraField            = extraField;
+            this.comment               = comment;
         }
 
 
@@ -498,16 +505,11 @@ public class ZipOutput
             int alignmentDelta = 0;
             if (!compressed)
             {
-                int alignment = extraUncompressedAlignmentFilter != null &&
-                                extraUncompressedAlignmentFilter.matches(name) ?
-                    extraUncompressedAlignment :
-                    uncompressedAlignment;
-
                 long dataOffset = outputStream.size() + 2 + nameLength + extraFieldLength;
-                alignmentDelta = (int)(dataOffset % alignment);
+                alignmentDelta = (int)(dataOffset % uncompressedAlignment);
                 if (alignmentDelta > 0)
                 {
-                    alignmentDelta = alignment - alignmentDelta;
+                    alignmentDelta = uncompressedAlignment - alignmentDelta;
                 }
             }
 
@@ -762,22 +764,22 @@ public class ZipOutput
         try
         {
             ZipOutput output =
-                new ZipOutput(new FileOutputStream(args[0]), null, 4, null, 1, "Main file comment");
+                new ZipOutput(new FileOutputStream(args[0]), null, 4, "Main file comment");
 
             PrintWriter printWriter1 =
-                new PrintWriter(output.createOutputStream("file1.txt", false, 0, new byte[] { 0x34, 0x12, 4, 0, 0x48, 0x65, 0x6c, 0x6c, 0x6f }, "Comment"));
+                new PrintWriter(output.createOutputStream("file1.txt", false, 1, 0, new byte[] { 0x34, 0x12, 4, 0, 0x48, 0x65, 0x6c, 0x6c, 0x6f }, "Comment"));
             printWriter1.println("This is file 1.");
             printWriter1.println("Hello, world!");
             printWriter1.close();
 
             PrintWriter printWriter2 =
-                new PrintWriter(output.createOutputStream("file2.txt", true, 0, null, "Another comment"));
+                new PrintWriter(output.createOutputStream("file2.txt", true, 1, 0, null, "Another comment"));
             printWriter2.println("This is file 2.");
             printWriter2.println("Hello, world!");
             printWriter2.close();
 
             PrintWriter printWriter3 =
-                new PrintWriter(output.createOutputStream("file3.txt", false, 0, null, "Last comment"));
+                new PrintWriter(output.createOutputStream("file3.txt", false, 1, 0, null, "Last comment"));
             printWriter3.println("This is file 3.");
             printWriter3.println("Hello, world!");
             printWriter3.close();

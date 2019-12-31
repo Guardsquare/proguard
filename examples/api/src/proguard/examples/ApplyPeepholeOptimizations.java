@@ -86,11 +86,14 @@ public class ApplyPeepholeOptimizations
             // We'll write the output to a jar file.
             JarWriter jarWriter =
                 new JarWriter(
-                new FixedFileWriter(new File(outputJarFileName)));
+                new ZipWriter(
+                new FixedFileWriter(
+                new File(outputJarFileName))));
 
             // Parse and push all classes from the input jar.
             DirectoryPump directoryPump =
-                new DirectoryPump(new File(inputJarFileName));
+                new DirectoryPump(
+                new File(inputJarFileName));
 
             BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
             CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
@@ -109,17 +112,16 @@ public class ApplyPeepholeOptimizations
                                                      branchTargetFinder,
                                                      codeAttributeEditor)))),
 
-                    // Preverify the methods of the class.
-                    new AllMethodVisitor(
-                    new AllAttributeVisitor(
-                    new CodePreverifier(false))),
+                    // For simple optimizations that don't change the control
+                    // flow, we don't need to preverify the processed code
+                    // from scratch; the updated stack map tables remain valid.
 
                     // For clean results, shrink and sort the constants of the class.
                     new ConstantPoolShrinker(),
                     new ConstantPoolSorter(),
 
                     // Write the class file.
-                    new DataEntryClassWriter(jarWriter, new FileDataEntry(null, null))
+                    new DataEntryClassWriter(jarWriter)
                 )))));
 
             jarWriter.close();

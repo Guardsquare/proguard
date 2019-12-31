@@ -369,7 +369,7 @@ public class DataEntryCopier implements DataEntryReader
                                                                      reader);
 
                                 // Unzip any jmods, if necessary.
-                                DataEntryReader jmodReader = new JarReader(reader, true);
+                                DataEntryReader jmodReader = new JarReader(true, reader);
                                 if (inputIsJmod)
                                 {
                                     // Always unzip.

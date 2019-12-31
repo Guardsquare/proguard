@@ -34,19 +34,29 @@ public class DataEntryClassWriter
 extends      SimplifiedVisitor
 implements   ClassVisitor
 {
-    private final DataEntryWriter dataEntryWriter;
     private final DataEntry       templateDataEntry;
+    private final DataEntryWriter dataEntryWriter;
+
+
+    /**
+     * Creates a new DataEntryClassWriter for writing to the given
+     * DataEntryWriter.
+     */
+    public DataEntryClassWriter(DataEntryWriter dataEntryWriter)
+    {
+        this(new FileDataEntry(new File(""), new File("")), dataEntryWriter);
+    }
 
 
     /**
      * Creates a new DataEntryClassWriter for writing to the given
      * DataEntryWriter, based on the given template DataEntry.
      */
-    public DataEntryClassWriter(DataEntryWriter dataEntryWriter,
-                                DataEntry       templateDataEntry)
+    public DataEntryClassWriter(DataEntry       templateDataEntry,
+                                DataEntryWriter dataEntryWriter)
     {
-        this.dataEntryWriter   = dataEntryWriter;
         this.templateDataEntry = templateDataEntry;
+        this.dataEntryWriter   = dataEntryWriter;
     }
 
 

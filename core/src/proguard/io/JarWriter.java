@@ -24,8 +24,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 
 /**
- * This DataEntryWriter sends data entries to a given jar file, automatically
- * adding a manifest file.
+ * This DataEntryWriter sends data entries to another given data entry writer,
+ * automatically adding a manifest file.
  *
  * You'll typically wrap a {@link ZipWriter} or one of its extensions:
  * <pre>

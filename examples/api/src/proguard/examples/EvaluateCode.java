@@ -35,7 +35,8 @@ public class EvaluateCode
             // Parse all classes from the input jar,
             // and stream their code to the method analyzer.
             DirectoryPump directoryPump =
-                new DirectoryPump(new File(inputJarFileName));
+                new DirectoryPump(
+                new File(inputJarFileName));
 
             directoryPump.pumpDataEntries(
                 new JarReader(

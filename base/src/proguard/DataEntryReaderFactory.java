@@ -236,7 +236,7 @@ public class DataEntryReaderFactory
         }
 
         // Unzip any jars, if necessary.
-        DataEntryReader jarReader = new JarReader(reader, stripJmodHeader);
+        DataEntryReader jarReader = new JarReader(stripJmodHeader, reader);
 
         if (isJar)
         {

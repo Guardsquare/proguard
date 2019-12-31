@@ -30,27 +30,31 @@ import java.util.zip.*;
  */
 public class JarReader implements DataEntryReader
 {
-    private final DataEntryReader dataEntryReader;
     private final boolean         jmod;
-
-
-    /**
-     * Creates a new JarReader that doesn't read jmods.
-     */
-    public JarReader(DataEntryReader dataEntryReader)
-    {
-        this(dataEntryReader, false);
-    }
+    private final DataEntryReader dataEntryReader;
 
 
     /**
      * Creates a new JarReader.
+     * @param dataEntryReader the reader that can process the jar entries.
      */
-    public JarReader(DataEntryReader dataEntryReader,
-                     boolean jmod)
+    public JarReader(DataEntryReader dataEntryReader)
     {
-        this.dataEntryReader = dataEntryReader;
+        this(false, dataEntryReader);
+    }
+
+
+    /**
+     * Creates a new JarReader that optionally reads jmod files.
+     * @param jmod            specifies whether the input jar is actually a
+     *                        jmod file.
+     * @param dataEntryReader the reader that can process the jar entries.
+     */
+    public JarReader(boolean         jmod,
+                     DataEntryReader dataEntryReader)
+    {
         this.jmod            = jmod;
+        this.dataEntryReader = dataEntryReader;
     }
 
 

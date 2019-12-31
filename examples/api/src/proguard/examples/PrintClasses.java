@@ -29,7 +29,8 @@ public class PrintClasses
             // Parse all classes from the input jar,
             // and stream them to the class printer.
             DirectoryPump directoryPump =
-                new DirectoryPump(new File(inputJarFileName));
+                new DirectoryPump(
+                new File(inputJarFileName));
 
             directoryPump.pumpDataEntries(
                 new JarReader(

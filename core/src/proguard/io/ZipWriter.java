@@ -43,6 +43,20 @@ public class ZipWriter implements DataEntryWriter
 
 
     /**
+     * Creates a new ZipWriter that compresses all zip entries.
+     * @param dataEntryWriter the data entry writer that can provide output
+     *                        streams for the zip archives.
+     */
+    public ZipWriter(DataEntryWriter dataEntryWriter)
+    {
+        this(null,
+             1,
+             0,
+             dataEntryWriter);
+    }
+
+
+    /**
      * Creates a new ZipWriter.
      * @param uncompressedFilter    an optional filter for files that should not
      *                              be compressed.
@@ -216,13 +230,17 @@ public class ZipWriter implements DataEntryWriter
         String name         = dataEntry.getName();
         String originalName = dataEntry.getOriginalName();
 
-        boolean compress =
-            (uncompressedFilter               == null || !uncompressedFilter.matches(originalName)) &&
-            (extraUncompressedAlignmentFilter == null || !extraUncompressedAlignmentFilter.matches(originalName));
+        boolean compress1 = uncompressedFilter               == null || !uncompressedFilter.matches(originalName);
+        boolean compress2 = extraUncompressedAlignmentFilter == null || !extraUncompressedAlignmentFilter.matches(originalName);
+
+        int uncompressedAlignment = compress2 ?
+            this.uncompressedAlignment :
+            this.extraUncompressedAlignment;
 
         return
             currentZipOutput.createOutputStream(name,
-                                                compress,
+                                                compress1 || compress2,
+                                                uncompressedAlignment,
                                                 modificationTime);
     }
 
@@ -261,8 +279,6 @@ public class ZipWriter implements DataEntryWriter
                 createZipOutput(dataEntryWriter.createOutputStream(currentParentEntry),
                                 header,
                                 uncompressedAlignment,
-                                extraUncompressedAlignmentFilter,
-                                extraUncompressedAlignment,
                                 null);
         }
     }
@@ -274,16 +290,12 @@ public class ZipWriter implements DataEntryWriter
     protected ZipOutput createZipOutput(OutputStream  outputStream,
                                         byte[]        header,
                                         int           uncompressedAlignment,
-                                        StringMatcher extraUncompressedAlignmentFilter,
-                                        int           extraUncompressedAlignment,
                                         String        comment)
     throws IOException
     {
         return new ZipOutput(outputStream,
                              header,
                              uncompressedAlignment,
-                             extraUncompressedAlignmentFilter,
-                             extraUncompressedAlignment,
                              comment);
     }
 

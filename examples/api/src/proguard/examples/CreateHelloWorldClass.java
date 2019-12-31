@@ -58,6 +58,7 @@ public class CreateHelloWorldClass
     private static ProgramClass createClass()
     {
         return
+            // Start building the class.
             new ClassBuilder(
                 VersionConstants.CLASS_VERSION_1_8,
                 AccessConstants.PUBLIC,
@@ -80,6 +81,11 @@ public class CreateHelloWorldClass
                         .invokevirtual("java/io/PrintStream", "println", "(Ljava/lang/String;)V")
                         .return_())
 
+                // We don't need to preverify simple code that doesn't have
+                // special control flow. It works fine without a stack map
+                // table attribute.
+
+                // Retrieve the final class.
                 .getProgramClass();
     }
 }

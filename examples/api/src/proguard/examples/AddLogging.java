@@ -1,7 +1,7 @@
 package proguard.examples;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
@@ -31,7 +31,9 @@ public class AddLogging
             // We'll write the output to a jar file.
             JarWriter jarWriter =
                 new JarWriter(
-                new FixedFileWriter(new File(outputJarFileName)));
+                new ZipWriter(
+                new FixedFileWriter(
+                new File(outputJarFileName))));
 
             // Parse and push all classes from the input jar.
             DirectoryPump directoryPump =
@@ -47,8 +49,12 @@ public class AddLogging
                     new AllAttributeVisitor(
                     new MyLoggingAdder())),
 
+                    // For simple changes that don't change the control flow,
+                    // we don't need to preverify the processed code from
+                    // scratch. The updated stack map tables remain valid.
+
                     // Write the class file.
-                    new DataEntryClassWriter(jarWriter, new FileDataEntry(null, null))
+                    new DataEntryClassWriter(jarWriter)
                 )))));
 
             jarWriter.close();
@@ -72,6 +78,9 @@ public class AddLogging
 
 
         // Implementations for AttributeVisitor.
+
+        public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
 
         public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
         {
