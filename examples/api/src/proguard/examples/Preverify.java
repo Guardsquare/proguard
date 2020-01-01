@@ -70,7 +70,8 @@ public class Preverify
         // Parse all classes from the input jar and
         // collect them in the class pool.
         DirectoryPump directoryPump =
-            new DirectoryPump(new File(jarFileName));
+            new DirectoryPump(
+            new File(jarFileName));
 
         directoryPump.pumpDataEntries(
             new JarReader(isLibrary,
