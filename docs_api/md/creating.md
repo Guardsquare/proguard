@@ -16,10 +16,9 @@ class that prints out "Hello, world!":
                 "([Ljava/lang/String;)V",
                 50,
 
-                // 
                 code -> code
                     .getstatic("java/lang/System", "out", "Ljava/io/PrintStream;")
-                    .ldc(MESSAGE)
+                    .ldc("Hello, world!")
                     .invokevirtual("java/io/PrintStream", "println", "(Ljava/lang/String;)V")
                     .return_())
 

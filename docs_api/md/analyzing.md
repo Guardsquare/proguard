@@ -8,9 +8,9 @@ classes. The visitor classes and filters quickly get you to the right place:
         new AllMethodVisitor(
         new AllAttributeVisitor(
         new AllInstructionVisitor(
-	new MyInstructionAnalyzer()))));
+        new MyInstructionAnalyzer()))));
 
-You then only need to implement the methods to visit and analyze the
+You then only need to implement the visitor methods to analyze the
 instructions:
 
     class      MyInstructionAnalyzer
@@ -51,15 +51,16 @@ Complete example: ApplyPeepholeOptimizations.java
 ## Basic control flow analysis
 
 You can extract a basic control flow graph of the instructions in a method
-with partial evaluation (often called abstract evaluation). The resulting
-graph is still defined at the instruction level: each instruction is labeled
-with potential branch targets and branch origins.
+with partial evaluation (often called abstract evaluation). The core class is
+PartialEvaluator. Its results are defined at the instruction level: each
+instruction is labeled with potential branch targets and branch origins.
 
     ValueFactory valueFactory =
         new BasicValueFactory();
 
     PartialEvaluator partialEvaluator =
-        new PartialEvaluator(                                                           new BasicInvocationUnit(valueFactory),
+        new PartialEvaluator(
+        new BasicInvocationUnit(valueFactory),
             false);
 
     partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
@@ -71,26 +72,30 @@ Complete example: VisualizeControlFlow.java
 
 ## Partial evaluation
 
-You can extract more information from a method, by tuning the precision of the
-partial evaluation with different value factories and different invocation
-units:
+You can extract a lot more information from a method with the same
+PartialEvaluator, by tuning the precision of the partial evaluation with
+different value factories and different invocation units:
 
-- The value factories define the level of detail in representing values like
+- A ValueFactory defines the level of detail in representing values like
   integers or reference types. The values can be very generic (any primitive
   integer, a reference to any object) or more precise (the integer 42, or an
   integer between 0 and 5, or a non-null reference to an instance of
-  java\/lang\/String).
+  java/lang/String).
 
-- The invocation units define the values returned from retrieved fields and
+- An InvocationUnit defines the values returned from retrieved fields and
   invoked methods. The values can again be very generic (any integer) or they
   can also be values that were cached in prior evaluations of the code base.
+
+You can pass them to the PartialEvaluator, apply it to the code, and retrieve
+the results:
 
     ValueFactory valueFactory =
         new RangeValueFactory(
         new ArrayReferenceValueFactory());
 
     PartialEvaluator partialEvaluator =
-        new PartialEvaluator(                                                           new BasicInvocationUnit(valueFactory),
+        new PartialEvaluator(
+        new BasicInvocationUnit(valueFactory),
             false);
 
     partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);

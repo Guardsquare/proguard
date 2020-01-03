@@ -51,6 +51,9 @@ import java.util.*;
  *
  *     CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
  *
+ *     InstructionSequenceBuilder builder =
+ *         new InstructionSequenceBuilder(clazz);
+ *	
  *     // Create labels and instructions.
  *     final CodeAttributeEditor.Label TRY_START = codeAttributeEditor.label();
  *     final CodeAttributeEditor.Label TRY_END   = codeAttributeEditor.label();

@@ -1,8 +1,8 @@
 ## Basic pattern matching
 
-The library has some powerful support to match patterns in bytecode
-instruction sequences. You first define the pattern as a sequence of
-instructions, with wildcards. For example:
+The library has powerful support to match patterns in bytecode instruction
+sequences. You first define the pattern as a sequence of instructions, with
+wildcards. For example:
 
     final int X = InstructionSequenceMatcher.X;
     final int C = InstructionSequenceMatcher.C;
@@ -19,7 +19,7 @@ instructions, with wildcards. For example:
 
 You can then find that pattern in given code:
 
-    clazz.accept(
+    programClassPool.classesAccept(
         new AllMethodVisitor(
         new AllAttributeVisitor(
         new AllInstructionVisitor(
@@ -28,12 +28,13 @@ You can then find that pattern in given code:
 
 Complete example: ApplyPeepholeOptimizations.java
 
-## Pattern replacement
+## Replacing patterns
 
 Instead of just matching instruction sequences, you can also replace matched
 sequences by other instruction sequences, for example to optimize code or
-instrument code. Say that you want to replace am instruction sequence
-"putstatic/getstatic" by an equivalent "dup/putstatic":
+instrument code. The core classes are PeepholeEditor and
+InstructionSequenceReplacer. Say that you want to replace am instruction
+sequence "putstatic/getstatic" by an equivalent "dup/putstatic":
 
     InstructionSequenceBuilder ____ =
         new InstructionSequenceBuilder();
@@ -52,7 +53,7 @@ instrument code. Say that you want to replace am instruction sequence
     BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
     CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
 
-    clazz.accept(
+    targetClass.accept(
         new AllMethodVisitor(
         new AllAttributeVisitor(
         new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
