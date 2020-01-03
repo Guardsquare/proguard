@@ -9,20 +9,20 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.AllMethodVisitor;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.io.*;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
- * This sample application illustrates how to evaluate bytecode and print out
- * some results. In this example, it prints out the potential return values of
- * all methods, as accurately as the analysis allows.
+ * This sample application illustrates how to evaluate bytecode to get
+ * information about its control flow and data flow. In this example,
+ * it prints out the potential return values of all methods, as accurately
+ * as the analysis allows.
  *
  * ProGuard applies more elaborate analyses to simplify the code, propagating
  * parameters and return values across methods, in proguard.optimize.Optimizer.
  *
  * Usage:
- *     java proguard.examples.EvaluateReturnValues input.jar
+ *     java proguard.examples.EvaluateCode input.jar
  */
 public class EvaluateCode
 {
@@ -32,19 +32,24 @@ public class EvaluateCode
 
         try
         {
-            // Parse all classes from the input jar,
-            // and stream their code to the method analyzer.
-            DirectoryPump directoryPump =
-                new DirectoryPump(
-                new File(inputJarFileName));
+            // Read the program classes and library classes.
+            // The latter are necessary to reconstruct the class hierarchy,
+            // which is necessary to properly evaluate the code.
+            // We're only reading the base jmod here. General code may need
+            // additional jmod files.
+            String runtimeFileName = System.getProperty("java.home") + "/jmods/java.base.jmod";
 
-            directoryPump.pumpDataEntries(
-                new JarReader(
-                new ClassFilter(
-                new ClassReader(false, false, false, false, null,
+            ClassPool libraryClassPool = JarUtil.readJar(runtimeFileName, true);
+            ClassPool programClassPool = JarUtil.readJar(inputJarFileName, false);
+
+            // Initialize all cross-references.
+            InitializationUtil.initialize(programClassPool, libraryClassPool);
+
+            // Analyze all methods.
+            programClassPool.classesAccept(
                 new AllMethodVisitor(
                 new AllAttributeVisitor(
-                new MyMethodAnalyzer()))))));
+                new MyMethodAnalyzer())));
         }
         catch (IOException e)
         {
@@ -65,10 +70,10 @@ public class EvaluateCode
     {
         // The partial evaluator and its support classes determine
         // the precision of the analysis.
-        private final RangeValueFactory valueFactory     = new RangeValueFactory(new ArrayReferenceValueFactory());
-        private final PartialEvaluator  partialEvaluator = new PartialEvaluator(valueFactory,
-                                                                                new BasicInvocationUnit(valueFactory),
-                                                                                false);
+        private final ValueFactory     valueFactory     = new RangeValueFactory(new ArrayReferenceValueFactory());
+        private final PartialEvaluator partialEvaluator = new PartialEvaluator(valueFactory,
+                                                                               new BasicInvocationUnit(valueFactory),
+                                                                               false);
 
         // Implementations for AttributeVisitor.
 
@@ -80,7 +85,7 @@ public class EvaluateCode
             // Evaluate the code.
             partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
 
-            // Go over all instruction to print out some information about
+            // Go over all instructions to print out some information about
             // the results.
             codeAttribute.instructionsAccept(clazz, method, this);
         }
@@ -107,10 +112,9 @@ public class EvaluateCode
                     {
                         // Print our the return value.
                         System.out.println(
-                            ClassUtil.externalClassName(clazz.getName()) +
-                            ": " +
+                            ClassUtil.externalClassName(clazz.getName()) + ": " +
                             ClassUtil.externalFullMethodDescription(clazz.getName(),
-                                                                    clazz.getAccessFlags(),
+                                                                    method.getAccessFlags(),
                                                                     method.getName(clazz),
                                                                     method.getDescriptor(clazz)) +
                             " may return " +

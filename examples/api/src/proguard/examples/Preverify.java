@@ -32,98 +32,22 @@ public class Preverify
             // additional jmod files.
             String runtimeFileName = System.getProperty("java.home") + "/jmods/java.base.jmod";
 
-            ClassPool libraryClassPool = readJar(runtimeFileName, true);
-            ClassPool programClassPool = readJar(inputJarFileName, false);
+            ClassPool libraryClassPool = JarUtil.readJar(runtimeFileName, true);
+            ClassPool programClassPool = JarUtil.readJar(inputJarFileName, false);
 
             // Initialize all cross-references.
-            initialize(programClassPool, libraryClassPool);
+            InitializationUtil.initialize(programClassPool, libraryClassPool);
 
             // Preverify the program classes.
             preverify(programClassPool);
 
             // Write the preverified classes to the jar file.
-            writeJar(programClassPool, outputJarFileName);
+            JarUtil.writeJar(programClassPool, outputJarFileName);
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
-    }
-
-
-    /**
-     * Reads the classes from the specified jar file and returns them as a class
-     * pool.
-     *
-     * @param jarFileName the name of the jar file or jmod file.
-     * @param isLibrary   specifies whether classes should be represented as
-     *                    ProgramClass instances (for processing) or
-     *                    LibraryClass instances (more compact).
-     * @return a new class pool with the read classes.
-     */
-    private static ClassPool readJar(String  jarFileName,
-                                     boolean isLibrary)
-    throws IOException
-    {
-        ClassPool classPool = new ClassPool();
-
-        // Parse all classes from the input jar and
-        // collect them in the class pool.
-        DirectoryPump directoryPump =
-            new DirectoryPump(
-            new File(jarFileName));
-
-        directoryPump.pumpDataEntries(
-            new JarReader(isLibrary,
-            new ClassFilter(
-            new ClassReader(isLibrary, false, false, false, null,
-            new ClassPoolFiller(classPool)))));
-
-        return classPool;
-    }
-
-
-    /**
-     * Initializes the cached cross-references of the classes in the given
-     * class pools.
-     * @param programClassPool the program class pool, typically with processed
-     *                         classes.
-     * @param libraryClassPool the library class pool, typically with run-time
-     *                         classes.
-     */
-    private static void initialize(ClassPool programClassPool,
-                                   ClassPool libraryClassPool)
-    {
-        // We may get some warnings about missing dependencies.
-        // They're a pain, but for proper results, we really need to have
-        // all dependencies.
-        PrintWriter    printWriter    = new PrintWriter(System.err);
-        WarningPrinter warningPrinter = new WarningPrinter(printWriter);
-
-        // Initialize the class hierarchies.
-        libraryClassPool.classesAccept(
-            new ClassSuperHierarchyInitializer(programClassPool,
-                                               libraryClassPool,
-                                               null,
-                                               null));
-
-        programClassPool.classesAccept(
-            new ClassSuperHierarchyInitializer(programClassPool,
-                                               libraryClassPool,
-                                               warningPrinter,
-                                               warningPrinter));
-
-        // Initialize the other references from the program classes.
-        programClassPool.classesAccept(
-            new ClassReferenceInitializer(programClassPool,
-                                          libraryClassPool,
-                                          warningPrinter,
-                                          warningPrinter,
-                                          warningPrinter,
-                                          null));
-
-        // Flush the warnings.
-        printWriter.flush();
     }
 
 
@@ -139,27 +63,5 @@ public class Preverify
             new AllMethodVisitor(
             new AllAttributeVisitor(
             new CodePreverifier(false)))));
-    }
-
-
-    /**
-     * Writes the classes from the given class pool to a specified jar.
-     * @param programClassPool  the classes to write.
-     * @param outputJarFileName the name of the output jar file.
-     */
-    private static void writeJar(ClassPool programClassPool,
-                                 String    outputJarFileName)
-    throws IOException
-    {
-        JarWriter jarWriter =
-            new JarWriter(
-            new ZipWriter(
-            new FixedFileWriter(
-            new File(outputJarFileName))));
-
-        programClassPool.classesAccept(
-            new DataEntryClassWriter(jarWriter));
-
-        jarWriter.close();
     }
 }
