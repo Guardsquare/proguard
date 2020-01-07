@@ -33,8 +33,10 @@ Complete example: ApplyPeepholeOptimizations.java
 Instead of just matching instruction sequences, you can also replace matched
 sequences by other instruction sequences, for example to optimize code or
 instrument code. The core classes are PeepholeEditor and
-InstructionSequenceReplacer. Say that you want to replace am instruction
+InstructionSequenceReplacer. Say that you want to replace an instruction
 sequence "putstatic/getstatic" by an equivalent "dup/putstatic":
+
+    final int X = InstructionSequenceReplacer.X;
 
     InstructionSequenceBuilder ____ =
         new InstructionSequenceBuilder();
@@ -53,14 +55,14 @@ sequence "putstatic/getstatic" by an equivalent "dup/putstatic":
     BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
     CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
 
-    targetClass.accept(
+    programClassPool.classesAccept(
         new AllMethodVisitor(
         new AllAttributeVisitor(
         new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
         new InstructionSequenceReplacer(constants,
                                         replacements,
                                         branchTargetFinder,
-                                        codeAttributeEditor)))))
+                                        codeAttributeEditor)))));
 
 You can define multiple patterns and their respective replacements in one go,
 with the wrapper InstructionSequencesReplacer.
