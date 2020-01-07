@@ -25,7 +25,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.io.PrintWriter;
 
@@ -177,11 +177,11 @@ implements   ClassVisitor,
 
     // Small utility methods.
 
-    private void printReason(VisitorAccepter visitorAccepter)
+    private void printReason(Processable processable)
     {
-        if (shortestUsageMarker.isUsed(visitorAccepter))
+        if (shortestUsageMarker.isUsed(processable))
         {
-            ShortestUsageMark shortestUsageMark = shortestUsageMarker.getShortestUsageMark(visitorAccepter);
+            ShortestUsageMark shortestUsageMark = shortestUsageMarker.getShortestUsageMark(processable);
 
             // Print the reason for keeping this class.
             pw.print("  " + shortestUsageMark.getReason());

@@ -14,14 +14,14 @@ This is a good place to use the visitor pattern.
 <p>
 Visitor interfaces avoid having to do series of <code>instanceof</code> tests
 on the elements of a list, followed by type casts and the proper operations.
-Every list element is a visitor accepter. When its <code>accept</code> method
+Every list element is a processable. When its <code>accept</code> method
 is called by a visitor, it calls its corresponding <code>visitX</code> method
 in the visitor, passing itself as an argument. This technique is called
 double-dispatch.
 <p>
 As already mentioned, the main advantage is avoiding lots of
 <code>instanceof</code> tests and type casts. Also, implementing a visitor
-interface ensures you're handling all possible visitor accepter types. Each
+interface ensures you're handling all possible processable types. Each
 type has its own method, which you simply have to implement.
 <p>
 A disadvantage is that the visitor methods always get the same names, specified
@@ -32,9 +32,9 @@ Also, the visitor methods always have the same parameters and return values, as
 specified by the visitor interfaces. Passing additional parameters is done by
 means of extra fields in the visitor, which is somewhat of a kludge.
 <p>
-Because objects (the visitor accepters) and the operations performed upon them
+Because objects (the processables) and the operations performed upon them
 (the visitors) are now separated, it becomes harder to associate some state
 with the objects. For convenience, we always provide an extra <i>visitor
-info</i> field in visitor accepters, in which visitors can put any temporary
+info</i> field in processables, in which visitors can put any temporary
 information they want.
 </body>

@@ -20,7 +20,7 @@ package proguard.classfile.attribute.preverification;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * This abstract class represents a verification type of a local variable or
@@ -28,7 +28,7 @@ import proguard.util.SimpleVisitorAccepter;
  *
  * @author Eric Lafortune
  */
-public abstract class VerificationType extends SimpleVisitorAccepter
+public abstract class VerificationType extends SimpleProcessable
 {
     public static final int TOP_TYPE                = 0;
     public static final int INTEGER_TYPE            = 1;

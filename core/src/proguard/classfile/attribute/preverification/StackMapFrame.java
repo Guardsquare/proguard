@@ -20,7 +20,7 @@ package proguard.classfile.attribute.preverification;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * This abstract class represents a stack map frame. Specific types
@@ -28,7 +28,7 @@ import proguard.util.SimpleVisitorAccepter;
  *
  * @author Eric Lafortune
  */
-public abstract class StackMapFrame extends SimpleVisitorAccepter
+public abstract class StackMapFrame extends SimpleProcessable
 {
     public static final int SAME_ZERO_FRAME          =   0;
     public static final int SAME_ONE_FRAME           =  64;

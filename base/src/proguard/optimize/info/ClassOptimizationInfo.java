@@ -133,12 +133,12 @@ public class ClassOptimizationInfo
 
     public static void setClassOptimizationInfo(Clazz clazz)
     {
-        clazz.setVisitorInfo(new ClassOptimizationInfo());
+        clazz.setProcessingInfo(new ClassOptimizationInfo());
     }
 
 
     public static ClassOptimizationInfo getClassOptimizationInfo(Clazz clazz)
     {
-        return (ClassOptimizationInfo)clazz.getVisitorInfo();
+        return (ClassOptimizationInfo)clazz.getProcessingInfo();
     }
 }

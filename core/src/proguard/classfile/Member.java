@@ -26,7 +26,7 @@ import proguard.util.*;
  *
  * @author Eric Lafortune
  */
-public interface Member extends Processable, VisitorAccepter
+public interface Member extends Processable
 {
     /**
      * Returns the access flags.

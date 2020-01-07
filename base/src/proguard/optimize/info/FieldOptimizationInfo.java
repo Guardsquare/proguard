@@ -80,12 +80,12 @@ extends      SimplifiedVisitor
 
     public static void setFieldOptimizationInfo(Clazz clazz, Field field)
     {
-        field.setVisitorInfo(new FieldOptimizationInfo());
+        field.setProcessingInfo(new FieldOptimizationInfo());
     }
 
 
     public static FieldOptimizationInfo getFieldOptimizationInfo(Field field)
     {
-        return (FieldOptimizationInfo)field.getVisitorInfo();
+        return (FieldOptimizationInfo)field.getProcessingInfo();
     }
 }

@@ -19,14 +19,14 @@ package proguard.classfile.attribute.module;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a Opens entry in a Module attribute.
  *
  * @author Joachim Vandersmissen
  */
-public class OpensInfo extends SimpleVisitorAccepter
+public class OpensInfo extends SimpleProcessable
 {
     public int   u2opensIndex;
     public int   u2opensFlags;

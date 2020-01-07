@@ -31,7 +31,7 @@ import proguard.util.*;
  * @author Eric Lafortune
  */
 public class LibraryClass
-extends      SimpleFeatureNamedProcessableVisitorAccepter
+extends      SimpleFeatureNamedProcessable
 implements   Clazz
 {
     public int             u2accessFlags;
@@ -63,7 +63,9 @@ implements   Clazz
     /**
      * Creates an empty LibraryClass.
      */
-    public LibraryClass() {}
+    public LibraryClass()
+    {
+    }
 
 
     /**

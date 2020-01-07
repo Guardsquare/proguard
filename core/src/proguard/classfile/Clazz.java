@@ -28,7 +28,7 @@ import proguard.util.*;
  *
  * @author Eric Lafortune
  */
-public interface Clazz extends FeatureNamed, Processable, VisitorAccepter
+public interface Clazz extends FeatureNamed, Processable
 {
     /**
      * Returns the access flags of this class.

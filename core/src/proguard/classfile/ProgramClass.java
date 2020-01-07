@@ -34,7 +34,7 @@ import proguard.util.*;
  * @author Eric Lafortune
  */
 public class ProgramClass
-extends      SimpleFeatureNamedProcessableVisitorAccepter
+extends      SimpleFeatureNamedProcessable
 implements   Clazz
 {
     private static final int[]           EMPTY_INTERFACES = new int[0];
@@ -69,7 +69,9 @@ implements   Clazz
     /**
      * Creates an uninitialized ProgramClass.
      */
-    public ProgramClass() {}
+    public ProgramClass()
+    {
+    }
 
 
     /**
@@ -89,7 +91,9 @@ implements   Clazz
              u2accessFlags,
              u2thisClass,
              u2superClass,
-             0);
+             null,
+             0,
+             null);
     }
 
 
@@ -103,7 +107,9 @@ implements   Clazz
                         int             u2accessFlags,
                         int             u2thisClass,
                         int             u2superClass,
-                        int             processingFlags)
+                        String          featureName,
+                        int             processingFlags,
+                        Object          processingInfo)
     {
         this(u4version,
              u2constantPoolCount,
@@ -120,7 +126,9 @@ implements   Clazz
              0,
              EMPTY_ATTRIBUTES,
              null,
-             processingFlags);
+             featureName,
+             processingFlags,
+             processingInfo);
     }
 
 
@@ -158,7 +166,9 @@ implements   Clazz
              u2attributesCount,
              attributes,
              subClasses,
-             0);
+             null,
+             0,
+             null);
     }
 
 
@@ -180,9 +190,11 @@ implements   Clazz
                         int             u2attributesCount,
                         Attribute[]     attributes,
                         Clazz[]         subClasses,
-                        int             processingFlags)
+                        String          featureName,
+                        int             processingFlags,
+                        Object          processingInfo)
     {
-        super(processingFlags);
+        super(featureName, processingFlags, processingInfo);
 
         this.u4version           = u4version;
         this.u2constantPoolCount = u2constantPoolCount;

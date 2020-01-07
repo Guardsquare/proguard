@@ -25,8 +25,8 @@ import java.util.*;
 
 
 public class KotlinContractMetadata
-extends    SimpleVisitorAccepter
-implements VisitorAccepter
+extends    SimpleProcessable
+implements Processable
 {
     public List<KotlinEffectMetadata> effects;
 

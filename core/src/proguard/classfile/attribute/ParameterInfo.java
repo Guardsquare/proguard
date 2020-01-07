@@ -19,7 +19,7 @@ package proguard.classfile.attribute;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a parameter, as defined in a method parameters
@@ -27,7 +27,7 @@ import proguard.util.SimpleVisitorAccepter;
  *
  * @author Eric Lafortune
  */
-public class ParameterInfo extends SimpleVisitorAccepter
+public class ParameterInfo extends SimpleProcessable
 {
     public int u2nameIndex;
     public int u2accessFlags;

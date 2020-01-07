@@ -17,14 +17,14 @@
  */
 package proguard.classfile.attribute;
 
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of an Exception table entry.
  *
  * @author Eric Lafortune
  */
-public class ExceptionInfo extends SimpleVisitorAccepter
+public class ExceptionInfo extends SimpleProcessable
 {
     public int u2startPC;
     public int u2endPC;

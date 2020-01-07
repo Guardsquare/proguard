@@ -24,7 +24,7 @@ import proguard.classfile.*;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitors.*;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.util.*;
 
@@ -341,7 +341,7 @@ implements   KotlinMetadataVisitor,
      * Returns whether the given metadata element has its corresponding jvm
      * implementation element shrunk, and thus should be shrunk itself.
      */
-    private boolean shouldShrinkMetadata(Object metadataElement, VisitorAccepter jvmElement)
+    private boolean shouldShrinkMetadata(Object metadataElement, Processable jvmElement)
     {
         // If this method throws a NPE, there is a kotlin metadata
         // element for which we could not find the corresponding
@@ -358,7 +358,7 @@ implements   KotlinMetadataVisitor,
      * List is modified - must be a modifiable list!
      */
     private void shrinkArray(List<?>                         elements,
-                             List<? extends VisitorAccepter> referencedJavaElements)
+                             List<? extends Processable> referencedJavaElements)
     {
         for (int k = elements.size() - 1; k >= 0; k--)
         {
@@ -374,7 +374,7 @@ implements   KotlinMetadataVisitor,
     /**
      * Shrinks elements based on their markings.
      */
-    private void shrinkMetadataArray(List<? extends VisitorAccepter> elements)
+    private void shrinkMetadataArray(List<? extends Processable> elements)
     {
         for (int k = elements.size() - 1; k >= 0; k--)
         {

@@ -19,14 +19,15 @@ package proguard.classfile.attribute;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.VisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a bootstrap method.
  *
  * @author Eric Lafortune
  */
-public class BootstrapMethodInfo implements VisitorAccepter
+public class BootstrapMethodInfo
+extends      SimpleProcessable
 {
     public static final int FLAG_BRIDGES      = 4;
     public static final int FLAG_MARKERS      = 2;
@@ -36,11 +37,6 @@ public class BootstrapMethodInfo implements VisitorAccepter
     public int   u2methodHandleIndex;
     public int   u2methodArgumentCount;
     public int[] u2methodArguments;
-
-    /**
-     * An extra field in which visitors can store information.
-     */
-    public Object visitorInfo;
 
 
     /**
@@ -86,18 +82,5 @@ public class BootstrapMethodInfo implements VisitorAccepter
             clazz.constantPoolEntryAccept(u2methodArguments[index],
                                           constantVisitor);
         }
-    }
-
-
-    // Implementations for VisitorAccepter.
-
-    public Object getVisitorInfo()
-    {
-        return visitorInfo;
-    }
-
-    public void setVisitorInfo(Object visitorInfo)
-    {
-        this.visitorInfo = visitorInfo;
     }
 }

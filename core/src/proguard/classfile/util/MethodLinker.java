@@ -19,7 +19,7 @@ package proguard.classfile.util;
 
 import proguard.classfile.*;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.util.*;
 
@@ -38,7 +38,7 @@ implements   ClassVisitor,
              MemberVisitor
 {
     // An object that is reset and reused every time.
-    // The map: [class member name+' '+descriptor - class member info]
+    // The map: [method name+' '+descriptor - method info]
     private final Map memberMap = new HashMap();
 
 
@@ -61,7 +61,7 @@ implements   ClassVisitor,
 
     public void visitAnyMember(Clazz clazz, Member member)
     {
-        // Get the class member's name and descriptor.
+        // Get the method's name and descriptor.
         String name       = member.getName(clazz);
         String descriptor = member.getDescriptor(clazz);
 
@@ -96,7 +96,7 @@ implements   ClassVisitor,
     // Small utility methods.
 
     /**
-     * Links the two given class members.
+     * Links the two given methods.
      */
     private static void link(Member member1, Member member2)
     {
@@ -110,28 +110,28 @@ implements   ClassVisitor,
             // Merge the two chains, with the library members last.
             if (lastMember2 instanceof LibraryMember)
             {
-                lastMember1.setVisitorInfo(lastMember2);
+                lastMember1.setProcessingInfo(lastMember2);
             }
             else
             {
-                lastMember2.setVisitorInfo(lastMember1);
+                lastMember2.setProcessingInfo(lastMember1);
             }
         }
     }
 
 
     /**
-     * Finds the last class member in the linked list of related class members.
-     * @param member the given class member.
-     * @return the last class member in the linked list.
+     * Finds the last method in the linked list of related methods.
+     * @param member the given method.
+     * @return the last method in the linked list.
      */
     public static Member lastMember(Member member)
     {
         Member lastMember = member;
-        while (lastMember.getVisitorInfo() != null &&
-               lastMember.getVisitorInfo() instanceof Member)
+        while (lastMember.getProcessingInfo() != null &&
+               lastMember.getProcessingInfo() instanceof Member)
         {
-            lastMember = (Member)lastMember.getVisitorInfo();
+            lastMember = (Member)lastMember.getProcessingInfo();
         }
 
         return lastMember;
@@ -139,19 +139,19 @@ implements   ClassVisitor,
 
 
     /**
-     * Finds the last visitor accepter in the linked list of visitors.
-     * @param visitorAccepter the given method.
+     * Finds the last method in the linked list of related methods.
+     * @param processable the given method.
      * @return the last method in the linked list.
      */
-    public static VisitorAccepter lastVisitorAccepter(VisitorAccepter visitorAccepter)
+    public static Processable lastProcessable(Processable processable)
     {
-        VisitorAccepter lastVisitorAccepter = visitorAccepter;
-        while (lastVisitorAccepter.getVisitorInfo() != null &&
-               lastVisitorAccepter.getVisitorInfo() instanceof VisitorAccepter)
+        Processable lastProcessable = processable;
+        while (lastProcessable.getProcessingInfo() != null &&
+               lastProcessable.getProcessingInfo() instanceof Processable)
         {
-            lastVisitorAccepter = (VisitorAccepter)lastVisitorAccepter.getVisitorInfo();
+            lastProcessable = (Processable)lastProcessable.getProcessingInfo();
         }
 
-        return lastVisitorAccepter;
+        return lastProcessable;
     }
 }

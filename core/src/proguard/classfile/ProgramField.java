@@ -51,10 +51,10 @@ public class ProgramField extends ProgramMember implements Field
     /**
      * Creates an initialized ProgramField without attributes.
      */
-    public ProgramField(int         u2accessFlags,
-                        int         u2nameIndex,
-                        int         u2descriptorIndex,
-                        Clazz       referencedClass)
+    public ProgramField(int   u2accessFlags,
+                        int   u2nameIndex,
+                        int   u2descriptorIndex,
+                        Clazz referencedClass)
     {
         this(u2accessFlags,
              u2nameIndex,
@@ -62,18 +62,20 @@ public class ProgramField extends ProgramMember implements Field
              0,
              EMPTY_ATTRIBUTES,
              referencedClass,
-             0);
+             0,
+             null);
     }
 
 
     /**
      * Creates an initialized ProgramField without attributes.
      */
-    public ProgramField(int         u2accessFlags,
-                        int         u2nameIndex,
-                        int         u2descriptorIndex,
-                        Clazz       referencedClass,
-                        int         processingFlags)
+    public ProgramField(int    u2accessFlags,
+                        int    u2nameIndex,
+                        int    u2descriptorIndex,
+                        Clazz  referencedClass,
+                        int    processingFlags,
+                        Object processingInfo)
     {
         this(u2accessFlags,
              u2nameIndex,
@@ -81,7 +83,8 @@ public class ProgramField extends ProgramMember implements Field
              0,
              EMPTY_ATTRIBUTES,
              referencedClass,
-             processingFlags);
+             processingFlags,
+             processingInfo);
     }
 
 
@@ -101,7 +104,8 @@ public class ProgramField extends ProgramMember implements Field
              u2attributesCount,
              attributes,
              referencedClass,
-             0);
+             0,
+             null);
     }
 
 
@@ -114,9 +118,16 @@ public class ProgramField extends ProgramMember implements Field
                         int         u2attributesCount,
                         Attribute[] attributes,
                         Clazz       referencedClass,
-                        int         processingFlags)
+                        int         processingFlags,
+                        Object      processingInfo)
     {
-        super(u2accessFlags, u2nameIndex, u2descriptorIndex, u2attributesCount, attributes, processingFlags);
+        super(u2accessFlags,
+              u2nameIndex,
+              u2descriptorIndex,
+              u2attributesCount,
+              attributes,
+              processingFlags,
+              processingInfo);
 
         this.referencedClass = referencedClass;
     }

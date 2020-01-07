@@ -297,7 +297,7 @@ public class Optimizer
         final MemberCounter        initializerFixCounter1                   = new MemberCounter();
         final MemberCounter        initializerFixCounter2                   = new MemberCounter();
 
-        // Clean up any old visitor info.
+        // Clean up any old processing info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
 

@@ -173,12 +173,12 @@ implements   AttributeVisitor
 
     public static void setProgramFieldOptimizationInfo(Clazz clazz, Field field)
     {
-        field.setVisitorInfo(new ProgramFieldOptimizationInfo(clazz, field));
+        field.setProcessingInfo(new ProgramFieldOptimizationInfo(clazz, field));
     }
 
 
     public static ProgramFieldOptimizationInfo getProgramFieldOptimizationInfo(Field field)
     {
-        return (ProgramFieldOptimizationInfo)field.getVisitorInfo();
+        return (ProgramFieldOptimizationInfo)field.getProcessingInfo();
     }
 }

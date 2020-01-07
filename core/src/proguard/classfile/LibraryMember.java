@@ -18,7 +18,7 @@
 package proguard.classfile;
 
 import proguard.classfile.visitor.MemberVisitor;
-import proguard.util.SimpleProcessableVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a field or method from a library class.
@@ -26,7 +26,7 @@ import proguard.util.SimpleProcessableVisitorAccepter;
  * @author Eric Lafortune
  */
 public abstract class LibraryMember
-extends               SimpleProcessableVisitorAccepter
+extends               SimpleProcessable
 implements            Member
 {
     public int    u2accessFlags;

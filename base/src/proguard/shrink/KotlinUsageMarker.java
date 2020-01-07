@@ -516,7 +516,7 @@ implements   KotlinMetadataVisitor,
 
     // Small helper methods.
 
-    private void markAsUsed(VisitorAccepter metadataElement)
+    private void markAsUsed(Processable metadataElement)
     {
         if (metadataElement != null)
         {
@@ -531,12 +531,12 @@ implements   KotlinMetadataVisitor,
         return isUsed(clazz) || ((clazz.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0);
     }
 
-    private void markAsUsed(List<? extends VisitorAccepter> metadataElements)
+    private void markAsUsed(List<? extends Processable> metadataElements)
     {
         metadataElements.forEach(this::markAsUsed);
     }
 
-    public boolean isUsed(VisitorAccepter metadataElement)
+    public boolean isUsed(Processable metadataElement)
     {
         return javaUsageMarker.isUsed(metadataElement);
     }

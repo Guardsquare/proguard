@@ -523,13 +523,13 @@ extends      MethodOptimizationInfo
 
     public static void setProgramMethodOptimizationInfo(Clazz clazz, Method method)
     {
-        MethodLinker.lastMember(method).setVisitorInfo(new ProgramMethodOptimizationInfo(clazz, method));
+        MethodLinker.lastMember(method).setProcessingInfo(new ProgramMethodOptimizationInfo(clazz, method));
     }
 
 
     public static ProgramMethodOptimizationInfo getProgramMethodOptimizationInfo(Method method)
     {
-        return (ProgramMethodOptimizationInfo)MethodLinker.lastMember(method).getVisitorInfo();
+        return (ProgramMethodOptimizationInfo)MethodLinker.lastMember(method).getProcessingInfo();
     }
 
 

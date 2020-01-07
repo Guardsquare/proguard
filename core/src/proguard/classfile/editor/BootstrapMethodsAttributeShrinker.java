@@ -25,7 +25,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.util.Arrays;
 
@@ -49,7 +49,7 @@ implements   ClassVisitor,
              InstructionVisitor,
              BootstrapMethodInfoVisitor
 {
-    // A visitor info flag to indicate the bootstrap method is being used.
+    // A processing info flag to indicate the bootstrap method is being used.
     private static final Object USED = new Object();
 
     private       int[]                   bootstrapMethodIndexMap = new int[ClassEstimates.TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE];
@@ -72,7 +72,7 @@ implements   ClassVisitor,
         modified                = false;
         bootstrapMethodIndexMap = new int[ClassEstimates.TYPICAL_BOOTSTRAP_METHODS_ATTRIBUTE_SIZE];
 
-        // Remove any previous visitor info.
+        // Remove any previous processing info.
         programClass.accept(new ClassCleaner());
 
         // Mark the bootstrap methods referenced by invokeDynamic instructions.
@@ -190,20 +190,20 @@ implements   ClassVisitor,
     // Small utility methods.
 
     /**
-     * Marks the given visitor accepter as being used.
+     * Marks the given processable as being used.
      */
     private void markAsUsed(BootstrapMethodInfo bootstrapMethodInfo)
     {
-        bootstrapMethodInfo.setVisitorInfo(USED);
+        bootstrapMethodInfo.setProcessingInfo(USED);
     }
 
 
     /**
-     * Returns whether the given visitor accepter has been marked as being used.
+     * Returns whether the given processable has been marked as being used.
      */
-    private boolean isUsed(VisitorAccepter visitorAccepter)
+    private boolean isUsed(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == USED;
+        return processable.getProcessingInfo() == USED;
     }
 
 
@@ -319,12 +319,12 @@ implements   ClassVisitor,
 
         private void markForRemoval(InnerClassesInfo innerClassesInfo)
         {
-            innerClassesInfo.setVisitorInfo(methodHandleLookupMarker);
+            innerClassesInfo.setProcessingInfo(methodHandleLookupMarker);
         }
 
         private boolean shouldBeRemoved(InnerClassesInfo innerClassesInfo)
         {
-            return innerClassesInfo.getVisitorInfo() == methodHandleLookupMarker;
+            return innerClassesInfo.getProcessingInfo() == methodHandleLookupMarker;
         }
 
         public boolean isMethodHandleClass(ClassConstant classConstant, Clazz clazz)

@@ -19,7 +19,7 @@ package proguard.classfile.attribute;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.visitor.ClassVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of an Local Variable table entry.
@@ -27,7 +27,7 @@ import proguard.util.SimpleVisitorAccepter;
  * @author Eric Lafortune
  */
 public class LocalVariableInfo
-extends      SimpleVisitorAccepter
+extends      SimpleProcessable
 implements   Comparable
 {
     public int u2startPC;

@@ -34,7 +34,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 /**
  * This ClassVisitor and MemberVisitor recursively marks all classes and class
@@ -66,7 +66,7 @@ implements   ClassVisitor,
              ProvidesInfoVisitor,
              InstructionVisitor
 {
-    // A visitor info flag to indicate the ProgramMember object is being used,
+    // A processing info flag to indicate the ProgramMember object is being used,
     // if its Clazz can be determined as being used as well.
     private final Object POSSIBLY_USED = new Object();
 
@@ -1287,11 +1287,11 @@ implements   ClassVisitor,
     // Small utility methods.
 
     /**
-     * Marks the given visitor accepter as being used.
+     * Marks the given processable as being used.
      */
-    public void markAsUsed(VisitorAccepter visitorAccepter)
+    public void markAsUsed(Processable processable)
     {
-        usageMarker.markAsUsed(visitorAccepter);
+        usageMarker.markAsUsed(processable);
     }
 
 
@@ -1301,7 +1301,7 @@ implements   ClassVisitor,
      */
     public boolean shouldBeMarkedAsUsed(ProgramClass programClass)
     {
-        return shouldBeMarkedAsUsed((VisitorAccepter)programClass);
+        return shouldBeMarkedAsUsed((Processable)programClass);
     }
 
 
@@ -1317,30 +1317,30 @@ implements   ClassVisitor,
 
 
     /**
-     * Returns whether the given visitor accepter should still be marked as
+     * Returns whether the given processable should still be marked as
      * being used.
      */
-    public boolean shouldBeMarkedAsUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsUsed(Processable processable)
     {
-        return !isUsed(visitorAccepter);
+        return !isUsed(processable);
     }
 
 
     /**
-     * Returns whether the given visitor accepter has been marked as being used.
+     * Returns whether the given processable has been marked as being used.
      */
-    public boolean isUsed(VisitorAccepter visitorAccepter)
+    public boolean isUsed(Processable processable)
     {
-        return usageMarker.isUsed(visitorAccepter);
+        return usageMarker.isUsed(processable);
     }
 
 
     /**
-     * Marks the given visitor accepter as possibly being used.
+     * Marks the given processable as possibly being used.
      */
-    public void markAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public void markAsPossiblyUsed(Processable processable)
     {
-        usageMarker.markAsPossiblyUsed(visitorAccepter);
+        usageMarker.markAsPossiblyUsed(processable);
     }
 
 
@@ -1356,32 +1356,32 @@ implements   ClassVisitor,
 
 
     /**
-     * Returns whether the given visitor accepter should still be marked as
+     * Returns whether the given processable should still be marked as
      * possibly being used.
      */
-    public boolean shouldBeMarkedAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsPossiblyUsed(Processable processable)
     {
-        return !isUsed(visitorAccepter) &&
-               !isPossiblyUsed(visitorAccepter);
+        return !isUsed(processable) &&
+               !isPossiblyUsed(processable);
     }
 
 
     /**
-     * Returns whether the given visitor accepter has been marked as possibly
+     * Returns whether the given processable has been marked as possibly
      * being used.
      */
-    public boolean isPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean isPossiblyUsed(Processable processable)
     {
-        return usageMarker.isPossiblyUsed(visitorAccepter);
+        return usageMarker.isPossiblyUsed(processable);
     }
 
 
     /**
-     * Clears any usage marks from the given visitor accepter.
+     * Clears any usage marks from the given processable.
      */
-    public void markAsUnused(VisitorAccepter visitorAccepter)
+    public void markAsUnused(Processable processable)
     {
-        usageMarker.markAsUnused(visitorAccepter);
+        usageMarker.markAsUnused(processable);
     }
 
 

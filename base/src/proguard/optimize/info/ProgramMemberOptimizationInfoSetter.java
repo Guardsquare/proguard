@@ -52,7 +52,7 @@ implements   MemberVisitor
     /**
      * Creates a new ProgramMemberOptimizationInfoSetter.
      *
-     * @param overwrite boolean indicating whether an existing visitor info on
+     * @param overwrite boolean indicating whether an existing processing info on
      *                  a visited member should be overwritten or not.
      */
     public ProgramMemberOptimizationInfoSetter(boolean overwrite)
@@ -64,7 +64,7 @@ implements   MemberVisitor
 
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
-        if (programField.getVisitorInfo() == null || overwrite)
+        if (programField.getProcessingInfo() == null || overwrite)
         {
             ProgramFieldOptimizationInfo.setProgramFieldOptimizationInfo(programClass,
                                                                          programField);
@@ -74,7 +74,7 @@ implements   MemberVisitor
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        if (MethodLinker.lastMember(programMethod).getVisitorInfo() == null || overwrite)
+        if (MethodLinker.lastMember(programMethod).getProcessingInfo() == null || overwrite)
         {
             ProgramMethodOptimizationInfo.setProgramMethodOptimizationInfo(programClass,
                                                                            programMethod);

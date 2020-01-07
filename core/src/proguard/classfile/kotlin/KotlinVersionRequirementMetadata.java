@@ -23,8 +23,8 @@ import proguard.classfile.kotlin.visitors.*;
 import proguard.util.*;
 
 public class KotlinVersionRequirementMetadata
-extends SimpleVisitorAccepter
-implements VisitorAccepter
+extends SimpleProcessable
+implements Processable
 {
     public KmVersionRequirementVersionKind kind;
 

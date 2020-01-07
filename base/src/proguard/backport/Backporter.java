@@ -64,7 +64,7 @@ public class Backporter
 
         PrintWriter err = new PrintWriter(System.err, true);
 
-        // Clean up any previous visitor info.
+        // Clean up any previous processing info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
 

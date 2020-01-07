@@ -62,7 +62,8 @@ public class ProgramMethod extends ProgramMember implements Method
              u2nameIndex,
              u2descriptorIndex,
              referencedClasses,
-             0);
+             0,
+             null);
     }
 
 
@@ -73,7 +74,8 @@ public class ProgramMethod extends ProgramMember implements Method
                          int     u2nameIndex,
                          int     u2descriptorIndex,
                          Clazz[] referencedClasses,
-                         int     processingFlags)
+                         int     processingFlags,
+                         Object  processingInfo)
     {
         this(u2accessFlags,
              u2nameIndex,
@@ -81,7 +83,8 @@ public class ProgramMethod extends ProgramMember implements Method
              0,
              EMPTY_ATTRIBUTES,
              referencedClasses,
-             processingFlags);
+             processingFlags,
+             processingInfo);
     }
 
 
@@ -101,7 +104,8 @@ public class ProgramMethod extends ProgramMember implements Method
              u2attributesCount,
              attributes,
              referencedClasses,
-             0);
+             0,
+             null);
     }
 
 
@@ -114,9 +118,16 @@ public class ProgramMethod extends ProgramMember implements Method
                          int         u2attributesCount,
                          Attribute[] attributes,
                          Clazz[]     referencedClasses,
-                         int         processingFlags)
+                         int         processingFlags,
+                         Object      processingInfo)
     {
-        super(u2accessFlags, u2nameIndex, u2descriptorIndex, u2attributesCount, attributes, processingFlags);
+        super(u2accessFlags,
+              u2nameIndex,
+              u2descriptorIndex,
+              u2attributesCount,
+              attributes,
+              processingFlags,
+              processingInfo);
 
         this.referencedClasses = referencedClasses;
     }

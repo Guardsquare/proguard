@@ -24,7 +24,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 /**
  * This AttributeVisitor marks all attributes that it visits.
@@ -37,7 +37,7 @@ public class AttributeUsageMarker
 extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
-    // A visitor info flag to indicate the attribute is being used.
+    // A processing info flag to indicate the attribute is being used.
     private static final Object USED = new Object();
 
 
@@ -52,21 +52,21 @@ implements   AttributeVisitor
     // Small utility methods.
 
     /**
-     * Marks the given VisitorAccepter as being used (or useful).
-     * In this context, the VisitorAccepter will be an Attribute object.
+     * Marks the given Processable as being used (or useful).
+     * In this context, the Processable will be an Attribute object.
      */
-    private static void markAsUsed(VisitorAccepter visitorAccepter)
+    private static void markAsUsed(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(USED);
+        processable.setProcessingInfo(USED);
     }
 
 
     /**
-     * Returns whether the given VisitorAccepter has been marked as being used.
-     * In this context, the VisitorAccepter will be an Attribute object.
+     * Returns whether the given Processable has been marked as being used.
+     * In this context, the Processable will be an Attribute object.
      */
-    static boolean isUsed(VisitorAccepter visitorAccepter)
+    static boolean isUsed(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == USED;
+        return processable.getProcessingInfo() == USED;
     }
 }

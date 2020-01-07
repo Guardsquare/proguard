@@ -51,57 +51,13 @@ public class ClassBuilder
      * Creates a new ClassBuilder for the Java class with the given
      * name and super class.
      *
-     * @param u2accessFlags   access flags for the new class.
-     * @param className       the fully qualified name of the new class.
-     * @param superclassName  the fully qualified name of the super class.
+     * @oaram u4version      the class version.
+     * @param u2accessFlags  access flags for the new class.
+     * @param className      the fully qualified name of the new class.
+     * @param superclassName the fully qualified name of the super class.
      *
-     * @see ClassConstants
-     */
-    public ClassBuilder(int    u2accessFlags,
-                        String className,
-                        String superclassName)
-    {
-        this(u2accessFlags,
-             className,
-             superclassName,
-             0);
-    }
-
-
-    /**
-     * Creates a new ClassBuilder for the Java class with the given
-     * name and super class.
-     *
-     * @param u2accessFlags   access flags for the new class.
-     * @param className       the fully qualified name of the new class.
-     * @param superclassName  the fully qualified name of the super class.
-     * @param processingFlags processing flags for the new class.
-     *
-     * @see ClassConstants
-     */
-    public ClassBuilder(int    u2accessFlags,
-                        String className,
-                        String superclassName,
-                        int    processingFlags)
-    {
-        this(VersionConstants.CLASS_VERSION_1_2,
-             u2accessFlags,
-             className,
-             superclassName,
-             processingFlags);
-    }
-
-
-    /**
-     * Creates a new ClassBuilder for the Java class with the given
-     * name and super class.
-     *
-     * @oaram u4version       the class version.
-     * @param u2accessFlags   access flags for the new class.
-     * @param className       the fully qualified name of the new class.
-     * @param superclassName  the fully qualified name of the super class.
-     *
-     * @see ClassConstants
+     * @see VersionConstants
+     * @see AccessConstants
      */
     public ClassBuilder(int    u4version,
                         int    u2accessFlags,
@@ -112,7 +68,9 @@ public class ClassBuilder
              u2accessFlags,
              className,
              superclassName,
-             0);
+             null,
+             0,
+             null);
     }
 
 
@@ -124,15 +82,20 @@ public class ClassBuilder
      * @param u2accessFlags   access flags for the new class.
      * @param className       the fully qualified name of the new class.
      * @param superclassName  the fully qualified name of the super class.
-     * @param processingFlags processing flags for the new class.
+     * @param featureName     an optional feature name for the new class.
+     * @param processingFlags optional processing flags for the new class.
+     * @param processingFlags optional processing info for the new class.
      *
-     * @see ClassConstants
+     * @see VersionConstants
+     * @see AccessConstants
      */
     public ClassBuilder(int    u4version,
                         int    u2accessFlags,
                         String className,
                         String superclassName,
-                        int    processingFlags)
+                        String featureName,
+                        int    processingFlags,
+                        Object processingInfo)
     {
         this(new ProgramClass(u4version,
                               1,
@@ -140,7 +103,9 @@ public class ClassBuilder
                               u2accessFlags,
                               0,
                               0,
-                              processingFlags));
+                              featureName,
+                              processingFlags,
+                              processingInfo));
 
         programClass.u2thisClass =
             constantPoolEditor.addClassConstant(className, programClass);

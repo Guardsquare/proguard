@@ -28,7 +28,7 @@ import java.io.*;
 
 /**
  * This MemberVisitor copies all class members that it visits to the given
- * target class. Their visitor info is set to the class members from which they
+ * target class. Their processing info is set to the class members from which they
  * were copied.
  *
  * @author Eric Lafortune
@@ -74,7 +74,7 @@ implements   MemberVisitor
      *                           will be added.
      * @param extraMemberVisitor an optional member visitor that visits each
      *                           new member right after it has been added. This
-     *                           allows changing the visitor info, for instance.
+     *                           allows changing the processing info, for instance.
      */
     public MemberAdder(ProgramClass      targetClass,
                        MemberVisitor     extraMemberVisitor)
@@ -92,7 +92,7 @@ implements   MemberVisitor
      *                           name will be used.
      * @param extraMemberVisitor an optional member visitor that visits each
      *                           new member right after it has been added. This
-     *                           allows changing the visitor info, for instance.
+     *                           allows changing the processing info, for instance.
      */
     public MemberAdder(ProgramClass   targetClass,
                        StringFunction nameTransformer,
@@ -171,7 +171,8 @@ implements   MemberVisitor
             System.out.println("MemberAdder: copying field ["+programClass+"."+programField.getName(programClass)+" "+programField.getDescriptor(programClass)+"] into ["+targetClass.getName()+"]");
         }
 
-        // Create a copy of the field.
+        // Create a copy of the field, with the same processing flags and with
+        // the processing info linking to this field.
         ProgramField newProgramField =
             new ProgramField(accessFlags,
                              constantPoolEditor.addUtf8Constant(name),
@@ -181,10 +182,8 @@ implements   MemberVisitor
                                  new Attribute[programField.u2attributesCount] :
                                  EMPTY_ATTRIBUTES,
                              programField.referencedClass,
-                             programField.processingFlags);
-
-        // Link to its visitor info.
-        newProgramField.setVisitorInfo(programField);
+                             programField.processingFlags,
+                             programField);
 
         // Copy its attributes.
         programField.attributesAccept(programClass,
@@ -274,7 +273,8 @@ implements   MemberVisitor
             System.out.println("MemberAdder: copying method ["+programClass.getName()+"."+name+descriptor+"] into ["+targetClass.getName()+"]");
         }
 
-        // Create a copy of the method.
+        // Create a copy of the method, with the same processing flags and with
+        // the processing info linking to this method.
         ProgramMethod newProgramMethod =
             new ProgramMethod(accessFlags & ~AccessConstants.FINAL,
                               constantPoolEditor.addUtf8Constant(name),
@@ -284,10 +284,8 @@ implements   MemberVisitor
                                   new Attribute[programMethod.u2attributesCount] :
                                   EMPTY_ATTRIBUTES,
                               ArrayUtil.cloneOrNull(programMethod.referencedClasses),
-                              programMethod.processingFlags);
-
-        // Link to its visitor info.
-        newProgramMethod.setVisitorInfo(programMethod);
+                              programMethod.processingFlags,
+                              programMethod);
 
         // Copy its attributes.
         programMethod.attributesAccept(programClass,

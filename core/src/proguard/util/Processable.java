@@ -18,26 +18,40 @@
 package proguard.util;
 
 /**
- * Base interface for entities that need flags when they are processed.
- * The processing flags provide details on how the entity should be
- * processed, possibly across processing steps.
+ * Base interface for entities that need flags and/or additional information
+ * when they are processed, typically by visitor classes.
  *
- * @see ProcessingFlags
+ * The processing flags provide simple boolean markers. In ProGuard, they
+ * mark entities to be kept across processing steps, for example.
+ *
+ * The processing info provides any more general information. In ProGuard,
+ * the contain relatively short-lived information inside processing steps.
  *
  * @author Johan Leys
+ * @Author Eric Lafortune
  */
 public interface Processable
 {
     /**
-     * Returns the processing flags for this entity.
+     * Sets the processing flags.
+     */
+    public void setProcessingFlags(int processingFlags);
+
+
+    /**
+     * Returns the processing flags.
      */
     public int getProcessingFlags();
 
 
     /**
-     * Sets the processing flags for this entity.
-     *
-     * @param processingFlags the processing flags to be set.
+     * Sets the processing information.
      */
-    public void setProcessingFlags(int processingFlags);
+    public void setProcessingInfo(Object processingInfo);
+
+
+    /**
+     * Gets the processing information.
+     */
+    public Object getProcessingInfo();
 }

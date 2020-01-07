@@ -65,14 +65,14 @@ implements   ClassVisitor
                 new AllAttributeVisitor(
                 new AllAnnotationVisitor(
                 new AnnotationTypeFilter(GsonClassConstants.ANNOTATION_TYPE_SERIALIZED_NAME,
-                new VisitorInfoSetter(mark)))));
+                new ProcessingInfoSetter(mark)))));
         }
 
         programClass.fieldsAccept(
             new AllAttributeVisitor(
             new AllAnnotationVisitor(
             new AnnotationTypeFilter(GsonClassConstants.ANNOTATION_TYPE_EXPOSE,
-            new VisitorInfoSetter(mark)))));
+            new ProcessingInfoSetter(mark)))));
 
         // Remove marked annotations.
         programClass.fieldsAccept(
@@ -83,7 +83,7 @@ implements   ClassVisitor
         programClass.fieldsAccept(
             new AllAttributeVisitor(
             new AllAnnotationVisitor(
-            new VisitorInfoSetter(null))));
+            new ProcessingInfoSetter(null))));
     }
 
 

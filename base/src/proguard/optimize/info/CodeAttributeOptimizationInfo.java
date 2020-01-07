@@ -39,13 +39,13 @@ public class CodeAttributeOptimizationInfo
 
     public static void setCodeAttributeOptimizationInfo(CodeAttribute codeAttribute)
     {
-        codeAttribute.setVisitorInfo(new CodeAttributeOptimizationInfo());
+        codeAttribute.setProcessingInfo(new CodeAttributeOptimizationInfo());
     }
 
 
     public static CodeAttributeOptimizationInfo getCodeAttributeOptimizationInfo(CodeAttribute codeAttribute)
     {
-        return (CodeAttributeOptimizationInfo)codeAttribute.getVisitorInfo();
+        return (CodeAttributeOptimizationInfo)codeAttribute.getProcessingInfo();
     }
 
 }

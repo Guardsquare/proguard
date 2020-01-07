@@ -30,7 +30,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This AttributeVisitor deletes annotations with the given object as
- * visitorInfo on the attributes that it visits.
+ * processingInfo on the attributes that it visits.
  * If deleting an annotation results in the corresponding annotation attribute
  * to be empty, that attribute will be deleted as well.
  *
@@ -40,14 +40,14 @@ class      MarkedAnnotationDeleter
 extends    SimplifiedVisitor
 implements AttributeVisitor
 {
-    // A visitor info flag to indicate the annotation can be deleted.
+    // A processing info flag to indicate the annotation can be deleted.
     private final Object mark;
 
 
     /**
      * Creates a new MarkedAnnotationDeleter.
      *
-     * @param mark the visitor info used to recognize annotations that
+     * @param mark the processing info used to recognize annotations that
      *             need to be deleted.
      */
     public MarkedAnnotationDeleter(Object mark)
@@ -149,7 +149,7 @@ implements AttributeVisitor
         for (int index = 0; index < attribute.u2annotationsCount; index++)
         {
             Annotation annotation = annotations[index];
-            if (annotation.getVisitorInfo() == mark)
+            if (annotation.getProcessingInfo() == mark)
             {
                 annotationsAttributeEditor.deleteAnnotation(index);
             }
@@ -182,7 +182,7 @@ implements AttributeVisitor
             for (int annotationIndex = 0; annotationIndex < annotationsCount; annotationIndex++)
             {
                 Annotation annotation = annotations[annotationIndex];
-                if (annotation.getVisitorInfo() == mark)
+                if (annotation.getProcessingInfo() == mark)
                 {
                     annotationsAttributeEditor.deleteAnnotation(parameterIndex, annotationIndex);
                 }

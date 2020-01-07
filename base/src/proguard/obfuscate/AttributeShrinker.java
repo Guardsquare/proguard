@@ -25,7 +25,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.util.Arrays;
 
@@ -96,11 +96,11 @@ implements   ClassVisitor,
     // Small utility methods.
 
     /**
-     * Removes all VisitorAccepter objects that are not marked as being used
+     * Removes all Processable objects that are not marked as being used
      * from the given array.
-     * @return the new number of VisitorAccepter objects.
+     * @return the new number of Processable objects.
      */
-    private static int shrinkArray(VisitorAccepter[] array, int length)
+    private static int shrinkArray(Processable[] array, int length)
     {
         int counter = 0;
 

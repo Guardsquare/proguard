@@ -86,6 +86,7 @@ implements   ClassVisitor
         {
             // Create a new utility class.
             ProgramClass utilityClass = new ClassBuilder(
+                VersionConstants.CLASS_VERSION_1_2,
                 AccessConstants.PUBLIC |
                 AccessConstants.SYNTHETIC,
                 programClass.getName() + "$$Util",

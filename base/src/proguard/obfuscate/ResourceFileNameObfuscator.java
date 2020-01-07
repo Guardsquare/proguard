@@ -84,8 +84,8 @@ implements   ResourceFileVisitor
      */
     private static void setNewResourceFileName(ResourceFile resourceFile, String newFileName)
     {
-        // Store the original filename as visitor info.
-        resourceFile.setVisitorInfo(resourceFile.fileName);
+        // Store the original filename as processing info.
+        resourceFile.setProcessingInfo(resourceFile.fileName);
         resourceFile.fileName = newFileName;
     }
 
@@ -109,10 +109,10 @@ implements   ResourceFileVisitor
      */
     public static String getOriginalResourceFileName(ResourceFile resourceFile)
     {
-        Object visitorInfo = resourceFile.getVisitorInfo();
+        Object processingInfo = resourceFile.getProcessingInfo();
 
-        return visitorInfo instanceof String ?
-            (String)visitorInfo :
+        return processingInfo instanceof String ?
+            (String)processingInfo :
             resourceFile.fileName;
     }
 }

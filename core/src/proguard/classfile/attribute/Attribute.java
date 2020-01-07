@@ -19,7 +19,7 @@ package proguard.classfile.attribute;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.util.SimpleProcessableVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * This abstract class represents an attribute that is attached to a class,
@@ -29,7 +29,7 @@ import proguard.util.SimpleProcessableVisitorAccepter;
  * @author Eric Lafortune
  * @noinspection AbstractClassWithoutAbstractMethods
  */
-public abstract class Attribute extends SimpleProcessableVisitorAccepter
+public abstract class Attribute extends SimpleProcessable
 {
     public static final String BOOTSTRAP_METHODS                       = "BootstrapMethods";
     public static final String SOURCE_FILE                             = "SourceFile";

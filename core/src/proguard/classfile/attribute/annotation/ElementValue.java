@@ -20,7 +20,7 @@ package proguard.classfile.attribute.annotation;
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.visitor.MemberVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * This abstract class represents an element value that is attached to an
@@ -29,7 +29,7 @@ import proguard.util.SimpleVisitorAccepter;
  *
  * @author Eric Lafortune
  */
-public abstract class ElementValue extends SimpleVisitorAccepter
+public abstract class ElementValue extends SimpleProcessable
 {
     public static final char TAG_STRING_CONSTANT = 's';
     public static final char TAG_ENUM_CONSTANT   = 'e';

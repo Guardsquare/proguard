@@ -33,7 +33,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -103,7 +103,7 @@ implements   ClassVisitor,
     public void visitProgramClass(ProgramClass programClass)
     {
         println("_____________________________________________________________________");
-        println(visitorInfo(programClass) + " " +
+        println(processingInfo(programClass) + " " +
                 "Program class: " + programClass.getName());
         indent();
         println("Superclass:    " + programClass.getSuperName());
@@ -157,7 +157,7 @@ implements   ClassVisitor,
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         println("_____________________________________________________________________");
-        println(visitorInfo(libraryClass) + " " +
+        println(processingInfo(libraryClass) + " " +
                 "Library class: " + libraryClass.getName());
         indent();
         println("Superclass:    " + libraryClass.getSuperName());
@@ -195,35 +195,35 @@ implements   ClassVisitor,
 
     public void visitIntegerConstant(Clazz clazz, IntegerConstant integerConstant)
     {
-        println(visitorInfo(integerConstant) + " Integer [" +
+        println(processingInfo(integerConstant) + " Integer [" +
                 integerConstant.getValue() + "]");
     }
 
 
     public void visitLongConstant(Clazz clazz, LongConstant longConstant)
     {
-        println(visitorInfo(longConstant) + " Long [" +
+        println(processingInfo(longConstant) + " Long [" +
                 longConstant.getValue() + "]");
     }
 
 
     public void visitFloatConstant(Clazz clazz, FloatConstant floatConstant)
     {
-        println(visitorInfo(floatConstant) + " Float [" +
+        println(processingInfo(floatConstant) + " Float [" +
                 floatConstant.getValue() + "]");
     }
 
 
     public void visitDoubleConstant(Clazz clazz, DoubleConstant doubleConstant)
     {
-        println(visitorInfo(doubleConstant) + " Double [" +
+        println(processingInfo(doubleConstant) + " Double [" +
                 doubleConstant.getValue() + "]");
     }
 
 
     public void visitPrimitiveArrayConstant(Clazz clazz, PrimitiveArrayConstant primitiveArrayConstant)
     {
-        println(visitorInfo(primitiveArrayConstant) + " PrimitiveArray " +
+        println(processingInfo(primitiveArrayConstant) + " PrimitiveArray " +
                 primitiveArrayConstant.getPrimitiveType() + "[" +
                 primitiveArrayConstant.getLength() + "]");
     }
@@ -231,21 +231,21 @@ implements   ClassVisitor,
 
     public void visitStringConstant(Clazz clazz, StringConstant stringConstant)
     {
-        println(visitorInfo(stringConstant) + " String [" +
+        println(processingInfo(stringConstant) + " String [" +
                 stringConstant.getString(clazz) + "]");
     }
 
 
     public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant)
     {
-        println(visitorInfo(utf8Constant) + " Utf8 [" +
+        println(processingInfo(utf8Constant) + " Utf8 [" +
                 utf8Constant.getString() + "]");
     }
 
 
     public void visitDynamicConstant(Clazz clazz, DynamicConstant dynamicConstant)
     {
-        println(visitorInfo(dynamicConstant) + " Dynamic [bootstrap method index = " + dynamicConstant.u2bootstrapMethodAttributeIndex + "]:");
+        println(processingInfo(dynamicConstant) + " Dynamic [bootstrap method index = " + dynamicConstant.u2bootstrapMethodAttributeIndex + "]:");
 
         indent();
         clazz.constantPoolEntryAccept(dynamicConstant.u2nameAndTypeIndex, this);
@@ -255,7 +255,7 @@ implements   ClassVisitor,
 
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
-        println(visitorInfo(invokeDynamicConstant) + " InvokeDynamic [bootstrap method index = " + invokeDynamicConstant.u2bootstrapMethodAttributeIndex + "]:");
+        println(processingInfo(invokeDynamicConstant) + " InvokeDynamic [bootstrap method index = " + invokeDynamicConstant.u2bootstrapMethodAttributeIndex + "]:");
 
         indent();
         clazz.constantPoolEntryAccept(invokeDynamicConstant.u2nameAndTypeIndex, this);
@@ -265,7 +265,7 @@ implements   ClassVisitor,
 
     public void visitMethodHandleConstant(Clazz clazz, MethodHandleConstant methodHandleConstant)
     {
-        println(visitorInfo(methodHandleConstant) + " MethodHandle [kind = " + methodHandleConstant.u1referenceKind + "]:");
+        println(processingInfo(methodHandleConstant) + " MethodHandle [kind = " + methodHandleConstant.u1referenceKind + "]:");
 
         indent();
         clazz.constantPoolEntryAccept(methodHandleConstant.u2referenceIndex, this);
@@ -274,21 +274,21 @@ implements   ClassVisitor,
 
     public void visitModuleConstant(Clazz clazz, ModuleConstant moduleConstant)
     {
-        println(visitorInfo(moduleConstant) + " Module [" +
+        println(processingInfo(moduleConstant) + " Module [" +
                 moduleConstant.getName(clazz) + "]");
     }
 
 
     public void visitPackageConstant(Clazz clazz, PackageConstant packageConstant)
     {
-        println(visitorInfo(packageConstant) + " Package [" +
+        println(processingInfo(packageConstant) + " Package [" +
                 packageConstant.getName(clazz) + "]");
     }
 
 
     public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
-        println(visitorInfo(fieldrefConstant) + " Fieldref [" +
+        println(processingInfo(fieldrefConstant) + " Fieldref [" +
                 clazz.getClassName(fieldrefConstant.u2classIndex) + "." +
                 clazz.getName(fieldrefConstant.u2nameAndTypeIndex) + " " +
                 clazz.getType(fieldrefConstant.u2nameAndTypeIndex) + "]");
@@ -297,7 +297,7 @@ implements   ClassVisitor,
 
     public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant)
     {
-        println(visitorInfo(interfaceMethodrefConstant) + " InterfaceMethodref [" +
+        println(processingInfo(interfaceMethodrefConstant) + " InterfaceMethodref [" +
                 clazz.getClassName(interfaceMethodrefConstant.u2classIndex)  + "." +
                 clazz.getName(interfaceMethodrefConstant.u2nameAndTypeIndex) + " " +
                 clazz.getType(interfaceMethodrefConstant.u2nameAndTypeIndex) + "]");
@@ -306,7 +306,7 @@ implements   ClassVisitor,
 
     public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant)
     {
-        println(visitorInfo(methodrefConstant) + " Methodref [" +
+        println(processingInfo(methodrefConstant) + " Methodref [" +
                 clazz.getClassName(methodrefConstant.u2classIndex)  + "." +
                 clazz.getName(methodrefConstant.u2nameAndTypeIndex) + " " +
                 clazz.getType(methodrefConstant.u2nameAndTypeIndex) + "]");
@@ -315,21 +315,21 @@ implements   ClassVisitor,
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
-        println(visitorInfo(classConstant) + " Class [" +
+        println(processingInfo(classConstant) + " Class [" +
                 classConstant.getName(clazz) + "]");
     }
 
 
     public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
     {
-        println(visitorInfo(methodTypeConstant) + " MethodType [" +
+        println(processingInfo(methodTypeConstant) + " MethodType [" +
                 methodTypeConstant.getType(clazz) + "]");
     }
 
 
     public void visitNameAndTypeConstant(Clazz clazz, NameAndTypeConstant nameAndTypeConstant)
     {
-        println(visitorInfo(nameAndTypeConstant) + " NameAndType [" +
+        println(processingInfo(nameAndTypeConstant) + " NameAndType [" +
                 nameAndTypeConstant.getName(clazz) + " " +
                 nameAndTypeConstant.getType(clazz) + "]");
     }
@@ -339,7 +339,7 @@ implements   ClassVisitor,
 
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
-        println(visitorInfo(programField) + " " +
+        println(processingInfo(programField) + " " +
                 "Field:        " +
                 programField.getName(programClass) + " " +
                 programField.getDescriptor(programClass));
@@ -358,7 +358,7 @@ implements   ClassVisitor,
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        println(visitorInfo(programMethod) + " " +
+        println(processingInfo(programMethod) + " " +
                 "Method:       " +
                 programMethod.getName(programClass) +
                 programMethod.getDescriptor(programClass));
@@ -388,7 +388,7 @@ implements   ClassVisitor,
 
     public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
     {
-        println(visitorInfo(libraryField) + " " +
+        println(processingInfo(libraryField) + " " +
                 "Field:        " +
                 libraryField.getName(libraryClass) + " " +
                 libraryField.getDescriptor(libraryClass));
@@ -405,7 +405,7 @@ implements   ClassVisitor,
 
     public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
     {
-        println(visitorInfo(libraryMethod) + " " +
+        println(processingInfo(libraryMethod) + " " +
                 "Method:       " +
                 libraryMethod.getName(libraryClass) + " " +
                 libraryMethod.getDescriptor(libraryClass));
@@ -427,14 +427,14 @@ implements   ClassVisitor,
 
     public void visitUnknownAttribute(Clazz clazz, UnknownAttribute unknownAttribute)
     {
-        println(visitorInfo(unknownAttribute) +
+        println(processingInfo(unknownAttribute) +
                 " Unknown attribute (" + unknownAttribute.getAttributeName(clazz) + ")");
     }
 
 
     public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute)
     {
-        println(visitorInfo(bootstrapMethodsAttribute) +
+        println(processingInfo(bootstrapMethodsAttribute) +
                 " Bootstrap methods attribute (count = " + bootstrapMethodsAttribute.u2bootstrapMethodsCount + "):");
 
         indent();
@@ -445,7 +445,7 @@ implements   ClassVisitor,
 
     public void visitSourceFileAttribute(Clazz clazz, SourceFileAttribute sourceFileAttribute)
     {
-        println(visitorInfo(sourceFileAttribute) +
+        println(processingInfo(sourceFileAttribute) +
                 " Source file attribute:");
 
         indent();
@@ -456,7 +456,7 @@ implements   ClassVisitor,
 
     public void visitSourceDirAttribute(Clazz clazz, SourceDirAttribute sourceDirAttribute)
     {
-        println(visitorInfo(sourceDirAttribute) +
+        println(processingInfo(sourceDirAttribute) +
                 " Source dir attribute:");
 
         indent();
@@ -467,14 +467,14 @@ implements   ClassVisitor,
 
     public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
     {
-        println(visitorInfo(sourceDebugExtensionAttribute) +
+        println(processingInfo(sourceDebugExtensionAttribute) +
                 " Source debug extension attribute: " + new String(sourceDebugExtensionAttribute.info, StandardCharsets.UTF_8));
     }
 
 
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
-        println(visitorInfo(innerClassesAttribute) +
+        println(processingInfo(innerClassesAttribute) +
                 " Inner classes attribute (count = " + innerClassesAttribute.u2classesCount + "):");
 
         indent();
@@ -485,7 +485,7 @@ implements   ClassVisitor,
 
     public void visitEnclosingMethodAttribute(Clazz clazz, EnclosingMethodAttribute enclosingMethodAttribute)
     {
-        println(visitorInfo(enclosingMethodAttribute) +
+        println(processingInfo(enclosingMethodAttribute) +
                 " Enclosing method attribute:");
 
         indent();
@@ -501,7 +501,7 @@ implements   ClassVisitor,
 
     public void visitNestHostAttribute(Clazz clazz, NestHostAttribute nestHostAttribute)
     {
-        println(visitorInfo(nestHostAttribute) +
+        println(processingInfo(nestHostAttribute) +
                 " Nest host attribute:");
 
         indent();
@@ -512,7 +512,7 @@ implements   ClassVisitor,
 
     public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
     {
-        println(visitorInfo(nestMembersAttribute) +
+        println(processingInfo(nestMembersAttribute) +
                 " Nest members attribute:");
 
         indent();
@@ -523,7 +523,7 @@ implements   ClassVisitor,
 
     public void visitModuleAttribute(Clazz clazz, ModuleAttribute moduleAttribute)
     {
-        println(visitorInfo(moduleAttribute) +
+        println(processingInfo(moduleAttribute) +
                 " Module attribute:");
 
         indent();
@@ -558,7 +558,7 @@ implements   ClassVisitor,
 
     public void visitModuleMainClassAttribute(Clazz clazz, ModuleMainClassAttribute moduleMainClassAttribute)
     {
-        println(visitorInfo(moduleMainClassAttribute) +
+        println(processingInfo(moduleMainClassAttribute) +
                 " Module main class attribute:");
 
         indent();
@@ -569,7 +569,7 @@ implements   ClassVisitor,
 
     public void visitModulePackagesAttribute(Clazz clazz, ModulePackagesAttribute modulePackagesAttribute)
     {
-        println(visitorInfo(modulePackagesAttribute) +
+        println(processingInfo(modulePackagesAttribute) +
                 " Module packages attribute (count = " + modulePackagesAttribute.u2packagesCount + "):");
 
         indent();
@@ -580,21 +580,21 @@ implements   ClassVisitor,
 
     public void visitDeprecatedAttribute(Clazz clazz, DeprecatedAttribute deprecatedAttribute)
     {
-        println(visitorInfo(deprecatedAttribute) +
+        println(processingInfo(deprecatedAttribute) +
                 " Deprecated attribute");
     }
 
 
     public void visitSyntheticAttribute(Clazz clazz, SyntheticAttribute syntheticAttribute)
     {
-        println(visitorInfo(syntheticAttribute) +
+        println(processingInfo(syntheticAttribute) +
                 " Synthetic attribute");
     }
 
 
     public void visitSignatureAttribute(Clazz clazz, SignatureAttribute signatureAttribute)
     {
-        println(visitorInfo(signatureAttribute) +
+        println(processingInfo(signatureAttribute) +
                 " Signature attribute:");
 
         indent();
@@ -605,7 +605,7 @@ implements   ClassVisitor,
 
     public void visitConstantValueAttribute(Clazz clazz, Field field, ConstantValueAttribute constantValueAttribute)
     {
-        println(visitorInfo(constantValueAttribute) +
+        println(processingInfo(constantValueAttribute) +
                 " Constant value attribute:");
 
         clazz.constantPoolEntryAccept(constantValueAttribute.u2constantValueIndex, this);
@@ -614,7 +614,7 @@ implements   ClassVisitor,
 
     public void visitMethodParametersAttribute(Clazz clazz, Method method, MethodParametersAttribute methodParametersAttribute)
     {
-        println(visitorInfo(methodParametersAttribute) +
+        println(processingInfo(methodParametersAttribute) +
                 " Method parameters attribute (count = " + methodParametersAttribute.u1parametersCount + "):");
 
         indent();
@@ -625,7 +625,7 @@ implements   ClassVisitor,
 
     public void visitExceptionsAttribute(Clazz clazz, Method method, ExceptionsAttribute exceptionsAttribute)
     {
-        println(visitorInfo(exceptionsAttribute) +
+        println(processingInfo(exceptionsAttribute) +
                 " Exceptions attribute (count = " + exceptionsAttribute.u2exceptionIndexTableLength + "):");
 
         indent();
@@ -636,7 +636,7 @@ implements   ClassVisitor,
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        println(visitorInfo(codeAttribute) +
+        println(processingInfo(codeAttribute) +
                 " Code attribute instructions (code length = "+ codeAttribute.u4codeLength +
                 ", locals = "+ codeAttribute.u2maxLocals +
                 ", stack = "+ codeAttribute.u2maxStack + "):");
@@ -661,7 +661,7 @@ implements   ClassVisitor,
 
     public void visitStackMapAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, StackMapAttribute stackMapAttribute)
     {
-        println(visitorInfo(codeAttribute) +
+        println(processingInfo(codeAttribute) +
                 " Stack map attribute (count = "+
                 stackMapAttribute.u2stackMapFramesCount + "):");
 
@@ -673,7 +673,7 @@ implements   ClassVisitor,
 
     public void visitStackMapTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, StackMapTableAttribute stackMapTableAttribute)
     {
-        println(visitorInfo(codeAttribute) +
+        println(processingInfo(codeAttribute) +
                 " Stack map table attribute (count = "+
                 stackMapTableAttribute.u2stackMapFramesCount + "):");
 
@@ -685,7 +685,7 @@ implements   ClassVisitor,
 
     public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
     {
-        println(visitorInfo(lineNumberTableAttribute) +
+        println(processingInfo(lineNumberTableAttribute) +
                 " Line number table attribute (count = " +
                 lineNumberTableAttribute.u2lineNumberTableLength + "):");
 
@@ -697,7 +697,7 @@ implements   ClassVisitor,
 
     public void visitLocalVariableTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTableAttribute localVariableTableAttribute)
     {
-        println(visitorInfo(localVariableTableAttribute) +
+        println(processingInfo(localVariableTableAttribute) +
                 " Local variable table attribute (count = " +
                 localVariableTableAttribute.u2localVariableTableLength + "):");
 
@@ -709,7 +709,7 @@ implements   ClassVisitor,
 
     public void visitLocalVariableTypeTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeTableAttribute localVariableTypeTableAttribute)
     {
-        println(visitorInfo(localVariableTypeTableAttribute) +
+        println(processingInfo(localVariableTypeTableAttribute) +
                 " Local variable type table attribute (count = "+
                 localVariableTypeTableAttribute.u2localVariableTypeTableLength + "):");
 
@@ -721,7 +721,7 @@ implements   ClassVisitor,
 
     public void visitRuntimeVisibleAnnotationsAttribute(Clazz clazz, RuntimeVisibleAnnotationsAttribute runtimeVisibleAnnotationsAttribute)
     {
-        println(visitorInfo(runtimeVisibleAnnotationsAttribute) +
+        println(processingInfo(runtimeVisibleAnnotationsAttribute) +
                 " Runtime visible annotations attribute:");
 
         indent();
@@ -732,7 +732,7 @@ implements   ClassVisitor,
 
     public void visitRuntimeInvisibleAnnotationsAttribute(Clazz clazz, RuntimeInvisibleAnnotationsAttribute runtimeInvisibleAnnotationsAttribute)
     {
-        println(visitorInfo(runtimeInvisibleAnnotationsAttribute) +
+        println(processingInfo(runtimeInvisibleAnnotationsAttribute) +
                 " Runtime invisible annotations attribute:");
 
         indent();
@@ -743,7 +743,7 @@ implements   ClassVisitor,
 
     public void visitRuntimeVisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeVisibleParameterAnnotationsAttribute runtimeVisibleParameterAnnotationsAttribute)
     {
-        println(visitorInfo(runtimeVisibleParameterAnnotationsAttribute) +
+        println(processingInfo(runtimeVisibleParameterAnnotationsAttribute) +
                 " Runtime visible parameter annotations attribute (parameter count = " + runtimeVisibleParameterAnnotationsAttribute.u1parametersCount + "):");
 
         indent();
@@ -754,7 +754,7 @@ implements   ClassVisitor,
 
     public void visitRuntimeInvisibleParameterAnnotationsAttribute(Clazz clazz, Method method, RuntimeInvisibleParameterAnnotationsAttribute runtimeInvisibleParameterAnnotationsAttribute)
     {
-        println(visitorInfo(runtimeInvisibleParameterAnnotationsAttribute) +
+        println(processingInfo(runtimeInvisibleParameterAnnotationsAttribute) +
                 " Runtime invisible parameter annotations attribute (parameter count = " + runtimeInvisibleParameterAnnotationsAttribute.u1parametersCount + "):");
 
         indent();
@@ -765,7 +765,7 @@ implements   ClassVisitor,
 
     public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
     {
-        println(visitorInfo(runtimeVisibleTypeAnnotationsAttribute) +
+        println(processingInfo(runtimeVisibleTypeAnnotationsAttribute) +
                 " Runtime visible type annotations attribute");
 
         indent();
@@ -776,7 +776,7 @@ implements   ClassVisitor,
 
     public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
     {
-        println(visitorInfo(runtimeInvisibleTypeAnnotationsAttribute) +
+        println(processingInfo(runtimeInvisibleTypeAnnotationsAttribute) +
                 " Runtime invisible type annotations attribute");
 
         indent();
@@ -787,7 +787,7 @@ implements   ClassVisitor,
 
     public void visitAnnotationDefaultAttribute(Clazz clazz, Method method, AnnotationDefaultAttribute annotationDefaultAttribute)
     {
-        println(visitorInfo(annotationDefaultAttribute) +
+        println(processingInfo(annotationDefaultAttribute) +
                 " Annotation default attribute:");
 
         indent();
@@ -800,7 +800,7 @@ implements   ClassVisitor,
 
     public void visitBootstrapMethodInfo(Clazz clazz, BootstrapMethodInfo bootstrapMethodInfo)
     {
-        println(visitorInfo(bootstrapMethodInfo) +
+        println(processingInfo(bootstrapMethodInfo) +
                 " BootstrapMethodInfo (argument count = " +
                 bootstrapMethodInfo.u2methodArgumentCount+ "):");
 
@@ -815,7 +815,7 @@ implements   ClassVisitor,
 
     public void visitInnerClassesInfo(Clazz clazz, InnerClassesInfo innerClassesInfo)
     {
-        println(visitorInfo(innerClassesInfo) +
+        println(processingInfo(innerClassesInfo) +
                 " InnerClassesInfo:");
 
         indent();
@@ -893,7 +893,7 @@ implements   ClassVisitor,
 
     public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
     {
-        println(visitorInfo(exceptionInfo) +
+        println(processingInfo(exceptionInfo) +
                 " ExceptionInfo (" +
                 exceptionInfo.u2startPC + " -> " +
                 exceptionInfo.u2endPC + ": " +
@@ -910,7 +910,7 @@ implements   ClassVisitor,
 
     public void visitSameZeroFrame(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SameZeroFrame sameZeroFrame)
     {
-        println(visitorInfo(sameZeroFrame) +
+        println(processingInfo(sameZeroFrame) +
                 " [" + offset  + "]" +
                 " Var: ..., Stack: (empty)");
     }
@@ -918,7 +918,7 @@ implements   ClassVisitor,
 
     public void visitSameOneFrame(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SameOneFrame sameOneFrame)
     {
-        print(visitorInfo(sameOneFrame) +
+        print(processingInfo(sameOneFrame) +
               " [" + offset  + "]" +
               " Var: ..., Stack: ");
 
@@ -930,7 +930,7 @@ implements   ClassVisitor,
 
     public void visitLessZeroFrame(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, LessZeroFrame lessZeroFrame)
     {
-        println(visitorInfo(lessZeroFrame) +
+        println(processingInfo(lessZeroFrame) +
                 " [" + offset  + "]" +
                 " Var: -" + lessZeroFrame.choppedVariablesCount +
                 ", Stack: (empty)");
@@ -939,7 +939,7 @@ implements   ClassVisitor,
 
     public void visitMoreZeroFrame(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, MoreZeroFrame moreZeroFrame)
     {
-        print(visitorInfo(moreZeroFrame) +
+        print(processingInfo(moreZeroFrame) +
               " [" + offset  + "]" +
               " Var: ...");
 
@@ -951,7 +951,7 @@ implements   ClassVisitor,
 
     public void visitFullFrame(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, FullFrame fullFrame)
     {
-        print(visitorInfo(fullFrame) +
+        print(processingInfo(fullFrame) +
               " [" + offset  + "]" +
               " Var: ");
 
@@ -1069,7 +1069,7 @@ implements   ClassVisitor,
 
     public void visitRequiresInfo(Clazz clazz, RequiresInfo requiresInfo)
     {
-        println(visitorInfo(requiresInfo) +
+        println(processingInfo(requiresInfo) +
                 " RequiresInfo:");
 
         indent();
@@ -1085,7 +1085,7 @@ implements   ClassVisitor,
 
     public void visitExportsInfo(Clazz clazz, ExportsInfo exportsInfo)
     {
-        println(visitorInfo(exportsInfo) +
+        println(processingInfo(exportsInfo) +
                 " ExportsInfo (targets count = " +
                 exportsInfo.u2exportsToCount + "):");
 
@@ -1107,7 +1107,7 @@ implements   ClassVisitor,
 
     public void visitOpensInfo(Clazz clazz, OpensInfo opensInfo)
     {
-        println(visitorInfo(opensInfo) +
+        println(processingInfo(opensInfo) +
                 " OpensInfo (targets count = " +
                 opensInfo.u2opensToCount + "):");
 
@@ -1129,7 +1129,7 @@ implements   ClassVisitor,
 
     public void visitProvidesInfo(Clazz clazz, ProvidesInfo providesInfo)
     {
-        println(visitorInfo(providesInfo) +
+        println(processingInfo(providesInfo) +
                 " ProvidesInfo (with count = " +
                 providesInfo.u2providesWithCount + "):");
 
@@ -1149,7 +1149,7 @@ implements   ClassVisitor,
 
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
-        println(visitorInfo(annotation) +
+        println(processingInfo(annotation) +
                 " Annotation [" + annotation.getType(clazz) + "]:");
 
         indent();
@@ -1160,7 +1160,7 @@ implements   ClassVisitor,
 
     public void visitAnnotation(Clazz clazz, Method method, int parameterIndex, Annotation annotation)
     {
-        println(visitorInfo(annotation) +
+        println(processingInfo(annotation) +
                 " Parameter #"+parameterIndex+", annotation [" + annotation.getType(clazz) + "]:");
 
         indent();
@@ -1173,7 +1173,7 @@ implements   ClassVisitor,
 
     public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
     {
-        println(visitorInfo(typeAnnotation) +
+        println(processingInfo(typeAnnotation) +
                 " Type annotation [" + typeAnnotation.getType(clazz) + "]:");
 
         indent();
@@ -1293,7 +1293,7 @@ implements   ClassVisitor,
 
     public void visitConstantElementValue(Clazz clazz, Annotation annotation, ConstantElementValue constantElementValue)
     {
-        println(visitorInfo(constantElementValue) +
+        println(processingInfo(constantElementValue) +
                 " Constant element value [" +
                 (constantElementValue.u2elementNameIndex == 0 ? "(default)" :
                 constantElementValue.getMethodName(clazz)) + " '" +
@@ -1307,7 +1307,7 @@ implements   ClassVisitor,
 
     public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
     {
-        println(visitorInfo(enumConstantElementValue) +
+        println(processingInfo(enumConstantElementValue) +
                 " Enum constant element value [" +
                 (enumConstantElementValue.u2elementNameIndex == 0 ? "(default)" :
                 enumConstantElementValue.getMethodName(clazz)) + ", " +
@@ -1318,7 +1318,7 @@ implements   ClassVisitor,
 
     public void visitClassElementValue(Clazz clazz, Annotation annotation, ClassElementValue classElementValue)
     {
-        println(visitorInfo(classElementValue) +
+        println(processingInfo(classElementValue) +
                 " Class element value [" +
                 (classElementValue.u2elementNameIndex == 0 ? "(default)" :
                 classElementValue.getMethodName(clazz)) + ", " +
@@ -1328,7 +1328,7 @@ implements   ClassVisitor,
 
     public void visitAnnotationElementValue(Clazz clazz, Annotation annotation, AnnotationElementValue annotationElementValue)
     {
-        println(visitorInfo(annotationElementValue) +
+        println(processingInfo(annotationElementValue) +
                 " Annotation element value [" +
                 (annotationElementValue.u2elementNameIndex == 0 ? "(default)" :
                 annotationElementValue.getMethodName(clazz)) + "]:");
@@ -1341,7 +1341,7 @@ implements   ClassVisitor,
 
     public void visitArrayElementValue(Clazz clazz, Annotation annotation, ArrayElementValue arrayElementValue)
     {
-        println(visitorInfo(arrayElementValue) +
+        println(processingInfo(arrayElementValue) +
                 " Array element value [" +
                 (arrayElementValue.u2elementNameIndex == 0 ? "(default)" :
                 arrayElementValue.getMethodName(clazz)) + "]:");
@@ -1387,8 +1387,8 @@ implements   ClassVisitor,
     }
 
 
-    private String visitorInfo(VisitorAccepter visitorAccepter)
+    private String processingInfo(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == null ? "-" : "+";
+        return processable.getProcessingInfo() == null ? "-" : "+";
     }
 }

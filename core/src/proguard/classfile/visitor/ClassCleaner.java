@@ -29,10 +29,10 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitors.KotlinMetadataVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 /**
- * This <code>ClassVisitor</code> removes all visitor information of the
+ * This <code>ClassVisitor</code> removes all processing information of the
  * classes it visits.
  *
  * @author Eric Lafortune
@@ -370,8 +370,8 @@ implements   ClassVisitor,
 
     // Small utility methods.
 
-    private void clean(VisitorAccepter visitorAccepter)
+    private void clean(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(null);
+        processable.setProcessingInfo(null);
     }
 }

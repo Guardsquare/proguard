@@ -19,7 +19,7 @@ package proguard.classfile.constant;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * This abstract class represents an entry in the ConstantPool. Specific types
@@ -27,7 +27,7 @@ import proguard.util.SimpleVisitorAccepter;
  *
  * @author Eric Lafortune
  */
-public abstract class Constant extends SimpleVisitorAccepter
+public abstract class Constant extends SimpleProcessable
 {
     public static final int UTF8                = 1;
     public static final int INTEGER             = 3;

@@ -19,14 +19,14 @@ package proguard.classfile.attribute.module;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a Provides entry in a Module attribute.
  *
  * @author Joachim Vandersmissen
  */
-public class ProvidesInfo extends SimpleVisitorAccepter
+public class ProvidesInfo extends SimpleProcessable
 {
     public int   u2providesIndex;
     public int   u2providesWithCount;

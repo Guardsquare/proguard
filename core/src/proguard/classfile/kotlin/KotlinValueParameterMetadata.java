@@ -24,8 +24,8 @@ import proguard.util.*;
 
 
 public class KotlinValueParameterMetadata
-extends SimpleVisitorAccepter
-implements VisitorAccepter
+extends SimpleProcessable
+implements Processable
 {
     public String parameterName;
 

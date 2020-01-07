@@ -50,7 +50,7 @@ public class SubroutineInliner
      */
     public void execute(ClassPool programClassPool)
     {
-        // Clean up any old visitor info.
+        // Clean up any old processing info.
         programClassPool.classesAccept(new ClassCleaner());
 
         // Inline all subroutines.

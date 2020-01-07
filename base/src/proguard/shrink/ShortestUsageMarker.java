@@ -23,7 +23,7 @@ package proguard.shrink;
 import proguard.classfile.*;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 /**
  * This SimpleUsageMarker keeps track of the shortest dependency chains.
@@ -49,39 +49,39 @@ extends      SimpleUsageMarker
 
     // Implementations for SimpleUsageMarker.
 
-    public void markAsUsed(VisitorAccepter visitorAccepter)
+    public void markAsUsed(Processable processable)
     {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
+        Object processingInfo = processable.getProcessingInfo();
 
         ShortestUsageMark shortestUsageMark =
-            visitorInfo instanceof ShortestUsageMark      &&
-            !((ShortestUsageMark)visitorInfo).isCertain() &&
-            !currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) ?
-                new ShortestUsageMark((ShortestUsageMark)visitorInfo, true):
+            processingInfo instanceof ShortestUsageMark      &&
+            !((ShortestUsageMark)processingInfo).isCertain() &&
+            !currentUsageMark.isShorter((ShortestUsageMark)processingInfo) ?
+                new ShortestUsageMark((ShortestUsageMark)processingInfo, true):
                 currentUsageMark;
 
-        visitorAccepter.setVisitorInfo(shortestUsageMark);
+        processable.setProcessingInfo(shortestUsageMark);
     }
 
 
-    public boolean isUsed(VisitorAccepter visitorAccepter)
+    public boolean isUsed(Processable processable)
     {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
+        Object processingInfo = processable.getProcessingInfo();
 
-        return visitorInfo != null                      &&
-               visitorInfo instanceof ShortestUsageMark &&
-               ((ShortestUsageMark)visitorInfo).isCertain();
+        return processingInfo != null                      &&
+               processingInfo instanceof ShortestUsageMark &&
+               ((ShortestUsageMark)processingInfo).isCertain();
     }
 
 
     public boolean shouldBeMarkedAsUsed(ProgramClass programClass)
     {
-        Object visitorInfo = programClass.getVisitorInfo();
+        Object processingInfo = programClass.getProcessingInfo();
 
-        return visitorInfo == null                           ||
-               !(visitorInfo instanceof ShortestUsageMark)   ||
-               !((ShortestUsageMark)visitorInfo).isCertain() ||
-               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+        return processingInfo == null                           ||
+               !(processingInfo instanceof ShortestUsageMark)   ||
+               !((ShortestUsageMark)processingInfo).isCertain() ||
+               currentUsageMark.isShorter((ShortestUsageMark)processingInfo) &&
                !referencesClassMember(currentUsageMark, programClass);
     }
 
@@ -89,74 +89,74 @@ extends      SimpleUsageMarker
     public boolean shouldBeMarkedAsUsed(ProgramClass  programClass,
                                         ProgramMember programMember)
     {
-        Object visitorInfo = programMember.getVisitorInfo();
+        Object processingInfo = programMember.getProcessingInfo();
 
-        return visitorInfo == null                           ||
-               !(visitorInfo instanceof ShortestUsageMark)   ||
-               !((ShortestUsageMark)visitorInfo).isCertain() ||
-               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+        return processingInfo == null                           ||
+               !(processingInfo instanceof ShortestUsageMark)   ||
+               !((ShortestUsageMark)processingInfo).isCertain() ||
+               currentUsageMark.isShorter((ShortestUsageMark)processingInfo) &&
                !referencesClass(currentUsageMark, programClass);
     }
 
 
-    public boolean shouldBeMarkedAsUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsUsed(Processable processable)
     {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
+        Object processingInfo = processable.getProcessingInfo();
 
-        return visitorInfo == null                           ||
-               !(visitorInfo instanceof ShortestUsageMark)   ||
-               !((ShortestUsageMark)visitorInfo).isCertain() ||
-               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo);
+        return processingInfo == null                           ||
+               !(processingInfo instanceof ShortestUsageMark)   ||
+               !((ShortestUsageMark)processingInfo).isCertain() ||
+               currentUsageMark.isShorter((ShortestUsageMark)processingInfo);
     }
 
 
-    public void markAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public void markAsPossiblyUsed(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(new ShortestUsageMark(currentUsageMark, false));
+        processable.setProcessingInfo(new ShortestUsageMark(currentUsageMark, false));
     }
 
 
     public boolean shouldBeMarkedAsPossiblyUsed(ProgramClass  programClass,
                                                 ProgramMember programMember)
     {
-        Object visitorInfo = programMember.getVisitorInfo();
+        Object processingInfo = programMember.getProcessingInfo();
 
-        return visitorInfo == null                         ||
-               !(visitorInfo instanceof ShortestUsageMark) ||
-               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+        return processingInfo == null                         ||
+               !(processingInfo instanceof ShortestUsageMark) ||
+               currentUsageMark.isShorter((ShortestUsageMark)processingInfo) &&
                // Do not overwrite a certain mark with a shorter potential mark.
-               !((ShortestUsageMark)visitorInfo).isCertain()              &&
+               !((ShortestUsageMark)processingInfo).isCertain()              &&
                !referencesClass(currentUsageMark, programClass);
     }
 
 
-    public boolean shouldBeMarkedAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsPossiblyUsed(Processable processable)
     {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
+        Object processingInfo = processable.getProcessingInfo();
 
-        return visitorInfo == null                         ||
-               !(visitorInfo instanceof ShortestUsageMark) ||
-               currentUsageMark.isShorter((ShortestUsageMark)visitorInfo) &&
+        return processingInfo == null                         ||
+               !(processingInfo instanceof ShortestUsageMark) ||
+               currentUsageMark.isShorter((ShortestUsageMark)processingInfo) &&
                // Do not overwrite a certain mark with a shorter potential mark.
-               !((ShortestUsageMark)visitorInfo).isCertain();
+               !((ShortestUsageMark)processingInfo).isCertain();
     }
 
 
-    public boolean isPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean isPossiblyUsed(Processable processable)
     {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
+        Object processingInfo = processable.getProcessingInfo();
 
-        return visitorInfo != null                      &&
-               visitorInfo instanceof ShortestUsageMark &&
-               !((ShortestUsageMark)visitorInfo).isCertain();
+        return processingInfo != null                      &&
+               processingInfo instanceof ShortestUsageMark &&
+               !((ShortestUsageMark)processingInfo).isCertain();
     }
 
 
-    protected ShortestUsageMark getShortestUsageMark(VisitorAccepter visitorAccepter)
+    protected ShortestUsageMark getShortestUsageMark(Processable processable)
     {
-        Object visitorInfo = visitorAccepter.getVisitorInfo();
+        Object processingInfo = processable.getProcessingInfo();
 
-        return (ShortestUsageMark)visitorInfo;
+        return (ShortestUsageMark)processingInfo;
     }
 
 
@@ -255,12 +255,12 @@ extends      SimpleUsageMarker
 
        // Small utility members.
 
-        private void checkReferenceFrom(VisitorAccepter visitorAccepter)
+        private void checkReferenceFrom(Processable processable)
         {
             // Check the causing class or member, if still necessary.
             if (!isReferencing)
             {
-                checkReferenceFrom(getShortestUsageMark(visitorAccepter));
+                checkReferenceFrom(getShortestUsageMark(processable));
             }
         }
 

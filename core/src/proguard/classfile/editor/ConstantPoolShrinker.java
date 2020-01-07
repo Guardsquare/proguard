@@ -32,7 +32,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.util.Arrays;
 
@@ -65,7 +65,7 @@ implements   ClassVisitor,
              ElementValueVisitor,
              InstructionVisitor
 {
-    // A visitor info flag to indicate that the constant is being used.
+    // A processing info flag to indicate that the constant is being used.
     // Don't make a static instance, so we don't need to clear any old flags.
     private final Object USED = new Object();
 
@@ -77,7 +77,7 @@ implements   ClassVisitor,
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        // Remove any previous visitor info from the constant pool entries.
+        // Remove any previous processing info from the constant pool entries.
         programClass.constantPoolEntriesAccept(new ClassCleaner());
 
         // Mark this class's name.
@@ -663,20 +663,20 @@ implements   ClassVisitor,
 
 
     /**
-     * Marks the given visitor accepter as being used.
+     * Marks the given processable as being used.
      */
     private void markAsUsed(Constant constant)
     {
-        constant.setVisitorInfo(USED);
+        constant.setProcessingInfo(USED);
     }
 
 
     /**
-     * Returns whether the given visitor accepter has been marked as being used.
+     * Returns whether the given processable has been marked as being used.
      */
-    private boolean isUsed(VisitorAccepter visitorAccepter)
+    private boolean isUsed(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == USED;
+        return processable.getProcessingInfo() == USED;
     }
 
 

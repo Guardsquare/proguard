@@ -20,10 +20,10 @@
  */
 package proguard.shrink;
 
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 /**
- * This class marks visitor accepters, in order to remember whether they are
+ * This class marks processables, in order to remember whether they are
  * unused, possibly used, or definitely used.
  */
 public class SimpleUsageMarker
@@ -33,47 +33,47 @@ public class SimpleUsageMarker
 
 
     /**
-     * Marks the given visitor accepter as possibly being used.
+     * Marks the given processable as possibly being used.
      */
-    public void markAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public void markAsPossiblyUsed(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(POSSIBLY_USED);
+        processable.setProcessingInfo(POSSIBLY_USED);
     }
 
 
     /**
-     * Returns whether the given visitor accepter has been marked as possibly
+     * Returns whether the given processable has been marked as possibly
      * being used.
      */
-    public boolean isPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean isPossiblyUsed(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == POSSIBLY_USED;
+        return processable.getProcessingInfo() == POSSIBLY_USED;
     }
 
 
     /**
-     * Marks the given visitor accepter as being used.
+     * Marks the given processable as being used.
      */
-    public void markAsUsed(VisitorAccepter visitorAccepter)
+    public void markAsUsed(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(USED);
+        processable.setProcessingInfo(USED);
     }
 
 
     /**
-     * Clears any usage marks from the given visitor accepter.
+     * Clears any usage marks from the given processable.
      */
-    public void markAsUnused(VisitorAccepter visitorAccepter)
+    public void markAsUnused(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(null);
+        processable.setProcessingInfo(null);
     }
 
 
     /**
-     * Returns whether the given visitor accepter has been marked as being used.
+     * Returns whether the given processable has been marked as being used.
      */
-    public boolean isUsed(VisitorAccepter visitorAccepter)
+    public boolean isUsed(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == USED;
+        return processable.getProcessingInfo() == USED;
     }
 }

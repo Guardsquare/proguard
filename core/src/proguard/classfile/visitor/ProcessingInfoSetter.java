@@ -29,12 +29,12 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This visitor sets a fixed info object on all the visitor accepters
+ * This visitor sets a fixed info object on all the Processable instances
  * that it visits.
  *
  * @author Eric Lafortune
  */
-public class VisitorInfoSetter
+public class ProcessingInfoSetter
 extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor,
@@ -50,16 +50,16 @@ implements   ClassVisitor,
              TypeAnnotationVisitor,
              ElementValueVisitor
 {
-    private final Object visitorInfo;
+    private final Object processingInfo;
 
 
     /**
-     * Creates a new VisitorInfoSetter that sets the given info on all visitor
-     * accepters that it visits.
+     * Creates a new ProcessingInfoSetter that sets the given info on all
+     * Processable instances that it visits.
      */
-    public VisitorInfoSetter(Object visitorInfo)
+    public ProcessingInfoSetter(Object processingInfo)
     {
-        this.visitorInfo = visitorInfo;
+        this.processingInfo = processingInfo;
     }
 
 
@@ -67,7 +67,7 @@ implements   ClassVisitor,
 
     public void visitAnyClass(Clazz clazz)
     {
-        clazz.setVisitorInfo(visitorInfo);
+        clazz.setProcessingInfo(processingInfo);
     }
 
 
@@ -75,7 +75,7 @@ implements   ClassVisitor,
 
     public void visitAnyConstant(Clazz clazz, Constant constant)
     {
-        constant.setVisitorInfo(visitorInfo);
+        constant.setProcessingInfo(processingInfo);
     }
 
 
@@ -83,7 +83,7 @@ implements   ClassVisitor,
 
     public void visitAnyMember(Clazz clazz, Member member)
     {
-        member.setVisitorInfo(visitorInfo);
+        member.setProcessingInfo(processingInfo);
     }
 
 
@@ -91,7 +91,7 @@ implements   ClassVisitor,
 
     public void visitAnyAttribute(Clazz clazz, Attribute attribute)
     {
-        attribute.setVisitorInfo(visitorInfo);
+        attribute.setProcessingInfo(processingInfo);
     }
 
 
@@ -99,7 +99,7 @@ implements   ClassVisitor,
 
     public void visitInnerClassesInfo(Clazz clazz, InnerClassesInfo innerClassesInfo)
     {
-        innerClassesInfo.setVisitorInfo(visitorInfo);
+        innerClassesInfo.setProcessingInfo(processingInfo);
     }
 
 
@@ -107,7 +107,7 @@ implements   ClassVisitor,
 
     public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
     {
-        exceptionInfo.setVisitorInfo(visitorInfo);
+        exceptionInfo.setProcessingInfo(processingInfo);
     }
 
 
@@ -115,7 +115,7 @@ implements   ClassVisitor,
 
     public void visitAnyStackMapFrame(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, StackMapFrame stackMapFrame)
     {
-        stackMapFrame.setVisitorInfo(visitorInfo);
+        stackMapFrame.setProcessingInfo(processingInfo);
     }
 
 
@@ -123,7 +123,7 @@ implements   ClassVisitor,
 
     public void visitAnyVerificationType(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VerificationType verificationType)
     {
-        verificationType.setVisitorInfo(visitorInfo);
+        verificationType.setProcessingInfo(processingInfo);
     }
 
 
@@ -131,7 +131,7 @@ implements   ClassVisitor,
 
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
-        localVariableInfo.setVisitorInfo(visitorInfo);
+        localVariableInfo.setProcessingInfo(processingInfo);
     }
 
 
@@ -139,7 +139,7 @@ implements   ClassVisitor,
 
     public void visitLocalVariableTypeInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeInfo localVariableTypeInfo)
     {
-        localVariableTypeInfo.setVisitorInfo(visitorInfo);
+        localVariableTypeInfo.setProcessingInfo(processingInfo);
     }
 
 
@@ -147,7 +147,7 @@ implements   ClassVisitor,
 
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
-        annotation.setVisitorInfo(visitorInfo);
+        annotation.setProcessingInfo(processingInfo);
     }
 
 
@@ -155,7 +155,7 @@ implements   ClassVisitor,
 
     public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
     {
-        typeAnnotation.setVisitorInfo(visitorInfo);
+        typeAnnotation.setProcessingInfo(processingInfo);
     }
 
 
@@ -163,6 +163,6 @@ implements   ClassVisitor,
 
     public void visitAnyElementValue(Clazz clazz, Annotation annotation, ElementValue elementValue)
     {
-        elementValue.setVisitorInfo(visitorInfo);
+        elementValue.setProcessingInfo(processingInfo);
     }
 }

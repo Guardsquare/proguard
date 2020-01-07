@@ -19,14 +19,14 @@ package proguard.classfile.attribute.module;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a Exports entry in a Module attribute.
  *
  * @author Joachim Vandersmissen
  */
-public class ExportsInfo extends SimpleVisitorAccepter
+public class ExportsInfo extends SimpleProcessable
 {
     public int   u2exportsIndex;
     public int   u2exportsFlags;

@@ -25,8 +25,8 @@ import java.util.List;
 
 
 public class KotlinEffectExpressionMetadata
-extends SimpleVisitorAccepter
-implements VisitorAccepter
+extends SimpleProcessable
+implements Processable
 {
     public int parameterIndex = -1;
 

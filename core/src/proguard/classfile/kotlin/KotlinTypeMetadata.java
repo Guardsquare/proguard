@@ -26,8 +26,8 @@ import proguard.util.*;
 import java.util.*;
 
 public class KotlinTypeMetadata
-extends SimpleVisitorAccepter
-implements VisitorAccepter
+extends SimpleProcessable
+implements Processable
 {
     public KmVariance variance;
 

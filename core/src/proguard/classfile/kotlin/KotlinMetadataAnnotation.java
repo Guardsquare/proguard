@@ -24,8 +24,8 @@ import proguard.util.*;
 import java.util.Map;
 
 public class KotlinMetadataAnnotation
-extends      SimpleVisitorAccepter
-implements   VisitorAccepter
+extends      SimpleProcessable
+implements   Processable
 {
     public KmAnnotation kmAnnotation;
     public Clazz        referencedAnnotationClass;

@@ -579,7 +579,7 @@ implements   ClassVisitor,
      */
     static void setNewClassName(Clazz clazz, String name)
     {
-        clazz.setVisitorInfo(name);
+        clazz.setProcessingInfo(name);
     }
 
 
@@ -603,10 +603,10 @@ implements   ClassVisitor,
      */
     static String newClassName(Clazz clazz)
     {
-        Object visitorInfo = clazz.getVisitorInfo();
+        Object processingInfo = clazz.getProcessingInfo();
 
-        return visitorInfo instanceof String ?
-            (String)visitorInfo :
+        return processingInfo instanceof String ?
+            (String)processingInfo :
             null;
     }
 }

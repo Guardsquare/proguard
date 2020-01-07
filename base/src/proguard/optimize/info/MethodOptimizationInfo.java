@@ -293,12 +293,12 @@ public class MethodOptimizationInfo
 
     public static void setMethodOptimizationInfo(Clazz clazz, Method method)
     {
-        MethodLinker.lastMember(method).setVisitorInfo(new MethodOptimizationInfo());
+        MethodLinker.lastMember(method).setProcessingInfo(new MethodOptimizationInfo());
     }
 
 
     public static MethodOptimizationInfo getMethodOptimizationInfo(Method method)
     {
-        return (MethodOptimizationInfo)MethodLinker.lastMember(method).getVisitorInfo();
+        return (MethodOptimizationInfo)MethodLinker.lastMember(method).getProcessingInfo();
     }
 }

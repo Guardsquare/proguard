@@ -24,7 +24,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 import java.util.Arrays;
 
@@ -41,7 +41,7 @@ implements   ClassVisitor,
              ConstantVisitor,
              AttributeVisitor
 {
-    // A visitor info flag to indicate the NameAndType constant pool entry is being used.
+    // A processing info flag to indicate the NameAndType constant pool entry is being used.
     private static final Object USED = new Object();
 
     private       int[]                constantIndexMap;
@@ -121,22 +121,22 @@ implements   ClassVisitor,
 
 
     /**
-     * Marks the given VisitorAccepter as being used.
-     * In this context, the VisitorAccepter will be a NameAndTypeConstant object.
+     * Marks the given Processable as being used.
+     * In this context, the Processable will be a NameAndTypeConstant object.
      */
-    private void markAsUsed(VisitorAccepter visitorAccepter)
+    private void markAsUsed(Processable processable)
     {
-        visitorAccepter.setVisitorInfo(USED);
+        processable.setProcessingInfo(USED);
     }
 
 
     /**
-     * Returns whether the given VisitorAccepter has been marked as being used.
-     * In this context, the VisitorAccepter will be a NameAndTypeConstant object.
+     * Returns whether the given Processable has been marked as being used.
+     * In this context, the Processable will be a NameAndTypeConstant object.
      */
-    private boolean isUsed(VisitorAccepter visitorAccepter)
+    private boolean isUsed(Processable processable)
     {
-        return visitorAccepter.getVisitorInfo() == USED;
+        return processable.getProcessingInfo() == USED;
     }
 
 

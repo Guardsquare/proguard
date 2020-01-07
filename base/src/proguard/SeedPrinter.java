@@ -60,7 +60,7 @@ public class SeedPrinter
             throw new IOException("You have to specify '-keep' options if you want to write out kept elements with '-printseeds'.");
         }
 
-        // Clean up any old visitor info.
+        // Clean up any old processing info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
 

@@ -21,7 +21,7 @@
 package proguard.shrink;
 
 import proguard.classfile.*;
-import proguard.util.VisitorAccepter;
+import proguard.util.Processable;
 
 /**
  * This UsageMarker constructs the shortest chain of dependencies.
@@ -128,21 +128,21 @@ extends      ClassUsageMarker
     }
 
 
-    public boolean shouldBeMarkedAsUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsUsed(Processable processable)
     {
-        return getUsageMarker().shouldBeMarkedAsUsed(visitorAccepter);
+        return getUsageMarker().shouldBeMarkedAsUsed(processable);
     }
 
 
-    public boolean isUsed(VisitorAccepter visitorAccepter)
+    public boolean isUsed(Processable processable)
     {
-        return getUsageMarker().isUsed(visitorAccepter);
+        return getUsageMarker().isUsed(processable);
     }
 
 
-    public void markAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public void markAsPossiblyUsed(Processable processable)
     {
-        getUsageMarker().markAsPossiblyUsed(visitorAccepter);
+        getUsageMarker().markAsPossiblyUsed(processable);
     }
 
 
@@ -153,21 +153,21 @@ extends      ClassUsageMarker
     }
 
 
-    public boolean shouldBeMarkedAsPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean shouldBeMarkedAsPossiblyUsed(Processable processable)
     {
-        return getUsageMarker().shouldBeMarkedAsPossiblyUsed(visitorAccepter);
+        return getUsageMarker().shouldBeMarkedAsPossiblyUsed(processable);
     }
 
 
-    public boolean isPossiblyUsed(VisitorAccepter visitorAccepter)
+    public boolean isPossiblyUsed(Processable processable)
     {
-        return getUsageMarker().isPossiblyUsed(visitorAccepter);
+        return getUsageMarker().isPossiblyUsed(processable);
     }
 
 
-    protected ShortestUsageMark getShortestUsageMark(VisitorAccepter visitorAccepter)
+    protected ShortestUsageMark getShortestUsageMark(Processable processable)
     {
-        return getUsageMarker().getShortestUsageMark(visitorAccepter);
+        return getUsageMarker().getShortestUsageMark(processable);
     }
 
 

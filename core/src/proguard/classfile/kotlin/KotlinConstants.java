@@ -200,12 +200,15 @@ public class KotlinConstants
     private static ProgramClass createDummyClass(String name)
     {
         return new ClassBuilder(
+            VersionConstants.CLASS_VERSION_1_2,
             PUBLIC,
             name,
             null,
+            null,
             ProcessingFlags.DONT_OBFUSCATE |
             ProcessingFlags.DONT_OPTIMIZE |
-            ProcessingFlags.DONT_SHRINK)
+            ProcessingFlags.DONT_SHRINK,
+            null)
             .getProgramClass();
     }
 }

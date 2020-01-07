@@ -28,7 +28,7 @@ import java.util.*;
  * @author Johan Leys
  */
 public class ResourceFile
-extends      SimpleFeatureNamedProcessableVisitorAccepter
+extends      SimpleFeatureNamedProcessable
 {
     public String                     fileName;
     public long                       fileSize;

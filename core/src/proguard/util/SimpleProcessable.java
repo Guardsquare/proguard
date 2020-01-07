@@ -18,31 +18,35 @@
 package proguard.util;
 
 /**
- * A SimpleVisitorAccepter that additionally implements Processable.
+ * This class provides a straightforward implementation of the Processable
+ * interface.
  *
- * @see ProcessingFlags
- *
- * @author Johan Leys
+ * @author Eric Lafortune
  */
-public class SimpleProcessableVisitorAccepter
-extends      SimpleVisitorAccepter
+public class SimpleProcessable
 implements   Processable
 {
+    public int    processingFlags;
+    public Object processingInfo;
+
+
     /**
-     * An extra field in which visitors can store information.
+     * Creates an uninitialized SimpleProcessable.
      */
-    public int processingFlags;
+    public SimpleProcessable() {}
 
 
-    public SimpleProcessableVisitorAccepter() {}
-
-
-    public SimpleProcessableVisitorAccepter(int processingFlags)
+    /**
+     * Creates an initialized SimpleProcessable.
+     */
+    public SimpleProcessable(int    processingFlags,
+                             Object processingInfo)
     {
         this.processingFlags = processingFlags;
+        this.processingInfo  = processingInfo;
     }
 
-
+    
     // Implementations for Processable.
 
     @Override
@@ -51,9 +55,24 @@ implements   Processable
         return processingFlags;
     }
 
+
     @Override
     public void setProcessingFlags(int processingFlags)
     {
         this.processingFlags = processingFlags;
+    }
+
+
+    @Override
+    public Object getProcessingInfo()
+    {
+        return processingInfo;
+    }
+
+
+    @Override
+    public void setProcessingInfo(Object processingInfo)
+    {
+        this.processingInfo = processingInfo;
     }
 }

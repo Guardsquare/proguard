@@ -66,7 +66,7 @@ public class Shrinker
         // the standard output.
         PrintWriter out = new PrintWriter(System.out, true);
 
-        // Clean up any old visitor info.
+        // Clean up any old processing info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
 

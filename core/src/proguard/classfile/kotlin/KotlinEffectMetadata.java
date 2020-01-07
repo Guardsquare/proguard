@@ -24,8 +24,8 @@ import proguard.util.*;
 
 
 public class KotlinEffectMetadata
-extends SimpleVisitorAccepter
-implements VisitorAccepter
+extends SimpleProcessable
+implements Processable
 {
     public KmEffectType effectType;
 

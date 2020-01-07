@@ -39,7 +39,7 @@ implements   ClassVisitor
 
     /**
      * Creates a new ProgramClassOptimizationInfoSetter.
-     * Existing visitor info is not overridden.
+     * Existing processing info is not overridden.
      */
     public ProgramClassOptimizationInfoSetter()
     {
@@ -50,7 +50,7 @@ implements   ClassVisitor
     /**
      * Creates a new ProgramClassOptimizationInfoSetter.
      *
-     * @param overwrite true if existing visitor info should be overridden,
+     * @param overwrite true if existing processing info should be overridden,
      *                  false otherwise.
      */
     public ProgramClassOptimizationInfoSetter(boolean overwrite)
@@ -62,7 +62,7 @@ implements   ClassVisitor
 
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (programClass.getVisitorInfo() == null || overwrite)
+        if (programClass.getProcessingInfo() == null || overwrite)
         {
             ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
         }

@@ -18,27 +18,33 @@
 package proguard.util;
 
 /**
- * A SimpleProcessableVisitorAccepter that additionally implements
- * FeatureNamed.
+ * A SimpleProcessable that additionally implements FeatureNamed.
  *
  * @author Eric Lafortune
  */
-public class SimpleFeatureNamedProcessableVisitorAccepter
-extends      SimpleProcessableVisitorAccepter
+public class SimpleFeatureNamedProcessable
+extends      SimpleProcessable
 implements   FeatureNamed
 {
-    /**
-     * An extra field in which visitors can store a feature name.
-     */
     public String featureName;
 
 
-    public SimpleFeatureNamedProcessableVisitorAccepter() {}
+    /**
+     * Creates an uninitialized SimpleFeatureNamedProcessable.
+     */
+    public SimpleFeatureNamedProcessable() {}
 
 
-    public SimpleFeatureNamedProcessableVisitorAccepter(int processingFlags)
+    /**
+     * Creates an initialized SimpleFeatureNamedProcessable.
+     */
+    public SimpleFeatureNamedProcessable(String featureName,
+                                         int    processingFlags,
+                                         Object processingInfo)
     {
-        super(processingFlags);
+        super(processingFlags, processingInfo);
+
+        this.featureName = featureName;
     }
 
 

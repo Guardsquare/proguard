@@ -211,12 +211,12 @@ extends      ClassOptimizationInfo
 
     public static void setProgramClassOptimizationInfo(Clazz clazz)
     {
-        clazz.setVisitorInfo(new ProgramClassOptimizationInfo());
+        clazz.setProcessingInfo(new ProgramClassOptimizationInfo());
     }
 
 
     public static ProgramClassOptimizationInfo getProgramClassOptimizationInfo(Clazz clazz)
     {
-        return (ProgramClassOptimizationInfo)clazz.getVisitorInfo();
+        return (ProgramClassOptimizationInfo)clazz.getProcessingInfo();
     }
 }

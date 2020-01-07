@@ -667,22 +667,22 @@ implements   ClassVisitor,
 
 
     /**
-     * Removes all VisitorAccepter objects that are not marked as being used
+     * Removes all Processable objects that are not marked as being used
      * from the given array.
-     * @return the new number of VisitorAccepter objects.
+     * @return the new number of Processable objects.
      */
-    private int shrinkArray(VisitorAccepter[] array, int length)
+    private int shrinkArray(Processable[] array, int length)
     {
         int counter = 0;
 
         // Shift the used objects together.
         for (int index = 0; index < length; index++)
         {
-            VisitorAccepter visitorAccepter = array[index];
+            Processable processable = array[index];
 
-            if (usageMarker.isUsed(visitorAccepter))
+            if (usageMarker.isUsed(processable))
             {
-                array[counter++] = visitorAccepter;
+                array[counter++] = processable;
             }
         }
 

@@ -19,14 +19,14 @@ package proguard.classfile.attribute.module;
 
 import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a Requires entry in a Module attribute.
  *
  * @author Joachim Vandersmissen
  */
-public class RequiresInfo extends SimpleVisitorAccepter
+public class RequiresInfo extends SimpleProcessable
 {
     public int u2requiresIndex;
     public int u2requiresFlags;

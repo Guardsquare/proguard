@@ -21,7 +21,7 @@ package proguard.classfile;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.MemberVisitor;
-import proguard.util.SimpleProcessableVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of a field or method from a program class.
@@ -29,7 +29,7 @@ import proguard.util.SimpleProcessableVisitorAccepter;
  * @author Eric Lafortune
  */
 public abstract class ProgramMember
-extends               SimpleProcessableVisitorAccepter
+extends               SimpleProcessable
 implements            Member
 {
     public int         u2accessFlags;
@@ -53,10 +53,30 @@ implements            Member
                             int         u2nameIndex,
                             int         u2descriptorIndex,
                             int         u2attributesCount,
-                            Attribute[] attributes,
-                            int         processingFlags)
+                            Attribute[] attributes)
     {
-        super(processingFlags);
+        this(u2accessFlags,
+             u2nameIndex,
+             u2descriptorIndex,
+             u2attributesCount,
+             attributes,
+             0,
+             null);
+    }
+
+
+    /**
+     * Creates an initialized ProgramMember.
+     */
+    protected ProgramMember(int         u2accessFlags,
+                            int         u2nameIndex,
+                            int         u2descriptorIndex,
+                            int         u2attributesCount,
+                            Attribute[] attributes,
+                            int         processingFlags,
+                            Object      processingInfo)
+    {
+        super(processingFlags, processingInfo);
 
         this.u2accessFlags     = u2accessFlags;
         this.u2nameIndex       = u2nameIndex;

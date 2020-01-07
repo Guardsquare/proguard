@@ -20,14 +20,14 @@ package proguard.classfile.attribute.annotation;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.visitor.ClassVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of an annotation.
  *
  * @author Eric Lafortune
  */
-public class Annotation extends SimpleVisitorAccepter
+public class Annotation extends SimpleProcessable
 {
     public int            u2typeIndex;
     public int            u2elementValuesCount;

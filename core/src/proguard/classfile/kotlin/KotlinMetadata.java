@@ -30,7 +30,7 @@ import proguard.util.*;
  *
  * @author Tim Van Den Broecke
  */
-public abstract class KotlinMetadata extends SimpleProcessableVisitorAccepter
+public abstract class KotlinMetadata extends SimpleProcessable
 {
     /**
      * A kind of the metadata this annotation encodes. Kotlin compiler recognizes the following kinds (see KotlinClassHeader.Kind):

@@ -804,10 +804,10 @@ implements   ClassVisitor,
         public void visitProgramField(ProgramClass programClass, ProgramField programField)
         {
             // Copy the optimization info from the field that was just copied.
-            ProgramField copiedField = (ProgramField)programField.getVisitorInfo();
-            Object       info        = copiedField.getVisitorInfo();
+            ProgramField copiedField = (ProgramField)programField.getProcessingInfo();
+            Object       info        = copiedField.getProcessingInfo();
 
-            programField.setVisitorInfo(info instanceof ProgramFieldOptimizationInfo ?
+            programField.setProcessingInfo(info instanceof ProgramFieldOptimizationInfo ?
                 new ProgramFieldOptimizationInfo((ProgramFieldOptimizationInfo)info) :
                 info);
         }

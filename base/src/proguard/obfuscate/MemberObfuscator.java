@@ -23,7 +23,7 @@ package proguard.obfuscate;
 import proguard.classfile.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
-import proguard.util.VisitorAccepter;
+import proguard.util.*;
 
 import java.util.*;
 
@@ -148,16 +148,16 @@ implements   MemberVisitor
      */
     static void setFixedNewMemberName(Member member, String name)
     {
-        VisitorAccepter lastVisitorAccepter = MethodLinker.lastVisitorAccepter(member);
+        Processable lastProcessable = MethodLinker.lastProcessable(member);
 
-        if (!(lastVisitorAccepter instanceof LibraryMember) &&
-            !(lastVisitorAccepter instanceof MyFixedName))
+        if (!(lastProcessable instanceof LibraryMember) &&
+            !(lastProcessable instanceof MyFixedName))
         {
-            lastVisitorAccepter.setVisitorInfo(new MyFixedName(name));
+            lastProcessable.setProcessingInfo(new MyFixedName(name));
         }
         else
         {
-            lastVisitorAccepter.setVisitorInfo(name);
+            lastProcessable.setProcessingInfo(name);
         }
     }
 
@@ -169,7 +169,7 @@ implements   MemberVisitor
      */
     static void setNewMemberName(Member member, String name)
     {
-        MethodLinker.lastVisitorAccepter(member).setVisitorInfo(name);
+        MethodLinker.lastProcessable(member).setProcessingInfo(name);
     }
 
 
@@ -180,10 +180,10 @@ implements   MemberVisitor
      */
     static boolean hasFixedNewMemberName(Member member)
     {
-        VisitorAccepter lastVisitorAccepter = MethodLinker.lastVisitorAccepter(member);
+        Processable lastProcessable = MethodLinker.lastProcessable(member);
 
-        return lastVisitorAccepter instanceof LibraryMember ||
-               lastVisitorAccepter instanceof MyFixedName;
+        return lastProcessable instanceof LibraryMember ||
+               lastProcessable instanceof MyFixedName;
     }
 
 
@@ -195,36 +195,19 @@ implements   MemberVisitor
      */
     static String newMemberName(Member member)
     {
-        return (String)MethodLinker.lastVisitorAccepter(member).getVisitorInfo();
+        return (String)MethodLinker.lastProcessable(member).getProcessingInfo();
     }
 
 
     /**
-     * This VisitorAccepter can be used to wrap a name string, to indicate that
+     * This Processable can be used to wrap a name string, to indicate that
      * the name is fixed.
      */
-    private static class MyFixedName implements VisitorAccepter
+    private static class MyFixedName extends SimpleProcessable
     {
-        private String newName;
-
-
         public MyFixedName(String newName)
         {
-            this.newName = newName;
-        }
-
-
-        // Implementations for VisitorAccepter.
-
-        public Object getVisitorInfo()
-        {
-            return newName;
-        }
-
-
-        public void setVisitorInfo(Object visitorInfo)
-        {
-            newName = (String)visitorInfo;
+            super(0, newName);
         }
     }
 }

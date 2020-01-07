@@ -67,7 +67,7 @@ implements   MemberVisitor,
      */
     public void checkClassSpecifications(List keepSpecifications)
     {
-        // Clean up any old visitor info.
+        // Clean up any old processing info.
         programClassPool.classesAccept(new ClassCleaner());
         libraryClassPool.classesAccept(new ClassCleaner());
 

@@ -19,14 +19,14 @@ package proguard.classfile.attribute;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.util.SimpleVisitorAccepter;
+import proguard.util.SimpleProcessable;
 
 /**
  * Representation of an Inner Classes table entry.
  *
  * @author Eric Lafortune
  */
-public class InnerClassesInfo extends SimpleVisitorAccepter
+public class InnerClassesInfo extends SimpleProcessable
 {
     public int u2innerClassIndex;
     public int u2outerClassIndex;

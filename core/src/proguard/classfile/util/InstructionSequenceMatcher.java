@@ -837,7 +837,8 @@ implements   InstructionVisitor,
     {
         // Create a class with a method with some code.
         ProgramClass programClass =
-            new ClassBuilder(AccessConstants.PUBLIC,
+            new ClassBuilder(VersionConstants.CLASS_VERSION_1_2,
+                             AccessConstants.PUBLIC,
                              "Test",
                              ClassConstants.NAME_JAVA_LANG_OBJECT)
 
