@@ -25,7 +25,7 @@ package proguard.classfile;
  *
  * @author Eric Lafortune
  */
-public interface JavaTypeConstants
+public class JavaTypeConstants
 {
     public static final String VOID    = "void";
     public static final String BOOLEAN = "boolean";

@@ -24,7 +24,7 @@ package proguard.classfile;
  *
  * @author Eric Lafortune
  */
-public interface JavaVersionConstants
+public class JavaVersionConstants
 {
     public static final String CLASS_VERSION_1_0       = "1.0";
     public static final String CLASS_VERSION_1_1       = "1.1";

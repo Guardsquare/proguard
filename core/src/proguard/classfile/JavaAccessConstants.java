@@ -25,7 +25,7 @@ package proguard.classfile;
  *
  * @author Eric Lafortune
  */
-public interface JavaAccessConstants
+public class JavaAccessConstants
 {
     public static final String PUBLIC       = "public";
     public static final String PRIVATE      = "private";

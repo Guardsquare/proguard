@@ -25,7 +25,7 @@ package proguard.classfile;
  *
  * @author Eric Lafortune
  */
-public interface JavaConstants
+public class JavaConstants
 {
     public static final String JAVA_FILE_EXTENSION = ".java";
 
