@@ -28,7 +28,7 @@ package proguard.util;
  * the contain relatively short-lived information inside processing steps.
  *
  * @author Johan Leys
- * @Author Eric Lafortune
+ * @author Eric Lafortune
  */
 public interface Processable
 {

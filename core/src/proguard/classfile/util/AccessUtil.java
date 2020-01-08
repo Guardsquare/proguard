@@ -100,6 +100,7 @@ public class AccessUtil
      *                       {@link AccessConstants#PRIVATE},
      *                       {@link AccessConstants#PROTECTED}, and
      *                       {@link AccessConstants#PUBLIC}.
+     * @return the modified access flags.
      */
     public static int replaceAccessFlags(int accessFlags, int newAccessFlags)
     {
@@ -132,6 +133,7 @@ public class AccessUtil
      *                                 {@link AccessConstants#PRIVATE},
      *                                 {@link AccessConstants#PROTECTED}, and
      *                                 {@link AccessConstants#PUBLIC}.
+     * @return whether the access flags match the requirements.
      */
     public static boolean accepted(int accessFlags,
                                    int requiredSetAccessFlags,

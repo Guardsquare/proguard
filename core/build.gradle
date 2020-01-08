@@ -22,6 +22,14 @@ sourceSets.main {
     }
 }
 
+javadoc {
+    title          = 'ProGuard Core'
+    source         = sourceSets.main.allJava
+    classpath      = configurations.compile
+    destinationDir = file('docs/api')
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-common:${kotlinVersion}"

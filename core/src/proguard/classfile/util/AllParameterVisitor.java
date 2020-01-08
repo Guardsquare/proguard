@@ -22,8 +22,8 @@ import proguard.classfile.visitor.*;
 
 /**
  * This MemberVisitor lets a given parameter visitor visit all the parameters
- * of the methods that it visits. The parameters optionally includes the
- * 'this' parameter of non-static methods, but never the return value.
+ * of the methods that it visits. The parameters optionally include the
+ * 'this' parameters of non-static methods, but never the return value.
  *
  * @author Eric Lafortune
  */
@@ -37,6 +37,11 @@ implements   MemberVisitor
     /**
      * Creates a new AllParameterVisitor for the given parameter
      * visitor.
+     *
+     * @param includeThisParameter specifies whether to visit the 'this'
+     *                             parameters.
+     * @param parameterVisitor     the visitor for the parameters of the
+     *                             visited methods.
      */
     public AllParameterVisitor(boolean          includeThisParameter,
                                ParameterVisitor parameterVisitor)

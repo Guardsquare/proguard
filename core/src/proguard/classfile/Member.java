@@ -21,8 +21,7 @@ import proguard.classfile.visitor.*;
 import proguard.util.*;
 
 /**
- * This abstract class provides the basis for representing a field or a method
- * from a class.
+ * Representation of a class member (field or method).
  *
  * @author Eric Lafortune
  */

@@ -51,7 +51,7 @@ public class ClassBuilder
      * Creates a new ClassBuilder for the Java class with the given
      * name and super class.
      *
-     * @oaram u4version      the class version.
+     * @param u4version      the class version.
      * @param u2accessFlags  access flags for the new class.
      * @param className      the fully qualified name of the new class.
      * @param superclassName the fully qualified name of the super class.
@@ -78,13 +78,13 @@ public class ClassBuilder
      * Creates a new ClassBuilder for the Java class with the given
      * name and super class.
      *
-     * @oaram u4version       the class version.
+     * @param u4version       the class version.
      * @param u2accessFlags   access flags for the new class.
      * @param className       the fully qualified name of the new class.
      * @param superclassName  the fully qualified name of the super class.
      * @param featureName     an optional feature name for the new class.
      * @param processingFlags optional processing flags for the new class.
-     * @param processingFlags optional processing info for the new class.
+     * @param processingInfo  optional processing info for the new class.
      *
      * @see VersionConstants
      * @see AccessConstants
@@ -191,8 +191,8 @@ public class ClassBuilder
     /**
      * Adds a new interface to the edited class.
      *
-     * @param interfaceName        the name of the interface.
-     * @pqaram referencedInterface the referenced interface.
+     * @param interfaceName       the name of the interface.
+     * @param referencedInterface the referenced interface.
      * @return this instance of ClassBuilder.
      */
     public ClassBuilder addInterface(String interfaceName,
