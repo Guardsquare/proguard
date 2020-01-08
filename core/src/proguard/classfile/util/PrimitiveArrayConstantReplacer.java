@@ -130,7 +130,7 @@ implements   ClassVisitor,
         builder = new InstructionSequenceBuilder((ProgramClass) clazz);
 
         // Push the primitive array length.
-        builder.pushInt(primitiveArrayConstant.getLength());
+        builder.pushInt(arrayLength);
 
         // Create the primitive array.
         builder.newarray(InstructionUtil.arrayTypeFromInternalType(primitiveType));

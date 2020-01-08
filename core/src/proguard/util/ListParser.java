@@ -25,7 +25,13 @@ import java.util.List;
  * interpreted as comma-separated lists, optionally prefixed with '!' negators.
  * If an entry with a negator matches, a negative match is returned, without
  * considering any subsequent entries in the list. The creation of StringMatcher
- * instances  for the entries is delegated to the given StringParser.
+ * instances for the entries is delegated to the given StringParser.
+ *
+ * For example,
+ *     "*.xml,*.jpg" matches all strings with the given extensions;
+ *     "!dummy" matches all strings except "dummy";
+ *     "!dummy.xml,*.xml" matches all strings with .xml, except "dummy.xml";
+ *     "special.xml,!*.xml" matches "special.xml" and all other non-.xml strings.
  *
  * @author Eric Lafortune
  */
@@ -65,19 +71,38 @@ public class ListParser implements StringParser
 
         // Loop over all simple regular expressions, backward, creating a
         // linked list of matchers.
-        for (int index = regularExpressions.size()-1; index >= 0; index--)
+        for (int index = regularExpressions.size()-1; index >= 0; )
         {
             String regularExpression = (String)regularExpressions.get(index);
 
-            StringMatcher entryMatcher = parseEntry(regularExpression);
+            boolean isNegated = isNegated(regularExpression);
 
-            // Prepend the entry matcher.
+            // Group similar expressions (all negated or all not negated) in
+            // an array and an OrMatcher, to reduce the length of the linked
+            // list and the resulting recursion depth when using the matchers
+            // later on.
+            int lastNegatedIndex =
+                lastNegatedIndex(regularExpressions, index, isNegated);
+
+            StringMatcher[] stringMatchers =
+                parseEntries(regularExpressions, lastNegatedIndex, index);
+
+            StringMatcher stringMatcher =
+                new OrMatcher(stringMatchers);
+
+            // Account for the negator, if any.
+            if (isNegated)
+            {
+                stringMatcher = new NotMatcher(stringMatcher);
+            }
+
+            // Prepend the string matcher.
             listMatcher =
-                listMatcher == null ?
-                    (StringMatcher)entryMatcher :
-                isNegated(regularExpression) ?
-                    (StringMatcher)new AndMatcher(entryMatcher, listMatcher) :
-                    (StringMatcher)new OrMatcher(entryMatcher, listMatcher);
+                listMatcher == null ? stringMatcher :
+                isNegated           ? new AndMatcher(stringMatcher, listMatcher) :
+                                      new OrMatcher(stringMatcher, listMatcher);
+
+            index -= stringMatchers.length;
         }
 
         return listMatcher != null ? listMatcher : new ConstantMatcher(true);
@@ -87,15 +112,61 @@ public class ListParser implements StringParser
     // Small utility methods.
 
     /**
-     * Creates a StringMatcher for the given regular expression, which is a
-     * an optionally negated simple expression.
+     * Returns the highest index that is negated or not, as specified.
+     */
+    private int lastNegatedIndex(List    regularExpressions,
+                                 int     lastIndex,
+                                 boolean isNegated)
+    {
+        for (int index = lastIndex; index > 0; index--)
+        {
+            String regularExpression = (String)regularExpressions.get(index-1);
+
+            if (isNegated(regularExpression) != isNegated)
+            {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+
+    /**
+     * Creates an array of StringMatcher instances for the specified simple
+     * regular expressions.
+     */
+    private StringMatcher[] parseEntries(List regularExpressions,
+                                         int  firstIndex,
+                                         int  lastIndex)
+    {
+        StringMatcher[] stringMatchers =
+            new StringMatcher[lastIndex - firstIndex + 1];
+
+        for (int index = firstIndex; index <= lastIndex; index++)
+        {
+            String regularExpression = (String)regularExpressions.get(index);
+
+            stringMatchers[index - firstIndex] = parseEntry(regularExpression);
+        }
+
+        return stringMatchers;
+    }
+
+
+    /**
+     * Creates a StringMatcher for the given regular expression, stripping any
+     * negator.
      */
     private StringMatcher parseEntry(String regularExpression)
     {
-        // Wrap the matcher if the regular expression starts with a '!' negator.
-        return isNegated(regularExpression) ?
-            new NotMatcher(stringParser.parse(regularExpression.substring(1))) :
-            stringParser.parse(regularExpression);
+        // Strip the negator, if any.
+        if (isNegated(regularExpression))
+        {
+            regularExpression = regularExpression.substring(1);
+        }
+
+        return stringParser.parse(regularExpression);
     }
 
 
