@@ -22,8 +22,8 @@ import proguard.classfile.attribute.module.ProvidesInfo;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>ProvidesInfo</code> objects. Note that there is only a single
- * implementation of <code>ProvidesInfo</code>, such that this interface
+ * {@link ProvidesInfo} instances. Note that there is only a single
+ * implementation of {@link ProvidesInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Joachim Vandersmissen

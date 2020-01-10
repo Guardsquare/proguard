@@ -18,15 +18,15 @@
 package proguard.evaluation.value;
 
 /**
- * This IntegerValue represents a specific integer value.
- *
+ * This {@link IntegerValue} represents a specific integer value.
+ * <p/>
  * This class handles interactions with:
  * - RangeIntegerValue
  * - SpecificInteger (in general)
- *
+ * <p/>
  * It reverses and delegates interactions with:
  * - IntegerValue (in general)
- *
+ * <p/>
  * It notably doesn't handle interactions with:
  * - UnknownInteger
  *

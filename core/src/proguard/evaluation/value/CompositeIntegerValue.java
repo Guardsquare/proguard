@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This IntegerValue represents the result of a binary operation on two integer
+ * This {@link IntegerValue} represents the result of a binary operation on two integer
  * values.
  *
  * @author Eric Lafortune

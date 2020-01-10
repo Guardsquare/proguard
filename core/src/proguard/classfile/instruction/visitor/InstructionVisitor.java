@@ -24,7 +24,7 @@ import proguard.classfile.instruction.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>Instruction</code> objects.
+ * {@link Instruction} instances.
  *
  * @author Eric Lafortune
  */

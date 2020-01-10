@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This IntegerValue represents a integer value that is negated.
+ * This {@link IntegerValue} represents a integer value that is negated.
  *
  * @author Eric Lafortune
  */

@@ -21,7 +21,7 @@ package proguard.io;
 import java.io.*;
 
 /**
- * This <code>DataEntry</code> represents a named output entry that doesn't
+ * This {@link DataEntry} represents a named output entry that doesn't
  * return an input stream. It is mostly useful for testing data entry writers,
  * explicitly creating and using output streams.
  *

@@ -21,8 +21,8 @@ import proguard.classfile.*;
 
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, but only when visiting program classes.
+ * This {@link ClassVisitor} delegates its visits to another given
+ * {@link ClassVisitor}, but only when visiting program classes.
  *
  * @author Eric Lafortune
  */

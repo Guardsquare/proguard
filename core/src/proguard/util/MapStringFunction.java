@@ -20,7 +20,7 @@ package proguard.util;
 import java.util.Map;
 
 /**
- * This StringFunction gets its transformed strings from a given map.
+ * This {@link StringFunction} gets its transformed strings from a given map.
  *
  * @author Eric Lafortune
  */

@@ -22,7 +22,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.util.SimpleProcessable;
 
 /**
- * Representation of an Inner Classes table entry.
+ * Representation of an inner classes table entry.
  *
  * @author Eric Lafortune
  */

@@ -26,8 +26,8 @@ import proguard.classfile.kotlin.visitors.*;
 import proguard.classfile.util.*;
 
 /**
- * This KotlinMetadataVisitor initializes missing references for known cases where
- * KotlinPropertyMetadata refers to hard-to-find Java elements.
+ * This {@link KotlinMetadataVisitor} initializes missing references for known cases where
+ * {@link KotlinPropertyMetadata} refers to hard-to-find Java elements.
  */
 public class KotlinInterClassReferenceInitializer
 implements   KotlinMetadataVisitor

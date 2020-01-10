@@ -27,8 +27,8 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ClassVisitor, MemberVisitor, ConstantVisitor, AttributeVisitor, etc.
- * lets a given ClassVisitor visit all the referenced classes of the elements
+ * This {@link ClassVisitor}, {@link MemberVisitor}, {@link ConstantVisitor}, {@link AttributeVisitor}, etc.
+ * lets a given {@link ClassVisitor} visit all the referenced classes of the elements
  * that it visits. Only downstream elements are considered (in order to avoid
  * loops and repeated visits).
  *

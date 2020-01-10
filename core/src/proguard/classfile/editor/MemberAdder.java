@@ -27,7 +27,7 @@ import proguard.util.*;
 import java.io.*;
 
 /**
- * This MemberVisitor copies all class members that it visits to the given
+ * This {@link MemberVisitor} copies all class members that it visits to the given
  * target class. Their processing info is set to the class members from which they
  * were copied.
  *

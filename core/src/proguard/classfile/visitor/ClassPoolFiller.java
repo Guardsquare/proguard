@@ -22,7 +22,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 
 
 /**
- * This ClassVisitor collects all the classes it visits in a given
+ * This {@link ClassVisitor} collects all the classes it visits in a given
  * class pool.
  *
  * @author Eric Lafortune

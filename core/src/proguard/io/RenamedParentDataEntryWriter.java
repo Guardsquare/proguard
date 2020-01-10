@@ -22,7 +22,7 @@ import proguard.util.StringMatcher;
 import java.io.*;
 
 /**
- * This DataEntryWriter delegates to another DataEntryWriter, renaming
+ * This {@link DataEntryWriter} delegates to another {@link DataEntryWriter}, renaming
  * parent data entries based on the given matcher.
  *
  * @author Thomas Neidhart

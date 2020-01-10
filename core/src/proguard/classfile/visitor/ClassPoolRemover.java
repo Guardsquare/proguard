@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ClassVisitor removes all the classes it visits from a given
+ * This {@link ClassVisitor} removes all the classes it visits from a given
  * class pool.
  *
  * @author Eric Lafortune

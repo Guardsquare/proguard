@@ -29,8 +29,8 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This visitor sets a fixed info object on all the Processable instances
- * that it visits.
+ * This visitor sets a fixed info object on all the {@link Processable}
+ * instances that it visits.
  *
  * @author Eric Lafortune
  */

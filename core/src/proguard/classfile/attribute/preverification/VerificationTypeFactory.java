@@ -18,7 +18,7 @@
 package proguard.classfile.attribute.preverification;
 
 /**
- * This class provides methods to create and reuse IntegerType objects.
+ * This class provides methods to create and reuse {@link IntegerType} instances.
  *
  * @author Eric Lafortune
  */

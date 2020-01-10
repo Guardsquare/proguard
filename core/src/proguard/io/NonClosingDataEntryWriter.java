@@ -20,9 +20,9 @@ package proguard.io;
 import java.io.*;
 
 /**
- * This DataEntryWriter delegates to another DataEntryWriter, except for
+ * This {@link DataEntryWriter} delegates to another {@link DataEntryWriter}, except for
  * any {@link #close()} calls.
- *
+ * <p/>
  * For example:
  * <pre>
  *     DataEntryWriter writer = ...

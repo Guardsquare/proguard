@@ -24,7 +24,7 @@ import proguard.util.Processable;
 import java.util.*;
 
 /**
- * This ClassVisitor links all corresponding non-private, non-static,
+ * This {@link ClassVisitor} links all corresponding non-private, non-static,
  * non-initializer methods in the class hierarchies of all visited classes.
  * Visited classes are typically all class files that are not being subclassed.
  * Chains of links that have been created in previous invocations are merged

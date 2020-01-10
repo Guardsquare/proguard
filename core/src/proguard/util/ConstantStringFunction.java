@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction returns a given constant string.
+ * This {@link StringFunction} returns a given constant string.
  *
  * @author Eric Lafortune
  */

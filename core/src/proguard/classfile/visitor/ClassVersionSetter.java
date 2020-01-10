@@ -22,7 +22,7 @@ import proguard.classfile.*;
 import java.util.Set;
 
 /**
- * This <code>ClassVisitor</code> sets the version number of the program classes
+ * This {@link ClassVisitor} sets the version number of the program classes
  * that it visits.
  *
  * @author Eric Lafortune

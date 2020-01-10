@@ -22,7 +22,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This Attribute represents a signature attribute.
+ * This {@link Attribute} represents a signature attribute.
  *
  * @author Eric Lafortune
  */

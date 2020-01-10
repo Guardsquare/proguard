@@ -22,7 +22,7 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This MemberVisitor delegates all visits to each MemberVisitor
+ * This {@link MemberVisitor} delegates all visits to each {@link MemberVisitor}
  * in a given list.
  *
  * @author Eric Lafortune

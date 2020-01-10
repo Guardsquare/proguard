@@ -20,7 +20,7 @@ package proguard.util;
 import java.io.File;
 
 /**
- * This StringParser can create StringMatcher instances for regular expressions
+ * This {@link StringParser} can create {@link StringMatcher} instances for regular expressions
  * matching file names. The regular expressions can contain the following
  * wildcards:
  * '?'  for a single regular file name character,

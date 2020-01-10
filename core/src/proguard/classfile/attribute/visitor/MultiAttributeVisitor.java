@@ -25,7 +25,7 @@ import proguard.classfile.attribute.preverification.*;
 import proguard.util.ArrayUtil;
 
 /**
- * This AttributeVisitor delegates all visits to each AttributeVisitor
+ * This {@link AttributeVisitor} delegates all visits to each {@link AttributeVisitor}
  * in a given list.
  *
  * @author Eric Lafortune

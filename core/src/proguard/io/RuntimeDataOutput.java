@@ -20,9 +20,9 @@ package proguard.io;
 import java.io.*;
 
 /**
- * This class delegates its method calls to the corresponding DataOutput methods,
+ * This class delegates its method calls to the corresponding {@link DataOutput} methods,
  * converting its IOExceptions to RuntimeExceptions.
- *
+ * <p/>
  * The class provides two convenience methods that additionally check whether the
  * written values are unsigned resp. signed short values before writing them.
  *

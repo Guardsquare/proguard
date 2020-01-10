@@ -18,8 +18,8 @@
 package proguard.evaluation.value;
 
 /**
- * This class represents a partially evaluated integer value.
- *
+ * {@link IntegerValue} that is unknown.
+ * <p/>
  * This class handles interactions with:
  * - IntegerValue (in general)
  *

@@ -22,7 +22,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.*;
 
 /**
- * Representation of a field from a program class.
+ * This {@link Field} represents a field in a {@link ProgramClass}.
  *
  * @author Eric Lafortune
  */

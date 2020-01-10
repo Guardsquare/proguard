@@ -22,8 +22,9 @@ import proguard.classfile.constant.ClassConstant;
 import proguard.evaluation.value.ValueFactory;
 
 /**
- * This class creates java.lang.Class ReferenceValue instances that correspond
- * to specified constant pool entries.
+ * This {@link ConstantValueFactory} creates <code>java.lang.Class</code>
+ * {@link ReferenceValue} instances that correspond to specified constant
+ * pool entries.
  *
  * @author Eric Lafortune
  */

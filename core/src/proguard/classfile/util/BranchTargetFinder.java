@@ -29,8 +29,8 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor finds all instruction offsets, branch targets, and
- * exception targets in the CodeAttribute objects that it visits.
+ * This {@link AttributeVisitor} finds all instruction offsets, branch targets, and
+ * exception targets in the {@link CodeAttribute} instances that it visits.
  *
  * @author Eric Lafortune
  */

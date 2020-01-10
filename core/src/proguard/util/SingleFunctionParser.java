@@ -18,10 +18,10 @@
 package proguard.util;
 
 /**
- * This StringFunctionParser creates StringFunction instances for regular
+ * This {@link StringFunctionParser} creates {@link StringFunction} instances for regular
  * expressions with optional "->" transformations. It parses the first
- * part with a given StringParser and the second part with an optional
- * WildcardManager.
+ * part with a given {@link StringParser} and the second part with an optional
+ * {@link WildcardManager}.
  *
  * @author Eric Lafortune
  */

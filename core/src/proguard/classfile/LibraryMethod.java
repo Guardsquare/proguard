@@ -20,7 +20,7 @@ package proguard.classfile;
 import proguard.classfile.visitor.*;
 
 /**
- * Representation of a method from a class-file.
+ * This {@link Method} represents a method in a {@link LibraryClass}.
  *
  * @author Eric Lafortune
  */

@@ -18,7 +18,7 @@
 package proguard.io;
 
 /**
- * This DataEntryFilter delegates filtering to a DataEntryFilter for its parent.
+ * This {@link DataEntryFilter} delegates filtering to a {@link DataEntryFilter} for its parent.
  *
  * @author Eric Lafortune
  */

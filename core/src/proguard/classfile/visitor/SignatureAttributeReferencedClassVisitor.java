@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given ClassVisitor visit all the
+ * This {@link AttributeVisitor} lets a given {@link ClassVisitor} visit all the
  * classes referenced by the type descriptors of the signatures that it visits.
  *
  * @author Joachim Vandersmissen

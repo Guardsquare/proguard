@@ -25,7 +25,7 @@ import proguard.classfile.attribute.preverification.*;
 import proguard.classfile.visitor.SimpleClassPrinter;
 
 /**
- * This AttributeVisitor delegates to a given AttributeVisitor, timing the
+ * This {@link AttributeVisitor} delegates to a given {@link AttributeVisitor}, timing the
  * invocations and printing out warnings when the timings exceed a given
  * threshold.
  *

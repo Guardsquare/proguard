@@ -29,7 +29,7 @@ import proguard.classfile.visitor.*;
 import proguard.util.StringMatcher;
 
 /**
- * This AttributeVisitor initializes any constant class member references of all
+ * This {@link AttributeVisitor} initializes any constant class member references of all
  * code that it visits. It currently handles invocations of
  *     Class#get[Declared]{Field,Constructor,Method} and
  *     Atomic{Integer,Long,Reference}FieldUpdater.newUpdater
@@ -37,7 +37,7 @@ import proguard.util.StringMatcher;
  * refer to their class members in the program class pool or in the library
  * class pool. It may create new string constants and update the code, in order
  * to avoid clashes between identically named class members.
- * <p>
+ * <p/>
  * The class hierarchy and references must be initialized before using this
  * visitor.
  *

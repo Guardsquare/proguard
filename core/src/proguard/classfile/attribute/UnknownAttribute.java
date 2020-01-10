@@ -22,7 +22,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents an unknown attribute.
+ * This {@link Attribute} represents an unknown attribute.
  *
  * @author Eric Lafortune
  */

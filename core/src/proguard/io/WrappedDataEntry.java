@@ -20,7 +20,7 @@ package proguard.io;
 import java.io.*;
 
 /**
- * This DataEntry wraps another data entry.
+ * This {@link DataEntry} wraps another data entry.
  *
  * @author Thomas Neidhart
  */

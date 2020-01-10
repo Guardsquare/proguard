@@ -24,7 +24,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.evaluation.value.*;
 
 /**
- * This InstructionVisitor executes the instructions that it visits on a given
+ * This {@link InstructionVisitor} executes the instructions that it visits on a given
  * local variable frame and stack.
  *
  * @author Eric Lafortune

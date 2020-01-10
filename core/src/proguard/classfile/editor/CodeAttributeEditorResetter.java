@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor resets it CodeAttributeEditor whenever it visits a
+ * This {@link AttributeVisitor} resets it {@link CodeAttributeEditor} whenever it visits a
  * code attribute.
  *
  * @author Eric Lafortune

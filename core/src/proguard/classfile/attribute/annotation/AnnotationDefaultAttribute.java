@@ -23,7 +23,7 @@ import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents an annotation default attribute.
+ * This {@link Attribute} represents an annotation default attribute.
  *
  * @author Eric Lafortune
  */

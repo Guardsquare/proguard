@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This ReferenceValue represents a reference value that is identified by a
+ * This {@link ReferenceValue} represents a reference value that is identified by a
  * unique ID.
  *
  * @author Eric Lafortune

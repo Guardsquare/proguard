@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This LongValue represents a particular long value.
+ * This {@link LongValue} represents a particular long value.
  *
  * @author Eric Lafortune
  */

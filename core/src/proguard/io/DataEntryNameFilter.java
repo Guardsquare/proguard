@@ -20,8 +20,8 @@ package proguard.io;
 import proguard.util.StringMatcher;
 
 /**
- * This DataEntryFilter filters data entries based on whether their names match
- * a given StringMatcher.
+ * This {@link DataEntryFilter} filters data entries based on whether their names match
+ * a given {@link StringMatcher}.
  *
  * @author Eric Lafortune
  */

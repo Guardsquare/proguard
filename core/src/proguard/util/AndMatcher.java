@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings match both given StringMatcher
+ * This {@link StringMatcher} tests whether strings match both given {@link StringMatcher}
  * instances.
  *
  * @author Eric Lafortune

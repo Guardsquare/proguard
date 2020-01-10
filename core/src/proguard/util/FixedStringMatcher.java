@@ -18,8 +18,8 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings start with a given fixed string
- * and then match another optional given StringMatcher.
+ * This {@link StringMatcher} tests whether strings start with a given fixed string
+ * and then match another optional given {@link StringMatcher}.
  *
  * @author Eric Lafortune
  */

@@ -22,8 +22,8 @@ import proguard.classfile.attribute.module.RequiresInfo;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>RequiresInfo</code> objects. Note that there is only a single
- * implementation of <code>RequiresInfo</code>, such that this interface
+ * {@link RequiresInfo} instances. Note that there is only a single
+ * implementation of {@link RequiresInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Joachim Vandersmissen

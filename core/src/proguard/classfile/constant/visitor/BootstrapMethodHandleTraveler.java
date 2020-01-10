@@ -24,7 +24,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ConstantVisitor and BootstrapMethodInfoVisitor travels from any invoke
+ * This {@link ConstantVisitor} and {@link BootstrapMethodInfoVisitor} travels from any invoke
  * dynamic constants or bootstrap method info entries that it visits to their
  * bootstrap method handle constants, and applies a given constant visitor.
  *

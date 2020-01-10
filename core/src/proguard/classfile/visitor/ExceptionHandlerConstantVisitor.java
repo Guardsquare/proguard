@@ -23,8 +23,8 @@ import proguard.classfile.attribute.visitor.ExceptionInfoVisitor;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This <code>ExceptionInfoVisitor</code> lets a given
- * <code>ConstantVisitor</code> visit all catch class constants of exceptions
+ * This {@link ExceptionInfoVisitor} lets a given
+ * {@link ConstantVisitor} visit all catch class constants of exceptions
  * that it visits.
  *
  * @author Eric Lafortune

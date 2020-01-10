@@ -27,10 +27,10 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This InstructionVisitor replaces a given pattern instruction sequence by
+ * This {@link InstructionVisitor} replaces a given pattern instruction sequence by
  * another given replacement instruction sequence. The arguments of the
  * instruction sequences can be wildcards that are matched and replaced.
- *
+ * <p/>
  * The class also supports labels ({@link #label()}) and exception handlers
  * ({@link #catch_(int,int,int)}) in replacement sequences. They provide
  * local branch offsets inside the replacement sequences

@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a runtime invisible type annotations attribute.
+ * This {@link Attribute} represents a runtime invisible type annotations attribute.
  *
  * @author Eric Lafortune
  */

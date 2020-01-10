@@ -23,7 +23,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ConstantVisitor remaps all possible indices of bootstrap methods
+ * This {@link ConstantVisitor} remaps all possible indices of bootstrap methods
  * of the constants that it visits, based on a given index map.
  *
  * @author Eric Lafortune

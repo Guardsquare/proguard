@@ -22,8 +22,8 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given ExceptionInfoVisitor visit all exceptions
- * objects of the CodeAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link ExceptionInfoVisitor} visit all exceptions
+ * instances of the {@link CodeAttribute} instances it visits.
  *
  * @author Eric Lafortune
  */

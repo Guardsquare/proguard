@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor removes the given class from the list of subclasses of the
+ * This {@link ClassVisitor} removes the given class from the list of subclasses of the
  * classes that it visits.
  *
  * @author Eric Lafortune

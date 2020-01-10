@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This class represents a partially evaluated reference value.
+ * Representation of a partially evaluated reference value.
  *
  * @author Eric Lafortune
  */

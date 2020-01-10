@@ -25,12 +25,12 @@ import proguard.classfile.visitor.ClassVisitor;
 import java.io.*;
 
 /**
- * This DataEntryReader applies a given ClassVisitor to the class
+ * This {@link DataEntryReader} applies a given {@link ClassVisitor} to the class
  * definitions that it reads.
- * <p>
- * Class files are read as ProgramClass objects or LibraryClass objects,
+ * <p/>
+ * Class files are read as {@link ProgramClass} instances or {@link LibraryClass} instances,
  * depending on the <code>isLibrary</code> flag.
- * <p>
+ * <p/>
  * In case of libraries, only public classes are considered, if the
  * <code>skipNonPublicLibraryClasses</code> flag is set.
  *

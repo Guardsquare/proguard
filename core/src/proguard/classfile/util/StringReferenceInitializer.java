@@ -22,7 +22,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This ConstantVisitor initializes any class references of all string constants
+ * This {@link ConstantVisitor} initializes any class references of all string constants
  * it visits. More specifically, it fills out the references of string constant
  * pool entries that happen to refer to a class in the program class pool or in
  * the library class pool.

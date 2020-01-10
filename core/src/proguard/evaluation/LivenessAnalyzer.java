@@ -28,7 +28,7 @@ import proguard.evaluation.value.*;
 import proguard.util.ArrayUtil;
 
 /**
- * This AttributeVisitor analyzes the liveness of the variables in the code
+ * This {@link AttributeVisitor} analyzes the liveness of the variables in the code
  * attributes that it visits, based on partial evaluation.
  *
  * @author Eric Lafortune

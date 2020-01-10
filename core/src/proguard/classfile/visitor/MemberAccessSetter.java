@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.util.AccessUtil;
 
 /**
- * This <code>MemberVisitor</code> sets the access part of the access flags of
+ * This {@link MemberVisitor} sets the access part of the access flags of
  * the program class members that its visits to a given value.
  *
  * @see ClassConstants

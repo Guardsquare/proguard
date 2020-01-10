@@ -20,12 +20,12 @@ package proguard.classfile.util;
 import proguard.classfile.JavaTypeConstants;
 
 /**
- * An <code>ExternalTypeEnumeration</code> provides an enumeration of all
+ * An {@link ExternalTypeEnumeration} provides an enumeration of all
  * types listed in a given external descriptor string. The method name can
  * be retrieved separately.
- * <p>
- * A <code>ExternalTypeEnumeration</code> object can be reused for processing
- * different subsequent descriptors, by means of the <code>setDescriptor</code>
+ * <p/>
+ * An {@link ExternalTypeEnumeration} instance can be reused for processing
+ * different subsequent descriptors, by means of the {@link #setDescriptor}
  * method.
  *
  * @author Eric Lafortune

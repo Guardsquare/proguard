@@ -32,24 +32,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * This ClassVisitor initializes the references of all classes that
+ * This {@link ClassVisitor} initializes the references of all classes that
  * it visits.
- * <p>
+ * <p/>
  * All class constant pool entries get direct references to the corresponding
  * classes. These references make it more convenient to travel up and across
  * the class hierarchy.
- * <p>
+ * <p/>
  * All field and method reference constant pool entries get direct references
  * to the corresponding classes, fields, and methods.
- * <p>
+ * <p/>
  * All name and type constant pool entries get a list of direct references to
  * the classes listed in the type.
- * <p>
+ * <p/>
  * All Kotlin metadata elements get references to their corresponding Java
  * implementation elements.
- * <p>
+ * <p/>
  * This visitor optionally prints warnings if some items can't be found.
- * <p>
+ * <p/>
  * The class hierarchy must be initialized before using this visitor.
  *
  * @author Eric Lafortune

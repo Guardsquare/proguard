@@ -25,7 +25,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor accumulates specified changes to local variables, and
+ * This {@link AttributeVisitor} accumulates specified changes to local variables, and
  * then applies these accumulated changes to the code attributes that it visits.
  *
  * @author Eric  Lafortune

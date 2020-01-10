@@ -25,7 +25,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor trims the line number table attributes that it visits.
+ * This {@link AttributeVisitor} trims the line number table attributes that it visits.
  *
  * @author Eric Lafortune
  */

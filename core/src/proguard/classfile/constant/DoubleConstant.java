@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This Constant represents a double constant in the constant pool.
+ * This {@link Constant} represents a double constant in the constant pool.
  *
  * @author Eric Lafortune
  */

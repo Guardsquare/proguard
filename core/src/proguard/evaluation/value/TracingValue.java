@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This class represents a value that has been tagged with a sticky trace
+ * Representation of a value that has been tagged with a sticky trace
  * value.
  *
  * @author Eric Lafortune

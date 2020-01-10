@@ -24,7 +24,7 @@ import proguard.classfile.visitor.ClassCollector;
 import java.util.*;
 
 /**
- * This ReferenceValue represents a partially evaluated reference value.
+ * This {@link ReferenceValue} represents a partially evaluated reference value.
  * It has a type and a flag that indicates whether the value could be
  * <code>null</code>. If the type is <code>null</code>, the value is
  * <code>null</code>.

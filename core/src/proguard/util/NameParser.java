@@ -20,7 +20,7 @@ package proguard.util;
 import java.util.*;
 
 /**
- * This StringParser can create StringMatcher instances for regular expressions
+ * This {@link StringParser} can create {@link StringMatcher} instances for regular expressions
  * matching names. The regular expressions are interpreted as comma-separated
  * lists of names, optionally prefixed with '!' negators.
  * If a name with a negator matches, a negative match is returned, without

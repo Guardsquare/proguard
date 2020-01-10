@@ -21,8 +21,8 @@ import proguard.classfile.ClassPool;
 
 
 /**
- * This ClassPoolVisitor lets a given ClassVisitor visit all Clazz
- * objects of the class pools it visits.
+ * This {@link ClassPoolVisitor} lets a given {@link ClassVisitor} visit all Clazz
+ * instances of the class pools it visits.
  *
  * @author Eric Lafortune
  */

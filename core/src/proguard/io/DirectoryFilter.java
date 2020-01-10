@@ -18,7 +18,7 @@
 package proguard.io;
 
 /**
- * This DataEntryReader delegates to one of two other DataEntryReader instances,
+ * This {@link DataEntryReader} delegates to one of two other {@link DataEntryReader} instances,
  * depending on whether the data entry represents a directory or not.
  *
  * @author Eric Lafortune

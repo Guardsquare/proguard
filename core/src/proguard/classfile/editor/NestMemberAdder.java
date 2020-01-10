@@ -27,7 +27,7 @@ import proguard.classfile.visitor.ClassVisitor;
 import proguard.util.ArrayUtil;
 
 /**
- * This ConstantVisitor and ClassVisitor adds the class constants or the
+ * This {@link ConstantVisitor} and {@link ClassVisitor} adds the class constants or the
  * classes that it visits to the given target nest member attribute.
  */
 public class NestMemberAdder

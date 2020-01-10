@@ -22,8 +22,8 @@ import proguard.classfile.attribute.ParameterInfo;
 
 /**
  * This interface specifies the method for a visitor of
- * <code>ParameterInfo</code> objects. Note that there is only a single
- * implementation of <code>ParameterInfo</code>, such that this interface
+ * {@link ParameterInfo} instances. Note that there is only a single
+ * implementation of {@link ParameterInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

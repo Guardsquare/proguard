@@ -22,8 +22,8 @@ import proguard.classfile.attribute.module.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>OpensInfo</code> objects. Note that there is only a single
- * implementation of <code>OpensInfo</code>, such that this interface
+ * {@link OpensInfo} instances. Note that there is only a single
+ * implementation of {@link OpensInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Joachim Vandersmissen

@@ -18,7 +18,7 @@
 package proguard.io;
 
 /**
- * This DataEntry wraps another data entry, returning a different name instead
+ * This {@link DataEntry} wraps another data entry, returning a different name instead
  * of the wrapped data entry's name.
  *
  * @author Eric Lafortune

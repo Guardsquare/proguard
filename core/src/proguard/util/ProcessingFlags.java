@@ -18,7 +18,8 @@
 package proguard.util;
 
 /**
- * Constants used by DexGuard for marking entities (classes, class members, resource files, ...) during processing.
+ * Constants used by ProGuard for marking entities (classes, class members,
+ * resource files, ...) during processing.
  *
  * @author Johan Leys
  */

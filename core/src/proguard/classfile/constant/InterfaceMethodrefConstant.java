@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This Constant represents a interface method reference constant in the constant pool.
+ * This {@link Constant} represents a interface method reference constant in the constant pool.
  *
  * @author Eric Lafortune
  */

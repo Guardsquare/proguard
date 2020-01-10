@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This IntegerValue represents a integer value that is converted from another
+ * This {@link IntegerValue} represents a integer value that is converted from another
  * scalar value.
  *
  * @author Eric Lafortune

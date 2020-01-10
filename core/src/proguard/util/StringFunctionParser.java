@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This interface provides a method to create a StringFunction for a given
+ * This interface provides a method to create a {@link StringFunction} for a given
  * regular expression.
  *
  * @author Eric Lafortune

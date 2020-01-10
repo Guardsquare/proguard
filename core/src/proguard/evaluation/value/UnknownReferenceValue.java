@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.*;
 
 /**
- * This class represents a partially evaluated reference value.
+ * {@link ReferenceValue} that is unknown.
  *
  * @author Eric Lafortune
  */

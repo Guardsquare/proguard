@@ -22,8 +22,8 @@ import proguard.evaluation.value.*;
 import java.util.Arrays;
 
 /**
- * This class represents an operand stack that contains <code>Value</code>
- * objects.
+ * This class represents an operand stack that contains {@link Value}
+ * instances.
  *
  * @author Eric Lafortune
  */

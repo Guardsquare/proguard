@@ -23,7 +23,7 @@ import proguard.classfile.io.ProgramClassWriter;
 import java.io.*;
 
 /**
- * This DataEntryWriter finds received class entries in the given class pool
+ * This {@link DataEntryWriter} finds received class entries in the given class pool
  * and writes them out to the given data entry writer. For resource entries,
  * it returns valid output streams. For class entries, it returns output
  * streams that must not be used.

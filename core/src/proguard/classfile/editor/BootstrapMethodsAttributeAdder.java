@@ -22,7 +22,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.BootstrapMethodInfoVisitor;
 
 /**
- * This BootstrapMethodInfoVisitor adds all bootstrap methods that it visits to
+ * This {@link BootstrapMethodInfoVisitor} adds all bootstrap methods that it visits to
  * the given target class, creating a bootstrap methods attribute if necessary.
  */
 public class BootstrapMethodsAttributeAdder

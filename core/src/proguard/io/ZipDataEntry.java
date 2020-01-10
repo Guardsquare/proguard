@@ -23,7 +23,7 @@ import java.io.*;
 import java.util.zip.*;
 
 /**
- * This <code>DataEntry</code> represents a ZIP entry.
+ * This {@link DataEntry} represents a ZIP entry.
  *
  * @author Eric Lafortune
  */

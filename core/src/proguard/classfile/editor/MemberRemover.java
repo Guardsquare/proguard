@@ -25,20 +25,23 @@ import java.util.*;
 
 
 /**
- * This visitor removes all members it visits in a ProgramClass.
- *
+ * This visitor removes all members it visits in a {@link ProgramClass}.
+ * <p/>
  * It should be used in two steps:
- * - in the first step, the collection step, all program fields to be removed
- *   should be visited.
- * - in the second step, the removal step, the program class containing the
- *   program fields should be visited. This will actually delete all
- *   collected fields.
- *
+ * <ul>
+ * <li>in the first step, the collection step, all program fields to be removed
+ *     should be visited.
+ * <li>in the second step, the removal step, the program class containing the
+ *     program fields should be visited. This will actually delete all
+ *     collected fields.
+ * </ul>
+ * <p/>
  * For example, to remove all fields in a program class:
- *
- *   MemberRemover remover = new MemberRemover();
- *   programClass.fieldsAccept(remover);
- *   programClass.accept(remover);
+ * <pre>
+ *     MemberRemover remover = new MemberRemover();
+ *     programClass.fieldsAccept(remover);
+ *     programClass.accept(remover);
+ * </pre>
  *
  * @author Johan Leys
  */

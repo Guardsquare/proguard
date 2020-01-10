@@ -22,8 +22,8 @@ import proguard.classfile.attribute.BootstrapMethodInfo;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>BootstrapMethodInfo</code> objects. Note that there is only a single
- * implementation of <code>BootstrapMethodInfo</code>, such that this interface
+ * {@link BootstrapMethodInfo} instances. Note that there is only a single
+ * implementation of {@link BootstrapMethodInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

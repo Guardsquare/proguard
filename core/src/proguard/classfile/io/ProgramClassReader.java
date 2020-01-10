@@ -37,8 +37,8 @@ import proguard.io.RuntimeDataInput;
 import java.io.DataInput;
 
 /**
- * This ClassVisitor fills out the ProgramClass objects that it visits with data
- * from the given DataInput object.
+ * This {@link ClassVisitor} fills out the {@link ProgramClass} instances that it visits with data
+ * from the given {@link DataInput} object.
  *
  * @author Eric Lafortune
  */

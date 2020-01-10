@@ -23,8 +23,8 @@ import proguard.classfile.attribute.annotation.Annotation;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>Annotation</code> objects. Note that there is only a single
- * implementation of <code>Annotation</code>, such that this interface
+ * {@link Annotation} instances. Note that there is only a single
+ * implementation of {@link Annotation}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

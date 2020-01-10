@@ -20,12 +20,12 @@ package proguard.classfile.util;
 import proguard.classfile.*;
 
 /**
- * An <code>InternalTypeEnumeration</code> provides an enumeration of all
+ * An {@link InternalTypeEnumeration} provides an enumeration of all
  * types listed in a given internal descriptor or signature of a class, a
  * method, or a field.
- *
+ * <p/>
  * The leading formal type parameters, if any, can be retrieved separately.
- *
+ * <p/>
  * The return type of a method descriptor can also be retrieved separately.
  *
  * @author Eric Lafortune

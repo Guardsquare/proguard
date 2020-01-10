@@ -18,8 +18,8 @@
 package proguard.util;
 
 /**
- * This StringFunction delegates a given String to one of two other StringFunctions, depending on
- * whether it matches the given filter.
+ * This {@link StringFunction} delegates a given String to one of two other {@link StringFunction}
+ * instances, depending on whether it matches the given filter.
  *
  * @author Tim Van Den Broecke
  */

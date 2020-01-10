@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This ReferenceValue represents a partially evaluated array. It has an array
+ * This {@link ReferenceValue} represents a partially evaluated array. It has an array
  * length and possibly array values (up to a fixed maximum number). It is not
  * immutable.
  *

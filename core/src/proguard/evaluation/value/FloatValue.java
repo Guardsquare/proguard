@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.*;
 
 /**
- * This class represents a partially evaluated float value.
+ * Representation of a partially evaluated float value.
  *
  * @author Eric Lafortune
  */

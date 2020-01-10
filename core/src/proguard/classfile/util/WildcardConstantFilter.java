@@ -23,7 +23,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This ConstantVisitor delegates to a given constant visitor, except for
+ * This {@link ConstantVisitor} delegates to a given constant visitor, except for
  * constants that contain wildcards (indices larger than 0xffff).
  *
  * @see InstructionSequenceMatcher

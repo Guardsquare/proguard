@@ -28,9 +28,9 @@ import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 
 /**
- * This ClassVisitor replaces array initialization instructions with optimized
+ * This {@link ClassVisitor} replaces array initialization instructions with optimized
  * primitive array constants.
- *
+ * <p/>
  * These constants are not supported by any Java specification and therefore
  * only for internal use.
  *

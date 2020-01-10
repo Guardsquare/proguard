@@ -20,7 +20,7 @@ package proguard.util;
 import proguard.classfile.TypeConstants;
 
 /**
- * This StringParser can create StringMatcher instances for regular expressions
+ * This {@link StringParser} can create {@link StringMatcher} instances for regular expressions
  * matching internal class names (or descriptors containing class names).
  * The regular expressions can contain the following wildcards:
  * '%'     for a single internal primitive type character (V, Z, B, C, S, I, F,

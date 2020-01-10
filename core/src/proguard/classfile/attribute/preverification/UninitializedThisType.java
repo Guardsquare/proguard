@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisitor;
 
 /**
- * This VerificationType represents a UninitializedThis type.
+ * This {@link VerificationType} represents an <code>UninitializedThis</code> type.
  *
  * @author Eric Lafortune
  */

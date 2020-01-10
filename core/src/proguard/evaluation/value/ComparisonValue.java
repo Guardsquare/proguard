@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This IntegerValue represents the result of a comparisons of two scalar
+ * This {@link IntegerValue} represents the result of a comparisons of two scalar
  * values.
  *
  * @author Eric Lafortune

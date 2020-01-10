@@ -23,9 +23,9 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This ConstantVisitor adds all constants that it visits to the constant pool
+ * This {@link ConstantVisitor} adds all constants that it visits to the constant pool
  * of a given target class.
- *
+ * <p/>
  * Bootstrap methods attributes are automatically updated for invokedynamic
  * constants.
  *

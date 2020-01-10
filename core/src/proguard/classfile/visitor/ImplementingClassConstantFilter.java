@@ -23,8 +23,8 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>ConstantVisitor</code> delegates its visits to class constants
- * to another given <code>ConstantVisitor</code>, except for classes that
+ * This {@link ConstantVisitor} delegates its visits to class constants
+ * to another given {@link ConstantVisitor}, except for classes that
  * are extended or implemented by a given class. This exception includes the
  * class itself.
  *

@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisitor;
 
 /**
- * This VerificationType represents a Float type.
+ * This {@link VerificationType} represents a <code>Float</code> type.
  *
  * @author Eric Lafortune
  */

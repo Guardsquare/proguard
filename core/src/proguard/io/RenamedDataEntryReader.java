@@ -24,10 +24,10 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * This DataEntryReader delegates to another DataEntryReader, renaming the
+ * This {@link DataEntryReader} delegates to another {@link DataEntryReader}, renaming the
  * data entries based on the given string function. Entries whose name are
  * transformed to null or an empty string are passed to an optional
- * alternative DataEntryReader.
+ * alternative {@link DataEntryReader}.
  *
  * @author Eric Lafortune
  */

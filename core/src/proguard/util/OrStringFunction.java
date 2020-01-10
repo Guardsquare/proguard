@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction tests whether strings match either given StringFunction
+ * This {@link StringFunction} tests whether strings match either given {@link StringFunction}
  * instances, returning the first non-null result.
  *
  * @author Eric Lafortune

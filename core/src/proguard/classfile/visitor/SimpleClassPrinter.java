@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 
 
 /**
- * This <code>ClassVisitor</code> and <code>MemberVisitor</code>
+ * This {@link ClassVisitor} and {@link MemberVisitor}
  * prints out the class names of the classes it visits, and the full class
  * member descriptions of the class members it visits. The names are printed
  * in a readable, Java-like format. The access modifiers can be included or not.

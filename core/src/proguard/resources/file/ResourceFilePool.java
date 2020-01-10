@@ -23,8 +23,8 @@ import proguard.util.*;
 import java.util.*;
 
 /**
- * Represents a set of resource files. They can be enumerated or retrieved by name. They can also be accessed by means
- * of resource file visitors.
+ * This is a set of {@link ResourceFile} instances. They can be enumerated or
+ * retrieved by name. They can also be accessed by means of resource file visitors.
  *
  * @author Johan Leys
  */

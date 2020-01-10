@@ -22,7 +22,7 @@ import kotlinx.metadata.*;
 import java.util.*;
 
 /**
- * KotlinFlags represent a collection of flags in the metadata.
+ * {@link KotlinFlags} represent a collection of flags in the metadata.
  * When implementing this interface, it is only expected that you override getOwnProperties().
  * If you have any children you also need to implement getChildren()
  */

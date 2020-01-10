@@ -25,8 +25,8 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This InstructionVisitor writes out the instructions that it visits,
- * collecting instructions that have to be widened. As an AttributeVisitor,
+ * This {@link InstructionVisitor} writes out the instructions that it visits,
+ * collecting instructions that have to be widened. As an {@link AttributeVisitor},
  * it then applies the collected changes. The process will be repeated
  * recursively, if necessary. The caller still has to update the frame sizes.
  *

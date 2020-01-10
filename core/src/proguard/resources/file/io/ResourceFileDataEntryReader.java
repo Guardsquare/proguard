@@ -25,8 +25,8 @@ import java.io.*;
 import java.util.*;
 
 /**
- * This DataEntryReader creates plain ResourceFile instances for the data
- * entries that it reads, and passes them to the given resource file visitor.
+ * This {@link DataEntryReader} creates plain {@link ResourceFile} instances for the data
+ * entries that it reads, and passes them to the given {@link ResourceFileVisitor}.
  *
  * @author Eric Lafortune
  */

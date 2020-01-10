@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction tests whether the first given StringFunction
+ * This {@link StringFunction} tests whether the first given {@link StringFunction}
  * returns null, returning the result of the latter function if so,
  * or null otherwise.
  *

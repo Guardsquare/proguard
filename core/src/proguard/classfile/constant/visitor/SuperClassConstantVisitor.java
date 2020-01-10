@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor lets a given ConstantVisitor visit all the constant pool
+ * This {@link ClassVisitor} lets a given {@link ConstantVisitor} visit all the constant pool
  * entries of the super class and interfaces of the program classes it visits.
  *
  * @author Eric Lafortune

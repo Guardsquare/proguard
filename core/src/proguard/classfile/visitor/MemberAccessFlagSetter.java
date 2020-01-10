@@ -20,7 +20,7 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>MemberVisitor</code> sets the specified access flags of the
+ * This {@link MemberVisitor} sets the specified access flags of the
  * program class members that it visits.
  *
  * @see ClassConstants

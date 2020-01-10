@@ -23,7 +23,7 @@ import proguard.util.StringFunction;
 import java.io.*;
 
 /**
- * This DataEntryWriter delegates to another DataEntryWriter, renaming the
+ * This {@link DataEntryWriter} delegates to another {@link DataEntryWriter}, renaming the
  * data entries with the given string function.
  *
  * @author Eric Lafortune

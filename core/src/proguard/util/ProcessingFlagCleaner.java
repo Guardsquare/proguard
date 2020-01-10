@@ -22,9 +22,8 @@ import proguard.classfile.visitor.*;
 import proguard.resources.file.visitor.ResourceFileVisitor;
 
 /**
- * This visitor clears the specified processing flags of the entities that it visits.
- *
- * @see ProcessingFlags
+ * This visitor clears the specified processing flags of the {@link Processable}
+ * instances that it visits.
  *
  * @author Johan Leys
  */

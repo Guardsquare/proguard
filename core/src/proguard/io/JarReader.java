@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.zip.*;
 
 /**
- * This DataEntryReader lets a given DataEntryReader read all data entries of
+ * This {@link DataEntryReader} lets a given {@link DataEntryReader} read all data entries of
  * the read archive data entries.
  *
  * @author Eric Lafortune

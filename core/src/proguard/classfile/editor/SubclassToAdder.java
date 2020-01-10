@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor adds all classes that it visits to the list of subclasses
+ * This {@link ClassVisitor} adds all classes that it visits to the list of subclasses
  * of the given target class.
  *
  * @author Eric Lafortune

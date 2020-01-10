@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.evaluation.ReferenceTracingValueFactory;
 
 /**
- * This ReferenceValue represents a reference value that is tagged with a trace
+ * This {@link ReferenceValue} represents a reference value that is tagged with a trace
  * value.
  *
  * @author Eric Lafortune

@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This ArrayReferenceValue represents an array reference value that is
+ * This {@link ArrayReferenceValue} represents an array reference value that is
  * identified by a unique ID.
  *
  * @author Eric Lafortune

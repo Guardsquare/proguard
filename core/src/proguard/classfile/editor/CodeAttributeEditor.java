@@ -34,9 +34,9 @@ import proguard.util.ArrayUtil;
 import java.util.*;
 
 /**
- * This AttributeVisitor accumulates specified changes to code, and then applies
+ * This {@link AttributeVisitor} accumulates specified changes to code, and then applies
  * these accumulated changes to the code attributes that it visits.
- *
+ * <p/>
  * The class also supports labels ({@link #label()}) and exception handlers
  * ({@link #catch_(int,int,int)}) in replacement sequences. They provide
  * local branch offsets inside the replacement sequences

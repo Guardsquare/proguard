@@ -23,7 +23,7 @@ import proguard.classfile.visitor.ClassVisitor;
 import java.util.*;
 
 /**
- * This ClassVisitor sorts the class members of the classes that it visits.
+ * This {@link ClassVisitor} sorts the class members of the classes that it visits.
  * The sorting order is based on the access flags, the names, and the
  * descriptors.
  *

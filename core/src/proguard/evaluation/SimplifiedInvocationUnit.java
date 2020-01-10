@@ -27,7 +27,7 @@ import proguard.classfile.visitor.*;
 import proguard.evaluation.value.*;
 
 /**
- * This InvocationUnit sets up the variables for entering a method,
+ * This {@link InvocationUnit} sets up the variables for entering a method,
  * and it updates the stack for the invocation of a class member,
  * using simple values.
  *

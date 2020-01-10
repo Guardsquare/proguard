@@ -23,7 +23,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.util.Counter;
 
 /**
- * This ConstantVisitor counts the number of constants that have been visited.
+ * This {@link ConstantVisitor} counts the number of constants that have been visited.
  *
  * @author Eric Lafortune
  */

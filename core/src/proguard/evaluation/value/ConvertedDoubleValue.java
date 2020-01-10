@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This DoubleValue represents a double value that is converted from another
+ * This {@link DoubleValue} represents a double value that is converted from another
  * scalar value.
  *
  * @author Eric Lafortune

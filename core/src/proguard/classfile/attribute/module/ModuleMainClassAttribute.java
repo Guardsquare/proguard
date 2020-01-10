@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This Attribute represents a main class attribute.
+ * This {@link Attribute} represents a main class attribute.
  *
  * @author Joachim Vandersmissen
  */

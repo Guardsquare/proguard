@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.util.Counter;
 
 /**
- * This MemberVisitor counts the number of class members that have been visited.
+ * This {@link MemberVisitor} counts the number of class members that have been visited.
  *
  * @author Eric Lafortune
  */

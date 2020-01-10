@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This MemberVisitor lets a given ClassVisitor visit all the classes
+ * This {@link MemberVisitor} lets a given {@link ClassVisitor} visit all the classes
  * referenced by the descriptors of the class members that it visits.
  *
  * @author Eric Lafortune

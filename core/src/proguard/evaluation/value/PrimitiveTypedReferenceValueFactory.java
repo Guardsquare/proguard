@@ -21,8 +21,8 @@ import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 
 /**
- * This class provides methods to create and reuse Value objects.
- * Its ReferenceValue objects have types if they represent primitive arrays.
+ * This class provides methods to create and reuse Value instances.
+ * Its {@link ReferenceValue} instances have types if they represent primitive arrays.
  *
  * @author Eric Lafortune
  */

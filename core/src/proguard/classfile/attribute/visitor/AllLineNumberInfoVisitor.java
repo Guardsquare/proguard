@@ -22,8 +22,8 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given LineNumberInfoVisitor visit all line numbers
- * of the LineNumberTableAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link LineNumberInfoVisitor} visit all line numbers
+ * of the {@link LineNumberTableAttribute} instances it visits.
  *
  * @author Eric Lafortune
  */

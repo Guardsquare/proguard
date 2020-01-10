@@ -25,7 +25,7 @@ import proguard.classfile.instruction.ConstantInstruction;
 import proguard.evaluation.value.*;
 
 /**
- * This InvocationUnit tags reference values of retrieved fields, passed method
+ * This {@link InvocationUnit} tags reference values of retrieved fields, passed method
  * parameters, method return values, and caught exceptions, so they can be
  * traced throughout the execution of a method. The tags are instruction offsets
  * or parameter indices (not parameter offsets).

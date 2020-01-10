@@ -22,7 +22,7 @@ import proguard.classfile.visitor.ClassVisitor;
 import proguard.util.SimpleProcessable;
 
 /**
- * Representation of an Local Variable table entry.
+ * Representation of a local variable table entry.
  *
  * @author Eric Lafortune
  */

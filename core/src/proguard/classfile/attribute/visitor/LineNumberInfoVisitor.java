@@ -23,8 +23,8 @@ import proguard.classfile.attribute.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>LineNumberInfo</code> objects. Note that there is only a single
- * implementation of <code>LineNumberInfo</code>, such that this interface
+ * {@link LineNumberInfo} instances. Note that there is only a single
+ * implementation of {@link LineNumberInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

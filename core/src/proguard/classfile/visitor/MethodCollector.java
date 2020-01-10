@@ -23,7 +23,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import java.util.Collection;
 
 /**
- * This <code>MemberVisitor</code> collects the methods that it visits in the
+ * This {@link MemberVisitor} collects the methods that it visits in the
  * given collection.
  *
  * @author Johan Leys

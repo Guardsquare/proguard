@@ -37,7 +37,7 @@ import java.util.*;
 import static proguard.classfile.kotlin.KotlinConstants.TYPE_KOTLIN_JVM_JVMNAME;
 
 /**
- * This ClassVisitor fixes references of constant pool entries, fields,
+ * This {@link ClassVisitor} fixes references of constant pool entries, fields,
  * methods, attributes and kotlin metadata to classes whose names have
  * changed. Descriptors of member references are not updated yet.
  *

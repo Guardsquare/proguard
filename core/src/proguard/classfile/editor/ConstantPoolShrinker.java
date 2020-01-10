@@ -37,7 +37,7 @@ import proguard.util.Processable;
 import java.util.Arrays;
 
 /**
- * This ClassVisitor removes all unused entries from the constant pool.
+ * This {@link ClassVisitor} removes all unused entries from the constant pool.
  *
  * @author Eric Lafortune
  */

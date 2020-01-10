@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringMatcher matches any string or no string at all.
+ * This {@link StringMatcher} matches any string or no string at all.
  *
  * @author Eric Lafortune
  */

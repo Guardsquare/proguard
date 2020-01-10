@@ -27,7 +27,7 @@ import proguard.classfile.visitor.ClassVisitor;
 import java.util.Arrays;
 
 /**
- * This ClassVisitor sorts the interfaces of the program classes that it visits.
+ * This {@link ClassVisitor} sorts the interfaces of the program classes that it visits.
  *
  * @author Eric Lafortune
  */

@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a source directory attribute.
+ * This {@link Attribute} represents a source directory attribute.
  *
  * @author Eric Lafortune
  */

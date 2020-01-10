@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 
 /**
- * This ElementValue represents an array element value.
+ * This {@link ElementValue} represents an array element value.
  *
  * @author Eric Lafortune
  */

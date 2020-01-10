@@ -23,8 +23,8 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 /**
- * This ClassVisitor, MemberVisitor, and AttributeVisitor lets a given
- * AttributeVisitor visit all Attribute objects of the program classes,
+ * This {@link ClassVisitor}, {@link MemberVisitor}, and {@link AttributeVisitor} lets a given
+ * {@link AttributeVisitor} visit all Attribute instances of the program classes,
  * program class members, or code attributes, respectively, that it visits.
  *
  * @author Eric Lafortune

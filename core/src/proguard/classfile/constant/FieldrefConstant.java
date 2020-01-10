@@ -22,7 +22,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This Constant represents a field reference constant in the constant pool.
+ * This {@link Constant} represents a field reference constant in the constant pool.
  *
  * @author Eric Lafortune
  */

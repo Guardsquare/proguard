@@ -20,8 +20,8 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This visitor clears the specified access flags of the
- * program classes and class members that its visits.
+ * This {@link ClassVisitor} and {@link MemberVisitor} clears the specified
+ * access flags of the classes and class members that its visits.
  *
  * @see ClassConstants
  *

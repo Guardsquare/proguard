@@ -30,11 +30,11 @@ import proguard.util.Processable;
 import java.util.Arrays;
 
 /**
- * This ClassVisitor removes all unused entries from the bootstrap method attribute.
- *
- * If all bootstrap methods are removed, it also removes the BootstrapMethodsAttribute from
- * the visited class. Additionally, the java/lang/MethodHandles$Lookup class will be
- * removed from the InnerClasses attribute and the InnerClassesAttribute will be removed if
+ * This {@link ClassVisitor} removes all unused entries from the bootstrap method attribute.
+ * <p/>
+ * If all bootstrap methods are removed, it also removes the {@link BootstrapMethodsAttribute} from
+ * the visited class. Additionally, the <code>java/lang/MethodHandles$Lookup</code> class will be
+ * removed from the {@link InnerClassesAttribute}, and the {@link InnerClassesAttribute} will be removed if
  * it was the only entry.
  *
  * @author Tim Van Den Broecke

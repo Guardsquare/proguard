@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.evaluation.value.InstructionOffsetValue;
 
 /**
- * This BranchUnit remembers the branch unit commands that are invoked on it.
+ * This {@link BranchUnit} remembers the branch unit commands that are invoked on it.
  * It doesn't consider conditions when branching.
  *
  * @author Eric Lafortune

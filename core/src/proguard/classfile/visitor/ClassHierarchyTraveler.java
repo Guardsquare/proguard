@@ -21,7 +21,7 @@ import proguard.classfile.*;
 
 
 /**
- * This <code>ClassVisitor</code> lets a given <code>ClassVisitor</code>
+ * This {@link ClassVisitor} lets a given {@link ClassVisitor}
  * optionally travel to the visited class, its superclass, its interfaces, and
  * its subclasses.
  *

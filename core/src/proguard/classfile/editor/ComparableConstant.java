@@ -25,8 +25,8 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This class is a <code>Comparable</code> wrapper of <code>Constant</code>
- * objects. It can store an index, in order to identify the constant pool
+ * This class is a {@link Comparable} wrapper of {@link Constant}
+ * instances. It can store an index, in order to identify the constant pool
  * entry after it has been sorted. The comparison is primarily based on the
  * types of the constant pool entries, and secondarily on the contents of
  * the constant pool entries.

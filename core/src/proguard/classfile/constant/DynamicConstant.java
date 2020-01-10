@@ -22,7 +22,7 @@ import proguard.classfile.constant.visitor.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This Constant represents a dynamic constant in the constant pool.
+ * This {@link Constant} represents a dynamic constant in the constant pool.
  *
  * @author Eric Lafortune
  */

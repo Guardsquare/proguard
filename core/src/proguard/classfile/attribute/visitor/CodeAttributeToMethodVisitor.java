@@ -25,7 +25,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This AttributeVisitor lets a given MemberVisitor visit all methods whose code attribute is visited.
+ * This {@link AttributeVisitor} lets a given {@link MemberVisitor} visit all methods whose code attribute is visited.
  *
  * @author Johan Leys
  */

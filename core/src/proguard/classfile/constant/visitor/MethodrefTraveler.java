@@ -22,7 +22,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ConstantVisitor travels from any method handle constants that it visits
+ * This {@link ConstantVisitor} travels from any method handle constants that it visits
  * to their methodref constants, and applies a given constant visitor.
  *
  * @author Eric Lafortune

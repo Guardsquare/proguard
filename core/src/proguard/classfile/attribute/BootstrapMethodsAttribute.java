@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.visitor.*;
 
 /**
- * This Attribute represents a bootstrap methods attribute.
+ * This {@link Attribute} represents a bootstrap methods attribute.
  *
  * @author Eric Lafortune
  */

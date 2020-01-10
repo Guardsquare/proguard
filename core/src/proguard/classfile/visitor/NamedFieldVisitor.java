@@ -21,7 +21,7 @@ import proguard.classfile.*;
 
 
 /**
- * This class visits ProgramMember objects referring to fields, identified by
+ * This class visits {@link ProgramMember} instances referring to fields, identified by
  * a name and descriptor pair.
  *
  * @author Eric Lafortune

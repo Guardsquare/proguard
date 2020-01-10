@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This interface provides methods to create Value objects.
+ * This interface provides methods to create {@link Value} instances.
  *
  * @author Eric Lafortune
  */

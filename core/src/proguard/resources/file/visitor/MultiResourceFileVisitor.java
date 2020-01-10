@@ -22,7 +22,7 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This ResourceFileVisitor delegates all visits to all ResourceFileVisitor
+ * This {@link ResourceFileVisitor} delegates all visits to all {@link ResourceFileVisitor}
  * instances in the given list.
  *
  * @author Johan Leys

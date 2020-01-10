@@ -24,7 +24,7 @@ import proguard.classfile.visitor.ClassVisitor;
 
 
 /**
- * This AnnotationVisitor delegates all visits to a given ClassVisitor.
+ * This {@link AnnotationVisitor} delegates all visits to a given {@link ClassVisitor}.
  * The latter visits the class of each visited annotation, although
  * never twice in a row.
  *

@@ -23,7 +23,7 @@ import proguard.classfile.attribute.preverification.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>VerificationType</code> objects. There a methods for stack entries
+ * {@link VerificationType} instances. There a methods for stack entries
  * and methods for variable entries.
  *
  * @author Eric Lafortune

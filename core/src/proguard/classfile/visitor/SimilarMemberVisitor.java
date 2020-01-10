@@ -20,7 +20,7 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>MemberVisitor</code> lets a given <code>MemberVisitor</code>
+ * This {@link MemberVisitor} lets a given {@link MemberVisitor}
  * visit all members that have the same name and type as the visited methods
  * in the class hierarchy of the members' classes or of a given target class.
  *

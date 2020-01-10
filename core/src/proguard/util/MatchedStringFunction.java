@@ -18,8 +18,8 @@
 package proguard.util;
 
 /**
- * This StringFunction returns the most recently matched string of a given
- * VariableStringMatcher.
+ * This {@link StringFunction} returns the most recently matched string of a given
+ * {@link VariableStringMatcher}.
  *
  * @author Eric Lafortune
  */

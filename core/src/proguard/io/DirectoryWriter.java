@@ -22,7 +22,7 @@ import proguard.classfile.TypeConstants;
 import java.io.*;
 
 /**
- * This DataEntryWriter writes data entries to individual files in a given
+ * This {@link DataEntryWriter} writes data entries to individual files in a given
  * directory.
  *
  * @author Eric Lafortune

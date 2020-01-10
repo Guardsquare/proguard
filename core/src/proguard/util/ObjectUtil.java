@@ -19,7 +19,7 @@
 package proguard.util;
 
 /**
- * This class contains utility methods operating on objects.
+ * This class contains utility methods operating on instances.
  */
 public class ObjectUtil
 {

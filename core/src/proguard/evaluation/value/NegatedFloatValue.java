@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This FloatValue represents a float value that is negated.
+ * This {@link FloatValue} represents a float value that is negated.
  *
  * @author Eric Lafortune
  */

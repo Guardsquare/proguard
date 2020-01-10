@@ -22,8 +22,8 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.util.SimpleProcessable;
 
 /**
- * This abstract class represents an entry in the ConstantPool. Specific types
- * of entries are subclassed from it.
+ * This abstract class represents an entry in the constant pool of a class.
+ * Specific types of entries are subclassed from it.
  *
  * @author Eric Lafortune
  */

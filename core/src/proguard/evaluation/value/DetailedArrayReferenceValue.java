@@ -22,7 +22,7 @@ import proguard.classfile.util.ClassUtil;
 import proguard.util.ArrayUtil;
 
 /**
- * This IdentifiedArrayReferenceValue represents an identified array reference
+ * This {@link IdentifiedArrayReferenceValue} represents an identified array reference
  * value with its elements.
  *
  * @author Eric Lafortune

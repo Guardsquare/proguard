@@ -24,14 +24,14 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given RequiresInfoVisitor visit all
- * RequiresInfo objects of the ModuleAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link RequiresInfoVisitor} visit all
+ * {@link RequiresInfo} instances of the {@link ModuleAttribute} instances it visits.
  *
  * @author Joachim Vandersmissen
  */
 public class AllRequiresInfoVisitor
-extends SimplifiedVisitor
-    implements AttributeVisitor
+extends      SimplifiedVisitor
+implements   AttributeVisitor
 {
     private final RequiresInfoVisitor requiresInfoVisitor;
 

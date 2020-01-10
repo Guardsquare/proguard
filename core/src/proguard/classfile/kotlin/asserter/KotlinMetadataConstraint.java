@@ -22,9 +22,9 @@ import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.classfile.kotlin.visitors.*;
 
 /**
- * Implementations of this class represent a conceptual constraint on KotlinMetadata.
+ * Implementations of this class represent a conceptual constraint on {@link KotlinMetadata}.
  *
- * A KotlinMetadataConstraint is checked in the context of ClassPools and a specific KotlinMetadata
+ * A {@link KotlinMetadataConstraint} is checked in the context of {@link ClassPools} and a specific {@link KotlinMetadata}
  * instance, and should report its findings to the passed Reporter.
  */
 @FunctionalInterface

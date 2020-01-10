@@ -23,9 +23,9 @@ import java.io.*;
 import java.nio.charset.Charset;
 
 /**
- * This DataEntryReader writes the resource data entries that it reads to a
- * given DataEntryWriter, updating their contents based on the renamed classes
- * in the given ClassPool.
+ * This {@link DataEntryReader} writes the resource data entries that it reads to a
+ * given {@link DataEntryWriter}, updating their contents based on the renamed classes
+ * in the given {@link ClassPool}.
  *
  * @author Eric Lafortune
  */

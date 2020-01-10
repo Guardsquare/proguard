@@ -28,7 +28,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
 /**
- * This ClassVisitor fixes constant pool field and method references to fields
+ * This {@link ClassVisitor} fixes constant pool field and method references to fields
  * and methods whose names or descriptors have changed.
  *
  * @author Eric Lafortune

@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This class represents a partially evaluated double value.
+ * {@link DoubleValue} that is unknown.
  *
  * @author Eric Lafortune
  */

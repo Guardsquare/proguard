@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor;
 
 /**
- * This StackMapFrame represents an "chop frame".
+ * This {@link StackMapFrame} represents an "chop frame".
  *
  * @author Eric Lafortune
  */

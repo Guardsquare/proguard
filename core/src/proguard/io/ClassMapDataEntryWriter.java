@@ -26,13 +26,13 @@ import java.util.Iterator;
 
 
 /**
- * This DataEntryWriter writes a class mapping to the given data entry, used
+ * This {@link DataEntryWriter} writes a class mapping to the given data entry, used
  * for debugging of the configuration.
- *
+ * <p/>
  * Syntax of the mapping file (one line per class):
- *
+ * <p/>
  * originalClassName,newClassName,hasObfuscatedMethods,hasObfuscatedFields
- *
+ * <p/>
  * hasObfuscatedMethods and hasObfuscatedFields can either take the value
  * 0 (false) or 1 (true).
  *

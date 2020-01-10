@@ -22,7 +22,7 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This ClassVisitor delegates all visits to each ClassVisitor
+ * This {@link ClassVisitor} delegates all visits to each {@link ClassVisitor}
  * in a given list.
  *
  * @author Eric Lafortune

@@ -24,7 +24,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This AttributeVisitor lets a given instruction visitor edit the code
+ * This {@link AttributeVisitor} lets a given instruction visitor edit the code
  * attributes that it visits. The instruction visitor can use a given
  * (optional) branch target finder and code attribute editor, which this
  * class sets up and applies, for convenience.

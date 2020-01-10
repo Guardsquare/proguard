@@ -37,8 +37,8 @@ import proguard.io.RuntimeDataOutput;
 import java.io.*;
 
 /**
- * This ClassVisitor writes out the ProgramClass objects that it visits to the
- * given DataOutput object.
+ * This {@link ClassVisitor} writes out the {@link ProgramClass} instances that it visits to the
+ * given {@link DataOutput} object.
  *
  * @author Eric Lafortune
  */

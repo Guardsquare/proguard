@@ -22,8 +22,8 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given InnerClassesInfoVisitor visit all
- * InnerClassessInfo objects of the InnerClassesAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link InnerClassesInfoVisitor} visit all
+ * {@link InnerClassesInfo} instances of the {@link InnerClassesAttribute} instances it visits.
  *
  * @author Eric Lafortune
  */

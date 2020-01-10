@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisitor;
 
 /**
- * This VerificationType represents a Null type.
+ * This {@link VerificationType} represents a <code>Null</code> type.
  *
  * @author Eric Lafortune
  */

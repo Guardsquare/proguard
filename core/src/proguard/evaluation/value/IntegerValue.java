@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.TypeConstants;
 
 /**
- * This class represents a partially evaluated integer value.
+ * Representation of a partially evaluated integer value.
  *
  * @author Eric Lafortune
  */

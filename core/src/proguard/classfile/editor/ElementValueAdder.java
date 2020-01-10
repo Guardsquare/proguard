@@ -23,8 +23,8 @@ import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.util.ArrayUtil;
 
 /**
- * This AnnotationVisitor adds all element values that it visits to the given
- * target annotation default attribute, annotation, or element value.
+ * This {@link ElementValueVisitor} adds all element values that it visits to
+ * the given target annotation default attribute, annotation, or element value.
  *
  * @author Eric Lafortune
  */

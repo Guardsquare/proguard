@@ -28,7 +28,7 @@ import proguard.classfile.visitor.ReferencedClassVisitor;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor adds all attributes that it visits to the given
+ * This {@link AttributeVisitor} adds all attributes that it visits to the given
  * target class, class member, or attribute.
  *
  * @author Eric Lafortune

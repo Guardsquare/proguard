@@ -18,8 +18,8 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings does not match the given
- * StringMatcher.
+ * This {@link StringMatcher} tests whether strings does not match the given
+ * {@link StringMatcher}.
  *
  * @author Eric Lafortune
  */

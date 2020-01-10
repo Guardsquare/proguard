@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.*;
 
 /**
- * This KotlinMetadataVisitor lets a given KotlinPropertyVisitor visit all properties
+ * This {@link KotlinMetadataVisitor} lets a given {@link KotlinPropertyVisitor} visit all properties
  * (regular and delegated) of visited KotlinDeclarationContainerMetadata.
  */
 public class AllKotlinPropertiesVisitor

@@ -25,8 +25,8 @@ import proguard.util.*;
 import java.util.List;
 
 /**
- * This <code>AnnotationVisitor</code> delegates its visits to another given
- * <code>AnnotationVisitor</code>, but only when the visited annotation has
+ * This {@link AnnotationVisitor} delegates its visits to another given
+ * {@link AnnotationVisitor}, but only when the visited annotation has
  * a type that matches a given regular expression.
  *
  * @author Eric Lafortune

@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This LongValue represents the result of a binary operation on two long
+ * This {@link LongValue} represents the result of a binary operation on two long
  * values.
  *
  * @author Eric Lafortune

@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings are empty.
+ * This {@link StringMatcher} tests whether strings are empty.
  *
  * @author Eric Lafortune
  */

@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction adds a prefix in front of each transformed String.
+ * This {@link StringFunction} adds a prefix in front of each transformed String.
  *
  * @author Johan Leys
  */

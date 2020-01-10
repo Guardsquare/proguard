@@ -22,7 +22,7 @@ import proguard.classfile.*;
 import java.util.Stack;
 
 /**
- * A <code>DescriptorClassEnumeration</code> provides an enumeration of all
+ * A {@link DescriptorClassEnumeration} provides an enumeration of all
  * classes mentioned in a given descriptor or signature.
  *
  * @author Eric Lafortune

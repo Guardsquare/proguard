@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This FloatValue represents the result of a binary operation on two float
+ * This {@link FloatValue} represents the result of a binary operation on two float
  * values.
  *
  * @author Eric Lafortune

@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.*;
 
 /**
- * This KotlinMetadataVisitor lets a given KotlinConstructorVisitor visit all constructors of visited KotlinMetadata.
+ * This {@link KotlinMetadataVisitor} lets a given {@link KotlinConstructorVisitor} visit all constructors of visited {@link KotlinMetadata}.
  */
 public class   AllConstructorsVisitor
     implements KotlinMetadataVisitor

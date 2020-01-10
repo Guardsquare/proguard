@@ -25,8 +25,8 @@ import proguard.classfile.visitor.ClassVisitor;
 import java.io.*;
 
 /**
- * This ClassVisitor writes out the ProgramClass objects that it visits to the
- * given DataEntry, modified to have the correct name.
+ * This {@link ClassVisitor} writes out the {@link ProgramClass} instances that it visits to the
+ * given {@link DataEntry}, modified to have the correct name.
  *
  * @author Eric Lafortune
  */

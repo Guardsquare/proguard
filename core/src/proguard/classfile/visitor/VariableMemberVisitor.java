@@ -21,7 +21,7 @@ import proguard.classfile.*;
 
 
 /**
- * This MemberVisitor     delegates all method calls to a MemberVisitor
+ * This {@link MemberVisitor} delegates all method calls to a {@link MemberVisitor}
  * that can be changed at any time.
  *
  * @author Eric Lafortune

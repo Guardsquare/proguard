@@ -22,7 +22,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This Attribute represents a nest host attribute.
+ * This {@link Attribute} represents a nest host attribute.
  *
  * @author Eric Lafortune
  */

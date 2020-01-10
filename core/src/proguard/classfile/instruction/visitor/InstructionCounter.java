@@ -23,7 +23,7 @@ import proguard.classfile.instruction.Instruction;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This InstructionVisitor counts the number of instructions that has been visited.
+ * This {@link InstructionVisitor} counts the number of instructions that has been visited.
  *
  * @author Eric Lafortune
  */

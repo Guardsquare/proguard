@@ -23,8 +23,8 @@ import proguard.classfile.attribute.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>LocalVariableInfo</code> objects. Note that there is only a single
- * implementation of <code>LocalVariableInfo</code>, such that this interface
+ * {@link LocalVariableInfo} instances. Note that there is only a single
+ * implementation of {@link LocalVariableInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

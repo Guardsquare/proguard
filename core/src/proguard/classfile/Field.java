@@ -20,7 +20,7 @@ package proguard.classfile;
 
 
 /**
- * Representation of a field from a class.
+ * Representation of a field in a class.
  *
  * @author Eric Lafortune
  */

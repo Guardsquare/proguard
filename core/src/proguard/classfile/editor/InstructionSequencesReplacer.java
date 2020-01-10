@@ -23,8 +23,8 @@ import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.BranchTargetFinder;
 
 /**
- * This InstructionVisitor replaces multiple instruction sequences at once.
- *
+ * This {@link InstructionVisitor} replaces multiple instruction sequences at once.
+ * <p/>
  * The replacement sequences are optional, defaulting to the empty sequence,
  * to delete the matched pattern sequences.
  *

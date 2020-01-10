@@ -36,7 +36,7 @@ import proguard.classfile.visitor.*;
 import java.util.Arrays;
 
 /**
- * This ClassVisitor remaps all possible references to constant pool entries
+ * This {@link ClassVisitor} remaps all possible references to constant pool entries
  * of the classes that it visits, based on a given index map. It is assumed that
  * the constant pool entries themselves have already been remapped.
  *

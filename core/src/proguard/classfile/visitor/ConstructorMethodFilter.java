@@ -27,7 +27,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This MemberVisitor delegates its visits to one of three delegates, depending on whether the visited method is:
+ * This {@link MemberVisitor} delegates its visits to one of three delegates, depending on whether the visited method is:
  *
  * - a constructor
  * - a constructor that calls a super constructor

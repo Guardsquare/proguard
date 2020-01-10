@@ -20,10 +20,10 @@ package proguard.util;
 import java.util.*;
 
 /**
- * This utility class creates and manages StringMatcher instances that
+ * This utility class creates and manages {@link StringMatcher} instances that
  * (1) match wildcards, and
  * (2) refer back to matched wildcards.
- *
+ * <p/>
  * Each instance represents a scope in which wildcards can be specified
  * and referenced.
  *

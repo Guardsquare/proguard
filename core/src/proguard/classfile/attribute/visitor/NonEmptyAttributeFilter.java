@@ -24,7 +24,7 @@ import proguard.classfile.attribute.module.*;
 import proguard.classfile.attribute.preverification.*;
 
 /**
- * This AttributeVisitor delegates its visits another AttributeVisitor, but
+ * This {@link AttributeVisitor} delegates its visits another {@link AttributeVisitor}, but
  * only when the visited attribute is not empty. For instance, a local variable
  * table without variables is empty.
  *

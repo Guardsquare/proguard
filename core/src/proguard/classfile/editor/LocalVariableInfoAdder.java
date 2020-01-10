@@ -22,7 +22,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.LocalVariableInfoVisitor;
 
 /**
- * This LocalVariableInfoVisitor adds all local variables that it visits to the
+ * This {@link LocalVariableInfoVisitor} adds all local variables that it visits to the
  * given target local variable table attribute.
  */
 public class LocalVariableInfoAdder

@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  * Delegate to another {@link KotlinMetadataVisitor} if the predicate returns true,
  * or if there's no predicate.
  *
- * Note: only for KotlinClassKindMetadata i.e. does not visit synthetic classes.
+ * Note: only for {@link KotlinClassKindMetadata} i.e. does not visit synthetic classes.
  *
  * For example, visit only abstract classes:
  *

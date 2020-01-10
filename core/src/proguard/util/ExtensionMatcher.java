@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings end in a given extension, ignoring
+ * This {@link StringMatcher} tests whether strings end in a given extension, ignoring
  * its case.
  *
  * @author Eric Lafortune

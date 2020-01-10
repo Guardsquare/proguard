@@ -195,7 +195,7 @@ public class ArrayInitializationMatcher
 
     /**
      * Returns the offset to skip to after a new-array instruction.
-     * <p>
+     * <p/>
      * This is a work-around for code converted by dex2jar. In some
      * cases, after an array has been created, it is immediately
      * stored into a variable and loaded again:

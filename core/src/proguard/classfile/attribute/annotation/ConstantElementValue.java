@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 
 /**
- * This ElementValue represents a constant element value.
+ * This {@link ElementValue} represents a constant element value.
  *
  * @author Eric Lafortune
  */

@@ -23,7 +23,7 @@ import static proguard.classfile.ClassConstants.CLASS_FILE_EXTENSION;
 import static proguard.classfile.util.ClassUtil.internalClassName;
 
 /**
- * DataEntry implementation which loads an input stream from the classpath of
+ * {@link DataEntry} implementation which loads an input stream from the classpath of
  * the running VM.
  *
  * @author Johan Leys

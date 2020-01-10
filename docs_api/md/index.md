@@ -25,7 +25,7 @@ lost when reading, analyzing, and writing them. The data classes contain only
 a minimum number of methods. They do have one or more accept methods to let
 the visitor classes below operate on them.
 
-### Visitors
+### Visitor classes
 
 The library applies the visitor pattern extensively. Visitor classes define
 the operations on the data: reading, writing, editing, transforming,

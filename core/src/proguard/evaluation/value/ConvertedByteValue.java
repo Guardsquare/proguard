@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This IntegerValue represents a byte value that is converted from an
+ * This {@link IntegerValue} represents a byte value that is converted from an
  * integer value.
  *
  * @author Eric Lafortune

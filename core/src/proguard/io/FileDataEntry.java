@@ -22,7 +22,7 @@ import proguard.classfile.TypeConstants;
 import java.io.*;
 
 /**
- * This <code>DataEntry</code> represents a file.
+ * This {@link DataEntry} represents a file.
  *
  * @author Eric Lafortune
  */

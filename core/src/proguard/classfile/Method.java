@@ -20,7 +20,7 @@ package proguard.classfile;
 
 
 /**
- * Representation of a method from a class.
+ * Representation of a method in a class.
  *
  * @author Eric Lafortune
  */

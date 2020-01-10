@@ -21,8 +21,8 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.annotation.*;
 
 /**
- * This interface specifies the methods for a visitor of <code>ElementValue</code>
- * objects.
+ * This interface specifies the methods for a visitor of {@link ElementValue}
+ * instances.
  *
  * @author Eric Lafortune
  */

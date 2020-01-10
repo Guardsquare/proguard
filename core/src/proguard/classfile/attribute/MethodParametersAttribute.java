@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
 
 /**
- * This Attribute represents a method parameters attribute.
+ * This {@link Attribute} represents a method parameters attribute.
  *
  * @author Eric Lafortune
  */

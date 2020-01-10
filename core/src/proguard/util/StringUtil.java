@@ -64,7 +64,7 @@ public class StringUtil
 
     /**
      * Returns the modified UTF-8 byte array representation of the given string.
-     * <p>
+     * <p/>
      * Note: surrogate pairs are encoded separately as three byte values as requested
      * by the modified UTF-8 specification. This method is suited for encoding strings
      * stored in class files, dex files or native libraries.

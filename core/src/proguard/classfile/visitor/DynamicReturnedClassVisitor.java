@@ -23,7 +23,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This ConstantVisitor lets a given ClassVisitor visit all the referenced
+ * This {@link ConstantVisitor} lets a given {@link ClassVisitor} visit all the referenced
  * classes that are returned by the dynamic constants and invoke dynamic
  * constants that it visits.
  *

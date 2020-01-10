@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a runtime invisible parameter annotations attribute.
+ * This {@link Attribute} represents a runtime invisible parameter annotations attribute.
  *
  * @author Eric Lafortune
  */

@@ -27,9 +27,9 @@ import proguard.classfile.util.SimplifiedVisitor;
 
 
 /**
- * This InstructionVisitor lets a given <code>ClassVisitor</code> visit all
+ * This {@link InstructionVisitor} lets a given {@link ClassVisitor} visit all
  * classes involved in any <code>.class</code> constructs that it visits.
- * <p>
+ * <p/>
  * Note that before JDK 1.5, <code>.class</code> constructs are actually
  * compiled differently, using <code>Class.forName</code> constructs.
  *

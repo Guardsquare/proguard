@@ -29,7 +29,7 @@ import proguard.classfile.visitor.MemberVisitor;
 import proguard.util.*;
 
 /**
- * This Clazz is a complete representation of the data in a Java class.
+ * This {@link Clazz} is a complete representation of the data in a Java class.
  *
  * @author Eric Lafortune
  */

@@ -22,8 +22,8 @@ import proguard.classfile.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>ProgramMember</code> objects and <code>LibraryMember</code>
- * objects.
+ * {@link ProgramMember} instances and {@link LibraryMember}
+ * instances.
  *
  * @author Eric Lafortune
  */

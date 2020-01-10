@@ -22,8 +22,8 @@ import proguard.classfile.*;
 
 /**
  * Utility methods for working with access flags. For convenience, this class
- * defines access levels, in ascending order: <code>PRIVATE</code>,
- * <code>PACKAGE_VISIBLE</code>, <code>PROTECTED</code>, and <code>PUBLIC</code>.
+ * defines access levels, in ascending order: {@link #PRIVATE},
+ * {@link #PACKAGE_VISIBLE}, {@link #PROTECTED}, and {@link #PUBLIC}.
  *
  * @author Eric Lafortune
  */

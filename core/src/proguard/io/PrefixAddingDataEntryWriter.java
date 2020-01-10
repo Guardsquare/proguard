@@ -20,7 +20,7 @@ package proguard.io;
 import java.io.*;
 
 /**
- * This DataEntryWriter delegates to a given DataEntryWriter, each time
+ * This {@link DataEntryWriter} delegates to a given {@link DataEntryWriter}, each time
  * adding a prefix of the written data entry name.
  *
  * @author Eric Lafortune

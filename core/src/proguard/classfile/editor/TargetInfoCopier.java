@@ -25,7 +25,7 @@ import proguard.classfile.attribute.annotation.target.visitor.TargetInfoVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This TargetInfoVisitor copies the target info instances that it visits to
+ * This {@link TargetInfoVisitor} copies the target info instances that it visits to
  * the given type annotation (each time overwriting any previous target info).
  *
  * @author Eric Lafortune

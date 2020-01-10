@@ -28,11 +28,11 @@ import java.util.zip.*;
  * output stream for each zip entry that is opened. An entry can be compressed
  * or uncompressed. Uncompressed entries can be aligned to a multiple of a
  * given number of bytes.
- *
+ * <p/>
  * Multiple entries and output streams can be open at the same time. The entries
  * are added to the central directory in the order in which they are opened, but
  * the corresponding data are only written when their output streams are closed.
- *
+ * <p/>
  * The code automatically computes the CRC and lengths of the data, for
  * compressed and uncompressed data.
  *

@@ -22,7 +22,7 @@ import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.visitor.*;
 
 /**
- * This ElementValue represents an enumeration constant element value.
+ * This {@link ElementValue} represents an enumeration constant element value.
  *
  * @author Eric Lafortune
  */

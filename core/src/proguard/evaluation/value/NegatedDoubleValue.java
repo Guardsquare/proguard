@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This DoubleValue represents a double value that is negated.
+ * This {@link DoubleValue} represents a double value that is negated.
  *
  * @author Eric Lafortune
  */

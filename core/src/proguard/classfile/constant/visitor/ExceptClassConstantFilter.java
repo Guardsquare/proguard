@@ -22,8 +22,8 @@ import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>ConstantVisitor</code> delegates its visits to class constants
- * to another given <code>ConstantVisitor</code>, except for one given class.
+ * This {@link ConstantVisitor} delegates its visits to class constants
+ * to another given {@link ConstantVisitor}, except for one given class.
  *
  * @author Eric Lafortune
  */

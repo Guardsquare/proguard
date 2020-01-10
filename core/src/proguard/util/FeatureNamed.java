@@ -20,7 +20,7 @@ package proguard.util;
 /**
  * Base interface for entities that are part of a feature, as indicated by a
  * feature name.
- *
+ * <p/>
  * The entities can for example be classes and resource files, and the feature
  * can be a dynamic feature in an Android app.
  *

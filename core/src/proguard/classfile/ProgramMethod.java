@@ -22,7 +22,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.*;
 
 /**
- * Representation of a method from a program class.
+ * This {@link Method} represents a method in a {@link ProgramClass}.
  *
  * @author Eric Lafortune
  */

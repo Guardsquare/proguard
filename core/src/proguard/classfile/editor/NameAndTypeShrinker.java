@@ -30,8 +30,8 @@ import java.util.Arrays;
 
 
 /**
- * This ClassVisitor removes NameAndType constant pool entries that are not
- * used.
+ * This {@link ClassVisitor} removes <code>NameAndType</code> constant pool
+ * entries that are not used.
  *
  * @author Eric Lafortune
  */

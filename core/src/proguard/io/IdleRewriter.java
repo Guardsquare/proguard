@@ -20,8 +20,8 @@ package proguard.io;
 import java.io.IOException;
 
 /**
- * This DataEntryReader reads data entries and requests their corresponding
- * output streams from a given DataEntryWriter, without actually using the
+ * This {@link DataEntryReader} reads data entries and requests their corresponding
+ * output streams from a given {@link DataEntryWriter}, without actually using the
  * output stream. This approach correctly accounts for any filtering of the
  * classes to output archives.
  *

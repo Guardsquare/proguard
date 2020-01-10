@@ -25,7 +25,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.evaluation.value.*;
 
 /**
- * This ValueFactory tags newly created reference values so they can be traced
+ * This {@link ValueFactory} tags newly created reference values so they can be traced
  * throughout the execution of a method.
  *
  * @see TracedReferenceValue

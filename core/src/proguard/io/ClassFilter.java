@@ -22,7 +22,7 @@ import proguard.util.ExtensionMatcher;
 
 
 /**
- * This DataEntryReader delegates to one of two other DataEntryReader instances,
+ * This {@link DataEntryReader} delegates to one of two other {@link DataEntryReader} instances,
  * depending on the extension of the data entry.
  *
  * @author Eric Lafortune

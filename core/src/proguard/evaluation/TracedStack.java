@@ -20,9 +20,9 @@ package proguard.evaluation;
 import proguard.evaluation.value.Value;
 
 /**
- * This Stack saves additional information with stack elements, to keep track
- * of their origins.
- * <p>
+ * This {@link Stack} saves additional information with stack elements, to keep
+ * track of their origins.
+ * <p/>
  * The stack stores a given producer Value along with each Value it stores.
  * It then generalizes a given collected Value with the producer Value
  * of each Value it loads. The producer Value and the initial collected Value

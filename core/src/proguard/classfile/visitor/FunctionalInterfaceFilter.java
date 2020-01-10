@@ -24,8 +24,8 @@ import java.util.*;
 import java.util.*;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, but only for functional interfaces, that
+ * This {@link ClassVisitor} delegates its visits to another given
+ * {@link ClassVisitor}, but only for functional interfaces, that
  * is, interface classes that have exactly one abstract method.
  *
  * @author Eric Lafortune

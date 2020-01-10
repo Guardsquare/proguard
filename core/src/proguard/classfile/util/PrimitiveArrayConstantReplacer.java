@@ -28,8 +28,8 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor replaces all PrimitiveArray constants by Java bytecode
- * compliant array store instructions.
+ * This {@link ClassVisitor} replaces all instances of {@link PrimitiveArrayConstant}
+ * by Java bytecode compliant array store instructions.
  *
  * @see ArrayInitializationReplacer
  * @author Thomas Neidhart

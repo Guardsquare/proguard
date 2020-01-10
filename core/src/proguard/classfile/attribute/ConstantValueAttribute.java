@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a constant value attribute.
+ * This {@link Attribute} represents a constant value attribute.
  *
  * @author Eric Lafortune
  */

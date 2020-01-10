@@ -30,7 +30,7 @@ import proguard.evaluation.value.*;
 import java.util.*;
 
 /**
- * This AttributeVisitor adds preverification information (for Java Micro
+ * This {@link AttributeVisitor} adds preverification information (for Java Micro
  * Edition or for Java 6 or higher) to the code attributes that it visits.
  *
  * @author Eric Lafortune

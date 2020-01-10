@@ -23,7 +23,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import java.util.Set;
 
 /**
- * This MemberVisitor collects dot-separated classname.membername.descriptor
+ * This {@link MemberVisitor} collects dot-separated classname.membername.descriptor
  * strings of the class members that it visits.
  *
  * @author Eric Lafortune

@@ -23,7 +23,7 @@ import proguard.classfile.attribute.annotation.*;
 import proguard.util.ArrayUtil;
 
 /**
- * This AnnotationVisitor delegates all visits to each AnnotationVisitor
+ * This {@link AnnotationVisitor} delegates all visits to each {@link AnnotationVisitor}
  * in a given list.
  *
  * @author Thomas Neidhart

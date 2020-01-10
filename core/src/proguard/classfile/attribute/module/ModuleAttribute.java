@@ -24,7 +24,7 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This Attribute represents a module attribute.
+ * This {@link Attribute} represents a module attribute.
  *
  * @author Joachim Vandersmissen
  */

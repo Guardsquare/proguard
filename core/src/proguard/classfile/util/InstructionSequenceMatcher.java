@@ -29,7 +29,7 @@ import proguard.classfile.instruction.visitor.*;
 import java.util.Arrays;
 
 /**
- * This InstructionVisitor checks whether a given pattern instruction sequence
+ * This {@link InstructionVisitor} checks whether a given pattern instruction sequence
  * occurs in the instructions that are visited. The arguments of the
  * instruction sequence can be wildcards that are matched.
  *

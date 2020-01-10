@@ -25,7 +25,7 @@ import proguard.classfile.visitor.ClassVisitor;
 import java.util.Arrays;
 
 /**
- * This ClassVisitor sorts the constant pool entries of the program classes
+ * This {@link ClassVisitor} sorts the constant pool entries of the program classes
  * that it visits. The sorting order is based on the types of the constant pool
  * entries in the first place, and on their contents in the second place.
  *

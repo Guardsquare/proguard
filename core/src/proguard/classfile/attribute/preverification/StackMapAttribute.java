@@ -23,7 +23,7 @@ import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a stack map attribute.
+ * This {@link Attribute} represents a stack map attribute.
  *
  * @author Eric Lafortune
  */

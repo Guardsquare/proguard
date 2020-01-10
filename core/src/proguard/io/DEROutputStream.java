@@ -22,18 +22,18 @@ import java.math.BigInteger;
 import java.util.Stack;
 
 /**
- * This OutputStream provides additional methods to write data with
- * Distinguished Encoding Rules to an underlying output stream.
- * DER is an encoding of ASN.1 (Abstract Syntax Notation).
- *
+ * This class provides methods to write data with Distinguished Encoding Rules
+ * to an underlying output stream. DER is an encoding of ASN.1 (Abstract
+ * Syntax Notation).
+ * <p/>
  * This is for example the format of signature files like META-INF/CERT.RSA
- *
+ * <p/>
  * You can view the resulting file with
  *   openssl asn1parse -inform DER META-INF/CERT.RSA
  *
  * @author Eric Lafortune
  */
-public class DEROutputStream // extends OutputStream
+class DEROutputStream // extends OutputStream
 {
     private static final byte BOOLEAN_TAG           = 0x01;
     private static final byte INTEGER_TAG           = 0x02;
@@ -404,7 +404,7 @@ public class DEROutputStream // extends OutputStream
 
 
     /**
-     * Pushes the current output stream, replacing it a byte array output
+     * Pushes the current output stream, replacing it by a byte array output
      * stream to temporarily collect output.
      */
     private void pushOutputStream()

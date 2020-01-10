@@ -22,7 +22,7 @@ import java.io.*;
 
 /**
  * This class can read a given file or directory, recursively, applying a given
- * DataEntryReader to all files it comes across.
+ * {@link DataEntryReader} to all files it comes across.
  *
  * @author Eric Lafortune
  */

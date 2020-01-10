@@ -26,7 +26,7 @@ import proguard.classfile.visitor.*;
 import java.util.*;
 
 /**
- * This ClassVisitor sorts the attributes of the classes that it visits.
+ * This {@link ClassVisitor} sorts the attributes of the classes that it visits.
  * The sorting order is based on the types of the attributes.
  *
  * @author Eric Lafortune

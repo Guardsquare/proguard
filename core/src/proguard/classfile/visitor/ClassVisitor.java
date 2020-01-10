@@ -22,7 +22,7 @@ import proguard.classfile.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>Clazz</code> objects.
+ * {@link Clazz} instances.
  *
  * @author Eric Lafortune
  */

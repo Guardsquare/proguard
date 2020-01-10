@@ -23,8 +23,8 @@ import proguard.util.ExtensionMatcher;
 import java.io.*;
 
 /**
- * This DataEntryReader writes the ZIP entries and files that it reads to a
- * given DataEntryWriter.
+ * This {@link DataEntryReader} writes the ZIP entries and files that it reads to a
+ * given {@link DataEntryWriter}.
  *
  * @author Eric Lafortune
  */

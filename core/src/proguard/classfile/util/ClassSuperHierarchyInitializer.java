@@ -23,14 +23,14 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor initializes the superclass hierarchy of all classes that
+ * This {@link ClassVisitor} initializes the superclass hierarchy of all classes that
  * it visits.
- * <p>
+ * <p/>
  * Visited library classes get direct references to their superclasses and
  * interfaces, replacing the superclass names and interface names. The direct
  * references are equivalent to the names, but they are more efficient to work
  * with.
- * <p>
+ * <p/>
  * This visitor optionally prints warnings if some superclasses can't be found
  * or if they are in the program class pool.
  *

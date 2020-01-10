@@ -24,7 +24,7 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This InstructionVisitor delegates all visits to each InstructionVisitor
+ * This {@link InstructionVisitor} delegates all visits to each {@link InstructionVisitor}
  * in a given list.
  *
  * @author Eric Lafortune

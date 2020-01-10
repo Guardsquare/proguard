@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
 /**
- * This Instruction represents an instruction that refers to a variable on the
+ * This {@link Instruction} represents an instruction that refers to a variable on the
  * local variable stack.
  *
  * @author Eric Lafortune

@@ -22,7 +22,7 @@ import proguard.classfile.TypeConstants;
 /**
  * This value factory creates initial values for fields and array elements,
  * with the help of a given value factory. Note that this class itself doesn't
- * implement ValueFactory.
+ * implement {@link ValueFactory}.
  *
  * @author Eric Lafortune
  */

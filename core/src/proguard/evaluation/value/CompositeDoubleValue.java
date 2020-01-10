@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This DoubleValue represents the result of a binary operation on two double
+ * This {@link DoubleValue} represents the result of a binary operation on two double
  * values.
  *
  * @author Eric Lafortune

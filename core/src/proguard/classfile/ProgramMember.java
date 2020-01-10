@@ -24,7 +24,7 @@ import proguard.classfile.visitor.MemberVisitor;
 import proguard.util.SimpleProcessable;
 
 /**
- * Representation of a field or method from a program class.
+ * Base representation of a field or method from a {@link ProgramClass}.
  *
  * @author Eric Lafortune
  */

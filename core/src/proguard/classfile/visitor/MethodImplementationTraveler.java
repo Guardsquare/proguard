@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>MemberVisitor</code> lets a given <code>MemberVisitor</code>
+ * This {@link MemberVisitor} lets a given {@link MemberVisitor}
  * travel to all concrete and abstract implementations of the visited methods
  * in their class hierarchies.
  *

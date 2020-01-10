@@ -18,7 +18,7 @@
 package proguard.classfile.attribute;
 
 /**
- * Representation of an Line Number table entry.
+ * Representation of an line number table entry.
  *
  * @author Eric Lafortune
  */

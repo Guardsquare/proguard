@@ -18,7 +18,7 @@
 package proguard.io;
 
 /**
- * This DataEntryFilter filters data entries based on whether they represent
+ * This {@link DataEntryFilter} filters data entries based on whether they represent
  * directories.
  *
  * @author Eric Lafortune

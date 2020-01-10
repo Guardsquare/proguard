@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 
 /**
- * This class provides methods to create and reuse Value objects.
+ * This class provides methods to create and reuse Value instances.
  *
  * @author Eric Lafortune
  */

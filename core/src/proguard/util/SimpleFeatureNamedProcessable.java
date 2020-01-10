@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * A SimpleProcessable that additionally implements FeatureNamed.
+ * A {@link SimpleProcessable} that additionally implements {@link FeatureNamed}.
  *
  * @author Eric Lafortune
  */

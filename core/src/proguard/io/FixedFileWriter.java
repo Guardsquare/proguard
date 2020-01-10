@@ -20,7 +20,7 @@ package proguard.io;
 import java.io.*;
 
 /**
- * This DataEntryWriter writes data entries to a single given file.
+ * This {@link DataEntryWriter} writes data entries to a single given file.
  *
  * @see DirectoryWriter
  * @author Eric Lafortune

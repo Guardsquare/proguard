@@ -21,8 +21,8 @@ import proguard.resources.file.*;
 import proguard.util.*;
 
 /**
- * This StringFunction maps resource file names on their (obfuscated) resource file name, as present on the
- * ResourceFile object in the given resource file pool.
+ * This {@link StringFunction} maps resource file names on their (obfuscated) resource file name, as present on the
+ * {@link ResourceFile} object in the given resource file pool.
  *
  * @author Johan Leys
  */

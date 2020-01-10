@@ -24,7 +24,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This InstructionVisitor delegates to a given AttributeVisitor.
+ * This {@link InstructionVisitor} delegates to a given {@link AttributeVisitor}.
  *
  * @author Johan Leys
  */

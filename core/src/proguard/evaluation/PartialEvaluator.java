@@ -30,7 +30,7 @@ import proguard.evaluation.value.*;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor performs partial evaluation on the code attributes
+ * This {@link AttributeVisitor} performs partial evaluation on the code attributes
  * that it visits.
  *
  * @author Eric Lafortune

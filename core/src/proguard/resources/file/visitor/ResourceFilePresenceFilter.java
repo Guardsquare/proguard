@@ -20,9 +20,9 @@ package proguard.resources.file.visitor;
 import proguard.resources.file.*;
 
 /**
- * This <code>ResourceFileVisitor</code> delegates its visits to one of two
- * <code>ResourceFileVisitor</code> instances, depending on whether the name of
- * the visited resource file is present in a given <code>ResourceFilePool</code> or not.
+ * This {@link ResourceFileVisitor} delegates its visits to one of two
+ * {@link ResourceFileVisitor} instances, depending on whether the name of
+ * the visited resource file is present in a given {@link ResourceFilePool} or not.
  *
  * @author Thomas Neidhart
  */

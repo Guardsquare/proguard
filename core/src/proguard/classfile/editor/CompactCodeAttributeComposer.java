@@ -25,26 +25,26 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.util.*;
 
 /**
- * This AttributeVisitor accumulates instructions, exceptions and line numbers,
+ * This {@link AttributeVisitor} accumulates instructions, exceptions and line numbers,
  * in a compact and fluent style, and then copies them into code attributes
  * that it visits.
- *
+ * <p/>
  * The class supports composing
  *   instructions       ({@link #appendInstruction(Instruction)}),
  *   labels             ({@link #createLabel()} and {@link #label(Label)}),
  *   exception handlers ({@link #catch_(Label, Label, String, Clazz)}), and
  *   line numbers       ({@link #line(int)}).
- *
+ * <p/>
  * The labels are numeric labels that you can choose freely, for example
  * instruction offsets from existing code that you are copying. You can then
  * refer to them in branches and exception handlers. You can compose the
  * code as a hierarchy of code fragments with their own local labels.
- *
+ * <p/>
  * You should provide an estimated maximum size (expressed in number of
  * bytes in the bytecode), so the implementation can efficiently allocate
  * the necessary internal buffers without reallocating them as the code
  * grows.
- *
+ * <p/>
  * For example:
  * <pre>
  *     ProgramClass  programClass  = ...
@@ -82,7 +82,7 @@ import proguard.classfile.util.*;
  *     // Put the code in the given code attribute.
  *     composer.visitCodeAttribute(programClass, programMethod, codeAttribute);
  * </pre>
- *
+ * <p/>
  * This class is mostly convenient to compose code programmatically from
  * scratch. To compose code based on existing code, where the instructions
  * are already available, see {@link CompactCodeAttributeComposer}.

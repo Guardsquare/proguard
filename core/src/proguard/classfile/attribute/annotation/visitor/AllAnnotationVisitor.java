@@ -24,8 +24,8 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given AnnotationVisitor visit all Annotation
- * objects of the attributes it visits.
+ * This {@link AttributeVisitor} lets a given {@link AnnotationVisitor} visit all Annotation
+ * instances of the attributes it visits.
  *
  * @author Eric Lafortune
  */

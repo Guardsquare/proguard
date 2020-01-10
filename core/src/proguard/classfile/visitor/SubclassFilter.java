@@ -20,8 +20,8 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, except for classes that have a given class as
+ * This {@link ClassVisitor} delegates its visits to another given
+ * {@link ClassVisitor}, except for classes that have a given class as
  * direct subclass.
  *
  * @author Eric Lafortune

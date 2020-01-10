@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.*;
 
 /**
- * This KotlinMetadataVisitor visits all ValueParameters that it finds down the tree of the visit Kotlin Metadata.
+ * This {@link KotlinMetadataVisitor} visits all {@link ValueParameters} that it finds down the tree of the visit Kotlin Metadata.
  *
  * @author Tim Van Den Broecke
  */

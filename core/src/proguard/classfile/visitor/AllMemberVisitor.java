@@ -21,8 +21,8 @@ import proguard.classfile.*;
 
 
 /**
- * This ClassVisitor lets a given MemberVisitor visit all Member
- * objects of the classes      it visits.
+ * This {@link ClassVisitor} lets a given {@link MemberVisitor} visit all Member
+ * instances of the classes it visits.
  *
  * @author Eric Lafortune
  */

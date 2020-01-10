@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction returns the original string if the given StringFunction
+ * This {@link StringFunction} returns the original string if the given {@link StringFunction}
  * returns null, or null otherwise.
  *
  * @author Eric Lafortune

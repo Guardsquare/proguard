@@ -20,10 +20,10 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to one of two given
- * <code>ClassVisitor</code>s, depending on whether the visited classes
+ * This {@link ClassVisitor} delegates its visits to one of two given
+ * {@link ClassVisitor}s, depending on whether the visited classes
  * extend/implement a given class or not.
- *
+ * <p/>
  * Filter:
  * - accepted: the visited class extends/implements the given class.
  * - rejected: the visited class does not extend/implement the given class.

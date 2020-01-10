@@ -23,7 +23,7 @@ import proguard.classfile.attribute.annotation.TypeAnnotation;
 import proguard.classfile.attribute.annotation.target.*;
 
 /**
- * This interface specifies the methods for a visitor of LocalVariableTargetElement
+ * This interface specifies the methods for a visitor of {@link LocalVariableTargetElement}
  * instances.
  *
  * @author Eric Lafortune

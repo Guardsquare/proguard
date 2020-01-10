@@ -20,9 +20,9 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to one of two
- * <code>ClassVisitor</code> instances, depending on whether the name of
- * the visited class file is present in a given <code>ClassPool</code> or not.
+ * This {@link ClassVisitor} delegates its visits to one of two
+ * {@link ClassVisitor} instances, depending on whether the name of
+ * the visited class file is present in a given {@link ClassPool} or not.
  *
  * @author Eric Lafortune
  */

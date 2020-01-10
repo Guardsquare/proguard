@@ -20,12 +20,12 @@ package proguard.evaluation;
 import proguard.evaluation.value.Value;
 
 /**
- * This Variables class saves additional information with variables, to keep
+ * This {@link Variables} saves additional information with variables, to keep
  * track of their origins.
- * <p>
- * The Variables class stores a given producer Value along with each Value it
- * stores. It then generalizes a given collected Value with the producer Value
- * of each Value it loads. The producer Value and the initial collected Value
+ * <p/>
+ * The class stores a given producer Value along with each Value it stores.
+ * It then generalizes a given collected Value with the producer Value of
+ * each Value it loads. The producer Value and the initial collected Value
  * can be set; the generalized collected Value can be retrieved.
  *
  * @author Eric Lafortune

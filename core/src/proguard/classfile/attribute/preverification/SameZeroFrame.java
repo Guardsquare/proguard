@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.StackMapFrameVisitor;
 
 /**
- * This StackMapFrame represents a "same frame" or a "same frame extended".
+ * This {@link StackMapFrame} represents a "same frame" or a "same frame extended".
  *
  * @author Eric Lafortune
  * @noinspection PointlessArithmeticExpression

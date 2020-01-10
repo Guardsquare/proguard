@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a deprecated attribute.
+ * This {@link Attribute} represents a deprecated attribute.
  *
  * @author Eric Lafortune
  */

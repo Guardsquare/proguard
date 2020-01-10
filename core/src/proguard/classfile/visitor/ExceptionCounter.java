@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.ExceptionInfoVisitor;
 import proguard.util.Counter;
 
 /**
- * This ExceptionInfoVisitor counts the number of exceptions that has been visited.
+ * This {@link ExceptionInfoVisitor} counts the number of exceptions that has been visited.
  *
  * @author Eric Lafortune
  */

@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.visitor.*;
 
 /**
- * This Constant represents a ref constant in the constant pool.
+ * This {@link Constant} represents a ref constant in the constant pool.
  *
  * @author Eric Lafortune
  */

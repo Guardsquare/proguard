@@ -27,7 +27,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This AttributeVisitor fixes all inappropriate special/virtual/static/interface
+ * This {@link AttributeVisitor} fixes all inappropriate special/virtual/static/interface
  * invocations of the code attributes that it visits.
  *
  * @author Eric Lafortune

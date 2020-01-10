@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction adds a given suffix to each transformed String.
+ * This {@link StringFunction} adds a given suffix to each transformed String.
  *
  * @author Johan Leys
  */

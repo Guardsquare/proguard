@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.CodeAttribute;
 
 /**
- * This InstructionVisitor evaluates the instructions that it visits.
+ * This interface defines methods to handle branches and returns from methods.
  *
  * @author Eric Lafortune
  */

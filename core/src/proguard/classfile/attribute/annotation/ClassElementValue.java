@@ -22,7 +22,7 @@ import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ElementValue represents a class element value.
+ * This {@link ElementValue} represents a class element value.
  *
  * @author Eric Lafortune
  */

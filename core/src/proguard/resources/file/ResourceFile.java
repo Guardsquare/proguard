@@ -23,7 +23,7 @@ import proguard.util.*;
 import java.util.*;
 
 /**
- * This class represents a resource file in an application.
+ * Representation of a resource file in an application.
  *
  * @author Johan Leys
  */

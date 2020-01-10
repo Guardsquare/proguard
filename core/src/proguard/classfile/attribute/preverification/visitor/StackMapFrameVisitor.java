@@ -23,7 +23,7 @@ import proguard.classfile.attribute.preverification.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>StackMapFrame</code> objects.
+ * {@link StackMapFrame} instances.
  *
  * @author Eric Lafortune
  */

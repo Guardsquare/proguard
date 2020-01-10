@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.Clazz;
 
 /**
- * This class provides methods to create and reuse Value objects that have
+ * This class provides methods to create and reuse Value instances that have
  * particular values, whenever they are known.
  *
  * @author Eric Lafortune

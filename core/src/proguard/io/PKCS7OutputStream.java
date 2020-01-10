@@ -22,21 +22,21 @@ import java.security.cert.*;
 import java.util.*;
 
 /**
- * This output stream provides methods to write signature data in PKCS7 format
+ * This class provides methods to write signature data in PKCS7 format
  * (= Cryptographic Message Syntax (CMS), part of the Public Key Cryptography
  * Standards) to an underlying DER output stream.
- *
+ * <p/>
  * This is for example the format of signature files like META-INF/CERT.RSA
- *
+ * <p/>
  * You can view the resulting file with
  *     openssl asn1parse -inform DER -in META-INF/CERT.RSA
- *
+ * <p/>
  * You can check a signed jar with
  *     jarsigner -verify -verbose example.jar
  *
  * @author Eric Lafortune
  */
-public class PKCS7OutputStream
+class PKCS7OutputStream
 {
     private static final int  PKCS7_VERSION  = 1;
     private static final int  SIGNER_VERSION = 1;

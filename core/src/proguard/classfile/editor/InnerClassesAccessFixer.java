@@ -26,7 +26,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This InnerClassesInfoVisitor fixes the inner class access flags of the
+ * This {@link InnerClassesInfoVisitor} fixes the inner class access flags of the
  * inner classes information that it visits.
  *
  * @author Eric Lafortune

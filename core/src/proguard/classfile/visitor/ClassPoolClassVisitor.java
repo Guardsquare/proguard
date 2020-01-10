@@ -20,8 +20,8 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This ClassPoolVisitor and ClassVisitor remembers the ClassPool instances
- * that it visits and applies the given ClassPoolVisitor to the most
+ * This {@link ClassPoolVisitor} and {@link ClassVisitor} remembers the {@link ClassPool} instances
+ * that it visits and applies the given {@link ClassPoolVisitor} to the most
  * recently remembered one, every time it visits a Clazz instance.
  *
  * @author Eric Lafortune

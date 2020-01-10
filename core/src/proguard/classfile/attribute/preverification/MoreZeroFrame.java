@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.*;
 
 /**
- * This StackMapFrame represents an "append frame".
+ * This {@link StackMapFrame} represents an "append frame".
  *
  * @author Eric Lafortune
  */

@@ -21,11 +21,9 @@ import proguard.classfile.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>MemberVisitor</code> delegates its visits to another given
- * <code>MemberVisitor</code>, but only when the visited member has the proper
+ * This {@link MemberVisitor} delegates its visits to another given
+ * {@link MemberVisitor}, but only when the visited member has the proper
  * processing flags.
- * <p>
- * @see proguard.util.ProcessingFlags
  *
  * @author Johan Leys
  */

@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a SourceDebugExtension attribute.
+ * This {@link Attribute} represents a source debug extension attribute.
  *
  * @author James Hamilton
  */

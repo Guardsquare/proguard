@@ -23,8 +23,8 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This <code>MemberVisitor</code> delegates its visits to another given
- * <code>MemberVisitor</code>, but only when the visited member is accessible
+ * This {@link MemberVisitor} delegates its visits to another given
+ * {@link MemberVisitor}, but only when the visited member is accessible
  * from the given referencing class.
  *
  * @author Eric Lafortune

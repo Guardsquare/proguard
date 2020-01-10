@@ -23,7 +23,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import java.util.Collection;
 
 /**
- * This <code>ClassVisitor</code> collects the names of the classes that it
+ * This {@link ClassVisitor} collects the names of the classes that it
  * visits in the given collection.
  *
  * @author Eric Lafortune

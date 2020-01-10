@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 
 /**
- * This ElementValue represents an annotation element value.
+ * This {@link ElementValue} represents an annotation element value.
  *
  * @author Eric Lafortune
  */

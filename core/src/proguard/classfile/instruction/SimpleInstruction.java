@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
 /**
- * This Instruction represents a simple instruction without variable arguments
+ * This {@link Instruction} represents a simple instruction without variable arguments
  * or constant pool references.
  *
  * @author Eric Lafortune

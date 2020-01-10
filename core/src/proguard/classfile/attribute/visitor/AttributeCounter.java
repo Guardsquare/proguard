@@ -23,7 +23,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.util.Counter;
 
 /**
- * This AttributeVisitor counts the number of attributes that have been visited.
+ * This {@link AttributeVisitor} counts the number of attributes that have been visited.
  *
  * @author Thomas Neidhart
  */

@@ -22,7 +22,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 
 /**
- * This Attribute represents an exceptions attribute.
+ * This {@link Attribute} represents an exceptions attribute.
  *
  * @author Eric Lafortune
  */

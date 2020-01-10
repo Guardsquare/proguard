@@ -18,8 +18,8 @@
 package proguard.util;
 
 /**
- * This StringMatcher delegates to a another StringMatcher that can be set
- * after this StringMatcher has been constructed.
+ * This {@link StringMatcher} delegates to a another {@link StringMatcher} that can be set
+ * after this {@link StringMatcher} has been constructed.
  *
  * @author Eric Lafortune
  */

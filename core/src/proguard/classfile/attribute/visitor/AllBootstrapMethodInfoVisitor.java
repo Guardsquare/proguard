@@ -22,8 +22,8 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given BootstrapMethodInfoVisitor visit all
- * bootstrap method objects of the BootstrapMethodsAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link BootstrapMethodInfoVisitor} visit all
+ * bootstrap method instances of the {@link BootstrapMethodsAttribute} instances it visits.
  *
  * @author Eric Lafortune
  */

@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This LongValue represents a long value that is negated.
+ * This {@link LongValue} represents a long value that is negated.
  *
  * @author Eric Lafortune
  */

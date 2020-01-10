@@ -20,7 +20,7 @@ package proguard.classfile.attribute;
 import proguard.util.SimpleProcessable;
 
 /**
- * Representation of an Exception table entry.
+ * Representation of an exception table entry.
  *
  * @author Eric Lafortune
  */

@@ -23,7 +23,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This AttributeVisitor delegates to a given ClassVisitor.
+ * This {@link AttributeVisitor} delegates to a given {@link ClassVisitor}.
  *
  * @author Eric Lafortune
  */

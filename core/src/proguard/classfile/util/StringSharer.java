@@ -25,7 +25,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor shares strings in the class files that it visits.
+ * This {@link ClassVisitor} shares strings in the class files that it visits.
  *
  * @author Eric Lafortune
  */

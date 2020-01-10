@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
 
 /**
- * This Attribute represents a local variable table attribute.
+ * This {@link Attribute} represents a local variable table attribute.
  *
  * @author Eric Lafortune
  */

@@ -21,8 +21,8 @@ import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.*;
 
 /**
- * This KotlinMetadataVisitor lets a given KotlinFunctionVisitor visit all functions
- * of visited KotlinMetadata.
+ * This {@link KotlinMetadataVisitor} lets a given {@link KotlinFunctionVisitor} visit all functions
+ * of visited {@link KotlinMetadata}.
  */
 public class AllFunctionsVisitor
 implements   KotlinMetadataVisitor

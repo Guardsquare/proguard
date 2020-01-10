@@ -22,7 +22,7 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This ClassPoolVisitor delegates all visits to each ClassPoolVisitor
+ * This {@link ClassPoolVisitor} delegates all visits to each {@link ClassPoolVisitor}
  * in a given list.
  *
  * @author Eric Lafortune

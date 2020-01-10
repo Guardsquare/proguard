@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This FloatValue represents a float value that is converted from another
+ * This {@link FloatValue} represents a float value that is converted from another
  * scalar value.
  *
  * @author Eric Lafortune

@@ -25,7 +25,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor cleans up variable tables in all code attributes that
+ * This {@link AttributeVisitor} cleans up variable tables in all code attributes that
  * it visits. It trims overlapping local variables. It removes empty local
  * variables and empty local variable tables.
  *

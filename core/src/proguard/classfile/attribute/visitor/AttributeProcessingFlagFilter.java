@@ -25,12 +25,9 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>AttributeVisitor</code> delegates its visits to another given
- * <code>AttributeVisitor</code>, but only when the visited attribute has the proper
+ * This {@link AttributeVisitor} delegates its visits to another given
+ * {@link AttributeVisitor}, but only when the visited attribute has the proper
  * processing flags.
- * <p>
- *
- * @see proguard.util.ProcessingFlags
  *
  * @author Johan Leys
  */

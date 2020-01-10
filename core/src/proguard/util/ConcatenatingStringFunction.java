@@ -18,8 +18,8 @@
 package proguard.util;
 
 /**
- * This StringFunction returns the concatenated transformed strings of two
- * given StringFunction instances.
+ * This {@link StringFunction} returns the concatenated transformed strings of two
+ * given {@link StringFunction} instances.
  *
  * @author Johan Leys
  */

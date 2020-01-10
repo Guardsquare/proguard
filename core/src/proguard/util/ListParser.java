@@ -20,13 +20,13 @@ package proguard.util;
 import java.util.List;
 
 /**
- * This StringParser can create StringMatcher instances for regular expressions.
+ * This {@link StringParser} can create {@link StringMatcher} instances for regular expressions.
  * The regular expressions are either presented as a list, or they are
  * interpreted as comma-separated lists, optionally prefixed with '!' negators.
  * If an entry with a negator matches, a negative match is returned, without
- * considering any subsequent entries in the list. The creation of StringMatcher
- * instances for the entries is delegated to the given StringParser.
- *
+ * considering any subsequent entries in the list. The creation of {@link StringMatcher}
+ * instances for the entries is delegated to the given {@link StringParser}.
+ * <p/>
  * For example,
  *     "*.xml,*.jpg" matches all strings with the given extensions;
  *     "!dummy" matches all strings except "dummy";
@@ -62,7 +62,7 @@ public class ListParser implements StringParser
     /**
      * Creates a StringMatcher for the given regular expression, which can
      * be a list of optionally negated simple entries.
-     * <p>
+     * <p/>
      * An empty list results in a StringMatcher that matches any string.
      */
     public StringMatcher parse(List regularExpressions)

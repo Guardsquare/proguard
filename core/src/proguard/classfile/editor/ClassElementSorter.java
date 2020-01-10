@@ -22,7 +22,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This ClassVisitor sorts the various elements of the classes that it visits:
+ * This {@link ClassVisitor} sorts the various elements of the classes that it visits:
  * interfaces, constants, fields, methods, and attributes.
  *
  * @author Eric Lafortune

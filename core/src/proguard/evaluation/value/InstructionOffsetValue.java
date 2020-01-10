@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.TypeConstants;
 
 /**
- * This class represents a partially evaluated instruction offset. It can
+ * Representation of a partially evaluated instruction offset. It can
  * contain 0 or more specific instruction offsets. Each instruction offset
  * can be flagged as an ordinary offset, a method parameter, a method return
  * value, a field value, a new instance value, or an exception handler.

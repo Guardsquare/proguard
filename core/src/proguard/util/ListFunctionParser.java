@@ -20,14 +20,14 @@ package proguard.util;
 import java.util.List;
 
 /**
- * This StringFunctionParser can create StringFunction instances for regular
+ * This {@link StringFunctionParser} can create {@link StringFunction} instances for regular
  * expressions. The created function returns a String, or null if it doesn't
  * match. The regular expressions are either presented as a list, or they are
  * interpreted as comma-separated lists, optionally prefixed with '!' negators.
  * If an entry with a negator matches, a negative match is returned, without
  * considering any subsequent entries in the list. The creation of
- * StringFunction instances for the entries is delegated to the given
- * StringFunctionParser.
+ * {@link StringFunction} instances for the entries is delegated to the given
+ * {@link StringFunctionParser}.
  *
  * @author Eric Lafortune
  */
@@ -58,7 +58,7 @@ public class ListFunctionParser implements StringFunctionParser
     /**
      * Creates a StringFunction for the given regular expression, which can
      * be a list of optionally negated simple entries.
-     * <p>
+     * <p/>
      * An empty list results in a StringFunction that matches any string.
      */
     public StringFunction parse(List regularExpressions)

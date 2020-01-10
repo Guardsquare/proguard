@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This FloatValue represents a specific float value.
+ * This {@link FloatValue} represents a specific float value.
  *
  * @author Eric Lafortune
  */

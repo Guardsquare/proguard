@@ -24,8 +24,8 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given ProvidesInfoVisitor visit all
- * ProvidesInfo objects of the ModuleAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link ProvidesInfoVisitor} visit all
+ * {@link ProvidesInfo} instances of the {@link ModuleAttribute} instances it visits.
  *
  * @author Joachim Vandersmissen
  */

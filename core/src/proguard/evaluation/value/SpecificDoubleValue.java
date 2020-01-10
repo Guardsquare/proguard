@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This DoubleValue represents a specific double value.
+ * This {@link DoubleValue} represents a specific double value.
  *
  * @author Eric Lafortune
  */

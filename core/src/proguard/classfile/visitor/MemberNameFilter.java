@@ -23,8 +23,8 @@ import proguard.util.*;
 import java.util.List;
 
 /**
- * This <code>MemberVisitor</code> delegates its visits to another given
- * <code>MemberVisitor</code>, but only when the visited member
+ * This {@link MemberVisitor} delegates its visits to another given
+ * {@link MemberVisitor}, but only when the visited member
  * has a name that matches a given regular expression.
  *
  * @author Eric Lafortune

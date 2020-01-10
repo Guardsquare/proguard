@@ -24,10 +24,10 @@ import proguard.classfile.attribute.module.*;
 import proguard.classfile.attribute.preverification.*;
 
 /**
- * This AttributeVisitor delegates its visits to one of two other
- * AttributeVisitor instances, depending on whether the visited attribute
+ * This {@link AttributeVisitor} delegates its visits to one of two other
+ * {@link AttributeVisitor} instances, depending on whether the visited attribute
  * is strictly required or not.
- *
+ * <p/>
  * Stack map attributes and stack map table attributes are treated as optional.
  *
  * @author Eric Lafortune

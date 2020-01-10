@@ -20,8 +20,8 @@ package proguard.evaluation.value;
 import proguard.classfile.*;
 
 /**
- * This class provides methods to create and reuse Value objects.
- * Its ReferenceValue objects have types.
+ * This class provides methods to create and reuse Value instances.
+ * Its {@link ReferenceValue} instances have types.
  *
  * @author Eric Lafortune
  */

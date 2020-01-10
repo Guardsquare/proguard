@@ -23,7 +23,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ConstantVisitor adds all interfaces that it visits to the given
+ * This {@link ConstantVisitor} adds all interfaces that it visits to the given
  * target class.
  *
  * @author Eric Lafortune

@@ -18,9 +18,9 @@
 package proguard.util;
 
 /**
- * This StringFunction returns unchanged strings or null, depending on whether
+ * This {@link StringFunction} returns unchanged strings or null, depending on whether
  * a given string matcher matches the strings. It can be seen as an adapter
- * from StringMatcher or StringFunction.
+ * from {@link StringMatcher} or {@link StringFunction}.
  *
  * @author Eric Lafortune
  */

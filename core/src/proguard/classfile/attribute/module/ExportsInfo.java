@@ -22,7 +22,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.util.SimpleProcessable;
 
 /**
- * Representation of a Exports entry in a Module attribute.
+ * Representation of an Exports entry in a {@link Module} attribute.
  *
  * @author Joachim Vandersmissen
  */

@@ -17,11 +17,13 @@
  */
 package proguard.classfile.visitor;
 
-import proguard.classfile.ClassPool;
+import proguard.classfile.*;
 
 
 /**
- * This class visits Clazz objects with the given name.
+ * This {@link ClassPoolVisitor} lets a given {@link ClassVisitor} visit
+ * {@link Clazz} instances with a given name, in the class pools that it
+ * visits.
  *
  * @author Eric Lafortune
  */
@@ -38,6 +40,8 @@ public class NamedClassVisitor implements ClassPoolVisitor
         this.name         = name;
     }
 
+
+    // Implementations for NamedClassVisitor.
 
     public void visitClassPool(ClassPool classPool)
     {

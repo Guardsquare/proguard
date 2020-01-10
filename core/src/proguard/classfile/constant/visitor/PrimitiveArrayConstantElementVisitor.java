@@ -22,7 +22,7 @@ import proguard.classfile.constant.PrimitiveArrayConstant;
 
 /**
  * This interface specifies the methods for a visitor of primitive elements
- * of the array of a PrimitiveArrayConstant.
+ * of the array of a {@link PrimitiveArrayConstant}.
  *
  * @author Eric Lafortune
  */

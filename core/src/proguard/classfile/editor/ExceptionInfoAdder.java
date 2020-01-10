@@ -22,7 +22,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.ExceptionInfoVisitor;
 
 /**
- * This ExceptionInfoVisitor adds all exception information that it visits to
+ * This {@link ExceptionInfoVisitor} adds all exception information that it visits to
  * the given target code attribute.
  *
  * @author Eric Lafortune

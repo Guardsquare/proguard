@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.LocalVariableTypeInfoVisitor;
 import proguard.util.ArrayUtil;
 
 /**
- * This LocalVariableTypeInfoVisitor adds all local variable types that it
+ * This {@link LocalVariableTypeInfoVisitor} adds all local variable types that it
  * visits to the given target local variable type attribute.
  */
 public class LocalVariableTypeInfoAdder

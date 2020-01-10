@@ -22,7 +22,7 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.ParameterInfoVisitor;
 
 /**
- * This ParameterInfoVisitor adds all parameter information that it visits to
+ * This {@link ParameterInfoVisitor} adds all parameter information that it visits to
  * the given target method parameters attribute.
  */
 public class ParameterInfoAdder

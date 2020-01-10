@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This class represents a partially evaluated float value.
+ * {@link FloatValue} that is unknown.
  *
  * @author Eric Lafortune
  */

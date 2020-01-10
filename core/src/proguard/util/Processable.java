@@ -20,10 +20,10 @@ package proguard.util;
 /**
  * Base interface for entities that need flags and/or additional information
  * when they are processed, typically by visitor classes.
- *
+ * <p/>
  * The processing flags provide simple boolean markers. In ProGuard, they
  * mark entities to be kept across processing steps, for example.
- *
+ * <p/>
  * The processing info provides any more general information. In ProGuard,
  * the contain relatively short-lived information inside processing steps.
  *

@@ -23,8 +23,8 @@ import proguard.util.*;
 import java.util.List;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, but only when the visited class has a name that
+ * This {@link ClassVisitor} delegates its visits to another given
+ * {@link ClassVisitor}, but only when the visited class has a name that
  * matches a given regular expression.
  *
  * @author Eric Lafortune

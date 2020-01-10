@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.TypeConstants;
 
 /**
- * This class represents a partially evaluated long value.
+ * Representation of a partially evaluated long value.
  *
  * @author Eric Lafortune
  */

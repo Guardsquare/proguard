@@ -22,7 +22,7 @@ import proguard.util.*;
 import java.util.List;
 
 /**
- * This DataEntryWriter delegates to one of two other DataEntryWriter instances,
+ * This {@link DataEntryWriter} delegates to one of two other {@link DataEntryWriter} instances,
  * depending on the name of the data entry.
  *
  * @author Eric Lafortune

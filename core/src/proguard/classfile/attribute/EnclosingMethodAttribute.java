@@ -22,7 +22,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.visitor.*;
 
 /**
- * This Attribute represents an enclosing method attribute.
+ * This {@link Attribute} represents an enclosing method attribute.
  *
  * @author Eric Lafortune
  */

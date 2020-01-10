@@ -20,7 +20,7 @@ package proguard.evaluation.value;
 import proguard.classfile.*;
 
 /**
- * This class provides methods to create and reuse Value objects that are
+ * This class provides methods to create and reuse Value instances that are
  * identified by unique integer IDs.
  *
  * @author Eric Lafortune

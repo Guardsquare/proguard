@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
 /**
- * This Instruction represents a lookup switch instruction.
+ * This {@link Instruction} represents a lookup switch instruction.
  *
  * @author Eric Lafortune
  */

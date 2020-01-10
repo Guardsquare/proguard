@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * This Attribute represents a synthetic attribute.
+ * This {@link Attribute} represents a synthetic attribute.
  *
  * @author Eric Lafortune
  */

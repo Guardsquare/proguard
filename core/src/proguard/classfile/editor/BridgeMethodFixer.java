@@ -28,7 +28,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This MemberVisitor fixes all inappropriate bridge access flags of the
+ * This {@link MemberVisitor} fixes all inappropriate bridge access flags of the
  * program methods that it visits, checking whether the methods to which they
  * bridge have the same name. Some compilers, like in Eclipse and in later
  * versions of JDK 1.6, complain if they can't find the method with the same

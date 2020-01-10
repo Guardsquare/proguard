@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This LongValue represents a long value that is converted from another
+ * This {@link LongValue} represents a long value that is converted from another
  * scalar value.
  *
  * @author Eric Lafortune

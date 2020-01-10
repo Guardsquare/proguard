@@ -27,14 +27,14 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.util.StringMatcher;
 
 /**
- * This InstructionVisitor initializes any constant <code>Class.forName</code> or
+ * This {@link InstructionVisitor} initializes any constant <code>Class.forName</code> or
  * <code>.class</code> references of all classes it visits. More specifically,
  * it fills out the references of string constant pool entries that refer to a
  * class in the program class pool or in the library class pool.
- * <p>
+ * <p/>
  * It optionally prints notes if on usage of
  * <code>(SomeClass)Class.forName(variable).newInstance()</code>.
- * <p>
+ * <p/>
  * The class hierarchy must be initialized before using this visitor.
  *
  * @see ClassSuperHierarchyInitializer

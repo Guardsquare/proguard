@@ -24,7 +24,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given ConstantVisitor visit all constants
+ * This {@link InstructionVisitor} lets a given {@link ConstantVisitor} visit all constants
  * of the instructions it visits.
  *
  * @author Eric Lafortune

@@ -18,7 +18,7 @@
 package proguard.classfile.instruction;
 
 /**
- * This class provides methods to create and reuse Instruction objects.
+ * This class provides methods to create and reuse Instruction instances.
  *
  * @author Eric Lafortune
  */

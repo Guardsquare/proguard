@@ -25,7 +25,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 
 /**
- * This AttributeVisitor computes and updates the maximum local variable frame
+ * This {@link AttributeVisitor} computes and updates the maximum local variable frame
  * size of the code attributes that it visits. It also cleans up the local
  * variable tables.
  *

@@ -20,7 +20,7 @@ package proguard.resources.file.visitor;
 import proguard.resources.file.ResourceFile;
 
 /**
- * Abstract class providing default implementations for ResourceFileVisitor.
+ * Abstract class providing default implementations for {@link ResourceFileVisitor}.
  *
  * @author Johan Leys
  */

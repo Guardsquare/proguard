@@ -21,8 +21,8 @@ import proguard.classfile.*;
 
 
 /**
- * This MemberVisitor delegates its visits to one of two other given
- * MemberVisitor instances, depending on whether the visited method
+ * This {@link MemberVisitor} delegates its visits to one of two other given
+ * {@link MemberVisitor} instances, depending on whether the visited method
  * is a method or a field.
  *
  * @author Thomas Neidhart

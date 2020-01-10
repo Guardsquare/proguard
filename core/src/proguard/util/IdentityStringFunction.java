@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction returns unchanged String instances.
+ * This {@link StringFunction} returns unchanged String instances.
  *
  * @author Eric Lafortune
  */

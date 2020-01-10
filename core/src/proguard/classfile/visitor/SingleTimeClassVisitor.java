@@ -20,7 +20,7 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This ClassVisitor delegates all visits to a given ClassVisitor, although
+ * This {@link ClassVisitor} delegates all visits to a given {@link ClassVisitor}, although
  * only once to the same class in a row.
  *
  * @author Eric Lafortune

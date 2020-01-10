@@ -27,7 +27,7 @@ import proguard.classfile.visitor.ClassPrinter;
 import proguard.util.ArrayUtil;
 
 /**
- * This AttributeVisitor computes the stack sizes at all instruction offsets
+ * This {@link AttributeVisitor} computes the stack sizes at all instruction offsets
  * of the code attributes that it visits.
  *
  * @author Eric Lafortune

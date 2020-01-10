@@ -34,7 +34,7 @@ import java.util.Arrays;
 
 
 /**
- * This ClassVisitor removes UTF-8 constant pool entries that are not used.
+ * This {@link ClassVisitor} removes UTF-8 constant pool entries that are not used.
  *
  * @author Eric Lafortune
  */

@@ -32,7 +32,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.util.Processable;
 
 /**
- * This <code>ClassVisitor</code> removes all processing information of the
+ * This {@link ClassVisitor} removes all processing information of the
  * classes it visits.
  *
  * @author Eric Lafortune

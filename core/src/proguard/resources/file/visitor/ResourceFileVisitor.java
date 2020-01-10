@@ -20,7 +20,7 @@ package proguard.resources.file.visitor;
 import proguard.resources.file.ResourceFile;
 
 /**
- * This interface specifies the methods for a visitor of ResourceFile instances.
+ * This interface specifies the methods for a visitor of {@link ResourceFile} instances.
  *
  * @author Johan Leys
  */

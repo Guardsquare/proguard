@@ -24,7 +24,7 @@ import proguard.classfile.visitor.MemberVisitor;
 
 
 /**
- * This AnnotationVisitor delegates all visits to a given MemberVisitor.
+ * This {@link AnnotationVisitor} delegates all visits to a given {@link MemberVisitor}.
  * The latter visits the class member of each visited class member annotation
  * or method parameter annotation, although never twice in a row.
  *

@@ -22,11 +22,9 @@ import proguard.classfile.ProgramClass;
 
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to another given
- * <code>ClassVisitor</code>, but only when the visited class
+ * This {@link ClassVisitor} delegates its visits to another given
+ * {@link ClassVisitor}, but only when the visited class
  * has the proper processing flags.
- *
- * @see proguard.util.ProcessingFlags
  *
  * @author Johan Leys
  */

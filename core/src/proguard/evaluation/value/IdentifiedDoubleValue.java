@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This DoubleValue represents a double value that is identified by a unique ID.
+ * This {@link DoubleValue} represents a double value that is identified by a unique ID.
  *
  * @author Eric Lafortune
  */

@@ -23,8 +23,8 @@ import proguard.classfile.attribute.InnerClassesInfo;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>InnerClassesInfo</code> objects. Note that there is only a single
- * implementation of <code>InnerClassesInfo</code>, such that this interface
+ * {@link InnerClassesInfo} instances. Note that there is only a single
+ * implementation of {@link InnerClassesInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

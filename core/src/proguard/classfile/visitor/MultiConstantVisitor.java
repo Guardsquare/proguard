@@ -25,7 +25,7 @@ import proguard.util.ArrayUtil;
 
 
 /**
- * This ConstantVisitor delegates all visits to each ConstantVisitor in a given list.
+ * This {@link ConstantVisitor} delegates all visits to each {@link ConstantVisitor} in a given list.
  *
  * @author Johan Leys
  */

@@ -27,7 +27,7 @@ import proguard.classfile.visitor.*;
 import java.util.Arrays;
 
 /**
- * This ClassVisitor removes specified interfaces from the classes and class
+ * This {@link ClassVisitor} removes specified interfaces from the classes and class
  * signatures that it visits.
  *
  * @author Eric Lafortune

@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor adds the line numbers of all line number attributes
+ * This {@link AttributeVisitor} adds the line numbers of all line number attributes
  * that it visits to the given target line number attribute. It ensures that
  * the sources of the line numbers are preserved or set.
  */

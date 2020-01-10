@@ -26,7 +26,7 @@ import proguard.classfile.visitor.*;
 import proguard.util.*;
 
 /**
- * This Clazz is a compact representation of the essential data in a Java class.
+ * This {@link Clazz} is a compact representation of the essential data in a Java class.
  *
  * @author Eric Lafortune
  */

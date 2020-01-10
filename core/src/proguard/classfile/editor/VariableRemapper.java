@@ -29,7 +29,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor remaps variable indexes in all attributes that it
+ * This {@link AttributeVisitor} remaps variable indexes in all attributes that it
  * visits, based on a given index map.
  *
  * @author Eric Lafortune

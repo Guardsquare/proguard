@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.VerificationTypeVisitor;
 
 /**
- * This VerificationType represents an Object type.
+ * This {@link VerificationType} represents an <code>Object</code> type.
  *
  * @author Eric Lafortune
  */

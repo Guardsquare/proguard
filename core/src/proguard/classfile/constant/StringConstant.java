@@ -24,7 +24,7 @@ import proguard.resources.file.ResourceFile;
 import proguard.resources.file.visitor.ResourceFileVisitor;
 
 /**
- * This Constant represents a string constant in the constant pool.
+ * This {@link Constant} represents a string constant in the constant pool.
  *
  * @author Eric Lafortune
  */

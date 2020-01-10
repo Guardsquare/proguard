@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.constant.PrimitiveArrayConstant;
 
 /**
- * This interface specifies the methods for a visitor of PrimitiveArrayConstant
+ * This interface specifies the methods for a visitor of {@link PrimitiveArrayConstant}
  * instances containing different types of arrays.
  *
  * @author Eric Lafortune

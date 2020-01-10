@@ -25,7 +25,7 @@ import proguard.classfile.visitor.*;
 
 
 /**
- * This ClassVisitor deletes attributes with a given name in the program
+ * This {@link ClassVisitor} deletes attributes with a given name in the program
  * classes, fields, methods, or code attributes that it visits.
  *
  * @author Eric Lafortune

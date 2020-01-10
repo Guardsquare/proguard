@@ -29,7 +29,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
 /**
- * This ClassVisitor fixes the access modifiers of all classes and class
+ * This {@link ClassVisitor} fixes the access modifiers of all classes and class
  * members that are referenced by the classes that it visits.
  *
  * @author Eric Lafortune

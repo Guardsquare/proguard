@@ -23,8 +23,8 @@ import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.target.*;
 
 /**
- * This interface specifies the methods for a visitor of <code>TargetInfo</code>
- * objects.
+ * This interface specifies the methods for a visitor of {@link TargetInfo}
+ * instances.
  *
  * @author Eric Lafortune
  */

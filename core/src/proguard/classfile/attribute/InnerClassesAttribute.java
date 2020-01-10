@@ -21,7 +21,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.attribute.visitor.*;
 
 /**
- * This Attribute represents an inner classes attribute.
+ * This {@link Attribute} represents an inner classes attribute.
  *
  * @author Eric Lafortune
  */

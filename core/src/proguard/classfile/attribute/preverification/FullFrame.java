@@ -22,7 +22,7 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.preverification.visitor.*;
 
 /**
- * This StackMapFrame represents a "full frame".
+ * This {@link StackMapFrame} represents a "full frame".
  *
  * @author Eric Lafortune
  */

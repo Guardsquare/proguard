@@ -24,8 +24,8 @@ import proguard.classfile.attribute.module.*;
 import proguard.classfile.attribute.preverification.*;
 
 /**
- * This interface specifies the methods for a visitor of <code>Attribute</code>
- * objects.
+ * This interface specifies the methods for a visitor of {@link Attribute}
+ * instances.
  *
  * @author Eric Lafortune
  */

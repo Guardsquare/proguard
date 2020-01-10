@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
 
 /**
- * This Attribute represents a line number table attribute.
+ * This {@link Attribute} represents a line number table attribute.
  *
  * @author Eric Lafortune
  */

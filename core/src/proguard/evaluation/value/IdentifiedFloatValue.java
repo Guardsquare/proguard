@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This FloatValue represents a float value that is identified by a unique ID.
+ * This {@link FloatValue} represents a float value that is identified by a unique ID.
  *
  * @author Eric Lafortune
  */

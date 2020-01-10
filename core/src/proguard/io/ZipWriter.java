@@ -23,7 +23,7 @@ import proguard.util.StringMatcher;
 import java.io.*;
 
 /**
- * This DataEntryWriter sends data entries to the zip files specified by
+ * This {@link DataEntryWriter} sends data entries to the zip files specified by
  * their parents.
  *
  * @author Eric Lafortune

@@ -18,7 +18,7 @@
 package proguard.classfile.instruction;
 
 /**
- * This Instruction represents a switch instruction.
+ * This {@link Instruction} represents a switch instruction.
  *
  * @author Eric Lafortune
  */

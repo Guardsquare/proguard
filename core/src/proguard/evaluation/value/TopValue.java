@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This class represents a partially evaluated top value. A top value is the
+ * Representation of a partially evaluated top value. A top value is the
  * dummy value that takes up the extra space when storing a long value or a
  * double value.
  *

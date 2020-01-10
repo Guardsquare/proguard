@@ -26,9 +26,9 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 
 /**
- * This JarWriter sends data entries to a given jar file, automatically
+ * This {@link JarWriter} sends data entries to a given jar file, automatically
  * adding a manifest file and signing it with JAR signature scheme v1.
- *
+ * <p/>
  * You'll typically wrap a {@link ZipWriter} or one of its extensions:
  * <pre>
  *     new SignedJarWriter(privateKeyEntry, new ZipWriter(...))

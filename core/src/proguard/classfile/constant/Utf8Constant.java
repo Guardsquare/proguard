@@ -24,7 +24,7 @@ import proguard.util.StringUtil;
 import java.io.UnsupportedEncodingException;
 
 /**
- * This Constant represents a UTF-8 constant in the constant pool.
+ * This {@link Constant} represents a UTF-8 constant in the constant pool.
  *
  * @author Eric Lafortune
  */

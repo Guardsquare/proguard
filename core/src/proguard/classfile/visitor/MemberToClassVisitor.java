@@ -21,7 +21,7 @@ import proguard.classfile.*;
 
 
 /**
- * This MemberVisitor delegates all visits to a given ClassVisitor.
+ * This {@link MemberVisitor} delegates all visits to a given {@link ClassVisitor}.
  * The latter visits the class of each visited class member.
  *
  * @author Eric Lafortune

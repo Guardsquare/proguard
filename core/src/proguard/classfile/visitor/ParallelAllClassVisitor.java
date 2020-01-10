@@ -24,16 +24,16 @@ import java.util.concurrent.*;
 
 
 /**
- * This ClassPoolVisitor will visit all Clazz objects of the class pool
- * in a parallel way. For each thread, a separate ClassVisitor will be
+ * This {@link ClassPoolVisitor} will visit all Clazz instances of the class pool
+ * in a parallel way. For each thread, a separate {@link ClassVisitor} will be
  * created using {@link ClassVisitorFactory#createClassVisitor()}.
- * <p>
+ * <p/>
  * The number of parallel threads is coupled to the number of available
  * processors:
  * <pre>
  *     parallel_threads = Runtime.getRuntime().availableProcessors() - 1;
  * </pre>
- * <p>
+ * <p/>
  * It is possible to override the number of threads by setting the
  * environment variable {@code parallel.threads} to an integer > 0.
  *
@@ -65,7 +65,7 @@ implements   ClassPoolVisitor
 
 
     /**
-     * A factory for ClassVisitor objects.
+     * A factory for {@link ClassVisitor} objects.
      */
     public interface ClassVisitorFactory
     {

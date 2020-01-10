@@ -24,7 +24,7 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This ConstantVisitor adds all class constants that it visits to the given
+ * This {@link ConstantVisitor} adds all class constants that it visits to the given
  * target exceptions attribute.
  *
  * @author Eric Lafortune

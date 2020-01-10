@@ -27,7 +27,7 @@ import proguard.util.*;
 import java.util.List;
 
 /**
- * This AttributeVisitor delegates its visits another AttributeVisitor, but
+ * This {@link AttributeVisitor} delegates its visits another {@link AttributeVisitor}, but
  * only when the visited attribute has a name that that matches a given regular
  * expression.
  *

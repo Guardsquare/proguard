@@ -21,8 +21,8 @@ import proguard.classfile.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>MemberVisitor</code> delegates its visits to methods to
- * another given <code>MemberVisitor</code>, but only when the visited
+ * This {@link MemberVisitor} delegates its visits to methods to
+ * another given {@link MemberVisitor}, but only when the visited
  * method may have implementations.
  *
  * @see Clazz#mayHaveImplementations(Method)

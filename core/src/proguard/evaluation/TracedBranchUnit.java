@@ -23,7 +23,7 @@ import proguard.evaluation.BasicBranchUnit;
 import proguard.evaluation.value.Value;
 
 /**
- * This BranchUnit remembers the branch unit commands that are invoked on it.
+ * This {@link BranchUnit} remembers the branch unit commands that are invoked on it.
  *
  * @author Eric Lafortune
  */

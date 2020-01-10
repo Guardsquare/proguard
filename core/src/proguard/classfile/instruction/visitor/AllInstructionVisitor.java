@@ -23,8 +23,8 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor lets a given InstructionVisitor visit all Instruction
- * objects of the CodeAttribute objects it visits.
+ * This {@link AttributeVisitor} lets a given {@link InstructionVisitor} visit all Instruction
+ * instances of the {@link CodeAttribute} instances it visits.
  *
  * @author Eric Lafortune
  */

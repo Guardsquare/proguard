@@ -28,8 +28,8 @@ import proguard.evaluation.value.*;
 import proguard.util.ArrayUtil;
 
 /**
- * This AttributeVisitor links 'new' instructions and their corresponding
- * initializers in the CodeAttribute objects that it visits.
+ * This {@link AttributeVisitor} links 'new' instructions and their corresponding
+ * initializers in the {@link CodeAttribute} instances that it visits.
  *
  * @author Eric Lafortune
  */

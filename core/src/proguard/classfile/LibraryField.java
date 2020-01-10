@@ -20,7 +20,7 @@ package proguard.classfile;
 import proguard.classfile.visitor.*;
 
 /**
- * Representation of a field from a class-file.
+ * This {@link Field} represents a field in a {@link LibraryClass}.
  *
  * @author Eric Lafortune
  */

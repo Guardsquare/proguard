@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 
 /**
- * This Attribute represents a type annotations attribute.
+ * This {@link Attribute} represents a type annotations attribute.
  *
  * @author Eric Lafortune
  */

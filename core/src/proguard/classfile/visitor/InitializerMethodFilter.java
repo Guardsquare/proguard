@@ -21,8 +21,8 @@ import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 
 /**
- * This MemberVisitor delegates its visits to one of two other given
- * MemberVisitor instances, depending on whether the visited method
+ * This {@link MemberVisitor} delegates its visits to one of two other given
+ * {@link MemberVisitor} instances, depending on whether the visited method
  * is a static initializer or instance initializer, or not.
  *
  * @author Eric Lafortune

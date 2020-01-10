@@ -23,7 +23,7 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This AttributeVisitor computes and updates the maximum stack size of the
+ * This {@link AttributeVisitor} computes and updates the maximum stack size of the
  * code attributes that it visits.
  *
  * @author Eric Lafortune

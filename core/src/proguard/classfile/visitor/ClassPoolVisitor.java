@@ -22,8 +22,8 @@ import proguard.classfile.ClassPool;
 
 /**
  * This interface specifies the methods for a visitor of
- * <code>ClassPool</code> objects. Note that there is only a single
- * implementation of <code>ClassPool</code>, such that this interface
+ * {@link ClassPool} instances. Note that there is only a single
+ * implementation of {@link ClassPool}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

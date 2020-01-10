@@ -25,7 +25,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
 
 /**
- * This Instruction represents an instruction that refers to an entry in the
+ * This {@link Instruction} represents an instruction that refers to an entry in the
  * constant pool.
  *
  * @author Eric Lafortune

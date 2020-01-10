@@ -20,8 +20,8 @@ package proguard.classfile.visitor;
 import proguard.classfile.*;
 
 /**
- * This <code>ClassVisitor</code> delegates its visits to program classes to
- * another given <code>ClassVisitor</code>, but only when the class version
+ * This {@link ClassVisitor} delegates its visits to program classes to
+ * another given {@link ClassVisitor}, but only when the class version
  * number of the visited program class lies in a given range.
  *
  * @author Eric Lafortune

@@ -18,7 +18,7 @@
 package proguard.evaluation.value;
 
 /**
- * This class represents a partially evaluated long value.
+ * {@link LongValue} that is unknown.
  *
  * @author Eric Lafortune
  */

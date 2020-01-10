@@ -22,7 +22,7 @@ import proguard.classfile.attribute.BootstrapMethodInfo;
 import proguard.classfile.attribute.visitor.BootstrapMethodInfoVisitor;
 
 /**
- * This BootstrapMethodInfoVisitor lets a given ConstantVisitor visit all
+ * This {@link BootstrapMethodInfoVisitor} lets a given {@link ConstantVisitor} visit all
  * constant pool entries of the bootstrap methods it visits.
  *
  * @author Eric Lafortune

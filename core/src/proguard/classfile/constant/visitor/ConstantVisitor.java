@@ -22,8 +22,8 @@ import proguard.classfile.constant.*;
 
 
 /**
- * This interface specifies the methods for a visitor of <code>Constant</code>
- * objects.
+ * This interface specifies the methods for a visitor of {@link Constant}
+ * instances.
  *
  * @author Eric Lafortune
  */

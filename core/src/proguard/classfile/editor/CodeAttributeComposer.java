@@ -36,25 +36,25 @@ import proguard.util.ArrayUtil;
 import java.util.Arrays;
 
 /**
- * This AttributeVisitor accumulates instructions, exceptions and line numbers,
+ * This {@link AttributeVisitor} accumulates instructions, exceptions and line numbers,
  * and then copies them into code attributes that it visits.
- *
+ * <p/>
  * The class supports composing
  *   instructions       ({@link #appendInstruction(Instruction)}),
  *   labels             ({@link #appendLabel(int)}),
  *   exception handlers ({@link #appendException(ExceptionInfo)}), and
  *   line numbers       ({@link #appendLineNumber(LineNumberInfo)}).
- *
+ * <p/>
  * The labels are numeric labels that you can choose freely, for example
  * instruction offsets from existing code that you are copying. You can then
  * refer to them in branches and exception handlers. You can compose the
  * code as a hierarchy of code fragments with their own local labels.
- *
+ * <p/>
  * You should provide an estimated maximum size (expressed in number of
  * bytes in the bytecode), so the implementation can efficiently allocate
  * the necessary internal buffers without reallocating them as the code
  * grows.
- *
+ * <p/>
  * For example:
  * <pre>
  *     ProgramClass  programClass  = ...
@@ -102,7 +102,7 @@ import java.util.Arrays;
  *     // Put the code in the given code attribute.
  *     composer.visitCodeAttribute(programClass, programMethod, codeAttribute);
  * </pre>
- *
+ * <p/>
  * This class is mostly convenient to compose code based on existing code,
  * where the instructions are already available. For a more compact and
  * readable alternative to compose code programmatically from scratch,

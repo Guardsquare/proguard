@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringMatcher tests whether strings match a given list of StringMatcher
+ * This {@link StringMatcher} tests whether strings match a given list of {@link StringMatcher}
  * instances. The instances are considered sequentially. Each instance in the
  * list can optionally be negated, meaning that a match makes the entire
  * remaining match fail.

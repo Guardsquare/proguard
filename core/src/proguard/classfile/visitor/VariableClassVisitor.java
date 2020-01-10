@@ -21,7 +21,7 @@ import proguard.classfile.*;
 
 
 /**
- * This ClassVisitor delegates all method calls to a ClassVisitor
+ * This {@link ClassVisitor} delegates all method calls to a {@link ClassVisitor}
  * that can be changed at any time.
  *
  * @author Eric Lafortune

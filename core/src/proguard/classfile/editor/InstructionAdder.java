@@ -24,7 +24,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This InstructionVisitor adds all instructions that it visits to the given
+ * This {@link InstructionVisitor} adds all instructions that it visits to the given
  * target code attribute.
  *
  * @author Eric Lafortune

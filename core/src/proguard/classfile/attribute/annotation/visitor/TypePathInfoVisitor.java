@@ -23,8 +23,8 @@ import proguard.classfile.attribute.annotation.*;
 
 /**
  * This interface specifies the methods for a visitor of
- * TypePathInfo instances. Note that there is only a single
- * implementation of TypePathInfo, such that this interface
+ * {@link TypePathInfo} instances. Note that there is only a single
+ * implementation of {@link TypePathInfo}, such that this interface
  * is not strictly necessary as a visitor.
  *
  * @author Eric Lafortune

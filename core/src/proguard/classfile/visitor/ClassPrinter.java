@@ -39,7 +39,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 /**
- * This <code>ClassVisitor</code> prints out the complete internal
+ * This {@link ClassVisitor} prints out the complete internal
  * structure of the classes it visits.
  *
  * @author Eric Lafortune

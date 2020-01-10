@@ -24,7 +24,7 @@ import proguard.classfile.util.SimplifiedVisitor;
 import proguard.util.ArrayUtil;
 
 /**
- * This AnnotationVisitor adds all annotations that it visits to the given
+ * This {@link AnnotationVisitor} adds all annotations that it visits to the given
  * target annotation element value, target annotation attribute, or target
  * parameter annotation attribute.
  *

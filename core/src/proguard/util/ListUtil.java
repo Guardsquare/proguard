@@ -22,7 +22,7 @@ import java.util.*;
 
 /**
  * This class provides some utility methods for working with
- * <code>java.util.List</code> objects.
+ * <code>java.util.List</code> instances.
  *
  * @author Eric Lafortune
  */

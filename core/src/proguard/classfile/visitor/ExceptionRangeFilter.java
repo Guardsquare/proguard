@@ -22,8 +22,8 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.ExceptionInfoVisitor;
 
 /**
- * This <code>ExceptionInfoVisitor</code> delegates its visits to another given
- * <code>ExceptionInfoVisitor</code>, but only when the visited exception
+ * This {@link ExceptionInfoVisitor} delegates its visits to another given
+ * {@link ExceptionInfoVisitor}, but only when the visited exception
  * overlaps with the given instruction range.
  *
  * @author Eric Lafortune

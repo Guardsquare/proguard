@@ -24,8 +24,8 @@ import proguard.classfile.util.*;
 import proguard.evaluation.value.*;
 
 /**
- * This class creates Value instance that correspond to specified constant pool
- * entries.
+ * This class creates {@link Value} instances that correspond to specified
+ * constant pool entries.
  *
  * @author Eric Lafortune
  */

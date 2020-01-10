@@ -29,8 +29,8 @@ import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This ElementValueVisitor initializes the field references of the
- * EnumConstantElementValue instances that it visits.
+ * This {@link ElementValueVisitor} initializes the field references of the
+ * {@link EnumConstantElementValue} instances that it visits.
  *
  * @author Eric Lafortune
  */

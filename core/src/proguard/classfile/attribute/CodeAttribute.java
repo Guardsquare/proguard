@@ -23,7 +23,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 
 /**
- * This Attribute represents a code attribute.
+ * This {@link Attribute} represents a code attribute.
  *
  * @author Eric Lafortune
  */

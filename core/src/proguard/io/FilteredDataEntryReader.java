@@ -21,7 +21,7 @@ import java.io.IOException;
 
 
 /**
- * This DataEntryReader delegates to one of two other DataEntryReader instances,
+ * This {@link DataEntryReader} delegates to one of two other {@link DataEntryReader} instances,
  * depending on whether the data entry passes through a given data entry filter
  * or not.
  *

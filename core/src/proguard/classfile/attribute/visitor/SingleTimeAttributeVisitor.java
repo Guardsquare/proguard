@@ -24,9 +24,9 @@ import proguard.classfile.attribute.module.*;
 import proguard.classfile.attribute.preverification.*;
 
 /**
- * This AttributeVisitor delegates all visits to a given AttributeVisitor,
+ * This {@link AttributeVisitor} delegates all visits to a given {@link AttributeVisitor},
  * although only once to the same attribute in a row.
- *
+ * <p/>
  * It can for example be used to lazily apply a visitor in a place where it
  * would be called multiple times.
  *

@@ -22,7 +22,7 @@ import proguard.classfile.constant.Constant;
 import proguard.classfile.util.SimplifiedVisitor;
 
 /**
- * This <code>ConstantVisitor</code> delegates its visits to one or more
+ * This {@link ConstantVisitor} delegates its visits to one or more
  * specified types of constants.
  *
  * @author Eric Lafortune

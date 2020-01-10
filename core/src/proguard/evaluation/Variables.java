@@ -22,8 +22,8 @@ import proguard.evaluation.value.*;
 import java.util.Arrays;
 
 /**
- * This class represents a local variable frame that contains <code>Value</code>
- * objects. Values are generalizations of all values that have been stored in
+ * This class represents a local variable frame that contains {@link Value}
+ * instances. Values are generalizations of all values that have been stored in
  * the respective variables.
  *
  * @author Eric Lafortune

@@ -22,10 +22,8 @@ import proguard.classfile.visitor.*;
 import proguard.resources.file.visitor.ResourceFileVisitor;
 
 /**
- * This visitor sets the specified processing flags of the Processable
+ * This visitor sets the specified processing flags of the {@link Processable}
  * instances that it visits.
- *
- * @see ProcessingFlags
  *
  * @author Johan Leys
  */

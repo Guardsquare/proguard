@@ -21,7 +21,7 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 
 /**
- * This LineNumberInfoVisitor remembers the lowest and the highest line
+ * This {@link LineNumberInfoVisitor} remembers the lowest and the highest line
  * numbers that it finds in all the line numbers that it visits. It
  * ignores the sources of the line numbers.
  */

@@ -18,7 +18,7 @@
 package proguard.util;
 
 /**
- * This StringFunction removes a given prefix from each transformed String, if present.
+ * This {@link StringFunction} removes a given prefix from each transformed String, if present.
  *
  * @author Johan Leys
  */

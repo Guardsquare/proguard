@@ -22,7 +22,7 @@ import proguard.util.ArrayUtil;
 import java.io.IOException;
 
 /**
- * This DataEntryReader delegates to a given DataEntryReader, each time
+ * This {@link DataEntryReader} delegates to a given {@link DataEntryReader}, each time
  * stripping a possible prefix from the read data entry name.
  *
  * @author Eric Lafortune
