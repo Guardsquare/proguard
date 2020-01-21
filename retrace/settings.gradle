@@ -1,2 +1,2 @@
-includeFlat 'core'
+includeFlat 'base'
 includeFlat 'base'

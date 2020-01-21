@@ -38,6 +38,8 @@ public class ClassConstants
     public static final String NAME_JAVA_LANG_CLASS                         = "java/lang/Class";
     public static final String TYPE_JAVA_LANG_CLASS                         = "Ljava/lang/Class;";
     public static final String NAME_JAVA_LANG_CLASS_LOADER                  = "java/lang/ClassLoader";
+    public static final String NAME_JAVA_LANG_ENUM                          = "java/lang/Enum";
+    public static final String NAME_JAVA_LANG_ANNOTATION_ANNOTATION         = "java/lang/annotation/Annotation";
     public static final String NAME_JAVA_LANG_STRING                        = "java/lang/String";
     public static final String TYPE_JAVA_LANG_STRING                        = "Ljava/lang/String;";
     public static final String NAME_JAVA_LANG_STRING_BUFFER                 = "java/lang/StringBuffer";

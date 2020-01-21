@@ -21,6 +21,13 @@ summary of changes below, to see if you're missing something essential.
 Unless noted otherwise, ProGuard remains compatible across versions, so
 don't be afraid to update.
 
+## Version 6.3 <div>In beta</div>
+
+|        |          |          |
+|--------|----------|----------|----------------------------------
+| 6.3.x  |          | CORE     | Optimizing away instance references to constructor-less classes.
+| 6.3.x  | PGD-12   | CORE     | Fixed building gradle plugin.
+
 ## Version 6.2 <div>October 2019</div>
 
 |        |          |          |
@@ -47,19 +54,6 @@ don't be afraid to update.
 | 6.2.0  | PGD-753  | CORE     | Fixed processing of signature attributes in constructors of inner classes and enum types.
 | 6.2.0  | PGD-759  | CORE     | Fixed backporting of Java 8 API types when used as parameters in private methods.
 | 6.2.0  | PGD-1    | CORE     | Fixed optimization of exception handling in Kotlin runtime.
-
-## Version 6.3 <div>In beta</div>
-
-|        |          |          |
-|--------|----------|----------|----------------------------------
-| 6.3.x  | DGD-1317 | CORE     | Fixed potential build errors when optimizing methods with many parameters.
-| 6.3.x  | PGD-750  | CORE     | Fixed UnsupportedOperationException when optimizing enum types in closure arguments.
-| 6.3.x  | PGD-12   | CORE     | Fixed building gradle plugin.
-
-## Version 6.2 <div>October 2019</div>
-
-|        |          |          |
-|--------|----------|----------|----------------------------------
 
 ## Version 6.1 <div>May 2019</div>
 

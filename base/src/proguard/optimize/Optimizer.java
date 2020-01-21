@@ -1082,7 +1082,10 @@ public class Optimizer
                     new WrapperClassMarker(),
 
                     new AllConstantVisitor(
-                    new PackageVisibleMemberInvokingClassMarker())
+                    new PackageVisibleMemberInvokingClassMarker()),
+
+                    new AllMemberVisitor(
+                    new ContainsConstructorsMarker())
                 )),
 
                 // Mark methods.
@@ -1637,16 +1640,21 @@ public class Optimizer
 
         if (codeSimplificationObject)
         {
-            // Peephole optimizations involving branches.
+            // Peephole optimizations involving objects.
             peepholeOptimizations.add(
                 new InstructionSequencesReplacer(sequences.CONSTANTS,
                                                  sequences.OBJECT_SEQUENCES,
                                                  branchTargetFinder, codeAttributeEditor, codeSimplificationObjectCounter));
+
+            // Include optimizations of instance references on classes without
+            // constructors.
+            peepholeOptimizations.add(
+                new NoConstructorReferenceReplacer(codeAttributeEditor, codeSimplificationObjectCounter));
         }
 
         if (codeSimplificationString)
         {
-            // Peephole optimizations involving branches.
+            // Peephole optimizations involving strings.
             peepholeOptimizations.add(
                 new InstructionSequencesReplacer(sequences.CONSTANTS,
                                                  sequences.STRING_SEQUENCES,

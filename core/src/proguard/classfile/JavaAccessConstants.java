@@ -32,7 +32,7 @@ public class JavaAccessConstants
     public static final String PROTECTED    = "protected";
     public static final String STATIC       = "static";
     public static final String FINAL        = "final";
-//  public static final String SUPER        = "super";
+    public static final String SUPER        = "super";
     public static final String SYNCHRONIZED = "synchronized";
     public static final String VOLATILE     = "volatile";
     public static final String TRANSIENT    = "transient";
@@ -50,5 +50,5 @@ public class JavaAccessConstants
     public static final String MODULE       = "module";
     public static final String OPEN         = "open";
     public static final String TRANSITIVE   = "transitive";
-//  public static final String STATIC_PHASE = "static";
+    public static final String STATIC_PHASE = "static_phase";
 }

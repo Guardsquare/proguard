@@ -352,6 +352,30 @@ implements   Clazz
         }
     }
 
+    public String getModuleName(int constantIndex)
+    {
+        try
+        {
+            return ((ModuleConstant)constantPool[constantIndex]).getName(this);
+        }
+        catch (ClassCastException ex)
+        {
+            throw ((IllegalStateException)new IllegalStateException("Expected ModuleConstant at index ["+constantIndex+"] in class ["+getName()+"]").initCause(ex));
+        }
+    }
+
+    public String getPackageName(int constantIndex)
+    {
+        try
+        {
+            return ((PackageConstant)constantPool[constantIndex]).getName(this);
+        }
+        catch (ClassCastException ex)
+        {
+            throw ((IllegalStateException)new IllegalStateException("Expected PackageConstant at index ["+constantIndex+"] in class ["+getName()+"]").initCause(ex));
+        }
+    }
+
 
     public void addSubClass(Clazz clazz)
     {

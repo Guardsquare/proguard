@@ -29,6 +29,13 @@ public class JavaConstants
 {
     public static final String JAVA_FILE_EXTENSION = ".java";
 
-    public static final String TYPE_JAVA_LANG_OBJECT = "java.lang.Object";
-    public static final String PACKAGE_JAVA_LANG     = "java.lang.";
+    public static final String TYPE_JAVA_LANG_OBJECT                = "java.lang.Object";
+    public static final String TYPE_JAVA_LANG_STRING                = "java.lang.String";
+    public static final String TYPE_JAVA_LANG_CLASS                 = "java.lang.Class";
+    public static final String TYPE_JAVA_LANG_ENUM                  = "java.lang.Enum";
+    public static final String TYPE_JAVA_LANG_ANNOTATION_ANNOTATION = "java.lang.annotation.Annotation";
+    public static final String TYPE_JAVA_LANG_REFLECT_ARRAY         = "java.lang.reflect.Array";
+    public static final String TYPE_JAVA_LANG_INVOKE_METHODHANDLE   = "java.lang.invoke.MethodHandle";
+    public static final String TYPE_JAVA_LANG_INVOKE_METHODTYPE     = "java.lang.invoke.MethodType";
+    public static final String PACKAGE_JAVA_LANG                    = "java.lang.";
 }

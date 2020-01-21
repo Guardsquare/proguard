@@ -66,7 +66,7 @@ public class InstructionFactory
     /**
      * Creates a new Instruction corresponding to the given opcode.
      */
-    private static Instruction create(byte opcode, boolean wide)
+    public static Instruction create(byte opcode, boolean wide)
     {
         switch (opcode)
         {

@@ -103,6 +103,16 @@ public interface Clazz extends FeatureNamed, Processable
      */
     public String getRefType(int constantIndex);
 
+    /**
+     * Returns the name of the ModuleConstant at the specified index.
+     */
+    public String getModuleName(int constantIndex);
+
+    /**
+     * Returns the name of the PackageConstant at the specified index.
+     */
+    public String getPackageName(int constantIndex);
+
 
     // Methods pertaining to related classes.
 

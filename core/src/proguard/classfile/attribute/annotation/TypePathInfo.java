@@ -24,6 +24,12 @@ package proguard.classfile.attribute.annotation;
  */
 public class TypePathInfo
 {
+    public static final int KIND_Array             = 0;
+    public static final int KIND_Nested            = 1;
+    public static final int KIND_TypeArgumentBound = 2;
+    public static final int KIND_TypeArgument      = 3;
+
+
     public int u1typePathKind;
     public int u1typeArgumentIndex;
 

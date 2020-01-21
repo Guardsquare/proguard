@@ -50,6 +50,15 @@ public class NestHostAttribute extends Attribute
     }
 
 
+    /**
+     * Returns the host class name.
+     */
+    public String getHostClassName(Clazz clazz)
+    {
+        return clazz.getClassName(u2hostClassIndex);
+    }
+
+
     // Implementations for Attribute.
 
     public void accept(Clazz clazz, AttributeVisitor attributeVisitor)

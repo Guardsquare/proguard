@@ -109,6 +109,7 @@ import java.util.Arrays;
  * see {@link CompactCodeAttributeComposer}.
  *
  * @author Eric Lafortune
+ * @author Joachim Vandersmissen
  */
 public class CodeAttributeComposer
 extends      SimplifiedVisitor
@@ -127,7 +128,7 @@ implements   AttributeVisitor,
     //*
     private static final boolean DEBUG = false;
     /*/
-    public  static       boolean DEBUG = false;
+    public  static       boolean DEBUG = System.getProperty("cac") != null;
     //*/
 
 
@@ -136,7 +137,7 @@ implements   AttributeVisitor,
 
 
     private final boolean allowExternalBranchTargets;
-    private final boolean allowExternalExceptionHandlers;
+    private final boolean allowExternalExceptionOffsets;
     private final boolean shrinkInstructions;
 
     private int maximumCodeLength;
@@ -164,7 +165,7 @@ implements   AttributeVisitor,
 
     /**
      * Creates a new CodeAttributeComposer that doesn't allow external branch
-     * targets or exception handlers and that automatically shrinks
+     * targets or exception offsets and that automatically shrinks
      * instructions.
      */
     public CodeAttributeComposer()
@@ -178,8 +179,8 @@ implements   AttributeVisitor,
      * @param allowExternalBranchTargets     specifies whether branch targets
      *                                       can lie outside the code fragment
      *                                       of the branch instructions.
-     * @param allowExternalExceptionHandlers specifies whether exception
-     *                                       handlers can lie outside the code
+     * @param allowExternalExceptionOffsets  specifies whether exception
+     *                                       offsets can lie outside the code
      *                                       fragment in which exceptions are
      *                                       defined.
      * @param shrinkInstructions             specifies whether instructions
@@ -187,11 +188,11 @@ implements   AttributeVisitor,
      *                                       before being written.
      */
     public CodeAttributeComposer(boolean allowExternalBranchTargets,
-                                 boolean allowExternalExceptionHandlers,
+                                 boolean allowExternalExceptionOffsets,
                                  boolean shrinkInstructions)
     {
         this.allowExternalBranchTargets     = allowExternalBranchTargets;
-        this.allowExternalExceptionHandlers = allowExternalExceptionHandlers;
+        this.allowExternalExceptionOffsets  = allowExternalExceptionOffsets;
         this.shrinkInstructions             = shrinkInstructions;
     }
 
@@ -552,26 +553,19 @@ implements   AttributeVisitor,
         maximumCodeLength += codeLength - codeFragmentOffsets[level] -
                              codeFragmentLengths[level];
 
-        // Try to remap the exception handlers that couldn't be remapped before.
-        if (allowExternalExceptionHandlers)
+        // Try to remap the exception offsets that couldn't be remapped before.
+        if (allowExternalExceptionOffsets)
         {
             for (int index = 0; index < exceptionTableLength; index++)
             {
                 ExceptionInfo exceptionInfo = exceptionTable[index];
 
-                // Unmapped exception handlers are still negated.
-                int handlerPC = -exceptionInfo.u2handlerPC;
-                if (handlerPC > 0)
-                {
-                    if (remappableExceptionHandler(handlerPC))
-                    {
-                        exceptionInfo.u2handlerPC = newInstructionOffset(handlerPC);
-                    }
-                    else if (level == 0)
-                    {
-                        throw new IllegalStateException("Couldn't remap exception handler offset ["+handlerPC+"]");
-                    }
-                }
+                exceptionInfo.u2startPC =
+                    remapExceptionOffset(exceptionInfo.u2startPC);
+                exceptionInfo.u2endPC =
+                    remapExceptionOffset(exceptionInfo.u2endPC);
+                exceptionInfo.u2handlerPC =
+                    remapExceptionOffset(exceptionInfo.u2handlerPC);
             }
         }
 
@@ -736,6 +730,20 @@ implements   AttributeVisitor,
     }
 
 
+    public void visitRuntimeVisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeVisibleTypeAnnotationsAttribute runtimeVisibleTypeAnnotationsAttribute)
+    {
+        // Remap all type annotations.
+        runtimeVisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz, method, codeAttribute, this);
+    }
+
+
+    public void visitRuntimeInvisibleTypeAnnotationsAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, RuntimeInvisibleTypeAnnotationsAttribute runtimeInvisibleTypeAnnotationsAttribute)
+    {
+        // Remap all type annotations.
+        runtimeInvisibleTypeAnnotationsAttribute.typeAnnotationsAccept(clazz, method, codeAttribute, this);
+    }
+
+
     // Implementations for InstructionVisitor.
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {}
@@ -792,17 +800,30 @@ implements   AttributeVisitor,
 
     public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
     {
-        // Remap the code offsets. Note that the instruction offset map also has
-        // an entry for the first offset after the code, for u2endPC.
-        exceptionInfo.u2startPC = newInstructionOffset(exceptionInfo.u2startPC);
-        exceptionInfo.u2endPC   = newInstructionOffset(exceptionInfo.u2endPC);
+        // See if we can remap the start right away. Unmapped exception starts
+        // are negated, in order to mark them as external.
+        int startPC = exceptionInfo.u2startPC;
+        exceptionInfo.u2startPC =
+            !allowExternalExceptionOffsets ||
+            remappableExceptionOffset(startPC) ?
+                newInstructionOffset(startPC) :
+                -startPC;
+
+        // See if we can remap the end right away. Unmapped exception ends are
+        // negated, in order to mark them as external.
+        int endPC = exceptionInfo.u2endPC;
+        exceptionInfo.u2endPC =
+            !allowExternalExceptionOffsets ||
+            remappableExceptionOffset(endPC) ?
+                newInstructionOffset(endPC) :
+                -endPC;
 
         // See if we can remap the handler right away. Unmapped exception
         // handlers are negated, in order to mark them as external.
         int handlerPC = exceptionInfo.u2handlerPC;
         exceptionInfo.u2handlerPC =
-            !allowExternalExceptionHandlers ||
-            remappableExceptionHandler(handlerPC) ?
+            !allowExternalExceptionOffsets ||
+            remappableExceptionOffset(handlerPC) ?
                 newInstructionOffset(handlerPC) :
                 -handlerPC;
     }
@@ -915,8 +936,15 @@ implements   AttributeVisitor,
 
     public void visitTypeAnnotation(Clazz clazz, TypeAnnotation typeAnnotation)
     {
-        // Update all local variable targets.
+        // Remap the target info.
         typeAnnotation.targetInfoAccept(clazz, this);
+    }
+
+
+    public void visitTypeAnnotation(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation)
+    {
+        // Remap the target info.
+        typeAnnotation.targetInfoAccept(clazz, method, codeAttribute, this);
     }
 
 
@@ -927,15 +955,28 @@ implements   AttributeVisitor,
 
     public void visitLocalVariableTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo)
     {
-        // Update the offsets of the variables.
+        // Remap all local variable target info elements.
         localVariableTargetInfo.targetElementsAccept(clazz, method, codeAttribute, typeAnnotation, this);
+
+        // Remove local variable target info elements with empty code blocks.
+        localVariableTargetInfo.u2tableLength =
+            removeEmptyLocalVariableTargetElements(localVariableTargetInfo.table,
+                                                   localVariableTargetInfo.u2tableLength,
+                                                   codeAttribute.u2maxLocals);
     }
 
 
     public void visitOffsetTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, OffsetTargetInfo offsetTargetInfo)
     {
-        // Update the offset.
+        // Remap the code offset.
         offsetTargetInfo.u2offset = newInstructionOffset(offsetTargetInfo.u2offset);
+    }
+
+
+    public void visitTypeArgumentTargetInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, TypeArgumentTargetInfo typeArgumentTargetInfo)
+    {
+        // Remap the code offset.
+        typeArgumentTargetInfo.u2offset = newInstructionOffset(typeArgumentTargetInfo.u2offset);
     }
 
 
@@ -944,6 +985,7 @@ implements   AttributeVisitor,
     public void visitLocalVariableTargetElement(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotation typeAnnotation, LocalVariableTargetInfo localVariableTargetInfo, LocalVariableTargetElement localVariableTargetElement)
     {
         // Remap the code offset and length.
+        // TODO: The local variable frame might not be strictly preserved.
         int startPC = newInstructionOffset(localVariableTargetElement.u2startPC);
         int endPC   = newInstructionOffset(localVariableTargetElement.u2startPC +
                                            localVariableTargetElement.u2length);
@@ -951,6 +993,7 @@ implements   AttributeVisitor,
         localVariableTargetElement.u2startPC = startPC;
         localVariableTargetElement.u2length  = endPC - startPC;
     }
+
 
     // Small utility methods.
 
@@ -1028,10 +1071,34 @@ implements   AttributeVisitor,
 
 
     /**
-     * Returns whether the given old exception handler can be remapped in the
+     * Computes the new instruction offset for an exception start, end, or
+     * handler, if the old instruction offset is negated.
+     */
+    private int remapExceptionOffset(int oldInstructionOffset)
+    {
+        // Unmapped exception offsets are still negated.
+        if (oldInstructionOffset < 0)
+        {
+            oldInstructionOffset = -oldInstructionOffset;
+            if (remappableExceptionOffset(oldInstructionOffset))
+            {
+                return newInstructionOffset(oldInstructionOffset);
+            }
+            else if (level == 0)
+            {
+                throw new IllegalStateException("Couldn't remap exception offset ["+oldInstructionOffset+"]");
+            }
+        }
+
+        return oldInstructionOffset;
+    }
+
+
+    /**
+     * Returns whether the given old exception offset can be remapped in the
      * current code fragment.
      */
-    private boolean remappableExceptionHandler(int oldInstructionOffset)
+    private boolean remappableExceptionOffset(int oldInstructionOffset)
     {
         // Can we index in the array?
         if (oldInstructionOffset > codeFragmentLengths[level])
@@ -1039,14 +1106,11 @@ implements   AttributeVisitor,
             return false;
         }
 
-        // Do we have a valid new instruction offset, but not yet right after
-        // the code? That offset is only labeled for mapping try blocks, not
-        // for mapping handlers.
+        // Do we have a valid new instruction offset?
         int newInstructionOffset =
             instructionOffsetMap[level][oldInstructionOffset];
 
-        return newInstructionOffset > INVALID &&
-               newInstructionOffset < codeLength;
+        return newInstructionOffset > INVALID;
     }
 
 
@@ -1152,6 +1216,33 @@ implements   AttributeVisitor,
 
         // Clear the unused array entries.
         Arrays.fill(localVariableTypeInfos, newIndex, localVariableTypeInfoCount, null);
+
+        return newIndex;
+    }
+
+
+    /**
+     * Returns the given list of local variable target elements, without the ones
+     * that have empty code blocks or that exceed the actual number of local variables.
+     */
+    private int removeEmptyLocalVariableTargetElements(LocalVariableTargetElement[] localVariableTargetElements,
+                                                       int                          localVariableTargetElementCount,
+                                                       int                          maxLocals)
+    {
+        // Overwrite all empty local variable target elements.
+        int newIndex = 0;
+        for (int index = 0; index < localVariableTargetElementCount; index++)
+        {
+            LocalVariableTargetElement localVariableTargetElement = localVariableTargetElements[index];
+            if (localVariableTargetElement.u2length > 0 &&
+                localVariableTargetElement.u2index < maxLocals)
+            {
+                localVariableTargetElements[newIndex++] = localVariableTargetElement;
+            }
+        }
+
+        // Clear the unused array entries.
+        Arrays.fill(localVariableTargetElements, newIndex, localVariableTargetElementCount, null);
 
         return newIndex;
     }

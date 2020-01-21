@@ -61,4 +61,4 @@ Enjoy!
 
 https://www.guardsquare.com/proguard
 
-Copyright (c) 2002-2019 Guardsquare NV
+Copyright (c) 2002-2020 Guardsquare NV

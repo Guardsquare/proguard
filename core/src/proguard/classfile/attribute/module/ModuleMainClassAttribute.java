@@ -50,6 +50,15 @@ public class ModuleMainClassAttribute extends Attribute
     }
 
 
+    /**
+     * Returns the main class name.
+     */
+    public String getMainClassName(Clazz clazz)
+    {
+        return clazz.getClassName(u2mainClass);
+    }
+
+
     // Implementations for Attribute.
 
     public void accept(Clazz clazz, AttributeVisitor attributeVisitor)

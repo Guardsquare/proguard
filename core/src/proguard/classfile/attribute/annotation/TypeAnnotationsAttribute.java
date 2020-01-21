@@ -18,6 +18,7 @@
 package proguard.classfile.attribute.annotation;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.annotation.visitor.*;
 
 /**
@@ -90,6 +91,22 @@ public abstract class TypeAnnotationsAttribute extends AnnotationsAttribute
             // We don't need double dispatching here, since there is only one
             // type of Annotation.
             typeAnnotationVisitor.visitTypeAnnotation(clazz, method, annotations[index]);
+        }
+    }
+
+
+    /**
+     * Applies the given visitor to all code attribute annotations.
+     */
+    public void typeAnnotationsAccept(Clazz clazz, Method method, CodeAttribute codeAttribute, TypeAnnotationVisitor typeAnnotationVisitor)
+    {
+        TypeAnnotation[] annotations = (TypeAnnotation[])this.annotations;
+
+        for (int index = 0; index < u2annotationsCount; index++)
+        {
+            // We don't need double dispatching here, since there is only one
+            // type of Annotation.
+            typeAnnotationVisitor.visitTypeAnnotation(clazz, method, codeAttribute, annotations[index]);
         }
     }
 }

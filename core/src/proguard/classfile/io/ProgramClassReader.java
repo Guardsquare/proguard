@@ -1268,7 +1268,7 @@ implements   ClassVisitor,
             attributeName.equals(Attribute.STACK_MAP_TABLE) && !ignoreStackMapAttributes ? new StackMapTableAttribute()                                  :
             attributeName.equals(Attribute.LINE_NUMBER_TABLE)                            ? new LineNumberTableAttribute()                                :
             attributeName.equals(Attribute.LOCAL_VARIABLE_TABLE)                         ? new LocalVariableTableAttribute()                             :
-            attributeName.equals(Attribute.LOCAL_VARIABLE_TYPETable)                     ? new LocalVariableTypeTableAttribute()                         :
+            attributeName.equals(Attribute.LOCAL_VARIABLE_TYPE_TABLE)                    ? new LocalVariableTypeTableAttribute()                         :
             attributeName.equals(Attribute.RUNTIME_VISIBLE_ANNOTATIONS)                  ? new RuntimeVisibleAnnotationsAttribute()                      :
             attributeName.equals(Attribute.RUNTIME_INVISIBLE_ANNOTATIONS)                ? new RuntimeInvisibleAnnotationsAttribute()                    :
             attributeName.equals(Attribute.RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS)        ? new RuntimeVisibleParameterAnnotationsAttribute()             :

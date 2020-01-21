@@ -151,6 +151,16 @@ implements   Clazz
         throw new UnsupportedOperationException("Library class ["+thisClassName+"] doesn't store constant pool");
     }
 
+    public String getModuleName(int constantIndex)
+    {
+        throw new UnsupportedOperationException("Library class ["+thisClassName+"] doesn't store constant pool");
+    }
+
+    public String getPackageName(int constantIndex)
+    {
+        throw new UnsupportedOperationException("Library class ["+thisClassName+"] doesn't store constant pool");
+    }
+
 
     public void addSubClass(Clazz clazz)
     {

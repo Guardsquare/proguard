@@ -51,6 +51,12 @@ public class ClassOptimizationInfo
     }
 
 
+    public boolean containsConstructors()
+    {
+        return true;
+    }
+
+
     public boolean isInstantiated()
     {
         return true;

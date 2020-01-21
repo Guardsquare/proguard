@@ -50,7 +50,7 @@ public class ClassReader implements DataEntryReader
 
 
     /**
-     * Creates a new DataEntryClassFilter for reading the specified
+     * Creates a new ClassReader for reading the specified
      * Clazz objects.
      */
     public ClassReader(boolean        isLibrary,

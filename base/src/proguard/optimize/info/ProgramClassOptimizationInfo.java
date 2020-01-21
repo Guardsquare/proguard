@@ -31,6 +31,7 @@ import proguard.classfile.Clazz;
 public class ProgramClassOptimizationInfo
 extends      ClassOptimizationInfo
 {
+    private volatile boolean containsConstructors          = false;
     private volatile boolean isInstantiated                = false;
     private volatile boolean isInstanceofed                = false;
     private volatile boolean isDotClassed                  = false;
@@ -48,6 +49,18 @@ extends      ClassOptimizationInfo
     public boolean isKept()
     {
         return false;
+    }
+
+
+    public void setContainsConstructors()
+    {
+        containsConstructors = true;
+    }
+
+
+    public boolean containsConstructors()
+    {
+        return containsConstructors;
     }
 
 
@@ -206,6 +219,7 @@ extends      ClassOptimizationInfo
         this.hasSideEffects                |= other.hasSideEffects();
         this.containsPackageVisibleMembers |= other.containsPackageVisibleMembers();
         this.invokesPackageVisibleMembers  |= other.invokesPackageVisibleMembers();
+        this.containsConstructors          |= other.containsConstructors();
     }
 
 

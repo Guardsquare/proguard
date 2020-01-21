@@ -91,7 +91,7 @@ implements   AttributeVisitor
                                      codeAttribute,
                                      true);
 
-            editor.deleteAttribute(Attribute.LOCAL_VARIABLE_TYPETable);
+            editor.deleteAttribute(Attribute.LOCAL_VARIABLE_TYPE_TABLE);
         }
     }
 
