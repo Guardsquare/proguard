@@ -1,36 +1,15 @@
-**ProGuard** is distributed under the terms of the GNU General Public License.
-Please consult the [license page](license.md) for more details.
+## Version 7.0 (In beta)
 
-ProGuard is written in Java, so it requires a Java Runtime Environment
-(JRE 1.8 or higher).
-
-You can download ProGuard in various forms:
-
-- [Pre-built artifacts](https://bintray.com/guardsquare/proguard) at JCenter
-- [Pre-built artifacts](https://search.maven.org/search?q=g:net.sf.proguard) at Maven Central
-- [Traditional pre-built archives](https://sourceforge.net/projects/proguard/files/) at SourceForge
-- A [Mercurial repository of the source code](https://sourceforge.net/p/proguard/code/) at SourceForge
-- A [Git repository of the source code](https://github.com/Guardsquare/proguard) at Github
-- The [complete ProGuard manual](https://www.guardsquare.com/proguard) at Guardsquare
-
-You can find major releases, minor releases with important bug fixes, and
-beta releases with the latest new features and any less urgent bug fixes.
-
-If you're still working with an older version of ProGuard, check out the
-summary of changes below, to see if you're missing something essential.
-Unless noted otherwise, ProGuard remains compatible across versions, so
-don't be afraid to update.
-
-## Version 6.3 <div>In beta</div>
-
-|        |          |          |
+| Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
-| 6.3.x  |          | CORE     | Optimizing away instance references to constructor-less classes.
-| 6.3.x  | PGD-12   | CORE     | Fixed building gradle plugin.
+| 7.0.0  |          | CORE     | Initial release of Kotlin support.
+| 7.0.0  |          | CORE     | Optimizing away instance references to constructor-less classes.
+| 7.0.0  | DGD-1489 | CORE     | Fixed potential `IllegalArgumentException` with message `Value "x" is not a reference value` when optimizing code with conditional casts.
+| 7.0.0  | PGD-12   | CORE     | Fixed building gradle plugin.
 
-## Version 6.2 <div>October 2019</div>
+## Version 6.2 (Oct 2019)
 
-|        |          |          |
+| Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
 | 6.2.2  |          | GRADLE   | Fixed missing runtime dependencies.
 | 6.2.1  | PGD-12   | GRADLE   | Fixed build of Gradle plugin.
@@ -55,7 +34,7 @@ don't be afraid to update.
 | 6.2.0  | PGD-759  | CORE     | Fixed backporting of Java 8 API types when used as parameters in private methods.
 | 6.2.0  | PGD-1    | CORE     | Fixed optimization of exception handling in Kotlin runtime.
 
-## Version 6.1 <div>May 2019</div>
+## Version 6.1 (May 2019)
 
 - \[PGD-750\] Fixed UnsupportedOperationException when optimizing enum types
   in closure arguments.
@@ -113,7 +92,7 @@ don't be afraid to update.
   classes with `requires` without version.
 - \[PGD-709\] Improved error messages for problems parsing wildcards.
 
-## Version 6.0 <div>Feb 2018</div>
+## Version 6.0 (Feb 2018)
 
 - \[PGD-701\] Fixed potential VerifyError in the presence of branches
   to instruction offset 0.
@@ -170,7 +149,7 @@ don't be afraid to update.
 - Fixed VerifyError triggered by merging classes with
   shrinking disabled.
 
-## Version 5.3 <div>Sep 2016</div>
+## Version 5.3 (Sep 2016)
 
 - Avoiding obfuscated name clashes with library classes.
 - Fixed processing of generic signatures with inner classes.
@@ -197,7 +176,7 @@ don't be afraid to update.
 - Added Gradle build file.
 - Updated documentation and examples.
 
-## Version 5.2 <div>Jan 2015</div>
+## Version 5.2 (Jan 2015)
 
 - Added encoding of optimized line numbers in ProGuard.
 - Added decoding of optimized stack frames in ReTrace.
@@ -210,7 +189,7 @@ don't be afraid to update.
 - Fixed internal processing of primitive array types.
 - Updated documentation and examples.
 
-## Version 5.1 <div>Oct 2014</div>
+## Version 5.1 (Oct 2014)
 
 - Fixed processing of various kinds of closures in Java 8.
 - Fixed shrinking of generic signatures in classes and methods.
@@ -221,7 +200,7 @@ don't be afraid to update.
 - Fixed obfuscation of internal class names in strings.
 - Updated documentation and examples.
 
-## Version 5.0 <div>Aug 2014</div>
+## Version 5.0 (Aug 2014)
 
 - Added support for Java 8.
 - Added [`-keep`](manual/usage.md#keep) modifier `includedescriptorclasses`.
@@ -248,7 +227,7 @@ don't be afraid to update.
 - Improved default path in Windows bat files.
 - Updated documentation and examples.
 
-## Version 4.11 <div>Dec 2013</div>
+## Version 4.11 (Dec 2013)
 
 - Added simplification of basic enum types.
 - Added reading and writing of apk and aar archives.
@@ -261,7 +240,7 @@ don't be afraid to update.
 - Refined criterion for method inlining.
 - Updated documentation and examples.
 
-## Version 4.10 <div>Jul 2013</div>
+## Version 4.10 (Jul 2013)
 
 - Made Gradle task resolve files lazily.
 - Enabled as-needed execution in Gradle task.
@@ -269,7 +248,7 @@ don't be afraid to update.
 - Reduced log levels for console output in Gradle task.
 - Updated documentation and examples.
 
-## Version 4.9 <div>Mar 2013</div>
+## Version 4.9 (Mar 2013)
 
 - Added Gradle task.
 - Added more peephole optimizations for strings.
@@ -295,7 +274,7 @@ don't be afraid to update.
 - Updated build files.
 - Updated documentation and examples.
 
-## Version 4.8 <div>May 2012</div>
+## Version 4.8 (May 2012)
 
 - Added more peephole optimizations for strings.
 - Added support for multiple external configuration files in
@@ -321,7 +300,7 @@ don't be afraid to update.
 - Improved default regular expression for stack traces in ReTrace.
 - Updated documentation and examples.
 
-## Version 4.7 <div>Dec 2011</div>
+## Version 4.7 (Dec 2011)
 
 - Added support for Java 7.
 - Parsing unquoted file names with special characters more leniently.
@@ -353,7 +332,7 @@ don't be afraid to update.
   on Linux.
 - Updated documentation and examples.
 
-## Version 4.6 <div>Feb 2011</div>
+## Version 4.6 (Feb 2011)
 
 - Added support for synthetic, bridge, and varargs modifiers
   in configuration.
@@ -382,7 +361,7 @@ don't be afraid to update.
 - Improved checking whether output is up to date.
 - Updated documentation and examples.
 
-## Version 4.5 <div>Jun 2010</div>
+## Version 4.5 (Jun 2010)
 
 - Added option `-keepparameternames`.
 - [`-dontskipnonpubliclibraryclasses`](manual/usage.md#dontskipnonpubliclibraryclasses) is now set by default. Added
@@ -416,7 +395,7 @@ don't be afraid to update.
 - Fixed regular expression pattern for constructors in ReTrace.
 - Updated documentation and examples.
 
-## Version 4.4 <div>Jul 2009</div>
+## Version 4.4 (Jul 2009)
 
 - Added new peephole optimizations.
 - Added option [`-optimizations`](manual/usage.md#optimizations) for fine-grained configuration
@@ -457,7 +436,7 @@ don't be afraid to update.
 - Fixed updating manifest files with split lines.
 - Updated documentation and examples.
 
-## Version 4.3 <div>Dec 2008</div>
+## Version 4.3 (Dec 2008)
 
 - Added class merging.
 - Added static single assignment analysis.
@@ -485,7 +464,7 @@ don't be afraid to update.
 - Added start-up scripts and build scripts.
 - Updated documentation and examples.
 
-## Version 4.2 <div>Mar 2008</div>
+## Version 4.2 (Mar 2008)
 
 - Refined data flow analysis in optimization step.
 - Fixed handling of exceptions when inlining subroutines.
@@ -511,7 +490,7 @@ don't be afraid to update.
 - Fixed default settings for Xlets in GUI.
 - Updated documentation and examples.
 
-## Version 4.1 <div>Dec 2007</div>
+## Version 4.1 (Dec 2007)
 
 - Fixed shrinking of default annotation element values.
 - Fixed optimization of invocations of methods in same class that are
@@ -530,7 +509,7 @@ don't be afraid to update.
   `<libraryjars>` elements.
 - Updated documentation and examples.
 
-## Version 4.0 <div>Sep 2007</div>
+## Version 4.0 (Sep 2007)
 
 - Added preverifier for Java 6 and Java Micro Edition, with new
   options `-microedition` and `-dontpreverify`.
@@ -582,7 +561,7 @@ Upgrade considerations:
 - You should preferably specify [`-repackageclasses`](manual/usage.md#repackageclasses) instead of the old
   option name `-defaultpackage`.
 
-## Version 3.11 <div>Dec 2007</div>
+## Version 3.11 (Dec 2007)
 
 - Fixed optimization of invocations of methods in same class that are
   accessed through extensions.
@@ -590,7 +569,7 @@ Upgrade considerations:
   other side-effects.
 - Updated documentation and examples.
 
-## Version 3.10 <div>Aug 2007</div>
+## Version 3.10 (Aug 2007)
 
 - Now handling mixed-case input class names when
   `-dontusemixedcaseclassnames` is specified.
@@ -600,7 +579,7 @@ Upgrade considerations:
 - Avoiding merging subsequent identically named files.
 - Updated documentation and examples.
 
-## Version 3.9 <div>Jun 2007</div>
+## Version 3.9 (Jun 2007)
 
 - Fixed processing of .class constructs in Java 6.
 - Fixed repeated processing of .class constructs.
@@ -609,7 +588,7 @@ Upgrade considerations:
   than 255.
 - Updated documentation and examples.
 
-## Version 3.8 <div>Mar 2007</div>
+## Version 3.8 (Mar 2007)
 
 - Fixed optimization of parameters used as local variables.
 - Fixed obfuscation with conflicting class member names.
@@ -617,7 +596,7 @@ Upgrade considerations:
   library jars.
 - Updated documentation and examples.
 
-## Version 3.7 <div>Dec 2006</div>
+## Version 3.7 (Dec 2006)
 
 - Now accepting Java 6 class files.
 - Fixed shrinking of partially used annotations.
@@ -636,7 +615,7 @@ Upgrade considerations:
 - Now allowing class names containing dashes.
 - Updated documentation and examples.
 
-## Version 3.6 <div>May 2006</div>
+## Version 3.6 (May 2006)
 
 - No longer automatically keeping classes in parameters of specified
   methods from obfuscation and optimization (introduced in
@@ -655,7 +634,7 @@ Upgrade considerations:
 - Fixed the boilerplate specification for enumerations in the GUI.
 - Updated documentation and examples.
 
-## Version 3.5 <div>Jan 2006</div>
+## Version 3.5 (Jan 2006)
 
 - Fixed obfuscation of class members with complex visibility.
 - Fixed optimization bugs causing stack verification errors.
@@ -669,7 +648,7 @@ Upgrade considerations:
   without wildcards.
 - Updated documentation and examples.
 
-## Version 3.4 <div>Oct 2005</div>
+## Version 3.4 (Oct 2005)
 
 - Extended optimizations: removing duplicate code within methods.
 - Extended regular expressions for class names to
@@ -686,7 +665,7 @@ Upgrade considerations:
 - Fixed exception when saving configuration with initializers in GUI.
 - Updated documentation and examples.
 
-## Version 3.3 <div>Jun 2005</div>
+## Version 3.3 (Jun 2005)
 
 - Extended optimizations: making methods private and static when
   possible, making classes static when possible, removing
@@ -708,7 +687,7 @@ Upgrade considerations:
 - Properly closing configuration files.
 - Updated documentation and examples.
 
-## Version 3.2 <div>Dec 2004</div>
+## Version 3.2 (Dec 2004)
 
 - Fixed JDK5.0 processing bugs.
 - Fixed optimization bugs.
@@ -716,7 +695,7 @@ Upgrade considerations:
 - Improved speed of shrinking step.
 - Updated documentation and examples.
 
-## Version 3.1 <div>Nov 2004</div>
+## Version 3.1 (Nov 2004)
 
 - Improved obfuscation and shrinking of private class members.
 - Added inlining of interfaces with single implementations.
@@ -728,7 +707,7 @@ Upgrade considerations:
 - Fixed two Ant task bugs.
 - Updated documentation and examples.
 
-## Version 3.0 <div>Aug 2004</div>
+## Version 3.0 (Aug 2004)
 
 - Added bytecode optimization step, between shrinking step and
   obfuscation step.
@@ -756,7 +735,7 @@ Upgrade considerations:
 - Improved jar compression.
 - Updated documentation and examples.
 
-## Version 2.1 <div>Mar 2004</div>
+## Version 2.1 (Mar 2004)
 
 - Added support for JDK1.5 classes.
 - Added additional wildcard for matching primitive types.
@@ -767,7 +746,7 @@ Upgrade considerations:
 - Fixed various Ant task bugs.
 - Updated documentation and examples.
 
-## Version 2.0 <div>Dec 2003</div>
+## Version 2.0 (Dec 2003)
 
 - Added a graphical user interface for ProGuard and ReTrace.
 - Added [`-applymapping`](manual/usage.md#applymapping) option for incremental obfuscation.
@@ -782,7 +761,7 @@ Upgrade considerations:
 - Fixed various Ant task bugs.
 - Updated documentation and examples.
 
-## Version 1.7 <div>Aug 2003</div>
+## Version 1.7 (Aug 2003)
 
 - Fixed various Ant task bugs.
 - Fixed ClassCastException due to explicitly used abstract classes
@@ -796,7 +775,7 @@ Upgrade considerations:
   class files.
 - Updated documentation and examples.
 
-## Version 1.6 <div>May 2003</div>
+## Version 1.6 (May 2003)
 
 - Added support for Ant.
 - Added support for the J2ME Wireless Toolkit.
@@ -811,7 +790,7 @@ Upgrade considerations:
   serializable code.
 - Updated documentation and examples.
 
-## Version 1.5 <div>Jan 2003</div>
+## Version 1.5 (Jan 2003)
 
 - Fixed processing of retrofitted library interfaces.
 - Fixed processing of `.class` constructs in internal classes targeted
@@ -819,7 +798,7 @@ Upgrade considerations:
 - Fixed [`-dump`](manual/usage.md#dump) option when `-outjar` option is not present.
 - Updated documentation and examples.
 
-## Version 1.4 <div>Nov 2002</div>
+## Version 1.4 (Nov 2002)
 
 - Now copying resource files over from the input jars to the
   output jar.
@@ -829,7 +808,7 @@ Upgrade considerations:
 - Added automatic `.class` detection for classes compiled with Jikes.
 - Updated documentation and examples.
 
-## Version 1.3 <div>Sep 2002</div>
+## Version 1.3 (Sep 2002)
 
 - Added support for wildcards in class names.
 - Added tool to de-obfuscate stack traces.
@@ -841,7 +820,7 @@ Upgrade considerations:
 - Fixed duplicate class entry bug.
 - Updated documentation and examples.
 
-## Version 1.2 <div>Aug 2002</div>
+## Version 1.2 (Aug 2002)
 
 - Improved speed.
 - Fixed processing of classes targeted at JRE1.2 (the default in
@@ -851,7 +830,7 @@ Upgrade considerations:
 - Added more flexible handling of white space in configuration.
 - Updated documentation.
 
-## Version 1.1 <div>Jul 2002</div>
+## Version 1.1 (Jul 2002)
 
 - Added automatic detection of `Class.forName("MyClass")`,
   `MyClass.class`, and
@@ -864,7 +843,7 @@ Upgrade considerations:
 - Added handling of missing/invalid manifest file in input jar.
 - Updated documentation and examples.
 
-## Version 1.0 <div>Jun 2002</div>
+## Version 1.0 (Jun 2002)
 
 - First public release, based on class parsing code from Mark Welsh's
   **RetroGuard**.

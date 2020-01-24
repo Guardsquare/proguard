@@ -1093,7 +1093,7 @@ will include line number information when printing out exception stack traces.
 
 The information will only be useful if we can map the obfuscated names back to
 their original names, so we're saving the mapping to a file `out.map`. The
-information can then be used by the [ReTrace](retrace/index.html) tool to
+information can then be used by the [ReTrace](retrace/index.md) tool to
 restore the original stack trace.
 
 ### Obfuscating package names {: #repackaging}

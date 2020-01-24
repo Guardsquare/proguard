@@ -13,7 +13,7 @@ ProGuard.
 
 The following wildcards are supported:
 
-|     |
+| Wildcard | Meaning
 |-----|----------------------------------------------------
 | `?` | matches any single character in an attribute name.
 | `*` | matches any part of an attribute name.

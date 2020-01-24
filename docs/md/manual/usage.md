@@ -511,11 +511,11 @@ you can abbreviate them to their first unique characters.
     or with `android.view`. This is unavoidable but it breaks the application
     in this case.
 
-`-keepattributes`{: #keepattributes} \[*[attribute\_filter](attributes.html)*\]
+`-keepattributes`{: #keepattributes} \[*[attribute\_filter](attributes.md)*\]
 : Specifies any optional attributes to be preserved. The attributes can be
   specified with one or more [`-keepattributes`](usage.md#keepattributes)
   directives. The optional filter is a comma-separated list of [attribute
-  names](attributes.html) that Java virtual machines and ProGuard support.
+  names](attributes.md) that Java virtual machines and ProGuard support.
   Attribute names can contain **?**, **\***, and **\*\*** wildcards, and they
   can be preceded by the **!** negator. For example, you should at least keep
   the `Exceptions`, `InnerClasses`, and `Signature` attributes when
@@ -777,7 +777,7 @@ list of file names that can contain wildcards. Only files with matching
 file names are read (in the case of input jars), or written (in the case
 of output jars). The following wildcards are supported:
 
-|      |
+| Wildcard | Meaning
 |------|-----------------------------------------------------------------------------------------
 | `?`  | matches any single character in a file name.
 | `*`  | matches any part of a filename not containing the directory separator.
@@ -807,7 +807,7 @@ Only names that match an item on the list pass the filter. The supported
 wildcards depend on the type of names for which the filter is being
 used, but the following wildcards are typical:
 
-|      |
+| Wildcard | Meaning
 |------|-----------------------------------------------------------------------------------------------------------
 | `?`  | matches any single character in a name.
 | `*`  | matches any part of a name not containing the package separator or directory separator.
@@ -934,8 +934,8 @@ irrelevant in actual configuration files.
   `java.lang.Thread$State`. Class names may be specified as regular
   expressions containing the following wildcards:
 
-    |       |
-    |-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    | Wildcard | Meaning
+    |-------|-----------
     | `?`   | matches any single character in a class name, but not the package separator. For example, "`com.example.Test?`" matches "`com.example.Test1`" and "`com.example.Test2`", but not "`com.example.Test12`".
     | `*`   | matches any part of a class name not containing the package separator. For example, "`com.example.*Test*`" matches "`com.example.Test`" and "`com.example.YourTestApplication`", but not "`com.example.mysubpackage.MyTest`". Or, more generally, "`com.example.*`" matches all classes in "`com.example`", but not in its subpackages.
     | `**`  | matches any part of a class name, possibly containing any number of package separators. For example, "`**.Test`" matches all `Test` classes in all packages except the root package. Or, "`com.example.**`" matches all classes in "`com.example`" and in its subpackages.
@@ -965,7 +965,7 @@ irrelevant in actual configuration files.
   other tools like `javadoc` and `javap`). The specifications can also
   contain the following catch-all wildcards:
 
-    |             |
+    | Wildcard    | Meaning
     |-------------|------------------------------
     | `<init>`    | matches any constructor.
     | `<fields>`  | matches any field.
@@ -978,15 +978,15 @@ irrelevant in actual configuration files.
     Fields and methods may also be specified using regular expressions.
     Names can contain the following wildcards:
 
-    |       |
-    |-------|--------------------------------------------------
+    | Wildcard | Meaning
+    |-------|-----------------------------------------------------------------
     | `?`   | matches any single character in a method name.
     | `*`   | matches any part of a method name.
     | `<n>` | matches the _n_'th matched wildcard in the same option.
 
     Types in descriptors can contain the following wildcards:
 
-    |       |
+    | Wildcard | Meaning
     |-------|-----------------------------------------------------------------------------------------
     | `%`   | matches any primitive type ("`boolean`", "`int`", etc, but not "`void`").
     | `?`   | matches any single character in a class name.

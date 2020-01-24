@@ -1,28 +1,63 @@
-site_name:    ProGuard
-site_favicon: favicon.ico
+###################################################################
+# Project information
+###################################################################
+site_name:        ProGuard
+site_description: Optimizer and obfuscator for Java bytecode
+site_author:      Guardsquare NV
+copyright:        Copyright &copy; 2002-2020 Guardsquare NV
 
-repo_url: http://www.guardsquare.com/proguard
+###################################################################
+# Options
+###################################################################
+theme:
+  name:       null
+  custom_dir: ../buildscripts/mkdocs/material
+  logo:       img/proguard.png
+  favicon:    img/guardsquare.png
+  language:   en
+  palette:    blue
+  font:
+  feature: 
 
-extra:
-    version:  6.2
-    logo:     guardsquare.png
-    palette:
-        primary: blue
-        accent:  blue
+docs_dir: md
+site_dir: html
+
+extra_css:
+  - css/extra.css
 
 use_directory_urls: false
+#strict: true # broken links are errors
+
+###################################################################
+# Theme specific
+###################################################################
+extra:
+  #font:
+  #  text: 'Droid Sans'
+  #  code: 'Ubuntu Mono'
+  social:
+  - type: 'twitter'
+    link: 'https://twitter.com/guardsquare'
+  - type: 'linkedin'
+    link: 'https://www.linkedin.com/company/guardsquare-nv'
+  - type: 'facebook'
+    link: 'https://www.facebook.com/guardsquare'
+  #feature:
+  #  tabs: true
+
+###################################################################
+# Extensions
+###################################################################
 markdown_extensions:
-- admonition
 - attr_list
+- admonition
+- footnotes
 - def_list
 
-docs_dir:  .
-site_dir:  ../docs_html
-theme_dir: ../buildscripts/mkdocs/mkdocs/themes/material-guardsquare
-extra_css:
-- style.css
-
-pages: 
+###################################################################
+# Page tree
+###################################################################
+nav:
 - Main:                index.md
 - Results:             results.md
 - FAQ:                 FAQ.md
@@ -50,6 +85,6 @@ pages:
     - GPL:             GPL.md
     - GPL Exception:   GPL_exception.md
 - Downloads:           downloads.md
+- Building:            building.md
+- Release notes:       releasenotes.md
 - Feedback:            feedback.md
-
-copyright: <hr/>Copyright © 2002-2019 <a href="https://www.guardsquare.com/proguard" target="_blank">Guardsquare NV</a>

@@ -1,21 +1,21 @@
 ## Usage
 
-|            |
+| OS         | Command
 |------------|-----------------------------
 | Windows:   | `proguard` *options* ...
 | Linux/Mac: | `proguard.sh` *options* ...
 
 Typically:
 
-|            |
+| OS         | Command
 |------------|-----------------------------
 | Windows:   | `proguard @myconfig.pro`
 | Linux/Mac: | `proguard.sh @myconfig.pro`
 
 ## Options
 
-|                                                                                                                                                                          |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Option | Meaning
+|--------|--------
 | [`@`](usage.md#at)[*filename*](usage.md#filename)                                                                                                                        | Short for '`-include` *filename*'.
 | [`-include`](usage.md#include) [*filename*](usage.md#filename)                                                                                                           | Read configuration options from the given file.
 | [`-basedirectory`](usage.md#basedirectory) [*directoryname*](usage.md#filename)                                                                                          | Specifies the base directory for subsequent relative file names.
@@ -97,7 +97,7 @@ Notes:
 
 ## Keep Option Modifiers {: #keepoptionmodifiers}
 
-|                                                                 |
+| Modifier                                                        | Meaning
 |-----------------------------------------------------------------|---------------------------------------------------------------------------
 | [`includedescriptorclasses`](usage.md#includedescriptorclasses) | Also keep any classes in the descriptors of specified fields and methods.
 | [`includecode`](usage.md#includecode)                           | Also keep the code of the specified methods unchanged.

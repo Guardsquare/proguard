@@ -33,7 +33,7 @@ file links the original class names and class member names to their
 obfuscated names.
 
 !!! note ""
-    ![android](../../android_small.png){: .icon} The standard Android build
+    ![android](../android_small.png){: .icon} The standard Android build
     process automatically writes out mapping files to their traditional
     locations in your Android project, e.g.
     `build/outputs/release/mapping/mapping.txt`.
