@@ -1,4 +1,4 @@
-// Gradle build script for the ProGuard API examples.
+// Gradle build script for the ProGuard Core examples.
 
 apply plugin: 'java'
 
