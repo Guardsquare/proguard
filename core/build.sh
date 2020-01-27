@@ -4,7 +4,11 @@
 
 cd $(dirname "$0")
 
-source ../buildscripts/functions.sh
+if [ -f ../buildscripts/functions.sh ]; then
+  source ../buildscripts/functions.sh
+else
+  source functions.sh
+fi
 
 MAIN_CLASS=proguard.*
 

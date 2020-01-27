@@ -1,16 +1,16 @@
 To run ProGuard, just type:
 
-`bin/proguard `*options* ...
+    bin/proguard <options...>
 
 Typically, you'll put most options in a configuration file (say,
 `myconfig.pro`), and just call:
 
-`bin/proguard @myconfig.pro`
+    bin/proguard @myconfig.pro
 
 You can combine command line options and options from configuration
 files. For instance:
 
-`bin/proguard @myconfig.pro -verbose`
+    bin/proguard @myconfig.pro -verbose
 
 You can add comments in a configuration file, starting with a `#`
 character and continuing until the end of the line.

@@ -1,8 +1,7 @@
 You can find the ReTrace jar in the `lib` directory of the ProGuard
 distribution. To run ReTrace, just type:
 
-`java -jar retrace.jar `\[*options...*\] *mapping\_file*
-\[*stacktrace\_file*\]
+    java -jar retrace.jar <options...> <mapping_file> <stacktrace_file>
 
 Alternatively, the `bin` directory contains some short Linux and Windows
 scripts containing this command. These are the arguments:
