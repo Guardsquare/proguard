@@ -1,7 +1,7 @@
 # Common ProGuard configuration for debug versions and release versions
 # of Android apps.
 #
-# Copyright (c) 2018-2019 Guardsquare NV
+# Copyright (c) 2018-2020 Guardsquare NV
 
 -ignorewarnings
 -dontwarn sun.**

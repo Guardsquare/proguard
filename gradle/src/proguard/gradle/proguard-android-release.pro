@@ -1,6 +1,6 @@
 # ProGuard configuration for release versions of Android apps.
 #
-# Copyright (c) 2018-2019 Guardsquare NV
+# Copyright (c) 2018-2020 Guardsquare NV
 
 -dontoptimize
 

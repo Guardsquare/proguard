@@ -1,7 +1,7 @@
 /*
  * Sample application to illustrate processing with ProGuard.
  *
- * Copyright (c) 2012-2019 Guardsquare NV
+ * Copyright (c) 2012-2020 Guardsquare NV
  */
 package com.example;
 

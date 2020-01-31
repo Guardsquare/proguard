@@ -1,6 +1,6 @@
 # Special Exception to the GNU General Public License
 
-Copyright © 2002-2019 Guardsquare NV
+Copyright © 2002-2020 Guardsquare NV
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
