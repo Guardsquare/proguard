@@ -162,7 +162,7 @@ public class InputReader
         {
             err.println("Note: there were " + noteCount +
                         " duplicate class definitions.");
-            err.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#duplicateclass)");
+            err.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#duplicateclass)");
         }
 
         // Print out a summary of the warnings, if necessary.
@@ -173,7 +173,7 @@ public class InputReader
                         " classes in incorrectly named files.");
             err.println("         You should make sure all file names correspond to their class names.");
             err.println("         The directory hierarchies must correspond to the package hierarchies.");
-            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unexpectedclass)");
+            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unexpectedclass)");
 
             if (!configuration.ignoreWarnings)
             {

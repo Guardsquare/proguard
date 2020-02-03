@@ -153,7 +153,7 @@ public class ConfigurationChecker
                             " '-keepclassmembers' options that didn't specify class");
                 out.println("      members. You should specify at least some class members or consider");
                 out.println("      if you just need '-keep'.");
-                out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#classmembers)");
+                out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#classmembers)");
             }
 
             int assumeNoSideEffectsNoteCount = assumeNoSideEffectsNotePrinter.getWarningCount();
@@ -163,7 +163,7 @@ public class ConfigurationChecker
                                    " '-assumenosideeffects' options that try to match all");
                 out.println("      methods with wildcards. This will likely cause problems with methods like");
                 out.println("      'wait()' and 'notify()'. You should specify the methods more precisely.");
-                out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#nosideeffects)");
+                out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#nosideeffects)");
             }
         }
     }

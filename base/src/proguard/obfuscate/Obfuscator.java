@@ -211,7 +211,7 @@ public class Obfuscator
                     err.println("         you could try your luck using the '-ignorewarnings' option.");
                 }
 
-                err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict1)");
+                err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict1)");
 
                 if (!configuration.ignoreWarnings)
                 {
@@ -456,7 +456,7 @@ public class Obfuscator
                 err.println("         you could try your luck using the '-ignorewarnings' option.");
             }
 
-            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#mappingconflict2)");
+            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict2)");
 
             if (!configuration.ignoreWarnings)
             {

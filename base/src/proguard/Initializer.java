@@ -389,7 +389,7 @@ public class Initializer
             out.println("Note: there were " + fullyQualifiedNoteCount +
                         " references to unknown classes.");
             out.println("      You should check your configuration for typos.");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#unknownclass)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#unknownclass)");
         }
 
         int classMemberNoteCount = classMemberNotePrinter.getWarningCount();
@@ -407,7 +407,7 @@ public class Initializer
                         " classes trying to access annotations using reflection.");
             out.println("      You should consider keeping the annotation attributes");
             out.println("      (using '-keepattributes *Annotation*').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int getSignatureNoteCount = getSignatureNotePrinter.getWarningCount();
@@ -417,7 +417,7 @@ public class Initializer
                         " classes trying to access generic signatures using reflection.");
             out.println("      You should consider keeping the signature attributes");
             out.println("      (using '-keepattributes Signature').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int getEnclosingClassNoteCount = getEnclosingClassNotePrinter.getWarningCount();
@@ -427,7 +427,7 @@ public class Initializer
                         " classes trying to access enclosing classes using reflection.");
             out.println("      You should consider keeping the inner classes attributes");
             out.println("      (using '-keepattributes InnerClasses').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int getEnclosingMethodNoteCount = getEnclosingMethodNotePrinter.getWarningCount();
@@ -437,7 +437,7 @@ public class Initializer
                         " classes trying to access enclosing methods using reflection.");
             out.println("      You should consider keeping the enclosing method attributes");
             out.println("      (using '-keepattributes InnerClasses,EnclosingMethod').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#attributes)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int descriptorNoteCount = descriptorKeepNotePrinter.getWarningCount();
@@ -447,7 +447,7 @@ public class Initializer
                         " unkept descriptor classes in kept class members.");
             out.println("      You should consider explicitly keeping the mentioned classes");
             out.println("      (using '-keep').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#descriptorclass)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#descriptorclass)");
         }
 
         int libraryNoteCount = libraryKeepNotePrinter.getWarningCount();
@@ -456,7 +456,7 @@ public class Initializer
             out.println("Note: there were " + libraryNoteCount +
                                " library classes explicitly being kept.");
             out.println("      You don't need to keep library classes; they are already left unchanged.");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#libraryclass)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#libraryclass)");
         }
 
         int dynamicClassReferenceNoteCount = dynamicClassReferenceNotePrinter.getWarningCount();
@@ -465,7 +465,7 @@ public class Initializer
             out.println("Note: there were " + dynamicClassReferenceNoteCount +
                         " unresolved dynamic references to classes or interfaces.");
             out.println("      You should check if you need to specify additional program jars.");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#dynamicalclass)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclass)");
         }
 
         int classForNameNoteCount = classForNameNotePrinter.getWarningCount();
@@ -475,7 +475,7 @@ public class Initializer
                         " class casts of dynamically created class instances.");
             out.println("      You might consider explicitly keeping the mentioned classes and/or");
             out.println("      their implementations (using '-keep').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#dynamicalclasscast)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclasscast)");
         }
 
         int getmemberNoteCount = getMemberNotePrinter.getWarningCount();
@@ -485,7 +485,7 @@ public class Initializer
                         " accesses to class members by means of reflection.");
             out.println("      You should consider explicitly keeping the mentioned class members");
             out.println("      (using '-keep' or '-keepclassmembers').");
-            out.println("      (http://proguard.sourceforge.net/manual/troubleshooting.html#dynamicalclassmember)");
+            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclassmember)");
         }
 
         // Print out a summary of the warnings, if necessary.
@@ -503,7 +503,7 @@ public class Initializer
                 err.println("         You may also have to remove the option '-skipnonpubliclibraryclasses'.");
             }
 
-            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unresolvedclass)");
+            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedclass)");
         }
 
         int dependencyWarningCount = dependencyWarningPrinter.getWarningCount();
@@ -513,7 +513,7 @@ public class Initializer
                         " instances of library classes depending on program classes.");
             err.println("         You must avoid such dependencies, since the program classes will");
             err.println("         be processed, while the library classes will remain unchanged.");
-            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#dependency)");
+            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#dependency)");
         }
 
         int programMemberReferenceWarningCount = programMemberReferenceWarningPrinter.getWarningCount();
@@ -523,7 +523,7 @@ public class Initializer
                         " unresolved references to program class members.");
             err.println("         Your input classes appear to be inconsistent.");
             err.println("         You may need to recompile the code.");
-            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unresolvedprogramclassmember)");
+            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedprogramclassmember)");
         }
 
         int libraryMemberReferenceWarningCount = libraryMemberReferenceWarningPrinter.getWarningCount();
@@ -544,7 +544,7 @@ public class Initializer
                 err.println("         You may also have to remove the option '-skipnonpubliclibraryclasses'.");
             }
 
-            err.println("         (http://proguard.sourceforge.net/manual/troubleshooting.html#unresolvedlibraryclassmember)");
+            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedlibraryclassmember)");
         }
 
         if (configuration.adaptKotlinMetadata)
