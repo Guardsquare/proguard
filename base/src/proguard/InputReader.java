@@ -239,16 +239,16 @@ public class InputReader
                                            classPathEntry,
                                            dataEntryReader);
 
-            // Create the data entry pump.
-            DirectoryPump directoryPump =
-                new DirectoryPump(classPathEntry.getFile());
+            // Create the data entry source.
+            DataEntrySource source =
+                new DirectorySource(classPathEntry.getFile());
 
             // Set he feature name for the class files and resource files
             // that we'll read.
             featureName = classPathEntry.getFeatureName();
 
             // Pump the data entries into the reader.
-            directoryPump.pumpDataEntries(reader);
+            source.pumpDataEntries(reader);
         }
         catch (IOException ex)
         {
@@ -262,7 +262,7 @@ public class InputReader
      * to any program classes that it visits.
      */
     private class MyClassFeatureNameSetter
-        extends SimplifiedVisitor
+    extends       SimplifiedVisitor
     implements    ClassVisitor
     {
         // Implementations for ClassVisitor.
@@ -279,7 +279,7 @@ public class InputReader
      * to any resource files that it visits.
      */
     private class MyResourceFileFeatureNameSetter
-        extends SimplifiedResourceFileVisitor
+    extends       SimplifiedResourceFileVisitor
     implements    ResourceFileVisitor
     {
         // Implementations for ResourceFileVisitor.
