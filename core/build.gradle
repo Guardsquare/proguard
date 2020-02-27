@@ -22,6 +22,17 @@ sourceSets.main {
     }
 }
 
+sourceSets.test {
+    java {
+        srcDir "$projectDir/test"
+    }
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = '1G'
+}
+
 jar {
     manifest.from 'src/META-INF/MANIFEST.MF'
 }
@@ -29,4 +40,7 @@ jar {
 
 dependencies {
     compile "com.google.code.gson:gson:${gsonVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${jupiterVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}"
 }
