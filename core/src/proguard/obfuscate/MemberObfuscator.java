@@ -42,6 +42,7 @@ extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final boolean        allowAggressiveOverloading;
+    private final boolean        dontResetMemberNaming;
     private final NameFactory    nameFactory;
     private final Map            descriptorMap;
 
@@ -50,16 +51,20 @@ implements   MemberVisitor
      * Creates a new MemberObfuscator.
      * @param allowAggressiveOverloading a flag that specifies whether class
      *                                   members can be overloaded aggressively.
+     * @param dontResetMemberNaming      a flag that specifies whether to reset
+     *                                   naming factory for every new class or not.
      * @param nameFactory                the factory that can produce
      *                                   obfuscated member names.
      * @param descriptorMap              the map of descriptors to
      *                                   [new name - old name] maps.
      */
     public MemberObfuscator(boolean        allowAggressiveOverloading,
+                            boolean        dontResetMemberNaming,
                             NameFactory    nameFactory,
                             Map            descriptorMap)
     {
         this.allowAggressiveOverloading = allowAggressiveOverloading;
+        this.dontResetMemberNaming      = dontResetMemberNaming;
         this.nameFactory                = nameFactory;
         this.descriptorMap              = descriptorMap;
     }
@@ -98,7 +103,10 @@ implements   MemberVisitor
         if (newName == null)
         {
             // Find an acceptable new name.
-            nameFactory.reset();
+            if(!dontResetMemberNaming)
+            {
+                nameFactory.reset();
+            }
 
             do
             {

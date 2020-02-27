@@ -114,6 +114,9 @@ public class ConfigurationWriter
         writeOption(ConfigurationConstants.DONT_OBFUSCATE_OPTION,                            !configuration.obfuscate);
         writeOption(ConfigurationConstants.PRINT_MAPPING_OPTION,                             configuration.printMapping);
         writeOption(ConfigurationConstants.APPLY_MAPPING_OPTION,                             configuration.applyMapping);
+        writeOption(ConfigurationConstants.DONT_RESET_PACKAGE_NAMING_OPTION,                 !configuration.dontResetPackageNaming);
+        writeOption(ConfigurationConstants.DONT_RESET_CLASS_NAMING_OPTION,                   !configuration.dontResetClassNaming);
+        writeOption(ConfigurationConstants.DONT_RESET_MEMBER_NAMING_OPTION,                  !configuration.dontResetMemberNaming);
         writeOption(ConfigurationConstants.OBFUSCATION_DICTIONARY_OPTION,                    configuration.obfuscationDictionary);
         writeOption(ConfigurationConstants.CLASS_OBFUSCATION_DICTIONARY_OPTION,              configuration.classObfuscationDictionary);
         writeOption(ConfigurationConstants.PACKAGE_OBFUSCATION_DICTIONARY_OPTION,            configuration.packageObfuscationDictionary);

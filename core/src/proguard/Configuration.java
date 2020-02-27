@@ -197,6 +197,21 @@ public class Configuration
     public boolean   obfuscate                        = true;
 
     /**
+     * Specifies whether package naming factory should reset for each package or not.
+     */
+    public boolean dontResetPackageNaming                 = false;
+
+    /**
+     * Specifies whether class naming factory should reset for each package or not.
+     */
+    public boolean dontResetClassNaming                   = false;
+
+    /**
+     * Specifies whether class member naming factory should reset for each package or not.
+     */
+    public boolean dontResetMemberNaming                   = false;
+
+    /**
      * An optional output file for listing the obfuscation mapping.
      * An empty file name means the standard output.
      */
