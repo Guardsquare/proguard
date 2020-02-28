@@ -21,7 +21,7 @@ class ProGuardTest {
                 "-dontoptimize",
                 "-adaptclassstrings",
                 "-keepparameternames",
-                "-keep class com.study.BootWebApplication",
+                "-keep class com.study.Application",
                 "-ignorewarnings",
                 "-injars '" + targetLocation + inputJar + "'",
                 "-outjars '" + targetLocation + outputJar + "'",
