@@ -7,14 +7,17 @@ class ProGuardTest {
     @Test
     void main() {
 
+        // NOTE: Change targetLocation value here to the location where
+        // inputJar and all below required items are available / expected
         String targetLocation = "\\";
+
         String inputJar = "classes";
         String outputJar = "proguardClasses";
         String map_filename = "proguard_map.txt";
         String seed_filename = "proguard_seed.txt";
-        String method_dir_filename = "method-dictionary.txt";
-        String class_dir_filename = "class-dictionary.txt";
-        String package_dir_filename = "package-dictionary.txt";
+        String members_dir_filename = "members-dictionary.txt";
+        String classes_dir_filename = "classes-dictionary.txt";
+        String packages_dir_filename = "packages-dictionary.txt";
 
         String [] arguments = {
                 "-dontshrink",
@@ -28,13 +31,16 @@ class ProGuardTest {
                 "-printmapping '" + targetLocation + map_filename + "'",
                 "-printseeds '" + targetLocation + seed_filename + "'",
 
+                //  This option makes sure that the obfuscation will use all unique names for members
                 "-dontresetmembernaming",
+                //  This option makes sure that the obfuscation will use all unique names for classes
                 "-dontresetclassnaming",
+                //  This option makes sure that the obfuscation will use all unique names for packages
                 "-dontresetpackagenaming",
 
-                "-obfuscationdictionary '" + targetLocation + method_dir_filename + "'",
-                "-classobfuscationdictionary '" + targetLocation + class_dir_filename + "'",
-                "-packageobfuscationdictionary '" + targetLocation + package_dir_filename + "'",
+                "-obfuscationdictionary '" + targetLocation + members_dir_filename + "'",
+                "-classobfuscationdictionary '" + targetLocation + classes_dir_filename + "'",
+                "-packageobfuscationdictionary '" + targetLocation + packages_dir_filename + "'",
 
                 "-dontwarn java.lang.**",
                 "-dontwarn java.util.**"
