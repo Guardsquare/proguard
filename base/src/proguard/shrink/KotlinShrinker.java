@@ -73,8 +73,6 @@ implements   KotlinMetadataVisitor,
     @Override
     public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
     {
-        //TODO kotlinc creates an array of KProperty objects for properties. We need to update that array as well. Maybe cache the array in the KotlinMetadata instance?
-
         // Compact the metadata's own fields.
         if (shouldShrinkMetadata(kotlinClassKindMetadata.companionObjectName,
                                  kotlinClassKindMetadata.referencedCompanionClass))
@@ -128,8 +126,6 @@ implements   KotlinMetadataVisitor,
     @Override
     public void visitKotlinMultiFilePartMetadata(Clazz clazz, KotlinMultiFilePartKindMetadata kotlinMultiFilePartKindMetadata)
     {
-        //TODO what if the facade is shrunk? It's not really part of a multi-file class anymore then...
-
         visitKotlinDeclarationContainerMetadata(clazz, kotlinMultiFilePartKindMetadata);
     }
 

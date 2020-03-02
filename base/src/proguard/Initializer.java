@@ -544,7 +544,6 @@ public class Initializer
 
             if (kotlinInitializationWarningCount > 0)
             {
-                //TODO
                 err.println("Warning: there were " + kotlinInitializationWarningCount +
                             " errors during Kotlin metadata initialisation.");
             }

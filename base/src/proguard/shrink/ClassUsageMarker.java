@@ -261,9 +261,6 @@ implements   ClassVisitor,
         // Only grow the Kotlin metadata usage tree for used classes.
         if (isUsed(clazz))
         {
-            // TODO Because some kotlin metadata refers to Java elements in different
-            //  classes, re-check all Kotlin metadata and patch up elements that
-            //  erroneously weren't marked yet.
             kotlinMetadata.accept(clazz, kotlinUsageMarker);
 
 //            // Check if any annotations should be kept.
@@ -273,11 +270,6 @@ implements   ClassVisitor,
 //            // Check if any types should be kept.
 //            kotlinMetadata.accept(clazz,
 //                new AllTypeVisitor(kotlinUsageMarker));
-
-            // Note that the above operations can in rare cases grow
-            // the java usage tree, leading to possible missed indirect
-            // dependencies. In practice such classes are used from
-            // java anyway and will have been marked earlier.
         }
     }
 
