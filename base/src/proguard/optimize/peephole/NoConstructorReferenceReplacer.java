@@ -127,9 +127,9 @@ implements   InstructionVisitor,
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        Clazz referencedClass = refConstant.referencedClass;
+        Clazz referencedClass = anyMethodrefConstant.referencedClass;
         containsConstructors =
             // We have to assume an unknown referenced class always has constructors.
             referencedClass == null                                                ||

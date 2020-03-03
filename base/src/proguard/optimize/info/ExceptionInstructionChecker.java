@@ -302,9 +302,9 @@ implements   InstructionVisitor
 
 //    // Implementations for ConstantVisitor.
 //
-//    public void visitAnyMethodrefConstant(Clazz clazz, RefConstant refConstant)
+//    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
 //    {
-//        Member referencedMember = refConstant.referencedMember;
+//        Member referencedMember = anyMethodrefConstant.referencedMember;
 //
 //        // Do we have a reference to the method?
 //        if (referencedMember == null)
@@ -316,12 +316,12 @@ implements   InstructionVisitor
 //        else
 //        {
 //            // First check the referenced method itself.
-//            refConstant.referencedMemberAccept(this);
+//            anyMethodrefConstant.referencedMethodAccept(this);
 //
 //            // If the result isn't conclusive, check down the hierarchy.
 //            if (!mayThrowExceptions)
 //            {
-//                Clazz  referencedClass  = refConstant.referencedClass;
+//                Clazz  referencedClass  = anyMethodrefConstant.referencedClass;
 //                Method referencedMethod = (Method)referencedMember;
 //
 //                // Check all other implementations of the method in the class
