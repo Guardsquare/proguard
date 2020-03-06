@@ -23,6 +23,7 @@ package proguard;
 import proguard.classfile.util.WarningPrinter;
 import proguard.resources.file.ResourceFile;
 import proguard.resources.file.visitor.ResourceFileVisitor;
+import proguard.resources.kotlinmodule.KotlinModule;
 
 /**
  * This ResourceFileVisitor writes out notes about the resource files that it visits
@@ -53,5 +54,14 @@ implements   ResourceFileVisitor
         notePrinter.print(resourceFile.getFileName(),
                           "Note: duplicate definition of resource file [" +
                           resourceFile.getFileName() + "]");
+    }
+
+
+    @Override
+    public void visitKotlinModule(KotlinModule kotlinModule)
+    {
+        notePrinter.print(kotlinModule.getFileName(),
+                          "Note: duplicate definition of Kotlin module file [" +
+                          kotlinModule.getFileName() + "]");
     }
 }

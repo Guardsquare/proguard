@@ -25,9 +25,9 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.kotlin.ReferencedKotlinMetadataVisitor;
-import proguard.classfile.kotlin.visitors.KotlinMetadataToClazzVisitor;
-import proguard.classfile.kotlin.visitors.filter.KotlinSyntheticClassKindFilter;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.KotlinMetadataToClazzVisitor;
+import proguard.classfile.kotlin.visitor.filter.KotlinSyntheticClassKindFilter;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.util.*;
@@ -203,8 +203,7 @@ implements   ClassVisitor,
         String innerClassName = clazz.getName();
         String outerClassName = clazz.getClassName(enclosingMethodAttribute.u2classIndex);
 
-        numericClassName = isNumericClassName(innerClassName,
-                                              outerClassName);
+        numericClassName = isNumericClassName(clazz, innerClassName, outerClassName);
     }
 
 
@@ -225,10 +224,7 @@ implements   ClassVisitor,
 
                 String outerClassName = clazz.getClassName(outerClassIndex);
 
-                numericClassName =
-                    adaptKotlin && isSyntheticKotlinLambdaClass(clazz) ||
-                    isNumericClassName(innerClassName,
-                                       outerClassName);
+                numericClassName = isNumericClassName(clazz, innerClassName, outerClassName);
             }
         }
     }
@@ -259,9 +255,15 @@ implements   ClassVisitor,
     /**
      * Returns whether the given inner class name is a numeric name.
      */
-    private boolean isNumericClassName(String innerClassName,
+    private boolean isNumericClassName(Clazz  innerClass,
+                                       String innerClassName,
                                        String outerClassName)
     {
+        if (this.adaptKotlin && isSyntheticKotlinLambdaClass(innerClass))
+        {
+            return true;
+        }
+
         int innerClassNameStart  = outerClassName.length() + 1;
         int innerClassNameLength = innerClassName.length();
 
@@ -577,7 +579,7 @@ implements   ClassVisitor,
      * @param clazz the given class.
      * @param name  the new name.
      */
-    static void setNewClassName(Clazz clazz, String name)
+    public static void setNewClassName(Clazz clazz, String name)
     {
         clazz.setProcessingInfo(name);
     }
@@ -589,7 +591,7 @@ implements   ClassVisitor,
      * @param clazz the given class.
      * @return true if the class name is unchanged, false otherwise.
      */
-    static boolean hasOriginalClassName(Clazz clazz)
+    public static boolean hasOriginalClassName(Clazz clazz)
     {
         return clazz.getName().equals(newClassName(clazz));
     }
@@ -601,7 +603,7 @@ implements   ClassVisitor,
      * @return the class's new name, or <code>null</code> if it doesn't
      *         have one yet.
      */
-    static String newClassName(Clazz clazz)
+    public static String newClassName(Clazz clazz)
     {
         Object processingInfo = clazz.getProcessingInfo();
 

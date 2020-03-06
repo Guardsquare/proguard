@@ -323,6 +323,10 @@ public class ProGuardTask extends ConfigurationTask
         configuration.addConfigurationDebugging = addConfigurationDebugging;
     }
 
+    public void setAdaptKotlinMetadata(boolean adaptKotlinMetadata)
+    {
+        configuration.adaptKotlinMetadata = adaptKotlinMetadata;
+    }
 
 
     // Implementations for Task.

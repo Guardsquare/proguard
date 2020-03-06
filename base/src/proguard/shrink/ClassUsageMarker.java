@@ -32,12 +32,17 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
+import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.visitor.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.util.Processable;
+import proguard.fixer.kotlin.KotlinAnnotationCounter;
+import proguard.util.*;
+
+import java.util.List;
 
 /**
- * This ClassVisitor and MemberVisitor recursively marks all classes and class
+ * This ClassVisitor, MemberVisitor and KotlinMetadataVisitor recursively marks all classes and class
  * elements that are being used.
  *
  * @see InterfaceUsageMarker
@@ -49,6 +54,7 @@ public class ClassUsageMarker
 extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
+             KotlinMetadataVisitor,
              ConstantVisitor,
              AttributeVisitor,
              InnerClassesInfoVisitor,
@@ -71,6 +77,7 @@ implements   ClassVisitor,
     private final Object POSSIBLY_USED = new Object();
 
     private final SimpleUsageMarker usageMarker;
+    private final KotlinUsageMarker kotlinUsageMarker = new KotlinUsageMarker();
 
     private final ClassVisitor                    interfaceUsageMarker;//           = new MyInterfaceUsageMarker();
     private final MyDefaultMethodUsageMarker      defaultMethodUsageMarker       = new MyDefaultMethodUsageMarker();
@@ -169,6 +176,9 @@ implements   ClassVisitor,
             markAsUsed(programClass);
 
             markProgramClassBody(programClass);
+
+            // Mark the Kotlin metadata.
+            programClass.accept(new ReferencedKotlinMetadataVisitor(kotlinUsageMarker));
         }
     }
 
@@ -232,6 +242,48 @@ implements   ClassVisitor,
             // Mark all methods.
             libraryClass.methodsAccept(this);
         }
+    }
+
+
+    // Implementations for KotlinMetadataVisitor.
+
+    @Override
+    public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata)
+    {
+        // Only grow the Kotlin metadata usage tree for used classes.
+        if (isUsed(clazz))
+        {
+            // TODO Because some kotlin metadata refers to Java elements in different
+            //  classes, re-check all Kotlin metadata and patch up elements that
+            //  erroneously weren't marked yet.
+            kotlinMetadata.accept(clazz, kotlinUsageMarker);
+
+//            // Check if any annotations should be kept.
+//            kotlinMetadata.accept(clazz,
+//                new AllKotlinAnnotationVisitor(kotlinUsageMarker));
+//
+//            // Check if any types should be kept.
+//            kotlinMetadata.accept(clazz,
+//                new AllTypeVisitor(kotlinUsageMarker));
+
+            // Note that the above operations can in rare cases grow
+            // the java usage tree, leading to possible missed indirect
+            // dependencies. In practice such classes are used from
+            // java anyway and will have been marked earlier.
+        }
+    }
+
+    @Override
+    public void visitKotlinDeclarationContainerMetadata(Clazz                              clazz,
+                                                        KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata)
+    {
+        // Check whether type aliases have a core type that's kept.
+        // Don't go into the specific subtypes of declaration containers,
+        // because we're only interested in type aliases and other members
+        // won't be marked anyway.
+        kotlinUsageMarker.visitKotlinDeclarationContainerMetadata(clazz, kotlinDeclarationContainerMetadata);
+
+        visitAnyKotlinMetadata(clazz, kotlinDeclarationContainerMetadata);
     }
 
 
@@ -427,6 +479,8 @@ implements   ClassVisitor,
             {
                 libraryMethod.accept(libraryClass, extraMethodVisitor);
             }
+
+            markMethodKotlinMetadata(libraryClass, libraryMethod);
         }
     }
 
@@ -442,6 +496,8 @@ implements   ClassVisitor,
 
         // Mark the classes referenced in the descriptor string.
         programField.referencedClassesAccept(this);
+
+        programField.accept(programClass, new MemberToKotlinPropertyVisitor(kotlinUsageMarker));
     }
 
 
@@ -460,6 +516,23 @@ implements   ClassVisitor,
         if (extraMethodVisitor != null)
         {
             programMethod.accept(programClass, extraMethodVisitor);
+        }
+
+        markMethodKotlinMetadata(programClass, programMethod);
+    }
+
+
+    private void markMethodKotlinMetadata(Clazz clazz, Method method)
+    {
+        if (method.getName(clazz).equals(ClassConstants.METHOD_NAME_INIT))
+        {
+            method.accept(clazz, new MethodToKotlinConstructorVisitor(kotlinUsageMarker));
+        }
+        else
+        {
+            method.accept(clazz, new MultiMemberVisitor(
+                                 new MethodToKotlinFunctionVisitor(kotlinUsageMarker),
+                                 new MemberToKotlinPropertyVisitor(kotlinUsageMarker)));
         }
     }
 
@@ -1420,5 +1493,522 @@ implements   ClassVisitor,
     private void markConstant(Clazz clazz, int constantIndex)
     {
         clazz.constantPoolEntryAccept(constantIndex, this);
+    }
+
+
+    public class KotlinUsageMarker
+    extends      SimplifiedVisitor
+    implements   KotlinMetadataVisitor,
+
+                 // Implementation interfaces.
+                 KotlinPropertyVisitor,
+                 KotlinFunctionVisitor,
+                 KotlinTypeAliasVisitor,
+                 KotlinTypeVisitor,
+                 KotlinConstructorVisitor,
+                 KotlinTypeParameterVisitor,
+                 KotlinValueParameterVisitor,
+                 KotlinVersionRequirementVisitor,
+                 KotlinContractVisitor,
+                 KotlinEffectVisitor,
+                 KotlinEffectExprVisitor,
+                 KotlinAnnotationVisitor
+    {
+
+
+        // Implementations for KotlinMetadataVisitor.
+        @Override
+        public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {}
+
+        @Override
+        public void visitKotlinDeclarationContainerMetadata(Clazz clazz, KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata)
+        {
+            if (!isUsed(kotlinDeclarationContainerMetadata))
+            {
+                if (isJavaClassUsed(kotlinDeclarationContainerMetadata.ownerReferencedClass))
+                {
+                    markAsUsed(kotlinDeclarationContainerMetadata);
+                }
+
+                kotlinDeclarationContainerMetadata.typeAliasesAccept(clazz, this);
+            }
+
+            if (isUsed(kotlinDeclarationContainerMetadata))
+            {
+                kotlinDeclarationContainerMetadata.propertiesAccept(         clazz, this);
+                kotlinDeclarationContainerMetadata.functionsAccept(          clazz, this);
+                kotlinDeclarationContainerMetadata.typeAliasesAccept(        clazz, this);
+                kotlinDeclarationContainerMetadata.delegatedPropertiesAccept(clazz, this);
+            }
+        }
+
+        @Override
+        public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
+        {
+            visitKotlinDeclarationContainerMetadata(clazz, kotlinClassKindMetadata);
+
+            if (isUsed(kotlinClassKindMetadata))
+            {
+                kotlinClassKindMetadata.referencedClass.accept(ClassUsageMarker.this);
+
+                markAsUsed(kotlinClassKindMetadata.superTypes);
+                markAsUsed(kotlinClassKindMetadata.typeParameters);
+
+                if (kotlinClassKindMetadata.flags.isAnnotationClass)
+                {
+                    // Annotation classes have constructors in the metadata but
+                    // no corresponding Java constructors.
+                    markAsUsed(kotlinClassKindMetadata.constructors);
+                }
+                else
+                {
+                    kotlinClassKindMetadata.constructorsAccept(clazz, this);
+                }
+
+                kotlinClassKindMetadata.superTypesAccept(        clazz, this);
+                kotlinClassKindMetadata.typeParametersAccept(    clazz, this);
+                kotlinClassKindMetadata.versionRequirementAccept(clazz, this);
+            }
+        }
+
+        @Override
+        public void visitKotlinFileFacadeMetadata(Clazz clazz, KotlinFileFacadeKindMetadata kotlinFileFacadeKindMetadata)
+        {
+            visitKotlinDeclarationContainerMetadata(clazz, kotlinFileFacadeKindMetadata);
+        }
+
+
+        @Override
+        public void visitKotlinSyntheticClassMetadata(Clazz                            clazz,
+                                                      KotlinSyntheticClassKindMetadata kotlinSyntheticClassKindMetadata)
+        {
+            markAsUsed(kotlinSyntheticClassKindMetadata);
+            kotlinSyntheticClassKindMetadata.functionsAccept(clazz, this);
+        }
+
+        @Override
+        public void visitKotlinMultiFileFacadeMetadata(Clazz                             clazz,
+                                                       KotlinMultiFileFacadeKindMetadata kotlinMultiFileFacadeKindMetadata)
+        {
+        }
+
+        @Override
+        public void visitKotlinMultiFilePartMetadata(Clazz                           clazz,
+                                                     KotlinMultiFilePartKindMetadata kotlinMultiFilePartKindMetadata)
+        {
+            visitKotlinDeclarationContainerMetadata(clazz, kotlinMultiFilePartKindMetadata);
+
+            if (isUsed(kotlinMultiFilePartKindMetadata))
+            {
+                kotlinMultiFilePartKindMetadata.referencedFacadeClass.accept(ClassUsageMarker.this);
+            }
+        }
+
+        // Implementations for KotlinPropertyVisitor.
+
+        @Override
+        public void visitAnyProperty(Clazz                              clazz,
+                                     KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                     KotlinPropertyMetadata             kotlinPropertyMetadata)
+        {
+            if (!isUsed(kotlinPropertyMetadata))
+            {
+                boolean backingFieldUsed =
+                    kotlinPropertyMetadata.referencedBackingField != null &&
+                    isUsed(kotlinPropertyMetadata.referencedBackingField);
+                boolean getterUsed =
+                    kotlinPropertyMetadata.referencedGetterMethod != null &&
+                    isUsed(kotlinPropertyMetadata.referencedGetterMethod);
+                boolean setterUsed =
+                    kotlinPropertyMetadata.referencedSetterMethod != null &&
+                    isUsed(kotlinPropertyMetadata.referencedSetterMethod);
+
+                if (backingFieldUsed || getterUsed || setterUsed)
+                {
+                    markAsUsed(kotlinPropertyMetadata);
+                }
+            }
+
+            if (isUsed(kotlinPropertyMetadata))
+            {
+                markAsUsed(kotlinPropertyMetadata.receiverType);
+                markAsUsed(kotlinPropertyMetadata.typeParameters);
+                markAsUsed(kotlinPropertyMetadata.setterParameters);
+                markAsUsed(kotlinPropertyMetadata.type);
+
+                if (kotlinPropertyMetadata.flags.common.hasAnnotations &&
+                    kotlinPropertyMetadata.syntheticMethodForAnnotations != null)
+                {
+                    // Annotations are placed on a synthetic method (e.g. myProperty$annotations())
+                    // so we must ensure that the synthetic method is marked as used, if there
+                    // are any used annotations there.
+
+                    KotlinAnnotationCounter annotationCounter = new KotlinAnnotationCounter(ClassUsageMarker.this.usageMarker);
+                    kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations.accept(
+                        kotlinPropertyMetadata.referencedSyntheticMethodClass,
+                        annotationCounter
+                    );
+
+                    if (annotationCounter.getCount() != 0)
+                    {
+                        kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations.accept(
+                            kotlinPropertyMetadata.referencedSyntheticMethodClass,
+                            ClassUsageMarker.this
+                        );
+                    }
+                }
+
+                kotlinPropertyMetadata.receiverTypeAccept(      clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinPropertyMetadata.typeParametersAccept(    clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinPropertyMetadata.setterParametersAccept(  clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinPropertyMetadata.typeAccept(              clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinPropertyMetadata.versionRequirementAccept(clazz, kotlinDeclarationContainerMetadata, this);
+            }
+        }
+
+        // Implementations for KotlinFunctionVisitor.
+
+        @Override
+        public void visitAnyFunction(Clazz                  clazz,
+                                     KotlinMetadata         kotlinMetadata,
+                                     KotlinFunctionMetadata kotlinFunctionMetadata)
+        {
+            if (!isUsed(kotlinFunctionMetadata))
+            {
+                if (isUsed(kotlinFunctionMetadata.referencedMethod))
+                {
+                    markAsUsed(kotlinFunctionMetadata);
+                }
+            }
+
+            if (isUsed(kotlinFunctionMetadata))
+            {
+                // Mark the required elements.
+                markAsUsed(kotlinFunctionMetadata.receiverType);
+                markAsUsed(kotlinFunctionMetadata.typeParameters);
+                markAsUsed(kotlinFunctionMetadata.valueParameters);
+                markAsUsed(kotlinFunctionMetadata.returnType);
+                markAsUsed(kotlinFunctionMetadata.contracts);
+
+                // If there is a corresponding default method and the user specifically kept this method, keep it as well.
+                if (kotlinFunctionMetadata.referencedDefaultMethod != null &&
+                    (kotlinFunctionMetadata.referencedMethod.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0)
+                {
+                    kotlinFunctionMetadata.referencedDefaultMethodClass
+                        .accept(ClassUsageMarker.this);
+                    kotlinFunctionMetadata.referencedDefaultMethod
+                        .accept(kotlinFunctionMetadata.referencedDefaultMethodClass,
+                                ClassUsageMarker.this);
+                }
+
+                kotlinFunctionMetadata.receiverTypeAccept(      clazz, kotlinMetadata, this);
+                kotlinFunctionMetadata.typeParametersAccept(    clazz, kotlinMetadata, this);
+                kotlinFunctionMetadata.valueParametersAccept(   clazz, kotlinMetadata, this);
+                kotlinFunctionMetadata.returnTypeAccept(        clazz, kotlinMetadata, this);
+                kotlinFunctionMetadata.contractsAccept(         clazz, kotlinMetadata, this);
+                kotlinFunctionMetadata.versionRequirementAccept(clazz, kotlinMetadata, this);
+            }
+        }
+
+        @Override
+        public void visitFunction(Clazz clazz,
+                                  KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                  KotlinFunctionMetadata kotlinFunctionMetadata)
+        {
+            visitAnyFunction(clazz, kotlinDeclarationContainerMetadata, kotlinFunctionMetadata);
+
+            // Non-abstract functions in interfaces should have default implementations, so keep it if the
+            // user kept the original function.
+            if (isUsed(kotlinFunctionMetadata))
+            {
+                if (kotlinDeclarationContainerMetadata.k == KotlinConstants.METADATA_KIND_CLASS &&
+                    ((KotlinClassKindMetadata)kotlinDeclarationContainerMetadata).flags.isInterface &&
+                    !kotlinFunctionMetadata.flags.modality.isAbstract &&
+                    (kotlinFunctionMetadata.referencedMethod.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0)
+                {
+                    kotlinFunctionMetadata.referencedDefaultImplementationMethodClass
+                        .accept(ClassUsageMarker.this);
+                    kotlinFunctionMetadata.referencedDefaultImplementationMethod
+                        .accept(kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
+                                ClassUsageMarker.this);
+                }
+            }
+        }
+
+        // Implementations for KotlinTypeAliasVisitor.
+
+        @Override
+        public void visitTypeAlias(Clazz                              clazz,
+                                   KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                   KotlinTypeAliasMetadata            kotlinTypeAliasMetadata)
+        {
+            if (!isUsed(kotlinTypeAliasMetadata))
+            {
+                // Mark a type alias if its expandedType is used.
+                kotlinTypeAliasMetadata.expandedTypeAccept(clazz, kotlinDeclarationContainerMetadata, this);
+
+                if (isUsed(kotlinTypeAliasMetadata.expandedType))
+                {
+                    markAsUsed(kotlinTypeAliasMetadata);
+                }
+            }
+
+            if (isUsed(kotlinTypeAliasMetadata))
+            {
+                clazz.accept(ClassUsageMarker.this);
+
+                markAsUsed(kotlinTypeAliasMetadata.typeParameters);
+                markAsUsed(kotlinTypeAliasMetadata.underlyingType);
+                markAsUsed(kotlinTypeAliasMetadata.expandedType);
+
+                kotlinTypeAliasMetadata.typeParametersAccept(    clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinTypeAliasMetadata.underlyingTypeAccept(    clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinTypeAliasMetadata.expandedTypeAccept(      clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinTypeAliasMetadata.versionRequirementAccept(clazz, kotlinDeclarationContainerMetadata, this);
+            }
+        }
+
+        // Implementations for KotlinTypeVisitor.
+
+        @Override
+        public void visitAnyType(Clazz clazz, KotlinTypeMetadata kotlinTypeMetadata)
+        {
+            if (!isUsed(kotlinTypeMetadata))
+            {
+                if (kotlinTypeMetadata.className != null)
+                {
+                    if (isJavaClassUsed(kotlinTypeMetadata.referencedClass))
+                    {
+                        markAsUsed(kotlinTypeMetadata);
+                    }
+                }
+                else if (kotlinTypeMetadata.aliasName != null)
+                {
+                    kotlinTypeMetadata.referencedTypeAlias.accept(kotlinTypeMetadata.referencedTypeAlias.referencedDeclarationContainer.ownerReferencedClass,
+                                                                  kotlinTypeMetadata.referencedTypeAlias.referencedDeclarationContainer,
+                                                                  this);
+
+                    if (isUsed(kotlinTypeMetadata.referencedTypeAlias))
+                    {
+                        markAsUsed(kotlinTypeMetadata);
+                    }
+                }
+                else
+                {
+                    markAsUsed(kotlinTypeMetadata);
+                }
+            }
+
+            if (isUsed(kotlinTypeMetadata))
+            {
+                if (kotlinTypeMetadata.className != null)
+                {
+                    kotlinTypeMetadata.referencedClass.accept(ClassUsageMarker.this);
+                }
+                else if (kotlinTypeMetadata.aliasName != null && !isUsed(kotlinTypeMetadata.referencedTypeAlias))
+                {
+                    markAsUsed(kotlinTypeMetadata.referencedTypeAlias);
+                    kotlinTypeMetadata.referencedTypeAlias.accept(null, null, this);
+                }
+
+                markAsUsed(kotlinTypeMetadata.typeArguments);
+                markAsUsed(kotlinTypeMetadata.upperBounds);
+                markAsUsed(kotlinTypeMetadata.outerClassType);
+
+                kotlinTypeMetadata.typeArgumentsAccept(clazz, this);
+                kotlinTypeMetadata.upperBoundsAccept(  clazz, this);
+                kotlinTypeMetadata.abbreviationAccept( clazz, this);
+                kotlinTypeMetadata.annotationsAccept(  clazz, this);
+            }
+        }
+
+        //Implementations for KotlinConstructorVisitor.
+
+        @Override
+        public void visitConstructor(Clazz                     clazz,
+                                     KotlinClassKindMetadata   kotlinClassKindMetadata,
+                                     KotlinConstructorMetadata kotlinConstructorMetadata)
+        {
+            if (!isUsed(kotlinConstructorMetadata))
+            {
+                if (isUsed(kotlinConstructorMetadata.referencedMethod))
+                {
+                    markAsUsed(kotlinConstructorMetadata);
+                }
+            }
+
+            if (isUsed(kotlinConstructorMetadata))
+            {
+                markAsUsed(kotlinConstructorMetadata.valueParameters);
+
+                kotlinConstructorMetadata.valueParametersAccept(  clazz,  kotlinClassKindMetadata, this);
+                kotlinConstructorMetadata.versionRequirementAccept(clazz, kotlinClassKindMetadata, this);
+            }
+        }
+
+        //Implementations for KotlinTypeParameterVisitor.
+
+        @Override
+        public void visitAnyTypeParameter(Clazz clazz, KotlinTypeParameterMetadata kotlinTypeParameterMetadata)
+        {
+            if (isUsed(kotlinTypeParameterMetadata))
+            {
+                markAsUsed(kotlinTypeParameterMetadata.upperBounds);
+                kotlinTypeParameterMetadata.upperBoundsAccept(clazz, this);
+                kotlinTypeParameterMetadata.annotationsAccept(clazz, this);
+            }
+        }
+
+        // Implementations for KotlinValueParameterVisitor.
+
+        @Override
+        public void visitAnyValueParameter(Clazz clazz,
+                                           KotlinValueParameterMetadata kotlinValueParameterMetadata) {}
+
+        @Override
+        public void visitFunctionValParameter(Clazz                        clazz,
+                                              KotlinMetadata               kotlinMetadata,
+                                              KotlinFunctionMetadata       kotlinFunctionMetadata,
+                                              KotlinValueParameterMetadata kotlinValueParameterMetadata)
+        {
+            if (isUsed(kotlinValueParameterMetadata))
+            {
+                kotlinValueParameterMetadata.typeAccept(clazz,
+                                                        kotlinMetadata,
+                                                        kotlinFunctionMetadata,
+                                                        this);
+            }
+        }
+
+        @Override
+        public void visitConstructorValParameter(Clazz                        clazz,
+                                                 KotlinClassKindMetadata      kotlinClassKindMetadata,
+                                                 KotlinConstructorMetadata    kotlinConstructorMetadata,
+                                                 KotlinValueParameterMetadata kotlinValueParameterMetadata)
+        {
+            if (isUsed(kotlinValueParameterMetadata))
+            {
+                kotlinValueParameterMetadata.typeAccept(clazz,
+                                                        kotlinClassKindMetadata,
+                                                        kotlinConstructorMetadata,
+                                                        this);
+            }
+        }
+
+        @Override
+        public void visitPropertyValParameter(Clazz                              clazz,
+                                              KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                              KotlinPropertyMetadata             kotlinPropertyMetadata,
+                                              KotlinValueParameterMetadata       kotlinValueParameterMetadata)
+        {
+            if (isUsed(kotlinValueParameterMetadata))
+            {
+                kotlinValueParameterMetadata.typeAccept(clazz,
+                                                        kotlinDeclarationContainerMetadata,
+                                                        kotlinPropertyMetadata,
+                                                        this);
+            }
+        }
+
+        // Implementations for KotlinVersionRequirementVisitor
+
+        @Override
+        public void visitAnyVersionRequirement(Clazz                            clazz,
+                                               KotlinVersionRequirementMetadata kotlinVersionRequirementMetadata)
+        {
+            markAsUsed(kotlinVersionRequirementMetadata);
+        }
+
+        // Implementations for KotlinAnnotationVisitor.
+
+        @Override
+        public void visitAnyAnnotation(Clazz                    clazz,
+                                       KotlinMetadataAnnotation annotation)
+        {
+            if (!isUsed(annotation))
+            {
+                if (isJavaClassUsed(annotation.referencedAnnotationClass))
+                {
+                    markAsUsed(annotation);
+                }
+            }
+        }
+
+        // Implementations for KotlinContractVisitor.
+
+        @Override
+        public void visitContract(Clazz                  clazz,
+                                  KotlinMetadata         kotlinMetadata,
+                                  KotlinFunctionMetadata kotlinFunctionMetadata,
+                                  KotlinContractMetadata kotlinContractMetadata)
+        {
+            if (isUsed(kotlinContractMetadata))
+            {
+                markAsUsed(kotlinContractMetadata.effects);
+
+                kotlinContractMetadata.effectsAccept(clazz, kotlinMetadata, kotlinFunctionMetadata, this);
+            }
+        }
+
+        // Implementations for KotlinEffectVisitor.
+
+        @Override
+        public void visitEffect(Clazz                  clazz,
+                                KotlinMetadata         kotlinMetadata,
+                                KotlinFunctionMetadata kotlinFunctionMetadata,
+                                KotlinContractMetadata kotlinContractMetadata,
+                                KotlinEffectMetadata   kotlinEffectMetadata)
+        {
+            if (isUsed(kotlinEffectMetadata))
+            {
+                markAsUsed(kotlinEffectMetadata.constructorArguments);
+                markAsUsed(kotlinEffectMetadata.conclusionOfConditionalEffect);
+
+                kotlinEffectMetadata.constructorArgumentAccept(clazz, this);
+                kotlinEffectMetadata.conclusionOfConditionalEffectAccept(clazz, this);
+            }
+        }
+
+        // Implementations for KotlinEffectExpressionVisitor.
+
+        @Override
+        public void visitAnyEffectExpression(Clazz                          clazz,
+                                             KotlinEffectMetadata           kotlinEffectMetadata,
+                                             KotlinEffectExpressionMetadata kotlinEffectExpressionMetadata)
+        {
+            if (!isUsed(kotlinEffectExpressionMetadata))
+            {
+                markAsUsed(kotlinEffectExpressionMetadata.typeOfIs);
+                markAsUsed(kotlinEffectExpressionMetadata.orRightHandSides);
+                markAsUsed(kotlinEffectExpressionMetadata.andRightHandSides);
+
+                kotlinEffectExpressionMetadata.typeOfIsAccept(clazz, this);
+                kotlinEffectExpressionMetadata.orRightHandSideAccept( clazz, kotlinEffectMetadata, this);
+                kotlinEffectExpressionMetadata.andRightHandSideAccept(clazz, kotlinEffectMetadata, this);
+            }
+        }
+
+        // Small helper methods.
+
+        private void markAsUsed(Processable metadataElement)
+        {
+            if (metadataElement != null)
+            {
+                ClassUsageMarker.this.markAsUsed(metadataElement);
+            }
+        }
+
+        private boolean isJavaClassUsed(Clazz clazz)
+        {
+            // Because Kotlin dummy classes (see ClassReferenceInitializer) won't be marked as used
+            // we must also check the DONT_SHRINK flag.
+            return ClassUsageMarker.this.isUsed(clazz) ||
+                   ((clazz.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0);
+        }
+
+        private void markAsUsed(List<? extends Processable> metadataElements)
+        {
+            metadataElements.forEach(this::markAsUsed);
+        }
     }
 }

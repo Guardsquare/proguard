@@ -27,14 +27,14 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.visitor.AllConstantVisitor;
 import proguard.classfile.instruction.visitor.AllInstructionVisitor;
 import proguard.classfile.kotlin.*;
-import proguard.classfile.kotlin.asserter.KotlinMetadataAsserter;
-import proguard.classfile.kotlin.initialize.*;
-import proguard.classfile.kotlin.visitors.MultiKotlinMetadataVisitor;
 import proguard.classfile.util.*;
+import proguard.classfile.util.kotlin.KotlinMetadataInitializer;
 import proguard.classfile.visitor.*;
 import proguard.resources.file.ResourceFilePool;
 import proguard.resources.file.visitor.ResourceJavaReferenceClassInitializer;
+import proguard.resources.kotlinmodule.util.KotlinModuleReferenceInitializer;
 import proguard.util.*;
+import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.io.*;
 import java.util.*;
@@ -164,6 +164,8 @@ public class Initializer
                                                null,
                                                dependencyWarningPrinter));
 
+        WarningPrinter kotlinInitializationWarningPrinter = new WarningPrinter(err, configuration.warn);
+
         // Initialize the Kotlin Metadata for Kotlin classes.
         if (configuration.adaptKotlinMetadata)
         {
@@ -172,7 +174,7 @@ public class Initializer
                 new AttributeNameFilter(Attribute.RUNTIME_VISIBLE_ANNOTATIONS,
                 new AllAnnotationVisitor(
                 new AnnotationTypeFilter(KotlinConstants.TYPE_KOTLIN_METADATA,
-                new KotlinMetadataInitializer()))));
+                new KotlinMetadataInitializer(kotlinInitializationWarningPrinter)))));
 
             programClassPool.classesAccept(kotlinMetadataInitializer);
             libraryClassPool.classesAccept(kotlinMetadataInitializer);
@@ -313,28 +315,17 @@ public class Initializer
         programClassPool.classesAccept(new ClassSubHierarchyInitializer());
         libraryClassPool.classesAccept(new ClassSubHierarchyInitializer());
 
-        WarningPrinter kotlinInitialisationWarningPrinter = new WarningPrinter(err, configuration.warn);
-
         if (configuration.adaptKotlinMetadata)
         {
-            // Initialize the inter-class references including property backing fields in Kotlin
-            // companion objects to their declaring class, default implementations of interface methods
-            // and synthetic methods referencing the enclosing method attribute.
-            // Initialize the $default methods - these methods are generated for methods with default parameters.
-            programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(
-                                           new MultiKotlinMetadataVisitor(
-                                           new KotlinInterClassReferenceInitializer(programClassPool,
-                                                                                    kotlinInitialisationWarningPrinter),
-                                           new KotlinDefaultMethodInitializer(programClassPool,
-                                                                              kotlinInitialisationWarningPrinter),
-                                           new KotlinDefaultImplsInitializer(programClassPool,
-                                                                             kotlinInitialisationWarningPrinter))
-                                           ));
+            resourceFilePool.resourceFilesAccept(new KotlinModuleReferenceInitializer(programClassPool, libraryClassPool));
 
             if (configuration.enableKotlinAsserter)
             {
-                programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(
-                                               new KotlinMetadataAsserter(programClassPool, libraryClassPool, kotlinInitialisationWarningPrinter)));
+                new KotlinMetadataAsserter()
+                    .execute(programClassPool,
+                             libraryClassPool,
+                             resourceFilePool,
+                             kotlinInitializationWarningPrinter);
             }
         }
 
@@ -549,7 +540,7 @@ public class Initializer
 
         if (configuration.adaptKotlinMetadata)
         {
-            int kotlinInitializationWarningCount = kotlinInitialisationWarningPrinter.getWarningCount();
+            int kotlinInitializationWarningCount = kotlinInitializationWarningPrinter.getWarningCount();
 
             if (kotlinInitializationWarningCount > 0)
             {

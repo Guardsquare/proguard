@@ -167,7 +167,7 @@ implements   MemberVisitor
      * @param member the class member.
      * @param name   the new name.
      */
-    static void setNewMemberName(Member member, String name)
+    public static void setNewMemberName(Member member, String name)
     {
         MethodLinker.lastProcessable(member).setProcessingInfo(name);
     }
@@ -193,7 +193,7 @@ implements   MemberVisitor
      * @return the class member's new name, or <code>null</code> if it doesn't
      *         have one yet.
      */
-    static String newMemberName(Member member)
+    public static String newMemberName(Member member)
     {
         return (String)MethodLinker.lastProcessable(member).getProcessingInfo();
     }

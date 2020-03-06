@@ -1,0 +1,104 @@
+/*
+ * ProGuard -- shrinking, optimization, obfuscation, and preverification
+ *             of Java bytecode.
+ *
+ * Copyright (c) 2002-2020 Guardsquare NV
+ */
+
+package proguard.util.kotlin.asserter;
+
+import proguard.classfile.*;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.visitor.*;
+import proguard.classfile.util.WarningPrinter;
+import proguard.resources.file.*;
+import proguard.resources.file.visitor.*;
+import proguard.resources.kotlinmodule.KotlinModule;
+import proguard.resources.kotlinmodule.visitor.KotlinModuleVisitor;
+import proguard.util.*;
+import proguard.util.kotlin.asserter.constraint.*;
+
+import java.util.*;
+
+/**
+ * This class performs a series of checks to see whether the kotlin metadata is intact.
+ */
+public class KotlinMetadataAsserter
+{
+    // This is the list of constraints that will be checked using this asserter.
+    private static final List<KotlinAsserterConstraint> DEFAULT_CONSTRAINTS = Arrays.asList(
+        new FunctionIntegrity(),
+        new ConstructorIntegrity(),
+        new PropertyIntegrity(),
+        new ClassIntegrity(),
+        new TypeIntegrity(),
+        new KmAnnotationIntegrity(),
+        new ValueParameterIntegrity(),
+        new SyntheticClassIntegrity(),
+        new FileFacadeIntegrity(),
+        new MultiFilePartIntegrity(),
+        new DeclarationContainerIntegrity(),
+        new KotlinModuleIntegrity()
+    );
+
+    public void execute(ClassPool programClassPool, ClassPool libraryClassPool, ResourceFilePool resourceFilePool, WarningPrinter warningPrinter)
+    {
+        Reporter reporter = new DefaultReporter(warningPrinter);
+        MyKotlinMetadataAsserter kotlinMetadataAsserter = new MyKotlinMetadataAsserter(reporter, DEFAULT_CONSTRAINTS);
+
+        reporter.setErrorMessage("Warning: Kotlin metadata errors encountered in %s. Not processing the metadata for this class.");
+        programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
+        libraryClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
+
+        reporter.setErrorMessage("Warning: Kotlin module errors encountered in module %s. Not processing the metadata for this module.");
+        resourceFilePool.resourceFilesAccept(
+            new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE, kotlinMetadataAsserter));
+    }
+
+    /**
+     * This class performs a series of checks to see whether the kotlin metadata is intact
+     */
+    public static class MyKotlinMetadataAsserter
+        implements KotlinMetadataVisitor,
+                   ResourceFileVisitor,
+                   KotlinModuleVisitor
+    {
+        private final List<? extends KotlinAsserterConstraint> constraints;
+        private final Reporter                                 reporter;
+
+        MyKotlinMetadataAsserter(Reporter reporter, List<KotlinAsserterConstraint> constraints)
+        {
+            this.constraints = constraints;
+            this.reporter    = reporter;
+        }
+
+        @Override
+        public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata)
+        {
+            reporter.resetCounter(clazz.getName());
+
+            constraints.forEach(constraint -> constraint.check(reporter, clazz, kotlinMetadata));
+
+            if (reporter.getCount() > 0)
+            {
+                clazz.accept(new KotlinMetadataRemover());
+            }
+        }
+
+        @Override
+        public void visitKotlinModule(KotlinModule kotlinModule)
+        {
+            reporter.resetCounter(kotlinModule.name);
+
+            constraints.forEach(constraint -> constraint.check(reporter, kotlinModule));
+
+            if (reporter.getCount() > 0)
+            {
+                kotlinModule.accept(new ProcessingFlagSetter(ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE));
+            }
+        }
+
+        @Override
+        public void visitResourceFile(ResourceFile resourceFile) {}
+    }
+}

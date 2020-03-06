@@ -117,6 +117,11 @@ implements   InstructionVisitor,
 
     // Implementations for ConstantVisitor.
 
+    public void visitAnyConstant(Clazz clazz, Constant constant)
+    {
+    }
+
+
     public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
     {
         Clazz referencedClass = fieldrefConstant.referencedClass;

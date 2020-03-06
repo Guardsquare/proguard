@@ -22,11 +22,13 @@ package proguard.shrink;
 
 import proguard.*;
 import proguard.classfile.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.kotlin.ReferencedKotlinMetadataVisitor;
-import proguard.classfile.kotlin.asserter.KotlinMetadataAsserter;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
+import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
+import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
+import proguard.resources.file.ResourceFilePool;
 import proguard.util.*;
 
 import java.io.*;
@@ -53,8 +55,9 @@ public class Shrinker
     /**
      * Performs shrinking of the given program class pool.
      */
-    public ClassPool execute(ClassPool programClassPool,
-                             ClassPool libraryClassPool) throws IOException
+    public ClassPool execute(ClassPool        programClassPool,
+                             ClassPool        libraryClassPool,
+                             ResourceFilePool resourceFilePool) throws IOException
     {
         // Check if we have at least some keep commands.
         if (configuration.keep == null)
@@ -85,6 +88,7 @@ public class Shrinker
         // Mark all used code and resources and resource files.
         new UsageMarker(configuration).mark(programClassPool,
                                             libraryClassPool,
+                                            resourceFilePool,
                                             simpleUsageMarker,
                                             classUsageMarker);
 
@@ -143,17 +147,28 @@ public class Shrinker
 
         if (configuration.adaptKotlinMetadata)
         {
-            // Clean up Kotlin metadata.
+            // Clean up Kotlin metadata for unused classes/members.
             newProgramClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new KotlinShrinker(simpleUsageMarker)));
 
+            newProgramClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new KotlinAnnotationFlagFixer()));
+
+            // Shrink the content of the Kotlin module files.
+            resourceFilePool.resourceFilesAccept(
+                new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE,
+                                                     new KotlinModuleShrinker(simpleUsageMarker)));
+
             if (configuration.enableKotlinAsserter)
             {
                 WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.err, true));
-                programClassPool.classesAccept(
-                    new ReferencedKotlinMetadataVisitor(
-                    new KotlinMetadataAsserter(programClassPool, libraryClassPool, warningPrinter)));
+                new KotlinMetadataAsserter()
+                    .execute(programClassPool,
+                             libraryClassPool,
+                             resourceFilePool,
+                             warningPrinter);
             }
         }
 

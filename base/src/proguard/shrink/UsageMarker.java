@@ -21,23 +21,15 @@
 package proguard.shrink;
 
 import proguard.Configuration;
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.annotation.*;
-import proguard.classfile.attribute.module.*;
-import proguard.classfile.attribute.module.visitor.*;
-import proguard.classfile.attribute.preverification.*;
-import proguard.classfile.attribute.preverification.visitor.*;
+import proguard.classfile.ClassPool;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
-import proguard.classfile.constant.visitor.*;
-import proguard.classfile.instruction.*;
-import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.kotlin.ReferencedKotlinMetadataVisitor;
-import proguard.classfile.util.*;
+import proguard.classfile.kotlin.KotlinConstants;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.classfile.visitor.*;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.*;
+import proguard.resources.file.*;
+import proguard.resources.file.visitor.*;
 import proguard.util.*;
 
 /**
@@ -66,15 +58,18 @@ public class UsageMarker
      *
      * @param programClassPool  the program class pool.
      * @param libraryClassPool  the library class pool.
+     * @param resourceFilePool  the resource file pool.
      * @param simpleUsageMarker the usage marker for marking any visitor
      *                          accepters.
      */
     public void mark(ClassPool         programClassPool,
                      ClassPool         libraryClassPool,
+                     ResourceFilePool  resourceFilePool,
                      SimpleUsageMarker simpleUsageMarker)
     {
         mark(programClassPool,
              libraryClassPool,
+             resourceFilePool,
              simpleUsageMarker,
              new ClassUsageMarker(simpleUsageMarker));
     }
@@ -86,6 +81,7 @@ public class UsageMarker
      *
      * @param programClassPool  the program class pool.
      * @param libraryClassPool  the library class pool.
+     * @param resourceFilePool  the resource file pool.
      * @param simpleUsageMarker the usage marker for marking any visitor
      *                          accepters.
      * @param classUsageMarker  the usage marker for recursively marking
@@ -93,6 +89,7 @@ public class UsageMarker
      */
     public void mark(ClassPool         programClassPool,
                      ClassPool         libraryClassPool,
+                     ResourceFilePool  resourceFilePool,
                      SimpleUsageMarker simpleUsageMarker,
                      ClassUsageMarker  classUsageMarker)
     {
@@ -109,6 +106,15 @@ public class UsageMarker
                 classUsageMarker))
             ));
 
+        // Mark the elements of Kotlin metadata that need to be kept.
+        if (configuration.adaptKotlinMetadata)
+        {
+            // Mark Kotlin things that refer to classes that have been marked as being kept now.
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                classUsageMarker));
+        }
+
         // Mark the inner class and annotation information that has to be kept.
         programClassPool.classesAccept(
             new UsedClassFilter(simpleUsageMarker,
@@ -120,19 +126,17 @@ public class UsageMarker
                 new LocalVariableTypeUsageMarker(classUsageMarker)
             ))));
 
-        // Mark the elements of Kotlin metadata that need to be kept.
-        if (configuration.adaptKotlinMetadata)
-        {
-            //TODO find a way to ensure consumer rules can force elements to be kept anyway. Maybe mark() them with DONT_SHRINK, then test for that flag in KotlinUsageMarker?
-            programClassPool.classesAccept(
-                new UsedClassFilter(simpleUsageMarker,
-                                    new ReferencedKotlinMetadataVisitor(
-                                    new KotlinUsageMarker(simpleUsageMarker,
-                                                          classUsageMarker))));
-        }
-
         // Mark interfaces that have to be kept.
         programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            // Mark the used Kotlin modules.
+            resourceFilePool.resourceFilesAccept(
+                new ResourceFileNameFilter(KotlinConstants.MODULE.FILE_EXPRESSION,
+                new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE,
+                new KotlinModuleUsageMarker(simpleUsageMarker))));
+        }
 
         // Check if the Gson optimization is enabled.
         StringMatcher filter = configuration.optimizations != null ?

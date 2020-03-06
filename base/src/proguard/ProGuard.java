@@ -25,6 +25,8 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.editor.*;
+import proguard.classfile.io.kotlin.KotlinMetadataWriter;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
@@ -189,6 +191,11 @@ public class ProGuard
             obfuscate();
         }
 
+        if (configuration.adaptKotlinMetadata)
+        {
+            adaptKotlinMetadata();
+        }
+
         if (configuration.optimize ||
             configuration.obfuscate)
         {
@@ -350,6 +357,30 @@ public class ProGuard
 
 
     /**
+     * Adapts Kotlin Metadata annotations.
+     */
+    private void adaptKotlinMetadata()
+    {
+        if (configuration.verbose)
+        {
+            System.out.println("Adapting Kotlin metadata...");
+        }
+
+        WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.out, true));
+
+        ClassCounter counter = new ClassCounter();
+        programClassPool.classesAccept(
+            new ReferencedKotlinMetadataVisitor(
+            new KotlinMetadataWriter(warningPrinter, counter)));
+
+        if (configuration.verbose)
+        {
+            System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
+        }
+    }
+
+
+    /**
      * Sets that target versions of the program classes.
      */
     private void target() throws IOException
@@ -413,7 +444,8 @@ public class ProGuard
         // Perform the actual shrinking.
         programClassPool =
             new Shrinker(configuration).execute(programClassPool,
-                                                libraryClassPool);
+                                                libraryClassPool,
+                                                resourceFilePool);
     }
 
 

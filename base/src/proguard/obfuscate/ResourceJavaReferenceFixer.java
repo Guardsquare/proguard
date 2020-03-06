@@ -24,6 +24,7 @@ import proguard.classfile.Clazz;
 import proguard.classfile.util.ClassUtil;
 import proguard.resources.file.*;
 import proguard.resources.file.visitor.ResourceFileVisitor;
+import proguard.resources.kotlinmodule.KotlinModule;
 
 import java.util.Set;
 
@@ -55,5 +56,11 @@ public class ResourceJavaReferenceFixer implements ResourceFileVisitor
                 }
             }
         }
+    }
+
+    @Override
+    public void visitKotlinModule(KotlinModule kotlinModule)
+    {
+
     }
 }

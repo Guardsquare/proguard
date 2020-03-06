@@ -1,2 +1,8 @@
 .hg/**
 .hgtags
+build
+base/build
+.gradle
+.idea
+local.properties
+

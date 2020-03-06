@@ -2,28 +2,15 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * Copyright (c) 2002-2019 GuardSquare NV
  */
 package proguard.shrink;
 
 import proguard.classfile.*;
 import proguard.classfile.kotlin.*;
-import proguard.classfile.kotlin.visitors.*;
+import proguard.classfile.kotlin.visitor.*;
 import proguard.classfile.util.SimplifiedVisitor;
+import proguard.classfile.visitor.*;
 import proguard.util.Processable;
 
 import java.util.*;
@@ -147,28 +134,25 @@ implements   KotlinMetadataVisitor,
         kotlinPropertyMetadata.receiverTypeAccept(      clazz, kotlinDeclarationContainerMetadata, this);
         kotlinPropertyMetadata.typeParametersAccept(    clazz, kotlinDeclarationContainerMetadata, this);
 
-        // TODO: Don't use JvmMethodSignature in ProGuard API.
-        if (shouldShrinkMetadata(null,//kotlinPropertyMetadata.backingFieldSignature,
+        if (shouldShrinkMetadata(kotlinPropertyMetadata.backingFieldSignature,
                                  kotlinPropertyMetadata.referencedBackingField))
         {
-            //kotlinPropertyMetadata.backingFieldSignature  = null;
+            kotlinPropertyMetadata.backingFieldSignature  = null;
             kotlinPropertyMetadata.referencedBackingField = null;
         }
 
-        // TODO: Don't use JvmMethodSignature in ProGuard API.
-        if (shouldShrinkMetadata(null,//kotlinPropertyMetadata.getterSignature,
+        if (shouldShrinkMetadata(kotlinPropertyMetadata.getterSignature,
                                  kotlinPropertyMetadata.referencedGetterMethod))
         {
-            //kotlinPropertyMetadata.getterSignature        = null;
+            kotlinPropertyMetadata.getterSignature        = null;
             kotlinPropertyMetadata.referencedGetterMethod = null;
             kotlinPropertyMetadata.flags.hasGetter        = false;
         }
 
-        // TODO: Don't use JvmMethodSignature in ProGuard API.
-        if (shouldShrinkMetadata(null,//kotlinPropertyMetadata.setterSignature,
+        if (shouldShrinkMetadata(kotlinPropertyMetadata.setterSignature,
                                  kotlinPropertyMetadata.referencedSetterMethod))
         {
-            //kotlinPropertyMetadata.setterSignature        = null;
+            kotlinPropertyMetadata.setterSignature        = null;
             kotlinPropertyMetadata.referencedSetterMethod = null;
             kotlinPropertyMetadata.flags.hasSetter        = false;
             kotlinPropertyMetadata.setterParameters.clear();
@@ -178,15 +162,31 @@ implements   KotlinMetadataVisitor,
                                                         kotlinDeclarationContainerMetadata,
                                                         this);
 
-        // TODO: Don't use JvmMethodSignature in ProGuard API.
-        if (//kotlinPropertyMetadata.syntheticMethodForAnnotations != null &&
+        if (kotlinPropertyMetadata.syntheticMethodForAnnotations != null &&
             !usageMarker.isUsed(kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations))
         {
-            // TODO: Don't use JvmMethodSignature in ProGuard API.
-            //kotlinPropertyMetadata.syntheticMethodForAnnotations           = null;
+            kotlinPropertyMetadata.syntheticMethodForAnnotations           = null;
             kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations = null;
             kotlinPropertyMetadata.referencedSyntheticMethodClass          = null;
             kotlinPropertyMetadata.flags.common.hasAnnotations             = false;
+        }
+
+        // Fix inconsistencies that were introduced as
+        // a result of shrinking
+        if (kotlinPropertyMetadata.referencedBackingField != null &&
+            kotlinPropertyMetadata.getterSignature        == null &&
+            kotlinPropertyMetadata.setterSignature        == null &&
+            (kotlinPropertyMetadata.referencedBackingField.getAccessFlags() & AccessConstants.PRIVATE) != 0 &&
+            !kotlinPropertyMetadata.flags.visibility.isPrivate)
+        {
+            int visibility =
+                kotlinPropertyMetadata.flags.visibility.isProtected ? AccessConstants.PROTECTED :
+                                                                      AccessConstants.PUBLIC;
+
+            kotlinPropertyMetadata.referencedBackingField.accept(kotlinPropertyMetadata.referencedBackingFieldClass,
+                                                                 new MultiMemberVisitor(
+                                                                     new MemberAccessFlagCleaner(AccessConstants.PRIVATE),
+                                                                     new MemberAccessSetter(visibility)));
         }
     }
 
@@ -208,15 +208,7 @@ implements   KotlinMetadataVisitor,
         kotlinFunctionMetadata.typeParametersAccept( clazz, kotlinMetadata, this);
         kotlinFunctionMetadata.valueParametersAccept(clazz, kotlinMetadata, this);
         kotlinFunctionMetadata.returnTypeAccept(     clazz, kotlinMetadata, this);
-
-        if (!kotlinFunctionMetadata.flags.modality.isAbstract &&
-            kotlinMetadata.k == KotlinConstants.METADATA_KIND_CLASS &&
-            ((KotlinClassKindMetadata)kotlinMetadata).flags.isInterface &&
-            kotlinFunctionMetadata.referencedDefaultImplementationMethod == null)
-        {
-            //TODO not sure if this can actually happen?
-            kotlinFunctionMetadata.flags.modality.isAbstract = true;
-        }
+        kotlinFunctionMetadata.contractsAccept(      clazz, kotlinMetadata, new AllTypeVisitor(this));
 
         if (kotlinFunctionMetadata.referencedDefaultMethod != null &&
             !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultMethod))
@@ -230,6 +222,16 @@ implements   KotlinMetadataVisitor,
         {
             kotlinFunctionMetadata.referencedDefaultImplementationMethod      = null;
             kotlinFunctionMetadata.referencedDefaultImplementationMethodClass = null;
+        }
+
+        // Fix inconsistencies that were introduced as
+        // a result of shrinking.
+        if (!kotlinFunctionMetadata.flags.modality.isAbstract &&
+            kotlinMetadata.k == KotlinConstants.METADATA_KIND_CLASS &&
+            ((KotlinClassKindMetadata)kotlinMetadata).flags.isInterface &&
+            kotlinFunctionMetadata.referencedDefaultImplementationMethod == null)
+        {
+            kotlinFunctionMetadata.flags.modality.isAbstract = true;
         }
     }
 
@@ -359,6 +361,19 @@ implements   KotlinMetadataVisitor,
      */
     private void shrinkArray(List<?>                         elements,
                              List<? extends Processable> referencedJavaElements)
+    {
+        shrinkArray(usageMarker, elements, referencedJavaElements);
+    }
+
+    /**
+     * Shrinks elements and their corresponding referenced element, based on
+     * markings on the referenced element.
+     *
+     * List is modified - must be a modifiable list!
+     */
+    static void shrinkArray(SimpleUsageMarker               usageMarker,
+                            List<?>                         elements,
+                            List<? extends Processable> referencedJavaElements)
     {
         for (int k = elements.size() - 1; k >= 0; k--)
         {

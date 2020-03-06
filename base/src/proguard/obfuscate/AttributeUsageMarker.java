@@ -65,7 +65,7 @@ implements   AttributeVisitor
      * Returns whether the given Processable has been marked as being used.
      * In this context, the Processable will be an Attribute object.
      */
-    static boolean isUsed(Processable processable)
+    public static boolean isUsed(Processable processable)
     {
         return processable.getProcessingInfo() == USED;
     }

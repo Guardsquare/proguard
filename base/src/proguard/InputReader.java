@@ -21,12 +21,14 @@
 package proguard;
 
 import proguard.classfile.*;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.*;
 import proguard.resources.file.*;
 import proguard.resources.file.io.ResourceFileDataEntryReader;
 import proguard.resources.file.visitor.*;
+import proguard.resources.kotlinmodule.io.KotlinModuleDataEntryReader;
 import proguard.util.*;
 
 import java.io.*;
@@ -118,6 +120,14 @@ public class InputReader
         DataEntryReader resourceReader =
             new ResourceFileDataEntryReader(resourceFilePoolFiller,
                                             adaptedDataEntryFilter);
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            resourceReader =
+                new NameFilteredDataEntryReader(KotlinConstants.MODULE.FILE_EXPRESSION,
+                    new KotlinModuleDataEntryReader(resourceFilePoolFiller),
+                    resourceReader);
+        }
 
         // Read the program class files and resource files and put them in the
         // program class pool and resource file pool.

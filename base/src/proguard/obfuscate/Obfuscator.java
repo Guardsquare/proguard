@@ -27,10 +27,17 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
+import proguard.classfile.kotlin.visitor.*;
+import proguard.classfile.kotlin.visitor.filter.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
+import proguard.obfuscate.kotlin.*;
+import proguard.obfuscate.util.InstructionSequenceObfuscator;
 import proguard.resources.file.ResourceFilePool;
+import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
 import proguard.util.*;
+import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.io.*;
 import java.util.*;
@@ -143,6 +150,14 @@ public class Obfuscator
             new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
             nameMarker))))))));
 
+        if (configuration.adaptKotlinMetadata)
+        {
+            programClassPool.classesAccept(
+                // Keep Kotlin default implementations class where the user had already kept the interface.
+                new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
+                new ReferencedKotlinMetadataVisitor(new KotlinInterfaceToDefaultImplsClassVisitor(nameMarker))));
+        }
+
         // Mark attributes that have to be kept.
         AttributeVisitor attributeUsageMarker =
             new NonEmptyAttributeFilter(
@@ -166,12 +181,45 @@ public class Obfuscator
                 new NewMemberNameFilter(
                 new AllAttributeVisitor(true,
                 new ParameterNameMarker(attributeUsageMarker)))));
+
+            if (configuration.adaptKotlinMetadata)
+            {
+                programClassPool.classesAccept(
+                    new ReferencedKotlinMetadataVisitor(
+                    new KotlinValueParameterUsageMarker()));
+            }
+        }
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new AllValueParameterVisitor(
+                new KotlinValueParameterNameShrinker())));
+
+            // Keep SourceDebugExtension annotations on Kotlin synthetic classes but obfuscate them.
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new KotlinSyntheticClassKindFilter(
+                    KotlinSyntheticClassKindFilter::isLambda,
+                new KotlinMetadataToClazzVisitor(
+                new AllAttributeVisitor(
+                new AttributeNameFilter(Attribute.SOURCE_DEBUG_EXTENSION,
+                                        new MultiAttributeVisitor(attributeUsageMarker,
+                                        new KotlinSourceDebugExtensionAttributeObfuscator())))))));
         }
 
         // Remove the attributes that can be discarded. Note that the attributes
         // may only be discarded after the seeds have been marked, since the
         // configuration may rely on annotations.
         programClassPool.classesAccept(new AttributeShrinker());
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new KotlinAnnotationFlagFixer()));
+        }
 
         // Apply the mapping, if one has been specified. The mapping can
         // override the names of library classes and of library class members.
@@ -464,6 +512,49 @@ public class Obfuscator
             }
         }
 
+        if (configuration.adaptKotlinMetadata)
+        {
+            programClassPool.classesAccept(
+                new MultiClassVisitor(
+                // Obfuscate the Intrinsics.check* method calls.
+                new InstructionSequenceObfuscator(
+                    new KotlinIntrinsicsReplacementSequences(programClassPool, libraryClassPool)),
+
+                new ReferencedKotlinMetadataVisitor(
+                new MultiKotlinMetadataVisitor(
+                // Come up with new names for Kotlin Properties.
+                new KotlinPropertyNameObfuscator(nameFactory),
+                // Obfuscate alias names.
+                new KotlinAliasNameObfuscator(nameFactory),
+
+                // Ensure companion classes have $CompanionName suffix.
+                new KotlinCompanionEqualizer(),
+                // Equalise/fix $DefaultImpls and $WhenMappings classes.
+                new KotlinSyntheticClassFixer(),
+
+                new AllFunctionsVisitor(
+                    // Ensure that all default interface implementations of methods have the same names.
+                    new KotlinDefaultImplsMethodNameEqualizer(),
+                    // Ensure all $default methods match their counterpart but with a $default suffix.
+                    new KotlinDefaultMethodNameEqualizer(),
+                    // Obfuscate the throw new UnsupportedOperationExceptions in $default methods
+                    // because they contain the original function name in the string.
+                    new KotlinFunctionToDefaultMethodVisitor(
+                    new InstructionSequenceObfuscator(
+                        new KotlinUnsupportedExceptionReplacementSequences(programClassPool, libraryClassPool)))
+                ),
+
+                // Obfuscate toString methods in data classes.
+                new KotlinClassKindFilter(
+                    kc -> kc.flags.isData,
+                    new KotlinDataClassObfuscator())
+            ))));
+
+            resourceFilePool.resourceFilesAccept(
+                new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_OBFUSCATE,
+                                                     new KotlinModuleNameObfuscator(nameFactory)));
+        }
+
         // Print out the mapping, if requested.
         if (configuration.printMapping != null)
         {
@@ -512,14 +603,44 @@ public class Obfuscator
                 obfuscatedFieldCounter))
             );
 
+        if (configuration.adaptKotlinMetadata)
+        {
+            // Ensure multi-file parts and facades are in the same package.
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new KotlinMultiFileFacadeFixer()));
+        }
+
         // Actually apply the new names.
         programClassPool.classesAccept(classRenamer);
         libraryClassPool.classesAccept(classRenamer);
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            // Apply new names to Kotlin properties.
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new AllKotlinPropertiesVisitor(
+                new KotlinPropertyRenamer())));
+        }
 
         // Update all references to these new names.
         programClassPool.classesAccept(new ClassReferenceFixer(false));
         libraryClassPool.classesAccept(new ClassReferenceFixer(false));
         programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new MultiKotlinMetadataVisitor(
+                new AllTypeVisitor(
+                    // Fix all the alias references.
+                    new KotlinAliasReferenceFixer()),
+
+                // Fix all the CallableReference interface methods to match the new names.
+                new KotlinCallableReferenceFixer(programClassPool, libraryClassPool))));
+        }
 
         // Make package visible elements public or protected, if obfuscated
         // classes are being repackaged aggressively.
@@ -567,6 +688,19 @@ public class Obfuscator
             System.out.println("  Number of obfuscated classes:                  " + obfuscatedClassCounter.getCount());
             System.out.println("  Number of obfuscated fields:                   " + obfuscatedFieldCounter.getCount());
             System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
+        }
+
+        if (configuration.adaptKotlinMetadata)
+        {
+            // Fix the Kotlin modules so the filename matches and the class names match.
+            resourceFilePool.resourceFilesAccept(
+                new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE,
+                new KotlinModuleFixer()));
+        }
+
+        if (configuration.adaptKotlinMetadata && configuration.enableKotlinAsserter)
+        {
+            new KotlinMetadataAsserter().execute(programClassPool, libraryClassPool, resourceFilePool, warningPrinter);
         }
     }
 }

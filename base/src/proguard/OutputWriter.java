@@ -21,11 +21,14 @@
 package proguard;
 
 import proguard.classfile.ClassPool;
+import proguard.classfile.io.visitor.ProcessingFlagDataEntryFilter;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassUtil;
 import proguard.configuration.ConfigurationLogger;
 import proguard.io.*;
 import proguard.resources.file.ResourceFilePool;
 import proguard.resources.file.util.ResourceFilePoolNameFunction;
+import proguard.resources.kotlinmodule.io.KotlinModuleDataEntryWriter;
 import proguard.util.*;
 
 import java.io.*;
@@ -301,6 +304,18 @@ public class OutputWriter
                 resourceWriter =
                     renameResourceFiles(resourceFilePool,
                                         resourceWriter);
+            }
+
+            if (configuration.adaptKotlinMetadata &&
+                (configuration.shrink ||
+                 configuration.obfuscate))
+            {
+                resourceWriter =
+                    new NameFilteredDataEntryWriter(KotlinConstants.MODULE.FILE_EXPRESSION,
+                        new FilteredDataEntryWriter(
+                            new ProcessingFlagDataEntryFilter(resourceFilePool, 0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE),
+                            new KotlinModuleDataEntryWriter(resourceFilePool, resourceWriter)),
+                        resourceWriter);
             }
 
             // By default, just copy resource files into the above writers.
