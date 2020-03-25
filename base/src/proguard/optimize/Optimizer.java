@@ -783,7 +783,7 @@ public class Optimizer
         {
             // We'll create values to be stored with fields, method parameters,
             // and return values.
-            ValueFactory valueFactory         = new RangeValueFactory();
+            ValueFactory valueFactory         = new BasicRangeValueFactory();
             ValueFactory detailedValueFactory = new DetailedArrayValueFactory();
 
             InvocationUnit storingInvocationUnit =
