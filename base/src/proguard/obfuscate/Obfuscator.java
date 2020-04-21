@@ -531,6 +531,8 @@ public class Obfuscator
                 new KotlinCompanionEqualizer(),
                 // Equalise/fix $DefaultImpls and $WhenMappings classes.
                 new KotlinSyntheticClassFixer(),
+                // Ensure object classes have the INSTANCE field.
+                new KotlinObjectFixer(),
 
                 new AllFunctionsVisitor(
                     // Ensure that all default interface implementations of methods have the same names.

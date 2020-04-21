@@ -29,6 +29,8 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.util.kotlin.asserter.AssertUtil;
 
+import static proguard.classfile.kotlin.KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME;
+
 /**
  * This class checks the assumption: All functions need a JVM signature
  */
@@ -87,6 +89,13 @@ extends AbstractKotlinMetadataConstraint
 
         kotlinClassKindMetadata.referencedSealedSubClasses
             .forEach(sealedSubClass -> util.reportIfNullReference("sealed subclasses", sealedSubClass));
+
+        if (kotlinClassKindMetadata.flags.isObject &&
+            kotlinClassKindMetadata.referencedClass != null &&
+            kotlinClassKindMetadata.referencedClass.findField(KOTLIN_OBJECT_INSTANCE_FIELD_NAME, null) == null)
+        {
+            reporter.report("Object class should have a field named " + KOTLIN_OBJECT_INSTANCE_FIELD_NAME);
+        }
     }
 
 

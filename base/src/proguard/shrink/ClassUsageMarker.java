@@ -1579,6 +1579,12 @@ implements   ClassVisitor,
                     kotlinClassKindMetadata.constructorsAccept(clazz, this);
                 }
 
+                // Mark the INSTANCE field in object classes.
+                if (kotlinClassKindMetadata.flags.isObject)
+                {
+                    clazz.fieldAccept(KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME, null, ClassUsageMarker.this);
+                }
+
                 kotlinClassKindMetadata.superTypesAccept(        clazz, this);
                 kotlinClassKindMetadata.typeParametersAccept(    clazz, this);
                 kotlinClassKindMetadata.versionRequirementAccept(clazz, this);
