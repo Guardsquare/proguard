@@ -41,7 +41,6 @@ import proguard.evaluation.value.*;
  * @author Lars Vandenbergh
  */
 public class GsonBuilderInvocationFinder
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     private final InstructionSequenceMatcher setVersionMatcher;

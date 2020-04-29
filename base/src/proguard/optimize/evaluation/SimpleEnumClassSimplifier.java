@@ -27,7 +27,6 @@ import proguard.classfile.constant.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.optimize.info.SimpleEnumMarker;
 
@@ -39,7 +38,6 @@ import proguard.optimize.info.SimpleEnumMarker;
  * @author Eric Lafortune
  */
 public class SimpleEnumClassSimplifier
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              AttributeVisitor,
              InstructionVisitor

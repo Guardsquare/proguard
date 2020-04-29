@@ -38,7 +38,6 @@ import static proguard.classfile.instruction.Instruction.OP_RETURN;
  * @author Lars Vandenbergh
  */
 public class GsonInstrumentationAdder
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     private static final boolean DEBUG = false;

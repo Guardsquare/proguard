@@ -21,7 +21,6 @@
 package proguard.optimize.peephole;
 
 import proguard.classfile.ProgramClass;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 /**
@@ -32,7 +31,6 @@ import proguard.classfile.visitor.*;
  * @author Eric Lafortune
  */
 public class HorizontalClassMerger
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private final boolean                       allowAccessModification;

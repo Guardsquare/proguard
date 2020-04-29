@@ -35,7 +35,6 @@ import proguard.evaluation.LivenessAnalyzer;
  * @author Eric Lafortune
  */
 public class VariableOptimizer
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor

@@ -38,7 +38,6 @@ import proguard.evaluation.value.*;
  * @author Eric Lafortune
  */
 public class ParameterUsageMarker
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              AttributeVisitor,
              InstructionVisitor

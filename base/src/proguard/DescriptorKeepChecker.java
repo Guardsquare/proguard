@@ -34,7 +34,6 @@ import java.util.List;
  * @author Eric Lafortune
  */
 public class DescriptorKeepChecker
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              ClassVisitor
 {

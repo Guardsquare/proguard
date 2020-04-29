@@ -7,7 +7,6 @@
 package proguard.util.kotlin.asserter;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 import java.util.*;
@@ -82,8 +81,7 @@ public class AssertUtil
     // Small helper classes.
 
     private static class ExactMemberMatcher
-        extends SimplifiedVisitor
-        implements MemberVisitor
+    implements           MemberVisitor
     {
         private final Member memberToMatch;
 

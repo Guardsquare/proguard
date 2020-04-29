@@ -46,7 +46,6 @@ import java.util.Stack;
  * @author Eric Lafortune
  */
 public class MethodInliner
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ConstantVisitor,

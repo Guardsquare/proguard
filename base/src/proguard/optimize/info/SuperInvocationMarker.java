@@ -26,7 +26,6 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This InstructionVisitor marks all methods that invoke super methods (other
@@ -35,7 +34,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class SuperInvocationMarker
-extends      SimplifiedVisitor
 implements   InstructionVisitor,
              ConstantVisitor
 {

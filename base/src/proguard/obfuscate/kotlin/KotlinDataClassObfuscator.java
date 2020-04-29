@@ -17,7 +17,6 @@ import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitor.*;
 import proguard.classfile.kotlin.visitor.filter.KotlinFunctionFilter;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.obfuscate.ClassObfuscator;
 
 import java.util.*;
@@ -91,7 +90,6 @@ implements   KotlinMetadataVisitor
 
 
     private static final class MyObfuscatedToStringFixer
-    extends                    SimplifiedVisitor
     implements                 AttributeVisitor,
                                InstructionVisitor,
                                ConstantVisitor

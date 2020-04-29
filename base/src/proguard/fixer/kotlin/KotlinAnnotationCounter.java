@@ -13,7 +13,6 @@ import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.kotlin.KotlinConstants;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.shrink.SimpleUsageMarker;
 
@@ -21,7 +20,6 @@ import proguard.shrink.SimpleUsageMarker;
  * @author james
  */
 public class KotlinAnnotationCounter
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              AttributeVisitor,
              AnnotationVisitor

@@ -35,7 +35,6 @@ import proguard.optimize.evaluation.StoringInvocationUnit;
  * @author Eric Lafortune
  */
 public class ConstantParameterFilter
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final MemberVisitor constantParameterVisitor;

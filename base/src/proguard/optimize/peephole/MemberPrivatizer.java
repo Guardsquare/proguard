@@ -36,7 +36,6 @@ import proguard.optimize.info.NonPrivateMemberMarker;
  * @author Eric Lafortune
  */
 public class MemberPrivatizer
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final MemberVisitor extraMemberVisitor;

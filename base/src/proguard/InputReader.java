@@ -272,7 +272,6 @@ public class InputReader
      * to any program classes that it visits.
      */
     private class MyClassFeatureNameSetter
-    extends       SimplifiedVisitor
     implements    ClassVisitor
     {
         // Implementations for ClassVisitor.
@@ -289,7 +288,6 @@ public class InputReader
      * to any resource files that it visits.
      */
     private class MyResourceFileFeatureNameSetter
-    extends       SimplifiedResourceFileVisitor
     implements    ResourceFileVisitor
     {
         // Implementations for ResourceFileVisitor.

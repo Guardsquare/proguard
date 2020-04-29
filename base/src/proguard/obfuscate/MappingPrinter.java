@@ -40,7 +40,6 @@ import java.util.Stack;
  * @author Eric Lafortune
  */
 public class MappingPrinter
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor

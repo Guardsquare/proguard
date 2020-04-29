@@ -32,7 +32,6 @@ import java.util.List;
  * @author Eric Lafortune
  */
 public class ClassMemberChecker
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final ClassPool      programClassPool;

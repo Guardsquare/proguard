@@ -44,7 +44,6 @@ import proguard.optimize.evaluation.StoringInvocationUnit;
  * @author Eric Lafortune
  */
 public class WrapperClassMarker
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor

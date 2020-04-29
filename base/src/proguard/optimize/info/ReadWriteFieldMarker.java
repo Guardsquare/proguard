@@ -26,7 +26,6 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
@@ -35,7 +34,6 @@ import proguard.classfile.visitor.MemberVisitor;
  * @author Eric Lafortune
  */
 public class ReadWriteFieldMarker
-extends      SimplifiedVisitor
 implements   InstructionVisitor,
              ConstantVisitor,
              MemberVisitor

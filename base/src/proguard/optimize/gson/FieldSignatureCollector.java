@@ -23,13 +23,11 @@ package proguard.optimize.gson;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This visitor collects the Signature attribute of a Field.
  */
 class      FieldSignatureCollector
-extends    SimplifiedVisitor
 implements AttributeVisitor
 {
     private String fieldSignature;

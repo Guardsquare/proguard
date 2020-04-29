@@ -47,7 +47,6 @@ import proguard.util.*;
  * @author Thomas Neidhart
  */
 class      AbstractAPIConverter
-extends    SimplifiedVisitor
 implements ClassVisitor,
 
            // Implementation interfaces.

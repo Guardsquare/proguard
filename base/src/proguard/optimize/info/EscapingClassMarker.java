@@ -39,7 +39,6 @@ import proguard.optimize.evaluation.*;
  * @author Eric Lafortune
  */
 public class EscapingClassMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ClassVisitor

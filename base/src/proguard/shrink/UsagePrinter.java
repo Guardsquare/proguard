@@ -38,7 +38,6 @@ import java.io.PrintWriter;
  * @author Eric Lafortune
  */
 public class UsagePrinter
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor

@@ -21,7 +21,6 @@
 package proguard.optimize.peephole;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.optimize.KeepMarker;
 
@@ -32,7 +31,6 @@ import proguard.optimize.KeepMarker;
  * @author Eric Lafortune
  */
 public class ClassFinalizer
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private final ClassVisitor extraClassVisitor;

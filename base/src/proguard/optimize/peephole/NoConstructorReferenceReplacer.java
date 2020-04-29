@@ -41,7 +41,6 @@ import java.io.IOException;
  * @author Joachim Vandersmissen
  */
 public class NoConstructorReferenceReplacer
-extends      SimplifiedVisitor
 implements   InstructionVisitor,
              ConstantVisitor
 {

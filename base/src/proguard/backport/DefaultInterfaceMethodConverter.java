@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Thomas Neidhart
  */
 public class DefaultInterfaceMethodConverter
-extends    SimplifiedVisitor
 implements ClassVisitor,
 
            // Implementation interfaces.
@@ -263,7 +262,6 @@ implements ClassVisitor,
      * referenced class and method.
      */
     private static class SuperInvocationInstructionMatcher
-    extends              SimplifiedVisitor
     implements           AttributeVisitor,
                          InstructionVisitor,
                          ConstantVisitor

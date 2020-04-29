@@ -22,7 +22,6 @@ package proguard.optimize;
 
 import proguard.classfile.*;
 import proguard.classfile.editor.MethodInvocationFixer;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.optimize.info.ParameterUsageMarker;
 import proguard.optimize.peephole.VariableShrinker;
@@ -37,7 +36,6 @@ import proguard.optimize.peephole.VariableShrinker;
  * @author Eric Lafortune
  */
 public class MethodStaticizer
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final MemberVisitor extraStaticMemberVisitor;

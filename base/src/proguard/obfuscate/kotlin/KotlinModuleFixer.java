@@ -26,13 +26,9 @@ import java.util.stream.Stream;
  * @author James Hamilton
  */
 public class KotlinModuleFixer
-extends      SimplifiedResourceFileVisitor
 implements   ResourceFileVisitor
 {
     // Implementations for ResourceFileVisitor.
-
-    @Override
-    public void visitAnyResourceFile(ResourceFile resourceFile) {}
 
     @Override
     public void visitKotlinModule(KotlinModule kotlinModule)

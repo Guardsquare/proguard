@@ -23,7 +23,6 @@ package proguard.obfuscate;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.util.Processable;
 
 /**
@@ -34,7 +33,6 @@ import proguard.util.Processable;
  * @author Eric Lafortune
  */
 public class AttributeUsageMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     // A processing info flag to indicate the attribute is being used.

@@ -25,7 +25,6 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This InstructionVisitor simplifies unconditional branches to other
@@ -34,7 +33,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class GotoGotoReplacer
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     private final CodeAttributeEditor codeAttributeEditor;

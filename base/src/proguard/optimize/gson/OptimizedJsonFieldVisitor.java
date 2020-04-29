@@ -35,7 +35,6 @@ import proguard.classfile.visitor.*;
  * @author Lars Vandenbergh
  */
 public class OptimizedJsonFieldVisitor
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor
 {

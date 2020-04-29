@@ -23,7 +23,6 @@ package proguard.optimize.gson;
 import proguard.classfile.*;
 import proguard.classfile.attribute.InnerClassesInfo;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -32,7 +31,6 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Lars Vandenbergh
  */
 class      LocalOrAnonymousClassChecker
-extends    SimplifiedVisitor
 implements ClassVisitor,
            InnerClassesInfoVisitor
 {

@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.util.SimplifiedVisitor;
 
 import java.util.Map;
 
@@ -36,7 +35,6 @@ import java.util.Map;
  * @author Lars Vandenbergh
  */
 public class OptimizedJsonWriterImplInitializer
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     private final ClassPool           programClassPool;

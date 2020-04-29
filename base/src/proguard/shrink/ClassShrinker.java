@@ -43,7 +43,6 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class ClassShrinker
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor,
@@ -327,7 +326,6 @@ implements   ClassVisitor,
      * attributes that it visits.
      */
     private class MyNestmemberShrinker
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
@@ -350,7 +348,6 @@ implements   ClassVisitor,
      * of classes, fields, and methods.
      */
     private class MySignatureCleaner
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}

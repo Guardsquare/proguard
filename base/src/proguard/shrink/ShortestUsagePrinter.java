@@ -39,7 +39,6 @@ import java.io.PrintWriter;
  * @author Eric Lafortune
  */
 public class ShortestUsagePrinter
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor

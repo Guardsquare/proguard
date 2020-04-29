@@ -21,7 +21,6 @@
 package proguard.optimize;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.optimize.info.ReadWriteFieldMarker;
 
@@ -34,7 +33,6 @@ import proguard.optimize.info.ReadWriteFieldMarker;
  * @author Eric Lafortune
  */
 public class WriteOnlyFieldFilter
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final MemberVisitor writeOnlyFieldVisitor;

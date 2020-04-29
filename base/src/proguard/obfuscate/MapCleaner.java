@@ -21,7 +21,6 @@
 package proguard.obfuscate;
 
 import proguard.classfile.Clazz;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 import java.util.Map;
@@ -32,7 +31,6 @@ import java.util.Map;
  * @author Eric Lafortune
  */
 public class MapCleaner
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private final Map map;

@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This class can tell whether an instruction might throw exceptions.
@@ -32,7 +31,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class ExceptionInstructionChecker
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 //             ConstantVisitor,
 //             MemberVisitor

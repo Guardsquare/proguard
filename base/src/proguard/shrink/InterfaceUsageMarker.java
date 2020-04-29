@@ -23,7 +23,6 @@ package proguard.shrink;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -35,7 +34,6 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Eric Lafortune
  */
 public class InterfaceUsageMarker
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor
 {

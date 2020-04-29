@@ -31,7 +31,6 @@ import proguard.util.*;
  * @author Johan Leys
  */
 public class ResourceFileNameObfuscator
-extends      SimplifiedResourceFileVisitor
 implements   ResourceFileVisitor
 {
     private final StringFunction      nameObfuscationFunction;

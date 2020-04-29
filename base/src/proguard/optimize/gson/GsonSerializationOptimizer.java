@@ -41,7 +41,6 @@ import static proguard.optimize.gson.OptimizedClassConstants.*;
  * @author Rob Coekaerts
  */
 public class GsonSerializationOptimizer
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              ClassVisitor,
              ElementValueVisitor,
@@ -191,7 +190,6 @@ implements   MemberVisitor,
 
 
     private class ToJsonFieldCodeBuilder
-    extends       SimplifiedVisitor
     implements    ClassBuilder.CodeBuilder,
                   MemberVisitor
     {

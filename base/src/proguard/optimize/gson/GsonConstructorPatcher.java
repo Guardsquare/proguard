@@ -27,7 +27,6 @@ import proguard.classfile.constant.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
@@ -40,7 +39,6 @@ import proguard.evaluation.value.*;
  * @author Lars Vandenbergh
  */
 public class GsonConstructorPatcher
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              AttributeVisitor,
              InstructionVisitor
@@ -218,7 +216,6 @@ implements   MemberVisitor,
 
 
     private class LocalFinder
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor

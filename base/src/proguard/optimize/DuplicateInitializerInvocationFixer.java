@@ -36,7 +36,6 @@ import proguard.classfile.visitor.MemberVisitor;
  * initialization method invocations that it visits.
  */
 public class DuplicateInitializerInvocationFixer
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ConstantVisitor,

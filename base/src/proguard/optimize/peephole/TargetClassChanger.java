@@ -28,7 +28,6 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 /**
@@ -41,7 +40,6 @@ import proguard.classfile.visitor.*;
  * @author Eric Lafortune
  */
 public class TargetClassChanger
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor,
              MemberVisitor,

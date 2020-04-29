@@ -28,7 +28,6 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.kotlin.KotlinConstants;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.util.ProcessingFlags;
 
@@ -41,7 +40,6 @@ import proguard.util.ProcessingFlags;
  * @author Eric Lafortune
  */
 public class AnnotationUsageMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              AnnotationVisitor,
              ElementValueVisitor,

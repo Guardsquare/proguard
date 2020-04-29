@@ -23,7 +23,6 @@ package proguard.optimize.info;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.optimize.OptimizationInfoMemberFilter;
 
@@ -34,7 +33,6 @@ import proguard.optimize.OptimizationInfoMemberFilter;
  * @author Eric Lafortune
  */
 public class NonPrivateMemberMarker
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor,
              MemberVisitor

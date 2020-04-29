@@ -23,7 +23,6 @@ package proguard.optimize.info;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This AttributeVisitor marks all methods that catch exceptions.
@@ -31,7 +30,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class CatchExceptionMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     // Implementations for AttributeVisitor.

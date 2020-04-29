@@ -47,7 +47,6 @@ import java.util.*;
  * @author Lars Vandenbergh
  */
 public class OptimizedTypeAdapterInitializer
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private final String              typeAdapterClassName;
@@ -148,7 +147,6 @@ implements   ClassVisitor
 
 
     private class TypeAdapterRenamer
-    extends       SimplifiedVisitor
     implements    ConstantVisitor
     {
 
@@ -166,7 +164,6 @@ implements   ClassVisitor
 
 
     private class LocalVariableTypeRenamer
-    extends       SimplifiedVisitor
     implements    AttributeVisitor,
                   LocalVariableInfoVisitor
     {
@@ -203,7 +200,6 @@ implements   ClassVisitor
      * provides it with a proper implementation for enum types.
      */
     private class EnumReadImplementer
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         // Implementations for AttributeVisitor.
@@ -307,7 +303,6 @@ implements   ClassVisitor
      * provides it with a proper implementation for non-enum types.
      */
     private class ReadImplementer
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         // Implementations for AttributeVisitor.
@@ -413,7 +408,6 @@ implements   ClassVisitor
      * provides it with a proper implementation for enum types.
      */
     private class EnumWriteImplementer
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         // Implementations for AttributeVisitor.
@@ -492,7 +486,6 @@ implements   ClassVisitor
      * provides it with a proper implementation for non-enum types.
      */
     private class WriteImplementer
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         // Implementations for AttributeVisitor.

@@ -21,7 +21,6 @@ import proguard.util.kotlin.asserter.AssertUtil;
 public class ClassIntegrity
 extends AbstractKotlinMetadataConstraint
 {
-
     @Override
     public void visitKotlinClassMetadata(Clazz clazz,
                                          KotlinClassKindMetadata kotlinClassKindMetadata)
@@ -104,7 +103,6 @@ extends AbstractKotlinMetadataConstraint
     }
 
     private class MyInnerClassChecker
-        extends SimplifiedVisitor
         implements ClassVisitor,
                    AttributeVisitor
     {

@@ -37,7 +37,6 @@ import proguard.optimize.*;
  * @author Eric Lafortune
  */
 public class UnusedParameterOptimizationInfoUpdater
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
 
              // Internal implementations.

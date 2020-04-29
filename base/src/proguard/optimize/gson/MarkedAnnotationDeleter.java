@@ -25,7 +25,6 @@ import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.util.SimplifiedVisitor;
 
 
 /**
@@ -37,7 +36,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Rob Coekaerts
  */
 class      MarkedAnnotationDeleter
-extends    SimplifiedVisitor
 implements AttributeVisitor
 {
     // A processing info flag to indicate the annotation can be deleted.

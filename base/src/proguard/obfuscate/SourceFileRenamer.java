@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.ConstantPoolEditor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -35,7 +34,6 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Eric Lafortune
  */
 public class SourceFileRenamer
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              AttributeVisitor
 {

@@ -38,7 +38,6 @@ import java.util.*;
  * @author Thomas Neidhart
  */
 public class LambdaExpressionCollector
-extends    SimplifiedVisitor
 implements ClassVisitor,
 
            // Implementation interfaces.

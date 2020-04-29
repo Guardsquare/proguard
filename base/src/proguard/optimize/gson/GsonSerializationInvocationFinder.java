@@ -40,7 +40,6 @@ import proguard.evaluation.value.*;
  * @author Lars Vandenbergh
  */
 public class GsonSerializationInvocationFinder
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     //*

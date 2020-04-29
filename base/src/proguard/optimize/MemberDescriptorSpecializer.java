@@ -36,7 +36,6 @@ import proguard.optimize.evaluation.StoringInvocationUnit;
  * @author Eric Lafortune
  */
 public class MemberDescriptorSpecializer
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private static final boolean DEBUG = false;

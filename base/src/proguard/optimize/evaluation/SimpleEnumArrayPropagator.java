@@ -21,7 +21,6 @@
 package proguard.optimize.evaluation;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.OptimizationInfoMemberFilter;
@@ -35,7 +34,6 @@ import proguard.optimize.info.*;
  * @author Eric Lafortune
  */
 public class SimpleEnumArrayPropagator
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor
 {

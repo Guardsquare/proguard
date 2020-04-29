@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.ConstantPoolEditor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 /**
@@ -38,7 +37,6 @@ import proguard.classfile.visitor.*;
  * @author Eric Lafortune
  */
 public class ClassRenamer
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              ConstantVisitor

@@ -9,14 +9,12 @@ package proguard.shrink;
 import proguard.classfile.*;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitor.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.util.Processable;
 
 import java.util.*;
 
 public class KotlinShrinker
-extends      SimplifiedVisitor
 implements   KotlinMetadataVisitor,
 
              // Implementation interfaces.

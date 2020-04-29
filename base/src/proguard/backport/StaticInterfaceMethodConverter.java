@@ -41,7 +41,6 @@ import java.util.*;
  * @author Thomas Neidhart
  */
 public class StaticInterfaceMethodConverter
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private final ClassPool             programClassPool;
@@ -226,7 +225,6 @@ implements   ClassVisitor
      * reference a given class via any RefConstant.
      */
     private static class MyReferencedClassFilter
-    extends    SimplifiedVisitor
     implements ClassVisitor,
                ConstantVisitor
     {

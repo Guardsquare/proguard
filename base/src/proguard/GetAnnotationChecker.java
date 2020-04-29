@@ -32,7 +32,6 @@ import proguard.classfile.util.*;
  * @author Eric Lafortune
  */
 public class GetAnnotationChecker
-extends      SimplifiedVisitor
 implements   ConstantVisitor
 {
     private final WarningPrinter notePrinter;

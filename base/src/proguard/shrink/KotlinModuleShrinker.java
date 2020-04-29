@@ -22,7 +22,6 @@ import java.util.*;
  * @author James Hamilton
  */
 public class KotlinModuleShrinker
-extends      SimplifiedResourceFileVisitor
 implements   ResourceFileVisitor,
              KotlinModulePackageVisitor
 {
@@ -37,13 +36,13 @@ implements   ResourceFileVisitor,
     // Implementations for ResourceFileVisitor.
 
     @Override
-    public void visitAnyResourceFile(ResourceFile resourceFile) {}
-
-    @Override
     public void visitKotlinModule(KotlinModule kotlinModule)
     {
         kotlinModule.modulePackagesAccept(this);
     }
+
+
+    // Implementations for KotlinModulePackageVisitor.
 
     @Override
     public void visitKotlinModulePackage(KotlinModule kotlinModule, KotlinModulePackage kotlinModulePart)

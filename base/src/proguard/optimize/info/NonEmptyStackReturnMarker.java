@@ -25,7 +25,6 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.StackSizeComputer;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This InstructionVisitor marks all methods that return with a non-empty stack
@@ -34,7 +33,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class NonEmptyStackReturnMarker
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     private final StackSizeComputer stackSizeComputer;

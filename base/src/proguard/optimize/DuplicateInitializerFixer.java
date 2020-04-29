@@ -34,7 +34,6 @@ import proguard.optimize.info.*;
  * initialization methods that it visits.
  */
 public class DuplicateInitializerFixer
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              AttributeVisitor
 {

@@ -40,7 +40,6 @@ import proguard.optimize.info.*;
  * @author Eric Lafortune
  */
 public class MethodDescriptorShrinker
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              AttributeVisitor
 {

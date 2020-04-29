@@ -42,7 +42,6 @@ import proguard.optimize.info.SimpleEnumMarker;
  * @author Eric Lafortune
  */
 public class SimpleEnumUseChecker
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor,

@@ -39,7 +39,6 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class MemberObfuscator
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final boolean        allowAggressiveOverloading;

@@ -51,7 +51,6 @@ import java.util.List;
  * @author Eric Lafortune
  */
 public class ClassUsageMarker
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              KotlinMetadataVisitor,
@@ -317,7 +316,6 @@ implements   ClassVisitor,
      * implementations that may be present in interface classes.
      */
     private class MyDefaultMethodUsageMarker
-    extends       SimplifiedVisitor
     implements    MemberVisitor
     {
         // Implementations for MemberVisitor.
@@ -343,7 +341,6 @@ implements   ClassVisitor,
      * have already been marked as possibly used.
      */
     private class MyPossiblyUsedMemberUsageMarker
-    extends       SimplifiedVisitor
     implements    MemberVisitor
     {
         // Implementations for MemberVisitor.
@@ -389,7 +386,6 @@ implements   ClassVisitor,
      * This AttributeVisitor marks ProgramMethod objects of non-empty methods.
      */
     private class MyNonEmptyMethodUsageMarker
-    extends       SimplifiedVisitor
     implements    AttributeVisitor
     {
         // Implementations for AttributeVisitor.
@@ -805,7 +801,6 @@ implements   ClassVisitor,
      * method entries, their method handles, and their arguments.
      */
     private class MyBootStrapMethodUsageMarker
-    extends       SimplifiedVisitor
     implements    AttributeVisitor,
                   BootstrapMethodInfoVisitor
     {
@@ -1497,7 +1492,6 @@ implements   ClassVisitor,
 
 
     public class KotlinUsageMarker
-    extends      SimplifiedVisitor
     implements   KotlinMetadataVisitor,
 
                  // Implementation interfaces.

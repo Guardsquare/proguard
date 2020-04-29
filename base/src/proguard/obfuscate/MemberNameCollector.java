@@ -35,7 +35,6 @@ import java.util.Map;
  * @author Eric Lafortune
  */
 public class MemberNameCollector
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final boolean allowAggressiveOverloading;

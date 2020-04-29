@@ -26,7 +26,6 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.editor.ClassEstimates;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 import java.util.Arrays;
 
@@ -37,7 +36,6 @@ import java.util.Arrays;
  * @author Eric Lafortune
  */
 public class ReachableCodeMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ExceptionInfoVisitor

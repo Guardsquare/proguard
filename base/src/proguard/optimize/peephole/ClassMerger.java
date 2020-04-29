@@ -45,7 +45,6 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class ClassMerger
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor
 {
@@ -798,7 +797,6 @@ implements   ClassVisitor,
      * This MemberVisitor copies field optimization info from copied fields.
      */
     private static class FieldOptimizationInfoCopier
-    extends              SimplifiedVisitor
     implements           MemberVisitor
     {
         public void visitProgramField(ProgramClass programClass, ProgramField programField)

@@ -37,7 +37,6 @@ import proguard.classfile.util.*;
  * @author Eric Lafortune
  */
 public class TailRecursionSimplifier
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ConstantVisitor,
@@ -241,7 +240,6 @@ implements   AttributeVisitor,
      * invocation can be treated as tail-recursive.
      */
     private class MyRecursionChecker
-    extends       SimplifiedVisitor
     implements    ConstantVisitor,
                   ExceptionInfoVisitor
     {

@@ -25,7 +25,6 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This InstructionVisitor removes all nop instructions that it encounters.
@@ -33,7 +32,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class NopRemover
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     private final CodeAttributeEditor codeAttributeEditor;

@@ -21,7 +21,6 @@
 package proguard.optimize;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.value.Value;
 import proguard.optimize.evaluation.StoringInvocationUnit;
@@ -35,7 +34,6 @@ import proguard.optimize.evaluation.StoringInvocationUnit;
  * @author Eric Lafortune
  */
 public class ConstantMemberFilter
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final MemberVisitor constantMemberVisitor;

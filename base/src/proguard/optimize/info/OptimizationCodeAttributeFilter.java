@@ -23,7 +23,6 @@ package proguard.optimize.info;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.optimize.KeepMarker;
 
 /**
@@ -36,7 +35,6 @@ import proguard.optimize.KeepMarker;
  * @author Thomas Neidhart
  */
 public class OptimizationCodeAttributeFilter
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     private final AttributeVisitor attributeVisitor;

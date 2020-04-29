@@ -9,14 +9,12 @@ package proguard.obfuscate.kotlin;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This class sets the SourceDebugExtension attribute to a basic minimum
  * SMAP entry. See DGD-1417.
  */
 public class KotlinSourceDebugExtensionAttributeObfuscator
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     private static final String MINIMUM_SMAP = "SMAP\n" +       // SMAP Header.

@@ -21,7 +21,6 @@
 package proguard.shrink;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.util.Processable;
 
@@ -189,7 +188,6 @@ extends      SimpleUsageMarker
      * class or a member of a given class, directly or indirectly.
      */
     private class MyReferenceChecker
-    extends       SimplifiedVisitor
     implements    ClassVisitor,
                   MemberVisitor
     {

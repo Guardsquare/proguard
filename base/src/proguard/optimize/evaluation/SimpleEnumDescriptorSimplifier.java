@@ -40,7 +40,6 @@ import proguard.optimize.info.*;
  * @author Eric Lafortune
  */
 public class SimpleEnumDescriptorSimplifier
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              ConstantVisitor,
              MemberVisitor,

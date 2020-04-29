@@ -33,7 +33,6 @@ import proguard.classfile.visitor.*;
  * @author Johan Leys
  */
 public class RenamedFlagSetter
-extends      SimplifiedVisitor
 implements   ClassVisitor,
 
              // Implementation interfaces.

@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.instruction.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.optimize.info.ExceptionInstructionChecker;
 
 /**
@@ -34,7 +33,6 @@ import proguard.optimize.info.ExceptionInstructionChecker;
  * @author Eric Lafortune
  */
 public class UnreachableExceptionRemover
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              ExceptionInfoVisitor
 {

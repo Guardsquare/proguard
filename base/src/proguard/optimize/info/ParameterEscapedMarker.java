@@ -42,7 +42,6 @@ import proguard.optimize.evaluation.*;
  * @author Eric Lafortune
  */
 public class ParameterEscapedMarker
-extends      SimplifiedVisitor
 implements   ClassPoolVisitor,
              ClassVisitor,
              MemberVisitor,

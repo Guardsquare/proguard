@@ -32,7 +32,6 @@ import proguard.classfile.visitor.MemberVisitor;
  * @author Eric Lafortune
  */
 public class ProgramMemberOptimizationInfoSetter
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final boolean overwrite;

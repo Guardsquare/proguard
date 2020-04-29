@@ -43,7 +43,6 @@ import proguard.util.ArrayUtil;
  * @author Eric Lafortune
  */
 public class ReferenceEscapeChecker
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor,
              ConstantVisitor

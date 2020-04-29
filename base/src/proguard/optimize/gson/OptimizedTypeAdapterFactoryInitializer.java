@@ -37,7 +37,6 @@ import java.util.Map;
  * @author Lars Vandenbergh
  */
 public class OptimizedTypeAdapterFactoryInitializer
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     private final ClassPool           programClassPool;

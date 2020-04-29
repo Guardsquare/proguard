@@ -27,7 +27,6 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.evaluation.*;
 import proguard.evaluation.value.InstructionOffsetValue;
 import proguard.util.ArrayUtil;
@@ -43,7 +42,6 @@ import proguard.util.ArrayUtil;
  * @author Lars Vandenbergh
  */
 class      TypeArgumentFinder
-extends    SimplifiedVisitor
 implements InstructionVisitor,
            ConstantVisitor
 {
@@ -160,7 +158,6 @@ implements InstructionVisitor,
     }
 
     private static class LastStoreFinder
-    extends              SimplifiedVisitor
     implements           InstructionVisitor
     {
         private final int           variableIndex;
@@ -191,7 +188,6 @@ implements InstructionVisitor,
     }
 
     private class TypeTokenSignatureFinder
-    extends       SimplifiedVisitor
     implements    InstructionVisitor,
                   ConstantVisitor,
                   AttributeVisitor

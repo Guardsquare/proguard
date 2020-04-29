@@ -23,7 +23,6 @@ package proguard.obfuscate;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This AttributeVisitor trims and marks all local variable (type) table
@@ -33,7 +32,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class ParameterNameMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     private final AttributeVisitor attributeUsageMarker;

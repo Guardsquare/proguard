@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.optimize.OptimizationInfoClassFilter;
 
@@ -36,7 +35,6 @@ import proguard.optimize.OptimizationInfoClassFilter;
  * @author Eric Lafortune
  */
 public class SideEffectMethodMarker
-extends      SimplifiedVisitor
 implements   MemberVisitor,
              InstructionVisitor
 {

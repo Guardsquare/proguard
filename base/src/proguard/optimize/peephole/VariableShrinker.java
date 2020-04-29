@@ -39,7 +39,6 @@ import proguard.optimize.info.*;
  * @author Eric Lafortune
  */
 public class VariableShrinker
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     //*

@@ -24,7 +24,6 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This InstructionVisitor marks all methods that branch backward in any of the
@@ -33,7 +32,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class BackwardBranchMarker
-extends      SimplifiedVisitor
 implements   InstructionVisitor
 {
     // Implementations for InstructionVisitor.

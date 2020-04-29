@@ -25,7 +25,6 @@ import proguard.classfile.attribute.annotation.*;
 import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 import java.util.*;
@@ -39,7 +38,6 @@ import java.util.*;
  * @author Rob Coekaerts
  */
 public class OptimizedJsonFieldCollector
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor
 {
@@ -117,7 +115,6 @@ implements   ClassVisitor,
 
 
     private static class ExposedFieldsCollector
-    extends              SimplifiedVisitor
     implements           AnnotationVisitor,
                          ElementValueVisitor,
                          ConstantVisitor
@@ -191,7 +188,6 @@ implements   ClassVisitor,
 
 
     private static class SerializedNamesCollector
-    extends              SimplifiedVisitor
     implements           AnnotationVisitor,
                          ElementValueVisitor
     {

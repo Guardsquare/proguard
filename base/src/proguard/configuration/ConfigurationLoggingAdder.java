@@ -46,7 +46,6 @@ import static proguard.classfile.util.ClassUtil.internalClassName;
  * @author Johan Leys
  */
 public class ConfigurationLoggingAdder
-extends      SimplifiedVisitor
 implements   // Implementation interfaces.
              InstructionVisitor
 {

@@ -38,7 +38,6 @@ import proguard.optimize.info.*;
  * @author Eric Lafortune
  */
 public class ParameterShrinker
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     //*

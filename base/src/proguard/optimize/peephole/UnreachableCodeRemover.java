@@ -26,7 +26,6 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 
 /**
  * This InstructionVisitor deletes blocks of code that can never be reached by
@@ -35,7 +34,6 @@ import proguard.classfile.util.SimplifiedVisitor;
  * @author Eric Lafortune
  */
 public class UnreachableCodeRemover
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor
 {

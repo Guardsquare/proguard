@@ -22,7 +22,6 @@
 package proguard.optimize.info;
 
 import proguard.classfile.Clazz;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -34,7 +33,6 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Eric Lafortune
  */
 public class NoSideEffectClassMarker
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     // Implementations for MemberVisitor.

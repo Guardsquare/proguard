@@ -17,7 +17,6 @@ import proguard.classfile.visitor.*;
 import java.util.Arrays;
 
 public class InstructionSequenceObfuscator
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor
 {

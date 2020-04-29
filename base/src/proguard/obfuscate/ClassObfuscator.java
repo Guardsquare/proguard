@@ -44,7 +44,6 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class ClassObfuscator
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              AttributeVisitor,
              InnerClassesInfoVisitor,

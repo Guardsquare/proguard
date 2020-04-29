@@ -32,7 +32,6 @@ import proguard.optimize.KeepMarker;
  * @author Eric Lafortune
  */
 public class MethodFinalizer
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     private final MemberVisitor extraMemberVisitor;

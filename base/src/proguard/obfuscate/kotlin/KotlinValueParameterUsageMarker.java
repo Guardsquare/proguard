@@ -11,7 +11,6 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitor.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.obfuscate.AttributeUsageMarker;
 import proguard.util.*;
 
@@ -20,7 +19,6 @@ import proguard.util.*;
  * based on markings by the {@link AttributeUsageMarker}.
  */
 public class KotlinValueParameterUsageMarker
-extends SimplifiedVisitor
 implements KotlinMetadataVisitor,
 
            // Implementation interfaces.

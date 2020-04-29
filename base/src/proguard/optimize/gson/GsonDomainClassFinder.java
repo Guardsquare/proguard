@@ -38,7 +38,6 @@ import java.util.Arrays;
  * @author Lars Vandenbergh
  */
 public class GsonDomainClassFinder
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     //*
@@ -310,7 +309,6 @@ implements   ClassVisitor
 
 
     private class HierarchyClassVisitor
-    extends       SimplifiedVisitor
     implements    ClassVisitor
     {
 
@@ -335,7 +333,6 @@ implements   ClassVisitor
 
 
     private class AnnotationFinder
-    extends       SimplifiedVisitor
     implements    AnnotationVisitor
     {
         private boolean found;
@@ -351,7 +348,6 @@ implements   ClassVisitor
 
 
     private class UnkeptFieldFinder
-    extends       SimplifiedVisitor
     implements    MemberVisitor
     {
         private boolean found;

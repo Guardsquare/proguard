@@ -1,7 +1,6 @@
 package proguard.optimize.info;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 
 /**
@@ -10,7 +9,6 @@ import proguard.classfile.visitor.*;
  * @author Joachim Vandersmissen
  */
 public class ContainsConstructorsMarker
-extends      SimplifiedVisitor
 implements   MemberVisitor
 {
     // Implementations for MemberVisitor.

@@ -40,7 +40,6 @@ import proguard.classfile.visitor.*;
  * @author Eric Lafortune
  */
 class      NameMarker
-extends    SimplifiedVisitor
 implements ClassVisitor,
            MemberVisitor,
            AttributeVisitor,

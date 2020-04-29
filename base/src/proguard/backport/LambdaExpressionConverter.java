@@ -40,7 +40,6 @@ import java.util.*;
  * @author Thomas Neidhart
  */
 public class LambdaExpressionConverter
-extends    SimplifiedVisitor
 implements ClassVisitor,
 
            // Implementation interfaces.

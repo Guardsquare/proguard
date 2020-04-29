@@ -33,7 +33,6 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class FullyQualifiedClassNameChecker
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private static final String INVALID_CLASS_EXTENSION = ClassUtil.internalClassName(ClassConstants.CLASS_FILE_EXTENSION);

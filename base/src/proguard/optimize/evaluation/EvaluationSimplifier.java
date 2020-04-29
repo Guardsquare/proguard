@@ -41,7 +41,6 @@ import java.util.Arrays;
  * @author Eric Lafortune
  */
 public class EvaluationSimplifier
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor
 {

@@ -18,7 +18,6 @@ import proguard.resources.kotlinmodule.KotlinModule;
  * @author James Hamilton
  */
 public class KotlinModuleNameObfuscator
-extends      SimplifiedResourceFileVisitor
 implements   ResourceFileVisitor
 {
     private final NameFactory nameFactory;
@@ -29,12 +28,12 @@ implements   ResourceFileVisitor
         this.nameFactory.reset();
     }
 
+
+    // Implementations for ResourceFileVisitor.
+
     @Override
     public void visitKotlinModule(KotlinModule kotlinModule)
     {
         kotlinModule.name = nameFactory.nextName();
     }
-
-    @Override
-    public void visitAnyResourceFile(ResourceFile resourceFile) {}
 }

@@ -21,7 +21,6 @@
 package proguard.optimize.info;
 
 import proguard.classfile.*;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.evaluation.value.*;
 
 /**
@@ -31,7 +30,6 @@ import proguard.evaluation.value.*;
  * @author Eric Lafortune
  */
 public class FieldOptimizationInfo
-extends      SimplifiedVisitor
 {
     protected Value value;
 

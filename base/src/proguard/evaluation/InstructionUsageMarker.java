@@ -51,7 +51,6 @@ import java.util.Arrays;
  * @author Eric Lafortune
  */
 public class InstructionUsageMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor
 {
     //*
@@ -556,7 +555,6 @@ implements   AttributeVisitor
      * parameters aren't used in the methods that are visited.
      */
     private class MyParameterUsageMarker
-    extends       SimplifiedVisitor
     implements    InstructionVisitor,
                   ConstantVisitor,
                   MemberVisitor
@@ -636,7 +634,6 @@ implements   AttributeVisitor
      * necessary, because they have side effects.
      */
     private class MyInitialUsageMarker
-    extends       SimplifiedVisitor
     implements    InstructionVisitor,
                   ConstantVisitor,
                   ParameterVisitor
@@ -973,7 +970,6 @@ implements   AttributeVisitor
      * Simplified method arguments are ignored.
      */
     private class MyProducerMarker
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.
@@ -1078,7 +1074,6 @@ implements   AttributeVisitor
      * necessary to appease the JVM.
      */
     private class MyVariableInitializationMarker
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.
@@ -1105,7 +1100,6 @@ implements   AttributeVisitor
      * consistent at later points in the execution.
      */
     private class MyStackConsistencyMarker
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.
@@ -1137,7 +1131,6 @@ implements   AttributeVisitor
      * pop some values to keep the stack consistent.
      */
     private class MyExtraPushPopInstructionMarker
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.

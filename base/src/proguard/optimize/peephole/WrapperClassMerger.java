@@ -23,7 +23,6 @@ package proguard.optimize.peephole;
 import proguard.classfile.ClassConstants;
 import proguard.classfile.Clazz;
 import proguard.classfile.ProgramClass;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.optimize.info.WrapperClassMarker;
 
@@ -39,7 +38,6 @@ import proguard.optimize.info.WrapperClassMarker;
  * @author Eric Lafortune
  */
 public class WrapperClassMerger
-extends SimplifiedVisitor
 implements ClassVisitor
 {
     private final boolean      allowAccessModification;

@@ -28,7 +28,6 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.*;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
@@ -41,7 +40,6 @@ import proguard.optimize.info.ParameterUsageMarker;
  * @author Eric Lafortune
  */
 public class EvaluationShrinker
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              ExceptionInfoVisitor
 {
@@ -349,7 +347,6 @@ implements   AttributeVisitor,
      * method invocations if the 'this' parameter isn't used.
      */
     private class MyStaticInvocationFixer
-    extends       SimplifiedVisitor
     implements    InstructionVisitor,
                   ConstantVisitor,
                   MemberVisitor
@@ -410,7 +407,6 @@ implements   AttributeVisitor,
      * infinite loops.
      */
     private class MyBackwardBranchFixer
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.
@@ -485,7 +481,6 @@ implements   AttributeVisitor,
      * non-returning subroutine invocations.
      */
     private class MyNonReturningSubroutineFixer
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.
@@ -517,7 +512,6 @@ implements   AttributeVisitor,
      * instructions.
      */
     private class MyStackConsistencyFixer
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.
@@ -1358,7 +1352,6 @@ implements   AttributeVisitor,
      * This InstructionVisitor deletes all visited instructions.
      */
     private class MyInstructionDeleter
-    extends       SimplifiedVisitor
     implements    InstructionVisitor
     {
         // Implementations for InstructionVisitor.

@@ -25,7 +25,6 @@ import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -37,7 +36,6 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Eric Lafortune
  */
 public class InnerUsageMarker
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InnerClassesInfoVisitor,
              ConstantVisitor,

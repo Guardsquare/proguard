@@ -38,7 +38,6 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class LineNumberLinearizer
-extends      SimplifiedVisitor
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor,

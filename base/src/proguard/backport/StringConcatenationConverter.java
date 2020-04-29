@@ -40,7 +40,6 @@ import java.util.*;
  * @author Tim Van Den Broecke
  */
 public class StringConcatenationConverter
-extends    SimplifiedVisitor
 implements InstructionVisitor,
 
            // Implementation interfaces.

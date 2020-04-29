@@ -33,7 +33,6 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.optimize.info.WrapperClassMarker;
 
@@ -52,11 +51,10 @@ import proguard.optimize.info.WrapperClassMarker;
  * @author Eric Lafortune
  */
 public class WrapperClassUseSimplifier
-extends SimplifiedVisitor
-implements AttributeVisitor,
-        InstructionVisitor,
-        ConstantVisitor,
-        ClassVisitor
+implements   AttributeVisitor,
+             InstructionVisitor,
+             ConstantVisitor,
+             ClassVisitor
 {
     //*
     private static final boolean DEBUG = false;

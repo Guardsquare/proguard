@@ -26,7 +26,6 @@ import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.optimize.OptimizationInfoClassFilter;
 
@@ -37,7 +36,6 @@ import proguard.optimize.OptimizationInfoClassFilter;
  * @author Eric Lafortune
  */
 public class InstantiationClassMarker
-extends      SimplifiedVisitor
 implements   InstructionVisitor,
              ConstantVisitor,
              ClassVisitor

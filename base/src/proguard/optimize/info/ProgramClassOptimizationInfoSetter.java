@@ -21,7 +21,6 @@
 package proguard.optimize.info;
 
 import proguard.classfile.ProgramClass;
-import proguard.classfile.util.SimplifiedVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -31,7 +30,6 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Eric Lafortune
  */
 public class ProgramClassOptimizationInfoSetter
-extends      SimplifiedVisitor
 implements   ClassVisitor
 {
     private final boolean overwrite;

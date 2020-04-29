@@ -36,7 +36,6 @@ import proguard.classfile.util.*;
  * @author Eric Lafortune
  */
 public class GotoCommonCodeReplacer
-extends      SimplifiedVisitor
 implements   AttributeVisitor,
              InstructionVisitor
 {
