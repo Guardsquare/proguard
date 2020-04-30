@@ -23,6 +23,7 @@ package proguard.util.kotlin.asserter.constraint;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.KotlinMultiFilePartKindMetadata;
+import proguard.util.kotlin.asserter.AssertUtil;
 
 /**
  * @author James Hamilton
@@ -34,6 +35,8 @@ extends      AbstractKotlinMetadataConstraint
     public void visitKotlinMultiFilePartMetadata(Clazz clazz,
                                                  KotlinMultiFilePartKindMetadata kotlinMultiFilePartKindMetadata)
     {
+        AssertUtil util = new AssertUtil("Multi-file part " + clazz.getName(), reporter);
+        util.reportIfNullReference("referenced facade class", kotlinMultiFilePartKindMetadata.referencedFacadeClass);
 /*        new AssertUtil("Multi-file part " + clazz.getName(), reporter).
             reportIfNullReference("referenced module", kotlinMultiFilePartKindMetadata.referencedModule);*/
     }
