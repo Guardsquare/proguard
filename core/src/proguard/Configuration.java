@@ -367,9 +367,14 @@ public class Configuration
     public boolean   addConfigurationDebugging;
 
     /**
-     * Specifies whether to backporting of class files to another
+     * Specifies whether backporting of class files to another
      * targetClassVersion shall be enabled.
      */
     public boolean   backport                         = false;
+
+    /**
+     * Specifies whether to compress output archives.
+     */
+    public boolean   compress                         = true;
 
 }

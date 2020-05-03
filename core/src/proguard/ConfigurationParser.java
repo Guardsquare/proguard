@@ -160,6 +160,7 @@ public class ConfigurationParser
             else if (ConfigurationConstants.DONT_SKIP_NON_PUBLIC_LIBRARY_CLASS_MEMBERS_OPTION.startsWith(nextWord)) configuration.skipNonPublicLibraryClassMembers      = parseNoArgument(false);
             else if (ConfigurationConstants.TARGET_OPTION                                    .startsWith(nextWord)) configuration.targetClassVersion                    = parseClassVersion();
             else if (ConfigurationConstants.FORCE_PROCESSING_OPTION                          .startsWith(nextWord)) configuration.lastModified                          = parseNoArgument(Long.MAX_VALUE);
+            else if (ConfigurationConstants.DONT_COMPRESS                                    .startsWith(nextWord)) configuration.compress                              = parseNoArgument(false);
 
             else if (ConfigurationConstants.IF_OPTION                                        .startsWith(nextWord)) configuration.keep                                  = parseIfCondition(configuration.keep);
             else if (ConfigurationConstants.KEEP_OPTION                                      .startsWith(nextWord)) configuration.keep                                  = parseKeepClassSpecificationArguments(configuration.keep, true,  false, false, null);

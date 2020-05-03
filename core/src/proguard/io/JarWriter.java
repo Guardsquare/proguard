@@ -33,6 +33,7 @@ import java.util.Date;
  */
 public class JarWriter implements DataEntryWriter
 {
+    private final boolean         compress;
     private final byte[]          header;
     private final int             modificationTime;
     private final DataEntryWriter dataEntryWriter;
@@ -46,9 +47,10 @@ public class JarWriter implements DataEntryWriter
      * @param dataEntryWriter the data entry writer that can provide
      *                        output streams for the jar/zip archives.
      */
-    public JarWriter(DataEntryWriter dataEntryWriter)
+    public JarWriter(DataEntryWriter dataEntryWriter,
+                     boolean         compress)
     {
-        this(null, dataEntryWriter);
+        this(null, dataEntryWriter, compress);
     }
 
 
@@ -59,9 +61,10 @@ public class JarWriter implements DataEntryWriter
      *                        output streams for the jar/zip archives.
      */
     public JarWriter(byte[]          header,
-                     DataEntryWriter dataEntryWriter)
+                     DataEntryWriter dataEntryWriter,
+                     boolean         compress)
     {
-        this(header, currentTime(), dataEntryWriter);
+        this(header, currentTime(), dataEntryWriter, compress);
     }
 
 
@@ -75,11 +78,13 @@ public class JarWriter implements DataEntryWriter
      */
     public JarWriter(byte[]          header,
                      int             modificationTime,
-                     DataEntryWriter dataEntryWriter)
+                     DataEntryWriter dataEntryWriter,
+                     boolean         compress)
     {
         this.header           = header;
         this.modificationTime = modificationTime;
         this.dataEntryWriter  = dataEntryWriter;
+        this.compress         = compress;
     }
 
 
@@ -135,7 +140,7 @@ public class JarWriter implements DataEntryWriter
 
         // Create a new zip entry.
         return currentZipOutput.createOutputStream(dataEntry.getName(),
-                                                   true,
+                                                   compress,
                                                    modificationTime);
     }
 

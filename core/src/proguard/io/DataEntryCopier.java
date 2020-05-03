@@ -153,7 +153,7 @@ public class DataEntryCopier implements DataEntryReader
                                                          outputIsZip);
 
             // Zip up any zips, if necessary.
-            DataEntryWriter zipWriter = new JarWriter(writer);
+            DataEntryWriter zipWriter = new JarWriter(writer, true);
             if (outputIsZip)
             {
                 // Always zip.
@@ -170,7 +170,7 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any jmods, if necessary.
-            DataEntryWriter jmodWriter = new JarWriter(ClassConstants.JMOD_HEADER, writer);
+            DataEntryWriter jmodWriter = new JarWriter(ClassConstants.JMOD_HEADER, writer, true);
             if (outputIsJmod)
             {
                 // Always zip.
@@ -187,7 +187,7 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any wars, if necessary.
-            DataEntryWriter warWriter = new JarWriter(writer);
+            DataEntryWriter warWriter = new JarWriter(writer, true);
             if (outputIsWar)
             {
                 // Always zip.
@@ -204,7 +204,7 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any aars, if necessary.
-            DataEntryWriter aarWriter = new JarWriter(writer);
+            DataEntryWriter aarWriter = new JarWriter(writer, true);
             if (outputIsWar)
             {
                 // Always zip.
@@ -221,7 +221,7 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any jars, if necessary.
-            DataEntryWriter jarWriter = new JarWriter(writer);
+            DataEntryWriter jarWriter = new JarWriter(writer, true);
             if (outputIsJar)
             {
                 // Always zip.
@@ -238,7 +238,7 @@ public class DataEntryCopier implements DataEntryReader
             }
 
             // Zip up any apks, if necessary.
-            DataEntryWriter apkWriter = new JarWriter(writer);
+            DataEntryWriter apkWriter = new JarWriter(writer, true);
             if (outputIsApk)
             {
                 // Always zip.

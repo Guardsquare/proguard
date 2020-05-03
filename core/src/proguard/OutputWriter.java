@@ -119,7 +119,8 @@ public class OutputWriter
             DataEntryWriter writer =
                 dataEntryWriterFactory.createDataEntryWriter(classPath,
                                                              fromOutputIndex,
-                                                             toOutputIndex);
+                                                             toOutputIndex,
+                                                             configuration.compress);
 
             if (configuration.addConfigurationDebugging)
             {

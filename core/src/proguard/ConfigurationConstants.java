@@ -103,6 +103,7 @@ class ConfigurationConstants
     public static final String TARGET_OPTION                                     = "-target";
     public static final String KEEP_DIRECTORIES_OPTION                           = "-keepdirectories";
     public static final String FORCE_PROCESSING_OPTION                           = "-forceprocessing";
+    public static final String DONT_COMPRESS                                     = "-dontcompress";
 
 
     public static final String ANY_FILE_KEYWORD            = "**";

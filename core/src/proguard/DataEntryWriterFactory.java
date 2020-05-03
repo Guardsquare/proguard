@@ -63,7 +63,8 @@ public class DataEntryWriterFactory
      */
     public DataEntryWriter createDataEntryWriter(ClassPath classPath,
                                                  int       fromIndex,
-                                                 int       toIndex)
+                                                 int       toIndex,
+                                                 boolean   compress)
     {
         DataEntryWriter writer = null;
 
@@ -72,7 +73,7 @@ public class DataEntryWriterFactory
         {
             ClassPathEntry entry = classPath.get(index);
 
-            writer = createClassPathEntryWriter(entry, writer);
+            writer = createClassPathEntryWriter(entry, writer, compress);
         }
 
         return writer;
@@ -84,7 +85,8 @@ public class DataEntryWriterFactory
      * or delegate to another DataEntryWriter if its filters don't match.
      */
     private DataEntryWriter createClassPathEntryWriter(ClassPathEntry  classPathEntry,
-                                                       DataEntryWriter alternativeWriter)
+                                                       DataEntryWriter alternativeWriter,
+                                                       boolean         compress)
     {
         boolean isApk  = classPathEntry.isApk();
         boolean isJar  = classPathEntry.isJar();
@@ -143,13 +145,13 @@ public class DataEntryWriterFactory
         boolean flattenZips  = flattenJmods || isJmod;
 
         // Set up the filtered jar writers.
-        writer = wrapInJarWriter(writer, flattenZips,  isZip,  ".zip",  zipFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenJmods, isJmod, ".jmod", jmodFilter, ClassConstants.JMOD_HEADER, ClassConstants.JMOD_CLASS_FILE_PREFIX);
-        writer = wrapInJarWriter(writer, flattenEars,  isEar,  ".ear",  earFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenWars,  isWar,  ".war",  warFilter,  null,                       ClassConstants.WAR_CLASS_FILE_PREFIX);
-        writer = wrapInJarWriter(writer, flattenAars,  isAar,  ".aar",  aarFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenJars,  isJar,  ".jar",  jarFilter,  null,                       null);
-        writer = wrapInJarWriter(writer, flattenApks,  isApk,  ".apk",  apkFilter,  null,                       null);
+        writer = wrapInJarWriter(writer, flattenZips,  isZip,  ".zip",  zipFilter,  null,                       null,                                  compress);
+        writer = wrapInJarWriter(writer, flattenJmods, isJmod, ".jmod", jmodFilter, ClassConstants.JMOD_HEADER, ClassConstants.JMOD_CLASS_FILE_PREFIX, compress);
+        writer = wrapInJarWriter(writer, flattenEars,  isEar,  ".ear",  earFilter,  null,                       null,                                  compress);
+        writer = wrapInJarWriter(writer, flattenWars,  isWar,  ".war",  warFilter,  null,                       ClassConstants.WAR_CLASS_FILE_PREFIX,  compress);
+        writer = wrapInJarWriter(writer, flattenAars,  isAar,  ".aar",  aarFilter,  null,                       null,                                  compress);
+        writer = wrapInJarWriter(writer, flattenJars,  isJar,  ".jar",  jarFilter,  null,                       null,                                  compress);
+        writer = wrapInJarWriter(writer, flattenApks,  isApk,  ".apk",  apkFilter,  null,                       null,                                  compress);
 
         // Set up for writing out the program classes.
         writer = new ClassDataEntryWriter(programClassPool, writer);
@@ -184,7 +186,8 @@ public class DataEntryWriterFactory
                                             String          jarFilterExtension,
                                             List            jarFilter,
                                             byte[]          jarHeader,
-                                            String          classFilePrefix)
+                                            String          classFilePrefix,
+                                            boolean         compress)
     {
         // Flatten jars or zip them up.
         DataEntryWriter jarWriter;
@@ -196,7 +199,7 @@ public class DataEntryWriterFactory
         else
         {
             // Pack the jar.
-            jarWriter = new JarWriter(jarHeader, writer);
+            jarWriter = new JarWriter(jarHeader, writer, compress);
 
             // Add a prefix for class files inside the jar, if specified.
             if (classFilePrefix != null)
