@@ -62,7 +62,7 @@ implements ClassVisitor,
     // Implementations for ClassVisitor.
 
     @Override
-    public void visitLibraryClass(LibraryClass libraryClass) {}
+    public void visitAnyClass(Clazz clazz) { }
 
 
     @Override
@@ -216,8 +216,8 @@ implements ClassVisitor,
     }
 
     // Small utility methods
-
     private static final String NAME_JAVA_LANG_INVOKE_LAMBDA_METAFACTORY = "java/lang/invoke/LambdaMetafactory";
+
     private static final String LAMBDA_ALTERNATE_METAFACTORY_METHOD      = "altMetafactory";
 
     private static boolean isLambdaMetaFactory(String className)

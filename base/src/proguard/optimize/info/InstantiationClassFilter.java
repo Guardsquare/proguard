@@ -43,20 +43,12 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitProgramClass(ProgramClass programClass)
+    @Override
+    public void visitAnyClass(Clazz clazz)
     {
-        if (InstantiationClassMarker.isInstantiated(programClass))
+        if (InstantiationClassMarker.isInstantiated(clazz))
         {
-            classVisitor.visitProgramClass(programClass);
-        }
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        if (InstantiationClassMarker.isInstantiated(libraryClass))
-        {
-            classVisitor.visitLibraryClass(libraryClass);
+            clazz.accept(classVisitor);
         }
     }
 }

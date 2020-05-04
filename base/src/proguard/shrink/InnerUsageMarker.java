@@ -147,12 +147,21 @@ implements   AttributeVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         classUsed = classUsageMarker.isUsed(programClass);
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         classUsed = true;

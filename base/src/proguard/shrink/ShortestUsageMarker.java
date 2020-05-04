@@ -224,9 +224,11 @@ extends      SimpleUsageMarker
 
         // Implementations for ClassVisitor.
 
-        public void visitLibraryClass(LibraryClass libraryClass) {}
+        @Override
+        public void visitAnyClass(Clazz clazz) { }
 
 
+        @Override
         public void visitProgramClass(ProgramClass programClass)
         {
             checkReferenceFrom(programClass);
@@ -234,8 +236,8 @@ extends      SimpleUsageMarker
 
 
         // Implementations for MemberVisitor.
-
         public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField) {}
+
         public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod) {}
 
 

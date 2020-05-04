@@ -23,7 +23,6 @@ package proguard.optimize.peephole;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
 import java.util.*;
@@ -57,6 +56,11 @@ implements   ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Find the highest line number in the entire class.

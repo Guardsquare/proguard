@@ -119,8 +119,15 @@ implements   ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
+        // Only merge program classes.
+
         //final String CLASS_NAME = "abc/Def";
         //DEBUG = programClass.getName().equals(CLASS_NAME) ||
         //        targetClass.getName().equals(CLASS_NAME);
@@ -148,7 +155,7 @@ implements   ClassVisitor,
         }
     }
 
-    public void visitProgramClass0(ProgramClass programClass)
+    private void visitProgramClass0(ProgramClass programClass)
     {
         if (!programClass.equals(targetClass) &&
 
@@ -396,12 +403,6 @@ implements   ClassVisitor,
                 extraClassVisitor.visitProgramClass(programClass);
             }
         }
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        // Ignore attempts to merge with a library class.
     }
 
 

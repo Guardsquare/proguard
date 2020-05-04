@@ -85,7 +85,7 @@ implements ClassVisitor,
     // Implementations for ClassVisitor.
 
     @Override
-    public void visitLibraryClass(LibraryClass libraryClass) {}
+    public void visitAnyClass(Clazz clazz) { }
 
 
     @Override

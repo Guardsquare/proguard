@@ -30,7 +30,8 @@ import proguard.classfile.visitor.ClassVisitor;
  *
  * @author Eric Lafortune
  */
-public class DuplicateClassPrinter implements ClassVisitor
+public class DuplicateClassPrinter
+implements   ClassVisitor
 {
     private final WarningPrinter notePrinter;
 
@@ -46,6 +47,14 @@ public class DuplicateClassPrinter implements ClassVisitor
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         notePrinter.print(programClass.getName(),
@@ -54,6 +63,7 @@ public class DuplicateClassPrinter implements ClassVisitor
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         notePrinter.print(libraryClass.getName(),

@@ -43,7 +43,6 @@ import proguard.optimize.evaluation.*;
  */
 public class ParameterEscapedMarker
 implements   ClassPoolVisitor,
-             ClassVisitor,
              MemberVisitor,
              AttributeVisitor,
              InstructionVisitor,

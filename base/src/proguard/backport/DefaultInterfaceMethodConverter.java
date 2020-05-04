@@ -28,7 +28,6 @@ import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.*;
-import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.util.*;
 
@@ -68,7 +67,7 @@ implements ClassVisitor,
     // Implementations for ClassVisitor.
 
     @Override
-    public void visitLibraryClass(LibraryClass libraryClass) {}
+    public void visitAnyClass(Clazz clazz) { }
 
 
     @Override
@@ -253,6 +252,7 @@ implements ClassVisitor,
                 }
             })));
     }
+
 
 
     /**

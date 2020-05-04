@@ -139,6 +139,11 @@ implements   MemberVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) {}
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         if (!KeepMarker.isKept(programClass))
@@ -161,7 +166,4 @@ implements   MemberVisitor,
                               "'");
         }
     }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass) {}
 }

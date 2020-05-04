@@ -42,17 +42,7 @@ implements   KotlinMetadataVisitor
 
             kotlinClassKindMetadata.accept(clazz,
                 new KotlinInterfaceToDefaultImplsClassVisitor(
-                new ClassVisitor()
-                {
-                    @Override
-                    public void visitProgramClass(ProgramClass programClass)
-                    {
-                        setNewClassName(programClass, defaultImplsClassName);
-                    }
-
-                    @Override
-                    public void visitLibraryClass(LibraryClass libraryClass) {}
-                }));
+                new ProgramClassFilter(_clazz -> setNewClassName(_clazz, defaultImplsClassName))));
         }
     }
 

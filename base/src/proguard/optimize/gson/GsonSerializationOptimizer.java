@@ -104,9 +104,11 @@ implements   MemberVisitor,
 
     // Implementations for ClassVisitor.
 
-    public void visitAnyClass(Clazz clazz) {}
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
 
 
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Make access public for _OptimizedTypeAdapterFactory.

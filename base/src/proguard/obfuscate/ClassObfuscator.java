@@ -146,6 +146,14 @@ implements   ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Does this class still need a new name?
@@ -174,6 +182,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         // This can happen for dubious input, if the outer class of a program
@@ -296,8 +305,14 @@ implements   ClassVisitor,
      * This ClassVisitor collects package names and class names that have to
      * be kept.
      */
-    private class MyKeepCollector implements ClassVisitor
+    private class MyKeepCollector
+    implements    ClassVisitor
     {
+        @Override
+        public void visitAnyClass(Clazz clazz) { }
+
+
+        @Override
         public void visitProgramClass(ProgramClass programClass)
         {
             // Does the program class already have a new name?
@@ -382,6 +397,7 @@ implements   ClassVisitor,
             while (packagePrefix.length()    > 0 &&
                    newPackagePrefix.length() > 0);
         }
+
     }
 
 

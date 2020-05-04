@@ -52,6 +52,11 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         final Object mark = new Object();
@@ -85,7 +90,4 @@ implements   ClassVisitor
             new AllAnnotationVisitor(
             new ProcessingInfoSetter(null))));
     }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass) {}
 }

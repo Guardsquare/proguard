@@ -11,7 +11,7 @@ import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.*;
-import proguard.classfile.util.*;
+import proguard.classfile.util.BranchTargetFinder;
 import proguard.classfile.visitor.*;
 
 import java.util.Arrays;
@@ -20,15 +20,15 @@ public class InstructionSequenceObfuscator
 implements   ClassVisitor,
              MemberVisitor
 {
+    private final PeepholeEditor peepholeEditor;
 
-    private final PeepholeEditor peepholeOptimizer;
 
     public InstructionSequenceObfuscator(ReplacementSequences replacementSequences)
     {
         BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
         CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
 
-        peepholeOptimizer = new PeepholeEditor(
+        peepholeEditor = new PeepholeEditor(
                                 branchTargetFinder, codeAttributeEditor,
                                 new MyInstructionSequenceReplacer(
                                     replacementSequences.getConstants(),
@@ -41,13 +41,15 @@ implements   ClassVisitor,
     // Implementations for ClassVisitor.
 
     @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         programClass.methodsAccept(this);
     }
 
-    @Override
-    public void visitLibraryClass(LibraryClass libraryClass) { }
 
     // Implementations for MemberVisitor.
 
@@ -57,8 +59,9 @@ implements   ClassVisitor,
     @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        programMethod.attributesAccept(programClass, peepholeOptimizer);
+        programMethod.attributesAccept(programClass, peepholeEditor);
     }
+
 
     // Helper classes.
 

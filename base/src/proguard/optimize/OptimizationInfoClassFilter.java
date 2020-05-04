@@ -53,6 +53,14 @@ implements   ClassVisitor
     // Implementations for ClassVisitor.
 
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Does the field have optimization info?
@@ -63,6 +71,7 @@ implements   ClassVisitor
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         // Does the class have optimization info?

@@ -42,8 +42,14 @@ implements   ClassVisitor,
                                                           new MethodImplementationFilter(this));
 
 
+
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Mark all referenced class members in different classes.
@@ -138,4 +144,5 @@ implements   ClassVisitor,
     {
         return MethodOptimizationInfo.getMethodOptimizationInfo(method).canBeMadePrivate();
     }
+
 }

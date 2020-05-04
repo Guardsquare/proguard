@@ -86,7 +86,8 @@ public class InputReader
             new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
             new MultiClassVisitor(
                 new ClassPoolFiller(programClassPool),
-                new MyClassFeatureNameSetter()));
+                // Attach the current resource name, if any, to any program classes that it visits.
+                new ProgramClassFilter(clazz -> clazz.setFeatureName(featureName))));
 
         // Create a reader to fill the program class pool (while checking for
         // duplicates).
@@ -263,22 +264,6 @@ public class InputReader
         catch (IOException ex)
         {
             throw (IOException)new IOException("Can't read [" + classPathEntry + "] (" + ex.getMessage() + ")").initCause(ex);
-        }
-    }
-
-
-    /**
-     * This class visitor attaches the current resource name, if any,
-     * to any program classes that it visits.
-     */
-    private class MyClassFeatureNameSetter
-    implements    ClassVisitor
-    {
-        // Implementations for ClassVisitor.
-
-        public void visitProgramClass(ProgramClass programClass)
-        {
-            programClass.setFeatureName(featureName);
         }
     }
 

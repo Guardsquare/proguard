@@ -100,6 +100,10 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
     // Implementations for ClassVisitor.
 
     @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Derive class name for optimized type adapter from the name of the
@@ -149,10 +153,6 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
             }
         }
     }
-
-
-    @Override
-    public void visitLibraryClass(LibraryClass libraryClass) {}
 
     // Utility methods.
 

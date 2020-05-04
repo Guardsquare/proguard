@@ -29,7 +29,8 @@ import proguard.classfile.visitor.ClassVisitor;
  *
  * @author Eric Lafortune
  */
-public class NameFactoryResetter implements ClassVisitor
+public class NameFactoryResetter
+implements   ClassVisitor
 {
     private final NameFactory nameFactory;
 
@@ -46,13 +47,8 @@ public class NameFactoryResetter implements ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitProgramClass(ProgramClass programClass)
-    {
-        nameFactory.reset();
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
+    @Override
+    public void visitAnyClass(Clazz clazz)
     {
         nameFactory.reset();
     }

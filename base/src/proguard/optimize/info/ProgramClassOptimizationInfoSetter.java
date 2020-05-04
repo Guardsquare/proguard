@@ -20,7 +20,7 @@
  */
 package proguard.optimize.info;
 
-import proguard.classfile.ProgramClass;
+import proguard.classfile.*;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
@@ -58,6 +58,11 @@ implements   ClassVisitor
 
     // Implementations for MemberVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         if (programClass.getProcessingInfo() == null || overwrite)

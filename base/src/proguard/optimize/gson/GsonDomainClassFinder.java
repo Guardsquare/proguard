@@ -79,6 +79,10 @@ implements   ClassVisitor
     // Implementations for ClassVisitor.
 
     @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // For classes that are Gson "seeds" (they immediately occur in Gson
@@ -86,14 +90,6 @@ implements   ClassVisitor
         // want to visit the super and sub classes in the class hierarchy.
         handleDomainClass(programClass, new HierarchyClassVisitor());
     }
-
-
-    @Override
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        // Library classes can not be optimized.
-    }
-
 
     // Utility methods.
 
@@ -311,8 +307,11 @@ implements   ClassVisitor
     private class HierarchyClassVisitor
     implements    ClassVisitor
     {
-
         // Implementations for ClassVisitor.
+
+        @Override
+        public void visitAnyClass(Clazz clazz) {}
+
 
         @Override
         public void visitProgramClass(ProgramClass programClass)
@@ -321,13 +320,6 @@ implements   ClassVisitor
             // "seed", we don't want to visit the super and sub classes in the
             // class hierarchy.
             handleDomainClass(programClass, null);
-        }
-
-
-        @Override
-        public void visitLibraryClass(LibraryClass libraryClass)
-        {
-            // Library classes can not be optimized.
         }
     }
 

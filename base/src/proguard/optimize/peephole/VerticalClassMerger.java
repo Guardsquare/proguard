@@ -20,7 +20,7 @@
  */
 package proguard.optimize.peephole;
 
-import proguard.classfile.ProgramClass;
+import proguard.classfile.*;
 import proguard.classfile.visitor.*;
 
 /**
@@ -77,6 +77,11 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Try inlining all immediate subclasses into this class.

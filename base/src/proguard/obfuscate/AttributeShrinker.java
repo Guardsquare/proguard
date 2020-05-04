@@ -43,8 +43,15 @@ implements   ClassVisitor,
 {
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
+        // Only change program classes - library classes are left unchanged.
+
         // Compact the array for class attributes.
         programClass.u2attributesCount =
             shrinkArray(programClass.attributes,
@@ -54,12 +61,6 @@ implements   ClassVisitor,
         programClass.fieldsAccept(this);
         programClass.methodsAccept(this);
         programClass.attributesAccept(this);
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        // Library classes are left unchanged.
     }
 
 
@@ -116,4 +117,5 @@ implements   ClassVisitor,
 
         return counter;
     }
+
 }

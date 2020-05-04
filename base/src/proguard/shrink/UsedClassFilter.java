@@ -72,30 +72,17 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitProgramClass(ProgramClass programClass)
+    @Override
+    public void visitAnyClass(Clazz clazz)
     {
         // Is the class marked?
-        ClassVisitor classVisitor = simpleUsageMarker.isUsed(programClass) ?
+        ClassVisitor classVisitor = simpleUsageMarker.isUsed(clazz) ?
             usedClassVisitor :
             unusedClassVisitor;
 
         if (classVisitor != null)
         {
-            classVisitor.visitProgramClass(programClass);
-        }
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        // Is the class marked?
-        ClassVisitor classVisitor = simpleUsageMarker.isUsed(libraryClass) ?
-            usedClassVisitor :
-            unusedClassVisitor;
-
-        if (classVisitor != null)
-        {
-            classVisitor.visitLibraryClass(libraryClass);
+            clazz.accept(classVisitor);
         }
     }
 }

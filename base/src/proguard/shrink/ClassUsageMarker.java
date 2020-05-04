@@ -167,6 +167,14 @@ implements   ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         if (shouldBeMarkedAsUsed(programClass))
@@ -208,6 +216,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         if (shouldBeMarkedAsUsed(libraryClass))
@@ -293,6 +302,15 @@ implements   ClassVisitor,
     private class MyInterfaceUsageMarker
     implements    ClassVisitor
     {
+
+        @Override
+        public void visitAnyClass(Clazz clazz)
+        {
+            throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+        }
+
+
+        @Override
         public void visitProgramClass(ProgramClass programClass)
         {
             if (shouldBeMarkedAsPossiblyUsed(programClass))
@@ -303,6 +321,8 @@ implements   ClassVisitor,
             }
         }
 
+
+        @Override
         public void visitLibraryClass(LibraryClass libraryClass)
         {
             // Make sure all library interface methods are marked.

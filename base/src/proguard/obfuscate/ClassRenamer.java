@@ -72,6 +72,14 @@ implements   ClassVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Rename this class.
@@ -83,6 +91,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         // Has the library class name changed?
@@ -161,4 +170,5 @@ implements   ClassVisitor,
             }
         }
     }
+
 }

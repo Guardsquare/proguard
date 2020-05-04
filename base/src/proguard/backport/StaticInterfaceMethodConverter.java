@@ -67,14 +67,14 @@ implements   ClassVisitor
     // Implementations for ClassVisitor.
 
     @Override
-    public void visitLibraryClass(LibraryClass libraryClass) {}
+    public void visitAnyClass(Clazz clazz) { }
 
 
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Collect all static methods of the interface class.
-        Set<String> staticMethods = new HashSet<String>();
+        Set<String> staticMethods = new HashSet<>();
         programClass.accept(
             new AllMethodVisitor(
             new MemberAccessFilter(AccessConstants.STATIC, 0,
@@ -243,6 +243,11 @@ implements   ClassVisitor
 
         // Implementations for ClassVisitor.
 
+        @Override
+        public void visitAnyClass(Clazz clazz) { }
+
+
+        @Override
         public void visitProgramClass(ProgramClass programClass)
         {
             referenceClassFound = false;

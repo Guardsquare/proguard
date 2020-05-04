@@ -30,7 +30,7 @@ import proguard.classfile.visitor.ClassVisitor;
  * @author Eric Lafortune
  */
 final class SubclassedClassFilter
-implements ClassVisitor
+implements  ClassVisitor
 {
     private final ClassVisitor classVisitor;
 
@@ -43,6 +43,14 @@ implements ClassVisitor
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         if (programClass.subClasses != null)
@@ -52,6 +60,7 @@ implements ClassVisitor
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         if (libraryClass.subClasses != null)

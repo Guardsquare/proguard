@@ -42,15 +42,10 @@ implements   ClassVisitor,
 {
     // Implementations for ClassVisitor.
 
-    public void visitProgramClass(ProgramClass programClass)
+    @Override
+    public void visitAnyClass(Clazz clazz)
     {
-        ClassOptimizationInfo.setClassOptimizationInfo(programClass);
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        ClassOptimizationInfo.setClassOptimizationInfo(libraryClass);
+        ClassOptimizationInfo.setClassOptimizationInfo(clazz);
     }
 
 

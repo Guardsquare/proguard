@@ -261,6 +261,14 @@ implements   AttributeVisitor,
 
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz)
+    {
+        throw new UnsupportedOperationException(this.getClass().getName() + " does not support " + clazz.getClass().getName());
+    }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         allClassesUsed &= classUsageMarker.isUsed(programClass);
@@ -275,6 +283,7 @@ implements   AttributeVisitor,
     }
 
 
+    @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
         // Add this special case for kotlin Metadata / DebugMetadata annotation
@@ -339,4 +348,5 @@ implements   AttributeVisitor,
             clazz.constantPoolEntryAccept(index, this);
         }
     }
+
 }

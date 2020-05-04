@@ -70,30 +70,17 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitLibraryClass(LibraryClass libraryClass)
+    @Override
+    public void visitAnyClass(Clazz clazz)
     {
         // Is the class marked to be escaping?
-        ClassVisitor classVisitor = EscapingClassMarker.isClassEscaping(libraryClass) ?
+        ClassVisitor classVisitor = EscapingClassMarker.isClassEscaping(clazz) ?
             escapingClassVisitor :
             otherClassVisitor;
 
         if (classVisitor != null)
         {
-            classVisitor.visitLibraryClass(libraryClass);
-        }
-    }
-
-
-    public void visitProgramClass(ProgramClass programClass)
-    {
-        // Is the class marked to be escaping?
-        ClassVisitor classVisitor = EscapingClassMarker.isClassEscaping(programClass) ?
-            escapingClassVisitor :
-            otherClassVisitor;
-
-        if (classVisitor != null)
-        {
-            classVisitor.visitProgramClass(programClass);
+            clazz.accept(classVisitor);
         }
     }
 }

@@ -52,8 +52,11 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitLibraryClass(LibraryClass libraryClass) {}
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
 
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         // Does the class have the simple enum constructor?

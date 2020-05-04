@@ -67,28 +67,15 @@ implements   ClassVisitor
 
     // Implementations for ClassVisitor.
 
-    public void visitProgramClass(ProgramClass programClass)
+    @Override
+    public void visitAnyClass(Clazz clazz)
     {
-        ClassVisitor delegateVisitor = selectVisitor(programClass);
-        if (delegateVisitor != null) {
-            delegateVisitor.visitProgramClass(programClass);
+        ClassVisitor delegateVisitor =
+            KeepMarker.isKept(clazz) ? acceptedVisitor : rejectedVisitor;
+
+        if (delegateVisitor != null)
+        {
+            clazz.accept(delegateVisitor);
         }
-    }
-
-
-    public void visitLibraryClass(LibraryClass libraryClass)
-    {
-        ClassVisitor delegateVisitor = selectVisitor(libraryClass);
-        if (delegateVisitor != null) {
-            delegateVisitor.visitLibraryClass(libraryClass);
-        }
-    }
-
-
-    // Small utility methods.
-
-    private ClassVisitor selectVisitor(Clazz clazz)
-    {
-        return KeepMarker.isKept(clazz) ? acceptedVisitor : rejectedVisitor;
     }
 }

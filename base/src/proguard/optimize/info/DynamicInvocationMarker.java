@@ -36,7 +36,6 @@ import proguard.classfile.visitor.*;
 public class DynamicInvocationMarker
 implements   InstructionVisitor,
              ConstantVisitor,
-             ClassVisitor,
              MemberVisitor
 {
     // Implementations for InstructionVisitor.

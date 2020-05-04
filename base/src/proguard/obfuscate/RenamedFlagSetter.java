@@ -22,7 +22,6 @@ package proguard.obfuscate;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 
 
@@ -41,6 +40,11 @@ implements   ClassVisitor,
 {
     // Implementations for ClassVisitor.
 
+    @Override
+    public void visitAnyClass(Clazz clazz) { }
+
+
+    @Override
     public void visitProgramClass(ProgramClass programClass)
     {
         String oldName = programClass.getName();
