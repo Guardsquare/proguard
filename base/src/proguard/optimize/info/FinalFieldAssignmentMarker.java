@@ -59,6 +59,7 @@ implements   InstructionVisitor,
 
     // Implementations for ConstantVisitor.
 
+    @Override
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
