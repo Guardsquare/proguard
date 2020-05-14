@@ -3,6 +3,7 @@
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
 | 7.0.0  |          | CORE     | Initial release of Kotlin support.
+| 7.0.0  | PGD-32   | CORE     | Allowing Java 14 class files.
 | 7.0.0  |          | CORE     | Optimizing away instance references to constructor-less classes.
 | 7.0.0  | DGD-1489 | CORE     | Fixed potential `IllegalArgumentException` with message `Value "x" is not a reference value` when optimizing code with conditional casts.
 | 7.0.0  | PGD-12   | CORE     | Fixed building gradle plugin.
