@@ -48,6 +48,7 @@ public interface JavaConstants
     public static final String CLASS_VERSION_11        = "11";
     public static final String CLASS_VERSION_12        = "12";
     public static final String CLASS_VERSION_13        = "13";
+    public static final String CLASS_VERSION_14        = "14";
 
     public static final String ACC_PUBLIC       = "public";
     public static final String ACC_PRIVATE      = "private";
