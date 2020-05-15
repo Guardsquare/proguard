@@ -232,6 +232,8 @@ public class Obfuscator
                                 classNameFactory,
                                 packageNameFactory,
                                 configuration.useMixedCaseClassNames,
+                                configuration.dontResetPackageNaming,
+                                configuration.dontResetClassNaming,
                                 configuration.keepPackageNames,
                                 configuration.flattenPackageHierarchy,
                                 configuration.repackageClasses,
@@ -264,6 +266,7 @@ public class Obfuscator
             programClassPool.classesAccept(
                 new AllMemberVisitor(
                 new MemberObfuscator(configuration.overloadAggressively,
+                                     configuration.dontResetMemberNaming,
                                      nameFactory,
                                      descriptorMap)));
         }
@@ -292,6 +295,7 @@ public class Obfuscator
                     new AllMemberVisitor(
                     new MemberAccessFilter(0, ClassConstants.ACC_PRIVATE,
                     new MemberObfuscator(configuration.overloadAggressively,
+                                         configuration.dontResetMemberNaming,
                                          nameFactory,
                                          descriptorMap))),
 
@@ -343,6 +347,7 @@ public class Obfuscator
                     new AllMemberVisitor(
                     new MemberAccessFilter(ClassConstants.ACC_PRIVATE, 0,
                     new MemberObfuscator(configuration.overloadAggressively,
+                                         configuration.dontResetMemberNaming,
                                          nameFactory,
                                          descriptorMap))),
 
@@ -400,6 +405,7 @@ public class Obfuscator
                                             descriptorMap,
                                             warningPrinter,
                 new MemberObfuscator(configuration.overloadAggressively,
+                                     configuration.dontResetMemberNaming,
                                      specialNameFactory,
                                      specialDescriptorMap))))),
 
@@ -431,6 +437,7 @@ public class Obfuscator
                                             descriptorMap,
                                             warningPrinter,
                 new MemberObfuscator(configuration.overloadAggressively,
+                                     configuration.dontResetMemberNaming,
                                      specialNameFactory,
                                      specialDescriptorMap)))),
 

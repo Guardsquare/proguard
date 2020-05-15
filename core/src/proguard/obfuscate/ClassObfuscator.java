@@ -50,6 +50,8 @@ implements   ClassVisitor,
     private final DictionaryNameFactory classNameFactory;
     private final DictionaryNameFactory packageNameFactory;
     private final boolean               useMixedCaseClassNames;
+    private final boolean               dontResetPackageNaming;
+    private final boolean               dontResetClassNaming;
     private final StringMatcher         keepPackageNamesMatcher;
     private final String                flattenPackageHierarchy;
     private final String                repackageClasses;
@@ -86,6 +88,10 @@ implements   ClassVisitor,
      *                                dictionary.
      * @param useMixedCaseClassNames  specifies whether obfuscated packages and
      *                                classes can get mixed-case names.
+     * @param dontResetPackageNaming  specifies whether package naming factory should be
+     *                                package level or root level for all packages.
+     * @param dontResetClassNaming    specifies whether class naming factory should be
+     *                                package level or root level for all classes.
      * @param keepPackageNames        the optional filter for which matching
      *                                package names are kept.
      * @param flattenPackageHierarchy the base package if the obfuscated package
@@ -100,6 +106,8 @@ implements   ClassVisitor,
                            DictionaryNameFactory classNameFactory,
                            DictionaryNameFactory packageNameFactory,
                            boolean               useMixedCaseClassNames,
+                           boolean               dontResetPackageNaming,
+                           boolean               dontResetClassNaming,
                            List                  keepPackageNames,
                            String                flattenPackageHierarchy,
                            String                repackageClasses,
@@ -123,6 +131,8 @@ implements   ClassVisitor,
         }
 
         this.useMixedCaseClassNames  = useMixedCaseClassNames;
+        this.dontResetPackageNaming  = dontResetPackageNaming;
+        this.dontResetClassNaming    = dontResetClassNaming;
         this.keepPackageNamesMatcher = keepPackageNames == null ? null :
             new ListParser(new FileNameParser()).parse(keepPackageNames);
         this.flattenPackageHierarchy = flattenPackageHierarchy;
@@ -403,7 +413,7 @@ implements   ClassVisitor,
     {
         // Find the right name factory for this package.
         NameFactory packageNameFactory =
-            (NameFactory)packagePrefixPackageNameFactoryMap.get(newSuperPackagePrefix);
+            (NameFactory)packagePrefixPackageNameFactoryMap.get((dontResetPackageNaming) ? "_" : newSuperPackagePrefix);
         if (packageNameFactory == null)
         {
             // We haven't seen packages in this superpackage before. Create
@@ -416,7 +426,7 @@ implements   ClassVisitor,
                                               packageNameFactory);
             }
 
-            packagePrefixPackageNameFactoryMap.put(newSuperPackagePrefix,
+            packagePrefixPackageNameFactoryMap.put((dontResetPackageNaming) ? "_" : newSuperPackagePrefix,
                                                    packageNameFactory);
         }
 
@@ -453,7 +463,7 @@ implements   ClassVisitor,
     {
         // Find the right name factory for this package.
         NameFactory classNameFactory =
-            (NameFactory)packagePrefixClassNameFactoryMap.get(newPackagePrefix);
+            (NameFactory)packagePrefixClassNameFactoryMap.get((dontResetClassNaming) ? "_" : newPackagePrefix);
         if (classNameFactory == null)
         {
             // We haven't seen classes in this package before.
@@ -466,7 +476,7 @@ implements   ClassVisitor,
                                               classNameFactory);
             }
 
-            packagePrefixClassNameFactoryMap.put(newPackagePrefix,
+            packagePrefixClassNameFactoryMap.put((dontResetClassNaming) ? "_" : newPackagePrefix,
                                                  classNameFactory);
         }
 
@@ -481,14 +491,14 @@ implements   ClassVisitor,
     {
         // Find the right name factory for this package.
         NameFactory classNameFactory =
-            (NameFactory)packagePrefixNumericClassNameFactoryMap.get(newPackagePrefix);
+            (NameFactory)packagePrefixNumericClassNameFactoryMap.get((dontResetClassNaming) ? "_" : newPackagePrefix);
         if (classNameFactory == null)
         {
             // We haven't seen classes in this package before.
             // Create a new name factory for them.
             classNameFactory = new NumericNameFactory();
 
-            packagePrefixNumericClassNameFactoryMap.put(newPackagePrefix,
+            packagePrefixNumericClassNameFactoryMap.put((dontResetClassNaming) ? "_" : newPackagePrefix,
                                                         classNameFactory);
         }
 

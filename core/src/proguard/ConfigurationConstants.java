@@ -69,6 +69,9 @@ class ConfigurationConstants
     public static final String DONT_OBFUSCATE_OPTION                  = "-dontobfuscate";
     public static final String PRINT_MAPPING_OPTION                   = "-printmapping";
     public static final String APPLY_MAPPING_OPTION                   = "-applymapping";
+    public static final String DONT_RESET_PACKAGE_NAMING_OPTION       = "-dontresetpackagenaming";
+    public static final String DONT_RESET_CLASS_NAMING_OPTION         = "-dontresetclassnaming";
+    public static final String DONT_RESET_MEMBER_NAMING_OPTION        = "-dontresetmembernaming";
     public static final String OBFUSCATION_DICTIONARY_OPTION          = "-obfuscationdictionary";
     public static final String CLASS_OBFUSCATION_DICTIONARY_OPTION    = "-classobfuscationdictionary";
     public static final String PACKAGE_OBFUSCATION_DICTIONARY_OPTION  = "-packageobfuscationdictionary";

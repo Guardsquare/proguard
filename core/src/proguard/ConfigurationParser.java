@@ -191,6 +191,9 @@ public class ConfigurationParser
             else if (ConfigurationConstants.DONT_OBFUSCATE_OPTION                            .startsWith(nextWord)) configuration.obfuscate                             = parseNoArgument(false);
             else if (ConfigurationConstants.PRINT_MAPPING_OPTION                             .startsWith(nextWord)) configuration.printMapping                          = parseOptionalFile();
             else if (ConfigurationConstants.APPLY_MAPPING_OPTION                             .startsWith(nextWord)) configuration.applyMapping                          = parseFile();
+            else if (ConfigurationConstants.DONT_RESET_PACKAGE_NAMING_OPTION                 .startsWith(nextWord)) configuration.dontResetPackageNaming                = parseNoArgument(true);
+            else if (ConfigurationConstants.DONT_RESET_CLASS_NAMING_OPTION                   .startsWith(nextWord)) configuration.dontResetClassNaming                  = parseNoArgument(true);
+            else if (ConfigurationConstants.DONT_RESET_MEMBER_NAMING_OPTION                  .startsWith(nextWord)) configuration.dontResetMemberNaming                 = parseNoArgument(true);
             else if (ConfigurationConstants.OBFUSCATION_DICTIONARY_OPTION                    .startsWith(nextWord)) configuration.obfuscationDictionary                 = parseURL();
             else if (ConfigurationConstants.CLASS_OBFUSCATION_DICTIONARY_OPTION              .startsWith(nextWord)) configuration.classObfuscationDictionary            = parseURL();
             else if (ConfigurationConstants.PACKAGE_OBFUSCATION_DICTIONARY_OPTION            .startsWith(nextWord)) configuration.packageObfuscationDictionary          = parseURL();
