@@ -31,6 +31,7 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.visitor.*;
+import proguard.util.ArrayUtil;
 
 /**
  * This ClassVisitor replaces references to classes and class members if the

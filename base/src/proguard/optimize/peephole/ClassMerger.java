@@ -179,8 +179,8 @@ implements   ClassVisitor,
             // The class to be merged into the target class must not have
             // non-copiable attributes (InnerClass, EnclosingMethod),
             // unless it is a synthetic class.
-            (mergeWrapperClasses                                                 ||
-             (programClass.getAccessFlags() & ClassConstants.ACC_SYNTHETIC) != 0 ||
+            (mergeWrapperClasses                                              ||
+             (programClass.getAccessFlags() & AccessConstants.SYNTHETIC) != 0 ||
              !hasNonCopiableAttributes(programClass)) &&
 
             (!DETAILS || print(programClass, "Package visibility?")) &&
@@ -371,14 +371,7 @@ implements   ClassVisitor,
 
             // Create a visitor to copy class members.
             MemberVisitor memberAdder =
-                new MemberAdder(targetClass,
-                new MultiMemberVisitor(
-                    // Copy or link optimization info.
-                    new MyMemberOptimizationInfoCopier(),
-
-                    // Mark copied members as being modified.
-                    ProcessingFlagSetter.MODIFIED
-                 ));
+                new MemberAdder(targetClass, new MyMemberOptimizationInfoCopier());
 
             // Copy over the fields (only static from wrapper classes).
             programClass.fieldsAccept(mergeWrapperClasses ?
