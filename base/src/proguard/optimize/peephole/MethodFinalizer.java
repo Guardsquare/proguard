@@ -77,7 +77,7 @@ implements   MemberVisitor
             !name.equals(ClassConstants.METHOD_NAME_INIT)                      &&
             ((programClass.u2accessFlags & AccessConstants.FINAL) != 0 ||
              (!KeepMarker.isKept(programMethod) &&
-              (programClass.subClasses == null ||
+              (programClass.subClassCount == 0 ||
                !memberFinder.isOverriden(programClass, programMethod)))))
         {
             programMethod.u2accessFlags |= AccessConstants.FINAL;

@@ -72,8 +72,8 @@ implements   ClassVisitor
         if ((programClass.u2accessFlags & (AccessConstants.FINAL     |
                                            AccessConstants.INTERFACE |
                                            AccessConstants.ABSTRACT)) == 0 &&
-            !KeepMarker.isKept(programClass)                                           &&
-            programClass.subClasses == null)
+            !KeepMarker.isKept(programClass)                               &&
+            programClass.subClassCount == 0)
         {
             programClass.u2accessFlags |= AccessConstants.FINAL;
 

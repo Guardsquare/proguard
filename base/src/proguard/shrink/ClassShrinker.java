@@ -178,8 +178,9 @@ implements   ClassVisitor,
         programClass.attributesAccept(signatureCleaner);
 
         // Compact the extra field pointing to the subclasses of this class.
-        programClass.subClasses =
-            shrinkToNewArray(programClass.subClasses);
+        programClass.subClassCount =
+            shrinkArray(programClass.subClasses,
+                        programClass.subClassCount);
     }
 
 
@@ -189,8 +190,9 @@ implements   ClassVisitor,
         // Library classes are left unchanged.
 
         // Compact the extra field pointing to the subclasses of this class.
-        libraryClass.subClasses =
-            shrinkToNewArray(libraryClass.subClasses);
+        libraryClass.subClassCount =
+            shrinkArray(libraryClass.subClasses,
+                        libraryClass.subClassCount);
     }
 
 
@@ -593,39 +595,6 @@ implements   ClassVisitor,
         Arrays.fill(array, counter, length, 0);
 
         return counter;
-    }
-
-
-    /**
-     * Removes all Clazz objects that are not marked as being used
-     * from the given array and returns the remaining objects in a an array
-     * of the right size.
-     * @return the new array.
-     */
-    private Clazz[] shrinkToNewArray(Clazz[] array)
-    {
-        if (array == null)
-        {
-            return null;
-        }
-
-        // Shrink the given array in-place.
-        int length = shrinkArray(array, array.length);
-        if (length == 0)
-        {
-            return null;
-        }
-
-        // Return immediately if the array is of right size already.
-        if (length == array.length)
-        {
-            return array;
-        }
-
-        // Copy the remaining elements into a new array of the right size.
-        Clazz[] newArray = new Clazz[length];
-        System.arraycopy(array, 0, newArray, 0, length);
-        return newArray;
     }
 
 

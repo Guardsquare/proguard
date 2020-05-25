@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import java.util.Arrays;
+
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -49,7 +51,11 @@ implements   ClassVisitor,
              AnnotationVisitor,
              ElementValueVisitor
 {
+    /*
     private static final boolean DEBUG = false;
+    /*/
+    private        final boolean DEBUG = System.getProperty("tcc") != null;;
+    //*/
 
 
     // Implementations for ClassVisitor.
@@ -122,31 +128,45 @@ implements   ClassVisitor,
 
             // This class will no longer have any subclasses, because their
             // subclasses and interfaces will be retargeted.
-            programClass.subClasses = null;
+            programClass.subClassCount = 0;
+
+            // Clear all elements.
+            Arrays.fill(programClass.subClasses, null);
         }
         else
         {
-            // This class has become the subclass of its possibly new
-            // superclass and of any new interfaces.
-            ConstantVisitor subclassAdder =
-                new ReferencedClassVisitor(
-                new SubclassFilter(programClass,
-                new SubclassAdder(programClass)));
-
-            programClass.superClassConstantAccept(subclassAdder);
-            programClass.interfaceConstantsAccept(subclassAdder);
+            // Retarget subclasses, avoiding duplicates and the class itself.
+            programClass.subClassCount =
+                updateUniqueReferencedClasses(programClass.subClasses,
+                                              programClass.subClassCount,
+                                              programClass);
 
             // TODO: Maybe restore private method references.
         }
+
+        // The class merger already made sure that any new interfaces got this
+        // class as a subclass. Now the superclass and interfaces have been
+        // retargeted, also make sure that they have this class as a subclass.
+        // Retargeting subclasses may not be sufficient, for example if a class
+        // didn't have subclasses before.
+        ConstantVisitor subclassAdder =
+            new ReferencedClassVisitor(
+            new SubclassFilter(programClass,
+            new SubclassAdder(programClass)));
+
+        programClass.superClassConstantAccept(subclassAdder);
+        programClass.interfaceConstantsAccept(subclassAdder);
     }
 
 
     @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        // Change the references of the class members.
-        libraryClass.fieldsAccept(this);
-        libraryClass.methodsAccept(this);
+        // Retarget subclasses, avoiding duplicates.
+        libraryClass.subClassCount =
+            updateUniqueReferencedClasses(libraryClass.subClasses,
+                                          libraryClass.subClassCount,
+                                          libraryClass);
     }
 
 
@@ -170,21 +190,6 @@ implements   ClassVisitor,
 
         // Change the references of the attributes.
         programMethod.attributesAccept(programClass, this);
-    }
-
-
-    public void visitLibraryField(LibraryClass libraryClass, LibraryField libraryField)
-    {
-        // Change the referenced class.
-        libraryField.referencedClass =
-            updateReferencedClass(libraryField.referencedClass);
-    }
-
-
-    public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
-    {
-        // Change the referenced classes.
-        updateReferencedClasses(libraryMethod.referencedClasses);
     }
 
 
@@ -466,6 +471,42 @@ implements   ClassVisitor,
         }
 
         return false;
+    }
+
+
+    /**
+     * Updates the retargeted classes in the given array of unique classes.
+     * Optionally gets a class to avoid in the results.
+     */
+    private int updateUniqueReferencedClasses(Clazz[] referencedClasses,
+                                              int     referencedClassCount,
+                                              Clazz   avoidClass)
+    {
+        int newIndex = 0;
+        for (int index = 0; index < referencedClassCount; index++)
+        {
+            Clazz referencedClass = referencedClasses[index];
+
+            // Isn't the subclass being retargeted?
+            Clazz targetClass = ClassMerger.getTargetClass(referencedClasses[index]);
+            if (targetClass == null)
+            {
+                // Keep the original class.
+                referencedClasses[newIndex++] = referencedClass;
+            }
+            // Isn't the targeted class present yet?
+            else if (!targetClass.equals(avoidClass) &&
+                     ArrayUtil.indexOf(referencedClasses, referencedClassCount, targetClass) < 0)
+            {
+                // Replace the original class by its targeted class.
+                referencedClasses[newIndex++] = targetClass;
+            }
+        }
+
+        // Clear the remaining elements.
+        Arrays.fill(referencedClasses, newIndex, referencedClassCount, null);
+
+        return newIndex;
     }
 
 

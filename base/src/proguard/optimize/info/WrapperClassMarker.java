@@ -91,8 +91,7 @@ implements   ClassVisitor,
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (programClass.subClasses == null ||
-            programClass.subClasses.length == 0)
+        if (programClass.subClassCount == 0)
         {
             wrappedClass = null;
 

@@ -78,7 +78,7 @@ implements   ClassVisitor,
     private final SimpleUsageMarker usageMarker;
     private final KotlinUsageMarker kotlinUsageMarker = new KotlinUsageMarker();
 
-    private final ClassVisitor                    interfaceUsageMarker;//           = new MyInterfaceUsageMarker();
+    private final ClassVisitor                    interfaceUsageMarker           = new MyInterfaceUsageMarker();
     private final MyDefaultMethodUsageMarker      defaultMethodUsageMarker       = new MyDefaultMethodUsageMarker();
     private final MyPossiblyUsedMemberUsageMarker possiblyUsedMemberUsageMarker  = new MyPossiblyUsedMemberUsageMarker();
     private final MemberVisitor                   nonEmptyMethodUsageMarker      = new AllAttributeVisitor(
@@ -98,7 +98,7 @@ implements   ClassVisitor,
      */
     public ClassUsageMarker()
     {
-        this(new SimpleUsageMarker(), false);
+        this(new SimpleUsageMarker());
     }
 
     /**
@@ -107,22 +107,7 @@ implements   ClassVisitor,
      */
     public ClassUsageMarker(SimpleUsageMarker usageMarker)
     {
-        this(usageMarker, false);
-    }
-
-
-    /**
-     * Creates a new UsageMarker.
-     * @param keepAllInterfaces a flag that specifies whether all interfaces
-     *                          of kept classes should automatically be kept
-     *                          as well.
-     */
-    public ClassUsageMarker(SimpleUsageMarker usageMarker,
-                            boolean           keepAllInterfaces)
-    {
-        this.usageMarker          = usageMarker;
-        this.interfaceUsageMarker = keepAllInterfaces ? this :
-            new MyInterfaceUsageMarker();
+        this.usageMarker = usageMarker;
     }
 
 

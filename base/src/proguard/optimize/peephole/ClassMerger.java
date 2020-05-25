@@ -63,8 +63,6 @@ implements   ClassVisitor,
     private final boolean      mergeWrapperClasses;
     private final ClassVisitor extraClassVisitor;
 
-    private final MemberVisitor fieldOptimizationInfoCopier = new FieldOptimizationInfoCopier();
-
 
     /**
      * Creates a new ClassMerger that will merge classes into the given target
@@ -175,6 +173,15 @@ implements   ClassVisitor,
 
             // Only merge classes with equal class versions.
             programClass.u4version == targetClass.u4version &&
+
+            (!DETAILS || print(programClass, "No non-copiable attributes?")) &&
+
+            // The class to be merged into the target class must not have
+            // non-copiable attributes (InnerClass, EnclosingMethod),
+            // unless it is a synthetic class.
+            (mergeWrapperClasses                                                 ||
+             (programClass.getAccessFlags() & ClassConstants.ACC_SYNTHETIC) != 0 ||
+             !hasNonCopiableAttributes(programClass)) &&
 
             (!DETAILS || print(programClass, "Package visibility?")) &&
 
@@ -295,16 +302,7 @@ implements   ClassVisitor,
             // The two classes must not have a signature attribute as type variables
             // and/or parameterized types can not always be merged.
             !hasSignatureAttribute(programClass) &&
-            !hasSignatureAttribute(targetClass)  &&
-
-            (!DETAILS || print(programClass, "No non-copiable attributes?")) &&
-
-            // The class to be merged into the target class must not have
-            // non-copiable attributes (InnerClass, EnclosingMethod),
-            // unless it is a synthetic class.
-            (mergeWrapperClasses                                                 ||
-             (programClass.getAccessFlags() & AccessConstants.SYNTHETIC) != 0 ||
-             !hasNonCopiableAttributes(programClass)))
+            !hasSignatureAttribute(targetClass))
         {
             // We're not actually merging the classes, but only copying the
             // contents from the source class to the target class. We'll
@@ -363,14 +361,31 @@ implements   ClassVisitor,
                 new ImplementingClassConstantFilter(targetClass,
                 new InterfaceAdder(targetClass)))));
 
-            // Copy over the class members.
-            MemberAdder memberAdder =
-                new MemberAdder(targetClass, fieldOptimizationInfoCopier);
+            // Make sure that the interfaces of the target class have the
+            // target class as subclass. We'll have to clean up the
+            // subclasses further when we actually apply the targets.
+            targetClass.interfaceConstantsAccept(
+                new ReferencedClassVisitor(
+                new SubclassFilter(targetClass,
+                new SubclassAdder(targetClass))));
 
+            // Create a visitor to copy class members.
+            MemberVisitor memberAdder =
+                new MemberAdder(targetClass,
+                new MultiMemberVisitor(
+                    // Copy or link optimization info.
+                    new MyMemberOptimizationInfoCopier(),
+
+                    // Mark copied members as being modified.
+                    ProcessingFlagSetter.MODIFIED
+                 ));
+
+            // Copy over the fields (only static from wrapper classes).
             programClass.fieldsAccept(mergeWrapperClasses ?
                 new MemberAccessFilter(AccessConstants.STATIC, 0, memberAdder) :
                 memberAdder);
 
+            // Copy over the methods (not initializers from wrapper classes).
             programClass.methodsAccept(mergeWrapperClasses ?
                 new MemberNameFilter(new NotMatcher(new FixedStringMatcher(ClassConstants.METHOD_NAME_INIT)), memberAdder) :
                 memberAdder);
@@ -397,6 +412,12 @@ implements   ClassVisitor,
             //    targetClass.accept(new ClassPrinter());
             //}
 
+            if (DEBUG)
+            {
+                System.out.println("  Interfaces:");
+                targetClass.interfaceConstantsAccept(new ClassPrinter());
+            }
+
             // Visit the merged class, if required.
             if (extraClassVisitor != null)
             {
@@ -422,9 +443,7 @@ implements   ClassVisitor,
     private boolean isOnlySubClass(Clazz        subClass,
                                    ProgramClass clazz)
     {
-        // TODO: The list of subclasses is not up to date.
-        return clazz.subClasses != null     &&
-               clazz.subClasses.length == 1 &&
+        return clazz.subClassCount == 1 &&
                clazz.subClasses[0].equals(subClass);
     }
 
@@ -570,7 +589,7 @@ implements   ClassVisitor,
         // It's ok if the target class is never instantiated and does not
         // have any subclasses except for maybe the source class.
         if (!InstantiationClassMarker.isInstantiated(targetClass) &&
-            (targetClass.subClasses == null ||
+            (targetClass.subClassCount == 0 ||
              isOnlySubClass(programClass, targetClass)))
         {
             return false;
@@ -639,7 +658,7 @@ implements   ClassVisitor,
         if ((targetClass.getAccessFlags() &
              (AccessConstants.ABSTRACT |
               AccessConstants.INTERFACE)) != 0 &&
-            (targetClass.subClasses == null ||
+            (targetClass.subClassCount == 0 ||
              isOnlySubClass(clazz, targetClass)))
         {
             return false;
@@ -673,7 +692,7 @@ implements   ClassVisitor,
         // It's ok if the target class is never instantiated and does
         // not have any subclasses except for maybe the source class.
         if (!InstantiationClassMarker.isInstantiated(targetClass) &&
-            (targetClass.subClasses == null ||
+            (targetClass.subClassCount == 0 ||
              isOnlySubClass(clazz, targetClass)))
         {
             return false;
@@ -797,7 +816,7 @@ implements   ClassVisitor,
     /**
      * This MemberVisitor copies field optimization info from copied fields.
      */
-    private static class FieldOptimizationInfoCopier
+    private static class MyMemberOptimizationInfoCopier
     implements           MemberVisitor
     {
         public void visitProgramField(ProgramClass programClass, ProgramField programField)

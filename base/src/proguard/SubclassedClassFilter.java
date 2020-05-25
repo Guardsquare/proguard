@@ -53,7 +53,7 @@ implements  ClassVisitor
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (programClass.subClasses != null)
+        if (programClass.subClassCount > 0)
         {
             classVisitor.visitProgramClass(programClass);
         }
@@ -63,7 +63,7 @@ implements  ClassVisitor
     @Override
     public void visitLibraryClass(LibraryClass libraryClass)
     {
-        if (libraryClass.subClasses != null)
+        if (libraryClass.subClassCount > 0)
         {
             classVisitor.visitLibraryClass(libraryClass);
         }

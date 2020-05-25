@@ -311,9 +311,13 @@ public class Initializer
                                               dependencyWarningPrinter));
         }
 
-        // Initialize the subclass hierarchies.
-        programClassPool.classesAccept(new ClassSubHierarchyInitializer());
-        libraryClassPool.classesAccept(new ClassSubHierarchyInitializer());
+        // Initialize the subclass hierarchies (in the right order,
+        // with a single instance).
+        ClassSubHierarchyInitializer classSubHierarchyInitializer =
+            new ClassSubHierarchyInitializer();
+
+        programClassPool.accept(classSubHierarchyInitializer);
+        libraryClassPool.accept(classSubHierarchyInitializer);
 
         if (configuration.adaptKotlinMetadata)
         {
@@ -338,15 +342,15 @@ public class Initializer
 
         if (checkConfiguration)
         {
-        ClassMemberChecker classMemberChecker =
-            new ClassMemberChecker(programClassPool,
-                                   classMemberNotePrinter);
+            ClassMemberChecker classMemberChecker =
+                new ClassMemberChecker(programClassPool,
+                                       classMemberNotePrinter);
 
-        classMemberChecker.checkClassSpecifications(configuration.keep);
-        classMemberChecker.checkClassSpecifications(configuration.assumeNoSideEffects);
-        classMemberChecker.checkClassSpecifications(configuration.assumeNoExternalSideEffects);
-        classMemberChecker.checkClassSpecifications(configuration.assumeNoEscapingParameters);
-        classMemberChecker.checkClassSpecifications(configuration.assumeNoExternalReturnValues);
+            classMemberChecker.checkClassSpecifications(configuration.keep);
+            classMemberChecker.checkClassSpecifications(configuration.assumeNoSideEffects);
+            classMemberChecker.checkClassSpecifications(configuration.assumeNoExternalSideEffects);
+            classMemberChecker.checkClassSpecifications(configuration.assumeNoEscapingParameters);
+            classMemberChecker.checkClassSpecifications(configuration.assumeNoExternalReturnValues);
         }
 
         // Check for unkept descriptor classes of kept class members.
@@ -354,9 +358,9 @@ public class Initializer
 
         if (checkConfiguration)
         {
-        new DescriptorKeepChecker(programClassPool,
-                                  libraryClassPool,
-                                  descriptorKeepNotePrinter).checkClassSpecifications(configuration.keep);
+            new DescriptorKeepChecker(programClassPool,
+                                      libraryClassPool,
+                                      descriptorKeepNotePrinter).checkClassSpecifications(configuration.keep);
         }
 
         // Check for keep options that only match library classes.
@@ -364,9 +368,9 @@ public class Initializer
 
         if (checkConfiguration)
         {
-        new LibraryKeepChecker(programClassPool,
-                               libraryClassPool,
-                               libraryKeepNotePrinter).checkClassSpecifications(configuration.keep);
+            new LibraryKeepChecker(programClassPool,
+                                   libraryClassPool,
+                                   libraryKeepNotePrinter).checkClassSpecifications(configuration.keep);
         }
 
         // Initialize the references to Java classes in resource files.
