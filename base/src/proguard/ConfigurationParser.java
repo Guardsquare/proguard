@@ -32,7 +32,7 @@ import java.util.*;
 /**
  * This class parses ProGuard configurations. Configurations can be read from an
  * array of arguments or from a configuration file or URL. External references
- * in file names ('<...>') can be resolved against a given set of properties.
+ * in file names ('&lt;...&gt;') can be resolved against a given set of properties.
  *
  * @author Eric Lafortune
  */

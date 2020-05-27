@@ -31,7 +31,6 @@ import java.net.URL;
  * Comments (everything starting with '#' on a single line) are ignored.
  *
  * @author Eric Lafortune
- * @noinspection TailRecursion
  */
 public abstract class WordReader
 {
