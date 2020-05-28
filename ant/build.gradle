@@ -1,6 +1,7 @@
-// Gradle build script for the ProGuard Ant task.
-
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 repositories {
     jcenter()
@@ -24,6 +25,6 @@ sourceSets.main {
 
 dependencies {
     compile project(':base')
-    compile project(':core')
+    compile 'net.sf.proguard:proguard-core'
     compile 'org.apache.ant:ant:1.9.7'
 }

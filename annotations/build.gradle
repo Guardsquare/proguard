@@ -1,6 +1,7 @@
-// Gradle build script for the ProGuard annotations.
-
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 sourceCompatibility = "${target}"
 targetCompatibility = "${target}"

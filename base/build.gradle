@@ -1,6 +1,7 @@
-// Gradle build script for ProGuard.
-
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 repositories {
     jcenter()
@@ -28,6 +29,6 @@ jar {
 
 
 dependencies {
-    compile project(':core')
+    compile 'net.sf.proguard:proguard-core'
     compile "com.google.code.gson:gson:${gsonVersion}"
 }

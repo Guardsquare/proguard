@@ -1,7 +1,8 @@
-// Gradle build script for the ProGuard Gradle task and plugin.
-
-apply plugin: 'java'
-apply plugin: 'groovy'
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'maven-publish'
+}
 
 repositories {
     google()
@@ -40,8 +41,16 @@ repositories {
 
 dependencies {
     compile project(':base')
-    compile project(':core')
+    compile 'net.sf.proguard:proguard-core'
     compile('com.android.tools.build:gradle:3.0.0')
     compile gradleApi()
     compile localGroovy()
+}
+
+publishing {
+    publications {
+        getByName('gradle-plugin') {
+            artifactId = 'proguard-gradle'
+        }
+    }
 }

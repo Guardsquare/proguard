@@ -1,0 +1,144 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'com.github.johnrengelman.shadow'
+    id 'maven-publish'
+    id 'signing'
+}
+
+allprojects {
+    group = 'net.sf.proguard'
+    version = '7.0.0'
+}
+
+wrapper {
+    gradleVersion = '6.4'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+configurations {
+    proguard {
+        transitive = false
+    }
+}   
+
+dependencies {
+    proguard 'net.sf.proguard:proguard-core'
+    proguard project(':base')
+    proguard project(':gradle-plugin')
+    proguard project(':ant')
+}
+
+// todo: inline manifest
+
+task jar(type: ShadowJar) {
+    manifest.from "$rootDir/base/src/META-INF/MANIFEST.MF"
+    configurations = [project.configurations.proguard]
+}
+
+allprojects { Project project ->
+    pluginManager.withPlugin('maven-publish') {
+        def publicationName = project.name
+        configure(project) {
+            publishing {
+                publications {
+                    create(publicationName, MavenPublication) {
+                        pom {
+                            name = "[$group] $artifactId"
+                            developers {
+                                developer {
+                                    id = 'lafortune'
+                                    name = 'Eric Lafortune'
+                                    url = 'https://www.guardsquare.com/proguard'
+                                    organization = 'Guardsquare'
+                                    organizationUrl = 'https://www.guardsquare.com/'
+                                    roles = ['Project Administrator', 'Developer']
+                                }
+                            }
+                        }
+                    }
+                }
+                repositories {
+                    maven {
+                        name = 'Github'
+                        url = uri('https://maven.pkg.github.com/guardsquare/proguard-core')
+                        credentials {
+                            username = project.findProperty('PROGUARD_GITHUB_USERNAME')
+                            password = project.findProperty('PROGUARD_GITHUB_TOKEN')
+                        }
+                    }
+                    maven {
+                        url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+                        credentials(PasswordCredentials) {
+                            username = findProperty('PROGUARD_STAGING_USERNAME')
+                            password = findProperty('PROGUARD_STAGING_PASSWORD')
+                        }
+                    }
+                }
+            }
+            // We use in-memory ascii-armored keys
+            // See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
+            signing {
+                String key = findProperty('PROGUARD_SIGNING_KEY')
+                String password = findProperty('PROGUARD_SIGNING_PASSWORD')
+                useInMemoryPgpKeys(key, password)
+                sign publishing.publications.getByName(publicationName)
+            }
+        }
+    }
+}
+
+allprojects { Project project ->
+    afterEvaluate {
+        if (pluginManager.hasPlugin('java') && pluginManager.hasPlugin('maven-publish')) {
+            configure(project) {
+                javadoc {
+                    options.addStringOption('Xdoclint:none', '-quiet')
+                }
+                java {
+                    withJavadocJar()
+                    withSourcesJar()
+                }
+                publishing {
+                    publications {
+                        getByName(project.name) {
+                            from components.java
+                            // Do not change artifact ID if already overriden at project level.
+                            if (artifactId == project.name) {
+                                artifactId = "proguard-$project.name"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        parent {
+            artifactId = "proguard-parent"
+            artifact(jar)
+            pom {
+                description = 'ProGuard is a free Java class file shrinker, optimizer, obfuscator, and preverifier.'
+                url = 'https://www.guardsquare.com/proguard'
+                licenses {
+                    license {
+                        name = 'GNU General Public License, Version 2'
+                        url = 'https://www.gnu.org/licenses/gpl-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+                issueManagement {
+                    system = 'Github Tracker'
+                    url = 'https://github.com/Guardsquare/proguard/issues'
+                }
+                scm {
+                    url = 'https://github.com/Guardsquare/proguard.git'
+                    connection = 'scm:git:https://github.com/Guardsquare/proguard.git'
+                }
+            }
+        }
+    }
+}

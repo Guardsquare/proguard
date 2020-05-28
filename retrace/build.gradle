@@ -1,6 +1,7 @@
-// Gradle build script for ReTrace.
-
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 repositories {
     jcenter()
@@ -24,7 +25,7 @@ sourceSets.main {
 
 dependencies {
     compile project(':base')
-    compile project(':core')
+    compile 'net.sf.proguard:proguard-core'
 }
 
 jar {

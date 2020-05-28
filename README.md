@@ -1,3 +1,5 @@
+![Continuous Deployment](https://github.com/Guardsquare/proguard-clone/workflows/Continuous%20Deployment/badge.svg?branch=github-workflow)
+
 ProGuard, Java bytecode optimizer and obfuscator
 ================================================
 

@@ -1,19 +1,21 @@
-If you've downloaded the source code of **ProGuard**, you can build it in a
-number of ways:
+If you've downloaded the source code of **ProGuard**, you can build it
+yourself with Gradle:
 
-- build.gradle : a Gradle build file for all platforms.
+- Build the artifacts:
+    ```
+    gradle assemble
+    ```
 
-        cd buildscripts
-        gradle clean assemble
+- Build the artifacts when you also have a personal copy of the ProGuard Core
+  library:
+    ```
+    gradle --include-build <path_to_proguard_core> assemble
+    ```
 
-- pom.xml: a Maven POM for all platforms.
-
-        cd buildscripts
-        mvn clean package
-
-- build.sh: a simple and fast shell script for GNU/Linux.
-
-        buildscripts/build.sh
+- Publish the artifacts to your local Maven cache (something like `~/.m2/`):
+    ```
+    gradle publishToMavenLocal
+    ```
 
 Once built, you can [run ProGuard](manual/index.md) with the scripts in the
 `bin` directory.
