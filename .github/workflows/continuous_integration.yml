@@ -6,11 +6,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PROGUARD_CORE_PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.PROGUARD_GITHUB_TOKEN }}
           path: proguard-main
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PROGUARD_CORE_PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.PROGUARD_GITHUB_TOKEN }}
           repository: Guardsquare/proguard-core
           ref: github-workflow
           path: proguard-core
