@@ -26,7 +26,7 @@
   </a>
 
   <!-- License -->
-  <a href="LICENSE.md">
+  <a href="LICENSE">
     <img src="https://img.shields.io/github/license/guardsquare/proguard">
   </a>
 
@@ -66,35 +66,36 @@ project you can enable ProGuard instead of the default R8 compiler:
 
 1. Disable R8 in your `gradle.properties`:
     ```
-android.enableR8=false
-android.enableR8.libraries=false
+    android.enableR8=false
+    android.enableR8.libraries=false
     ```
 
 2. Override the default version of ProGuard with the most recent one in your
    main `build.gradle`:
     ```
-buildscript {
-    ...
-    configurations.all {
-        resolutionStrategy {
-            force 'net.sf.proguard:proguard-gradle:7.0.0'
+    buildscript {
+        ...
+        configurations.all {
+            resolutionStrategy {
+                force 'net.sf.proguard:proguard-gradle:7.0.0'
+            }
         }
     }
-}
     ```
+
 3. Enable minification as usual in your `build.gradle`:
     ```
-android {
-    ...
-    buildTypes {
-        release {
-            minifyEnabled   true
-            shrinkResources true
-            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
-            proguardFile 'proguard-project.txt'
+    android {
+        ...
+        buildTypes {
+            release {
+                minifyEnabled   true
+                shrinkResources true
+                proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+                proguardFile 'proguard-project.txt'
+            }
         }
     }
-}
     ```
 
 4. Add any necessary configuration to your `proguard-project.txt`.
@@ -114,7 +115,7 @@ ProGuard works like an advanced optimizing compiler, removing unused classes,
 fields, methods, and attributes, shortening identifiers, merging classes,
 inlining methods, propagating constants, removing unused parameters, etc.
 
-* The optimizations typically reduce the sixe of an application by anything
+* The optimizations typically reduce the size of an application by anything
   between 20% and 90%. The reduction mostly depends on the size of external
   libraries that ProGuard can remove in whole or in part.
 
@@ -123,7 +124,9 @@ inlining methods, propagating constants, removing unused parameters, etc.
   generally isn't noticeable. For the Dalvik virtual machine and ART on
   Android devices, the difference can be worth it.
 
-* ProGuard can also remove logging code, from applications and their libraries.
+* ProGuard can also remove logging code, from applications and their
+  libraries, without needing to change the source code &mdash; in fact,
+  without needing the source code at all!
 
 The manual pages ([markdown](docs/md),
 [html](https://www.guardsquare.com/proguard)) cover the features and usage of
@@ -140,4 +143,6 @@ guide](blob/master/CONTRIBUTING.md) if you would like to contribute.
 
 Copyright (c) 2002-2020 [Guardsquare NV](https://www.guardsquare.com/).
 ProGuard is released under the [GNU General Public License, version
-2](LICENSE.md).
+2](LICENSE), with [exceptions granted to a number of
+projects](docs/md/license.md).
+
