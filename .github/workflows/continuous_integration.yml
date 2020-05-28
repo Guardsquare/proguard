@@ -12,7 +12,6 @@ jobs:
         with:
           token: ${{ secrets.PROGUARD_GITHUB_TOKEN }}
           repository: Guardsquare/proguard-core
-          ref: github-workflow
           path: proguard-core
       - uses: actions/setup-java@v1
         with:
