@@ -21,8 +21,8 @@
   </a>
 
   <!-- Maven -->
-  <a href="https://search.maven.org/search?q=g:net.sf.proguard">
-    <img src="https://img.shields.io/maven-central/v/net.sf.proguard/proguard-parent">
+  <a href="https://search.maven.org/search?q=g:com.guardsquare">
+    <img src="https://img.shields.io/maven-central/v/com.guardsquare/proguard-parent">
   </a>
 
   <!-- License -->
@@ -77,7 +77,7 @@ project you can enable ProGuard instead of the default R8 compiler:
         ...
         configurations.all {
             resolutionStrategy {
-                force 'net.sf.proguard:proguard-gradle:7.0.0'
+                force 'com.guardsquare:proguard-gradle:7.0.0'
             }
         }
     }
@@ -145,4 +145,3 @@ Copyright (c) 2002-2020 [Guardsquare NV](https://www.guardsquare.com/).
 ProGuard is released under the [GNU General Public License, version
 2](LICENSE), with [exceptions granted to a number of
 projects](docs/md/license.md).
-

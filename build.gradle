@@ -7,7 +7,7 @@ plugins {
 }
 
 allprojects {
-    group = 'net.sf.proguard'
+    group = 'com.guardsquare'
     version = '7.0.0'
 }
 
@@ -23,7 +23,7 @@ configurations {
 }   
 
 dependencies {
-    proguard 'net.sf.proguard:proguard-core'
+    proguard 'com.guardsquare:proguard-core'
     proguard project(':base')
     proguard project(':gradle-plugin')
     proguard project(':ant')

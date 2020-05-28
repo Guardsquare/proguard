@@ -117,7 +117,7 @@ format or embedded in the Groovy configuration.
 ## Does ProGuard have support for Maven? {: #maven}
 
 **ProGuard**'s jar files are also distributed as artefacts from the [Maven
-Central](http://search.maven.org/#search%7Cga%7C1%7Cg:%22net.sf.proguard%22)
+Central](http://search.maven.org/#search%7Cga%7C1%7Cg:%22com.guardsquare%22)
 repository. There are some third-party plugins that support **ProGuard**, such
 as the [android-maven-plugin](http://code.google.com/p/maven-android-plugin/)
 and the [IDFC Maven ProGuard Plug-in](http://mavenproguard.sourceforge.net/).

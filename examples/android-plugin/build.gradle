@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         //classpath ':proguard:'    // For the local copy of the ProGuard plugin.
-        classpath 'net.sf.proguard:proguard-gradle:6.2.2' // For the copy from Jcenter.
+        classpath 'com.guardsquare:proguard-gradle:7.0.0' // For the copy from Jcenter.
         classpath 'com.android.tools.build:gradle:3.3.0'
     }
 }

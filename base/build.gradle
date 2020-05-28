@@ -29,6 +29,6 @@ jar {
 
 
 dependencies {
-    compile 'net.sf.proguard:proguard-core'
+    compile 'com.guardsquare:proguard-core'
     compile "com.google.code.gson:gson:${gsonVersion}"
 }

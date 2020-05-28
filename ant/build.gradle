@@ -25,6 +25,6 @@ sourceSets.main {
 
 dependencies {
     compile project(':base')
-    compile 'net.sf.proguard:proguard-core'
+    compile 'com.guardsquare:proguard-core'
     compile 'org.apache.ant:ant:1.9.7'
 }

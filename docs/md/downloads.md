@@ -7,7 +7,7 @@ ProGuard is written in Java, so it requires a Java Runtime Environment
 You can download ProGuard in various forms:
 
 - [Pre-built artifacts](https://bintray.com/guardsquare/proguard) at JCenter
-- [Pre-built artifacts](https://search.maven.org/search?q=g:net.sf.proguard) at Maven Central
+- [Pre-built artifacts](https://search.maven.org/search?q=g:com.guardsquare) at Maven Central
 - [Traditional pre-built archives](https://sourceforge.net/projects/proguard/files/) at SourceForge
 - A [Git repository of the source code](https://github.com/Guardsquare/proguard) at Github
 - A [Mercurial repository of the source code](https://sourceforge.net/p/proguard/code/) at SourceForge
