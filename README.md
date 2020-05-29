@@ -132,10 +132,12 @@ The manual pages ([markdown](docs/md),
 [html](https://www.guardsquare.com/proguard)) cover the features and usage of
 ProGuard in detail.
 
-
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome.
+ProGuard builds on the
+[ProGuard Core](https://github.com/Guardsquare/proguard-core) library.
+
+Contributions, issues and feature requests are welcome in both projects.
 Feel free to check the [issues](issues) page and the [contributing
 guide](CONTRIBUTING.md) if you would like to contribute.
 
