@@ -6,6 +6,12 @@ plugins {
     id 'signing'
 }
 
+repositories {
+    mavenCentral()
+    jcenter()
+    google()
+}
+
 allprojects {
     group = 'com.guardsquare'
     version = '7.0.0'
@@ -17,23 +23,37 @@ wrapper {
 }
 
 configurations {
-    proguard {
+    runtime {
+        transitive = true
+    }
+    runtimeShallow {
+        extendsFrom runtime
         transitive = false
     }
 }   
 
 dependencies {
-    proguard 'com.guardsquare:proguard-core'
-    proguard project(':base')
-    proguard project(':gradle-plugin')
-    proguard project(':ant')
+    runtime 'com.guardsquare:proguard-core'
+    runtime project(':base')
+    runtime project(':gradle-plugin')
+    runtime project(':ant')
 }
 
 // todo: inline manifest
 
 task jar(type: ShadowJar) {
-    manifest.from "$rootDir/base/src/META-INF/MANIFEST.MF"
-    configurations = [project.configurations.proguard]
+    configurations = [project.configurations.runtimeShallow]
+}
+
+task fatJar(type: ShadowJar) {
+    archiveFileName.set('proguard-fat.jar')
+    configurations = [project.configurations.runtime]
+    zip64 = true  // fixes too-many-entry error
+}
+
+assemble {
+    dependsOn jar
+    dependsOn fatJar
 }
 
 allprojects { Project project ->

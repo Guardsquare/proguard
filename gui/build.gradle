@@ -1,4 +1,7 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
+    id 'com.github.johnrengelman.shadow'
     id 'java'
     id 'maven-publish'
 }
@@ -32,3 +35,10 @@ dependencies {
 jar {
     manifest.from 'src/META-INF/MANIFEST.MF'
 }
+
+task fatJar(type: ShadowJar) {
+    archiveFileName.set('gui-fat.jar')
+    configurations = [project.configurations.runtime]
+}
+
+assemble.dependsOn fatJar
