@@ -21,4 +21,4 @@ fi
 
 PROGUARD_HOME=`dirname "$PROGUARD"`/..
 
-java -jar "$PROGUARD_HOME/retrace/build/libs/retrace-fat.jar" "$@"
+java -jar "$PROGUARD_HOME/lib/retrace.jar" "$@"

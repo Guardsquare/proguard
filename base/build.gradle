@@ -32,7 +32,8 @@ dependencies {
 }
 
 task fatJar(type: ShadowJar) {
-    archiveFileName.set('base-fat.jar')
+    destinationDirectory.set(file("$rootDir/lib"))
+    archiveFileName.set('proguard.jar')
     from sourceSets.main.output
     configurations = [project.configurations.runtime]
     manifest {

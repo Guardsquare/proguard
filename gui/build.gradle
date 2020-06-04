@@ -33,7 +33,8 @@ dependencies {
 }
 
 task fatJar(type: ShadowJar) {
-    archiveFileName.set('gui-fat.jar')
+    destinationDirectory.set(file("$rootDir/lib"))
+    archiveFileName.set('proguardgui.jar')
     from sourceSets.main.output
     configurations = [project.configurations.runtime]
     manifest {

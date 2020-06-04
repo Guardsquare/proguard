@@ -11,4 +11,4 @@ IF EXIST "%PROGUARD_HOME%" GOTO home
 SET PROGUARD_HOME=%~dp0\..
 :home
 
-java -jar "%PROGUARD_HOME%\retrace\build\libs\retrace-fat.jar" %*
+java -jar "%PROGUARD_HOME%\lib\retrace.jar" %*

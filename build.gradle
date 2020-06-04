@@ -123,7 +123,7 @@ publishing {
 distributions {
     main {
         contents {
-            into('build/libs') {
+            into('lib') {
                 from tasks.getByPath(':base:fatJar').outputs
                 from tasks.getByPath(':gui:fatJar').outputs
                 from tasks.getByPath(':retrace:fatJar').outputs
@@ -138,4 +138,8 @@ distributions {
             }
         }
     }
+}
+
+clean {
+    delete file("$rootDir/lib")
 }
