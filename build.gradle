@@ -1,4 +1,5 @@
 plugins {
+    id 'distribution'
     id 'maven-publish'
     id 'signing'
 }
@@ -114,6 +115,21 @@ publishing {
                     url = 'https://github.com/Guardsquare/proguard.git'
                     connection = 'scm:git:https://github.com/Guardsquare/proguard.git'
                 }
+            }
+        }
+    }
+}
+
+distributions {
+    main {
+        contents {
+            into('docs') {
+                from('docs/md') {
+                    include '*.md'
+                }
+            }
+            from(rootDir) {
+                include 'examples/'
             }
         }
     }
