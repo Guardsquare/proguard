@@ -123,6 +123,11 @@ publishing {
 distributions {
     main {
         contents {
+            into('build/libs') {
+                from tasks.getByPath(':base:fatJar').outputs
+                from tasks.getByPath(':gui:fatJar').outputs
+                from tasks.getByPath(':retrace:fatJar').outputs
+            }
             into('docs') {
                 from('docs/md') {
                     include '*.md'
