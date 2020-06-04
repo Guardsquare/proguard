@@ -32,13 +32,16 @@ dependencies {
     compile project(':retrace')
 }
 
-jar {
-    manifest.from 'src/META-INF/MANIFEST.MF'
-}
-
 task fatJar(type: ShadowJar) {
     archiveFileName.set('gui-fat.jar')
+    from sourceSets.main.output
     configurations = [project.configurations.runtime]
+    manifest {
+        attributes(
+                'Manifest-Version': '1.0',
+                'Main-Class': 'proguard.gui.ProGuardGUI',
+                'Implementation-Version': archiveVersion)
+    }
 }
 
 assemble.dependsOn fatJar

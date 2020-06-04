@@ -1,15 +1,6 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
-    id 'com.github.johnrengelman.shadow'
     id 'maven-publish'
     id 'signing'
-}
-
-repositories {
-    mavenCentral()
-    jcenter()
-    google()
 }
 
 allprojects {
@@ -20,40 +11,6 @@ allprojects {
 wrapper {
     gradleVersion = '6.4'
     distributionType = Wrapper.DistributionType.ALL
-}
-
-configurations {
-    runtime {
-        transitive = true
-    }
-    runtimeShallow {
-        extendsFrom runtime
-        transitive = false
-    }
-}   
-
-dependencies {
-    runtime 'com.guardsquare:proguard-core'
-    runtime project(':base')
-    runtime project(':gradle-plugin')
-    runtime project(':ant')
-}
-
-// todo: inline manifest
-
-task jar(type: ShadowJar) {
-    configurations = [project.configurations.runtimeShallow]
-}
-
-task fatJar(type: ShadowJar) {
-    archiveFileName.set('proguard-fat.jar')
-    configurations = [project.configurations.runtime]
-    zip64 = true  // fixes too-many-entry error
-}
-
-assemble {
-    dependsOn jar
-    dependsOn fatJar
 }
 
 allprojects { Project project ->
@@ -139,7 +96,6 @@ publishing {
     publications {
         parent {
             artifactId = "proguard-parent"
-            artifact(jar)
             pom {
                 description = 'ProGuard is a free Java class file shrinker, optimizer, obfuscator, and preverifier.'
                 url = 'https://www.guardsquare.com/proguard'

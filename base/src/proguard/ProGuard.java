@@ -42,6 +42,10 @@ import proguard.shrink.Shrinker;
 import proguard.util.*;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Tool for shrinking, optimizing, obfuscating, and preverifying Java classes.
@@ -50,7 +54,7 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 6.2.2";
+    public static final String VERSION = String.format("ProGuard, version %s", getVersion());
 
     private final Configuration    configuration;
 
@@ -61,6 +65,16 @@ public class ProGuard
     // All injected data entries.
     private final ExtraDataEntryNameMap extraDataEntryNameMap = new ExtraDataEntryNameMap();
 
+    private static String getVersion() {
+        URLClassLoader cl = (URLClassLoader) ProGuard.class.getClassLoader();
+        URL url = cl.findResource("META-INF/MANIFEST.MF");
+        try {
+            Manifest manifest = new Manifest(url.openStream());
+            return manifest.getMainAttributes().getValue("Implementation-Version");
+        } catch (IOException e) {
+            return "undefined";
+        }
+    }
 
     /**
      * Creates a new ProGuard object to process jars as specified by the given

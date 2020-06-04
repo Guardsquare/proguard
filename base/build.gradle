@@ -1,4 +1,7 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
+    id 'com.github.johnrengelman.shadow'
     id 'java'
     id 'maven-publish'
 }
@@ -23,12 +26,20 @@ sourceSets.main {
     }
 }
 
-jar {
-    manifest.from 'src/META-INF/MANIFEST.MF'
-}
-
-
 dependencies {
     compile 'com.guardsquare:proguard-core'
     compile "com.google.code.gson:gson:${gsonVersion}"
 }
+
+task fatJar(type: ShadowJar) {
+    archiveFileName.set('base-fat.jar')
+    from sourceSets.main.output
+    configurations = [project.configurations.runtime]
+    manifest {
+        attributes(
+                'Main-Class': 'proguard.ProGuard',
+                'Implementation-Version': archiveVersion.get())
+    }
+}
+
+assemble.dependsOn fatJar
