@@ -54,7 +54,8 @@ import java.util.jar.Manifest;
  */
 public class ProGuard
 {
-    public static final String VERSION = String.format("ProGuard, version %s", getVersion());
+    public static final String VERSION = "ProGuard, version " + getVersion();
+
 
     private final Configuration    configuration;
 
@@ -65,16 +66,6 @@ public class ProGuard
     // All injected data entries.
     private final ExtraDataEntryNameMap extraDataEntryNameMap = new ExtraDataEntryNameMap();
 
-    private static String getVersion() {
-        URLClassLoader cl = (URLClassLoader) ProGuard.class.getClassLoader();
-        URL url = cl.findResource("META-INF/MANIFEST.MF");
-        try {
-            Manifest manifest = new Manifest(url.openStream());
-            return manifest.getMainAttributes().getValue("Implementation-Version");
-        } catch (IOException e) {
-            return "undefined";
-        }
-    }
 
     /**
      * Creates a new ProGuard object to process jars as specified by the given
@@ -631,6 +622,25 @@ public class ProGuard
         {
             PrintWriterUtil.closePrintWriter(configuration.dump, pw);
         }
+    }
+
+
+    /**
+     * Returns the implementation version from the manifest.
+     */
+    public static String getVersion()
+    {
+        Package pack = ProGuard.class.getPackage();
+        if (pack != null)
+        {
+            String version = pack.getImplementationVersion();
+            if (version != null)
+            {
+                return version;
+            }
+        }
+
+        return "undefined";
     }
 
 
