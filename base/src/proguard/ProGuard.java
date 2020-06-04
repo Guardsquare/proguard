@@ -42,6 +42,10 @@ import proguard.shrink.Shrinker;
 import proguard.util.*;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Tool for shrinking, optimizing, obfuscating, and preverifying Java classes.
@@ -50,7 +54,8 @@ import java.io.*;
  */
 public class ProGuard
 {
-    public static final String VERSION = "ProGuard, version 6.2.2";
+    public static final String VERSION = "ProGuard, version " + getVersion();
+
 
     private final Configuration    configuration;
 
@@ -617,6 +622,25 @@ public class ProGuard
         {
             PrintWriterUtil.closePrintWriter(configuration.dump, pw);
         }
+    }
+
+
+    /**
+     * Returns the implementation version from the manifest.
+     */
+    public static String getVersion()
+    {
+        Package pack = ProGuard.class.getPackage();
+        if (pack != null)
+        {
+            String version = pack.getImplementationVersion();
+            if (version != null)
+            {
+                return version;
+            }
+        }
+
+        return "undefined";
     }
 
 

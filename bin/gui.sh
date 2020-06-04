@@ -24,4 +24,4 @@ PROGUARD_HOME=`dirname "$PROGUARD"`/..
 # On Linux, Java 1.6.0_24 and higher hang when starting the GUI:
 #   http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7027598
 # We're using the -D option as a workaround.
-java -DsuppressSwingDropSupport=true -jar "$PROGUARD_HOME/lib/proguardgui.jar" "$@"
+java -DsuppressSwingDropSupport=true -jar "$PROGUARD_HOME/gui/build/libs/gui-fat.jar" "$@"
