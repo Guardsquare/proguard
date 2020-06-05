@@ -130,7 +130,8 @@ distributions {
             }
             into('docs') {
                 from('docs/md') {
-                    include '*.md'
+                    includeEmptyDirs = false
+                    include '**/*.md'
                 }
             }
             from(rootDir) {
