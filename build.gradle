@@ -45,6 +45,7 @@ allprojects { Project project ->
                         }
                     }
                     maven {
+                        name = 'Sonatype'
                         url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
                         credentials(PasswordCredentials) {
                             username = findProperty('PROGUARD_STAGING_USERNAME')
