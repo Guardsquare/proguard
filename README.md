@@ -12,7 +12,7 @@
 <p align="center">
   <!-- CI -->
   <a href="https://github.com/Guardsquare/proguard/actions?query=workflow%3A%22Continuous+Integration%22">
-    <img src="https://github.com/Guardsquare/proguard/workflows/Continuous%20Integration/badge.svg?branch=github-workflow">
+    <img src="https://github.com/Guardsquare/proguard/workflows/Continuous%20Integration/badge.svg">
   </a>
 
   <!-- Github version -->
