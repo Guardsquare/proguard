@@ -144,6 +144,11 @@ distributions {
     }
 }
 
+distTar {
+    compression = Compression.GZIP
+    archiveExtension.set('tar.gz')
+}
+
 clean {
     delete file("$rootDir/lib")
 }
