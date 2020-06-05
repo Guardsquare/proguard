@@ -122,6 +122,7 @@ publishing {
 
 distributions {
     main {
+        distributionBaseName.set('proguard')
         contents {
             into('lib') {
                 from tasks.getByPath(':base:fatJar').outputs
