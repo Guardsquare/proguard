@@ -1,4 +1,5 @@
 plugins {
+    id 'distribution'
     id 'maven-publish'
     id 'signing'
 }
@@ -118,4 +119,38 @@ publishing {
             }
         }
     }
+}
+
+distributions {
+    main {
+        distributionBaseName.set('proguard')
+        contents {
+            into('lib') {
+                from tasks.getByPath(':base:fatJar').outputs
+                from tasks.getByPath(':gui:fatJar').outputs
+                from tasks.getByPath(':retrace:fatJar').outputs
+            }
+            into('docs') {
+                from('docs/md') {
+                    includeEmptyDirs = false
+                    include '**/*.md'
+                }
+            }
+            from(rootDir) {
+                include 'bin/'
+                include 'examples/'
+                include 'LICENSE'
+                include 'LICENSE_exception.md'
+            }
+        }
+    }
+}
+
+distTar {
+    compression = Compression.GZIP
+    archiveExtension.set('tar.gz')
+}
+
+clean {
+    delete file("$rootDir/lib")
 }
