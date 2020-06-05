@@ -10,14 +10,13 @@ copyright:        Copyright &copy; 2002-2020 Guardsquare NV
 # Options
 ###################################################################
 theme:
-  name:       null
-  custom_dir: ../buildscripts/mkdocs/material
-  logo:       img/proguard.png
-  favicon:    img/guardsquare.png
-  language:   en
-  palette:    blue
+  name:     material
+  logo:     img/proguard.png
+  favicon:  img/guardsquare.png
+  language: en
+  palette:  blue
   font:
-  feature: 
+  feature:
 
 docs_dir: md
 site_dir: html
@@ -36,12 +35,14 @@ extra:
   #  text: 'Droid Sans'
   #  code: 'Ubuntu Mono'
   social:
-  - type: 'twitter'
-    link: 'https://twitter.com/guardsquare'
-  - type: 'linkedin'
-    link: 'https://www.linkedin.com/company/guardsquare-nv'
-  - type: 'facebook'
-    link: 'https://www.facebook.com/guardsquare'
+  - icon: fontawesome/brands/github
+    link: https://github.com/Guardsquare/proguard
+  - icon: fontawesome/brands/twitter
+    link: https://twitter.com/guardsquare
+  - icon: fontawesome/brands/linkedin
+    link: https://www.linkedin.com/company/guardsquare-nv
+  - icon: fontawesome/brands/facebook
+    link: https://www.facebook.com/guardsquare
   #feature:
   #  tabs: true
 
@@ -51,6 +52,7 @@ extra:
 markdown_extensions:
 - attr_list
 - admonition
+- codehilite
 - footnotes
 - def_list
 
@@ -64,6 +66,7 @@ nav:
 - ProGuard Manual:
     - Introduction:    manual/index.md
     - Usage:           manual/usage.md
+    - Kotlin:          manual/kotlin.md
     - Attributes:      manual/attributes.md
     - Optimizations:   manual/optimizations.md
     - Limitations:     manual/limitations.md

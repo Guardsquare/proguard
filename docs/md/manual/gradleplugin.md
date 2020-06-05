@@ -1,30 +1,47 @@
-You can enable ProGuard in your Android Gradle build process, by enabling
-minification in the `build.gradle` file of your project:
+ProGuard is integrated in Google's Android SDK. If you have an Android Gradle
+project you can enable ProGuard instead of the default R8 compiler:
 
-    android {
-        .....
-        buildTypes {
-            debug {
-                minifyEnabled   false
-                shrinkResources false
-            }
-            release {
-                minifyEnabled   true
-                shrinkResources true
-                proguardFile getDefaultProguardFile('proguard-android-optimize.pro')
-                proguardFile 'proguard-project.txt'
+1. Disable R8 in your `gradle.properties`:
+
+        android.enableR8=false
+        android.enableR8.libraries=false
+
+2. Override the default version of ProGuard with the most recent one in your
+   main `build.gradle`:
+
+        buildscript {
+            ...
+            configurations.all {
+                resolutionStrategy {
+                    force 'net.sf.proguard:proguard-gradle:7.0.0'
+                }
             }
         }
-    }
 
-You then need to make sure that you use ProGuard instead of R8, in the
-`gradle.properties` file of your project:
+3. Enable minification as usual in your `build.gradle`:
 
-    android.enableR8=false
-    android.enableR8.libraries=false
+        android {
+            ...
+            buildTypes {
+                release {
+                    minifyEnabled   true
+                    shrinkResources true
+                    proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+                    proguardFile 'proguard-project.txt'
+                }
+            }
+        }
 
-You can find a complete sample project in `examples/android` in the ProGuard
-distribution.
+4. Add any necessary configuration to your `proguard-project.txt`.
+
+You can then build your application as usual:
+
+    gradle assembleRelease
+
+The repository contains some sample configurations in the [examples](examples)
+directory. Notably, [examples/android](examples/android) has a small working
+Android project.
+You can enable ProGuard in your Android Gradle build process, by enabling
 
 ## ProGuard Gradle Plugin
 

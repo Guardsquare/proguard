@@ -10,7 +10,6 @@ You can download ProGuard in various forms:
 - [Pre-built artifacts](https://search.maven.org/search?q=g:com.guardsquare) at Maven Central
 - [Traditional pre-built archives](https://sourceforge.net/projects/proguard/files/) at SourceForge
 - A [Git repository of the source code](https://github.com/Guardsquare/proguard) at Github
-- A [Mercurial repository of the source code](https://sourceforge.net/p/proguard/code/) at SourceForge
 - The [complete ProGuard manual](https://www.guardsquare.com/proguard) at Guardsquare
 
 You can find major releases, minor releases with important bug fixes, and

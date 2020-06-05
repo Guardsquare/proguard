@@ -1,14 +1,12 @@
-You can find the ProGuard GUI jar in the `lib` directory of the ProGuard
-distribution. To run the ProGuard graphical user interface, just type:
+You can find the ProGuard GUI script in the `bin` directory of the ProGuard
+distribution. To run it, just type:
 
-`proguardgui [-nosplash]` \[*configuration\_file*\]
+  `bin/proguardgui [-nosplash]` \[*configuration\_file*\]
 
-Alternatively, the `bin` directory contains some short Linux and Windows
-scripts containing this command. The GUI will pop up in a window. With the
-`-nosplash` option, you can switch off the short opening animation. If you
-have specified a ProGuard configuration file, it will be loaded. The GUI works
-like a wizard. You can edit the configuration and execute ProGuard through a
-few tabs:
+The application will pop up a window. With the `-nosplash` option, you can
+switch off the short opening animation. If you have specified a ProGuard
+configuration file, it will be loaded. The GUI works like a wizard. You
+can edit the configuration and execute ProGuard through a few tabs:
 
 | Tab                           | Purpose
 |-------------------------------|--------------------------------------------------------------

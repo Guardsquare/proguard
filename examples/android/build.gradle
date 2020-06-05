@@ -10,7 +10,7 @@ buildscript {
         resolutionStrategy {
             // Override the default version of ProGuard
             // with the most recent one.
-            force 'com.guardsquare:proguard-gradle:7.0.0'
+            force 'net.sf.proguard:proguard-gradle:7.0.0'
         }
     }
 }
