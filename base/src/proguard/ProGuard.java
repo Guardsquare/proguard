@@ -122,7 +122,7 @@ public class ProGuard
             configuration.obfuscate                 ||
             configuration.preverify                 ||
             configuration.addConfigurationDebugging ||
-            configuration.adaptKotlinMetadata)
+            configuration.keepKotlinMetadata)
         {
             initialize();
             mark();
@@ -196,9 +196,9 @@ public class ProGuard
             obfuscate();
         }
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
-            adaptKotlinMetadata();
+            keepKotlinMetadata();
         }
 
         if (configuration.optimize ||
@@ -364,7 +364,7 @@ public class ProGuard
     /**
      * Adapts Kotlin Metadata annotations.
      */
-    private void adaptKotlinMetadata()
+    private void keepKotlinMetadata()
     {
         if (configuration.verbose)
         {

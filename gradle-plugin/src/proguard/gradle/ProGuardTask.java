@@ -1063,15 +1063,15 @@ public class ProGuardTask extends DefaultTask
     }
 
     // Hack: support the keyword without parentheses in Groovy.
-    public Object getadaptkotlinmetadata()
+    public Object getkeepkotlinmetadata()
     {
-        adaptkotlinmetadata();
+        keepkotlinmetadata();
         return null;
     }
 
-    public void adaptkotlinmetadata()
+    public void keepkotlinmetadata()
     {
-        configuration.adaptKotlinMetadata = true;
+        configuration.keepKotlinMetadata = true;
     }
 
     // Hack: support the keyword without parentheses in Groovy.

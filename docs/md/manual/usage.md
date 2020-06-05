@@ -542,6 +542,12 @@ you can abbreviate them to their first unique characters.
   obfuscated stack traces](examples.md#stacktrace). Only applicable when
   obfuscating.
 
+`-keepkotlinmetadata`{: #keepkotlinmetadata}
+: Specifies to process `kotlin.Metadata` annotations if present.
+  Currently only shrinking and obfuscation of its content is supported.
+  Classes containing such annotations should be excuded from optimization
+  if this option is enabled.
+
 `-adaptclassstrings`{: #adaptclassstrings} \[*[class\_filter](#filters)*\]
 : Specifies that string constants that correspond to class names should be
   obfuscated as well. Without a filter, all string constants that correspond

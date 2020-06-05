@@ -150,7 +150,7 @@ public class Obfuscator
             new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
             nameMarker))))))));
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             programClassPool.classesAccept(
                 // Keep Kotlin default implementations class where the user had already kept the interface.
@@ -182,7 +182,7 @@ public class Obfuscator
                 new AllAttributeVisitor(true,
                 new ParameterNameMarker(attributeUsageMarker)))));
 
-            if (configuration.adaptKotlinMetadata)
+            if (configuration.keepKotlinMetadata)
             {
                 programClassPool.classesAccept(
                     new ReferencedKotlinMetadataVisitor(
@@ -190,7 +190,7 @@ public class Obfuscator
             }
         }
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
@@ -214,7 +214,7 @@ public class Obfuscator
         // configuration may rely on annotations.
         programClassPool.classesAccept(new AttributeShrinker());
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
@@ -287,7 +287,7 @@ public class Obfuscator
                                 configuration.flattenPackageHierarchy,
                                 configuration.repackageClasses,
                                 configuration.allowAccessModification,
-                                configuration.adaptKotlinMetadata));
+                                configuration.keepKotlinMetadata));
 
         // Come up with new names for all class members.
         NameFactory nameFactory = new SimpleNameFactory();
@@ -512,7 +512,7 @@ public class Obfuscator
             }
         }
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             programClassPool.classesAccept(
                 new MultiClassVisitor(
@@ -605,7 +605,7 @@ public class Obfuscator
                 obfuscatedFieldCounter))
             );
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Ensure multi-file parts and facades are in the same package.
             programClassPool.classesAccept(
@@ -617,7 +617,7 @@ public class Obfuscator
         programClassPool.classesAccept(classRenamer);
         libraryClassPool.classesAccept(classRenamer);
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Apply new names to Kotlin properties.
             programClassPool.classesAccept(
@@ -631,7 +631,7 @@ public class Obfuscator
         libraryClassPool.classesAccept(new ClassReferenceFixer(false));
         programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
@@ -692,7 +692,7 @@ public class Obfuscator
             System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
         }
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Fix the Kotlin modules so the filename matches and the class names match.
             resourceFilePool.resourceFilesAccept(
@@ -700,7 +700,7 @@ public class Obfuscator
                 new KotlinModuleFixer()));
         }
 
-        if (configuration.adaptKotlinMetadata && configuration.enableKotlinAsserter)
+        if (configuration.keepKotlinMetadata && configuration.enableKotlinAsserter)
         {
             new KotlinMetadataAsserter().execute(programClassPool, libraryClassPool, resourceFilePool, warningPrinter);
         }

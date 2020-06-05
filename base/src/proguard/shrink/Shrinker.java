@@ -145,7 +145,7 @@ public class Shrinker
             new UsedClassFilter(simpleUsageMarker,
             new ClassShrinker(simpleUsageMarker)));
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Clean up Kotlin metadata for unused classes/members.
             newProgramClassPool.classesAccept(

@@ -167,7 +167,7 @@ public class Initializer
         WarningPrinter kotlinInitializationWarningPrinter = new WarningPrinter(err, configuration.warn);
 
         // Initialize the Kotlin Metadata for Kotlin classes.
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             ClassVisitor kotlinMetadataInitializer =
                 new AllAttributeVisitor(
@@ -319,7 +319,7 @@ public class Initializer
         programClassPool.accept(classSubHierarchyInitializer);
         libraryClassPool.accept(classSubHierarchyInitializer);
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             resourceFilePool.resourceFilesAccept(new KotlinModuleReferenceInitializer(programClassPool, libraryClassPool));
 
@@ -542,7 +542,7 @@ public class Initializer
             err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedlibraryclassmember)");
         }
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             int kotlinInitializationWarningCount = kotlinInitializationWarningPrinter.getWarningCount();
 

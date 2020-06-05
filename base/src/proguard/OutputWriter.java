@@ -306,7 +306,7 @@ public class OutputWriter
                                         resourceWriter);
             }
 
-            if (configuration.adaptKotlinMetadata &&
+            if (configuration.keepKotlinMetadata &&
                 (configuration.shrink ||
                  configuration.obfuscate))
             {

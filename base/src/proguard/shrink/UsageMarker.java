@@ -107,7 +107,7 @@ public class UsageMarker
             ));
 
         // Mark the elements of Kotlin metadata that need to be kept.
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Mark Kotlin things that refer to classes that have been marked as being kept now.
             programClassPool.classesAccept(
@@ -129,7 +129,7 @@ public class UsageMarker
         // Mark interfaces that have to be kept.
         programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Mark the used Kotlin modules.
             resourceFilePool.resourceFilesAccept(

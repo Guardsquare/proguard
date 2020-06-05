@@ -122,7 +122,7 @@ public class InputReader
             new ResourceFileDataEntryReader(resourceFilePoolFiller,
                                             adaptedDataEntryFilter);
 
-        if (configuration.adaptKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             resourceReader =
                 new NameFilteredDataEntryReader(KotlinConstants.MODULE.FILE_EXPRESSION,

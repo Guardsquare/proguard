@@ -6,7 +6,7 @@ The Kotlin compiler injects code and metadata into the classes that it generates
 
 In most cases, you do not need to keep Kotlin metadata for app projects - therefore, no configuration changes are necessary and the Kotlin metadata can be safely removed.
 
-ProGuard will only keep the Kotlin metadata of a class if you explicitly keep that class or one of its members and you add `-adaptkotlinmetadata` option to your configuration.
+ProGuard will only keep the Kotlin metadata of a class if you explicitly keep that class or one of its members and you add `-keepkotlinmetadata` option to your configuration.
 
 For example, if you have the following keep rule for a Kotlin class named `com.example.KotlinExample`, by default the class will be kept but its metadata will not:
 
@@ -15,11 +15,11 @@ For example, if you have the following keep rule for a Kotlin class named `com.e
 -keep class com.example.KotlinExample
 ```
 
-You can add `-adaptkotlinmetadata` to your configuration to instruct ProGuard to keep and adapt Kotlin metadata:
+You can add `-keepkotlinmetadata` to your configuration to instruct ProGuard to keep and adapt Kotlin metadata:
 
 ```
 # Add this option to tell ProGuard to keep and adapt Kotlin metadata
--adaptkotlinmetadata
+-keepkotlinmetadata
 ```
 
 
@@ -31,7 +31,7 @@ The most common case to keep Kotlin metadata would be if you use the [kotlin-ref
 In this case, to instruct ProGuard to keep and adapt the corresponding Kotlin metadata, add the following to your configuration:
 
 ```
--adaptkotlinmetadata
+-keepkotlinmetadata
 ```
 
 A popular framework that relies on reflection is [Jackson](https://github.com/FasterXML/jackson-module-kotlin).
@@ -45,7 +45,7 @@ In the case of a library, you would already be keeping the public API so you can
 to your configuration:
 
 ```
--adaptkotlinmetadata
+-keepkotlinmetadata
 ```
 
 ## Protection

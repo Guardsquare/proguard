@@ -318,14 +318,14 @@ public class ProGuardTask extends ConfigurationTask
     }
 
 
-    public void setAddConfigurationDebugging(boolean addConfigurationDebugging)
+    public void setAddconfigurationdebugging(boolean addConfigurationDebugging)
     {
         configuration.addConfigurationDebugging = addConfigurationDebugging;
     }
 
-    public void setAdaptKotlinMetadata(boolean adaptKotlinMetadata)
+    public void setKeepkotlinmetadata(boolean keepKotlinMetadata)
     {
-        configuration.adaptKotlinMetadata = adaptKotlinMetadata;
+        configuration.keepKotlinMetadata = keepKotlinMetadata;
     }
 
 

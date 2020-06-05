@@ -112,7 +112,7 @@ public class ConfigurationConstants
     public static final String ZIP_ALIGN_OPTION                                  = "-zipalign";
     public static final String FORCE_PROCESSING_OPTION                           = "-forceprocessing";
 
-    public static final String ADAPT_KOTLIN_METADATA                             = "-adaptkotlinmetadata";
+    public static final String KEEP_KOTLIN_METADATA                              = "-keepkotlinmetadata";
 
     public static final String ANY_FILE_KEYWORD            = "**";
 

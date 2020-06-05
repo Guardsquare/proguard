@@ -132,7 +132,7 @@ public class ConfigurationWriter
         writeOption(ConfigurationConstants.ADAPT_CLASS_STRINGS_OPTION,                       configuration.adaptClassStrings, true);
         writeOption(ConfigurationConstants.ADAPT_RESOURCE_FILE_NAMES_OPTION,                 configuration.adaptResourceFileNames);
         writeOption(ConfigurationConstants.ADAPT_RESOURCE_FILE_CONTENTS_OPTION,              configuration.adaptResourceFileContents);
-        writeOption(ConfigurationConstants.ADAPT_KOTLIN_METADATA,                            configuration.adaptKotlinMetadata);
+        writeOption(ConfigurationConstants.KEEP_KOTLIN_METADATA,                             configuration.keepKotlinMetadata);
 
         writeOption(ConfigurationConstants.DONT_PREVERIFY_OPTION,     !configuration.preverify);
         writeOption(ConfigurationConstants.MICRO_EDITION_OPTION,      configuration.microEdition);

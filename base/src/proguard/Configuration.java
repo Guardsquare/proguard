@@ -416,7 +416,7 @@ public class Configuration
     /**
      * Specifies whether to process Kotlin metadata or not.
      */
-    public boolean                      adaptKotlinMetadata              = false;
+    public boolean                      keepKotlinMetadata               = false;
 
     /**
      * Enables of disables the Kotlin asserter. This is a hidden option,
