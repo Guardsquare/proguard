@@ -134,6 +134,7 @@ distributions {
                 }
             }
             from(rootDir) {
+                include 'bin/'
                 include 'examples/'
             }
         }
