@@ -77,7 +77,9 @@ project you can enable ProGuard instead of the default R8 compiler:
         ...
         configurations.all {
             resolutionStrategy {
-                force 'net.sf.proguard:proguard-gradle:7.0.0'
+                dependencySubstitution {
+                    substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.0.0')
+                }
             }
         }
     }
