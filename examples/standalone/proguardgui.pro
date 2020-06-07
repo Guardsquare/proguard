@@ -9,12 +9,8 @@
 
 # Specify the input jars, output jars, and library jars.
 # The input jars will be merged in a single output jar.
-# We'll filter out the Ant classes, Gradle classes, and WTK classes, keeping
-# everything else.
 
 -injars  ../../lib/proguardgui.jar
--injars  ../../lib/proguard.jar(!META-INF/**,!proguard/gradle/**,!proguard/ant/**,!proguard/wtk/**)
--injars  ../../lib/retrace.jar (!META-INF/**)
 -outjars proguardgui_out.jar
 
 # Before Java 9, the runtime classes were packaged in a single jar file.
@@ -22,12 +18,14 @@
 
 # As of Java 9, the runtime classes are packaged in modular jmod files.
 -libraryjars <java.home>/jmods/java.base.jmod   (!**.jar;!module-info.class)
+-libraryjars <java.home>/jmods/java.sql.jmod    (!**.jar;!module-info.class)
 -libraryjars <java.home>/jmods/java.desktop.jmod(!**.jar;!module-info.class)
+#-libraryjars <java.home>/jmods/.....
 
--libraryjars <user.home>/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.31/11289d20fd95ae219333f3456072be9f081c30cc/kotlin-stdlib-1.3.31.jar
--libraryjars <user.home>/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.31/20c34a04ea25cb1ef0139598bd67c764562cb170/kotlin-stdlib-common-1.3.31.jar
--libraryjars <user.home>/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-metadata-jvm/0.1.0/505481587ce23e1d8207734e496632df5c4e6f58/kotlinx-metadata-jvm-0.1.0.jar
--libraryjars <user.home>/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.5/f645ed69d595b24d4cf8b3fbb64cc505bede8829/gson-2.8.5.jar
+# Write out an obfuscation mapping file, for de-obfuscating any stack traces
+# later on, or for incremental obfuscation of extensions.
+
+-printmapping proguardgui.map
 
 # If we wanted to reuse the previously obfuscated proguard_out.jar, we could
 # perform incremental obfuscation based on its mapping file, and only keep the
@@ -41,8 +39,12 @@
 #-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)
 #-libraryjars <java.home>/jmods/java.desktop.jmod(!**.jar;!module-info.class)
 
-# Don't print notes about reflection in injected code.
+# Don't print notes about reflection in GSON code, the Kotlin runtime, and
+# our own optionally injected code.
 
+-dontnote kotlin.**
+-dontnote kotlinx.**
+-dontnote com.google.gson.**
 -dontnote proguard.configuration.ConfigurationLogger
 
 # Preserve injected GSON utility classes and their members.

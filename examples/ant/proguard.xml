@@ -17,7 +17,7 @@
 
     <!-- Specify the input jars, output jars, and library jars. -->
 
-    <injar  file="lib/proguard.jar" filter="!proguard/ant/**,!proguard/gradle/**,!proguard/wtk/**" />
+    <injar  file="lib/proguard.jar" />
     <outjar file="examples/ant/proguard_out.jar" />
 
     <!-- Before Java 9, the runtime classes were packaged in a single jar file. -->
@@ -25,14 +25,18 @@
 
     <!-- As of Java 9, the runtime classes are packaged in modular jmod files. -->
     <libraryjar file="${java.home}/jmods/java.base.jmod" jarfilter="!**.jar" filter="!module-info.class" />
+    <libraryjar file="${java.home}/jmods/java.sql.jmod" jarfilter="!**.jar" filter="!module-info.class" />
 
     <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.31/11289d20fd95ae219333f3456072be9f081c30cc/kotlin-stdlib-1.3.31.jar" />
     <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.31/20c34a04ea25cb1ef0139598bd67c764562cb170/kotlin-stdlib-common-1.3.31.jar" />
     <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-metadata-jvm/0.1.0/505481587ce23e1d8207734e496632df5c4e6f58/kotlinx-metadata-jvm-0.1.0.jar" />
     <libraryjar file="${user.home}/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.5/f645ed69d595b24d4cf8b3fbb64cc505bede8829/gson-2.8.5.jar" />
 
-    <!-- Don't print notes about reflection in injected code. -->
+    <!-- Don't print notes about reflection in GSON code, the Kotlin runtime, and our own optionally injected code. -->
 
+    <dontnote filter="kotlin.**" />
+    <dontnote filter="kotlinx.**" />
+    <dontnote filter="com.google.gson.**" />
     <dontnote filter="proguard.configuration.ConfigurationLogger" />
 
     <!-- Preserve injected GSON utility classes and their members. -->
@@ -44,6 +48,7 @@
     </keepclassmembers>
 
     <!-- Obfuscate class strings of injected GSON utility classes. -->
+
     <adaptclassstrings name="proguard.optimize.gson.**" />
 
     <!-- Adapt the resource file names, based on the corresponding obfuscated
