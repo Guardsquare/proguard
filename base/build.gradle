@@ -31,6 +31,8 @@ dependencies {
     compile "com.google.code.gson:gson:${gsonVersion}"
 }
 
+jar.manifest.attributes('Implementation-Version': version)
+
 task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard.jar')
