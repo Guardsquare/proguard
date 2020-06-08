@@ -14,6 +14,11 @@
   <a href="https://github.com/Guardsquare/proguard/actions?query=workflow%3A%22Continuous+Integration%22">
     <img src="https://github.com/Guardsquare/proguard/workflows/Continuous%20Integration/badge.svg">
   </a>
+  
+  <!-- jcenter -->
+  <a href='https://bintray.com/guardsquare/proguard/com.guardsquare%3Aproguard-base/_latestVersion'>
+    <img alt="jcenter" src="https://img.shields.io/bintray/v/guardsquare/proguard/com.guardsquare:proguard-base?label=jcenter">
+  </a>
 
   <!-- Github version -->
   <a href="releases">
