@@ -21,15 +21,19 @@
   </a>
 
   <!-- Github version -->
+  <!--
   <a href="releases">
     <img src="https://img.shields.io/github/v/release/guardsquare/proguard">
   </a>
-
+  -->
+    
   <!-- Maven -->
+  <!--
   <a href="https://search.maven.org/search?q=g:com.guardsquare">
     <img src="https://img.shields.io/maven-central/v/com.guardsquare/proguard-parent">
   </a>
-
+  -->
+  
   <!-- License -->
   <a href="LICENSE">
     <img src="https://img.shields.io/github/license/guardsquare/proguard">
