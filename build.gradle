@@ -1,4 +1,5 @@
 plugins {
+    id 'com.jfrog.bintray'
     id 'distribution'
     id 'maven-publish'
     id 'signing'
@@ -16,11 +17,10 @@ wrapper {
 
 allprojects { Project project ->
     pluginManager.withPlugin('maven-publish') {
-        def publicationName = project.name
         configure(project) {
             publishing {
                 publications {
-                    create(publicationName, MavenPublication) {
+                    create(project.name, MavenPublication) {
                         pom {
                             name = "[$group] $artifactId"
                             developers {
@@ -61,7 +61,7 @@ allprojects { Project project ->
                 String key = findProperty('PROGUARD_SIGNING_KEY')
                 String password = findProperty('PROGUARD_SIGNING_PASSWORD')
                 useInMemoryPgpKeys(key, password)
-                sign publishing.publications.getByName(publicationName)
+                sign publishing.publications.getByName(project.name)
             }
         }
     }
@@ -86,6 +86,38 @@ allprojects { Project project ->
                             if (artifactId == project.name) {
                                 artifactId = "proguard-$project.name"
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+allprojects { Project project ->
+    afterEvaluate {
+        if (pluginManager.hasPlugin('com.jfrog.bintray') && pluginManager.hasPlugin('maven-publish')) {
+            configure(project) {
+                bintray {
+                    Publication rootPub = rootProject.publishing.publications.parent
+                    Publication pub = project.publishing.publications.getByName(project.name)
+                    user = findProperty('PROGUARD_BINTRAY_USER')
+                    key = findProperty('PROGUARD_BINTRAY_KEY')
+                    publications = [project.name]
+                    dryRun = false
+                    override = true
+                    pkg {
+                        repo = 'proguard'
+                        name = "$project.group:$pub.artifactId"
+                        desc = pub.artifactId
+                        licenses = ['GPL-2.0']
+                        websiteUrl = rootPub.pom.url.get()
+                        issueTrackerUrl = rootPub.pom.issueManagement.url.get()
+                        vcsUrl = rootPub.pom.scm.url.get()
+                        version {
+                            name = project.version
+                            gpg.sign = true
+                            released = new Date()
                         }
                     }
                 }
