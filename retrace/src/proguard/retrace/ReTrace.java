@@ -33,16 +33,59 @@ import java.util.*;
  */
 public class ReTrace
 {
-    private static final String USAGE          = "Usage: java proguard.retrace.ReTrace [-regex <regex>] [-verbose] <mapping_file> [<stacktrace_file>]";
+    private static final String USAGE          = "Usage: java proguard.retrace.ReTrace [-regex <regex>] [-verbose] [-greedy] <mapping_file> [<stacktrace_file>]";
+    private static final String DEFAULT_REGEX  = "Default regex: ";
     private static final String REGEX_OPTION   = "-regex";
     private static final String VERBOSE_OPTION = "-verbose";
+    private static final String GREEDY_OPTION  = "-greedy";
 
-    public static final String STACK_TRACE_EXPRESSION = "(?:.*?\\bat\\s+%c\\.%m\\s*\\(%s(?::%l)?\\)\\s*(?:~\\[.*\\])?)|(?:(?:.*?[:\"]\\s+)?%c(?::.*)?)";
+    // For example: "com.example.Foo.bar"
+    private static final String REGULAR_EXPRESSION_CLASS_METHOD     = "%c\\.%m";
 
+    // For example:
+    // "(Foo.java:123:0) ~[0]"
+    // "()(Foo.java:123:0)"     (DGD-1732, unknown origin, possibly Sentry)
+    // or no source line info   (DGD-1732, Sentry)
+    private static final String REGULAR_EXPRESSION_SOURCE_LINE      = "(?:\\(\\))?(?:\\((?:%s)?(?::?%l)?(?::\\d+)?\\))?\\s*(?:~\\[.*\\])?";
+
+    // For example: "at o.afc.b + 45(:45)"
+    // Might be present in recent stacktraces accessible from crashlytics.
+    private static final String REGULAR_EXPRESSION_OPTIONAL_SOURCE_LINE_INFO = "(?:\\+\\s+[0-9]+)?";
+
+    // For example: "    at com.example.Foo.bar(Foo.java:123:0) ~[0]"
+    private static final String REGULAR_EXPRESSION_AT               = ".*?\\bat\\s+" + REGULAR_EXPRESSION_CLASS_METHOD + "\\s*" + REGULAR_EXPRESSION_OPTIONAL_SOURCE_LINE_INFO + REGULAR_EXPRESSION_SOURCE_LINE;
+
+    // For example: "java.lang.ClassCastException: com.example.Foo cannot be cast to com.example.Bar"
+    // Every line can only have a single matched class, so we try to avoid
+    // longer non-obfuscated class names.
+    private static final String REGULAR_EXPRESSION_CAST1            = ".*?\\bjava\\.lang\\.ClassCastException: %c cannot be cast to .{5,}";
+    private static final String REGULAR_EXPRESSION_CAST2            = ".*?\\bjava\\.lang\\.ClassCastException: .* cannot be cast to %c";
+
+    // For example: "java.lang.NullPointerException: Attempt to read from field 'java.lang.String com.example.Foo.bar' on a null object reference"
+    private static final String REGULAR_EXPRESSION_NULL_FIELD_READ  = ".*?\\bjava\\.lang\\.NullPointerException: Attempt to read from field '%t %c\\.%f' on a null object reference";
+
+    // For example: "java.lang.NullPointerException: Attempt to write to field 'java.lang.String com.example.Foo.bar' on a null object reference"
+    private static final String REGULAR_EXPRESSION_NULL_FIELD_WRITE = ".*?\\bjava\\.lang\\.NullPointerException: Attempt to write to field '%t %c\\.%f' on a null object reference";
+
+    // For example: "java.lang.NullPointerException: Attempt to invoke virtual method 'void com.example.Foo.bar(int,boolean)' on a null object reference"
+    private static final String REGULAR_EXPRESSION_NULL_METHOD      = ".*?\\bjava\\.lang\\.NullPointerException: Attempt to invoke (?:virtual|interface) method '%t %c\\.%m\\(%a\\)' on a null object reference";
+
+    // For example: "Something: com.example.FooException: something"
+    private static final String REGULAR_EXPRESSION_THROW            = "(?:.*?[:\"]\\s+)?%c(?::.*)?";
+
+    // The overall regular expression for a line in the stack trace.
+    public static final String REGULAR_EXPRESSION  = "(?:" + REGULAR_EXPRESSION_AT               + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_CAST1            + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_CAST2            + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_NULL_FIELD_READ  + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_NULL_FIELD_WRITE + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_NULL_METHOD      + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_THROW            + ")";
 
     // The settings.
     private final String  regularExpression;
     private final boolean verbose;
+    private final boolean greedy;
     private final File    mappingFile;
 
 
@@ -57,10 +100,12 @@ public class ReTrace
      */
     public ReTrace(String  regularExpression,
                    boolean verbose,
+                   boolean greedy,
                    File    mappingFile)
     {
         this.regularExpression = regularExpression;
         this.verbose           = verbose;
+        this.greedy            = greedy;
         this.mappingFile       = mappingFile;
     }
 
@@ -125,6 +170,11 @@ public class ReTrace
                     // Print out the retraced line.
                     if (trimmedLine != null)
                     {
+                        if (greedy)
+                        {
+                            trimmedLine = deobfuscateTokens(trimmedLine, mapper);
+                        }
+
                         stackTraceWriter.println(trimmedLine);
                     }
 
@@ -133,12 +183,36 @@ public class ReTrace
             }
             else
             {
+                if (greedy)
+                {
+                    obfuscatedLine = deobfuscateTokens(obfuscatedLine, mapper);
+                }
+
                 // Print out the original line.
                 stackTraceWriter.println(obfuscatedLine);
             }
         }
 
         stackTraceWriter.flush();
+    }
+
+
+    /**
+     * Attempts to deobfuscate each token of the line to a corresponding
+     * original classname if possible.
+     */
+    private String deobfuscateTokens(String line, FrameRemapper mapper)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        // Try to deobfuscate any token encountered in the line.
+        StringTokenizer st = new StringTokenizer(line, "[]{}()/\\:;, '\"<>", true);
+        while (st.hasMoreTokens())
+        {
+            sb.append(mapper.originalClassName(st.nextToken()));
+        }
+
+        return sb.toString();
     }
 
 
@@ -216,11 +290,14 @@ public class ReTrace
         if (args.length < 1)
         {
             System.err.println(USAGE);
+            System.err.println();
+            System.err.println(DEFAULT_REGEX + REGULAR_EXPRESSION);
             System.exit(-1);
         }
 
-        String  regularExpresssion = STACK_TRACE_EXPRESSION;
+        String  regularExpresssion = REGULAR_EXPRESSION;
         boolean verbose            = false;
+        boolean greedy             = false;
 
         int argumentIndex = 0;
         while (argumentIndex < args.length)
@@ -233,6 +310,10 @@ public class ReTrace
             else if (arg.equals(VERBOSE_OPTION))
             {
                 verbose = true;
+            }
+            else if (arg.equals(GREEDY_OPTION))
+            {
+                greedy = true;
             }
             else
             {
@@ -272,7 +353,7 @@ public class ReTrace
             try
             {
                 // Execute ReTrace with the collected settings.
-                new ReTrace(regularExpresssion, verbose, mappingFile)
+                new ReTrace(regularExpresssion, verbose, greedy, mappingFile)
                     .retrace(reader, writer);
             }
             finally

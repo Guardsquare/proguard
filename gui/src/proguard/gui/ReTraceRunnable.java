@@ -78,7 +78,7 @@ final class ReTraceRunnable implements Runnable
         try
         {
             // Execute ReTrace with the collected settings.
-            new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, verbose, mappingFile)
+            new ReTrace(ReTrace.REGULAR_EXPRESSION, verbose, false, mappingFile)
                 .retrace(reader, writer);
         }
         catch (Exception ex)

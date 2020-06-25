@@ -236,7 +236,7 @@ public class FrameRemapper implements MappingProcessor
     /**
      * Returns the original class name.
      */
-    private String originalClassName(String obfuscatedClassName)
+    public String originalClassName(String obfuscatedClassName)
     {
         String originalClassName = classMap.get(obfuscatedClassName);
 

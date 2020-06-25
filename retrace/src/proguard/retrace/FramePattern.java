@@ -36,7 +36,9 @@ public class FramePattern
     // characters, so we're no longer using \\b for classes and class members.
     private static final String REGEX_CLASS       = "(?:[^\\s\":./()]+\\.)*[^\\s\":./()]+";
     private static final String REGEX_CLASS_SLASH = "(?:[^\\s\":./()]+/)*[^\\s\":./()]+";
-    private static final String REGEX_SOURCE_FILE = "[^:()]*";
+    // Source file strings can not start with a digit, otherwise we can not
+    // distinguish them from line numbers.
+    private static final String REGEX_SOURCE_FILE = "(?:[^:()\\d][^:()]*)?";
     private static final String REGEX_LINE_NUMBER = "-?\\b\\d+\\b";
     private static final String REGEX_TYPE        = REGEX_CLASS + "(?:\\[\\])*";
     private static final String REGEX_MEMBER      = "<?[^\\s\":./()]+>?";
@@ -256,6 +258,11 @@ public class FramePattern
                         break;
 
                     case 'l':
+                        // Add a colon if needed.
+                        if (formattedBuffer.charAt(formattedBuffer.length() - 1) != ':')
+                        {
+                            formattedBuffer.append(':');
+                        }
                         formattedBuffer.append(frameInfo.getLineNumber());
                         break;
 

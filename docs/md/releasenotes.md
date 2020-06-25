@@ -2,6 +2,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.0.1  |          | RETRACE  | Extend expressions supported by Retrace.
 | 7.0.0  |          | CORE     | Added support for [Kotlin metadata](manual/kotlin.md), with new option `-keepkotlinmetadata`.
 | 7.0.0  | PGD-32   | CORE     | Allowing Java 14 class files.
 | 7.0.0  |          | CORE     | Optimizing away instance references to constructor-less classes.
