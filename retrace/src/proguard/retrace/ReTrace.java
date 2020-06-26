@@ -33,11 +33,11 @@ import java.util.*;
  */
 public class ReTrace
 {
-    private static final String USAGE          = "Usage: java proguard.retrace.ReTrace [-regex <regex>] [-verbose] [-greedy] <mapping_file> [<stacktrace_file>]";
-    private static final String DEFAULT_REGEX  = "Default regex: ";
-    private static final String REGEX_OPTION   = "-regex";
-    private static final String VERBOSE_OPTION = "-verbose";
-    private static final String GREEDY_OPTION  = "-greedy";
+    private static final String USAGE                  = "Usage: java proguard.retrace.ReTrace [-regex <regex>] [-allclassnames] [-verbose] <mapping_file> [<stacktrace_file>]";
+    private static final String DEFAULT_REGEX          = "Default regex: ";
+    private static final String REGEX_OPTION           = "-regex";
+    private static final String ALL_CLASS_NAMES_OPTION = "-allclassnames";
+    private static final String VERBOSE_OPTION         = "-verbose";
 
     // For example: "com.example.Foo.bar"
     private static final String REGULAR_EXPRESSION_CLASS_METHOD     = "%c\\.%m";
@@ -84,28 +84,42 @@ public class ReTrace
 
     // The settings.
     private final String  regularExpression;
+    private final boolean allClassNames;
     private final boolean verbose;
-    private final boolean greedy;
     private final File    mappingFile;
+
+
+    /**
+     * Creates a new ReTrace instance with a default regular expression,
+     * @param mappingFile the mapping file that was written out by
+     *                    ProGuard.
+     */
+    public ReTrace(File mappingFile)
+    {
+        this(REGULAR_EXPRESSION, false, false, mappingFile);
+    }
 
 
     /**
      * Creates a new ReTrace instance.
      * @param regularExpression the regular expression for parsing the lines in
      *                          the stack trace.
+     * @param allClassNames     specifies whether all words that match class
+     *                          names should be de-obfuscated, even if they
+     *                          aren't matching the regular expression.
      * @param verbose           specifies whether the de-obfuscated stack trace
      *                          should be verbose.
      * @param mappingFile       the mapping file that was written out by
      *                          ProGuard.
      */
     public ReTrace(String  regularExpression,
+                   boolean allClassNames,
                    boolean verbose,
-                   boolean greedy,
                    File    mappingFile)
     {
         this.regularExpression = regularExpression;
+        this.allClassNames     = allClassNames;
         this.verbose           = verbose;
-        this.greedy            = greedy;
         this.mappingFile       = mappingFile;
     }
 
@@ -170,7 +184,7 @@ public class ReTrace
                     // Print out the retraced line.
                     if (trimmedLine != null)
                     {
-                        if (greedy)
+                        if (allClassNames)
                         {
                             trimmedLine = deobfuscateTokens(trimmedLine, mapper);
                         }
@@ -183,7 +197,7 @@ public class ReTrace
             }
             else
             {
-                if (greedy)
+                if (allClassNames)
                 {
                     obfuscatedLine = deobfuscateTokens(obfuscatedLine, mapper);
                 }
@@ -297,7 +311,7 @@ public class ReTrace
 
         String  regularExpresssion = REGULAR_EXPRESSION;
         boolean verbose            = false;
-        boolean greedy             = false;
+        boolean allClassNames             = false;
 
         int argumentIndex = 0;
         while (argumentIndex < args.length)
@@ -307,13 +321,13 @@ public class ReTrace
             {
                 regularExpresssion = args[++argumentIndex];
             }
+            else if (arg.equals(ALL_CLASS_NAMES_OPTION))
+            {
+                allClassNames = true;
+            }
             else if (arg.equals(VERBOSE_OPTION))
             {
                 verbose = true;
-            }
-            else if (arg.equals(GREEDY_OPTION))
-            {
-                greedy = true;
             }
             else
             {
@@ -353,7 +367,7 @@ public class ReTrace
             try
             {
                 // Execute ReTrace with the collected settings.
-                new ReTrace(regularExpresssion, verbose, greedy, mappingFile)
+                new ReTrace(regularExpresssion, allClassNames, verbose, mappingFile)
                     .retrace(reader, writer);
             }
             finally
