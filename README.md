@@ -140,7 +140,7 @@ inlining methods, propagating constants, removing unused parameters, etc.
   without needing the source code at all!
 
 The manual pages ([markdown](docs/md),
-[html](https://www.guardsquare.com/proguard/manual)) cover the features and usage of
+[html](https://www.guardsquare.com/en/products/proguard/manual)) cover the features and usage of
 ProGuard in detail.
 
 ## 🤝 Contributing
