@@ -92,9 +92,8 @@ implements   MemberVisitor
             // Isn't there another original name for this new name, or should
             // this original name get priority?
             String otherName = (String)nameMap.get(newName);
-            if (otherName == null                              ||
-                MemberObfuscator.hasFixedNewMemberName(member) ||
-                name.compareTo(otherName) < 0)
+            if (otherName == null ||
+                MemberObfuscator.hasFixedNewMemberName(member))
             {
                 // Remember not to use the new name again in this name space.
                 nameMap.put(newName, name);
