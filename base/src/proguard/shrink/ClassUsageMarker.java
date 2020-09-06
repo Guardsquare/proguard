@@ -857,15 +857,6 @@ implements   ClassVisitor,
     }
 
 
-    public void visitSourceDebugExtensionAttribute(Clazz clazz,
-                                                   SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
-    {
-        markAsUsed(sourceDebugExtensionAttribute);
-
-        markConstant(clazz, sourceDebugExtensionAttribute.u2attributeNameIndex);
-    }
-
-
     public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute)
     {
         // Don't mark the attribute and its name here. We may mark it in
@@ -888,6 +879,26 @@ implements   ClassVisitor,
 
         markConstant(clazz, sourceDirAttribute.u2attributeNameIndex);
         markConstant(clazz, sourceDirAttribute.u2sourceDirIndex);
+    }
+
+
+    public void visitSourceDebugExtensionAttribute(Clazz clazz, SourceDebugExtensionAttribute sourceDebugExtensionAttribute)
+    {
+        markAsUsed(sourceDebugExtensionAttribute);
+
+        markConstant(clazz, sourceDebugExtensionAttribute.u2attributeNameIndex);
+    }
+
+
+    public void visitRecordAttribute(Clazz clazz, RecordAttribute recordAttribute)
+    {
+        markAsUsed(recordAttribute);
+
+        markConstant(clazz, recordAttribute.u2attributeNameIndex);
+
+        // Don't mark the components yet. We may mark them later, in
+        // RecordComponentUsageMarker.
+        //recordAttribute.componentsAccept(clazz, this);
     }
 
 

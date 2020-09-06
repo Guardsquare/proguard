@@ -47,6 +47,10 @@ attributes. You can keep them with the
 : Specifies the name of the source directory from which the class file was
   compiled.
 
+`Record`
+: Specifies the components of a record class. Code may access this information
+  by reflection.
+
 `InnerClasses`
 : Specifies the relationship between a class and its inner classes and outer
   classes. Other than this and the naming convention with a '\$' separator
@@ -135,7 +139,7 @@ ProGuard automatically keeps the following essential attributes, processing
 them as necessary. We're listing them for the sake of completeness:
 
 `ConstantValue`
-: Specifies a constant integer, float, class, string, etc.  
+: Specifies a constant integer, float, class, string, etc.
 
 `Code`
 : Specifies the actual bytecode of a method.
