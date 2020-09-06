@@ -22,7 +22,7 @@ package proguard.obfuscate;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.visitor.*;
 import proguard.util.Processable;
 
@@ -39,7 +39,8 @@ import java.util.Arrays;
 public class AttributeShrinker
 implements   ClassVisitor,
              MemberVisitor,
-             AttributeVisitor
+             AttributeVisitor,
+             RecordComponentInfoVisitor
 {
     // Implementations for ClassVisitor.
 
@@ -83,12 +84,30 @@ implements   ClassVisitor,
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
 
+    public void visitRecordAttribute(Clazz clazz, RecordAttribute recordAttribute)
+    {
+        // Compact any attributes of the components.
+        recordAttribute.componentsAccept(clazz, this);
+    }
+
+
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
         // Compact the attributes array.
         codeAttribute.u2attributesCount =
             shrinkArray(codeAttribute.attributes,
                         codeAttribute.u2attributesCount);
+    }
+
+
+    // Implementations for RecordComponentInfoVisitor.
+
+    public void visitRecordComponentInfo(Clazz clazz, RecordComponentInfo recordComponentInfo)
+    {
+        // Compact the attributes array.
+        recordComponentInfo.u2attributesCount =
+            shrinkArray(recordComponentInfo.attributes,
+                        recordComponentInfo.u2attributesCount);
     }
 
 

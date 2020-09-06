@@ -138,6 +138,12 @@ public class UsageMarker
                 new KotlinModuleUsageMarker(simpleUsageMarker))));
         }
 
+        // Mark the record metadata.
+        programClassPool.classesAccept(
+            new AllAttributeVisitor(
+            new AllRecordComponentInfoVisitor(
+            new RecordComponentUsageMarker(classUsageMarker))));
+
         // Check if the Gson optimization is enabled.
         StringMatcher filter = configuration.optimizations != null ?
             new ListParser(new NameParser()).parse(configuration.optimizations) :

@@ -46,6 +46,7 @@ public class ClassShrinker
 implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor,
+             RecordComponentInfoVisitor,
              AnnotationVisitor,
              ElementValueVisitor
 {
@@ -233,6 +234,18 @@ implements   ClassVisitor,
     }
 
 
+    public void visitRecordAttribute(Clazz clazz, RecordAttribute recordAttribute)
+    {
+        // Shrink the array of RecordComponentInfo objects.
+        recordAttribute.u2componentsCount =
+            shrinkArray(recordAttribute.components,
+                        recordAttribute.u2componentsCount);
+
+        // Shrink the attributes of the remaining components.
+        recordAttribute.componentsAccept(clazz, this);
+    }
+
+
     public void visitInnerClassesAttribute(Clazz clazz, InnerClassesAttribute innerClassesAttribute)
     {
         // Shrink the array of InnerClassesInfo objects.
@@ -315,6 +328,20 @@ implements   ClassVisitor,
 
         // Shrink the annotations themselves.
         parameterAnnotationsAttribute.annotationsAccept(clazz, method, this);
+    }
+
+
+    // Implementations for RecordComponentInfoVisitor.
+
+    public void visitRecordComponentInfo(Clazz clazz, RecordComponentInfo recordComponentInfo)
+    {
+        // Shrink the attributes array.
+        recordComponentInfo.u2attributesCount =
+            shrinkArray(recordComponentInfo.attributes,
+                        recordComponentInfo.u2attributesCount);
+
+        // Shrink the remaining attributes.
+        recordComponentInfo.attributesAccept(clazz, this);
     }
 
 

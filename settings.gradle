@@ -11,6 +11,11 @@ pluginManagement {
     }
 }
 
+if (hasProperty('proguardCoreDir'))
+{
+    includeBuild proguardCoreDir
+}
+
 rootProject.name = 'parent'
 
 include 'base'

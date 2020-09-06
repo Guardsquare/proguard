@@ -44,9 +44,12 @@ import proguard.util.ArrayUtil;
  */
 public class TargetClassChanger
 implements   ClassVisitor,
+
+             // Implementation interfaces.
              ConstantVisitor,
              MemberVisitor,
              AttributeVisitor,
+             RecordComponentInfoVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor,
              AnnotationVisitor,
@@ -305,6 +308,13 @@ implements   ClassVisitor,
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
 
+    public void visitRecordAttribute(Clazz clazz, RecordAttribute recordAttribute)
+    {
+        // Fix the record component attributes.
+        recordAttribute.componentsAccept(clazz, this);
+    }
+
+
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
         // Change the references of the attributes.
@@ -351,6 +361,18 @@ implements   ClassVisitor,
     {
         // Change the references of the annotation.
         annotationDefaultAttribute.defaultValueAccept(clazz, this);
+    }
+
+
+    // Implementations for RecordComponentInfoVisitor.
+
+    public void visitRecordComponentInfo(Clazz clazz, RecordComponentInfo recordComponentInfo)
+    {
+        // Don't change the referenced field; it's still the original one
+        // in this class.
+
+        // Change the references of the attributes.
+        recordComponentInfo.attributesAccept(clazz, this);
     }
 
 
