@@ -53,7 +53,7 @@ task ('proguard', type: proguard.gradle.ProGuardTask) {
     printmapping 'out.map'
     keepparameternames
     renamesourcefileattribute 'SourceFile'
-    keepattributes 'Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,EnclosingMethod'
+    keepattributes 'Signature,Exceptions,InnerClasses,PermittedSubclasses,EnclosingMethod,Deprecated,SourceFile,LineNumberTable'
 
     // Preserve all annotations.
 

@@ -949,6 +949,19 @@ implements   ClassVisitor,
     }
 
 
+    public void visitPermittedSubclassesAttribute(Clazz clazz, PermittedSubclassesAttribute permittedSubclassesAttribute)
+    {
+        // Don't mark the attribute and its contents yet. We may mark it later,
+        // in NestUsageMarker.
+        //markAsUsed(permittedSubclassesAttribute);
+
+        //markConstant(clazz, permittedSubclassesAttribute.u2attributeNameIndex);
+
+        // Mark the nest member entries.
+        //permittedSubclassesAttribute.memberClassConstantsAccept(clazz, this);
+    }
+
+
     public void visitModuleAttribute(Clazz clazz, ModuleAttribute moduleAttribute)
     {
         markAsUsed(moduleAttribute);

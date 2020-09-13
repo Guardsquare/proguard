@@ -347,8 +347,9 @@ still be used as such, for developing code based on its public API.
 
     -keepparameternames
     -renamesourcefileattribute SourceFile
-    -keepattributes Exceptions,InnerClasses,Signature,Deprecated,
-                    SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+    -keepattributes Signature,Exceptions,*Annotation*,
+                    InnerClasses,PermittedSubclasses,EnclosingMethod,
+                    Deprecated,SourceFile,LineNumberTable
 
     -keepclasseswithmembernames,includedescriptorclasses class * {
         native <methods>;
@@ -373,16 +374,26 @@ access in the library. Only if there are any other non-public classes or
 methods that are invoked dynamically, they should be specified using
 additional [`-keep`](usage.md#keep) options.
 
+The "Signature" attribute is required to be able to access generic types.
+
 The "Exceptions" attribute has to be preserved, so the compiler knows
 which exceptions methods may throw.
+
+The various "\*Annotations\*" attributes contain any annotations, which
+developers might need to access through reflection.
 
 The "InnerClasses" attribute (or more precisely, its source name part) has to
 be preserved too, for any inner classes that can be referenced from outside
 the library. The `javac` compiler would be unable to find the inner classes
 otherwise.
 
-The "Signature" attribute is required to be able to access generic types when
-compiling in JDK 5.0 and higher.
+The "PermittedSubclasses" attribute defines sealed classes, which developers
+can't extend further.
+
+The "EnclosingMethod" attribute marks classes that are defined inside methods.
+
+The "Deprecated" attribute marks any deprecated classes, fields, or
+methods, which may be useful for developers to know.
 
 The [`-keepparameternames`](usage.md#keepparameternames) option keeps the
 parameter names in the "LocalVariableTable" and "LocalVariableTypeTable"
