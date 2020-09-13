@@ -102,6 +102,12 @@ implements   AttributeVisitor
     }
 
 
+    public void visitPermittedSubclassesAttribute(Clazz clazz, PermittedSubclassesAttribute permittedSubclassesAttribute)
+    {
+        attributeVisitor.visitPermittedSubclassesAttribute(clazz, permittedSubclassesAttribute);
+    }
+
+
     public void visitModuleAttribute(Clazz clazz, ModuleAttribute moduleAttribute)
     {
         attributeVisitor.visitModuleAttribute(clazz, moduleAttribute);

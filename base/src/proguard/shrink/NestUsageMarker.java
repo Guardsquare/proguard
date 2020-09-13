@@ -28,8 +28,8 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 
 /**
- * This AttributeVisitor marks all necessary nest host attributes and nest
- * members attributes that it visits.
+ * This AttributeVisitor marks all necessary nest host attributes, nest
+ * members attributes, and permitted subclasses attributes that it visits.
  *
  * @see UsageMarker
  *
@@ -82,17 +82,35 @@ implements   AttributeVisitor,
 
     public void visitNestMembersAttribute(Clazz clazz, NestMembersAttribute nestMembersAttribute)
     {
-        // Mark the necessary inner classes information.
+        // Mark the necessary nest member information.
         attributeUsed = false;
         nestMembersAttribute.memberClassConstantsAccept(clazz, this);
 
         if (attributeUsed)
         {
-            // We got a positive used flag, so the nest members class is being used.
-            // Mark this attribute as being used as well.
+            // We got a positive used flag, so at least one of the nest members
+            // is being used. Mark this attribute as being used as well.
             classUsageMarker.markAsUsed(nestMembersAttribute);
 
             markConstant(clazz, nestMembersAttribute.u2attributeNameIndex);
+        }
+    }
+
+
+    public void visitPermittedSubclassesAttribute(Clazz clazz, PermittedSubclassesAttribute permittedSubclassesAttribute)
+    {
+        // Mark the necessary permitted subclasses information.
+        attributeUsed = false;
+        permittedSubclassesAttribute.permittedSubclassConstantsAccept(clazz, this);
+
+        if (attributeUsed)
+        {
+            // We got a positive used flag, so at least one of the permitted
+            // subclasses class is being used. Mark this attribute as being
+            // used as well.
+            classUsageMarker.markAsUsed(permittedSubclassesAttribute);
+
+            markConstant(clazz, permittedSubclassesAttribute.u2attributeNameIndex);
         }
     }
 

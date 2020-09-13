@@ -69,15 +69,16 @@ Yes, you can. **ProGuard** itself is distributed under the GPL, but this
 doesn't affect the programs that you process. Your code remains yours, and its
 license can remain the same.
 
-## Does ProGuard work with Java 2, 5,..., 14? {: #jdk1.4}
+## Does ProGuard work with Java 2, 5,..., 15? {: #jdk1.4}
 
-Yes, **ProGuard** supports all JDKs from 1.1 up to and including 14. Java 2
+Yes, **ProGuard** supports all JDKs from 1.1 up to and including 15. Java 2
 introduced some small differences in the class file format. Java 5 added
 attributes for generics and for annotations. Java 6 introduced optional
 preverification attributes. Java 7 made preverification obligatory and
 introduced support for dynamic languages. Java 8 added more attributes and
 default methods. Java 9 added support for modules. Java 11 added dynamic
-constants and nest-based access control. Java 14 added records.
+constants and nest-based access control. Java 14 added records. Java 15
+added sealed classes.
 **ProGuard** handles all versions correctly.
 
 ## Does ProGuard work with Java Micro Edition? {: #jme}

@@ -54,7 +54,7 @@ implements   ClassVisitor,
 
     private       int[]                   constantIndexMap        = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
     private       int[]                   bootstrapMethodIndexMap = new int[ClassEstimates.TYPICAL_CONSTANT_POOL_SIZE];
-    private final MyNestmemberShrinker    nestMemberShrinker      = new MyNestmemberShrinker();
+    private final MyAttributeShrinker     attributeShrinker       = new MyAttributeShrinker();
     private final ConstantPoolRemapper    constantPoolRemapper    = new ConstantPoolRemapper();
     private final BootstrapMethodRemapper bootstrapMethodRemapper = new BootstrapMethodRemapper();
     private final MySignatureCleaner      signatureCleaner        = new MySignatureCleaner();
@@ -127,8 +127,8 @@ implements   ClassVisitor,
                 .visitProgramClass(programClass);
         }
 
-        // Shrink the arrays for nest members.
-        programClass.attributesAccept(nestMemberShrinker);
+        // Shrink the arrays for nest members and permitted subclasses.
+        programClass.attributesAccept(attributeShrinker);
 
         // Shrink the constant pool, also setting up an index map.
         int newConstantPoolCount =
@@ -361,9 +361,10 @@ implements   ClassVisitor,
 
     /**
      * This AttributeVisitor shrinks the nest members in the nest member
+     * attributes and the permitted subclasses in the permitted subclasses
      * attributes that it visits.
      */
-    private class MyNestmemberShrinker
+    private class MyAttributeShrinker
     implements    AttributeVisitor
     {
         public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
@@ -377,6 +378,17 @@ implements   ClassVisitor,
                 shrinkConstantIndexArray(((ProgramClass)clazz).constantPool,
                                          nestMembersAttribute.u2classes,
                                          nestMembersAttribute.u2classesCount);
+        }
+
+
+        public void visitPermittedSubclassesAttribute(Clazz clazz, PermittedSubclassesAttribute permittedSubclassesAttribute)
+        {
+            // Shrink the array of nest member indices.
+            // We must do this before the corresponding constants are remapped.
+            permittedSubclassesAttribute.u2classesCount =
+                shrinkConstantIndexArray(((ProgramClass)clazz).constantPool,
+                                         permittedSubclassesAttribute.u2classes,
+                                         permittedSubclassesAttribute.u2classesCount);
         }
     }
 

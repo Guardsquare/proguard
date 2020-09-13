@@ -47,7 +47,7 @@ attributes. You can keep them with the
 : Specifies the name of the source directory from which the class file was
   compiled.
 
-`Record`
+`Record` <div>(Java 14 or higher)</div>
 : Specifies the components of a record class. Code may access this information
   by reflection.
 
@@ -58,6 +58,10 @@ attributes. You can keep them with the
   like ordinary classes. Compilers may need this information to find classes
   referenced in a compiled library. Code may access this information by
   reflection, for instance to derive the simple name of the class.
+
+`PermittedSubclasses` <div>(Java 15 or higher)</div>
+: Specifies the allowed extensions or implementations of sealed classes or
+  interfaces.
 
 `EnclosingMethod`<div>(Java 5 or higher)</div>
 : Specifies the method in which the class was defined. Compilers may need this
