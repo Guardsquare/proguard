@@ -10,7 +10,7 @@ line to your **`build.gradle`** file:
             jcenter()
         }
         dependencies {
-            classpath 'com.guardsquare:proguard-gradle:7.0.0'
+            classpath 'com.guardsquare:proguard-gradle:7.0.1'
         }
     }
 

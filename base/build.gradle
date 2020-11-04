@@ -28,7 +28,7 @@ sourceSets.main {
 }
 
 dependencies {
-    compile 'com.guardsquare:proguard-core:7.0.0'
+    compile "com.guardsquare:proguard-core:${proguardCoreVersion}"
     compile "com.google.code.gson:gson:${gsonVersion}"
 }
 

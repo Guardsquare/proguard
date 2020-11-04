@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = 'com.guardsquare'
-    version = '7.0.0'
+    version = proguardVersion
 }
 
 wrapper {
