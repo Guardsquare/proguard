@@ -233,9 +233,6 @@ public class Initializer
                                                  classForNameNotePrinter,
                                                  createClassNoteExceptionMatcher(configuration.keep, true))))));
 
-        // Initialize the WebView.addJavascriptInterface references.
-        WarningPrinter webViewClassReferenceNotePrinter = new WarningPrinter(out, configuration.note);
-
         // Initialize the Class.get[Declared]{Field,Method} references.
         WarningPrinter getMemberNotePrinter = new WarningPrinter(out, configuration.note);
 
