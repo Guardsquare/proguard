@@ -199,7 +199,7 @@ public class Initializer
             // Collect the library classes that are directly referenced by
             // program classes, without reflection.
             programClassPool.classesAccept(
-                new ReferencedClassVisitor(
+                new ReferencedClassVisitor(true,
                 new LibraryClassFilter(
                 new ClassPoolFiller(reducedLibraryClassPool))));
 

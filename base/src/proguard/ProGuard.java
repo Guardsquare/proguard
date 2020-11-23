@@ -39,6 +39,7 @@ import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.preverify.*;
 import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.Shrinker;
+import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.*;
 
 import java.io.*;
@@ -126,6 +127,11 @@ public class ProGuard
         {
             initialize();
             mark();
+        }
+
+        if (configuration.keepKotlinMetadata)
+        {
+            stripKotlinMetadataAnnotations();
         }
 
         if (configuration.optimize ||
@@ -316,6 +322,17 @@ public class ProGuard
 
         new Marker(configuration).mark(programClassPool,
                                        libraryClassPool);
+    }
+
+
+    /**
+     * Strips the Kotlin metadata annotation where possible.
+     */
+    private void stripKotlinMetadataAnnotations()
+    {
+        new KotlinAnnotationStripper().execute(configuration,
+                                               programClassPool,
+                                               libraryClassPool);
     }
 
 
