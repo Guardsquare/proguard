@@ -153,10 +153,28 @@ The manual pages ([markdown](docs/md),
 [html](https://www.guardsquare.com/proguard/manual)) cover the features and usage of
 ProGuard in detail.
 
-## 🤝 Contributing
+## 💻 Building ProGuard
 
-ProGuard builds on the
-[ProGuardCORE](https://github.com/Guardsquare/proguard-core) library.
+Building ProGuard is easy - you'll need:
+
+* a Java 8 JDK installed
+* a clone of the [ProGuardCORE](https://github.com/Guardsquare/proguard-core) repository, since ProGuard 
+  is built on the ProGuardCORE library 
+
+You can then execute a composite build with the following Gradle command:
+
+```bash
+./gradlew --include-build=../proguard-core assemble
+```
+
+The artifacts will be generated in the `lib` directory. You can then execute ProGuard using the
+scripts in `bin`, for example:
+
+```bash
+bin/proguard.sh
+```
+
+## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome in both projects.
 Feel free to check the [issues](issues) page and the [contributing
