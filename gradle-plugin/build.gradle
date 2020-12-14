@@ -43,7 +43,7 @@ repositories {
 dependencies {
     compile project(':base')
     compile 'com.guardsquare:proguard-core'
-    compile('com.android.tools.build:gradle:3.0.0')
+    compileOnly 'com.android.tools.build:gradle:3.0.0'
     compile gradleApi()
     compile localGroovy()
 }
