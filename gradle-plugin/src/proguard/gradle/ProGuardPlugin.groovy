@@ -23,14 +23,13 @@ package proguard.gradle
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BasePlugin
 import com.android.build.gradle.api.*
-import com.android.build.gradle.internal.BadPluginException
 import org.gradle.api.*
 
 import static GradleUtil.*;
 
 
 /**
- * This Plugin installs a DexGuard transform in an Android application project.
+ * This Plugin installs a ProGuard transform in an Android application project.
  *
  * @author Thomas Neidhart
  */
@@ -44,8 +43,17 @@ implements Plugin<Project>
     {
         if (!project.hasProperty('android'))
         {
-            throw new BadPluginException('The ProGuard plugin requires the Android plugin to function properly.\n' +
-                                         'Please specify\n    apply plugin: \'com.android.application\'\n    apply plugin: \'proguard\'')
+            throw new GradleException("""The ProGuard plugin requires the Android plugin to function properly. Please specify:
+                                         |
+                                         |     apply plugin: 'com.android.application'
+                                         |     apply plugin: 'proguard'
+                                         |
+                                         |If you're not using an Android project, you can use the ProGuard Task instead:
+                                         |
+                                         |     task myProguardTask(type: proguard.gradle.ProGuardTask) {
+                                         |       // ...
+                                         |     }
+                                      """.stripMargin())
         }
 
         // Add the extra method 'getTunedProGuardFile' to the project.
