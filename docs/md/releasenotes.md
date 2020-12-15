@@ -2,6 +2,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.0.2  | PGD-66   | CORE     | Removed Gradle plugin dependency on Android build tools.
 | 7.0.1  | DGD-2382 | CORE     | Fixed processing of Kotlin 1.4 metadata annotations.
 | 7.0.1  | DGD-2494 | CORE     | Fix naming conflict resolution potentially resulting in the renaming of library members.
 | 7.0.1  |          | RETRACE  | Extend expressions supported by Retrace.
