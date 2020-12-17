@@ -48,7 +48,7 @@ implements Plugin<Project>
                                          |     apply plugin: 'com.android.application'
                                          |     apply plugin: 'proguard'
                                          |
-                                         |If you're not using an Android project, you can use the ProGuard Task instead:
+                                         |If you're not using an Android project, you can manually declare a ProGuardTask instead of applying the plugin:
                                          |
                                          |     task myProguardTask(type: proguard.gradle.ProGuardTask) {
                                          |       // ...
