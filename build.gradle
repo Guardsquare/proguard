@@ -15,6 +15,14 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+task buildDocumentation(type: Exec) {
+    inputs.dir 'docs/md'
+    inputs.file 'docs/mkdocs.yml'
+    outputs.dir 'docs/html'
+    executable 'sh'
+    args '-c', "docker run --volume $rootDir/docs:/docs --rm squidfunk/mkdocs-material:5.2.2 build"
+}
+
 allprojects { Project project ->
     pluginManager.withPlugin('maven-publish') {
         configure(project) {
@@ -185,4 +193,6 @@ distTar {
 
 clean {
     delete file("$rootDir/lib")
+// TODO docker runs as root, so cannot clean the HTML yet
+//    delete buildDocumentation.outputs
 }
