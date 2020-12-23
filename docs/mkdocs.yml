@@ -60,34 +60,33 @@ markdown_extensions:
 # Page tree
 ###################################################################
 nav:
-- Main:                index.md
-- Results:             results.md
-- FAQ:                 FAQ.md
-- ProGuard Manual:
-    - Introduction:    manual/index.md
-    - Usage:           manual/usage.md
-    - Kotlin:          manual/kotlin.md
-    - Attributes:      manual/attributes.md
-    - Optimizations:   manual/optimizations.md
-    - Limitations:     manual/limitations.md
-    - Examples:        manual/examples.md
-    - Troubleshooting: manual/troubleshooting.md
-    - Reference Card:  manual/refcard.md
-    - GUI:             manual/gui.md
-    - Ant Task:        manual/ant.md
+- Home:            manual/index.md
+- Building:        building.md
+- Setup:
     - Gradle Task:     manual/gradle.md
     - Gradle Plugin:   manual/gradleplugin.md
-    - JME WTK:         manual/wtk.md
-- ReTrace Manual:
-    - Introduction:    manual/retrace/index.md
-    - Usage:           manual/retrace/usage.md
-    - Mapping File:    manual/retrace/mapping.md
-    - Examples:        manual/retrace/examples.md
+    - Ant Task:        manual/ant.md
+- Configuration:
+    - Usage:           manual/usage.md
+    - Attributes:      manual/attributes.md
+    - Optimizations:   manual/optimizations.md
+    - Examples:        manual/examples.md
+- Languages:
+    - Java:            manual/java.md
+    - Kotlin:          manual/kotlin.md
+- Tools:
+    - ReTrace:
+        - Introduction:    manual/retrace/index.md
+        - Usage:           manual/retrace/usage.md
+        - Mapping File:    manual/retrace/mapping.md
+        - Examples:        manual/retrace/examples.md
+- Troubleshooting:
+    - Overview:        manual/troubleshooting.md
+    - Limitations:     manual/limitations.md
+- Reference Card:  manual/refcard.md
+- Version History: releasenotes.md
+- Feedback:        feedback.md
 - License:
     - Overview:        license.md
     - GPL:             GPL.md
     - GPL Exception:   GPL_exception.md
-- Downloads:           downloads.md
-- Building:            building.md
-- Release notes:       releasenotes.md
-- Feedback:            feedback.md
