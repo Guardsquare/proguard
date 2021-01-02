@@ -24,4 +24,4 @@ jobs:
         with:
           build-root-directory: proguard-main/
           wrapper-directory: proguard-main/
-          arguments: --include-build ../proguard-core/ jar
+          arguments: --include-build ../proguard-core/ test jar
