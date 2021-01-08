@@ -2,6 +2,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.x  | PGD-0110 | CORE     | Fixed writing of kept directories.
 | 7.1.x  | PGC-0015 | CORE     | Added support for Java 16.
 | 7.1.x  | PGD-0064 | CORE     | Added support for Java 14 and 15.
 | 7.1.x  | PGD-0064 | CORE     | Added support for sealed classes (permitted subclasses attributes).

@@ -390,8 +390,10 @@ public class OutputWriter
     private DataEntryWriter renameResourceFiles(ResourceFilePool resourceFilePool,
                                                 DataEntryWriter  dataEntryWriter)
     {
-        return new RenamedDataEntryWriter(new ResourceFilePoolNameFunction(resourceFilePool),
-                                          dataEntryWriter);
+        return new FilteredDataEntryWriter(new DataEntryDirectoryFilter(),
+                   dataEntryWriter,
+                   new RenamedDataEntryWriter(new ResourceFilePoolNameFunction(resourceFilePool),
+                                              dataEntryWriter));
     }
 
 
