@@ -50,11 +50,22 @@ extra:
 # Extensions
 ###################################################################
 markdown_extensions:
-- attr_list
-- admonition
-- codehilite
-- footnotes
-- def_list
+  - attr_list
+  - admonition
+  - footnotes
+  - def_list
+  - toc:
+      permalink: True
+  - codehilite:
+      guess_lang: False
+  - pymdownx.magiclink
+  - pymdownx.tabbed
+  - pymdownx.superfences:
+      css_class: codehilite
+  - pymdownx.striphtml:
+      strip_comments: true
+plugins:
+  - search
 
 ###################################################################
 # Page tree
