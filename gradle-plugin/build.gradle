@@ -1,6 +1,6 @@
 plugins {
     id 'com.jfrog.bintray'
-    id 'java'
+    id 'java-library'
     id 'groovy'
     id 'maven-publish'
 }
@@ -31,6 +31,28 @@ sourceSets.main {
     }
 }
 
+sourceSets.test {
+    java {
+        srcDirs = ['test']
+    }
+    groovy {
+        srcDirs = ['test']
+    }
+    resources {
+        srcDirs += "$buildDir/fixtures"
+    }
+}
+
+// Copies examples/spring-boot in to the test resources to compile during an integration test.
+tasks.register('copySpringBootSample', Copy) {
+    from "$rootProject.rootDir/examples/spring-boot"
+    into "$buildDir/fixtures/spring-boot"
+}
+
+tasks.withType(Test).configureEach {
+    dependsOn copySpringBootSample
+}
+
 jar {
     metaInf.from 'src/META-INF'
 }
@@ -46,6 +68,10 @@ dependencies {
     compileOnly 'com.android.tools.build:gradle:3.0.0'
     compile gradleApi()
     compile localGroovy()
+    testImplementation gradleTestKit()
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation "org.spockframework:spock-core:1.1-groovy-2.4@jar"
+    testImplementation "commons-io:commons-io:2.8.0"
 }
 
 publishing {
