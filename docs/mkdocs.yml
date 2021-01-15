@@ -71,35 +71,31 @@ plugins:
 # Page tree
 ###################################################################
 nav:
-- Home:            manual/index.md
+- Home:            manual/home.md
 - Quickstart:      manual/quickstart.md  
 - Building:        manual/building.md
 - Setup:
-    - Standalone:          manual/standalone.md
-    - Android Gradle:      manual/gradleplugin.md
-    - Java/Kotlin Gradle:  manual/gradle.md
-    - Ant Task:            manual/ant.md
+    - Standalone:          manual/setup/standalone.md
+    - Android Gradle:      manual/setup/gradleplugin.md
+    - Java/Kotlin Gradle:  manual/setup/gradle.md
+    - Ant Task:            manual/setup/ant.md
 - Configuration:
-    - Usage:           manual/usage.md
-    - Attributes:      manual/attributes.md
-    - Optimizations:   manual/optimizations.md
-    - Examples:        manual/examples.md
+    - Usage:           manual/configuration/usage.md
+    - Attributes:      manual/configuration/attributes.md
+    - Optimizations:   manual/configuration/optimizations.md
+    - Examples:        manual/configuration/examples.md
 - Languages:
-    - Java:            manual/java.md
-    - Kotlin:          manual/kotlin.md
+    - Java:            manual/languages/java.md
+    - Kotlin:          manual/languages/kotlin.md
 - Tools:
-    - ReTrace:
-        - Introduction:    manual/retrace/index.md
-        - Usage:           manual/retrace/usage.md
-        - Mapping File:    manual/retrace/mapping.md
-        - Examples:        manual/retrace/examples.md
+    - ReTrace:         manual/tools/retrace.md
 - Troubleshooting:
-    - Overview:        manual/troubleshooting.md
-    - Limitations:     manual/limitations.md
+    - Overview:        manual/troubleshooting/troubleshooting.md
+    - Limitations:     manual/troubleshooting/limitations.md
 - Reference Card:  manual/refcard.md
 - Version History: manual/releasenotes.md
-- Feedback:        feedback.md
+- Feedback:        manual/feedback.md
 - License:
-    - Overview:        license.md
-    - GPL:             GPL.md
-    - GPL Exception:   GPL_exception.md
+    - Overview:        manual/license/license.md
+    - GPL:             manual/license/gpl.md
+    - GPL Exception:   manual/license/gplexception.md

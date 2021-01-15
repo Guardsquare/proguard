@@ -193,7 +193,7 @@ files](#resourcefiles).
 ### A complete Android application {: #android}
 
 !!! note ""
-    ![android](android_small.png){: .icon} The standard build processes of the
+![android](../android_small.png){: .icon} The standard build processes of the
     Android SDK (with Ant, Gradle, Android Studio, and Eclipse) already
     integrate ProGuard with all the proper settings. You only need to enable
     ProGuard by uncommenting the line "`proguard.config=.....`" in the file
@@ -214,7 +214,7 @@ Notes:
   jars, and output jars for you — don't specify them again.
 - If you get warnings about missing referenced classes: it's all too common
   that libraries refer to missing classes. See ["Warning: can't find
-  referenced class"](troubleshooting.md#unresolvedclass) in the
+  referenced class"](../troubleshooting/troubleshooting.md#unresolvedclass) in the
   Troubleshooting section.
 
 For more information, you can consult the official [Developer
@@ -1104,7 +1104,7 @@ will include line number information when printing out exception stack traces.
 
 The information will only be useful if we can map the obfuscated names back to
 their original names, so we're saving the mapping to a file `out.map`. The
-information can then be used by the [ReTrace](retrace/index.md) tool to
+information can then be used by the [ReTrace](../tools/retrace.md) tool to
 restore the original stack trace.
 
 ### Obfuscating package names {: #repackaging}

@@ -15,9 +15,9 @@ for efficient use in Java 6.
 
 If you are getting started with ProGuard, please follow the [Quick Start](building.md) guide in order to arrive at a basic setup for your application or library as quickly as possible.
 
-Experienced users can directly consult the [Configuration section](usage.md) where all features are described.
+Experienced users can directly consult the [Configuration section](configuration/usage.md) where all features are described.
 
-If during the process you run into any issues, please make sure to check the [Troubleshooting section](troubleshooting.md).
+If during the process you run into any issues, please make sure to check the [Troubleshooting section](troubleshooting/troubleshooting.md).
 
 ## How it works
 
@@ -74,8 +74,8 @@ applets, midlets, activities, etc.
 - The **preverification step** is the only step that doesn't have to know the
   entry points.
 
-The [Usage section](usage.md) of this manual describes the necessary [`-keep`
-options](usage.md#keepoptions) and the [Examples section](examples.md)
+The [Usage section](configuration/usage.md) of this manual describes the necessary [`-keep`
+options](configuration/usage.md#keepoptions) and the [Examples section](configuration/examples.md)
 provides plenty of examples.
 
 ## Reflection
@@ -87,7 +87,7 @@ entry points too. For example, `Class.forName()` constructs may refer to any
 class at run-time. It is generally impossible to compute which classes have to
 be preserved (with their original names), since the class names might be read
 from a configuration file, for instance. You therefore have to specify them in
-your ProGuard configuration, with the same simple [`-keep`](usage.md#keep)
+your ProGuard configuration, with the same simple [`-keep`](configuration/usage.md#keep)
 options.
 
 However, ProGuard already detects and handles the following cases for you:
@@ -119,7 +119,7 @@ implementations may need to be preserved. You can then adapt your
 configuration accordingly.
 
 !!! tip
-    Generate an instrumented build to allow ProGuard finding cases of reflection at *run-time*. The tailored configuration advice for your application will be outputted to the console, and can be copy/pasted to your configuration. To do so, just enable the option [`-addconfigurationdebugging`](usage.md#addconfigurationdebugging)
+    Generate an instrumented build to allow ProGuard finding cases of reflection at *run-time*. The tailored configuration advice for your application will be outputted to the console, and can be copy/pasted to your configuration. To do so, just enable the option [`-addconfigurationdebugging`](configuration/usage.md#addconfigurationdebugging)
 
 
 For proper results, you should at least be somewhat familiar with the

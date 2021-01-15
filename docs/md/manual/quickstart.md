@@ -32,7 +32,7 @@ ProGuard can then be executed directly from the command line by calling a script
 
 
  
-For more detailed information see [standalone mode](standalone.md).
+For more detailed information see [standalone mode](setup/standalone.md).
 
 
 ## Integrated
@@ -47,7 +47,7 @@ When working on your Android app (apk, aab) or library (aar), you can include Pr
 1. Either directly use ProGuard by disabling R8 in your `gradle.properties`.
 2. Or use ProGuard's built-in Gradle plugin, which you can apply in your `build.gradle`.
 
-For more detailed information see  [Android Gradle](gradleplugin.md).
+For more detailed information see  [Android Gradle](setup/gradleplugin.md).
 
 ### Java or Kotlin Gradle project
 
@@ -57,7 +57,7 @@ Your non-mobile Java or Kotlin applications can execute ProGuard's Gradle task:
     .....
     }
 
-For more detailed information see [Java/Kotlin Gradle](gradle.md).
+For more detailed information see [Java/Kotlin Gradle](setup/gradle.md).
 
 ### Ant project
 
@@ -67,7 +67,7 @@ You can also include ProGuard in your Ant build, all you have to do is to includ
              classpath="/usr/local/java/proguard/lib/proguard.jar" />
 
 
-For more detailed information see [Ant](ant.md).
+For more detailed information see [Ant](setup/ant.md).
 
 
 ### Maven project

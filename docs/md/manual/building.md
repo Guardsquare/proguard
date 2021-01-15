@@ -2,7 +2,7 @@
 
 !!! info
 
-    **ProGuard** is distributed under the terms of the GNU General Public License. Please consult the [license page](../license.md) for more details.
+    **ProGuard** is distributed under the terms of the GNU General Public License. Please consult the [license page](license/license.md) for more details.
 
 Building ProGuard is easy - you'll need:
 

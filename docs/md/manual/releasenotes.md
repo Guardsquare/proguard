@@ -22,7 +22,7 @@
 | 7.0.1  | DGD-2382 | CORE     | Fixed processing of Kotlin 1.4 metadata annotations.
 | 7.0.1  | DGD-2494 | CORE     | Fix naming conflict resolution potentially resulting in the renaming of library members.
 | 7.0.1  |          | RETRACE  | Extend expressions supported by Retrace.
-| 7.0.0  |          | CORE     | Added support for [Kotlin metadata](kotlin.md), with new option `-keepkotlinmetadata`.
+| 7.0.0  |          | CORE     | Added support for [Kotlin metadata](languages/kotlin.md), with new option `-keepkotlinmetadata`.
 | 7.0.0  | PGD-32   | CORE     | Allowing Java 14 class files.
 | 7.0.0  |          | CORE     | Optimizing away instance references to constructor-less classes.
 | 7.0.0  | DGD-1489 | CORE     | Fixed potential `IllegalArgumentException` with message `Value "x" is not a reference value` when optimizing code with conditional casts.
@@ -129,10 +129,10 @@
   in superclasses.
 - \[PGD-693\] Fixed obfuscation of closures for functional interfaces
   with default methods.
-- Added new option `-if`, to specify conditions for [`-keep`](usage.md#keep) options.
+- Added new option `-if`, to specify conditions for [`-keep`](configuration/usage.md#keep) options.
 - Added new option `-addconfigurationdebugging`, to instrument the
   code to get feedback about missing configuration at runtime.
-- Added new option [`-android`](usage.md#android) to tune processing for Android.
+- Added new option [`-android`](configuration/usage.md#android) to tune processing for Android.
 - Added support for references to matched wildcards in regular
   expressions in `-keep` options.
 - Added new options `-assumenoexternalsideeffects`,
@@ -187,7 +187,7 @@
 - Fixed adapting invocations for referenced class members.
 - Preserving class member signature classes if
   `includedescriptorclasses` is specified.
-- Allowing empty output jars if [`-ignorewarnings`](usage.md#ignorewarnings) is specified.
+- Allowing empty output jars if [`-ignorewarnings`](configuration/usage.md#ignorewarnings) is specified.
 - Avoiding exceptions when inlining invalid line number
   instruction offsets.
 - Fixed preverification of wildcard exceptions.
@@ -224,7 +224,7 @@
 ## Version 5.0 (Aug 2014)
 
 - Added support for Java 8.
-- Added [`-keep`](usage.md#keep) modifier `includedescriptorclasses`.
+- Added [`-keep`](configuration/usage.md#keep) modifier `includedescriptorclasses`.
 - Added automatic suggestions for keeping attributes.
 - Clearing preverification information when `-dontpreverify`
   is specified.
@@ -377,7 +377,7 @@
 - Fixed filtering of warnings about references to array types.
 - Fixed overriding of warning option and note option in Ant task.
 - Improved detection of file name extensions for canonical paths.
-- Improved printing of seeds specified by [`-keep`](usage.md#keep) options.
+- Improved printing of seeds specified by [`-keep`](configuration/usage.md#keep) options.
 - Improved printing of notes about unkept classes.
 - Improved checking whether output is up to date.
 - Updated documentation and examples.
@@ -385,7 +385,7 @@
 ## Version 4.5 (Jun 2010)
 
 - Added option `-keepparameternames`.
-- [`-dontskipnonpubliclibraryclasses`](usage.md#dontskipnonpubliclibraryclasses) is now set by default. Added
+- [`-dontskipnonpubliclibraryclasses`](configuration/usage.md#dontskipnonpubliclibraryclasses) is now set by default. Added
   `-skipnonpubliclibraryclasses` as an option.
 - Made processing independent of order of input classes to get even
   more deterministic output.
@@ -419,15 +419,15 @@
 ## Version 4.4 (Jul 2009)
 
 - Added new peephole optimizations.
-- Added option [`-optimizations`](usage.md#optimizations) for fine-grained configuration
+- Added option [`-optimizations`](configuration/usage.md#optimizations) for fine-grained configuration
   of optimizations.
-- Added option [`-adaptclassstrings`](usage.md#adaptclassstrings) for adapting string constants that
+- Added option [`-adaptclassstrings`](configuration/usage.md#adaptclassstrings) for adapting string constants that
   correspond to obfuscated classes.
-- Added option [`-keeppackagenames`](usage.md#keeppackagenames) for keeping specified package names
+- Added option [`-keeppackagenames`](configuration/usage.md#keeppackagenames) for keeping specified package names
   from being obfuscated.
-- Added option [`-keepdirectories`](usage.md#keepdirectories) for keeping specified directory
+- Added option [`-keepdirectories`](configuration/usage.md#keepdirectories) for keeping specified directory
   entries in output jars.
-- Extended options [`-dontnote`](usage.md#dontnote) and [`-dontwarn`](usage.md#dontwarn) for fine-grained
+- Extended options [`-dontnote`](configuration/usage.md#dontnote) and [`-dontwarn`](configuration/usage.md#dontwarn) for fine-grained
   configuration of notes and warnings.
 - Added option `-regex` in ReTrace, for specifying alternative regular
   expressions to parse stack traces.
@@ -478,7 +478,7 @@
 - Fixed obfuscation of classes with inner classes whose names
   are preserved.
 - Fixed access of protected methods in repackaged classes.
-- Added options [`-classobfuscationdictionary`](usage.md#classobfuscationdictionary) and
+- Added options [`-classobfuscationdictionary`](configuration/usage.md#classobfuscationdictionary) and
   `-packageobfuscationdictionary`.
 - Adapting more types of resource file names based on obfuscation.
 - Extended warnings about incorrect dependencies.
@@ -534,9 +534,9 @@
 
 - Added preverifier for Java 6 and Java Micro Edition, with new
   options `-microedition` and `-dontpreverify`.
-- Added new option [`-target`](usage.md#target) to modify java version of processed
+- Added new option [`-target`](configuration/usage.md#target) to modify java version of processed
   class files.
-- Made [`-keep`](usage.md#keep) options more orthogonal and flexible, with option
+- Made [`-keep`](configuration/usage.md#keep) options more orthogonal and flexible, with option
   modifiers `allowshrinking`, `allowoptimization`, and
   `allowobfuscation`.
 - Added new wildcards for class member descriptors: "`***`", matching
@@ -545,10 +545,10 @@
 - Improved shrinking of unused annotations.
 - Added check on modification times of input and output, to avoid
   unnecessary processing, with new option `-forceprocessing`.
-- Added new options [`-flattenpackagehierarchy`](usage.md#flattenpackagehierarchy) and `-repackageclasses`
+- Added new options [`-flattenpackagehierarchy`](configuration/usage.md#flattenpackagehierarchy) and `-repackageclasses`
   (replacing `-defaultpackage`) to control obfuscation of
   package names.
-- Added new options [`-adaptresourcefilenames`](usage.md#adaptresourcefilenames) and
+- Added new options [`-adaptresourcefilenames`](configuration/usage.md#adaptresourcefilenames) and
   `-adaptresourcefilecontents`, with file filters, to update resource
   files corresponding to obfuscated class names.
 - Added detection of dynamically accessed fields and methods.
@@ -579,7 +579,7 @@ Upgrade considerations:
 - ProGuard now preverifies code for Java Micro Edition, if you specify
   the option `-microedition`. You then no longer need to process the
   code with an external preverifier.
-- You should preferably specify [`-repackageclasses`](usage.md#repackageclasses) instead of the old
+- You should preferably specify [`-repackageclasses`](configuration/usage.md#repackageclasses) instead of the old
   option name `-defaultpackage`.
 
 ## Version 3.11 (Dec 2007)
@@ -693,7 +693,7 @@ Upgrade considerations:
   unused parameters.
 - Made file names relative to the configuration files in which they
   are specified. Added `-basedirectory` option.
-- Added [`-whyareyoukeeping`](usage.md#whyareyoukeeping) option to get details on why given classes
+- Added [`-whyareyoukeeping`](configuration/usage.md#whyareyoukeeping) option to get details on why given classes
   and class members are being kept.
 - Added warnings for misplaced class files.
 - Improved printing of notes for `Class.forName` constructs.
@@ -770,7 +770,7 @@ Upgrade considerations:
 ## Version 2.0 (Dec 2003)
 
 - Added a graphical user interface for ProGuard and ReTrace.
-- Added [`-applymapping`](usage.md#applymapping) option for incremental obfuscation.
+- Added [`-applymapping`](configuration/usage.md#applymapping) option for incremental obfuscation.
 - Added support for filtering input and output files.
 - Added support for the J++ `SourceDir` attribute.
 - Improved detection of `.class` constructs.
@@ -816,7 +816,7 @@ Upgrade considerations:
 - Fixed processing of retrofitted library interfaces.
 - Fixed processing of `.class` constructs in internal classes targeted
   at JRE1.2 (the default in JDK1.4).
-- Fixed [`-dump`](usage.md#dump) option when `-outjar` option is not present.
+- Fixed [`-dump`](configuration/usage.md#dump) option when `-outjar` option is not present.
 - Updated documentation and examples.
 
 ## Version 1.4 (Nov 2002)

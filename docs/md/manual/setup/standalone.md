@@ -51,4 +51,4 @@ characters, for instance.
 The order of the options is generally irrelevant. For quick experiments,
 you can abbreviate them to their first unique characters.
 
-All available options are described in the [Configuration section](usage.md).
+All available options are described in the [Configuration section](../configuration/usage.md).

@@ -18,7 +18,7 @@ ProGuard may print out some notes and non-fatal warnings:
   on your application, you may need to keep the mentioned classes with an
   option like "`-keep class MyClass`", or their implementations with an option
   like "`-keep class * implements MyClass`". You can switch off these notes by
-  specifying the [`-dontnote`](usage.md#dontnote) option.
+  specifying the [`-dontnote`](../configuration/usage.md#dontnote) option.
 
 **Note: ... accesses a field/method '...' dynamically** {: #dynamicalclassmember}
 : Your code uses reflection to find a fields or a method, with a construct
@@ -28,18 +28,18 @@ ProGuard may print out some notes and non-fatal warnings:
   Otherwise, ProGuard might remove or obfuscate the class members, since it
   can't know which ones they are exactly. It does list possible candidates,
   for your information. You can switch off these notes by specifying the
-  [`-dontnote`](usage.md#dontnote) option.
+  [`-dontnote`](../configuration/usage.md#dontnote) option.
 
 **Note: ... calls 'Class.get...'**, **'Field.get...'**, or **'Method.get...'** {: #attributes}
 : Your code uses reflection to access metadata from the code, with an
   invocation like "`class.getAnnotations()`". You then generally need to
-  preserve optional [class file attributes](attributes.md), which ProGuard
+  preserve optional [class file attributes](../configuration/attributes.md), which ProGuard
   removes by default. The attributes contain information about annotations,
   enclosing classes, enclosing methods, etc. In a summary in the log, ProGuard
   provides a suggested configuration, like [`-keepattributes
-  *Annotation*`](usage.md#keepattributes). If you're sure the attributes are
+  *Annotation*`](../configuration/usage.md#keepattributes). If you're sure the attributes are
   not necessary, you can switch off these notes by specifying the
-  [`-dontnote`](usage.md#dontnote) option.
+  [`-dontnote`](../configuration/usage.md#dontnote) option.
 
 **Note: the configuration refers to the unknown class '...'** {: #unknownclass}
 : Your configuration refers to the name of a class that is not present in
@@ -48,46 +48,46 @@ ProGuard may print out some notes and non-fatal warnings:
   fully-qualified names, not forgetting the package names.
 
 **Note: the configuration keeps the entry point '...', but not the descriptor class '...'** {: #descriptorclass}
-: Your configuration contains a [`-keep`](usage.md#keep) option to preserve
+: Your configuration contains a [`-keep`](../configuration/usage.md#keep) option to preserve
   the given method (or field), but no `-keep` option for the given class that
   is an argument type or return type in the method's descriptor. You may then
   want to keep the class too. Otherwise, ProGuard will obfuscate its name,
   thus changing the method's signature. The method might then become
   unfindable as an entry point, e.g. if it is part of a public API. You can
   automatically keep such descriptor classes with the `-keep` option modifier
-  [`includedescriptorclasses`](usage.md#includedescriptorclasses)
+  [`includedescriptorclasses`](../configuration/usage.md#includedescriptorclasses)
   (`-keep,includedescriptorclasses` ...). You can switch off these notes by
-  specifying the [`-dontnote`](usage.md#dontnote) option.
+  specifying the [`-dontnote`](../configuration/usage.md#dontnote) option.
 
 **Note: the configuration explicitly specifies '...' to keep library class '...'** {: #libraryclass}
-: Your configuration contains a [`-keep`](usage.md#keep) option to preserve
+: Your configuration contains a [`-keep`](../configuration/usage.md#keep) option to preserve
   the given library class. However, you don't need to keep any library
   classes. ProGuard always leaves underlying libraries unchanged. You can
-  switch off these notes by specifying the [`-dontnote`](usage.md#dontnote)
+  switch off these notes by specifying the [`-dontnote`](../configuration/usage.md#dontnote)
   option.
 
 **Note: the configuration doesn't specify which class members to keep for class '...'** {: #classmembers}
 : Your configuration contains a
-  [`-keepclassmembers`](usage.md#keepclassmembers)/[`-keepclasseswithmembers`](usage.md#keepclasseswithmembers)
+  [`-keepclassmembers`](../configuration/usage.md#keepclassmembers)/[`-keepclasseswithmembers`](../configuration/usage.md#keepclasseswithmembers)
   option to preserve fields or methods in the given class, but it doesn't
   specify which fields or methods. This way, the option simply won't have any
   effect. You probably want to specify one or more fields or methods, as usual
   between curly braces. You can specify all fields or methods with a wildcard
   "`*;`". You should also consider if you just need the more common
-  [`-keep`](usage.md#keep) option, which preserves all specified classes *and*
-  class members. The [overview of all `keep` options](usage.md#keepoverview)
+  [`-keep`](../configuration/usage.md#keep) option, which preserves all specified classes *and*
+  class members. The [overview of all `keep` options](../configuration/usage.md#keepoverview)
   can help. You can switch off these notes by specifying the
-  [`-dontnote`](usage.md#dontnote) option.
+  [`-dontnote`](../configuration/usage.md#dontnote) option.
 
 **Note: the configuration specifies that none of the methods of class '...' have any side effects** {: #nosideeffects}
 : Your configuration contains an option
-  [`-assumenosideeffects`](usage.md#assumenosideeffects) to indicate that the
+  [`-assumenosideeffects`](../configuration/usage.md#assumenosideeffects) to indicate that the
   specified methods don't have any side effects. However, the configuration
   tries to match *all* methods, by using a wildcard like "`*;`". This includes
   methods from `java.lang.Object`, such as `wait()` and `notify()`. Removing
   invocations of those methods will most likely break your application. You
   should list the methods without side effects more conservatively. You can
-  switch off these notes by specifying the [`-dontnote`](usage.md#dontnote)
+  switch off these notes by specifying the [`-dontnote`](../configuration/usage.md#dontnote)
   option.
 
 **Note: duplicate definition of program/library class** {: #duplicateclass}
@@ -96,10 +96,10 @@ ProGuard may print out some notes and non-fatal warnings:
   first definitions. The warning may be an indication of some problem though,
   so it's advisable to remove the duplicates. A convenient way to do so is by
   specifying filters on the input jars or library jars. You can switch off
-  these notes by specifying the [`-dontnote`](usage.md#dontnote) option.
+  these notes by specifying the [`-dontnote`](../configuration/usage.md#dontnote) option.
 
 !!! note ""
-    ![android](android_small.png){: .icon} The
+![android](../android_small.png){: .icon} The
     standard Android build process automatically specifies the input
     jars for you. There may not be an easy way to filter them to remove
     these notes. You could remove the duplicate classes manually from
@@ -121,7 +121,7 @@ ProGuard may print out some notes and non-fatal warnings:
   no option to switch off these warnings.
 
 !!! note ""
-    ![android](android_small.png){: .icon} The
+![android](../android_small.png){: .icon} The
     standard Android build process automatically specifies the input
     jars for you. There may not be an easy way to filter them to remove
     these warnings. You could remove the duplicate resource files
@@ -141,15 +141,15 @@ or some more serious warnings:
         compiling all code from scratch, you must specify all libraries
         that the code is referencing, directly or indirectly. If the
         library should be processed and included in the output, you
-        should specify it with [`-injars`](usage.md#injars), otherwise
-        you should specify it with [`-libraryjars`](usage.md#libraryjars).
+        should specify it with [`-injars`](../configuration/usage.md#injars), otherwise
+        you should specify it with [`-libraryjars`](../configuration/usage.md#libraryjars).
         For example, if ProGuard complains that it can't find a
         `java.lang` class, you have to make sure that you are specifying
         the run-time library of your platform. For JSE, these are
         typically packaged in `lib/rt.jar` (`vm.jar` for IBM's JVM, and
         `classes.jar` in MacOS X) or as of Java 9, `jmods/java.base.jmod`.
         For Android, it is typically packaged in `android.jar`. The
-        [examples section](examples.md) provides more details for the
+        [examples section](../configuration/examples.md) provides more details for the
         various platforms. If ProGuard still complains that it can't find a
         `javax.crypto` class, you probably still have to specify `jce.jar`,
         next to the more common `rt.jar`.
@@ -157,7 +157,7 @@ or some more serious warnings:
     2.  If the missing class is referenced from a pre-compiled
         third-party library, and your original code runs fine without
         it, then the missing dependency doesn't seem to hurt. The
-        cleanest solution is to [filter out](usage.md#filters) the
+        cleanest solution is to [filter out](../configuration/usage.md#filters) the
         *referencing* class or classes from the input, with a filter
         like
          "`-injars myapplication.jar(!somepackage/SomeUnusedReferencingClass.class)`".
@@ -171,13 +171,13 @@ or some more serious warnings:
 
     3.  If you don't feel like filtering out the problematic classes,
         you can try your luck with the
-        [`-ignorewarnings`](usage.md#ignorewarnings) option, or even
-        the [`-dontwarn`](usage.md#dontwarn) option. Only use these
+        [`-ignorewarnings`](../configuration/usage.md#ignorewarnings) option, or even
+        the [`-dontwarn`](../configuration/usage.md#dontwarn) option. Only use these
         options if you really know what you're doing though.
 
 
 !!! note ""
-    ![android](android_small.png){: .icon} The
+![android](../android_small.png){: .icon} The
     standard Android build process automatically specifies the input
     jars for you. Unfortunately, many pre-compiled third-party libraries
     refer to other libraries that are not actually used and therefore
@@ -201,18 +201,18 @@ or some more serious warnings:
 **Error: Can't find any super classes of ... (not even immediate super class ...)**
 **Error: Can't find common super class of ... and ...** {: #superclass}
 : It seems like you tried to avoid the warnings from the previous paragraph
-  by specifying [`-ignorewarnings`](usage.md#ignorewarnings) or
-  [`-dontwarn`](usage.md#dontwarn), but it didn't work out. ProGuard's
+  by specifying [`-ignorewarnings`](../configuration/usage.md#ignorewarnings) or
+  [`-dontwarn`](../configuration/usage.md#dontwarn), but it didn't work out. ProGuard's
   optimization step and preverification step really need the missing classes
   to make sense of the code. Preferably, you would solve the problem by adding
   the missing library, as discussed. If you're sure the class that references
   the missing class isn't used either, you could also try filtering it out
   from the input, by adding a filter to the corresponding
-  [`-injars`](usage.md#injars) option: "`-injars
+  [`-injars`](../configuration/usage.md#injars) option: "`-injars
   myapplication.jar(!somepackage/SomeUnusedClass.class)`". As a final
   solution, you could switch off optimization
-  ([`-dontoptimize`](usage.md#dontoptimize)) and preverification
-  ([`-dontpreverify`](usage.md#dontpreverify)).
+  ([`-dontoptimize`](../configuration/usage.md#dontoptimize)) and preverification
+  ([`-dontpreverify`](../configuration/usage.md#dontpreverify)).
 
 **Warning: can't find referenced field/method '...' in program class ...** {: #unresolvedprogramclassmember}
 : A program class is referring to a field or a method that is missing from
@@ -242,13 +242,13 @@ or some more serious warnings:
         otherwise upgrade the libraries to consistent versions.
 
     Alternatively, you may get away with ignoring the inconsistency
-    with the options [`-ignorewarnings`](usage.md#ignorewarnings)
-    or even [`-dontwarn`](usage.md#dontwarn). For instance if the
+    with the options [`-ignorewarnings`](../configuration/usage.md#ignorewarnings)
+    or even [`-dontwarn`](../configuration/usage.md#dontwarn). For instance if the
     code contains a class to optionally support recent versions of
     Android, you can specify "`-dontwarn mypackage.MySupportClass`".
 
 !!! note ""
-    ![android](android_small.png){: .icon} If
+![android](../android_small.png){: .icon} If
     If you're developing for Android, and ProGuard complains that it can't
     find a run-time method that is only available in recent versions of
     Android, you should change the target to that recent version in your
@@ -270,11 +270,11 @@ or some more serious warnings:
   classes always remain unchanged. It is therefore impossible to adapt
   references from library classes to program classes, for instance if the
   program classes are renamed. You should define a clean separation between
-  program code (specified with [`-injars`](usage.md#injars)) and library code
-  (specified with [`-libraryjars`](usage.md#libraryjars)), and try again.
+  program code (specified with [`-injars`](../configuration/usage.md#injars)) and library code
+  (specified with [`-libraryjars`](../configuration/usage.md#libraryjars)), and try again.
 
 !!! note ""
-    ![android](android_small.png){: .icon} In
+![android](../android_small.png){: .icon} In
     Android development, sloppy libraries may contain duplicates of
     classes that are already present in the Android run-time (notably
     `org.w3c.dom`, `org.xml.sax`, `org.xmlpull.v1`,
@@ -292,23 +292,23 @@ or some more serious warnings:
   the `WEB-INF/classes` directory in a war should be packaged in a jar and put
   in the `WEB-INF/lib` directory. If you don't mind these classes not being
   written to the output, you can specify the
-  [`-ignorewarnings`](usage.md#ignorewarnings) option, or even the
-  [`-dontwarn`](usage.md#dontwarn) option.
+  [`-ignorewarnings`](../configuration/usage.md#ignorewarnings) option, or even the
+  [`-dontwarn`](../configuration/usage.md#dontwarn) option.
 
 **Warning: ... is not being kept as ..., but remapped to ...** {: #mappingconflict1}
-: There is a conflict between a [`-keep`](usage.md#keep) option and the
-  mapping file specified with an [`-applymapping`](usage.md#applymapping)
+: There is a conflict between a [`-keep`](../configuration/usage.md#keep) option and the
+  mapping file specified with an [`-applymapping`](../configuration/usage.md#applymapping)
   option, in the obfuscation step. The given class name or class member name
   can't be kept by its original name, as specified in the configuration, but
   it has to be mapped to the other given name, as specified in the mapping
   file. You should adapt your configuration or your mapping file to remove the
   conflict. Alternatively, if you're sure the renaming won't hurt, you can
-  specify the [`-ignorewarnings`](usage.md#ignorewarnings) option, or even the
-  [`-dontwarn`](usage.md#dontwarn) option.
+  specify the [`-ignorewarnings`](../configuration/usage.md#ignorewarnings) option, or even the
+  [`-dontwarn`](../configuration/usage.md#dontwarn) option.
 
 **Warning: field/method ... can't be mapped to ...** {: #mappingconflict2}
 : There is a conflict between some new program code and the mapping file
-  specified with an [`-applymapping`](usage.md#applymapping) option, in the
+  specified with an [`-applymapping`](../configuration/usage.md#applymapping) option, in the
   obfuscation step. The given class member can't be mapped to the given name,
   because it would conflict with another class member that is already being
   mapped to the same name. This can happen if you are performing incremental
@@ -317,19 +317,19 @@ or some more serious warnings:
   extends two existing classes, introducing a conflict in the name space of
   its class members. If you're sure the class member receiving another name
   than the one specified won't hurt, you can specify the
-  [`-ignorewarnings`](usage.md#ignorewarnings) option, or even the
-  [`-dontwarn`](usage.md#dontwarn) option. Note that you should always use the
-  [`-useuniqueclassmembernames`](usage.md#useuniqueclassmembernames) option in
+  [`-ignorewarnings`](../configuration/usage.md#ignorewarnings) option, or even the
+  [`-dontwarn`](../configuration/usage.md#dontwarn) option. Note that you should always use the
+  [`-useuniqueclassmembernames`](../configuration/usage.md#useuniqueclassmembernames) option in
   the initial obfuscation step, in order to reduce the risk of conflicts.
 
 **Error: Unsupported class version number** {: #unsupportedclassversion}
 : You are trying to process class files compiled for a recent version of
   Java that your copy of ProGuard doesn't support yet. You should [check
-  on-line](http://proguard.sourceforge.net/downloads.html) if there is a more
+  on-line](https://github.com/Guardsquare/proguard/releases) if there is a more
   recent release.
 
-**Error: You have to specify [`-keep`](usage.md#keep) options**
-: You either forgot to specify [`-keep`](usage.md#keep) options, or you
+**Error: You have to specify [`-keep`](../configuration/usage.md#keep) options**
+: You either forgot to specify [`-keep`](../configuration/usage.md#keep) options, or you
   mistyped the class names. ProGuard has to know exactly what you want to
   keep: an application, an applet, a servlet, a midlet,..., or any combination
   of these. Without the proper seed specifications, ProGuard would shrink,
@@ -338,7 +338,7 @@ or some more serious warnings:
 **Error: Expecting class path separator ';' before 'Files\Java\\**...**'** (in Windows)
 : If the path of your run-time jar contains spaces, like in "Program Files",
   you have to enclose it with single or double quotes, as explained in the
-  section on [file names](usage.md#filename). This is actually true for all
+  section on [file names](../configuration/usage.md#filename). This is actually true for all
   file names containing special characters, on all platforms.
 
 **Error: Can't read [**...**/lib/rt.jar\] (No such file or directory)**
@@ -398,7 +398,7 @@ Should ProGuard crash while processing your application:
 **Unexpected error** {: #unexpectederror}
 : ProGuard has encountered an unexpected condition, typically in the
   optimization step. It may or may not recover. You should be able to avoid it
-  using the [`-dontoptimize`](usage.md#dontoptimize) option. In any case,
+  using the [`-dontoptimize`](../configuration/usage.md#dontoptimize) option. In any case,
   please report the problem, preferably with the simplest example that causes
   ProGuard to crash.
 
@@ -420,7 +420,7 @@ right, there might be a couple of reasons:
   tools often let class files with similar lower-case and upper-case names
   overwrite each other. If you really can't switch to a different operating
   system, you could consider using ProGuard's
-  [`-dontusemixedcaseclassnames`](usage.md#dontusemixedcaseclassnames) option.
+  [`-dontusemixedcaseclassnames`](../configuration/usage.md#dontusemixedcaseclassnames) option.
   Also, you should make sure your class files are in directories that
   correspond to their package names. ProGuard will read misplaced class files,
   but it will currently not write their processed versions. Notably, class
@@ -432,7 +432,7 @@ right, there might be a couple of reasons:
   you are using fully qualified class names. If the package name of some class
   is missing, ProGuard won't match the elements that you might be expecting.
   It may help to double-check for typos too. You can use the
-  [`-printseeds`](usage.md#printseeds) option to see which elements are being
+  [`-printseeds`](../configuration/usage.md#printseeds) option to see which elements are being
   kept exactly.
 
     If you are using marker interfaces to keep other classes, the marker
@@ -494,8 +494,8 @@ subsequently fails with an error:
   java compiler not produce debug information (`-g:none`), or let ProGuard's
   obfuscation step remove the debug information again (by *not* keeping the
   attributes `LocalVariableTable` and `LocalVariableTypeTable` with
-  [`-keepattributes`](usage.md#keepattributes)), or otherwise just disable
-  optimization ([`-dontoptimize`](usage.md#dontoptimize)).
+  [`-keepattributes`](../configuration/usage.md#keepattributes)), or otherwise just disable
+  optimization ([`-dontoptimize`](../configuration/usage.md#dontoptimize)).
 
 **Conversion to Dalvik format failed with error 1** {: #conversionerror}
 : This error may have various causes, but if dx is tripping over some code
@@ -515,17 +515,17 @@ produces errors, it's usually for a single reason:
   on a platform with a case-insensitive file system, such as Windows. The
   `preverify` tool always unpacks the jars, so class files with similar
   lower-case and upper-case names overwrite each other. You can use ProGuard's
-  [`-dontusemixedcaseclassnames`](usage.md#dontusemixedcaseclassnames) option
+  [`-dontusemixedcaseclassnames`](../configuration/usage.md#dontusemixedcaseclassnames) option
   to work around this problem. If the above doesn't help, there is probably a
   bug in the optimization step of ProGuard. Make sure you are using the latest
   version. You should be able to work around the problem by using the
-  [`-dontoptimize`](usage.md#dontoptimize) option. You can check the bug
+  [`-dontoptimize`](../configuration/usage.md#dontoptimize) option. You can check the bug
   database to see if it is a known problem (often with a fix). Otherwise,
   please report it, preferably with the simplest example on which you can find
   ProGuard to fail.
 
 Note that it is no longer necessary to use an external preverifier. With
-the [`-microedition`](usage.md#microedition) option, ProGuard will
+the [`-microedition`](../configuration/usage.md#microedition) option, ProGuard will
 preverify the class files for Java Micro Edition.
 
 ## Problems at run-time {: #runtime}
@@ -548,11 +548,11 @@ there might be several reasons:
   missing class dynamically. ProGuard can only detect constant name arguments,
   like `Class.forName("com.example.MyClass")`. For variable name arguments
   like `Class.forName(someClass)`, you have to keep all possible classes using
-  the appropriate [`-keep`](usage.md#keep) option, e.g. "`-keep class
+  the appropriate [`-keep`](../configuration/usage.md#keep) option, e.g. "`-keep class
   com.example.MyClass`" or "`-keep class * implements
   com.example.MyInterface`". While setting up your configuration, you can
   specify the option
-  [`-addconfigurationdebugging`](usage.md#addconfigurationdebugging) to help
+  [`-addconfigurationdebugging`](../configuration/usage.md#addconfigurationdebugging) to help
   track down these cases at run-time and let the instrumented code suggest
   settings for them.
 
@@ -560,10 +560,10 @@ there might be several reasons:
 : Your code is probably calling something like `myClass.getField`, trying to
   find some field dynamically. Since ProGuard can't always detect this
   automatically, you have to keep the missing field using the appropriate
-  [`-keep`](usage.md#keep) option, e.g. "`-keepclassmembers class
+  [`-keep`](../configuration/usage.md#keep) option, e.g. "`-keepclassmembers class
   com.example.MyClass { int myField; }`". While setting up your configuration,
   you can specify the option
-  [`-addconfigurationdebugging`](usage.md#addconfigurationdebugging) to help
+  [`-addconfigurationdebugging`](../configuration/usage.md#addconfigurationdebugging) to help
   track down these cases at run-time and let the instrumented code suggest
   settings for them.
 
@@ -571,23 +571,23 @@ there might be several reasons:
 : Your code is probably calling something like `myClass.getMethod`, trying to
   find some method dynamically. Since ProGuard can't always detect this
   automatically, you have to keep the missing method using the appropriate
-  [`-keep`](usage.md#keep) option, e.g. "`-keepclassmembers class
+  [`-keep`](../configuration/usage.md#keep) option, e.g. "`-keepclassmembers class
   com.example.MyClass { void myMethod(); }`". While setting up your
   configuration, you can specify the option
-  [`-addconfigurationdebugging`](usage.md#addconfigurationdebugging) to help
+  [`-addconfigurationdebugging`](../configuration/usage.md#addconfigurationdebugging) to help
   track down these cases at run-time and let the instrumented code suggest
   settings for them. More specifically, if the method reported as missing is
   `values` or `valueOf`, you probably have to keep some methods related to
-  [enumerations](examples.md#enumerations).
+  [enumerations](../configuration/examples.md#enumerations).
 
 **MissingResourceException** or **NullPointerException**
 : Your processed code may be unable to find some resource files. ProGuard
   simply copies resource files over from the input jars to the output jars.
   Their names and contents remain unchanged, unless you specify the options
-  [`-adaptresourcefilenames`](usage.md#adaptresourcefilenames) and/or
-  [`-adaptresourcefilecontents`](usage.md#adaptresourcefilecontents).
+  [`-adaptresourcefilenames`](../configuration/usage.md#adaptresourcefilenames) and/or
+  [`-adaptresourcefilecontents`](../configuration/usage.md#adaptresourcefilecontents).
   Furthermore, directory entries in jar files aren't copied, unless you
-  specify the option [`-keepdirectories`](usage.md#keepdirectories). Note that
+  specify the option [`-keepdirectories`](../configuration/usage.md#keepdirectories). Note that
   Sun advises against calling `Class.getResource()` for directories (Sun Bug
   \#4761949](http://bugs.sun.com/view_bug.do?bug_id=4761949)).
 
@@ -617,7 +617,7 @@ there might be several reasons:
 
 **InvalidClassException**, **class loading error**, or **verification error** (in Java Micro Edition)
 : If you get such an error in Java Micro Edition, you may have forgotten to
-  specify the [`-microedition`](usage.md#microedition) option, so the
+  specify the [`-microedition`](../configuration/usage.md#microedition) option, so the
   processed class files are preverified properly.
 
 **Error: No Such Field or Method**, **Error verifying method** (in a Java Micro Edition emulator)
@@ -625,7 +625,7 @@ there might be several reasons:
   it's because these emulators don't like packageless classes and/or
   overloaded fields and methods. You can work around it by not using the
   options `-repackageclasses ''` and
-  [`-overloadaggressively`](usage.md#overloadaggressively). If you're using
+  [`-overloadaggressively`](../configuration/usage.md#overloadaggressively). If you're using
   the JME WTK plugin, you can adapt the configuration
   `proguard/wtk/default.pro` that's inside the `proguard.jar`.
 
@@ -633,10 +633,10 @@ there might be several reasons:
 : If your midlet runs in an emulator and on some devices, but not on some
   other devices, this is probably due to a bug in the latter devices. For some
   older Motorola and Nokia phones, you might try specifying the
-  [`-useuniqueclassmembernames`](usage.md#useuniqueclassmembernames) option.
+  [`-useuniqueclassmembernames`](../configuration/usage.md#useuniqueclassmembernames) option.
   It avoids overloading class member names, which triggers a bug in their java
   virtual machine. You might also try using the
-  [`-dontusemixedcaseclassnames`](usage.md#dontusemixedcaseclassnames) option.
+  [`-dontusemixedcaseclassnames`](../configuration/usage.md#dontusemixedcaseclassnames) option.
   Even if the midlet has been properly processed and then preverified on a
   case-sensitive file system, the device itself might not like the mixed-case
   class names. Notably, the Nokia N-Gage emulator works fine, but the actual
@@ -650,7 +650,7 @@ there might be several reasons:
   always mark fields that are accessed across different threads without
   further synchronization as `volatile`. If this is not possible for some
   reason, you'll have to switch off optimization using the
-  [`-dontoptimize`](usage.md#dontoptimize) option.
+  [`-dontoptimize`](../configuration/usage.md#dontoptimize) option.
 
 **SecurityException: SHA1 digest error** {: #securityexception}
 : You may have forgotten to sign your program jar *after* having processed
@@ -659,7 +659,7 @@ there might be several reasons:
 **ClassCastException: class not an enum**<br/>**IllegalArgumentException: class not an enum type** {: #classcastexception}
 : You should make sure you're preserving the special methods of enumeration
   types, which the run-time environment calls by introspection. The required
-  options are shown in the [examples](examples.md#enumerations).
+  options are shown in the [examples](../configuration/examples.md#enumerations).
 
 **ArrayStoreException: sun.reflect.annotation.EnumConstantNotPresentExceptionProxy** {: #arraystoreexception}
 : You are probably processing annotations involving enumerations. Again, you
@@ -668,7 +668,7 @@ there might be several reasons:
 
 **IllegalArgumentException: methods with same signature but incompatible return types** {: #illegalargumentexception}
 : You are probably running some code that has been obfuscated with the
-  [`-overloadaggressively`](usage.md#overloadaggressively) option. The class
+  [`-overloadaggressively`](../configuration/usage.md#overloadaggressively) option. The class
   `java.lang.reflect.Proxy` can't handle classes that contain methods with the
   same names and signatures, but different return types. Its method
   `newProxyInstance` then throws this exception. You can avoid the problem by
@@ -676,14 +676,14 @@ there might be several reasons:
 
 **CompilerError: duplicate addition** {: #compilererror}
 : You are probably compiling or running some code that has been obfuscated
-  with the [`-overloadaggressively`](usage.md#overloadaggressively) option.
+  with the [`-overloadaggressively`](../configuration/usage.md#overloadaggressively) option.
   This option triggers a bug in `sun.tools.java.MethodSet.add` in Sun's JDK
   1.2.2, which is used for (dynamic) compilation. You should then avoid this
   option.
 
 **ClassFormatError: repetitive field name/signature** {: #classformaterror1}
 : You are probably processing some code that has been obfuscated before with
-  the [`-overloadaggressively`](usage.md#overloadaggressively) option. You
+  the [`-overloadaggressively`](../configuration/usage.md#overloadaggressively) option. You
   should then use the same option again in the second processing round.
 
 **ClassFormatError: Invalid index in LocalVariableTable in class file** {: #classformaterror2}
@@ -697,7 +697,7 @@ there might be several reasons:
   corresponding generated classes. DexGuard's default configuration already
   preserves the generated classes, but you still preserve the annotated base
   classes in your project-specific configuration. This is explained in some
-  more detail in the [Dagger example](examples.md#dagger).
+  more detail in the [Dagger example](../configuration/examples.md#dagger).
 
 **NoSuchMethodError** or **AbstractMethodError** {: #nosuchmethoderror}
 : You should make sure you're not writing your output class files to a
@@ -718,7 +718,7 @@ there might be several reasons:
   the result of a bug in the optimization step of ProGuard. Make sure
   you are using the latest version. You should be able to work around
   the problem by using the
-  [`-dontoptimize`](usage.md#dontoptimize) option. You can check the
+  [`-dontoptimize`](../configuration/usage.md#dontoptimize) option. You can check the
   bug database to see if it is a known problem (often with a fix).
   Otherwise, please report it, preferably with the simplest example on
   which ProGuard fails.

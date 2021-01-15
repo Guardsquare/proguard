@@ -45,211 +45,211 @@ The ProGuard task supports the following settings in its closure:
 : Read and merge options from the given ProGuard configuration files.
   The files are resolved and parsed lazily, during the execution phase.
 
-[**`injars`**](usage.md#injars) [*class\_path*](#classpath)
+[**`injars`**](../configuration/usage.md#injars) [*class\_path*](#classpath)
 : Specifies the program jars (or apks, aabs, aars, wars, ears, jmods, zips, or
   directories). The files are resolved and read lazily, during the execution
   phase.
 
-[**`outjars`**](usage.md#outjars) [*class\_path*](#classpath)
+[**`outjars`**](../configuration/usage.md#outjars) [*class\_path*](#classpath)
 : Specifies the names of the output jars (or apks, aabs, aars, wars, ears,
   jmods, zips, or directories). The files are resolved and written lazily,
   during the execution phase.
 
-[**`libraryjars`**](usage.md#libraryjars) [*class\_path*](#classpath)
+[**`libraryjars`**](../configuration/usage.md#libraryjars) [*class\_path*](#classpath)
 : Specifies the names of the output jars (or apks, aabs, aars, wars, ears,
   jmods, zips, or directories). The files are resolved and written lazily,
   during the execution phase.
 
-[**`skipnonpubliclibraryclasses`**](usage.md#skipnonpubliclibraryclasses)
+[**`skipnonpubliclibraryclasses`**](../configuration/usage.md#skipnonpubliclibraryclasses)
 : Ignore non-public library classes.
 
-[**`dontskipnonpubliclibraryclassmembers`**](usage.md#dontskipnonpubliclibraryclassmembers)
+[**`dontskipnonpubliclibraryclassmembers`**](../configuration/usage.md#dontskipnonpubliclibraryclassmembers)
 : Don't ignore package visible library class members.
 
-[**`keepdirectories`**](usage.md#keepdirectories) \['[*directory\_filter*](usage.md#filefilters)'\]
+[**`keepdirectories`**](../configuration/usage.md#keepdirectories) \['[*directory\_filter*](../configuration/usage.md#filefilters)'\]
 : Keep the specified directories in the output jars (or apks, aabs, aars, wars,
   ears, jmods, zips, or directories).
 
-[**`target`**](usage.md#target) '*version*'
+[**`target`**](../configuration/usage.md#target) '*version*'
 : Set the given version number in the processed classes.
 
-[**`forceprocessing`**](usage.md#forceprocessing)
+[**`forceprocessing`**](../configuration/usage.md#forceprocessing)
 : Process the input, even if the output seems up to date.
 
-[**`keep`**](usage.md#keep) \[[*modifier*,...](#keepmodifier)\] [*class\_specification*](#classspecification)
+[**`keep`**](../configuration/usage.md#keep) \[[*modifier*,...](#keepmodifier)\] [*class\_specification*](#classspecification)
 : Preserve the specified classes *and* class members.
 
-[**`keepclassmembers`**](usage.md#keepclassmembers) \[[*modifier*,...](#keepmodifier)\] [*class\_specification*](#classspecification)
+[**`keepclassmembers`**](../configuration/usage.md#keepclassmembers) \[[*modifier*,...](#keepmodifier)\] [*class\_specification*](#classspecification)
 : Preserve the specified class members, if their classes are preserved as
   well.
 
-[**`keepclasseswithmembers`**](usage.md#keepclasseswithmembers) \[[*modifier*,...](#keepmodifier)\] [*class\_specification*](#classspecification)
+[**`keepclasseswithmembers`**](../configuration/usage.md#keepclasseswithmembers) \[[*modifier*,...](#keepmodifier)\] [*class\_specification*](#classspecification)
 : Preserve the specified classes *and* class members, if all of the
   specified class members are present.
 
-[**`keepnames`**](usage.md#keepnames) [*class\_specification*](#classspecification)
+[**`keepnames`**](../configuration/usage.md#keepnames) [*class\_specification*](#classspecification)
 : Preserve the names of the specified classes *and* class members (if they
   aren't removed in the shrinking step).
 
-[**`keepclassmembernames`**](usage.md#keepclassmembernames) [*class\_specification*](#classspecification)
+[**`keepclassmembernames`**](../configuration/usage.md#keepclassmembernames) [*class\_specification*](#classspecification)
 : Preserve the names of the specified class members (if they aren't removed
   in the shrinking step).
 
-[**`keepclasseswithmembernames`**](usage.md#keepclasseswithmembernames) [*class\_specification*](#classspecification)
+[**`keepclasseswithmembernames`**](../configuration/usage.md#keepclasseswithmembernames) [*class\_specification*](#classspecification)
 : Preserve the names of the specified classes *and* class members, if all of
   the specified class members are present (after the shrinking step).
 
-[**`printseeds`**](usage.md#printseeds) \[[*file*](#file)\]
+[**`printseeds`**](../configuration/usage.md#printseeds) \[[*file*](#file)\]
 : List classes and class members matched by the various **`keep`** commands,
   to the standard output or to the given file.
 
-[**`dontshrink`**](usage.md#dontshrink)
+[**`dontshrink`**](../configuration/usage.md#dontshrink)
 : Don't shrink the input class files.
 
-[**`printusage`**](usage.md#printusage) \[[*file*](#file)\]
+[**`printusage`**](../configuration/usage.md#printusage) \[[*file*](#file)\]
 : List dead code of the input class files, to the standard output or to the
   given file.
 
-[**`whyareyoukeeping`**](usage.md#whyareyoukeeping) [*class\_specification*](#classspecification)
+[**`whyareyoukeeping`**](../configuration/usage.md#whyareyoukeeping) [*class\_specification*](#classspecification)
 : Print details on why the given classes and class members are being kept in
   the shrinking step.
 
-[**`dontoptimize`**](usage.md#dontoptimize)
+[**`dontoptimize`**](../configuration/usage.md#dontoptimize)
 : Don't optimize the input class files.
 
-[**`optimizations`**](usage.md#optimizations) '[*optimization\_filter*](optimizations.md)'
+[**`optimizations`**](../configuration/usage.md#optimizations) '[*optimization\_filter*](../configuration/optimizations.md)'
 : Perform only the specified optimizations.
 
-[**`optimizationpasses`**](usage.md#optimizationpasses) *n*
+[**`optimizationpasses`**](../configuration/usage.md#optimizationpasses) *n*
 : The number of optimization passes to be performed.
 
-[**`assumenosideeffects`**](usage.md#assumenosideeffects) [*class\_specification*](#classspecification)
+[**`assumenosideeffects`**](../configuration/usage.md#assumenosideeffects) [*class\_specification*](#classspecification)
 : Assume that the specified methods don't have any side effects, while
   optimizing. *Only use this option if you know what you're doing!*
 
-[**`assumenoexternalsideeffects`**](usage.md#assumenoexternalsideeffects) [*class\_specification*](#classspecification)
+[**`assumenoexternalsideeffects`**](../configuration/usage.md#assumenoexternalsideeffects) [*class\_specification*](#classspecification)
 : Assume that the specified methods don't have any external side effects,
   while optimizing. *Only use this option if you know what you're doing!*
 
-[**`assumenoescapingparameters`**](usage.md#assumenoescapingparameters) [*class\_specification*](#classspecification)
+[**`assumenoescapingparameters`**](../configuration/usage.md#assumenoescapingparameters) [*class\_specification*](#classspecification)
 : Assume that the specified methods don't let any reference parameters
   escape to the heap, while optimizing. *Only use this option if you know what
   you're doing!*
 
-[**`assumenoexternalreturnvalues`**](usage.md#assumenoexternalreturnvalues) [*class\_specification*](#classspecification)
+[**`assumenoexternalreturnvalues`**](../configuration/usage.md#assumenoexternalreturnvalues) [*class\_specification*](#classspecification)
 : Assume that the specified methods don't return any external reference
   values, while optimizing. *Only use this option if you know what you're
   doing!*
 
-[**`assumevalues`**](usage.md#assumevalues) [*class\_specification*](#classspecification)
+[**`assumevalues`**](../configuration/usage.md#assumevalues) [*class\_specification*](#classspecification)
 : Assume fixed values or ranges of values for primitive fields and methods,
   while optimizing. *Only use this option if you know what you're doing!*
 
-[**`allowaccessmodification`**](usage.md#allowaccessmodification)
+[**`allowaccessmodification`**](../configuration/usage.md#allowaccessmodification)
 : Allow the access modifiers of classes and class members to be modified,
   while optimizing.
 
-[**`mergeinterfacesaggressively`**](usage.md#mergeinterfacesaggressively)
+[**`mergeinterfacesaggressively`**](../configuration/usage.md#mergeinterfacesaggressively)
 : Allow any interfaces to be merged, while optimizing.
 
-[**`dontobfuscate`**](usage.md#dontobfuscate)
+[**`dontobfuscate`**](../configuration/usage.md#dontobfuscate)
 : Don't obfuscate the input class files.
 
-[**`printmapping`**](usage.md#printmapping) \[[*file*](#file)\]
+[**`printmapping`**](../configuration/usage.md#printmapping) \[[*file*](#file)\]
 : Print the mapping from old names to new names for classes and class
   members that have been renamed, to the standard output or to the given file.
 
-[**`applymapping`**](usage.md#applymapping) [*file*](#file)
+[**`applymapping`**](../configuration/usage.md#applymapping) [*file*](#file)
 : Reuse the given mapping, for incremental obfuscation.
 
-[**`obfuscationdictionary`**](usage.md#obfuscationdictionary) [*file*](#file)
+[**`obfuscationdictionary`**](../configuration/usage.md#obfuscationdictionary) [*file*](#file)
 : Use the words in the given text file as obfuscated field names and method
   names.
 
-[**`classobfuscationdictionary`**](usage.md#classobfuscationdictionary) [*file*](#file)
+[**`classobfuscationdictionary`**](../configuration/usage.md#classobfuscationdictionary) [*file*](#file)
 : Use the words in the given text file as obfuscated class names.
 
-[**`packageobfuscationdictionary`**](usage.md#packageobfuscationdictionary) [*file*](#file)
+[**`packageobfuscationdictionary`**](../configuration/usage.md#packageobfuscationdictionary) [*file*](#file)
 : Use the words in the given text file as obfuscated package names.
 
-[**`overloadaggressively`**](usage.md#overloadaggressively)
+[**`overloadaggressively`**](../configuration/usage.md#overloadaggressively)
 : Apply aggressive overloading while obfuscating.
 
-[**`useuniqueclassmembernames`**](usage.md#useuniqueclassmembernames)
+[**`useuniqueclassmembernames`**](../configuration/usage.md#useuniqueclassmembernames)
 : Ensure uniform obfuscated class member names for subsequent incremental
   obfuscation.
 
-[**`dontusemixedcaseclassnames`**](usage.md#dontusemixedcaseclassnames)
+[**`dontusemixedcaseclassnames`**](../configuration/usage.md#dontusemixedcaseclassnames)
 : Don't generate mixed-case class names while obfuscating.
 
-[**`keeppackagenames`**](usage.md#keeppackagenames) \['[*package\_filter*](usage.md#filters)'\]
+[**`keeppackagenames`**](../configuration/usage.md#keeppackagenames) \['[*package\_filter*](../configuration/usage.md#filters)'\]
 : Keep the specified package names from being obfuscated. If no name is
   given, all package names are preserved.
 
-[**`flattenpackagehierarchy`**](usage.md#flattenpackagehierarchy) '*package\_name*'
+[**`flattenpackagehierarchy`**](../configuration/usage.md#flattenpackagehierarchy) '*package\_name*'
 : Repackage all packages that are renamed into the single given parent
   package.
 
-[**`repackageclasses`**](usage.md#repackageclasses) \['*package\_name*'\]
+[**`repackageclasses`**](../configuration/usage.md#repackageclasses) \['*package\_name*'\]
 : Repackage all class files that are renamed into the single given package.
 
-[**`keepattributes`**](usage.md#keepattributes) \['[*attribute\_filter*](usage.md#filters)'\]
+[**`keepattributes`**](../configuration/usage.md#keepattributes) \['[*attribute\_filter*](../configuration/usage.md#filters)'\]
 : Preserve the specified optional Java bytecode attributes, with optional
   wildcards. If no name is given, all attributes are preserved.
 
-[**`keepparameternames`**](usage.md#keepparameternames)
+[**`keepparameternames`**](../configuration/usage.md#keepparameternames)
 : Keep the parameter names and types of methods that are kept.
 
-[**`renamesourcefileattribute`**](usage.md#renamesourcefileattribute) \['*string*'\]
+[**`renamesourcefileattribute`**](../configuration/usage.md#renamesourcefileattribute) \['*string*'\]
 : Put the given constant string in the **`SourceFile`** attributes.
 
-[**`adaptclassstrings`**](usage.md#adaptclassstrings) \['[*class\_filter*](usage.md#filters)'\]
+[**`adaptclassstrings`**](../configuration/usage.md#adaptclassstrings) \['[*class\_filter*](../configuration/usage.md#filters)'\]
 : Adapt string constants in the specified classes, based on the obfuscated
   names of any corresponding classes.
 
-[**`adaptresourcefilenames`**](usage.md#adaptresourcefilenames) \['[*file\_filter*](usage.md#filefilters)'\]
+[**`adaptresourcefilenames`**](../configuration/usage.md#adaptresourcefilenames) \['[*file\_filter*](../configuration/usage.md#filefilters)'\]
 : Rename the specified resource files, based on the obfuscated names of the
   corresponding class files.
 
-[**`adaptresourcefilecontents`**](usage.md#adaptresourcefilecontents) \['[*file\_filter*](usage.md#filefilters)'\]
+[**`adaptresourcefilecontents`**](../configuration/usage.md#adaptresourcefilecontents) \['[*file\_filter*](../configuration/usage.md#filefilters)'\]
 : Update the contents of the specified resource files, based on the
   obfuscated names of the processed classes.
 
-[**`dontpreverify`**](usage.md#dontpreverify)
+[**`dontpreverify`**](../configuration/usage.md#dontpreverify)
 : Don't preverify the processed class files if they are targeted at Java
   Micro Edition or at Java 6 or higher.
 
-[**`microedition`**](usage.md#microedition)
+[**`microedition`**](../configuration/usage.md#microedition)
 : Target the processed class files at Java Micro Edition.
 
-[**`android`**](usage.md#android)
+[**`android`**](../configuration/usage.md#android)
 : Target the processed class files at Android.
 
-[**`verbose`**](usage.md#verbose)
+[**`verbose`**](../configuration/usage.md#verbose)
 : Write out some more information during processing.
 
-[**`dontnote`**](usage.md#dontnote) '[*class\_filter*](usage.md#filters)'
+[**`dontnote`**](../configuration/usage.md#dontnote) '[*class\_filter*](../configuration/usage.md#filters)'
 : Don't print notes about classes matching the specified class name filter.
 
-[**`dontwarn`**](usage.md#dontwarn) '[*class\_filter*](usage.md#filters)'
+[**`dontwarn`**](../configuration/usage.md#dontwarn) '[*class\_filter*](../configuration/usage.md#filters)'
 : Don't print warnings about classes matching the specified class name
   filter. *Only use this option if you know what you're doing!*
 
-[**`ignorewarnings`**](usage.md#ignorewarnings)
+[**`ignorewarnings`**](../configuration/usage.md#ignorewarnings)
 : Print warnings about unresolved references, but continue processing
   anyhow. *Only use this option if you know what you're doing!*
 
-[**`printconfiguration`**](usage.md#printconfiguration) \[[*file*](#file)\]
+[**`printconfiguration`**](../configuration/usage.md#printconfiguration) \[[*file*](#file)\]
 : Write out the entire configuration in traditional ProGuard style, to the
   standard output or to the given file. Useful to replace unreadable XML
   configurations.
 
-[**`dump`**](usage.md#dump) \[[*file*](#file)\]
+[**`dump`**](../configuration/usage.md#dump) \[[*file*](#file)\]
 : Write out the internal structure of the processed class files, to the
   standard output or to the given file.
 
-[**`addconfigurationdebugging`**](usage.md#addconfigurationdebugging)
-: Adds debugging information to the code, to print out DexGuard
+[**`addconfigurationdebugging`**](../configuration/usage.md#addconfigurationdebugging)
+: Adds debugging information to the code, to print out ProGuard
   configuration suggestions at runtime. *Do not use this option in release
   versions.*
 
@@ -261,26 +261,26 @@ can be specified as simple strings, with **`files(Object)`**, etc.
 In addition, they can have ProGuard filters, specified as
 comma-separated named arguments after the file:
 
-`filter:` '[*file\_filter*](usage.md#filefilters)'
+`filter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all class file names and resource file names that
   are encountered.
 
-`apkfilter:` '[*file\_filter*](usage.md#filefilters)'
+`apkfilter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all apk names that are encountered.
 
-`jarfilter:` '[*file\_filter*](usage.md#filefilters)'
+`jarfilter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all jar names that are encountered.
 
-`aarfilter:` '[*file\_filter*](usage.md#filefilters)'
+`aarfilter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all aar names that are encountered.
 
-`warfilter:` '[*file\_filter*](usage.md#filefilters)'
+`warfilter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all war names that are encountered.
 
-`earfilter:` '[*file\_filter*](usage.md#filefilters)'
+`earfilter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all ear names that are encountered.
 
-`zipfilter:` '[*file\_filter*](usage.md#filefilters)'
+`zipfilter:` '[*file\_filter*](../configuration/usage.md#filefilters)'
 : An optional filter for all zip names that are encountered.
 
 ## Files {: #file}
@@ -302,23 +302,23 @@ current working directory.
 The keep settings can have the following named arguments that modify
 their behaviors:
 
-[**`if:`**](usage.md#if) [*class\_specification*](#classspecification)
+[**`if:`**](../configuration/usage.md#if) [*class\_specification*](#classspecification)
 : Specifies classes and class members that must be present to activate the
   keep option.
 
-[**`includedescriptorclasses:`**](usage.md#includedescriptorclasses) *boolean* (default = false)
+[**`includedescriptorclasses:`**](../configuration/usage.md#includedescriptorclasses) *boolean* (default = false)
 : Specifies whether the classes of the fields and methods specified in the
   keep tag must be kept as well.
 
-[**`allowshrinking:`**](usage.md#allowshrinking) *boolean* (default = false)
+[**`allowshrinking:`**](../configuration/usage.md#allowshrinking) *boolean* (default = false)
 : Specifies whether the entry points specified in the keep tag may be
   shrunk.
 
-[**`allowoptimization:`**](usage.md#allowoptimization) *boolean* (default = false)
+[**`allowoptimization:`**](../configuration/usage.md#allowoptimization) *boolean* (default = false)
 : Specifies whether the entry points specified in the keep tag may be
   optimized.
 
-[**`allowobfuscation:`**](usage.md#allowobfuscation) *boolean* (default = false)
+[**`allowobfuscation:`**](../configuration/usage.md#allowobfuscation) *boolean* (default = false)
 : Specifies whether the entry points specified in the keep tag may be
   obfuscated.
 
@@ -349,7 +349,7 @@ and methods). There are two alternative ways to specify such a template:
                         parameters: 'java.lang.String[]'
         }
 
-The [ProGuard class specification](usage.md#classspecification)
+The [ProGuard class specification](../configuration/usage.md#classspecification)
 is described on the traditional Usage page.
 
 A Gradle-style class specification can have the following named
