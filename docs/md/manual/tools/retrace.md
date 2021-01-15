@@ -9,24 +9,7 @@ have been replaced by short meaningless strings. Source file names and
 line numbers are missing altogether. While this may be intentional, it
 can also be inconvenient when debugging problems.
 
-<table class="diagram" align="center">
-  <tr>
-    <td><div class="lightgreen box">Original code</div></td>
-    <td><div class="right arrow">ProGuard / DexGuard</div></td>
-    <td><div class="darkgreen box">Obfuscated code</div></td>
-  </tr>
-  <tr>
-    <td/>
-    <td><div class="overlap"><div class="down arrow"></div></div>
-        <div class="overlap"><div class="green box">Mapping file</div></div></td>
-    <td><div class="down arrow">Crash!</div></td>
-  </tr>
-  <tr>
-    <td><div class="lightgreen box">Readable stack trace</div></td>
-    <td><div class="left arrow">ReTrace</div></td>
-    <td><div class="darkgreen box">Obfuscated stack trace</div></td>
-  </tr>
-</table>
+<img src="PG_ReTrace.png" alt="ReTrace deobfuscation workflow" style="display: block; margin-left: auto; margin-right: auto;" />
 
 ReTrace can read an obfuscated stack trace and restore it to what it
 would look like without obfuscation. The restoration is based on the
