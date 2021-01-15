@@ -14,17 +14,6 @@ line to your **`build.gradle`** file:
         }
     }
 
-Or if you want to use your local copy of the plugin:
-
-    buildscript {
-        repositories {
-            flatDir dirs: '/usr/local/java/proguard/lib'
-        }
-        dependencies {
-            classpath ':proguard:'
-        }
-    }
-
 Please make sure the class path is set correctly for your system.
 
 You can then define a task:

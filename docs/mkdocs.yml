@@ -4,7 +4,7 @@
 site_name:        ProGuard
 site_description: Optimizer and obfuscator for Java bytecode
 site_author:      Guardsquare NV
-copyright:        Copyright &copy; 2002-2020 Guardsquare NV
+copyright:        Copyright &copy; 2002-2021 Guardsquare NV
 
 ###################################################################
 # Options
@@ -72,11 +72,13 @@ plugins:
 ###################################################################
 nav:
 - Home:            manual/index.md
-- Building:        building.md
+- Quickstart:      manual/quickstart.md  
+- Building:        manual/building.md
 - Setup:
-    - Gradle Task:     manual/gradle.md
-    - Gradle Plugin:   manual/gradleplugin.md
-    - Ant Task:        manual/ant.md
+    - Standalone:          manual/standalone.md
+    - Android Gradle:      manual/gradleplugin.md
+    - Java/Kotlin Gradle:  manual/gradle.md
+    - Ant Task:            manual/ant.md
 - Configuration:
     - Usage:           manual/usage.md
     - Attributes:      manual/attributes.md
@@ -95,7 +97,7 @@ nav:
     - Overview:        manual/troubleshooting.md
     - Limitations:     manual/limitations.md
 - Reference Card:  manual/refcard.md
-- Version History: releasenotes.md
+- Version History: manual/releasenotes.md
 - Feedback:        feedback.md
 - License:
     - Overview:        license.md
