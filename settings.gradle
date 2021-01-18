@@ -17,7 +17,6 @@ if (hasProperty('proguardCoreDir'))
 }
 
 rootProject.name = 'parent'
-
 include 'base'
 include 'retrace'
 include 'gui'

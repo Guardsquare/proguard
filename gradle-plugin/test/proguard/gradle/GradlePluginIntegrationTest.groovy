@@ -18,11 +18,12 @@ class GradlePluginIntegrationTest extends Specification {
 
         when:
         def result = GradleRunner.create()
-        .forwardOutput().withArguments('proguard')
-        .withProjectDir(projectRoot)
-        .build()
+                .forwardOutput().withArguments('proguard')
+                .withProjectDir(projectRoot)
+                .build()
 
         then:
         result.output =~ "SUCCESSFUL"
     }
 }
+

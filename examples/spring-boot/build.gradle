@@ -70,7 +70,7 @@ task proguard(type: ProGuardTask) {
     verbose
 
     injars  "${buildDir}/extracted/BOOT-INF/classes"
-    outjars "${buildDir}/obfuscatedClasses"
+    outjars "${buildDir}/obfuscatedClasses.jar"
 
     // Automatically handle the Java version of this build.
     if (System.getProperty('java.version').startsWith('1.')) {

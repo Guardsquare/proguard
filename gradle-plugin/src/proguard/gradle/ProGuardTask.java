@@ -24,13 +24,14 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.*;
-import org.gradle.api.tasks.Optional;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.ListUtil;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -40,8 +41,16 @@ import java.util.*;
  *
  * @author Eric Lafortune
  */
-public class ProGuardTask extends DefaultTask
+@CacheableTask
+public abstract class ProGuardTask extends DefaultTask
 {
+
+    @Inject
+    public abstract ProjectLayout getProjectLayout();
+
+    @Inject
+    public abstract ObjectFactory getObjectFactory();
+
     // Accumulated input and output, for the sake of Gradle's lazy file
     // resolution and lazy task execution.
     private final List          inJarFiles         = new ArrayList();
@@ -68,30 +77,30 @@ public class ProGuardTask extends DefaultTask
     // (private or not) don't seem to work. Private methods don't work either,
     // but package visible or protected methods are ok.
 
-    @InputFiles
+    @Classpath
     protected FileCollection getInJarFileCollection()
     {
         return getProject().files(inJarFiles);
     }
 
-    @Optional @OutputFiles
+    @OutputFiles
     protected FileCollection getOutJarFileCollection()
     {
-        return getProject().files(outJarFiles);
+        return getObjectFactory().fileCollection().from(getProject().files(outJarFiles).builtBy(this));
     }
 
-    @InputFiles
+    @Classpath
     protected FileCollection getLibraryJarFileCollection()
     {
         return getProject().files(libraryJarFiles);
     }
 
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     protected FileCollection getConfigurationFileCollection()
     {
         return getProject().files(configurationFiles);
     }
-
 
     // Convenience methods to retrieve settings from outside the task.
 
@@ -99,6 +108,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of input files (directory, jar, aar, etc,
      * represented as Object, String, File, etc).
      */
+    @Internal
     public List getInJarFiles()
     {
         return inJarFiles;
@@ -108,6 +118,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of input files.
      */
+    @Input
     public List getInJarFilters()
     {
         return inJarFilters;
@@ -117,6 +128,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of output files (directory, jar, aar, etc,
      * represented as Object, String, File, etc).
      */
+    @Internal
     public List getOutJarFiles()
     {
         return outJarFiles;
@@ -126,6 +138,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of output files.
      */
+    @Input
     public List getOutJarFilters()
     {
         return outJarFilters;
@@ -139,6 +152,7 @@ public class ProGuardTask extends DefaultTask
      *   the contents of the first 2 input files go to the first output file and
      *   the contents of the next 3 input files go to the second output file.
      */
+    @Internal
     public List getInJarCounts()
     {
         return inJarCounts;
@@ -148,6 +162,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of library files (directory, jar, aar, etc,
      * represented as Object, String, File, etc).
      */
+    @Internal
     public List getLibraryJarFiles()
     {
         return libraryJarFiles;
@@ -157,6 +172,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of library files.
      */
+    @Input
     public List getLibraryJarFilters()
     {
         return libraryJarFilters;
@@ -166,6 +182,7 @@ public class ProGuardTask extends DefaultTask
      * Returns the collected list of configuration files to be included
      * (represented as Object, String, File, etc).
      */
+    @Internal
     public List getConfigurationFiles()
     {
         return configurationFiles;
@@ -233,6 +250,7 @@ public class ProGuardTask extends DefaultTask
     }
 
     // Hack: support the keyword without parentheses in Groovy.
+    @Internal
     public Object getskipnonpubliclibraryclasses()
     {
         skipnonpubliclibraryclasses();
@@ -244,6 +262,7 @@ public class ProGuardTask extends DefaultTask
         configuration.skipNonPublicLibraryClasses = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontskipnonpubliclibraryclassmembers()
     {
@@ -256,6 +275,7 @@ public class ProGuardTask extends DefaultTask
         configuration.skipNonPublicLibraryClassMembers = false;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getkeepdirectories()
     {
@@ -280,6 +300,7 @@ public class ProGuardTask extends DefaultTask
             ClassUtil.internalClassVersion(targetClassVersion);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getforceprocessing()
     {
@@ -628,6 +649,7 @@ public class ProGuardTask extends DefaultTask
                                          classMembersClosure));
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getprintseeds()
     {
@@ -646,6 +668,7 @@ public class ProGuardTask extends DefaultTask
         configuration.printSeeds = getProject().file(printSeeds);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontshrink()
     {
@@ -658,6 +681,7 @@ public class ProGuardTask extends DefaultTask
         configuration.shrink = false;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getprintusage()
     {
@@ -702,6 +726,7 @@ public class ProGuardTask extends DefaultTask
                                                                classMembersClosure));
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontoptimize()
     {
@@ -826,6 +851,7 @@ public class ProGuardTask extends DefaultTask
                                      classMembersClosure));
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getallowaccessmodification()
     {
@@ -838,6 +864,7 @@ public class ProGuardTask extends DefaultTask
         configuration.allowAccessModification = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getmergeinterfacesaggressively()
     {
@@ -850,6 +877,7 @@ public class ProGuardTask extends DefaultTask
         configuration.mergeInterfacesAggressively = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontobfuscate()
     {
@@ -862,6 +890,7 @@ public class ProGuardTask extends DefaultTask
         configuration.obfuscate = false;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getprintmapping()
     {
@@ -907,6 +936,7 @@ public class ProGuardTask extends DefaultTask
             url(packageObfuscationDictionary);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getoverloadaggressively()
     {
@@ -919,6 +949,7 @@ public class ProGuardTask extends DefaultTask
         configuration.overloadAggressively = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getuseuniqueclassmembernames()
     {
@@ -931,6 +962,7 @@ public class ProGuardTask extends DefaultTask
         configuration.useUniqueClassMemberNames = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontusemixedcaseclassnames()
     {
@@ -943,6 +975,7 @@ public class ProGuardTask extends DefaultTask
         configuration.useMixedCaseClassNames = false;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getkeeppackagenames()
     {
@@ -961,6 +994,7 @@ public class ProGuardTask extends DefaultTask
             extendFilter(configuration.keepPackageNames, filter, true);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getflattenpackagehierarchy()
     {
@@ -979,6 +1013,7 @@ public class ProGuardTask extends DefaultTask
             ClassUtil.internalClassName(flattenPackageHierarchy);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getrepackageclasses()
     {
@@ -997,6 +1032,7 @@ public class ProGuardTask extends DefaultTask
             ClassUtil.internalClassName(repackageClasses);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getkeepattributes()
     {
@@ -1015,6 +1051,7 @@ public class ProGuardTask extends DefaultTask
             extendFilter(configuration.keepAttributes, filter);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getkeepparameternames()
     {
@@ -1027,6 +1064,7 @@ public class ProGuardTask extends DefaultTask
         configuration.keepParameterNames = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getrenamesourcefileattribute()
     {
@@ -1044,6 +1082,7 @@ public class ProGuardTask extends DefaultTask
         configuration.newSourceFileAttribute = newSourceFileAttribute;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getadaptclassstrings()
     {
@@ -1062,6 +1101,7 @@ public class ProGuardTask extends DefaultTask
             extendFilter(configuration.adaptClassStrings, filter, true);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getkeepkotlinmetadata()
     {
@@ -1074,6 +1114,7 @@ public class ProGuardTask extends DefaultTask
         configuration.keepKotlinMetadata = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getadaptresourcefilenames()
     {
@@ -1092,6 +1133,7 @@ public class ProGuardTask extends DefaultTask
             extendFilter(configuration.adaptResourceFileNames, filter);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getadaptresourcefilecontents()
     {
@@ -1110,6 +1152,7 @@ public class ProGuardTask extends DefaultTask
             extendFilter(configuration.adaptResourceFileContents, filter);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontpreverify()
     {
@@ -1122,6 +1165,7 @@ public class ProGuardTask extends DefaultTask
         configuration.preverify = false;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getmicroedition()
     {
@@ -1134,6 +1178,7 @@ public class ProGuardTask extends DefaultTask
         configuration.microEdition = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getandroid()
     {
@@ -1170,6 +1215,7 @@ public class ProGuardTask extends DefaultTask
             extendList(configuration.keyPasswords, keyPassword);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getverbose()
     {
@@ -1182,6 +1228,7 @@ public class ProGuardTask extends DefaultTask
         configuration.verbose = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontnote()
     {
@@ -1200,6 +1247,7 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontwarn()
     {
@@ -1218,6 +1266,7 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getignorewarnings()
     {
@@ -1230,6 +1279,7 @@ public class ProGuardTask extends DefaultTask
         configuration.ignoreWarnings = true;
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getprintconfiguration()
     {
@@ -1249,6 +1299,7 @@ public class ProGuardTask extends DefaultTask
             getProject().file(printConfiguration);
     }
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdump()
     {
@@ -1268,6 +1319,7 @@ public class ProGuardTask extends DefaultTask
     }
 
 
+    @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getaddconfigurationdebugging()
     {
