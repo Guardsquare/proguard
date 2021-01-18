@@ -2,6 +2,7 @@ package proguard.gradle
 
 import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -40,9 +41,7 @@ class ProguardCacheRelocateabilityIntegrationTest extends Specification {
             .withProjectDir(relocatedDir)
             .build()
         then:
-        result.output =~ "SUCCESSFUL"
-        result2.output =~ "SUCCESSFUL"
-        result2.output =~ "Task :proguard FROM-CACHE"
+        result2.task(':proguard').outcome == TaskOutcome.FROM_CACHE
     }
 
     def writeSettingsGradle(def projectDir, def cacheDir) {

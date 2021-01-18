@@ -44,13 +44,6 @@ import java.util.*;
 @CacheableTask
 public abstract class ProGuardTask extends DefaultTask
 {
-
-    @Inject
-    public abstract ProjectLayout getProjectLayout();
-
-    @Inject
-    public abstract ObjectFactory getObjectFactory();
-
     // Accumulated input and output, for the sake of Gradle's lazy file
     // resolution and lazy task execution.
     private final List          inJarFiles         = new ArrayList();
@@ -86,7 +79,7 @@ public abstract class ProGuardTask extends DefaultTask
     @OutputFiles
     protected FileCollection getOutJarFileCollection()
     {
-        return getObjectFactory().fileCollection().from(getProject().files(outJarFiles).builtBy(this));
+        return getProject().files(outJarFiles);
     }
 
     @Classpath
