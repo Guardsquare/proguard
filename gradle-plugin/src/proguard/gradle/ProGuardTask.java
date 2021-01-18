@@ -24,14 +24,12 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
-import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.*;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.ListUtil;
 
-import javax.inject.Inject;
 import java.io.*;
 import java.net.*;
 import java.util.*;
