@@ -15,7 +15,6 @@ jobs:
           path: proguard-main
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PROGUARD_GITHUB_TOKEN }}
           repository: Guardsquare/proguard-core
           path: proguard-core
       - uses: actions/setup-java@v1
@@ -25,4 +24,4 @@ jobs:
         with:
           build-root-directory: proguard-main/
           wrapper-directory: proguard-main/
-          arguments: --include-build ../proguard-core/ jar
+          arguments: --include-build ../proguard-core/ test jar
