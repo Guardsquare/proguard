@@ -218,7 +218,7 @@ implements   ClassVisitor,
                                GsonClassConstants.METHOD_TYPE_READER_BEGIN_OBJECT);
 
             // Assign locals for nextFieldIndex.
-            int nextFieldIndexLocalIndex = 1;
+            int nextFieldIndexLocalIndex = 4;
 
             // Start while loop that iterates over Json fields.
             CompactCodeAttributeComposer.Label startWhile    = ____.createLabel();
