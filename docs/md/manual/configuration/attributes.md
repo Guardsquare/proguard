@@ -26,9 +26,10 @@ for potential typos.
 For example, the following setting preserves the optional attributes that are
 typically necessary when processing code that is intended to be used as a
 library:
-
-    -keepattributes Exceptions,InnerClasses,Signature,Deprecated,
-                    SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+```proguard
+-keepattributes Exceptions,InnerClasses,Signature,Deprecated,
+                SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+```
 
 The Java bytecode specifications currently specify the following list of
 attributes.

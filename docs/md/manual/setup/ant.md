@@ -26,10 +26,11 @@ keep your ProGuard configuration file, and include it from Ant. You can
 include your ProGuard configuration file by setting the
 [**`configuration`**](#configuration_attribute) attribute of your `proguard`
 task. Your ant build file will then look like this:
-
+```xml
     <taskdef resource="proguard/ant/task.properties"
              classpath="/usr/local/java/proguard/lib/proguard-ant.jar" />
     <proguard configuration="myconfigfile.pro"/>
+```
 
 This is a convenient option if you prefer ProGuard's configuration style
 over XML, if you want to keep your build file small, or if you have to

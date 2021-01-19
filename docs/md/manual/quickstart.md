@@ -52,20 +52,21 @@ For more detailed information see  [Android Gradle](setup/gradleplugin.md).
 ### Java or Kotlin Gradle project
 
 Your non-mobile Java or Kotlin applications can execute ProGuard's Gradle task:
-
-    task myProguardTask(type: proguard.gradle.ProGuardTask) {
-    .....
-    }
+```proguard
+task myProguardTask(type: proguard.gradle.ProGuardTask) {
+.....
+}
+```
 
 For more detailed information see [Java/Kotlin Gradle](setup/gradle.md).
 
 ### Ant project
 
 You can also include ProGuard in your Ant build, all you have to do is to include the related task into your `build.xml` file:
-
-    <taskdef resource="proguard/ant/task.properties"
-             classpath="/usr/local/java/proguard/lib/proguard.jar" />
-
+```xml
+<taskdef resource="proguard/ant/task.properties"
+        classpath="/usr/local/java/proguard/lib/proguard.jar" />
+```
 
 For more detailed information see [Ant](setup/ant.md).
 

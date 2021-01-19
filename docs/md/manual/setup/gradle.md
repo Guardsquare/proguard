@@ -4,23 +4,25 @@
 Before you can use the **`proguard`** task, you have to make sure Gradle can
 find it in its class path at build time. One way is to add the following
 line to your **`build.gradle`** file:
-
-    buildscript {
-        repositories {
-            jcenter()
-        }
-        dependencies {
-            classpath 'com.guardsquare:proguard-gradle:7.0.1'
-        }
+```Groovy
+buildscript {
+    repositories {
+        jcenter()
     }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.0.1'
+    }
+}
+```
 
 Please make sure the class path is set correctly for your system.
 
 You can then define a task:
-
-    task myProguardTask(type: proguard.gradle.ProGuardTask) {
-        .....
-    }
+```Groovy
+task myProguardTask(type: proguard.gradle.ProGuardTask) {
+    .....
+}
+```
 
 The embedded configuration is much like a standard ProGuard
 configuration. Notable similarities and differences:
@@ -332,22 +334,24 @@ and methods). There are two alternative ways to specify such a template:
 1.  As a string containing a ProGuard class specification. This is
     the most compact and most readable way. The specification looks like
     a Java declaration of a class with fields and methods. For example:
-
-        keep 'public class com.example.MyMainClass {  \
-            public static void main(java.lang.String[]);  \
-        }'
+    ```Groovy
+    keep 'public class com.example.MyMainClass {  \
+        public static void main(java.lang.String[]);  \
+    }'
+    ```
 
 2.  As a Gradle-style setting: a method call with named arguments and
     a closure. This is more verbose, but it might be useful for
     programmatic specifications. For example:
-
-        keep access: 'public',
-             name:   'com.example.MyMainClass', {
-                 method access:     'public static',
-                        type:       'void',
-                        name:       'main',
-                        parameters: 'java.lang.String[]'
-        }
+    ```Groovy
+    keep access: 'public',
+            name:   'com.example.MyMainClass', {
+                method access:     'public static',
+                    type:       'void',
+                    name:       'main',
+                    parameters: 'java.lang.String[]'
+    }
+    ```
 
 The [ProGuard class specification](../configuration/usage.md#classspecification)
 is described on the traditional Usage page.
@@ -435,26 +439,28 @@ A class member setting doesn't have a closure.
 
 Instead of using the Gradle task, you could also integrate the Ant task
 in your Gradle build file:
+```proguard
+ant.project.basedir = '../..'
 
-    ant.project.basedir = '../..'
-
-    ant.taskdef(resource:  'proguard/ant/task.properties',
-                classpath: '/usr/local/java/proguard/lib/proguard.jar')
+ant.taskdef(resource:  'proguard/ant/task.properties',
+            classpath: '/usr/local/java/proguard/lib/proguard.jar')
+```
 
 Gradle automatically converts the elements and attributes to Groovy
 methods, so converting the configuration is essentially mechanical. The
 one-on-one mapping can be useful, but the resulting configuration is
 more verbose. For instance:
+```proguard
+task proguard << {
+    ant.proguard(printmapping: 'proguard.map',
+                overloadaggressively: 'on',
+                repackageclasses: '',
+                renamesourcefileattribute: 'SourceFile') {
 
-    task proguard << {
-      ant.proguard(printmapping: 'proguard.map',
-                   overloadaggressively: 'on',
-                   repackageclasses: '',
-                   renamesourcefileattribute: 'SourceFile') {
+    injar(file: 'application.jar')
+    injar(file: 'gui.jar', filter: '!META-INF/**')
 
-        injar(file: 'application.jar')
-        injar(file: 'gui.jar', filter: '!META-INF/**')
-
-        .....
-      }
+    .....
     }
+}
+```

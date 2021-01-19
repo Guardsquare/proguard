@@ -19,19 +19,21 @@ In order to enable Java 8 language support, a Java 8 Compiler must be
 available when running gradle, i.e. by setting `JAVA\_HOME`. You need to
 configure the *source* and *target* compatibility settings in your
 `build.gradle` script:
-
-    android {
-        .....
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_8
-            targetCompatibility JavaVersion.VERSION_1_8
-        }
+```Groovy
+android {
+    .....
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
+}
+```
 
 If you want to target a minimum API level less than 19, you should add the
 following configuration to your `proguard-project.txt`:
-
-    -target 1.6
+```proguard
+-target 1.6
+```
 
 ## Java 8 stream API support
 
@@ -60,23 +62,25 @@ build:
 
 In order to use the Java 8 stream API and enable backporting in ProGuard, you
 have to specify a minimum `compileSdkVersion` of *24*:
-
-    android {
-        .....
-        compileSdkVersion 24 // or a higher version
-    }
+```Groovy
+android {
+    .....
+    compileSdkVersion 24 // or a higher version
+}
+```
 
 Furthermore, you need to add the *streamsupport* library as dependency to your
 project, e.g. like this:
+```Groovy
+repositories {
+    jcenter()
+}
 
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        ...
-        compile 'net.sourceforge.streamsupport:streamsupport:1.6.3'
-    }
+dependencies {
+    ...
+    compile 'net.sourceforge.streamsupport:streamsupport:1.6.3'
+}
+```
 
 If you use the Java 8 stream API in your project, but ProGuard can not
 backport to the included *streamsupport* library (e.g. due to an incompatible
@@ -117,42 +121,46 @@ This includes the following interfaces:
 
 In order to use the Java 8 time API and enable backporting in ProGuard,
 a minimum `compileSdkVersion` of *26* has to be used:
-
-    android {
-        .....
-        compileSdkVersion 26 // or a higher version
-    }
+```Groovy
+android {
+    .....
+    compileSdkVersion 26 // or a higher version
+}
+```
 
 Furthermore, you need to add the *threetenbp* library as dependency to your
 project, e.g. like this:
+```Groovy
+repositories {
+    jcenter()
+}
 
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        ...
-        api group: 'org.threeten', name: 'threetenbp', version: '1.3.6'
-    }
+dependencies {
+    ...
+    api group: 'org.threeten', name: 'threetenbp', version: '1.3.6'
+}
+```
 
 It is highly recommended to use the *threetenabp* library from Jake Wharton
 instead, which is just as a wrapper around the *threetenbp* library and
 provides an efficient way to initialize the timezone database:
-
-    dependencies {
-        ...
-        compile 'com.jakewharton.threetenabp:threetenabp:1.0.5'
-    }
+```Groovy
+dependencies {
+    ...
+    compile 'com.jakewharton.threetenabp:threetenabp:1.0.5'
+}
+```
 
 Additionally, you have to initialize the timezone database in your application
 class like this:
-
-    public void onCreate()
-    {
-        super.onCreate();
-        ...
-        com.jakewharton.threetenabp.AndroidThreeTen.init(this);
-    }
+```java
+public void onCreate()
+{
+    super.onCreate();
+    ...
+    com.jakewharton.threetenabp.AndroidThreeTen.init(this);
+}
+```
 
 If you use the Java 8 stream API in your project, but ProGuard can not
 backport to the included *threetenbp* library (e.g. due to an incompatible
