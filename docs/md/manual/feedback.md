@@ -16,6 +16,9 @@ ProGuard is currently hosted on GitHub:
   [source code](https://github.com/Guardsquare/proguard) yourself and create
   [pull requests](https://github.com/Guardsquare/proguard/pulls).
 
+!!! tip
+    The [***Guardsquare Community***](https://community.guardsquare.com/) is the place to be for all your ProGuard-related questions and feedback. 
+
 You may also find answers on
 [Stack Overflow](http://stackoverflow.com/questions/tagged/proguard).
 
