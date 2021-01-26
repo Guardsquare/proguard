@@ -45,12 +45,12 @@ task deleteClasses(type: Delete) {
 task copyObfuscatedClasses(type: Copy) {
     dependsOn tasks.deleteClasses
 
-    from "${buildDir}/obfuscatedClasses"
+    from zipTree("${buildDir}/obfuscatedClasses.jar")
     into "${buildDir}/extracted/BOOT-INF/classes/"
 }
 
 task deleteObfuscated(type: Delete) {
-    delete 'build/obfuscatedClasses'
+    delete 'build/obfuscatedClasses.jar'
 }
 
 task repackage(type: Zip) {
