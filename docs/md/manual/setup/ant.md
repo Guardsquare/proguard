@@ -6,7 +6,7 @@ new task. The easiest way is to add the following line to your
 `build.xml` file:
 
     <taskdef resource="proguard/ant/task.properties"
-             classpath="/usr/local/java/proguard/lib/proguard.jar" />
+             classpath="/usr/local/java/proguard/lib/proguard-ant.jar" />
 
 Please make sure the class path is set correctly for your system.
 
@@ -28,7 +28,7 @@ include your ProGuard configuration file by setting the
 task. Your ant build file will then look like this:
 
     <taskdef resource="proguard/ant/task.properties"
-             classpath="/usr/local/java/proguard/lib/proguard.jar" />
+             classpath="/usr/local/java/proguard/lib/proguard-ant.jar" />
     <proguard configuration="myconfigfile.pro"/>
 
 This is a convenient option if you prefer ProGuard's configuration style
@@ -42,7 +42,7 @@ copy the contents of the file into the nested text of the **`proguard`**
 task (the PCDATA area). Your Ant build file will then look like this:
 
     <taskdef resource="proguard/ant/task.properties"
-             classpath="/usr/local/java/proguard/lib/proguard.jar" />
+             classpath="/usr/local/java/proguard/lib/proguard-ant.jar" />
     <proguard>
       -injars      in.jar
       -outjars     out.jar
