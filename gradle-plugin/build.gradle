@@ -1,6 +1,6 @@
 plugins {
     id 'com.jfrog.bintray'
-    id 'java-library'
+    id 'java-gradle-plugin'
     id 'groovy'
     id 'maven-publish'
 }
@@ -63,11 +63,11 @@ repositories {
 }
 
 dependencies {
-    compile project(':base')
-    compile 'com.guardsquare:proguard-core'
+    implementation project(':base')
+    implementation 'com.guardsquare:proguard-core'
     compileOnly 'com.android.tools.build:gradle:3.0.0'
-    compile gradleApi()
-    compile localGroovy()
+    compileOnly gradleApi()
+    implementation localGroovy()
     testImplementation gradleTestKit()
     testImplementation 'junit:junit:4.13.1'
     testImplementation "org.spockframework:spock-core:1.1-groovy-2.4@jar"

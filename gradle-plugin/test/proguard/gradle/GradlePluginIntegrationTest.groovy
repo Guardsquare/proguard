@@ -15,14 +15,18 @@ class GradlePluginIntegrationTest extends Specification {
         def projectRoot = temporaryFolder.newFolder()
         def fixture = new File(getClass().classLoader.getResource('spring-boot').path)
         FileUtils.copyDirectory(fixture, projectRoot)
+        TestPluginClasspath.applyToRootGradle(projectRoot)
 
         when:
         def result = GradleRunner.create()
-        .forwardOutput().withArguments('proguard')
-        .withProjectDir(projectRoot)
-        .build()
+            .forwardOutput()
+            .withArguments('proguard')
+            .withPluginClasspath()
+            .withProjectDir(projectRoot)
+            .build()
 
         then:
         result.output =~ "SUCCESSFUL"
     }
 }
+
