@@ -5,6 +5,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.x  | PGD-0052 | CORE     | Fixed packaging of Ant plugin.
 | 7.1.x  | PGD-0047 | CORE     | Fixed potential IllegalArgumentException in GSON optimization.
 | 7.1.x  | PGD-0110 | CORE     | Fixed writing of kept directories.
 | 7.1.x  | PGC-0015 | CORE     | Added support for Java 16.
