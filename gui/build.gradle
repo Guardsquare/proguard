@@ -17,6 +17,7 @@ targetCompatibility = "${target}"
 sourceSets.main {
     java {
         srcDirs = ['src']
+        include '**/*.java'
     }
     resources {
         srcDirs = ['src']
@@ -28,16 +29,16 @@ sourceSets.main {
 }
 
 dependencies {
-    compile project(':base')
-    compile 'com.guardsquare:proguard-core'
-    compile project(':retrace')
+    implementation project(':base')
+    implementation 'com.guardsquare:proguard-core'
+    implementation project(':retrace')
 }
 
 task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguardgui.jar')
     from sourceSets.main.output
-    configurations = [project.configurations.runtime]
+    configurations = [project.configurations.runtimeClasspath]
     manifest {
         attributes(
                 'Manifest-Version': '1.0',

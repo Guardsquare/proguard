@@ -28,8 +28,8 @@ sourceSets.main {
 }
 
 dependencies {
-    compile "com.guardsquare:proguard-core:${proguardCoreVersion}"
-    compile "com.google.code.gson:gson:${gsonVersion}"
+    implementation "com.guardsquare:proguard-core:${proguardCoreVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
 }
 
 jar.manifest.attributes('Implementation-Version': version)
@@ -38,7 +38,7 @@ task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard.jar')
     from sourceSets.main.output
-    configurations = [project.configurations.runtime]
+    configurations = [project.configurations.runtimeClasspath]
     manifest {
         attributes(
                 'Main-Class': 'proguard.ProGuard',

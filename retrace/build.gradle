@@ -28,15 +28,15 @@ sourceSets.main {
 }
 
 dependencies {
-    compile project(':base')
-    compile 'com.guardsquare:proguard-core'
+    implementation project(':base')
+    implementation 'com.guardsquare:proguard-core'
 }
 
 task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('retrace.jar')
     from sourceSets.main.output
-    configurations = [project.configurations.runtime]
+    configurations = [project.configurations.runtimeClasspath]
     manifest {
         attributes(
                 'Manifest-Version': '1.0',
