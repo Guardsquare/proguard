@@ -61,11 +61,6 @@ jar {
     metaInf.from 'src/META-INF'
 }
 
-repositories {
-    google()
-    jcenter()
-}
-
 dependencies {
     implementation project(':base')
     implementation 'com.guardsquare:proguard-core'
