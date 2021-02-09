@@ -60,8 +60,8 @@ task repackage(type: Zip) {
 
     from  "${buildDir}/extracted"
     entryCompression ZipEntryCompression.STORED
-    archiveName "demo-$version-obfuscated.jar"
-    destinationDir(file("${buildDir}/libs"))
+    archiveFileName= "demo-$archiveVersion-obfuscated.jar"
+    destinationDirectory = file("${buildDir}/libs")
 }
 
 task proguard(type: ProGuardTask) {
