@@ -174,6 +174,11 @@ implements   ClassVisitor,
             // Only merge classes with equal class versions.
             programClass.u4version == targetClass.u4version &&
 
+            (!DETAILS || print(programClass, "Nest host or member?")) &&
+
+            // Don't merge nest hosts or members.
+            !isNestHostOrMember(programClass) &&
+
             (!DETAILS || print(programClass, "No non-copiable attributes?")) &&
 
             // The class to be merged into the target class must not have
@@ -776,6 +781,20 @@ implements   ClassVisitor,
             new AttributeNameFilter(
                 new OrMatcher(new FixedStringMatcher(Attribute.INNER_CLASSES),
                               new FixedStringMatcher(Attribute.ENCLOSING_METHOD)),
+            counter));
+
+        return counter.getCount() > 0;
+    }
+
+
+    private boolean isNestHostOrMember(Clazz clazz)
+    {
+        AttributeCounter counter = new AttributeCounter();
+
+        clazz.attributesAccept(
+            new AttributeNameFilter(
+                new OrMatcher(new FixedStringMatcher(Attribute.NEST_HOST),
+                              new FixedStringMatcher(Attribute.NEST_MEMBERS)),
             counter));
 
         return counter.getCount() > 0;
