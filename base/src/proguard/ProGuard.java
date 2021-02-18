@@ -504,9 +504,10 @@ public class ProGuard
             }
 
             // Perform the Gson optimization.
-            new GsonOptimizer(configuration).execute(programClassPool,
-                                                     libraryClassPool,
-                                                     extraDataEntryNameMap);
+            new GsonOptimizer().execute(programClassPool,
+                                        libraryClassPool,
+                                        extraDataEntryNameMap,
+                                        configuration);
         }
     }
 

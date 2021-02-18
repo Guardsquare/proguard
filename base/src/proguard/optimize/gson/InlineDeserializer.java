@@ -20,8 +20,9 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.editor.*;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramField;
+import proguard.classfile.editor.CompactCodeAttributeComposer;
 
 /**
  * Interface for injecting optimized code for deserializing a field of a class
@@ -55,13 +56,13 @@ interface InlineDeserializer
      *                             deserialize.
      * @param programField         The field of the domain class to
      *                             deserialize.
-     * @param compactCodeAttributeComposer the code attribute composer to be
-     *                                     used for generating instructions.
+     * @param composer             the composer to be used for adding
+     *                             instructions.
      * @param gsonRuntimeSettings  tracks the GSON parameters that are utilized
      *                             in the code.
      */
     void deserialize(ProgramClass                 programClass,
                      ProgramField                 programField,
-                     CompactCodeAttributeComposer compactCodeAttributeComposer,
+                     CompactCodeAttributeComposer composer,
                      GsonRuntimeSettings          gsonRuntimeSettings);
 }

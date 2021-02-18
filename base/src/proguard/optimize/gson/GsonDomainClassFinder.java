@@ -22,13 +22,18 @@ package proguard.optimize.gson;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.Annotation;
-import proguard.classfile.attribute.annotation.visitor.*;
+import proguard.classfile.attribute.annotation.visitor.AllAnnotationVisitor;
+import proguard.classfile.attribute.annotation.visitor.AnnotationTypeFilter;
+import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.util.*;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
 import proguard.util.ProcessingFlags;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Queue;
 
 /**
  * This class visitor determines whether a given domain class can be optimized
@@ -50,12 +55,16 @@ implements   ClassVisitor
     private final GsonRuntimeSettings           gsonRuntimeSettings;
     private final ClassPool                     gsonDomainClassPool;
     private final WarningPrinter                warningPrinter;
-
-    private final ClassPool                     unoptimizedClassPool         = new ClassPool();
-    private final LocalOrAnonymousClassChecker  localOrAnonymousClassChecker = new LocalOrAnonymousClassChecker();
-    private final TypeParameterClassChecker     typeParameterClassChecker    = new TypeParameterClassChecker();
-    private final DuplicateJsonFieldNameChecker duplicateFieldNameChecker    = new DuplicateJsonFieldNameChecker();
-
+    private final ClassPool                     unoptimizedClassPool =
+        new ClassPool();
+    private final LocalOrAnonymousClassChecker  localOrAnonymousClassChecker =
+        new LocalOrAnonymousClassChecker();
+    private final TypeParameterClassChecker     typeParameterClassChecker    =
+        new TypeParameterClassChecker();
+    private final DuplicateJsonFieldNameChecker duplicateFieldNameChecker    =
+        new DuplicateJsonFieldNameChecker();
+    private Queue<ClassAnalysisCommand>         toProcess =
+        new ArrayDeque<>();
 
     /**
      * Creates a new GsonDomainClassFinder.
@@ -85,15 +94,23 @@ implements   ClassVisitor
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
+        toProcess.add(new ClassAnalysisCommand(programClass, true));
         // For classes that are Gson "seeds" (they immediately occur in Gson
         // invocations or are a field of another Gson domain class), we also
         // want to visit the super and sub classes in the class hierarchy.
-        handleDomainClass(programClass, new HierarchyClassVisitor());
+        ClassVisitor recursiveVisitor      = new HierarchyClassVisitor(true);
+        ClassVisitor hierarchyClassVisitor = new HierarchyClassVisitor(false);
+
+        while(!toProcess.isEmpty())
+        {
+            ClassAnalysisCommand toAnalyse = toProcess.poll();
+            handleDomainClass(toAnalyse.programClass, recursiveVisitor, toAnalyse.recursive ? hierarchyClassVisitor : null);
+        }
     }
 
     // Utility methods.
 
-    private void handleDomainClass(ProgramClass programClass, ClassVisitor hierarchyClassVisitor)
+    private void handleDomainClass(ProgramClass programClass, ClassVisitor recursiveVisitor, ClassVisitor hierarchyClassVisitor)
     {
         if (gsonDomainClassPool.getClass(programClass.getName())  == null &&
             unoptimizedClassPool.getClass(programClass.getName()) == null)
@@ -224,10 +241,10 @@ implements   ClassVisitor
                 }
                 programClass.fieldsAccept(
                     new MemberAccessFilter(0, requiredUnsetAccessFlags,
-                    new MultiMemberVisitor(
-                        new MemberDescriptorReferencedClassVisitor(this),
+                                           new MultiMemberVisitor(
+                        new MemberDescriptorReferencedClassVisitor(recursiveVisitor),
                         new AllAttributeVisitor(
-                        new SignatureAttributeReferencedClassVisitor(this)))));
+                        new SignatureAttributeReferencedClassVisitor(recursiveVisitor)))));
             }
 
             // Consider super and sub classes as domain classes too, except for
@@ -293,8 +310,9 @@ implements   ClassVisitor
 
     private boolean isKept(ProgramClass programClass)
     {
-        if((programClass.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0 &&
-           (programClass.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0){
+        if ((programClass.getProcessingFlags() & ProcessingFlags.DONT_SHRINK)    != 0 &&
+            (programClass.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0)
+        {
             UnkeptFieldFinder unkeptFieldFinder = new UnkeptFieldFinder();
             programClass.fieldsAccept(unkeptFieldFinder);
             return !unkeptFieldFinder.found;
@@ -307,19 +325,24 @@ implements   ClassVisitor
     private class HierarchyClassVisitor
     implements    ClassVisitor
     {
+        private final boolean recursive;
+
+
+        private HierarchyClassVisitor(boolean recursive)
+        {
+            this.recursive = recursive;
+        }
+
         // Implementations for ClassVisitor.
 
         @Override
-        public void visitAnyClass(Clazz clazz) {}
+        public void visitAnyClass(Clazz clazz) { }
 
 
         @Override
         public void visitProgramClass(ProgramClass programClass)
         {
-            // For classes that are only a subclass or a superclass of a Gson
-            // "seed", we don't want to visit the super and sub classes in the
-            // class hierarchy.
-            handleDomainClass(programClass, null);
+            toProcess.add(new ClassAnalysisCommand(programClass, recursive));
         }
     }
 
@@ -358,6 +381,19 @@ implements   ClassVisitor
         {
             return (programField.getProcessingFlags() & ProcessingFlags.DONT_SHRINK)    != 0 &&
                    (programField.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0;
+        }
+    }
+
+
+    private static class ClassAnalysisCommand
+    {
+        public final ProgramClass programClass;
+        public final boolean      recursive;
+
+        private ClassAnalysisCommand(ProgramClass programClass, boolean recursive)
+        {
+            this.programClass = programClass;
+            this.recursive    = recursive;
         }
     }
 }

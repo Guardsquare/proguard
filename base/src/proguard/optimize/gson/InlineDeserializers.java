@@ -20,8 +20,10 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.editor.*;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramField;
+import proguard.classfile.editor.CompactCodeAttributeComposer;
 
 /**
  * Class that groups all InlineDeserializer implementations for common types
@@ -56,7 +58,11 @@ class InlineDeserializers
         @Override
         public boolean canDeserialize(GsonRuntimeSettings gsonRuntimeSettings)
         {
-            return true;
+            // Don't deserialize inline when a custom type adapter for Integer
+            // is registered.
+            return gsonRuntimeSettings
+                       .typeAdapterClassPool
+                       .getClass(ClassConstants.NAME_JAVA_LANG_INTEGER) == null;
         }
 
         @Override
@@ -65,7 +71,7 @@ class InlineDeserializers
                                 CompactCodeAttributeComposer ____,
                                 GsonRuntimeSettings          gsonRuntimeSettings)
         {
-            // Create labels for the exception.
+            // Create labels for exception table.
             CompactCodeAttributeComposer.Label tryStart = ____.createLabel();
             CompactCodeAttributeComposer.Label tryEnd   = ____.createLabel();
             CompactCodeAttributeComposer.Label catchEnd = ____.createLabel();
@@ -119,7 +125,11 @@ class InlineDeserializers
         @Override
         public boolean canDeserialize(GsonRuntimeSettings gsonRuntimeSettings)
         {
-            return true;
+            // Don't deserialize inline when a custom type adapter for String is
+            // registered.
+            return gsonRuntimeSettings
+                       .typeAdapterClassPool
+                       .getClass(ClassConstants.NAME_JAVA_LANG_STRING) == null;
         }
 
         @Override

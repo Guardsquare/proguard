@@ -23,14 +23,26 @@ package proguard.optimize.gson;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.editor.*;
-import proguard.classfile.util.*;
+import proguard.classfile.editor.ClassEditor;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.editor.PeepholeEditor;
+import proguard.classfile.util.BranchTargetFinder;
+import proguard.classfile.util.ClassReferenceInitializer;
+import proguard.classfile.util.ClassSubHierarchyInitializer;
+import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
-import proguard.io.*;
-import proguard.util.*;
+import proguard.io.ClassPathDataEntry;
+import proguard.io.ClassReader;
+import proguard.io.ExtraDataEntryNameMap;
+import proguard.util.ProcessingFlagSetter;
+import proguard.util.ProcessingFlags;
+import proguard.util.StringUtil;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static proguard.classfile.ClassConstants.CLASS_FILE_EXTENSION;
 import static proguard.optimize.gson.GsonClassConstants.NAME_EXCLUDER;
@@ -76,28 +88,16 @@ public class GsonOptimizer
 
     // The order of this matters to ensure that the class references are
     // initialized properly.
-    private static final String[] TEMPLATE_CLASS_NAMES =
-    {
-        NAME_OPTIMIZED_TYPE_ADAPTER,
-        NAME_GSON_UTIL,
-        NAME_OPTIMIZED_JSON_READER,
-        NAME_OPTIMIZED_JSON_READER_IMPL,
-        NAME_OPTIMIZED_JSON_WRITER,
-        NAME_OPTIMIZED_JSON_WRITER_IMPL,
-        NAME_OPTIMIZED_TYPE_ADAPTER_FACTORY
-    };
-
-
-    private final Configuration configuration;
-
-
-    /**
-     * Creates a new GsonOptimizer.
-     */
-    public GsonOptimizer(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
+    private static final String[] TEMPLATE_CLASSES =
+        {
+            NAME_OPTIMIZED_TYPE_ADAPTER,
+            NAME_GSON_UTIL,
+            NAME_OPTIMIZED_JSON_READER,
+            NAME_OPTIMIZED_JSON_READER_IMPL,
+            NAME_OPTIMIZED_JSON_WRITER,
+            NAME_OPTIMIZED_JSON_WRITER_IMPL,
+            NAME_OPTIMIZED_TYPE_ADAPTER_FACTORY
+        };
 
 
     /**
@@ -109,13 +109,14 @@ public class GsonOptimizer
      *                              library class references.
      * @param extraDataEntryNameMap the map to which injected class names are
      *                              added.
+     * @param configuration         the configuration that is applied.
      * @throws IOException          when the injected template classes can not
      *                              be read.
      */
     public void execute(ClassPool             programClassPool,
                         ClassPool             libraryClassPool,
-                        ExtraDataEntryNameMap extraDataEntryNameMap)
-    throws IOException
+                        ExtraDataEntryNameMap extraDataEntryNameMap,
+                        Configuration         configuration) throws IOException
     {
         // Set all fields of Gson to public.
         programClassPool.classesAccept(
@@ -144,6 +145,7 @@ public class GsonOptimizer
         // Is there something to optimize at all?
         if (gsonContext.gsonDomainClassPool.size() > 0)
         {
+
             // Collect fields that need to be serialized and deserialized.
             OptimizedJsonInfo serializationInfo   = new OptimizedJsonInfo();
             OptimizedJsonInfo deserializationInfo = new OptimizedJsonInfo();
@@ -181,11 +183,13 @@ public class GsonOptimizer
                                     new ClassReferenceInitializer(programClassPool, libraryClassPool),
                                     new ClassSubHierarchyInitializer()));
 
-            for (String className : TEMPLATE_CLASS_NAMES)
+            for (String clazz : TEMPLATE_CLASSES)
             {
-                helperClassReader.read(new ClassPathDataEntry(className + CLASS_FILE_EXTENSION));
-                extraDataEntryNameMap.addExtraClassToClass(GsonClassConstants.NAME_GSON,
-                                                           className);
+                helperClassReader.read(new ClassPathDataEntry(clazz + CLASS_FILE_EXTENSION));
+                for (Clazz domainClass : gsonContext.gsonDomainClassPool.classes())
+                {
+                    extraDataEntryNameMap.addExtraClassToClass(domainClass.getName(), clazz);
+                }
             }
 
             // Inject serialization and deserialization data structures in
@@ -197,6 +201,8 @@ public class GsonOptimizer
             programClassPool
                 .classesAccept(NAME_OPTIMIZED_JSON_WRITER_IMPL,
                     new MultiClassVisitor(
+                        // Class encryption is disabled to avoid performance loss.
+                        // new ProcessingFlagSetter(ProcessingFlags.ENCRYPT),
                         new AllMemberVisitor(
                         new MemberNameFilter(OptimizedClassConstants.METHOD_NAME_INIT_NAMES,
                         new MemberDescriptorFilter(OptimizedClassConstants.METHOD_TYPE_INIT_NAMES,
@@ -236,7 +242,8 @@ public class GsonOptimizer
             gsonContext.gsonDomainClassPool
                 .classesAccept(new ClassReferenceInitializer(programClassPool, libraryClassPool));
 
-            // Inject type adapters for all serialized and deserialized classes.
+            // Inject type adapters for all serialized and deserialized classes that are not abstract and hence can
+            // be instantiated directly.
             Map<String, String> typeAdapterRegistry = new HashMap<String, String>();
             OptimizedTypeAdapterAdder optimizedTypeAdapterAdder =
                 new OptimizedTypeAdapterAdder(programClassPool,
@@ -248,19 +255,21 @@ public class GsonOptimizer
                                               typeAdapterRegistry,
                                               gsonContext.gsonRuntimeSettings);
 
-            gsonContext.gsonDomainClassPool.classesAccept(optimizedTypeAdapterAdder);
+            gsonContext.gsonDomainClassPool.classesAccept(
+                new ClassAccessFilter(0, AccessConstants.ABSTRACT,
+                optimizedTypeAdapterAdder));
 
             // Implement type adapter factory.
             programClassPool.classAccept(NAME_OPTIMIZED_TYPE_ADAPTER_FACTORY,
-                    new MultiClassVisitor(
-                        new AllMemberVisitor(
-                        new AllAttributeVisitor(
-                        new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
-                                           new OptimizedTypeAdapterFactoryInitializer(programClassPool,
-                                                                   codeAttributeEditor,
-                                                                   typeAdapterRegistry,
-                                                                   gsonContext.gsonRuntimeSettings)))),
-                        new ClassReferenceInitializer(programClassPool, libraryClassPool)));
+                new MultiClassVisitor(
+                new AllMemberVisitor(
+                new AllAttributeVisitor(
+                new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
+                new OptimizedTypeAdapterFactoryInitializer(programClassPool,
+                                                           codeAttributeEditor,
+                                                           typeAdapterRegistry,
+                                                           gsonContext.gsonRuntimeSettings)))),
+                new ClassReferenceInitializer(programClassPool, libraryClassPool)));
 
 
             // Add excluder field to Gson class if not present to support
@@ -292,11 +301,12 @@ public class GsonOptimizer
 
             // Inject code that registers inject type adapter factory for optimized domain classes in Gson constructor.
             programClassPool.classAccept(NAME_GSON,
-                    new MultiClassVisitor(
-                        new AllMemberVisitor(
-                            new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
-                            new GsonConstructorPatcher(codeAttributeEditor, addExcluder))),
-                        new ClassReferenceInitializer(programClassPool, libraryClassPool)));
+                new MultiClassVisitor(
+                    new AllMemberVisitor(
+                        new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
+                        new GsonConstructorPatcher(codeAttributeEditor, addExcluder))),
+                    new ClassReferenceInitializer(programClassPool, libraryClassPool)));
+
 
             if (configuration.verbose)
             {
@@ -308,24 +318,24 @@ public class GsonOptimizer
                 // Inject instrumentation code in Gson.toJson() and Gson.fromJson().
                 programClassPool.classAccept(NAME_GSON,
                     new AllMethodVisitor(
-                        new MultiMemberVisitor(
-                        new MemberNameFilter(GsonClassConstants.METHOD_NAME_TO_JSON,
-                                             new MemberDescriptorFilter(StringUtil.join(",",
-                                                                   GsonClassConstants.METHOD_TYPE_TO_JSON_OBJECT_TYPE_WRITER,
-                                                                   GsonClassConstants.METHOD_TYPE_TO_JSON_JSON_ELEMENT_WRITER),
-                        new AllAttributeVisitor(
-                        new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
-                                           new GsonInstrumentationAdder(programClassPool,
-                                                     libraryClassPool,
-                                                     codeAttributeEditor))))),
+                    new MultiMemberVisitor(
+                    new MemberNameFilter(GsonClassConstants.METHOD_NAME_TO_JSON,
+                    new MemberDescriptorFilter(StringUtil.join(",",
+                                                               GsonClassConstants.METHOD_TYPE_TO_JSON_OBJECT_TYPE_WRITER,
+                                                               GsonClassConstants.METHOD_TYPE_TO_JSON_JSON_ELEMENT_WRITER),
+                    new AllAttributeVisitor(
+                    new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
+                    new GsonInstrumentationAdder(programClassPool,
+                                                 libraryClassPool,
+                                                 codeAttributeEditor))))),
 
-                        new MemberNameFilter(GsonClassConstants.METHOD_NAME_FROM_JSON,
-                        new MemberDescriptorFilter(GsonClassConstants.METHOD_TYPE_FROM_JSON_JSON_READER_TYPE,
-                        new AllAttributeVisitor(
-                        new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
-                                           new GsonInstrumentationAdder(programClassPool,
-                                                     libraryClassPool,
-                                                     codeAttributeEditor))))))));
+                    new MemberNameFilter(GsonClassConstants.METHOD_NAME_FROM_JSON,
+                    new MemberDescriptorFilter(GsonClassConstants.METHOD_TYPE_FROM_JSON_JSON_READER_TYPE,
+                    new AllAttributeVisitor(
+                    new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
+                    new GsonInstrumentationAdder(programClassPool,
+                                                 libraryClassPool,
+                                                 codeAttributeEditor))))))));
             }
         }
     }

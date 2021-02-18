@@ -20,17 +20,27 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.visitor.AttributeNameFilter;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.SingleTimeAttributeVisitor;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.InstructionSequenceBuilder;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
+import proguard.classfile.util.InstructionSequenceMatcher;
+import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.ClassVisitor;
-import proguard.evaluation.*;
-import proguard.evaluation.value.*;
+import proguard.evaluation.BasicInvocationUnit;
+import proguard.evaluation.PartialEvaluator;
+import proguard.evaluation.value.InstructionOffsetValue;
+import proguard.evaluation.value.ReferenceValue;
+import proguard.evaluation.value.TypedReferenceValueFactory;
 
 /**
  * This instruction visitor searches the code for invocations to any of the
@@ -62,7 +72,7 @@ implements   InstructionVisitor
                              true);
     private final AttributeVisitor           lazyPartialEvaluator =
         new AttributeNameFilter(Attribute.CODE,
-        new SingleTimeAttributeVisitor(partialEvaluator));
+                                new SingleTimeAttributeVisitor(partialEvaluator));
 
 
     /**
@@ -86,7 +96,7 @@ implements   InstructionVisitor
         this.programClassPool   = programClassPool;
         this.libraryClassPool   = libraryClassPool;
         this.domainClassVisitor = domainClassVisitor;
-        this.warningPrinter     = warningPrinter;
+        this.warningPrinter = warningPrinter;
 
         // Create matchers for relevant instruction sequences.
         InstructionSequenceBuilder builder = new InstructionSequenceBuilder();
@@ -254,11 +264,11 @@ implements   InstructionVisitor
                 else if (warningPrinter != null)
                 {
                     warningPrinter.print(clazz.getName(),
-                                         "Warning: can't derive serialized type from toJson() invocation in " +
-                                         clazz.getName() +
-                                         "." +
-                                         method.getName(clazz) +
-                                         method.getDescriptor(clazz));
+                                      "Warning: can't derive serialized type from toJson() invocation in " +
+                                      clazz.getName() +
+                                      "." +
+                                      method.getName(clazz) +
+                                      method.getDescriptor(clazz));
                 }
             }
         }

@@ -22,10 +22,11 @@ package proguard.optimize.gson;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.SignatureAttribute;
-import proguard.classfile.editor.*;
+import proguard.classfile.editor.AttributesEditor;
+import proguard.classfile.editor.ClassBuilder;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.editor.SubclassAdder;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
-
-import static proguard.classfile.VersionConstants.CLASS_VERSION_1_5;
 
 /**
  * This builder builds a GSON TypeToken class based on a given field signature.
@@ -61,9 +62,11 @@ class TypeTokenClassBuilder
      * Builds and returns a new TypeToken subclass that contains all necessary
      * type information in its signature.
      *
+     * @param programClassPool the program class pool used to look up class
+     *                         references.
      * @return the TypeToken class with the correct signature.
      */
-    public ProgramClass build()
+    public ProgramClass build(ClassPool programClassPool)
     {
         String typeTokenClassName = programClass.getName() +
                                     programField.getName(programClass) +
@@ -72,27 +75,27 @@ class TypeTokenClassBuilder
         // Create sub-class of TypeToken with default constructor.
         // Class version 1.5 is required to make the Java runtime even consider
         // the Signature attribute.
-        ProgramClass subClass = new ClassBuilder(
-            CLASS_VERSION_1_5,
-            AccessConstants.PUBLIC,
-            typeTokenClassName,
-            GsonClassConstants.NAME_TYPE_TOKEN)
-
-            .addMethod(
-                AccessConstants.PUBLIC,
-                ClassConstants.METHOD_NAME_INIT,
-                ClassConstants.METHOD_TYPE_INIT,
-                10,
-                code -> code
-                    .aload_0()
-                    .invokespecial(GsonClassConstants.NAME_TYPE_TOKEN,
-                                   ClassConstants.METHOD_NAME_INIT,
-                                   ClassConstants.METHOD_TYPE_INIT)
-                    .return_())
-
-            .getProgramClass();
+        ProgramClass subClass =
+            new ClassBuilder(VersionConstants.CLASS_VERSION_1_5,
+                             AccessConstants.PUBLIC,
+                             typeTokenClassName,
+                             GsonClassConstants.NAME_TYPE_TOKEN)
+                .addMethod(
+                    AccessConstants.PUBLIC,
+                    ClassConstants.METHOD_NAME_INIT,
+                    ClassConstants.METHOD_TYPE_INIT,
+                    10,
+                    ____ -> ____
+                        .aload_0()
+                        .invokespecial(GsonClassConstants.NAME_TYPE_TOKEN,
+                                       ClassConstants.METHOD_NAME_INIT,
+                                       ClassConstants.METHOD_TYPE_INIT)
+                        .return_())
+                .getProgramClass();
 
         subClass.accept(new ProgramClassOptimizationInfoSetter(true));
+        programClassPool.classAccept(GsonClassConstants.NAME_TYPE_TOKEN,
+                                     new SubclassAdder(subClass));
 
         // Add signature attribute with full generic type.
         ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor(subClass);

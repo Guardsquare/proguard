@@ -20,8 +20,10 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.editor.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramField;
+import proguard.classfile.editor.CompactCodeAttributeComposer;
 
 /**
  * Interface for injecting optimized code for serializing a field of a class
@@ -53,17 +55,16 @@ interface InlineSerializer
      * 2 jsonWriter
      * 3 optimizedJsonWriter
      *
-     * @param programClass                 the domain class containing the
-     *                                     field to serialize.
-     * @param programField                 the field of the domain class to
-     *                                     serialize.
-     * @param compactCodeAttributeComposer the code attribute composer to be
-     *                                     used for generating instructions.
-     * @param gsonRuntimeSettings          tracks the GSON parameters that
-     *                                     are utilized in the code.
+     * @param programClass         The domain class containing the field to
+     *                             serialize.
+     * @param programField         The field of the domain class to serialize.
+     * @param composer             the composer to be used for adding
+     *                             instructions.
+     * @param gsonRuntimeSettings  tracks the GSON parameters that are utilized
+     *                             in the code.
      */
     void serialize(ProgramClass                 programClass,
                    ProgramField                 programField,
-                   CompactCodeAttributeComposer compactCodeAttributeComposer,
+                   CompactCodeAttributeComposer composer,
                    GsonRuntimeSettings          gsonRuntimeSettings);
 }

@@ -20,12 +20,23 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.JavaTypeConstants;
+import proguard.classfile.ProgramClass;
 import proguard.classfile.editor.CodeAttributeEditor;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
-import proguard.io.*;
-import proguard.util.*;
+import proguard.classfile.util.ClassReferenceInitializer;
+import proguard.classfile.util.ClassSubHierarchyInitializer;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.visitor.ClassPoolFiller;
+import proguard.classfile.visitor.ClassPresenceFilter;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.MultiClassVisitor;
+import proguard.io.ClassPathDataEntry;
+import proguard.io.ClassReader;
+import proguard.io.ExtraDataEntryNameMap;
+import proguard.util.ProcessingFlagSetter;
+import proguard.util.ProcessingFlags;
 
 import java.io.IOException;
 import java.util.Map;
@@ -86,14 +97,14 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
                                      Map<String, String>   typeAdapterRegistry,
                                      GsonRuntimeSettings   gsonRuntimeSettings)
     {
-        this.programClassPool      = programClassPool;
-        this.libraryClassPool      = libraryClassPool;
-        this.codeAttributeEditor   = codeAttributeEditor;
-        this.serializationInfo     = serializationInfo;
-        this.deserializationInfo   = deserializationInfo;
-        this.extraDataEntryNameMap = extraDataEntryNameMap;
-        this.typeAdapterRegistry   = typeAdapterRegistry;
-        this.gsonRuntimeSettings   = gsonRuntimeSettings;
+        this.programClassPool         = programClassPool;
+        this.libraryClassPool         = libraryClassPool;
+        this.codeAttributeEditor      = codeAttributeEditor;
+        this.serializationInfo        = serializationInfo;
+        this.deserializationInfo      = deserializationInfo;
+        this.extraDataEntryNameMap    = extraDataEntryNameMap;
+        this.typeAdapterRegistry      = typeAdapterRegistry;
+        this.gsonRuntimeSettings      = gsonRuntimeSettings;
     }
 
 
@@ -144,7 +155,7 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
             {
                 String dataEntryName = getDataEntryName(NAME_OPTIMIZED_TYPE_ADAPTER_IMPL);
                 templateClassReader.read(new ClassPathDataEntry(dataEntryName));
-                extraDataEntryNameMap.addExtraClassToClass(programClass, typeAdapterClassName);
+                extraDataEntryNameMap.addExtraClassToClass(programClass.getName(), typeAdapterClassName);
                 typeAdapterRegistry.put(programClass.getName(), typeAdapterClassName);
             }
             catch (IOException e)

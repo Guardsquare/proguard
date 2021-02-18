@@ -20,14 +20,25 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.SignatureAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.MethodrefConstant;
+import proguard.classfile.constant.RefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.instruction.*;
+import proguard.classfile.instruction.ConstantInstruction;
+import proguard.classfile.instruction.Instruction;
+import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.evaluation.*;
+import proguard.evaluation.PartialEvaluator;
+import proguard.evaluation.TracedStack;
 import proguard.evaluation.value.InstructionOffsetValue;
 import proguard.util.ArrayUtil;
 
@@ -227,13 +238,16 @@ implements InstructionVisitor,
         public void visitMethodrefConstant(Clazz             clazz,
                                            MethodrefConstant methodrefConstant)
         {
-            if (methodrefConstant.referencedClass.getName().equals(GsonClassConstants.NAME_TYPE_TOKEN) &&
-                methodrefConstant.getName(clazz).equals(GsonClassConstants.METHOD_NAME_GET_TYPE))
+            if (methodrefConstant.referencedClass != null)
             {
-                programClassPool.classAccept(methodrefConstant.getClassName(clazz),
-                                             new AllAttributeVisitor(this));
-                libraryClassPool.classAccept(methodrefConstant.getClassName(clazz),
-                                             new AllAttributeVisitor(this));
+                if (GsonClassConstants.NAME_TYPE_TOKEN.equals(methodrefConstant.referencedClass.getName()) &&
+                    GsonClassConstants.METHOD_NAME_GET_TYPE.equals(methodrefConstant.getName(clazz)))
+                {
+                    programClassPool.classAccept(methodrefConstant.getClassName(clazz),
+                                                 new AllAttributeVisitor(this));
+                    libraryClassPool.classAccept(methodrefConstant.getClassName(clazz),
+                                                 new AllAttributeVisitor(this));
+                }
             }
         }
 

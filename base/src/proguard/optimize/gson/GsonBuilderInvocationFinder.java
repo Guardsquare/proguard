@@ -20,17 +20,26 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.visitor.AttributeNameFilter;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.SingleTimeAttributeVisitor;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.InstructionSequenceBuilder;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
-import proguard.evaluation.*;
-import proguard.evaluation.value.*;
+import proguard.classfile.util.InstructionSequenceMatcher;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.ImplementedClassFilter;
+import proguard.evaluation.BasicInvocationUnit;
+import proguard.evaluation.PartialEvaluator;
+import proguard.evaluation.value.InstructionOffsetValue;
+import proguard.evaluation.value.TypedReferenceValueFactory;
 
 /**
  * This instructor visitor searches for invocations to GsonBuilder and keeps
@@ -67,7 +76,8 @@ implements   InstructionVisitor
                              true);
     private final AttributeVisitor           lazyPartialEvaluator =
         new AttributeNameFilter(Attribute.CODE,
-        new SingleTimeAttributeVisitor(partialEvaluator));
+                                new SingleTimeAttributeVisitor(
+                                             partialEvaluator));
     private final ClassPool                  programClassPool;
     private final ClassPool                  libraryClassPool;
     private final GsonRuntimeSettings        gsonRuntimeSettings;

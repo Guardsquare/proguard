@@ -21,7 +21,7 @@
 package proguard.optimize.gson;
 
 import proguard.classfile.*;
-import proguard.classfile.editor.*;
+import proguard.classfile.editor.CompactCodeAttributeComposer;
 
 /**
  * Class that groups all InlineSerializer implementations for common types
@@ -42,7 +42,11 @@ class InlineSerializers
         public boolean canSerialize(ClassPool           programClassPool,
                                     GsonRuntimeSettings gsonRuntimeSettings)
         {
-            return true;
+            // Don't serialize inline when a custom type adapter for Boolean is
+            // registered.
+            return gsonRuntimeSettings
+                       .typeAdapterClassPool
+                       .getClass(ClassConstants.NAME_JAVA_LANG_BOOLEAN) == null;
         }
 
 
@@ -73,6 +77,15 @@ class InlineSerializers
         public boolean canSerialize(ClassPool           programClassPool,
                                     GsonRuntimeSettings gsonRuntimeSettings)
         {
+            // Don't serialize inline when a custom type adapter for Boolean is
+            // registered.
+            if (gsonRuntimeSettings
+                    .typeAdapterClassPool
+                    .getClass(ClassConstants.NAME_JAVA_LANG_BOOLEAN) != null)
+            {
+                return false;
+            }
+
             // Check whether JsonWriter.value(Boolean) is present in the used
             // version of Gson (should be from Gson 2.7 onwards).
             Clazz jsonWriterClass =
@@ -111,7 +124,11 @@ class InlineSerializers
         public boolean canSerialize(ClassPool           programClassPool,
                                     GsonRuntimeSettings gsonRuntimeSettings)
         {
-            return true;
+            // Don't serialize inline when a custom type adapter for Integer is
+            // registered.
+            return gsonRuntimeSettings
+                       .typeAdapterClassPool
+                       .getClass(ClassConstants.NAME_JAVA_LANG_INTEGER) == null;
         }
 
 
@@ -123,11 +140,11 @@ class InlineSerializers
         {
             ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .aload(OptimizedClassConstants.ToJsonLocals.THIS)
-                .getfield(programClass, programField)
-                .invokestatic(ClassConstants.NAME_JAVA_LANG_INTEGER,
+                .getfield(programClass, programField);
+            ____.invokestatic(ClassConstants.NAME_JAVA_LANG_INTEGER,
                               ClassConstants.METHOD_NAME_VALUE_OF,
-                              ClassConstants.METHOD_TYPE_VALUE_OF_INT)
-                .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
+                              ClassConstants.METHOD_TYPE_VALUE_OF_INT);
+            ____.invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
                                GsonClassConstants.METHOD_NAME_VALUE_NUMBER,
                                GsonClassConstants.METHOD_TYPE_VALUE_NUMBER)
                 .pop();
@@ -145,7 +162,11 @@ class InlineSerializers
         public boolean canSerialize(ClassPool           programClassPool,
                                     GsonRuntimeSettings gsonRuntimeSettings)
         {
-            return true;
+            // Don't serialize inline when a custom type adapter for String is
+            // registered.
+            return gsonRuntimeSettings
+                       .typeAdapterClassPool
+                       .getClass(ClassConstants.NAME_JAVA_LANG_STRING) == null;
         }
 
 

@@ -5,6 +5,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.x  | DGD-3110 | CORE     | Improved GSON support.
 | 7.1.x  | DGD-3289 | CORE     | Fixed potential, incorrect advanced code optimizations.
 | 7.1.x  | PGD-0037 | CORE     | Disallowed merging of nest hosts or members during class merging optimization.
 | 7.1.x  | PGD-0052 | CORE     | Fixed packaging of Ant plugin.
