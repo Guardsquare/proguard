@@ -63,7 +63,8 @@ implements   AttributeVisitor
 
     private final PartialEvaluator                partialEvaluator;
     private final boolean                         runPartialEvaluator;
-    private final PartialEvaluator                simplePartialEvaluator        = new PartialEvaluator(new TypedReferenceValueFactory());
+    private final boolean                         ensureSafetyForVerifier;
+    private final PartialEvaluator                simplePartialEvaluator;
     private final SideEffectInstructionChecker    sideEffectInstructionChecker  = new SideEffectInstructionChecker(true, true);
     private final MyParameterUsageMarker          parameterUsageMarker          = new MyParameterUsageMarker();
     private final MyInitialUsageMarker            initialUsageMarker            = new MyInitialUsageMarker();
@@ -93,6 +94,7 @@ implements   AttributeVisitor
 
     /**
      * Creates a new InstructionUsageMarker.
+     *
      * @param partialEvaluator    the evaluator to be used for the analysis.
      * @param runPartialEvaluator specifies whether to run this evaluator on
      *                            every code attribute that is visited.
@@ -100,8 +102,36 @@ implements   AttributeVisitor
     public InstructionUsageMarker(PartialEvaluator partialEvaluator,
                                   boolean          runPartialEvaluator)
     {
-        this.partialEvaluator    = partialEvaluator;
-        this.runPartialEvaluator = runPartialEvaluator;
+        this(partialEvaluator, runPartialEvaluator, true);
+    }
+
+
+    /**
+     * Creates a new InstructionUsageMarker.
+     *
+     * @param partialEvaluator         the evaluator to be used for the analysis.
+     * @param runPartialEvaluator      specifies whether to run this evaluator on
+     *                                 every code attribute that is visited.
+     * @param ensureSafetyForVerifier  some instructions are not necessary for
+     *                                 code correctness but are necessary for the
+     *                                 java verifier. This flag determines whether
+     *                                 these instructions are visited (default: true).
+     */
+    public InstructionUsageMarker(PartialEvaluator partialEvaluator,
+                                  boolean          runPartialEvaluator,
+                                  boolean          ensureSafetyForVerifier)
+    {
+        this.partialEvaluator        = partialEvaluator;
+        this.runPartialEvaluator     = runPartialEvaluator;
+        this.ensureSafetyForVerifier = ensureSafetyForVerifier;
+        if (ensureSafetyForVerifier)
+        {
+            this.simplePartialEvaluator = new PartialEvaluator(new TypedReferenceValueFactory());
+        }
+        else
+        {
+            this.simplePartialEvaluator = partialEvaluator;
+        }
     }
 
 
@@ -370,6 +400,11 @@ implements   AttributeVisitor
         if (runPartialEvaluator)
         {
             partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
+        }
+        if (ensureSafetyForVerifier)
+        {
+            // Evaluate the method the way the JVM verifier would do it.
+            simplePartialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
         }
 
         // Evaluate the method the way the JVM verifier would do it.

@@ -51,6 +51,7 @@ implements   AttributeVisitor,
     private static boolean DEBUG_RESULTS  = DEBUG;
     //*/
 
+    // Useful short sequences of simple instructions (LSB first).
     private static final int UNSUPPORTED         = -1;
     private static final int NOP                 = Instruction.OP_NOP     & 0xff;
     private static final int POP                 = Instruction.OP_POP     & 0xff;
@@ -90,7 +91,7 @@ implements   AttributeVisitor,
     private static final int DUP2_X1_POP         = DUP2_X1 | (POP     << 8);
     private static final int DUP2_X1_POP3_DUP    = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP    << 24);
     private static final int DUP2_X1_POP3_DUP_X1 = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP_X1 << 24);
-    private static final int DUP2_X1_POP3_DUP2   = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP2    << 24);
+    private static final int DUP2_X1_POP3_DUP2   = DUP2_X1 | (POP2    << 8) | (POP    << 16) | (DUP2   << 24);
     private static final int DUP2_X2_POP3        = DUP2_X2 | (POP2    << 8) | (POP    << 16);
     private static final int DUP2_X2_SWAP_POP    = DUP2_X2 | (SWAP    << 8) | (POP    << 16);
 
@@ -135,7 +136,7 @@ implements   AttributeVisitor,
                               InstructionVisitor extraDeletedInstructionVisitor,
                               InstructionVisitor extraAddedInstructionVisitor)
     {
-        this(new InstructionUsageMarker(partialEvaluator, runPartialEvaluator),
+        this(new InstructionUsageMarker(partialEvaluator, runPartialEvaluator, true),
              true,
              extraDeletedInstructionVisitor,
              extraAddedInstructionVisitor);
@@ -526,6 +527,7 @@ implements   AttributeVisitor,
                 // no longer consumed as a method parameter.
                 // Typical case: a freshly marked variable initialization that
                 // requires some value on the stack.
+                // In practice, it can be at most one of those at once.
                 int popCount = instruction.stackPopCount(clazz);
                 if (popCount > 0)
                 {
@@ -534,10 +536,17 @@ implements   AttributeVisitor,
 
                     int stackSize = tracedStack.size();
 
-                    int requiredPopCount  = 0;
-                    int requiredPushCount = 0;
+                    // We represent entries that need to be popped or pushed as
+                    // a bitmask. In theory, the pop mask could overflow, but
+                    // the case is very rare to begin with.
+                    int requiredPopMask  = 0;
+                    int requiredPushMask = 0;
+
                     for (int stackIndex = stackSize - popCount; stackIndex < stackSize; stackIndex++)
                     {
+                        requiredPopMask  <<= 1;
+                        requiredPushMask <<= 1;
+
                         boolean stackEntryUnwantedBefore =
                             instructionUsageMarker.isStackEntryUnwantedBefore(offset, stackIndex);
                         boolean stackEntryPresentBefore =
@@ -547,28 +556,8 @@ implements   AttributeVisitor,
                         {
                             if (stackEntryPresentBefore)
                             {
-                                // Check if it is an exception pushed by a
-                                // handler (should be) that is not at the
-                                // top of the stack ([PGD-748], test2162).
-                                InstructionOffsetValue producers =
-                                    tracedStack.getBottomProducerValue(stackIndex).instructionOffsetValue();
-                                if (producers.instructionOffsetCount() == 1 &&
-                                    producers.isExceptionHandler(0)         &&
-                                    stackIndex < stackSize - 1)
-                                {
-                                    // Try to handle it.
-                                    // This only works if the exception isn't
-                                    // consumed elsewhere (should be ok, since
-                                    // it's an unused parameter).
-                                    if (DEBUG) System.out.println("  Popping exception at handler "+instruction.toString(offset));
-
-                                    insertPopInstructions(producers.instructionOffset(0), false, true, 1);
-                                }
-                                else
-                                {
-                                    // Remember to pop it.
-                                    requiredPopCount++;
-                                }
+                                // Remember to pop it.
+                                requiredPopMask |= 1;
                             }
                         }
                         else
@@ -576,32 +565,30 @@ implements   AttributeVisitor,
                             if (!stackEntryPresentBefore)
                             {
                                 // Remember to push some value.
-                                requiredPushCount++;
+                                requiredPushMask |= 1;
                             }
                         }
                     }
 
                     // Pop some unnecessary stack entries.
-                    // This only works if the entries are at the top of the stack.
-                    if (requiredPopCount > 0)
+                    if (requiredPopMask > 0)
                     {
-                        if (DEBUG) System.out.println("  Popping "+requiredPopCount+" entries before marked consumer "+instruction.toString(offset));
+                        if (DEBUG) System.out.println("  Popping 0x"+Integer.toHexString(requiredPopMask)+" before marked consumer "+instruction.toString(offset));
 
-                        insertPopInstructions(offset, false, true, requiredPopCount);
+                        insertInstructions(offset, false, true, instruction, simpleInstructions(complexPop(requiredPopMask)));
                     }
 
                     // Push some necessary stack entries.
-                    // This only works if the entries are at the top of the stack.
-                    if (requiredPushCount > 0)
+                    if (requiredPushMask > 0)
                     {
                         Value value = tracedStack.getTop(0);
 
-                        if (DEBUG) System.out.println("  Pushing type "+value.computationalType()+" entry before marked consumer "+instruction.toString(offset));
-
-                        if (requiredPushCount > (value.isCategory2() ? 2 : 1))
+                        if (requiredPushMask != (value.isCategory2() ? 3 : 1))
                         {
-                            throw new IllegalArgumentException("Unsupported stack size increment ["+requiredPushCount+"] at ["+offset+"]");
+                            throw new IllegalArgumentException("Unsupported stack size increment ["+requiredPushMask+"] at ["+offset+"]");
                         }
+
+                        if (DEBUG) System.out.println("  Pushing "+value.computationalType()+" before marked consumer "+instruction.toString(offset));
 
                         insertPushInstructions(offset, false, true, value.computationalType());
                     }
@@ -719,74 +706,7 @@ implements   AttributeVisitor,
                 // Simplify the dup/swap instruction if possible.
                 int newOpcodes = fixDupSwap(offset, oldOpcode, topBefore, topAfter);
 
-                // Did we find a suitable (extended) opcode?
-                if (newOpcodes == UNSUPPORTED)
-                {
-                    // We can't easily emulate some constructs.
-                    throw new UnsupportedOperationException("Can't handle "+simpleInstruction.toString()+" instruction at ["+offset +"]");
-                }
-
-                // Is there a single replacement opcode?
-                if ((newOpcodes & ~0xff) == 0)
-                {
-                    byte newOpcode = (byte)newOpcodes;
-
-                    if      (newOpcode == Instruction.OP_NOP)
-                    {
-                        // Delete the instruction.
-                        codeAttributeEditor.deleteInstruction(offset);
-
-                        if (extraDeletedInstructionVisitor != null)
-                        {
-                            extraDeletedInstructionVisitor.visitSimpleInstruction(null, null, null, offset, null);
-                        }
-
-                        if (DEBUG) System.out.println("  Deleting marked instruction "+simpleInstruction.toString(offset));
-                    }
-                    else if (newOpcode == oldOpcode)
-                    {
-                        // Leave the instruction unchanged.
-                        codeAttributeEditor.undeleteInstruction(offset);
-
-                        if (DEBUG) System.out.println("  Marking unchanged instruction "+simpleInstruction.toString(offset));
-                    }
-                    else
-                    {
-                        // Replace the instruction.
-                        Instruction replacementInstruction = new SimpleInstruction(newOpcode);
-                        codeAttributeEditor.replaceInstruction(offset,
-                                                               replacementInstruction);
-
-                        if (DEBUG) System.out.println("  Replacing instruction "+simpleInstruction.toString(offset)+" by "+replacementInstruction.toString());
-                    }
-                }
-                else
-                {
-                    // Collect the replacement instructions.
-                    Instruction[] replacementInstructions = new Instruction[4];
-
-                    if (DEBUG) System.out.println("  Replacing instruction "+simpleInstruction.toString(offset)+" by");
-                    int count = 0;
-                    while (newOpcodes != 0)
-                    {
-                        SimpleInstruction replacementInstruction = new SimpleInstruction((byte)newOpcodes);
-                        replacementInstructions[count++] = replacementInstruction;
-
-                        if (DEBUG) System.out.println("    "+replacementInstruction.toString());
-                        newOpcodes >>>= 8;
-                    }
-
-                    // Create a properly sized array.
-                    if (count < 4)
-                    {
-                        Instruction[] newInstructions = new Instruction[count];
-                        System.arraycopy(replacementInstructions, 0, newInstructions, 0, count);
-                        replacementInstructions = newInstructions;
-                    }
-
-                    codeAttributeEditor.replaceInstruction(offset,
-                                                           replacementInstructions);
-                }
+                replaceBySimpleInstructions(offset, simpleInstruction, newOpcodes);
             }
             else
             {
@@ -1073,7 +993,7 @@ implements   AttributeVisitor,
                             stackEntryNecessary0 ? SWAP_POP_DUP     : // ...AB -> ...BB
                                                    POP_X1           : // ...AB -> ...B
                         // !stackEntryPresent1
-                            stackEntryNecessary0 ? POP              : // ...B  -> ...BB
+                            stackEntryNecessary0 ? DUP              : // ...B  -> ...BB
                                                    NOP              : // ...B  -> ...B
                     // !stackEntryNecessary2
                         stackEntryNecessary1 ?
@@ -1344,6 +1264,28 @@ implements   AttributeVisitor,
                                            NOP    : // ...A  -> ...A
                 stackEntryPresent1       ? POP_X1 : // ...AB -> ...B
                                            NOP;     // ...B -> ...B
+        }
+
+
+        /**
+         * Returns sequence of dup/swap opcodes that pop the given mask.
+         * @param popMask the mask of stack entries that needs to be popped,
+         *                where the least significant bit corresponds to the
+         *                top of the stack.
+         * @return the sequence of simple opcodes.
+         */
+        private int complexPop(int popMask)
+        {
+            switch (popMask)
+            {
+                case 0x01: return POP;
+                case 0x03: return POP2;
+                case 0x07: return POP3;
+                case 0x0f: return POP4;
+                case 0x02: return POP_X1;
+                case 0x04: return POP_X2;
+                default:   throw new UnsupportedOperationException("Can't remove complex pattern of entries from stack [0x"+Integer.toHexString(popMask)+"]");
+            }
         }
     }
 
@@ -1635,7 +1577,7 @@ implements   AttributeVisitor,
 
 
     /**
-     * Replaces the instruction at a given offset by a static invocation.
+     * Replaces the given invocation instruction by a static invocation.
      */
     private void replaceByStaticInvocation(Clazz               clazz,
                                            int                 offset,
@@ -1653,7 +1595,7 @@ implements   AttributeVisitor,
 
 
     /**
-     * Replaces the given instruction by an infinite loop.
+     * Replaces the specified instruction by an infinite loop.
      */
     private void replaceByInfiniteLoop(Clazz clazz,
                                        int   offset)
@@ -1668,5 +1610,104 @@ implements   AttributeVisitor,
             new BranchInstruction(Instruction.OP_GOTO, 0);
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
+    }
+
+
+    /**
+     * Replaces the given instruction by one or more instructions with the
+     * given simple opcodes.
+     */
+    private void replaceBySimpleInstructions(int         offset,
+                                             Instruction oldInstruction,
+                                             int         newOpcodes)
+    {
+        // Did we find a suitable (extended) opcode?
+        if (newOpcodes == UNSUPPORTED)
+        {
+            // We can't easily emulate some constructs.
+            throw new UnsupportedOperationException("Can't handle " + oldInstruction.toString() + " instruction at [" + offset + "]");
+        }
+
+        // Did we get a single replacement opcode?
+        if ((newOpcodes & ~0xff) == 0)
+        {
+            byte newOpcode = (byte)newOpcodes;
+
+            if (newOpcode == Instruction.OP_NOP)
+            {
+                // Delete the instruction.
+                codeAttributeEditor.deleteInstruction(offset);
+
+                if (extraDeletedInstructionVisitor != null)
+                {
+                    extraDeletedInstructionVisitor.visitSimpleInstruction(null, null, null, offset, null);
+                }
+
+                if (DEBUG) System.out.println("  Deleting marked instruction " + oldInstruction.toString(offset));
+            }
+            else if (newOpcode == oldInstruction.opcode)
+            {
+                // Leave the instruction unchanged.
+                codeAttributeEditor.undeleteInstruction(offset);
+
+                if (DEBUG) System.out.println("  Marking unchanged instruction " + oldInstruction.toString(offset));
+            }
+            else
+            {
+                // Replace the instruction.
+                Instruction replacementInstruction = new SimpleInstruction(newOpcode);
+                codeAttributeEditor.replaceInstruction(offset,
+                                                       replacementInstruction);
+
+                if (DEBUG) System.out.println("  Replacing instruction " + oldInstruction.toString(offset) + " by " + replacementInstruction.toString());
+            }
+        }
+        else
+        {
+            if (DEBUG) System.out.println("  Replacing instruction " + oldInstruction.toString(offset) + " by");
+
+            // Replace the instruction.
+            Instruction[] replacementInstructions = simpleInstructions(newOpcodes);
+
+            codeAttributeEditor.replaceInstruction(offset,
+                                                   replacementInstructions);
+        }
+    }
+
+
+    /**
+     * Returns the simple instructions with the given opcodes (LSB first).
+     */
+    private Instruction[] simpleInstructions(int opcodes)
+    {
+        // Did we find a suitable (extended) opcode?
+        if (opcodes == UNSUPPORTED)
+        {
+            // We can't easily emulate some constructs.
+            throw new UnsupportedOperationException("Can't perform complex stack manipulation");
+        }
+
+       // Collect the replacement instructions.
+        Instruction[] instructions = new Instruction[4];
+
+        int count = 0;
+        while (opcodes != 0)
+        {
+            Instruction replacementInstruction = new SimpleInstruction((byte)opcodes);
+            instructions[count++] = replacementInstruction;
+
+            if (DEBUG) System.out.println("    "+replacementInstruction.toString());
+            opcodes >>>= 8;
+        }
+
+        // Create a properly sized array.
+        if (count < 4)
+        {
+            Instruction[] newInstructions = new Instruction[count];
+            System.arraycopy(instructions, 0, newInstructions, 0, count);
+            instructions = newInstructions;
+        }
+
+        return instructions;
     }
 }
