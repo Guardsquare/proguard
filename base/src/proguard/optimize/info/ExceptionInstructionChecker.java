@@ -211,7 +211,7 @@ implements   InstructionVisitor
                                       int           offset,
                                       Instruction   instruction)
     {
-        return instruction.mayThrowExceptions();
+        return instruction.mayInstanceThrowExceptions(clazz);
 
 //        mayThrowExceptions = false;
 //

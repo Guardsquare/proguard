@@ -118,7 +118,7 @@ implements   AttributeVisitor,
             Instruction instruction = InstructionFactory.create(code, offset);
 
             // Check if it may be throwing exceptions.
-            if (instruction.mayThrowExceptions())
+            if (instruction.mayInstanceThrowExceptions(clazz))
             {
                 return true;
             }
