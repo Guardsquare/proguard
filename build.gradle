@@ -58,13 +58,16 @@ allprojects { Project project ->
                     }
                 }
             }
-            // We use in-memory ascii-armored keys
-            // See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
-            signing {
-                String key = findProperty('PROGUARD_SIGNING_KEY')
-                String password = findProperty('PROGUARD_SIGNING_PASSWORD')
-                useInMemoryPgpKeys(key, password)
-                sign publishing.publications.getByName(project.name)
+
+            if (hasProperty('PROGUARD_SIGNING_KEY')) {
+                // We use in-memory ascii-armored keys
+                // See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
+                signing {
+                    String key = findProperty('PROGUARD_SIGNING_KEY')
+                    String password = findProperty('PROGUARD_SIGNING_PASSWORD')
+                    useInMemoryPgpKeys(key, password)
+                    sign publishing.publications.getByName(project.name)
+                }
             }
         }
     }
