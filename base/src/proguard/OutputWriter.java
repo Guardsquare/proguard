@@ -96,7 +96,8 @@ public class OutputWriter
                                        configuration.zipAlign,
                                        configuration.android, //resourceInfo.pageAlignNativeLibs,
                                        configuration.obfuscate,
-                                       privateKeyEntries);
+                                       privateKeyEntries,
+                                       configuration.verbose);
 
         int firstInputIndex = 0;
         int lastInputIndex  = 0;

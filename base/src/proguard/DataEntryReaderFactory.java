@@ -43,6 +43,7 @@ public class DataEntryReaderFactory
 
 
     private final boolean android;
+    private final boolean verbose;
 
 
     /**
@@ -51,25 +52,13 @@ public class DataEntryReaderFactory
      * @param android Specifies whether the packaging is targeted at the
      *                Android platform. Archives inside the assets directory
      *                then aren't unpacked but simply read as data files.
+     * @param verbose Specifies if verbose messages should be emitted when
+     *                creating the DataEntryReader.
      */
-    public DataEntryReaderFactory(boolean android)
+    public DataEntryReaderFactory(boolean android, boolean verbose)
     {
         this.android = android;
-    }
-
-
-    /**
-     * Creates a DataEntryReader that can read the given class path entry.
-     *
-     * @param classPathEntry the input class path entry.
-     * @param reader         a data entry reader to which the reading of actual
-     *                       classes and resource files can be delegated.
-     * @return a DataEntryReader for reading the given class path entry.
-     */
-    public DataEntryReader createDataEntryReader(ClassPathEntry  classPathEntry,
-                                                 DataEntryReader reader)
-    {
-        return createDataEntryReader("", classPathEntry, reader, null);
+        this.verbose = verbose;
     }
 
     /**
@@ -84,25 +73,6 @@ public class DataEntryReaderFactory
     public DataEntryReader createDataEntryReader(String          messagePrefix,
                                                  ClassPathEntry  classPathEntry,
                                                  DataEntryReader reader)
-    {
-        return createDataEntryReader(messagePrefix, classPathEntry, reader, System.out);
-    }
-
-
-    /**
-     * Creates a DataEntryReader that can read the given class path entry.
-     *
-     * @param messagePrefix  a prefix for messages that are printed out.
-     * @param classPathEntry the input class path entry.
-     * @param reader         a data entry reader to which the reading of actual
-     *                       classes and resource files can be delegated.
-     * @param out            an optional print stream for messages.
-     * @return a DataEntryReader for reading the given class path entry.
-     */
-    public DataEntryReader createDataEntryReader(String          messagePrefix,
-                                                 ClassPathEntry  classPathEntry,
-                                                 DataEntryReader reader,
-                                                 PrintStream     out)
     {
         boolean isApk  = classPathEntry.isApk();
         boolean isAab  = classPathEntry.isAab();
@@ -123,9 +93,9 @@ public class DataEntryReaderFactory
         List jmodFilter = classPathEntry.getJmodFilter();
         List zipFilter  = classPathEntry.getZipFilter();
 
-        if (out != null)
+        if (verbose)
         {
-            out.println(messagePrefix +
+            System.out.println(messagePrefix +
                            (isApk  ? "apk"  :
                             isAab  ? "aab"  :
                             isJar  ? "jar"  :
