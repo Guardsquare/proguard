@@ -1,0 +1,6 @@
+//
+// Gradle Settings file, required to test any of the example gradle build files in this directory.
+// Invoke Gradle with the `-b` argument to point at a particular build file
+//
+
+rootProject.name = "proguard-gradle-examples"
