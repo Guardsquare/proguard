@@ -167,6 +167,14 @@ You can then execute a composite build with the following Gradle command:
 ./gradlew --include-build=../proguard-core assemble
 ```
 
+Alternatively, make the composite build persistent by editing this line in `gradle.properties`.
+You can also add this line to a `gradle.properties` file in your Gradle user home (`~/.gradle/gradle.properties`).
+
+```properties
+# Optionally set up a composite build with ProGuardCORE.
+#proguardCoreDir = ../proguard-core
+```
+
 The artifacts will be generated in the `lib` directory. You can then execute ProGuard using the
 scripts in `bin`, for example:
 
