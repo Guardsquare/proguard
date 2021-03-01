@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id 'com.github.johnrengelman.shadow'
     id 'com.jfrog.bintray'
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
 }
 
@@ -28,7 +28,7 @@ sourceSets.main {
 }
 
 dependencies {
-    implementation "com.guardsquare:proguard-core:${proguardCoreVersion}"
+    api "com.guardsquare:proguard-core:${proguardCoreVersion}"
     implementation "com.google.code.gson:gson:${gsonVersion}"
 }
 

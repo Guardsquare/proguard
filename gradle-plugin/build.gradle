@@ -63,7 +63,6 @@ jar {
 
 dependencies {
     implementation project(':base')
-    implementation 'com.guardsquare:proguard-core'
     compileOnly 'com.android.tools.build:gradle:3.0.0'
     compileOnly gradleApi()
     implementation localGroovy()

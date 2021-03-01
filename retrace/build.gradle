@@ -29,7 +29,6 @@ sourceSets.main {
 
 dependencies {
     implementation project(':base')
-    implementation 'com.guardsquare:proguard-core'
 }
 
 task fatJar(type: ShadowJar) {
