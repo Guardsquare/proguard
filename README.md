@@ -182,6 +182,12 @@ scripts in `bin`, for example:
 bin/proguard.sh
 ```
 
+You can publish the artifacts (including proguard-core) to your local Maven repository using:
+
+```bash
+./gradlew --include-build=../proguard-core :proguard-core:publishToMavenLocal publishToMavenLocal
+```
+
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome in both projects.
