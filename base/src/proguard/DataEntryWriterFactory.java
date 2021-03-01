@@ -64,6 +64,7 @@ public class DataEntryWriterFactory
     private final boolean                    pageAlignNativeLibs;
     private final boolean                    mergeBundleJars;
     private final KeyStore.PrivateKeyEntry[] privateKeyEntries;
+    private final boolean                    verbose;
 
     private Map<File,DataEntryWriter> jarWriterCache = new HashMap();
 
@@ -86,6 +87,8 @@ public class DataEntryWriterFactory
      *                              in an Android app bundle into a
      *                              single jar.
      * @param privateKeyEntries     optional private keys to sign jars.
+     * @param verbose               specifies if verbose messages should be emitted when
+     *                              creating the DataEntryWriter.
      */
     public DataEntryWriterFactory(ClassPool                  programClassPool,
                                   ResourceFilePool           resourceFilePool,
@@ -94,7 +97,8 @@ public class DataEntryWriterFactory
                                   int                        uncompressedAlignment,
                                   boolean                    pageAlignNativeLibs,
                                   boolean                    mergeBundleJars,
-                                  KeyStore.PrivateKeyEntry[] privateKeyEntries)
+                                  KeyStore.PrivateKeyEntry[] privateKeyEntries,
+                                  boolean                    verbose)
     {
         this.programClassPool      = programClassPool;
         this.resourceFilePool      = resourceFilePool;
@@ -104,6 +108,7 @@ public class DataEntryWriterFactory
         this.pageAlignNativeLibs   = pageAlignNativeLibs;
         this.mergeBundleJars       = mergeBundleJars;
         this.privateKeyEntries     = privateKeyEntries;
+        this.verbose = verbose;
     }
 
 
@@ -209,28 +214,30 @@ public class DataEntryWriterFactory
         List jmodFilter = classPathEntry.getJmodFilter();
         List zipFilter  = classPathEntry.getZipFilter();
 
-        System.out.println("Preparing " +
-                           (privateKeyEntries == null ? "" : "signed ") +
-                           "output " +
-                           (isApk  ? "apk"  :
-                            isAab  ? "aab"  :
-                            isJar  ? "jar"  :
-                            isAar  ? "aar"  :
-                            isWar  ? "war"  :
-                            isEar  ? "ear"  :
-                            isJmod ? "jmod" :
-                            isZip  ? "zip"  :
-                                     "directory") +
-                           " [" + classPathEntry.getName() + "]" +
-                           (filter     != null ||
-                            apkFilter  != null ||
-                            aabFilter  != null ||
-                            jarFilter  != null ||
-                            aarFilter  != null ||
-                            warFilter  != null ||
-                            earFilter  != null ||
-                            jmodFilter != null ||
-                            zipFilter  != null ? " (filtered)" : ""));
+        if (verbose) {
+            System.out.println("Preparing " +
+                               (privateKeyEntries == null ? "" : "signed ") +
+                               "output " +
+                               (isApk  ? "apk"  :
+                                isAab  ? "aab"  :
+                                isJar  ? "jar"  :
+                                isAar  ? "aar"  :
+                                isWar  ? "war"  :
+                                isEar  ? "ear"  :
+                                isJmod ? "jmod" :
+                                isZip  ? "zip"  :
+                                         "directory") +
+                               " [" + classPathEntry.getName() + "]" +
+                               (filter     != null ||
+                                apkFilter  != null ||
+                                aabFilter  != null ||
+                                jarFilter  != null ||
+                                aarFilter  != null ||
+                                warFilter  != null ||
+                                earFilter  != null ||
+                                jmodFilter != null ||
+                                zipFilter  != null ? " (filtered)" : ""));
+        }
 
         // Create the writer for the main file or directory.
         DataEntryWriter writer =

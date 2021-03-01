@@ -245,7 +245,7 @@ public class InputReader
         {
             // Create a reader that can unwrap jars, wars, ears, jmods and zips.
             DataEntryReader reader =
-                new DataEntryReaderFactory(configuration.android)
+                new DataEntryReaderFactory(configuration.android, configuration.verbose)
                     .createDataEntryReader(messagePrefix,
                                            classPathEntry,
                                            dataEntryReader);
