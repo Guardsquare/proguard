@@ -5,25 +5,25 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
-| 7.1.x  | DGD-3036 | CORE     | Fixed potential incorrect removal of exception handlers during optimization.
-| 7.1.x  | DGD-3110 | CORE     | Improved GSON support.
-| 7.1.x  | DGD-3289 | CORE     | Fixed potential, incorrect advanced code optimizations.
-| 7.1.x  | PGD-0037 | CORE     | Disallowed merging of nest hosts or members during class merging optimization.
-| 7.1.x  | PGD-0052 | CORE     | Fixed packaging of Ant plugin.
-| 7.1.x  | PGD-0047 | CORE     | Fixed potential IllegalArgumentException in GSON optimization.
-| 7.1.x  | PGD-0110 | CORE     | Fixed writing of kept directories.
-| 7.1.x  | PGC-0015 | CORE     | Added support for Java 16.
-| 7.1.x  | PGD-0064 | CORE     | Added support for Java 14 and 15.
-| 7.1.x  | PGD-0064 | CORE     | Added support for sealed classes (permitted subclasses attributes).
-| 7.1.x  | PGD-0064 | CORE     | Added support for record attributes.
-| 7.1.x  | DGD-2390 | CORE     | Fixed storage and alignment of uncompressed zip entries.
-| 7.1.x  | DGD-2338 | CORE     | Fixed processing of constant boolean arrays.
+| 7.1.0  | DGD-3036 | CORE     | Fixed potential incorrect removal of exception handlers during optimization.
+| 7.1.0  | DGD-3110 | CORE     | Improved GSON support.
+| 7.1.0  | DGD-3289 | CORE     | Fixed potential, incorrect advanced code optimizations.
+| 7.1.0  | PGD-0037 | CORE     | Disallowed merging of nest hosts or members during class merging optimization.
+| 7.1.0  | PGD-0052 | CORE     | Fixed packaging of Ant plugin.
+| 7.1.0  | PGD-0047 | CORE     | Fixed potential IllegalArgumentException in GSON optimization.
+| 7.1.0  | PGD-0110 | CORE     | Fixed writing of kept directories.
+| 7.1.0  | PGC-0015 | CORE     | Added support for Java 16.
+| 7.1.0  | PGD-0064 | CORE     | Added support for Java 14 and 15.
+| 7.1.0  | PGD-0064 | CORE     | Added support for sealed classes (permitted subclasses attributes).
+| 7.1.0  | PGD-0064 | CORE     | Added support for record attributes.
+| 7.1.0  | DGD-2390 | CORE     | Fixed storage and alignment of uncompressed zip entries.
+| 7.1.0  | DGD-2338 | CORE     | Fixed processing of constant boolean arrays.
+| 7.1.0  | PGD-66   | CORE     | Removed Gradle plugin dependency on Android build tools.
 
 ## Version 7.0 (Jun 2020)
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
-| 7.0.2  | PGD-66   | CORE     | Removed Gradle plugin dependency on Android build tools.
 | 7.0.1  | DGD-2382 | CORE     | Fixed processing of Kotlin 1.4 metadata annotations.
 | 7.0.1  | DGD-2494 | CORE     | Fix naming conflict resolution potentially resulting in the renaming of library members.
 | 7.0.1  |          | RETRACE  | Extend expressions supported by Retrace.
