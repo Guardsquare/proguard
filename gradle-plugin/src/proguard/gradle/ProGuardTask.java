@@ -24,10 +24,14 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.TaskAction;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
+import proguard.gradle.configuration.ProGuardTaskConfiguration;
 import proguard.util.ListUtil;
 
 import java.io.*;
@@ -63,31 +67,34 @@ public abstract class ProGuardTask extends DefaultTask
     private static final String CONFIGURATION_FILE_NAME_PREFIX      = "/proguard/gradle/proguard-";
     private              String resolvedConfigurationFileNamePrefix = getProject().file(CONFIGURATION_FILE_NAME_PREFIX).toString();
 
+    @Nested
+    protected ProGuardTaskConfiguration getTaskConfiguration() throws IOException, ParseException {
+        return new ProGuardTaskConfiguration(getConfiguration());
+    }
 
     // Gradle task inputs and outputs, because annotations on the List fields
     // (private or not) don't seem to work. Private methods don't work either,
     // but package visible or protected methods are ok.
 
-    @Classpath
+    @Internal
     protected FileCollection getInJarFileCollection()
     {
         return getProject().files(inJarFiles);
     }
 
-    @OutputFiles
+    @Internal
     protected FileCollection getOutJarFileCollection()
     {
         return getProject().files(outJarFiles);
     }
 
-    @Classpath
+    @Internal
     protected FileCollection getLibraryJarFileCollection()
     {
         return getProject().files(libraryJarFiles);
     }
 
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @Internal
     protected FileCollection getConfigurationFileCollection()
     {
         return getProject().files(configurationFiles);
@@ -109,7 +116,7 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of input files.
      */
-    @Input
+    @Internal
     public List getInJarFilters()
     {
         return inJarFilters;
@@ -129,7 +136,7 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of output files.
      */
-    @Input
+    @Internal
     public List getOutJarFilters()
     {
         return outJarFilters;
@@ -163,7 +170,7 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of library files.
      */
-    @Input
+    @Internal
     public List getLibraryJarFilters()
     {
         return libraryJarFilters;
