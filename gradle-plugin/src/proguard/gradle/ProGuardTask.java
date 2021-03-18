@@ -24,10 +24,7 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
-import org.gradle.api.tasks.CacheableTask;
-import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.Nested;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
@@ -55,7 +52,6 @@ public abstract class ProGuardTask extends DefaultTask
     private final List          inJarCounts        = new ArrayList();
     private final List          libraryJarFiles    = new ArrayList();
     private final List          libraryJarFilters  = new ArrayList();
-    private final List          configurationFiles = new ArrayList();
 
     // Accumulated configuration.
     protected final Configuration configuration      = new Configuration();
@@ -94,11 +90,9 @@ public abstract class ProGuardTask extends DefaultTask
         return getProject().files(libraryJarFiles);
     }
 
-    @Internal
-    protected FileCollection getConfigurationFileCollection()
-    {
-        return getProject().files(configurationFiles);
-    }
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    protected abstract ConfigurableFileCollection getConfigurationFiles();
 
     // Convenience methods to retrieve settings from outside the task.
 
@@ -176,32 +170,13 @@ public abstract class ProGuardTask extends DefaultTask
         return libraryJarFilters;
     }
 
-    /**
-     * Returns the collected list of configuration files to be included
-     * (represented as Object, String, File, etc).
-     */
-    @Internal
-    public List getConfigurationFiles()
-    {
-        return configurationFiles;
-    }
-
 
     // Gradle task settings corresponding to all ProGuard options.
 
     public void configuration(Object configurationFiles)
     throws ParseException, IOException
     {
-        // Just collect the arguments, so they can be resolved lazily.
-        // Flatten collections, so they are easier to analyze later on.
-        if (configurationFiles instanceof Collection)
-        {
-            this.configurationFiles.addAll((Collection)configurationFiles);
-        }
-        else
-        {
-            this.configurationFiles.add(configurationFiles);
-        }
+        getConfigurationFiles().from(configurationFiles);
     }
 
     public void injars(Object inJarFiles)
@@ -1448,68 +1423,51 @@ public abstract class ProGuardTask extends DefaultTask
         }
 
         // Lazily apply the external configuration files.
-        for (int index = 0; index < configurationFiles.size(); index++)
-        {
-            Object fileObject = configurationFiles.get(index);
+        for (File file : getConfigurationFiles().getFiles()) {
 
-            ConfigurableFileCollection fileCollection =
-                getProject().files(fileObject);
-
-            // Parse the configuration as a collection of files.
-            Iterator<File> files = fileCollection.iterator();
-
-            while (files.hasNext())
+            // Check if this is the name of an internal configuration file.
+            if (isInternalConfigurationFile(file))
             {
-                File file = files.next();
+                getLogger().info("Loading default configuration file " +
+                                 file.getAbsolutePath());
 
-                // Check if this is the name of an internal configuration file.
-                if (isInternalConfigurationFile(file))
+                String internalConfigFileName =
+                    internalConfigurationFileName(file);
+
+                URL configurationURL =
+                    ProGuardTask.class.getResource(internalConfigFileName);
+
+                if (configurationURL == null)
                 {
-                    getLogger().info("Loading default configuration file " +
-                                     file.getAbsolutePath());
-
-                    String internalConfigFileName =
-                        internalConfigurationFileName(file);
-
-                    URL configurationURL =
-                        ProGuardTask.class.getResource(internalConfigFileName);
-
-                    if (configurationURL == null)
-                    {
-                        throw new FileNotFoundException("'" + file.getAbsolutePath() + "'");
-                    }
-
-                    // Parse the configuration as a URL.
-                    ConfigurationParser parser =
-                        new ConfigurationParser(configurationURL,
-                                                System.getProperties());
-
-                    try
-                    {
-                        parser.parse(configuration);
-                    }
-                    finally
-                    {
-                        parser.close();
-                    }
+                    throw new FileNotFoundException("'" + file.getAbsolutePath() + "'");
                 }
-                else
+
+                // Parse the configuration as a URL.
+                ConfigurationParser parser =
+                    new ConfigurationParser(configurationURL,
+                                            System.getProperties());
+
+                try
                 {
-                    getLogger().info("Loading configuration file " +
-                                     file.getAbsolutePath());
+                    parser.parse(configuration);
+                }
+                finally
+                {
+                    parser.close();
+                }
+            }
+            else {
+                getLogger().info("Loading configuration file " +
+                        file.getAbsolutePath());
 
-                    ConfigurationParser parser =
+                ConfigurationParser parser =
                         new ConfigurationParser(file,
-                                                System.getProperties());
+                                System.getProperties());
 
-                    try
-                    {
-                        parser.parse(configuration);
-                    }
-                    finally
-                    {
-                        parser.close();
-                    }
+                try {
+                    parser.parse(configuration);
+                } finally {
+                    parser.close();
                 }
             }
         }
