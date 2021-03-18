@@ -1,12 +1,17 @@
 package proguard.gradle.configuration;
 
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.FileCollection;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.OutputDirectories;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.OutputFiles;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import proguard.ClassPath;
@@ -18,8 +23,6 @@ import proguard.KeepClassSpecification;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,9 +35,11 @@ import java.util.List;
  */
 public class ProGuardTaskConfiguration {
     private final Provider<Configuration> configurationProvider;
+    private final ObjectFactory objectFactory;
 
-    public ProGuardTaskConfiguration(Provider<Configuration> configurationProvider) {
+    public ProGuardTaskConfiguration(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
         this.configurationProvider = configurationProvider;
+        this.objectFactory = objectFactory;
     }
 
     private Configuration getConfiguration() {
@@ -45,14 +50,92 @@ public class ProGuardTaskConfiguration {
     // Input and output options.
     ///////////////////////////////////////////////////////////////////////////
 
-    @Nested
-    public Collection<ProGuardTaskClassPathEntry> getProgramJars() {
-        return wrapClassPath(getConfiguration().programJars);
+    @Classpath
+    public FileCollection getInputJars() {
+        Configuration config = getConfiguration();
+
+        ConfigurableFileCollection files = objectFactory.fileCollection();
+        ClassPath programJars = config.programJars;
+        for (int i = 0; i < programJars.size(); i++) {
+            ClassPathEntry classPathEntry = programJars.get(i);
+            if (!classPathEntry.isOutput()) {
+                files.from(classPathEntry.getFile());
+            }
+        }
+
+        ClassPath libraryJars = config.libraryJars;
+        for (int i = 0; i < libraryJars.size(); i++) {
+            ClassPathEntry classPathEntry = libraryJars.get(i);
+            if (!classPathEntry.isOutput()) {
+                files.from(classPathEntry.getFile());
+            }
+        }
+        return files;
     }
 
-    @Nested
-    public Collection<ProGuardTaskClassPathEntry> getLibraryJars() {
-        return wrapClassPath(getConfiguration().libraryJars);
+    @OutputFiles
+    public FileCollection getOutputFiles() {
+        Configuration config = getConfiguration();
+
+        ConfigurableFileCollection files = objectFactory.fileCollection();
+        ClassPath programJars = config.programJars;
+        for (int i = 0; i < programJars.size(); i++) {
+            ClassPathEntry classPathEntry = programJars.get(i);
+            if (classPathEntry.isOutput() && classPathEntry.getFile().isFile()) {
+                files.from(classPathEntry.getFile());
+            }
+        }
+
+        ClassPath libraryJars = config.libraryJars;
+        for (int i = 0; i < libraryJars.size(); i++) {
+            ClassPathEntry classPathEntry = libraryJars.get(i);
+            if (classPathEntry.isOutput() && classPathEntry.getFile().isFile()) {
+                files.from(classPathEntry.getFile());
+            }
+        }
+        return files;
+    }
+
+    @OutputDirectories
+    public FileCollection getOutputDirectories() {
+        Configuration config = getConfiguration();
+
+        ConfigurableFileCollection files = objectFactory.fileCollection();
+        ClassPath programJars = config.programJars;
+        for (int i = 0; i < programJars.size(); i++) {
+            ClassPathEntry classPathEntry = programJars.get(i);
+            if (classPathEntry.isOutput() && classPathEntry.getFile().isDirectory()) {
+                files.from(classPathEntry.getFile());
+            }
+        }
+
+        ClassPath libraryJars = config.libraryJars;
+        for (int i = 0; i < libraryJars.size(); i++) {
+            ClassPathEntry classPathEntry = libraryJars.get(i);
+            if (classPathEntry.isOutput() && classPathEntry.getFile().isDirectory()) {
+                files.from(classPathEntry.getFile());
+            }
+        }
+        return files;
+    }
+
+    @Input
+    public List<ProGuardTaskClassPathEntry> getJarFilters() {
+        Configuration config = getConfiguration();
+
+        List<ProGuardTaskClassPathEntry> entries = new ArrayList<>();
+        ClassPath programJars = config.programJars;
+        for (int i = 0; i < programJars.size(); i++) {
+            ClassPathEntry classPathEntry = programJars.get(i);
+            entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
+        }
+
+        ClassPath libraryJars = config.libraryJars;
+        for (int i = 0; i < libraryJars.size(); i++) {
+            ClassPathEntry classPathEntry = libraryJars.get(i);
+            entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
+        }
+        return entries;
     }
 
     @Input
@@ -372,10 +455,10 @@ public class ProGuardTaskConfiguration {
         return getConfiguration().enableKotlinAsserter;
     }
 
-
     ///////////////////////////////////////////////////////////////////////////
     // Utility methods.
     ///////////////////////////////////////////////////////////////////////////
+
     private static File optionalFile(File input) {
         if (input == null || input == Configuration.STD_OUT) {
             return null;
@@ -388,26 +471,5 @@ public class ProGuardTaskConfiguration {
             return null;
         }
         return new File(input.getFile());
-    }
-
-    private static List<ProGuardTaskClassPathEntry> wrapClassPath(ClassPath classPath) {
-        if (classPath == null) {
-            return Collections.emptyList();
-        }
-        List<ProGuardTaskClassPathEntry> entries = new ArrayList<>();
-        for (int i = 0; i < classPath.size(); i++) {
-            ClassPathEntry classPathEntry = classPath.get(i);
-            entries.add(wrapClassPathEntry(classPathEntry));
-        }
-        return entries;
-    }
-
-    private static ProGuardTaskClassPathEntry wrapClassPathEntry(ClassPathEntry entry) {
-        File file = entry.getFile();
-        if (file.isDirectory()) {
-            return entry.isOutput() ? new OutputDirectoryClassPathEntry(entry) : new InputDirectoryClassPathEntry(entry);
-        } else {
-            return entry.isOutput() ? new OutputFileClassPathEntry(entry) : new InputFileClassPathEntry(entry);
-        }
     }
 }

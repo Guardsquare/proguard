@@ -67,9 +67,12 @@ public abstract class ProGuardTask extends DefaultTask
     private static final String CONFIGURATION_FILE_NAME_PREFIX      = "/proguard/gradle/proguard-";
     private              String resolvedConfigurationFileNamePrefix = getProject().file(CONFIGURATION_FILE_NAME_PREFIX).toString();
 
+    @Inject
+    protected abstract ObjectFactory getObjectFactory();
+
     @Nested
     protected ProGuardTaskConfiguration getTaskConfiguration() {
-        return new ProGuardTaskConfiguration(getConfigurationProvider());
+        return new ProGuardTaskConfiguration(getConfigurationProvider(), getObjectFactory());
     }
 
     // Gradle task inputs and outputs, because annotations on the List fields
