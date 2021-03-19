@@ -79,24 +79,29 @@ public abstract class ProGuardTask extends DefaultTask
     // (private or not) don't seem to work. Private methods don't work either,
     // but package visible or protected methods are ok.
 
-    @Internal
+    // Need to track injar and libraryjar files separately, even though they are also tracked as part of ProGuardTaskConfiguration.
+    // This is required to correctly add task dependencies for any file inputs, without requiring loading the configuration files early.
+    @Classpath
     protected FileCollection getInJarFileCollection()
     {
         return getProject().files(inJarFiles);
     }
 
+    @Classpath
+    protected FileCollection getLibraryJarFileCollection()
+    {
+        return getProject().files(libraryJarFiles);
+    }
+
+    // Do not need to track outputs separately, since they do not carry task dependency information.
+    // This method could be removed.
     @Internal
     protected FileCollection getOutJarFileCollection()
     {
         return getProject().files(outJarFiles);
     }
 
-    @Internal
-    protected FileCollection getLibraryJarFileCollection()
-    {
-        return getProject().files(libraryJarFiles);
-    }
-
+    // Configuration files are genuine, direct inputs to this task
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     protected abstract ConfigurableFileCollection getConfigurationFiles();
