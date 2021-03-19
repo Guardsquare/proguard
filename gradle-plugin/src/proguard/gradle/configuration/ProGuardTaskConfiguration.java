@@ -51,26 +51,26 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Classpath
-    public FileCollection getInputJars() {
-        Configuration config = getConfiguration();
-
-        ConfigurableFileCollection files = objectFactory.fileCollection();
-        ClassPath programJars = config.programJars;
-        for (int i = 0; i < programJars.size(); i++) {
-            ClassPathEntry classPathEntry = programJars.get(i);
-            if (!classPathEntry.isOutput()) {
-                files.from(classPathEntry.getFile());
+    public Provider<FileCollection> getInputJars() {
+        return configurationProvider.map(config -> {
+            ConfigurableFileCollection files = objectFactory.fileCollection();
+            ClassPath programJars = config.programJars;
+            for (int i = 0; i < programJars.size(); i++) {
+                ClassPathEntry classPathEntry = programJars.get(i);
+                if (!classPathEntry.isOutput()) {
+                    files.from(classPathEntry.getFile());
+                }
             }
-        }
 
-        ClassPath libraryJars = config.libraryJars;
-        for (int i = 0; i < libraryJars.size(); i++) {
-            ClassPathEntry classPathEntry = libraryJars.get(i);
-            if (!classPathEntry.isOutput()) {
-                files.from(classPathEntry.getFile());
+            ClassPath libraryJars = config.libraryJars;
+            for (int i = 0; i < libraryJars.size(); i++) {
+                ClassPathEntry classPathEntry = libraryJars.get(i);
+                if (!classPathEntry.isOutput()) {
+                    files.from(classPathEntry.getFile());
+                }
             }
-        }
-        return files;
+            return files;
+        });
     }
 
     @OutputFiles
@@ -260,26 +260,26 @@ public class ProGuardTaskConfiguration {
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public File getApplyMapping() {
-        return optionalFile(getConfiguration().applyMapping);
+    public Provider<File> getApplyMapping() {
+        return configurationProvider.map(config -> optionalFile(config.applyMapping));
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public File getObfuscationDictionary() {
-        return optionalFile(getConfiguration().obfuscationDictionary);
+    public Provider<File> getObfuscationDictionary() {
+        return configurationProvider.map(config -> optionalFile(config.obfuscationDictionary));
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public File getClassObfuscationDictionary() {
-        return optionalFile(getConfiguration().classObfuscationDictionary);
+    public Provider<File> getClassObfuscationDictionary() {
+        return configurationProvider.map(config -> optionalFile(config.classObfuscationDictionary));
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public File getPackageObfuscationDictionary() {
-        return optionalFile(getConfiguration().packageObfuscationDictionary);
+    public Provider<File> getPackageObfuscationDictionary() {
+        return configurationProvider.map(config -> optionalFile(config.packageObfuscationDictionary));
     }
 
     @Input
