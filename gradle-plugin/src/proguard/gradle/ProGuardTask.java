@@ -24,13 +24,17 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
+import org.gradle.api.model.*;
+import org.gradle.api.provider.*;
 import org.gradle.api.tasks.*;
+
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.gradle.configuration.ProGuardTaskConfiguration;
 import proguard.util.ListUtil;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -64,8 +68,8 @@ public abstract class ProGuardTask extends DefaultTask
     private              String resolvedConfigurationFileNamePrefix = getProject().file(CONFIGURATION_FILE_NAME_PREFIX).toString();
 
     @Nested
-    protected ProGuardTaskConfiguration getTaskConfiguration() throws IOException, ParseException {
-        return new ProGuardTaskConfiguration(getConfiguration());
+    protected ProGuardTaskConfiguration getTaskConfiguration() {
+        return new ProGuardTaskConfiguration(getConfigurationProvider());
     }
 
     // Gradle task inputs and outputs, because annotations on the List fields
@@ -169,6 +173,7 @@ public abstract class ProGuardTask extends DefaultTask
     {
         return libraryJarFilters;
     }
+
 
 
     // Gradle task settings corresponding to all ProGuard options.
@@ -1366,17 +1371,37 @@ public abstract class ProGuardTask extends DefaultTask
         loggingManager.captureStandardError(LogLevel.WARN);
 
         // Run ProGuard with the collected configuration.
-        new ProGuard(getConfiguration()).execute();
+        new ProGuard(getConfiguration(getConfigurationFiles().getElements().get())).execute();
 
     }
 
+    private Provider<Configuration> getConfigurationProvider() {
+        return getConfigurationFiles().getElements().map(configFiles -> {
+            try {
+                return getConfiguration(configFiles);
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private synchronized Configuration getConfiguration(Collection<FileSystemLocation> configurationFiles) throws IOException, ParseException {
+        if (configuration.programJars == null) {
+            loadConfiguration(configurationFiles);
+        }
+        return configuration;
+    }
 
     /**
      * Returns the configuration collected so far, resolving files and
      * reading included configurations.
      */
-    private Configuration getConfiguration() throws IOException, ParseException
-    {
+    private Configuration loadConfiguration(Collection<FileSystemLocation> configurationFiles) throws IOException, ParseException {
+        if (configuration.programJars != null) {
+            return configuration;
+        }
+        getLogger().warn("LOADING CONFIGURATION");
+
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.
         configuration.programJars = new ClassPath();
@@ -1423,7 +1448,9 @@ public abstract class ProGuardTask extends DefaultTask
         }
 
         // Lazily apply the external configuration files.
-        for (File file : getConfigurationFiles().getFiles()) {
+        for (FileSystemLocation configFile : configurationFiles) {
+
+            File file = configFile.getAsFile();
 
             // Check if this is the name of an internal configuration file.
             if (isInternalConfigurationFile(file))
