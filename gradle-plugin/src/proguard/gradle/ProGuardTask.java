@@ -72,7 +72,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     @Nested
     protected ProGuardTaskConfiguration getTaskConfiguration() {
-        return new ProGuardTaskConfiguration(getConfigurationProvider(), getObjectFactory());
+        return ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
     }
 
     // Gradle task inputs and outputs, because annotations on the List fields

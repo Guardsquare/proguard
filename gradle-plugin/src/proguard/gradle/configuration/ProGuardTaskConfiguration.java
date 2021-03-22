@@ -1,7 +1,10 @@
 package proguard.gradle.configuration;
 
+import org.gradle.api.Transformer;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.internal.GradleInternal;
+import org.gradle.api.invocation.Gradle;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Classpath;
@@ -34,7 +37,7 @@ import java.util.List;
  * These methods could just as easily be removed from this type.
  */
 public class ProGuardTaskConfiguration {
-    private final Provider<Configuration> configurationProvider;
+    protected final Provider<Configuration> configurationProvider;
     private final ObjectFactory objectFactory;
 
     public ProGuardTaskConfiguration(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
@@ -42,8 +45,20 @@ public class ProGuardTaskConfiguration {
         this.objectFactory = objectFactory;
     }
 
+    public static ProGuardTaskConfiguration create(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
+        if (GradleVersionCheck.isAtLeastGradle7()) {
+            return new ProGuardTaskConfiguration(configurationProvider, objectFactory);
+        } else {
+            return new ProGuardTaskConfigurationForGradle6(configurationProvider, objectFactory);
+        }
+    }
+
     private Configuration getConfiguration() {
         return configurationProvider.get();
+    }
+
+    protected <T> Provider<T> mappedProvider(Transformer<T, Configuration> transformer) {
+        return configurationProvider.map(transformer);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -52,7 +67,7 @@ public class ProGuardTaskConfiguration {
 
     @Classpath
     public Provider<FileCollection> getInputJars() {
-        return configurationProvider.map(config -> {
+        return mappedProvider(config -> {
             ConfigurableFileCollection files = objectFactory.fileCollection();
             ClassPath programJars = config.programJars;
             for (int i = 0; i < programJars.size(); i++) {
@@ -261,25 +276,25 @@ public class ProGuardTaskConfiguration {
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getApplyMapping() {
-        return configurationProvider.map(config -> optionalFile(config.applyMapping));
+        return mappedProvider(config -> optionalFile(config.applyMapping));
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getObfuscationDictionary() {
-        return configurationProvider.map(config -> optionalFile(config.obfuscationDictionary));
+        return mappedProvider(config -> optionalFile(config.obfuscationDictionary));
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getClassObfuscationDictionary() {
-        return configurationProvider.map(config -> optionalFile(config.classObfuscationDictionary));
+        return mappedProvider(config -> optionalFile(config.classObfuscationDictionary));
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getPackageObfuscationDictionary() {
-        return configurationProvider.map(config -> optionalFile(config.packageObfuscationDictionary));
+        return mappedProvider(config -> optionalFile(config.packageObfuscationDictionary));
     }
 
     @Input
