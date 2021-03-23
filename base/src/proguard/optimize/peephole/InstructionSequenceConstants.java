@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -61,6 +61,7 @@ public class InstructionSequenceConstants
     private static final String LONG           = ClassConstants.NAME_JAVA_LANG_LONG;
     private static final String FLOAT          = ClassConstants.NAME_JAVA_LANG_FLOAT;
     private static final String DOUBLE         = ClassConstants.NAME_JAVA_LANG_DOUBLE;
+    private static final String CLASS          = ClassConstants.NAME_JAVA_LANG_CLASS;
     private static final String STRING         = ClassConstants.NAME_JAVA_LANG_STRING;
     private static final String STRING_BUFFER  = ClassConstants.NAME_JAVA_LANG_STRING_BUFFER;
     private static final String STRING_BUILDER = ClassConstants.NAME_JAVA_LANG_STRING_BUILDER;
@@ -77,21 +78,23 @@ public class InstructionSequenceConstants
     private static final int D = InstructionSequenceReplacer.D;
 
     // Replacement constants that are derived from matched variables.
-    private static final int STRING_A_LENGTH  = InstructionSequenceReplacer.STRING_A_LENGTH;
-    private static final int BOOLEAN_A_STRING = InstructionSequenceReplacer.BOOLEAN_A_STRING;
-    private static final int CHAR_A_STRING    = InstructionSequenceReplacer.CHAR_A_STRING;
-    private static final int INT_A_STRING     = InstructionSequenceReplacer.INT_A_STRING;
-    private static final int LONG_A_STRING    = InstructionSequenceReplacer.LONG_A_STRING;
-    private static final int FLOAT_A_STRING   = InstructionSequenceReplacer.FLOAT_A_STRING;
-    private static final int DOUBLE_A_STRING  = InstructionSequenceReplacer.DOUBLE_A_STRING;
-    private static final int STRING_A_STRING  = InstructionSequenceReplacer.STRING_A_STRING;
-    private static final int BOOLEAN_B_STRING = InstructionSequenceReplacer.BOOLEAN_B_STRING;
-    private static final int CHAR_B_STRING    = InstructionSequenceReplacer.CHAR_B_STRING;
-    private static final int INT_B_STRING     = InstructionSequenceReplacer.INT_B_STRING;
-    private static final int LONG_B_STRING    = InstructionSequenceReplacer.LONG_B_STRING;
-    private static final int FLOAT_B_STRING   = InstructionSequenceReplacer.FLOAT_B_STRING;
-    private static final int DOUBLE_B_STRING  = InstructionSequenceReplacer.DOUBLE_B_STRING;
-    private static final int STRING_B_STRING  = InstructionSequenceReplacer.STRING_B_STRING;
+    private static final int STRING_A_LENGTH     = InstructionSequenceReplacer.STRING_A_LENGTH;
+    private static final int CLASS_A_NAME        = InstructionSequenceReplacer.CLASS_A_NAME;
+    private static final int CLASS_A_SIMPLE_NAME = InstructionSequenceReplacer.CLASS_A_SIMPLE_NAME;
+    private static final int BOOLEAN_A_STRING    = InstructionSequenceReplacer.BOOLEAN_A_STRING;
+    private static final int CHAR_A_STRING       = InstructionSequenceReplacer.CHAR_A_STRING;
+    private static final int INT_A_STRING        = InstructionSequenceReplacer.INT_A_STRING;
+    private static final int LONG_A_STRING       = InstructionSequenceReplacer.LONG_A_STRING;
+    private static final int FLOAT_A_STRING      = InstructionSequenceReplacer.FLOAT_A_STRING;
+    private static final int DOUBLE_A_STRING     = InstructionSequenceReplacer.DOUBLE_A_STRING;
+    private static final int STRING_A_STRING     = InstructionSequenceReplacer.STRING_A_STRING;
+    private static final int BOOLEAN_B_STRING    = InstructionSequenceReplacer.BOOLEAN_B_STRING;
+    private static final int CHAR_B_STRING       = InstructionSequenceReplacer.CHAR_B_STRING;
+    private static final int INT_B_STRING        = InstructionSequenceReplacer.INT_B_STRING;
+    private static final int LONG_B_STRING       = InstructionSequenceReplacer.LONG_B_STRING;
+    private static final int FLOAT_B_STRING      = InstructionSequenceReplacer.FLOAT_B_STRING;
+    private static final int DOUBLE_B_STRING     = InstructionSequenceReplacer.DOUBLE_B_STRING;
+    private static final int STRING_B_STRING     = InstructionSequenceReplacer.STRING_B_STRING;
 
 
     /**
@@ -3187,6 +3190,19 @@ public class InstructionSequenceConstants
                 ____.invokestatic(DOUBLE, "valueOf", "(D)Ljava/lang/Double;")
                     .invokevirtual(DOUBLE_VALUE).__(),
             },
+            // Doesn't fill out the references to the classes.
+            //{   // ...class.getName() = "..."
+            //    ____.ldc_(A)
+            //        .invokevirtual(CLASS, "getName", "()Ljava/lang/String;").__(),
+            //
+            //    ____.ldc_(CLASS_A_NAME).__()
+            //},
+            //{   // ...class.getSimpleName() = "..."
+            //    ____.ldc_(A)
+            //        .invokevirtual(CLASS, "getSimpleName", "()Ljava/lang/String;").__(),
+            //
+            //    ____.ldc_(CLASS_A_SIMPLE_NAME).__()
+            //},
         };
 
         STRING_SEQUENCES = new Instruction[][][]

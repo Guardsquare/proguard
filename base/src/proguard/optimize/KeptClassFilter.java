@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -70,12 +70,18 @@ implements   ClassVisitor
     @Override
     public void visitAnyClass(Clazz clazz)
     {
-        ClassVisitor delegateVisitor =
-            KeepMarker.isKept(clazz) ? acceptedVisitor : rejectedVisitor;
-
+        ClassVisitor delegateVisitor = selectVisitor(clazz);
         if (delegateVisitor != null)
         {
             clazz.accept(delegateVisitor);
         }
+    }
+
+
+    // Small utility methods.
+
+    private ClassVisitor selectVisitor(Clazz clazz)
+    {
+        return KeepMarker.isKept(clazz) ? acceptedVisitor : rejectedVisitor;
     }
 }

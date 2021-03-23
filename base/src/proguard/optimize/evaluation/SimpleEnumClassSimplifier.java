@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,6 @@ import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
-import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.*;
 import proguard.optimize.info.SimpleEnumMarker;
 
@@ -39,8 +38,7 @@ import proguard.optimize.info.SimpleEnumMarker;
  */
 public class SimpleEnumClassSimplifier
 implements   ClassVisitor,
-             AttributeVisitor,
-             InstructionVisitor
+             AttributeVisitor
 {
     //*
     private static final boolean DEBUG = false;
@@ -120,6 +118,25 @@ implements   ClassVisitor,
                 new SimpleInstruction(Instruction.OP_IADD),
             }
         },
+        {
+            // The code might be obfuscated, pushing constant and invokespecial
+            // might not come directly after each other, e.g. when obfuscated by Arxan.
+            // Replace <init>(..., constant)
+            // by      dup_x2; pop; <init>(..., 0); swap; pop; constant + 1.
+            {
+                new ConstantInstruction(Instruction.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
+            },
+            {
+                new SimpleInstruction(Instruction.OP_DUP_X2),
+                new SimpleInstruction(Instruction.OP_POP),
+                new SimpleInstruction(Instruction.OP_ICONST_0),
+                new ConstantInstruction(Instruction.OP_INVOKESPECIAL, METHOD_ENUM_INIT),
+                new SimpleInstruction(Instruction.OP_SWAP),
+                new SimpleInstruction(Instruction.OP_POP),
+                new SimpleInstruction(Instruction.OP_ICONST_1),
+                new SimpleInstruction(Instruction.OP_IADD),
+            }
+        },
     };
 
     private final CodeAttributeEditor codeAttributeEditor =
@@ -127,11 +144,9 @@ implements   ClassVisitor,
 
     private final InstructionSequencesReplacer instructionSequenceReplacer =
         new InstructionSequencesReplacer(CONSTANTS,
-                                        INSTRUCTION_SEQUENCES,
-                                        null,
-                                        codeAttributeEditor);
-
-    private final MemberVisitor initializerSimplifier = new AllAttributeVisitor(this);
+                                         INSTRUCTION_SEQUENCES,
+                                         null,
+                                         codeAttributeEditor);
 
 
     // Implementations for ClassVisitor.
@@ -162,7 +177,7 @@ implements   ClassVisitor,
         // Simplify the static initializer.
         programClass.methodAccept(ClassConstants.METHOD_NAME_CLINIT,
                                   ClassConstants.METHOD_TYPE_CLINIT,
-                                  initializerSimplifier);
+                                  new AllAttributeVisitor(this));
     }
 
 

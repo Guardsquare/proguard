@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -27,6 +27,8 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.optimize.*;
 
+import java.util.*;
+
 /**
  * This AttributeVisitor removes unused parameters from the optimization info
  * of the methods that it visits. This includes 'this' parameters.
@@ -37,10 +39,7 @@ import proguard.optimize.*;
  * @author Eric Lafortune
  */
 public class UnusedParameterOptimizationInfoUpdater
-implements   AttributeVisitor,
-
-             // Internal implementations.
-             ParameterVisitor
+implements   AttributeVisitor
 {
     //*
     private static final boolean DEBUG = false;
@@ -50,13 +49,6 @@ implements   AttributeVisitor,
 
 
     private final MemberVisitor extraUnusedParameterMethodVisitor;
-
-    private final MemberVisitor unusedParameterRemover = new AllParameterVisitor(true,
-                                                         new UsedParameterFilter(null, this));
-
-    // Parameters and return values for visitor methods.
-    private int removedParameterSize;
-    private int removedParameterCount;
 
 
     /**
@@ -92,48 +84,50 @@ implements   AttributeVisitor,
             System.out.println("UnusedParameterOptimizationInfoUpdater: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
         }
 
-        // Update the optimization info.
-        removedParameterCount = 0;
-        removedParameterSize  = 0;
-
-        method.accept(clazz, unusedParameterRemover);
+        // Get the original parameter size that was saved.
+        int oldParameterSize = ParameterUsageMarker.getParameterSize(method);
 
         // Compute the new parameter size from the shrunk descriptor.
-        ProgramMethodOptimizationInfo programMethodOptimizationInfo =
-            ProgramMethodOptimizationInfo.getProgramMethodOptimizationInfo(method);
-
         int newParameterSize =
-            programMethodOptimizationInfo.getParameterSize() - removedParameterSize;
+            ClassUtil.internalMethodParameterSize(method.getDescriptor(clazz),
+                                                   method.getAccessFlags());
 
-        programMethodOptimizationInfo.setParameterSize(newParameterSize);
-        programMethodOptimizationInfo.updateUsedParameters(-1L);
-    }
-
-
-    // Implementations for ParameterVisitor.
-
-    public void visitParameter(Clazz clazz, Member member, int parameterIndex, int parameterCount, int parameterOffset, int parameterSize, String parameterType, Clazz referencedClass)
-    {
-        if (DEBUG)
+        if (oldParameterSize > newParameterSize)
         {
-            System.out.println("  Deleting parameter #"+parameterIndex+" (v"+parameterOffset+")");
-        }
+            ProgramMethodOptimizationInfo programMethodOptimizationInfo =
+                ProgramMethodOptimizationInfo.getProgramMethodOptimizationInfo(method);
 
-        Method method = (Method)member;
+            List<Integer> removedParameters = new ArrayList<Integer>();
+            for (int parameterIndex = 0, variableIndex = 0; variableIndex < oldParameterSize; parameterIndex++)
+            {
+                // Is the variable required as a parameter?
+                if (!ParameterUsageMarker.isParameterUsed(method, variableIndex))
+                {
+                    if (DEBUG)
+                    {
+                        System.out.println("  Deleting parameter #"+parameterIndex+" (v"+variableIndex+")");
+                    }
 
-        // Remove the unused parameter in the optimization info.
-        // Take into acount the delta from previously removed parameters.
-        ProgramMethodOptimizationInfo programMethodOptimizationInfo =
-            ProgramMethodOptimizationInfo.getProgramMethodOptimizationInfo(method);
+                    removedParameters.add(parameterIndex);
+                }
 
-        programMethodOptimizationInfo.removeParameter(parameterIndex - removedParameterCount++);
+                variableIndex += programMethodOptimizationInfo.getParameterSize(parameterIndex);
+            }
 
-        removedParameterSize += ClassUtil.internalTypeSize(parameterType);
+            // Remove the parameters in reverse order.
+            for (int i = removedParameters.size() - 1; i >= 0; i--)
+            {
+                programMethodOptimizationInfo.removeParameter(removedParameters.get(i));
+            }
 
-        // Visit the method, if required.
-        if (extraUnusedParameterMethodVisitor != null)
-        {
-            method.accept(clazz, extraUnusedParameterMethodVisitor);
+            programMethodOptimizationInfo.setParameterSize(newParameterSize);
+            programMethodOptimizationInfo.updateUsedParameters(-1L);
+
+            // Visit the method, if required.
+            if (extraUnusedParameterMethodVisitor != null)
+            {
+                method.accept(clazz, extraUnusedParameterMethodVisitor);
+            }
         }
     }
 }

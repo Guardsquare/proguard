@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -184,7 +184,7 @@ implements   ClassVisitor,
             // The class to be merged into the target class must not have
             // non-copiable attributes (InnerClass, EnclosingMethod),
             // unless it is a synthetic class.
-            (mergeWrapperClasses                                              ||
+            (mergeWrapperClasses                                                 ||
              (programClass.getAccessFlags() & AccessConstants.SYNTHETIC) != 0 ||
              !hasNonCopiableAttributes(programClass)) &&
 
@@ -318,8 +318,8 @@ implements   ClassVisitor,
                 System.out.println("ClassMerger ["+programClass.getName()+"] -> ["+targetClass.getName()+"]");
                 System.out.println("  Source interface? ["+((programClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
                 System.out.println("  Target interface? ["+((targetClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
-                System.out.println("  Source subclasses ["+programClass.subClasses+"]");
-                System.out.println("  Target subclasses ["+targetClass.subClasses+"]");
+                System.out.println("  Source subclasses ("+programClass.subClassCount+")");
+                System.out.println("  Target subclasses ("+targetClass.subClassCount+")");
                 System.out.println("  Source superclass ["+programClass.getSuperClass().getName()+"]");
                 System.out.println("  Target superclass ["+targetClass.getSuperClass().getName()+"]");
 
@@ -358,8 +358,7 @@ implements   ClassVisitor,
             // Copy over the interfaces that aren't present yet and that
             // wouldn't cause loops in the class hierarchy.
             // Note that the code shouldn't be iterating over the original
-            // list at this point. This is why we only add subclasses in
-            // a separate step.
+            // list at this point.
             programClass.interfaceConstantsAccept(
                 new ExceptClassConstantFilter(targetClass.getName(),
                 new ImplementedClassConstantFilter(targetClass,
@@ -376,11 +375,18 @@ implements   ClassVisitor,
 
             // Create a visitor to copy class members.
             MemberVisitor memberAdder =
-                new MemberAdder(targetClass, new MyMemberOptimizationInfoCopier());
+                new MemberAdder(targetClass,
+                new MultiMemberVisitor(
+                    // Copy or link optimization info.
+                    new MyMemberOptimizationInfoCopier(),
+
+                    // Mark copied members as being modified.
+                    new ProcessingFlagSetter(ProcessingFlags.MODIFIED)
+                 ));
 
             // Copy over the fields (only static from wrapper classes).
             programClass.fieldsAccept(mergeWrapperClasses ?
-                new MemberAccessFilter(AccessConstants.STATIC, 0, memberAdder) :
+                new MemberAccessFilter( AccessConstants.STATIC, 0, memberAdder) :
                 memberAdder);
 
             // Copy over the methods (not initializers from wrapper classes).
@@ -547,7 +553,7 @@ implements   ClassVisitor,
      * Returns whether the given class has a Signature attributes containing
      * type variables or parameterized types.
      */
-    private boolean hasSignatureAttribute(Clazz clazz)
+    static boolean hasSignatureAttribute(Clazz clazz)
     {
         AttributeCounter counter = new AttributeCounter();
 

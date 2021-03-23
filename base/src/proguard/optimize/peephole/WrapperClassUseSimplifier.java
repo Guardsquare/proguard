@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,13 +22,9 @@
 package proguard.optimize.peephole;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.ClassConstant;
-import proguard.classfile.constant.Constant;
-import proguard.classfile.constant.FieldrefConstant;
-import proguard.classfile.constant.MethodrefConstant;
+import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
@@ -68,8 +64,9 @@ implements   AttributeVisitor,
     private final CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor(true, true);
 
     // Fields acting as parameters and return values for the visitor methods.
-    private Clazz wrappedClass;
-    private Instruction popInstruction;
+    private Clazz       wrappedClass;
+    private boolean     isDupedOnStack;
+    private Instruction storeInstruction;
 
 
     /**
@@ -131,39 +128,62 @@ implements   AttributeVisitor,
                 // Is it instantiating a wrapper class?
                 if (isReferencingWrapperClass(clazz, constantInstruction.constantIndex))
                 {
-                    // Is the next instruction a typical dup instruction?
-                    int nextOffset = offset + constantInstruction.length(offset);
-                    popInstruction = InstructionFactory.create(codeAttribute.code, nextOffset);
-                    switch (popInstruction.canonicalOpcode())
+                    // We at least need to handle any of these sequences:
+                    //     new                  -> (nothing)
+                    //     new / dup            -> (nothing)
+                    //     new / astore / aload -> (nothing)
+                    //     new / dup / astore   -> (nothing)
+
+                    // Replace the new instance by a dummy null.
+                    codeAttributeEditor.deleteInstruction(offset);
+
+                    // Look at the next instruction.
+                    offset += constantInstruction.length(offset);
+                    Instruction nextInstruction = InstructionFactory.create(codeAttribute.code, offset);
+
+                    // Is the next instruction a (typical) dup instruction?
+                    isDupedOnStack = nextInstruction.opcode == Instruction.OP_DUP;
+                    if (isDupedOnStack)
                     {
-                        case Instruction.OP_DUP:
+                        // Delete the duplicate.
+                        codeAttributeEditor.deleteInstruction(offset);
+
+                        // Look at the next instruction.
+                        offset += nextInstruction.length(offset);
+                        nextInstruction = InstructionFactory.create(codeAttribute.code, offset);
+                    }
+
+                    // Is the next instruction a (less common) store instruction?
+                    if (nextInstruction.canonicalOpcode() ==  Instruction.OP_ASTORE)
+                    {
+                        // Delete the store.
+                        codeAttributeEditor.deleteInstruction(offset);
+
+                        // Remember the store instruction, so we can use it to
+                        // store the wrapped class later on.
+                        storeInstruction = nextInstruction;
+
+                        // Look at the next instruction.
+                        offset += nextInstruction.length(offset);
+                        nextInstruction = InstructionFactory.create(codeAttribute.code, offset);
+
+                        // Is the next instruction the corresponding load
+                        // instruction?
+                        if (nextInstruction.canonicalOpcode() == Instruction.OP_ALOAD &&
+                            ((VariableInstruction)storeInstruction).variableIndex ==
+                            ((VariableInstruction)nextInstruction ).variableIndex)
                         {
-                            // Delete the new and dup instructions:
-                            //     new Wrapper
-                            //     dup
+                            // Delete the load.
                             codeAttributeEditor.deleteInstruction(offset);
-                            codeAttributeEditor.deleteInstruction(nextOffset);
-                            popInstruction = null;
-                            break;
+
+                            // Remember that the original code had a duplicate
+                            // of the wrapper on the stack.
+                            isDupedOnStack = true;
                         }
-                        case Instruction.OP_ASTORE:
-                        {
-                            // Replace the new instance by a dummy null
-                            // and remember to store the target instance:
-                            //     new Wrapper -> aconst_null
-                            //     astore x    -> remember
-                            //     aload x
-                            codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(Instruction.OP_ACONST_NULL));
-                            break;
-                        }
-                        default:
-                        {
-                            // Replace the new instance by a dummy null
-                            // and remember to pop the target instance:
-                            //     new Wrapper -> aconst_null
-                            codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(Instruction.OP_ACONST_NULL));
-                            popInstruction = new SimpleInstruction(Instruction.OP_POP);
-                        }
+                    }
+                    else
+                    {
+                        storeInstruction = null;
                     }
 
                     if (extraInstructionVisitor != null)
@@ -178,25 +198,33 @@ implements   AttributeVisitor,
                 // Is it initializing a wrapper class?
                 if (isReferencingWrapperClass(clazz, constantInstruction.constantIndex))
                 {
-                    // Do we have a special pop instruction?
-                    // TODO: May still fail with nested initializers.
-                    if (popInstruction == null)
+                    // Replace the initializer invocation, popping or storing
+                    // the wrapped instance from the stack.
+                    // TODO: May still fail with nested initializers for different wrapper classes.
+
+                    // Do we have a store instruction?
+                    if (storeInstruction != null)
                     {
-                        // Delete the initializer invocation (with the
-                        // wrapper instance no longer on the stack):
-                        //     Wrapper.<init>(target) -> target
+                        // The wrapper was stored beforehand. Store the wrapped
+                        // instance now.
+                        //     wrapper.<init>(target) -> astore
+                        codeAttributeEditor.replaceInstruction(offset, storeInstruction);
+                    }
+                    else if (isDupedOnStack)
+                    {
+                        // The wrapper was originally duplicated on the stack.
+                        // Delete the initializer invocation, leaving just the
+                        // wrapped instance on the stack:
+                        //     wrapper.<init>(target) -> (target)
+                        // A subsequent astore/putfield/... should consume it.
                         codeAttributeEditor.deleteInstruction(offset);
                     }
                     else
                     {
-                        // Delete the initializer invocation, and store
-                        // the target instance again:
-                        //     invokespecial Wrapper.<init>(target) -> astore x / pop
-                        codeAttributeEditor.replaceInstruction(offset, new Instruction[]
-                        {
-                            popInstruction,
-                            new SimpleInstruction(Instruction.OP_POP),
-                        });
+                        // The wrapper wasn't duplicated on the stack or
+                        // stored in a variable. Just pop the wrapped instance.
+                        //     wrapper.<init>(target) -> pop
+                        codeAttributeEditor.replaceInstruction(offset, new SimpleInstruction(Instruction.OP_POP));
                     }
                 }
                 break;
@@ -207,7 +235,7 @@ implements   AttributeVisitor,
                 if (isReferencingWrapperClass(clazz, constantInstruction.constantIndex))
                 {
                     // Delete the retrieval:
-                    //     wrapper.field -> wrapper.
+                    //     wrapper.field -> wrapper
                     codeAttributeEditor.deleteInstruction(offset);
                 }
                 break;

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,7 +29,6 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.evaluation.*;
 
 /**
  * This AttributeVisitor marks the classes that are escaping from the visited
@@ -71,16 +70,14 @@ implements   AttributeVisitor,
      */
     public EscapingClassMarker(ValueFactory valueFactory)
     {
-        this(valueFactory,
-             new ReferenceTracingValueFactory(valueFactory));
+        this(new ReferenceTracingValueFactory(valueFactory));
     }
 
 
     /**
      * Creates a new EscapingClassMarker.
      */
-    public EscapingClassMarker(ValueFactory                 valueFactory,
-                               ReferenceTracingValueFactory tracingValueFactory)
+    public EscapingClassMarker(ReferenceTracingValueFactory tracingValueFactory)
     {
         this(new PartialEvaluator(tracingValueFactory,
                                   new ReferenceTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)),

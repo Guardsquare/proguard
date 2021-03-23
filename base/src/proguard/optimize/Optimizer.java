@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -34,11 +34,12 @@ import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.evaluation.*;
+import proguard.optimize.evaluation.InstructionUsageMarker;
 import proguard.optimize.info.*;
 import proguard.optimize.peephole.*;
 import proguard.util.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -58,12 +59,17 @@ public class Optimizer
     private static final String CLASS_MERGING_WRAPPER                = "class/merging/wrapper";
     private static final String FIELD_REMOVAL_WRITEONLY              = "field/removal/writeonly";
     private static final String FIELD_MARKING_PRIVATE                = "field/marking/private";
+    private static final String FIELD_GENERALIZATION_CLASS           = "field/generalization/class";
+    private static final String FIELD_SPECIALIZATION_TYPE            = "field/specialization/type";
     private static final String FIELD_PROPAGATION_VALUE              = "field/propagation/value";
     private static final String METHOD_MARKING_PRIVATE               = "method/marking/private";
     private static final String METHOD_MARKING_STATIC                = "method/marking/static";
     private static final String METHOD_MARKING_FINAL                 = "method/marking/final";
     private static final String METHOD_MARKING_SYNCHRONIZED          = "method/marking/synchronized";
     private static final String METHOD_REMOVAL_PARAMETER             = "method/removal/parameter";
+    private static final String METHOD_GENERALIZATION_CLASS          = "method/generalization/class";
+    private static final String METHOD_SPECIALIZATION_PARAMETER_TYPE = "method/specialization/parametertype";
+    private static final String METHOD_SPECIALIZATION_RETURN_TYPE    = "method/specialization/returntype";
     private static final String METHOD_PROPAGATION_PARAMETER         = "method/propagation/parameter";
     private static final String METHOD_PROPAGATION_RETURNVALUE       = "method/propagation/returnvalue";
     private static final String METHOD_INLINING_SHORT                = "method/inlining/short";
@@ -94,12 +100,17 @@ public class Optimizer
         CLASS_MERGING_HORIZONTAL,
         FIELD_REMOVAL_WRITEONLY,
         FIELD_MARKING_PRIVATE,
+        FIELD_GENERALIZATION_CLASS,
+        FIELD_SPECIALIZATION_TYPE,
         FIELD_PROPAGATION_VALUE,
         METHOD_MARKING_PRIVATE,
         METHOD_MARKING_STATIC,
         METHOD_MARKING_FINAL,
         METHOD_MARKING_SYNCHRONIZED,
         METHOD_REMOVAL_PARAMETER,
+        METHOD_GENERALIZATION_CLASS,
+        METHOD_SPECIALIZATION_PARAMETER_TYPE,
+        METHOD_SPECIALIZATION_RETURN_TYPE,
         METHOD_PROPAGATION_PARAMETER,
         METHOD_PROPAGATION_RETURNVALUE,
         METHOD_INLINING_SHORT,
@@ -132,12 +143,17 @@ public class Optimizer
     private final boolean classMergingWrapper;
     private final boolean fieldRemovalWriteonly;
     private final boolean fieldMarkingPrivate;
+    private final boolean fieldGeneralizationClass;
+    private final boolean fieldSpecializationType;
     private final boolean fieldPropagationValue;
     private final boolean methodMarkingPrivate;
     private final boolean methodMarkingStatic;
     private final boolean methodMarkingFinal;
     private final boolean methodMarkingSynchronized;
     private final boolean methodRemovalParameter;
+    private final boolean methodGeneralizationClass;
+    private final boolean methodSpecializationParametertype;
+    private final boolean methodSpecializationReturntype;
     private final boolean methodPropagationParameter;
     private final boolean methodPropagationReturnvalue;
     private final boolean methodInliningShort;
@@ -181,12 +197,17 @@ public class Optimizer
         classMergingWrapper               = filter.matches(CLASS_MERGING_WRAPPER);
         fieldRemovalWriteonly             = filter.matches(FIELD_REMOVAL_WRITEONLY);
         fieldMarkingPrivate               = filter.matches(FIELD_MARKING_PRIVATE);
+        fieldGeneralizationClass          = filter.matches(FIELD_GENERALIZATION_CLASS);
+        fieldSpecializationType           = filter.matches(FIELD_SPECIALIZATION_TYPE);
         fieldPropagationValue             = filter.matches(FIELD_PROPAGATION_VALUE);
         methodMarkingPrivate              = filter.matches(METHOD_MARKING_PRIVATE);
         methodMarkingStatic               = filter.matches(METHOD_MARKING_STATIC);
         methodMarkingFinal                = filter.matches(METHOD_MARKING_FINAL);
         methodMarkingSynchronized         = filter.matches(METHOD_MARKING_SYNCHRONIZED);
         methodRemovalParameter            = filter.matches(METHOD_REMOVAL_PARAMETER);
+        methodGeneralizationClass         = filter.matches(METHOD_GENERALIZATION_CLASS);
+        methodSpecializationParametertype = filter.matches(METHOD_SPECIALIZATION_PARAMETER_TYPE);
+        methodSpecializationReturntype    = filter.matches(METHOD_SPECIALIZATION_RETURN_TYPE);
         methodPropagationParameter        = filter.matches(METHOD_PROPAGATION_PARAMETER);
         methodPropagationReturnvalue      = filter.matches(METHOD_PROPAGATION_RETURNVALUE);
         methodInliningShort               = filter.matches(METHOD_INLINING_SHORT);
@@ -238,7 +259,9 @@ public class Optimizer
             codeSimplificationBranch     ||
             codeSimplificationObject     ||
             codeSimplificationString     ||
-            codeSimplificationMath;
+            codeSimplificationMath       ||
+            fieldGeneralizationClass     ||
+            methodGeneralizationClass;
     }
 
 
@@ -266,6 +289,8 @@ public class Optimizer
         final ClassCounter         classMergingWrapperCounter               = new ClassCounter();
         final MemberCounter        fieldRemovalWriteonlyCounter             = new MemberCounter();
         final MemberCounter        fieldMarkingPrivateCounter               = new MemberCounter();
+        final InstructionCounter   fieldGeneralizationClassCounter          = new InstructionCounter();
+        final MemberCounter        fieldSpecializationTypeCounter           = new MemberCounter();
         final MemberCounter        fieldPropagationValueCounter             = new MemberCounter();
         final MemberCounter        methodMarkingPrivateCounter              = new MemberCounter();
         final MemberCounter        methodMarkingStaticCounter               = new MemberCounter();
@@ -273,6 +298,9 @@ public class Optimizer
         final MemberCounter        methodMarkingSynchronizedCounter         = new MemberCounter();
         final MemberCounter        methodRemovalParameterCounter1           = new MemberCounter();
         final MemberCounter        methodRemovalParameterCounter2           = new MemberCounter();
+        final InstructionCounter   methodGeneralizationClassCounter         = new InstructionCounter();
+        final MemberCounter        methodSpecializationParametertypeCounter = new MemberCounter();
+        final MemberCounter        methodSpecializationReturntypeCounter    = new MemberCounter();
         final MemberCounter        methodPropagationParameterCounter        = new MemberCounter();
         final MemberCounter        methodPropagationReturnvalueCounter      = new MemberCounter();
         final InstructionCounter   methodInliningShortCounter               = new InstructionCounter();
@@ -531,92 +559,12 @@ public class Optimizer
             new AllMethodVisitor(
             new OptimizationInfoMemberFilter(
             new MultiMemberVisitor(
-                new SideEffectMethodMarker(mutableBoolean),
-                new ParameterEscapeMarker(mutableBoolean)
+                new SideEffectMethodMarker(),
+                new ParameterEscapeMarker()
             ))));
 
-        // Now repeatedly loop over all classes to mark read/written fields.
-        // side-effect methods, and escaping parameters. Marked elements like
-        // write-only fields or side-effect methods can each time affect the
-        // subsequent analysis, such as instructions that are used. We'll loop
-        // until the markers no longer trigger the repeat flag, meaning that
-        // all marks have converged.
-        //
-        // We'll mark classes in parallel threads, but with a shared repeat
-        // trigger.
-        final MutableBoolean repeatTrigger = new MutableBoolean();
-
-        programClassPool.accept(
-            new RepeatedClassPoolVisitor(repeatTrigger,
-            new TimedClassPoolVisitor("Marking fields, methods, and parameters",
-            new ParallelAllClassVisitor(
-            new ParallelAllClassVisitor.ClassVisitorFactory()
-            {
-                public ClassVisitor createClassVisitor()
-                {
-                    ReferenceTracingValueFactory referenceTracingValueFactory1 =
-                        new ReferenceTracingValueFactory(new TypedReferenceValueFactory());
-                    PartialEvaluator partialEvaluator =
-                        new PartialEvaluator(referenceTracingValueFactory1,
-                                             new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory1)),
-                                             false,
-                                             referenceTracingValueFactory1);
-                    InstructionUsageMarker instructionUsageMarker =
-                        new InstructionUsageMarker(partialEvaluator, false);
-
-                    // Create the various markers.
-                    // They will be used as code attribute visitors and
-                    // instruction visitors this time.
-                    // We're currently marking read and written fields once,
-                    // outside of these iterations, for better performance,
-                    // at the cost of some effectiveness (test2209).
-                    //ReadWriteFieldMarker readWriteFieldMarker =
-                    //    new ReadWriteFieldMarker(repeatTrigger);
-                    SideEffectMethodMarker sideEffectMethodMarker =
-                        new SideEffectMethodMarker(repeatTrigger);
-                    ParameterEscapeMarker parameterEscapeMarker =
-                        new ParameterEscapeMarker(repeatTrigger, partialEvaluator, false);
-
-                    return
-                        new AllMethodVisitor(
-                        new OptimizationInfoMemberFilter(
-                            // Methods with editable optimization info.
-                            new AllAttributeVisitor(
-                            new DebugAttributeVisitor("Marking fields, methods, and parameters",
-                            new MultiAttributeVisitor(
-                                partialEvaluator,
-                                parameterEscapeMarker,
-                                instructionUsageMarker,
-                                new AllInstructionVisitor(
-                                instructionUsageMarker.necessaryInstructionFilter(
-                                new MultiInstructionVisitor(
-                                    // All read / write field instruction are already marked
-                                    // for all code (see above), there is no need to mark them again.
-                                    // If unused code is removed that accesses fields, the
-                                    // respective field will be removed in the next iteration.
-                                    // This is a trade-off between performance and correctness.
-                                    // TODO: improve the marking for read / write fields after
-                                    //       performance improvements have been implemented.
-                                    //readWriteFieldMarker,
-                                    sideEffectMethodMarker,
-                                    parameterEscapeMarker
-                                ))))))
-
-                            // TODO: disabled for now, see comment above.
-                            // Methods without editable optimization info, for
-                            // which we can't mark side-effects or escaping
-                            // parameters, so we can save some effort.
-                            //new AllAttributeVisitor(
-                            //new DebugAttributeVisitor("Marking fields",
-                            //new MultiAttributeVisitor(
-                            //    partialEvaluator,
-                            //    instructionUsageMarker,
-                            //    new AllInstructionVisitor(
-                            //    instructionUsageMarker.necessaryInstructionFilter(
-                            //    readWriteFieldMarker)))))
-                            ));
-                }
-            }))));
+        programClassPool.accept(new InfluenceFixpointVisitor(
+                                new SideEffectVisitorMarkerFactory()));
 
         if (methodMarkingSynchronized)
         {
@@ -776,7 +724,10 @@ public class Optimizer
 
         // Perform partial evaluation for filling out fields, method parameters,
         // and method return values, so they can be propagated.
-        if (fieldPropagationValue             ||
+        if (fieldSpecializationType           ||
+            methodSpecializationParametertype ||
+            methodSpecializationReturntype    ||
+            fieldPropagationValue             ||
             methodPropagationParameter        ||
             methodPropagationReturnvalue      ||
             classMergingWrapper)
@@ -788,9 +739,9 @@ public class Optimizer
 
             InvocationUnit storingInvocationUnit =
                 new StoringInvocationUnit(valueFactory,
-                                          fieldPropagationValue,
-                                          methodPropagationParameter || classMergingWrapper,
-                                          methodPropagationReturnvalue);
+                                          fieldSpecializationType           || fieldPropagationValue,
+                                          methodSpecializationParametertype || methodPropagationParameter || classMergingWrapper,
+                                          methodSpecializationReturntype    || methodPropagationReturnvalue);
 
             // Evaluate synthetic classes in more detail, notably to propagate
             // the arrays of the classes generated for enum switch statements.
@@ -813,9 +764,9 @@ public class Optimizer
 
                         InvocationUnit storingInvocationUnit =
                             new StoringInvocationUnit(valueFactory,
-                                                      fieldPropagationValue,
-                                                      methodPropagationParameter || classMergingWrapper,
-                                                      methodPropagationReturnvalue);
+                                                      fieldSpecializationType           || fieldPropagationValue,
+                                                      methodSpecializationParametertype || methodPropagationParameter || classMergingWrapper,
+                                                      methodSpecializationReturntype    || methodPropagationReturnvalue);
 
                         return
                             new ClassAccessFilter(0, AccessConstants.SYNTHETIC,
@@ -823,7 +774,9 @@ public class Optimizer
                             new AllAttributeVisitor(
                             new DebugAttributeVisitor("Filling out fields, method parameters, and return values",
                             new PartialEvaluator(valueFactory, storingInvocationUnit,
-                                                 false)))));
+                                                 fieldSpecializationType           ||
+                                                 methodSpecializationParametertype ||
+                                                 methodSpecializationReturntype)))));
                     }
                 };
 
@@ -831,6 +784,30 @@ public class Optimizer
                 new TimedClassPoolVisitor("Filling out values in non-synthetic classes",
                 new ParallelAllClassVisitor(
                 fillingOutValuesClassVisitor)));
+
+            if (fieldSpecializationType           ||
+                methodSpecializationParametertype ||
+                methodSpecializationReturntype)
+            {
+                // Specialize class member descriptors, based on partial evaluation.
+                programClassPool.classesAccept(
+                    new AllMemberVisitor(
+                    new OptimizationInfoMemberFilter(
+                    new MemberDescriptorSpecializer(fieldSpecializationType,
+                                                    methodSpecializationParametertype,
+                                                    methodSpecializationReturntype,
+                                                    fieldSpecializationTypeCounter,
+                                                    methodSpecializationParametertypeCounter,
+                                                    methodSpecializationReturntypeCounter))));
+
+                if (fieldSpecializationTypeCounter.getCount()           > 0 ||
+                    methodSpecializationParametertypeCounter.getCount() > 0 ||
+                    methodSpecializationReturntypeCounter.getCount()    > 0)
+                {
+                    // Fix all references to specialized members.
+                    programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
+                }
+            }
 
             if (configuration.assumeValues != null)
             {
@@ -1032,7 +1009,7 @@ public class Optimizer
                 new AllMethodVisitor(
                 new UnusedParameterMethodFilter(
                 new AllAttributeVisitor(
-                new UnusedParameterOptimizationInfoUpdater()))));
+                new UnusedParameterOptimizationInfoUpdater(new ProcessingFlagSetter(ProcessingFlags.MODIFIED))))));
         }
         else if (codeRemovalAdvanced)
         {
@@ -1082,10 +1059,7 @@ public class Optimizer
                     new WrapperClassMarker(),
 
                     new AllConstantVisitor(
-                    new PackageVisibleMemberInvokingClassMarker()),
-
-                    new AllMemberVisitor(
-                    new ContainsConstructorsMarker())
+                    new PackageVisibleMemberInvokingClassMarker())
                 )),
 
                 // Mark methods.
@@ -1136,8 +1110,9 @@ public class Optimizer
             programClassPool.accept(
                 new TimedClassPoolVisitor("Merging wrapper classes",
                 // Exclude injected classes - they might not end up in the output.
+                new InjectedClassFilter(null,
                 new WrapperClassMerger(configuration.allowAccessModification,
-                                       classMergingWrapperCounter)));
+                                       classMergingWrapperCounter))));
 
             if (classMergingWrapperCounter.getCount() > 0)
             {
@@ -1156,22 +1131,45 @@ public class Optimizer
             // merge interfaces down into their implementing classes.
             programClassPool.accept(
                 new TimedClassPoolVisitor("Merging classes vertically",
+                // Exclude injected classes - they might not end up in the output.
+                new InjectedClassFilter(null,
                 new VerticalClassMerger(configuration.allowAccessModification,
                                         configuration.mergeInterfacesAggressively,
-                                        classMergingVerticalCounter)));
+                                        classMergingVerticalCounter))));
         }
 
         if (classMergingHorizontal)
         {
-            // Merge classes into their sibling classes.
+            long start = 0;
+            if (DETAILS)
+            {
+                System.out.print("Merging classes horizontally....................");
+                start = System.currentTimeMillis();
+            }
+
+            Set<String> forbiddenClassNames = new HashSet<>();
+
+            // Extra Data Entries are not allowed to be merged
+            extraDataEntryNameMap.getAllExtraDataEntryNames()
+                .stream()
+                .filter(s -> s.endsWith(".class"))
+                .map(s -> s.substring(0, s.length() - 6))
+                .forEachOrdered(forbiddenClassNames::add);
+
+
             programClassPool.accept(
-                new TimedClassPoolVisitor("Merging classes horizontally",
-                new ClassNameFilter(new NotMatcher(
-                    new TransformedStringMatcher(new SuffixAddingStringFunction(ClassConstants.CLASS_FILE_EXTENSION),
-                    new CollectionMatcher(extraDataEntryNameMap.getAllExtraDataEntryNames()))),
                 new HorizontalClassMerger(configuration.allowAccessModification,
                                           configuration.mergeInterfacesAggressively,
-                                          classMergingHorizontalCounter))));
+                                          forbiddenClassNames,
+                                          classMergingHorizontalCounter)
+            );
+
+            if (DETAILS)
+            {
+                long end = System.currentTimeMillis();
+                System.out.printf(" took: %6d ms%n", (end - start));
+            }
+
         }
 
         if (classMergingVerticalCounter  .getCount() > 0 ||
@@ -1352,7 +1350,7 @@ public class Optimizer
                             new InstructionSequenceConstants(programClassPool,
                                                              libraryClassPool);
 
-                        List peepholeOptimizations = createPeepholeOptimizations(sequences,
+                        List<InstructionVisitor> peepholeOptimizations = createPeepholeOptimizations(sequences,
                                                                                  branchTargetFinder,
                                                                                  codeAttributeEditor,
                                                                                  codeSimplificationVariableCounter,
@@ -1363,7 +1361,9 @@ public class Optimizer
                                                                                  codeSimplificationObjectCounter,
                                                                                  codeSimplificationStringCounter,
                                                                                  codeSimplificationMathCounter,
-                                                                                 codeSimplificationAndroidMathCounter);
+                                                                                 codeSimplificationAndroidMathCounter,
+                                                                                 fieldGeneralizationClassCounter,
+                                                                                 methodGeneralizationClassCounter);
 
                         // Convert the list into an array.
                         InstructionVisitor[] peepholeOptimizationsArray =
@@ -1459,6 +1459,8 @@ public class Optimizer
         int classMergingWrapperCount               = classMergingWrapperCounter              .getCount();
         int fieldRemovalWriteonlyCount             = fieldRemovalWriteonlyCounter            .getCount();
         int fieldMarkingPrivateCount               = fieldMarkingPrivateCounter              .getCount();
+        int fieldGeneralizationClassCount          = fieldGeneralizationClassCounter         .getCount();
+        int fieldSpecializationTypeCount           = fieldSpecializationTypeCounter          .getCount();
         int fieldPropagationValueCount             = fieldPropagationValueCounter            .getCount();
         int methodMarkingPrivateCount              = methodMarkingPrivateCounter             .getCount();
         int methodMarkingStaticCount               = methodMarkingStaticCounter              .getCount();
@@ -1466,6 +1468,9 @@ public class Optimizer
         int methodMarkingSynchronizedCount         = methodMarkingSynchronizedCounter        .getCount();
         int methodRemovalParameterCount1           = methodRemovalParameterCounter1          .getCount() - initializerFixCounter1.getCount() - initializerFixCounter2.getCount();
         int methodRemovalParameterCount2           = methodRemovalParameterCounter2          .getCount() - methodMarkingStaticCounter.getCount() - initializerFixCounter1.getCount() - initializerFixCounter2.getCount();
+        int methodGeneralizationClassCount         = methodGeneralizationClassCounter        .getCount();
+        int methodSpecializationParametertypeCount = methodSpecializationParametertypeCounter.getCount();
+        int methodSpecializationReturntypeCount    = methodSpecializationReturntypeCounter   .getCount();
         int methodPropagationParameterCount        = methodPropagationParameterCounter       .getCount();
         int methodPropagationReturnvalueCount      = methodPropagationReturnvalueCounter     .getCount();
         int methodInliningShortCount               = methodInliningShortCounter              .getCount();
@@ -1506,6 +1511,8 @@ public class Optimizer
             System.out.println("  Number of merged wrapper classes:              " + classMergingWrapperCount               + disabled(classMergingWrapper));
             System.out.println("  Number of removed write-only fields:           " + fieldRemovalWriteonlyCount             + disabled(fieldRemovalWriteonly));
             System.out.println("  Number of privatized fields:                   " + fieldMarkingPrivateCount               + disabled(fieldMarkingPrivate));
+            System.out.println("  Number of generalized field accesses:          " + fieldGeneralizationClassCount          + disabled(fieldGeneralizationClass));
+            System.out.println("  Number of specialized field types:             " + fieldSpecializationTypeCount           + disabled(fieldSpecializationType));
             System.out.println("  Number of inlined constant fields:             " + fieldPropagationValueCount             + disabled(fieldPropagationValue));
             System.out.println("  Number of privatized methods:                  " + methodMarkingPrivateCount              + disabled(methodMarkingPrivate));
             System.out.println("  Number of staticized methods:                  " + methodMarkingStaticCount               + disabled(methodMarkingStatic));
@@ -1513,6 +1520,9 @@ public class Optimizer
             System.out.println("  Number of desynchronized methods:              " + methodMarkingSynchronizedCount         + disabled(methodMarkingSynchronized));
             System.out.println("  Number of simplified method signatures:        " + methodRemovalParameterCount1           + disabled(methodRemovalParameter));
             System.out.println("  Number of removed method parameters:           " + methodRemovalParameterCount2           + disabled(methodRemovalParameter));
+            System.out.println("  Number of generalized method invocations:      " + methodGeneralizationClassCount         + disabled(methodGeneralizationClass));
+            System.out.println("  Number of specialized method parameter types:  " + methodSpecializationParametertypeCount + disabled(methodSpecializationParametertype));
+            System.out.println("  Number of specialized method return types:     " + methodSpecializationReturntypeCount    + disabled(methodSpecializationReturntype));
             System.out.println("  Number of inlined constant parameters:         " + methodPropagationParameterCount        + disabled(methodPropagationParameter));
             System.out.println("  Number of inlined constant return values:      " + methodPropagationReturnvalueCount      + disabled(methodPropagationReturnvalue));
             System.out.println("  Number of inlined short method calls:          " + methodInliningShortCount               + disabled(methodInliningShort));
@@ -1546,9 +1556,14 @@ public class Optimizer
                methodMarkingPrivateCount              > 0 ||
                methodMarkingStaticCount               > 0 ||
                methodMarkingFinalCount                > 0 ||
+               fieldGeneralizationClassCount          > 0 ||
+               fieldSpecializationTypeCount           > 0 ||
                fieldPropagationValueCount             > 0 ||
                methodRemovalParameterCount1           > 0 ||
                methodRemovalParameterCount2           > 0 ||
+               methodGeneralizationClassCount         > 0 ||
+               methodSpecializationParametertypeCount > 0 ||
+               methodSpecializationReturntypeCount    > 0 ||
                methodPropagationParameterCount        > 0 ||
                methodPropagationReturnvalueCount      > 0 ||
                methodInliningShortCount               > 0 ||
@@ -1572,7 +1587,7 @@ public class Optimizer
     }
 
 
-    private List createPeepholeOptimizations(InstructionSequenceConstants sequences,
+    private List<InstructionVisitor> createPeepholeOptimizations(InstructionSequenceConstants sequences,
                                              BranchTargetFinder           branchTargetFinder,
                                              CodeAttributeEditor          codeAttributeEditor,
                                              InstructionCounter           codeSimplificationVariableCounter,
@@ -1583,54 +1598,107 @@ public class Optimizer
                                              InstructionCounter           codeSimplificationObjectCounter,
                                              InstructionCounter           codeSimplificationStringCounter,
                                              InstructionCounter           codeSimplificationMathCounter,
-                                             InstructionCounter           codeSimplificationAndroidMathCounter)
+                                             InstructionCounter           codeSimplificationAndroidMathCounter,
+                                             InstructionCounter           fieldGeneralizationClassCounter,
+                                             InstructionCounter           methodGeneralizationClassCounter)
     {
-        List<InstructionVisitor> peepholeOptimizations = new ArrayList<InstructionVisitor>();
+        List<InstructionVisitor> peepholeOptimizations = new ArrayList<>();
 
         if (codeSimplificationVariable)
         {
             // Peephole optimizations involving local variables.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.VARIABLE_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationVariableCounter));
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.VARIABLE_SEQUENCES,
+                                                                       branchTargetFinder,
+                                                                       codeAttributeEditor,
+                                                                       codeSimplificationVariableCounter));
         }
 
         if (codeSimplificationArithmetic)
         {
             // Peephole optimizations involving arithmetic operations.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.ARITHMETIC_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationArithmeticCounter));
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.ARITHMETIC_SEQUENCES,
+                                                                       branchTargetFinder,
+                                                                       codeAttributeEditor,
+                                                                       codeSimplificationArithmeticCounter));
         }
 
         if (codeSimplificationCast)
         {
             // Peephole optimizations involving cast operations.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.CAST_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationCastCounter));
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.CAST_SEQUENCES,
+                                                                       branchTargetFinder,
+                                                                       codeAttributeEditor,
+                                                                       codeSimplificationCastCounter));
         }
 
         if (codeSimplificationField)
         {
             // Peephole optimizations involving fields.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.FIELD_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationFieldCounter));
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.FIELD_SEQUENCES,
+                                                                       branchTargetFinder,
+                                                                       codeAttributeEditor,
+                                                                       codeSimplificationFieldCounter));
         }
 
         if (codeSimplificationBranch)
         {
             // Peephole optimizations involving branches.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.BRANCH_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationBranchCounter));
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.BRANCH_SEQUENCES,
+                                                                       branchTargetFinder,
+                                                                       codeAttributeEditor,
+                                                                       codeSimplificationBranchCounter));
+        }
 
+        if (codeSimplificationObject)
+        {
+            // Peephole optimizations involving objects.
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                     sequences.OBJECT_SEQUENCES,
+                                                                     branchTargetFinder,
+                                                                     codeAttributeEditor,
+                                                                     codeSimplificationObjectCounter));
+
+            // Include optimizations of instance references on classes without
+            // constructors.
+            peepholeOptimizations.add(
+                    new NoConstructorReferenceReplacer(codeAttributeEditor, codeSimplificationObjectCounter));
+        }
+
+        if (codeSimplificationString)
+        {
+            // Peephole optimizations involving branches.
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.STRING_SEQUENCES,
+                                                                       branchTargetFinder, codeAttributeEditor,
+                                                                       codeSimplificationStringCounter));
+        }
+
+        if (codeSimplificationMath)
+        {
+            // Peephole optimizations involving math.
+            peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                       sequences.MATH_SEQUENCES,
+                                                                       branchTargetFinder,
+                                                                       codeAttributeEditor,
+                                                                       codeSimplificationMathCounter));
+
+            if (configuration.android)
+            {
+                peepholeOptimizations.add(new InstructionSequencesReplacer(sequences.CONSTANTS,
+                                                                           sequences.MATH_ANDROID_SEQUENCES,
+                                                                           branchTargetFinder,
+                                                                           codeAttributeEditor,
+                                                                           codeSimplificationAndroidMathCounter));
+            }
+        }
+
+        if(codeSimplificationBranch)
+        {
             // Include optimization of branches to branches and returns.
             peepholeOptimizations.add(
                 new GotoGotoReplacer(codeAttributeEditor, codeSimplificationBranchCounter));
@@ -1638,45 +1706,19 @@ public class Optimizer
                 new GotoReturnReplacer(codeAttributeEditor, codeSimplificationBranchCounter));
         }
 
-        if (codeSimplificationObject)
+        if (fieldGeneralizationClass ||
+            methodGeneralizationClass)
         {
-            // Peephole optimizations involving objects.
+            // Generalize the target classes of method invocations, to
+            // reduce the number of descriptors.
             peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.OBJECT_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationObjectCounter));
-
-            // Include optimizations of instance references on classes without
-            // constructors.
-            peepholeOptimizations.add(
-                new NoConstructorReferenceReplacer(codeAttributeEditor, codeSimplificationObjectCounter));
+                new MemberReferenceGeneralizer(fieldGeneralizationClass,
+                                               methodGeneralizationClass,
+                                               codeAttributeEditor,
+                                               fieldGeneralizationClassCounter,
+                                               methodGeneralizationClassCounter));
         }
 
-        if (codeSimplificationString)
-        {
-            // Peephole optimizations involving strings.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.STRING_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationStringCounter));
-        }
-
-        if (codeSimplificationMath)
-        {
-            // Peephole optimizations involving math.
-            peepholeOptimizations.add(
-                new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                 sequences.MATH_SEQUENCES,
-                                                 branchTargetFinder, codeAttributeEditor, codeSimplificationMathCounter));
-
-            if (configuration.android)
-            {
-                peepholeOptimizations.add(
-                    new InstructionSequencesReplacer(sequences.CONSTANTS,
-                                                     sequences.MATH_ANDROID_SEQUENCES,
-                                                     branchTargetFinder, codeAttributeEditor, codeSimplificationAndroidMathCounter));
-            }
-        }
 
         return peepholeOptimizations;
     }
@@ -1701,63 +1743,5 @@ public class Optimizer
         return flag1 && flag2 ? "" :
                flag1 || flag2 ? "   (partially disabled)" :
                                 "   (disabled)";
-    }
-
-
-    /**
-     * A simple class pool visitor that will output timing information.
-     */
-    private class TimedClassPoolVisitor
-    implements ClassPoolVisitor
-    {
-        private final String           message;
-        private final ClassPoolVisitor classPoolVisitor;
-
-        public TimedClassPoolVisitor(String message, ClassVisitor classVisitor)
-        {
-            this(message, new AllClassVisitor(classVisitor));
-        }
-
-        public TimedClassPoolVisitor(String message, ClassPoolVisitor classPoolVisitor)
-        {
-            this.message          = message;
-            this.classPoolVisitor = classPoolVisitor;
-        }
-
-
-        // Implementations for ClassPoolVisitor.
-
-        public void visitClassPool(ClassPool classPool)
-        {
-            long start = 0;
-
-            if (DETAILS)
-            {
-                System.out.print(message);
-                System.out.print(getPadding(message.length(), 48));
-                start = System.currentTimeMillis();
-            }
-
-            classPool.accept(classPoolVisitor);
-
-            if (DETAILS)
-            {
-                long end = System.currentTimeMillis();
-                System.out.println(String.format(" took: %6d ms", (end - start)));
-            }
-        }
-
-
-        // Private helper methods
-
-        private String getPadding(int pos, int size)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = pos; i < size; i++)
-            {
-                sb.append('.');
-            }
-            return sb.toString();
-        }
     }
 }

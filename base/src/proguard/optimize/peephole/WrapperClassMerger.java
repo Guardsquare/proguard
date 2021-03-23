@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,10 +20,8 @@
  */
 package proguard.optimize.peephole;
 
-import proguard.classfile.ClassConstants;
-import proguard.classfile.Clazz;
-import proguard.classfile.ProgramClass;
-import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.*;
+import proguard.classfile.visitor.*;
 import proguard.optimize.info.WrapperClassMarker;
 
 /**
@@ -38,7 +36,7 @@ import proguard.optimize.info.WrapperClassMarker;
  * @author Eric Lafortune
  */
 public class WrapperClassMerger
-implements ClassVisitor
+implements   ClassVisitor
 {
     private final boolean      allowAccessModification;
     private final ClassVisitor extraClassVisitor;

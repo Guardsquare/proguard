@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -64,18 +64,20 @@ extends      ReferenceTracingInvocationUnit
 
     // Implementations for SimplifiedInvocationUnit.
 
-    public void setMethodParameterValue(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant, int parameterIndex, Value value)
+    @Override
+    public void setMethodParameterValue(Clazz clazz, AnyMethodrefConstant refConstant, int parameterIndex, Value value)
     {
-        super.setMethodParameterValue(clazz, anyMethodrefConstant, parameterIndex, value);
+        super.setMethodParameterValue(clazz, refConstant, parameterIndex, value);
 
         parameters[parameterIndex] = value;
     }
 
 
-    public Value getMethodReturnValue(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant, String type)
+    @Override
+    public Value getMethodReturnValue(Clazz clazz, AnyMethodrefConstant refConstant, String type)
     {
         Value returnValue =
-            super.getMethodReturnValue(clazz, anyMethodrefConstant, type);
+            super.getMethodReturnValue(clazz, refConstant, type);
 
         // We only need to worry about reference values.
         if (returnValue.computationalType() != Value.TYPE_REFERENCE)
@@ -83,7 +85,7 @@ extends      ReferenceTracingInvocationUnit
             return returnValue;
         }
 
-        Method referencedMethod = (Method)anyMethodrefConstant.referencedMethod;
+        Method referencedMethod = refConstant.referencedMethod;
         if (referencedMethod != null)
         {
             // Start figuring out which trace value to attach to the return value.
@@ -100,7 +102,7 @@ extends      ReferenceTracingInvocationUnit
                 ParameterEscapeMarker.getReturnedParameters(referencedMethod);
 
             int parameterCount =
-                ClassUtil.internalMethodParameterCount(anyMethodrefConstant.getType(clazz), isStatic);
+                ClassUtil.internalMethodParameterCount(refConstant.getType(clazz), isStatic);
 
             for (int parameterIndex = 0; parameterIndex < parameterCount; parameterIndex++)
             {
@@ -112,7 +114,7 @@ extends      ReferenceTracingInvocationUnit
                         TracedReferenceValue tracedParameterValue =
                             (TracedReferenceValue)parameterValue;
 
-                        if (mayReturnType(anyMethodrefConstant.referencedClass,
+                        if (mayReturnType(refConstant.referencedClass,
                                           referencedMethod,
                                           tracedParameterValue))
                         {
@@ -129,7 +131,7 @@ extends      ReferenceTracingInvocationUnit
 
             if (DEBUG)
             {
-                System.out.println("ParameterTracingInvocationUnit.getMethodReturnValue: calling [" + anyMethodrefConstant.getClassName(clazz) + "." + anyMethodrefConstant.getName(clazz) + anyMethodrefConstant.getType(clazz) + "] returns [" + traceValue + " " + returnValue + "]");
+                System.out.println("ParameterTracingInvocationUnit.getMethodReturnValue: calling ["+refConstant.getClassName(clazz)+"."+refConstant.getName(clazz)+refConstant.getType(clazz)+"] returns ["+traceValue+" "+returnValue+"]");
             }
 
             // Did we find more detailed information on the return value?

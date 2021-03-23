@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,6 +28,7 @@ import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.optimize.info.*;
+import proguard.util.ProcessingFlags;
 
 /**
  * This MemberVisitor adds an additional parameter to the duplicate
@@ -90,7 +91,9 @@ implements   MemberVisitor,
             if (!programMethod.equals(similarMethod))
             {
                 // Should this initializer be preserved?
-                if (KeepMarker.isKept(programMethod))
+                if (KeepMarker.isKept(programMethod) ||
+                    // PGD-18: preserve this initializer if the other one has been modified.
+                    (similarMethod.getProcessingFlags() & ProcessingFlags.MODIFIED) != 0)
                 {
                     // Fix the other initializer.
                     // We'll just proceed if it is being kept as well;
@@ -149,7 +152,7 @@ implements   MemberVisitor,
                             int parameterCount =
                                 ClassUtil.internalMethodParameterCount(newDescriptor,
                                                                        programMethod.getAccessFlags());
-                            programMethodOptimizationInfo.insertParameter(parameterCount - 1);
+                            programMethodOptimizationInfo.insertParameter(parameterCount - 1, 1);
 
                             int parameterSize =
                                 programMethodOptimizationInfo.getParameterSize();

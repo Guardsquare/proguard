@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,27 +20,17 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.ClassPool;
-import proguard.classfile.Clazz;
-import proguard.classfile.Method;
-import proguard.classfile.ProgramClass;
-import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.visitor.AttributeNameFilter;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.attribute.visitor.SingleTimeAttributeVisitor;
+import proguard.classfile.*;
+import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.InstructionSequenceBuilder;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.InstructionSequenceMatcher;
-import proguard.classfile.util.WarningPrinter;
-import proguard.classfile.visitor.ClassVisitor;
-import proguard.evaluation.BasicInvocationUnit;
-import proguard.evaluation.PartialEvaluator;
-import proguard.evaluation.value.InstructionOffsetValue;
-import proguard.evaluation.value.ReferenceValue;
-import proguard.evaluation.value.TypedReferenceValueFactory;
+import proguard.classfile.util.*;
+import proguard.classfile.visitor.*;
+import proguard.evaluation.*;
+import proguard.evaluation.value.*;
 
 /**
  * This instruction visitor searches the code for invocations to any of the

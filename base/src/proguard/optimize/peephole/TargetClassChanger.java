@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,8 +20,6 @@
  */
 package proguard.optimize.peephole;
 
-import java.util.Arrays;
-
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -31,7 +29,10 @@ import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.visitor.*;
+import proguard.optimize.info.ClassOptimizationInfo;
 import proguard.util.ArrayUtil;
+
+import java.util.Arrays;
 
 /**
  * This ClassVisitor replaces references to classes and class members if the
@@ -176,6 +177,7 @@ implements   ClassVisitor,
 
     // Implementations for MemberVisitor.
 
+    @Override
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
         // Change the referenced class.
@@ -187,6 +189,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         // Change the referenced classes.
@@ -199,9 +202,11 @@ implements   ClassVisitor,
 
     // Implementations for ConstantVisitor.
 
+    @Override
     public void visitAnyConstant(Clazz clazz, Constant constant) {}
 
 
+    @Override
     public void visitStringConstant(Clazz clazz, StringConstant stringConstant)
     {
         // Does the string refer to a class, due to a Class.forName construct?
@@ -222,6 +227,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
         // Change the referenced classes.
@@ -229,66 +235,67 @@ implements   ClassVisitor,
     }
 
 
-    public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant)
+    @Override
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant refConstant)
     {
-        Clazz referencedClass    = fieldrefConstant.referencedClass;
+        Clazz referencedClass    = refConstant.referencedClass;
         Clazz newReferencedClass = updateReferencedClass(referencedClass);
         if (referencedClass != newReferencedClass)
         {
             if (DEBUG)
             {
                 System.out.println("TargetClassChanger:");
-                System.out.println("  ["+clazz.getName()+"] changing reference from ["+fieldrefConstant.referencedClass+"."+fieldrefConstant.referencedField.getName(fieldrefConstant.referencedClass)+fieldrefConstant.referencedField.getDescriptor(fieldrefConstant.referencedClass)+"]");
+                System.out.println("  ["+clazz.getName()+"] changing reference from ["+refConstant.referencedClass.getName()+"."+refConstant.referencedMethod.getName(refConstant.referencedClass)+refConstant.referencedMethod.getDescriptor(refConstant.referencedClass)+"]");
             }
 
             // Change the referenced class.
-            fieldrefConstant.referencedClass  = newReferencedClass;
+            refConstant.referencedClass  = newReferencedClass;
 
             // Change the referenced class member.
-            fieldrefConstant.referencedField =
-                updateReferencedField(fieldrefConstant.referencedField,
-                                      fieldrefConstant.getName(clazz),
-                                      fieldrefConstant.getType(clazz),
-                                      newReferencedClass);
+            refConstant.referencedMethod = (Method)updateReferencedMember(refConstant.referencedMethod,
+                                                                          refConstant.getName(clazz),
+                                                                          refConstant.getType(clazz),
+                                                                          newReferencedClass);
 
             if (DEBUG)
             {
-                System.out.println("  ["+clazz.getName()+"]                    to   ["+fieldrefConstant.referencedClass+"."+fieldrefConstant.referencedField.getName(fieldrefConstant.referencedClass)+fieldrefConstant.referencedField.getDescriptor(fieldrefConstant.referencedClass)+"]");
+                System.out.println("  ["+clazz.getName()+"]                    to   ["+refConstant.referencedClass+"."+refConstant.referencedMethod+"]");
             }
         }
     }
 
 
-    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
+    @Override
+    public void visitFieldrefConstant(Clazz clazz, FieldrefConstant refConstant)
     {
-        Clazz referencedClass    = anyMethodrefConstant.referencedClass;
+        Clazz referencedClass    = refConstant.referencedClass;
         Clazz newReferencedClass = updateReferencedClass(referencedClass);
         if (referencedClass != newReferencedClass)
         {
             if (DEBUG)
             {
                 System.out.println("TargetClassChanger:");
-                System.out.println("  ["+clazz.getName()+"] changing reference from ["+anyMethodrefConstant.referencedClass+"."+anyMethodrefConstant.referencedMethod.getName(anyMethodrefConstant.referencedClass)+anyMethodrefConstant.referencedMethod.getDescriptor(anyMethodrefConstant.referencedClass)+"]");
+                System.out.println("  ["+clazz.getName()+"] changing reference from ["+refConstant.referencedClass.getName()+"."+refConstant.referencedField.getName(refConstant.referencedClass)+refConstant.referencedField.getDescriptor(refConstant.referencedClass)+"]");
             }
 
             // Change the referenced class.
-            anyMethodrefConstant.referencedClass  = newReferencedClass;
+            refConstant.referencedClass  = newReferencedClass;
 
             // Change the referenced class member.
-            anyMethodrefConstant.referencedMethod =
-                updateReferencedMethod(anyMethodrefConstant.referencedMethod,
-                                       anyMethodrefConstant.getName(clazz),
-                                       anyMethodrefConstant.getType(clazz),
-                                       newReferencedClass);
+            refConstant.referencedField = (Field)updateReferencedMember(refConstant.referencedField,
+                                                                        refConstant.getName(clazz),
+                                                                        refConstant.getType(clazz),
+                                                                        newReferencedClass);
 
             if (DEBUG)
             {
-                System.out.println("  ["+clazz.getName()+"]                    to   ["+anyMethodrefConstant.referencedClass+"."+anyMethodrefConstant.referencedMethod.getName(anyMethodrefConstant.referencedClass)+anyMethodrefConstant.referencedMethod.getDescriptor(anyMethodrefConstant.referencedClass)+"]");
+                System.out.println("  ["+clazz.getName()+"]                    to   ["+refConstant.referencedClass+"."+refConstant.referencedField+"]");
             }
         }
     }
 
 
+    @Override
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
         // Change the referenced class.
@@ -297,6 +304,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitMethodTypeConstant(Clazz clazz, MethodTypeConstant methodTypeConstant)
     {
         updateReferencedClasses(methodTypeConstant.referencedClasses);
@@ -305,16 +313,11 @@ implements   ClassVisitor,
 
     // Implementations for AttributeVisitor.
 
+    @Override
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
 
-    public void visitRecordAttribute(Clazz clazz, RecordAttribute recordAttribute)
-    {
-        // Fix the record component attributes.
-        recordAttribute.componentsAccept(clazz, this);
-    }
-
-
+    @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
         // Change the references of the attributes.
@@ -322,6 +325,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitLocalVariableTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTableAttribute localVariableTableAttribute)
     {
         // Change the references of the local variables.
@@ -329,6 +333,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitLocalVariableTypeTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeTableAttribute localVariableTypeTableAttribute)
     {
         // Change the references of the local variables.
@@ -336,13 +341,44 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitSignatureAttribute(Clazz clazz, SignatureAttribute signatureAttribute)
     {
-        // Change the referenced classes.
-        updateReferencedClasses(signatureAttribute.referencedClasses);
+        try
+        {
+                // Change the referenced classes.
+                updateReferencedClasses(signatureAttribute.referencedClasses);
+        }
+        catch (RuntimeException e)
+        {
+            System.err.println("Unexpected error while adapting signatures for merged classes:");
+            System.err.println("  Class     = ["+clazz.getName()+"]");
+            System.err.println("  Signature = ["+signatureAttribute.getSignature(clazz)+"]");
+            Clazz[] referencedClasses = signatureAttribute.referencedClasses;
+            if (referencedClasses != null)
+            {
+                for (int index = 0; index < referencedClasses.length; index++)
+                {
+                    Clazz referencedClass = referencedClasses[index];
+                    System.err.println("  Referenced class #"+index+" = "+ referencedClass);
+                    if (referencedClass != null)
+                    {
+                        ClassOptimizationInfo info = ClassOptimizationInfo.getClassOptimizationInfo(referencedClass);
+                        System.err.println("                         info        = "+info);
+                        if (info != null)
+                        {
+                            System.err.println("                         target      = "+info.getTargetClass());
+                        }
+                    }
+                }
+            }
+            System.err.println("  Exception = ["+e.getClass().getName()+"] ("+e.getMessage()+")");
+            throw e;
+        }
     }
 
 
+    @Override
     public void visitAnyAnnotationsAttribute(Clazz clazz, AnnotationsAttribute annotationsAttribute)
     {
         // Change the references of the annotations.
@@ -350,6 +386,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitAnyParameterAnnotationsAttribute(Clazz clazz, Method method, ParameterAnnotationsAttribute parameterAnnotationsAttribute)
     {
         // Change the references of the annotations.
@@ -357,6 +394,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitAnnotationDefaultAttribute(Clazz clazz, Method method, AnnotationDefaultAttribute annotationDefaultAttribute)
     {
         // Change the references of the annotation.
@@ -378,6 +416,7 @@ implements   ClassVisitor,
 
     // Implementations for LocalVariableInfoVisitor.
 
+    @Override
     public void visitLocalVariableInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableInfo localVariableInfo)
     {
         // Change the referenced class.
@@ -388,6 +427,7 @@ implements   ClassVisitor,
 
     // Implementations for LocalVariableTypeInfoVisitor.
 
+    @Override
     public void visitLocalVariableTypeInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LocalVariableTypeInfo localVariableTypeInfo)
     {
         // Change the referenced classes.
@@ -397,6 +437,7 @@ implements   ClassVisitor,
 
     // Implementations for AnnotationVisitor.
 
+    @Override
     public void visitAnnotation(Clazz clazz, Annotation annotation)
     {
         // Change the referenced classes.
@@ -409,6 +450,7 @@ implements   ClassVisitor,
 
     // Implementations for ElementValueVisitor.
 
+    @Override
     public void visitAnyElementValue(Clazz clazz, Annotation annotation, ElementValue elementValue)
     {
         Clazz referencedClass    = elementValue.referencedClass;
@@ -420,14 +462,15 @@ implements   ClassVisitor,
 
             // Change the referenced method.
             elementValue.referencedMethod =
-                updateReferencedMethod(elementValue.referencedMethod,
-                                       elementValue.getMethodName(clazz),
-                                       null,
-                                       newReferencedClass);
+                (Method)updateReferencedMember(elementValue.referencedMethod,
+                                               elementValue.getMethodName(clazz),
+                                               null,
+                                               newReferencedClass);
         }
     }
 
 
+    @Override
     public void visitConstantElementValue(Clazz clazz, Annotation annotation, ConstantElementValue constantElementValue)
     {
         // Change the referenced annotation class and method.
@@ -435,6 +478,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitEnumConstantElementValue(Clazz clazz, Annotation annotation, EnumConstantElementValue enumConstantElementValue)
     {
         // Change the referenced annotation class and method.
@@ -445,6 +489,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitClassElementValue(Clazz clazz, Annotation annotation, ClassElementValue classElementValue)
     {
         // Change the referenced annotation class and method.
@@ -455,6 +500,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitAnnotationElementValue(Clazz clazz, Annotation annotation, AnnotationElementValue annotationElementValue)
     {
         // Change the referenced annotation class and method.
@@ -465,6 +511,7 @@ implements   ClassVisitor,
     }
 
 
+    @Override
     public void visitArrayElementValue(Clazz clazz, Annotation annotation, ArrayElementValue arrayElementValue)
     {
         // Change the referenced annotation class and method.
@@ -533,7 +580,7 @@ implements   ClassVisitor,
     }
 
 
-   /**
+    /**
      * Updates the retargeted classes in the given array of classes.
      */
     private void updateReferencedClasses(Clazz[] referencedClasses)
@@ -576,50 +623,14 @@ implements   ClassVisitor,
                                           String type,
                                           Clazz  newReferencedClass)
     {
-        return referencedMember instanceof  Field ?
-            updateReferencedField((Field)referencedMember,
-                                  name,
-                                  type,
-                                  newReferencedClass) :
-            updateReferencedMethod((Method)referencedMember,
-                                   name,
-                                   type,
-                                   newReferencedClass);
-    }
-
-
-
-    /**
-     * Returns the retargeted field of the given field.
-     */
-    private Field updateReferencedField(Field  referencedField,
-                                        String name,
-                                        String type,
-                                        Clazz  newReferencedClass)
-    {
-        if (referencedField == null)
+        if (referencedMember == null)
         {
             return null;
         }
 
-        return newReferencedClass.findField(name, type);
-    }
-
-
-    /**
-     * Returns the retargeted method of the given method.
-     */
-    private Method updateReferencedMethod(Method referencedMethod,
-                                          String name,
-                                          String type,
-                                          Clazz  newReferencedClass)
-    {
-        if (referencedMethod == null)
-        {
-            return null;
-        }
-
-        return newReferencedClass.findMethod(name, type);
+        return referencedMember instanceof Field ?
+            newReferencedClass.findField(name, type) :
+            newReferencedClass.findMethod(name, type);
     }
 
 

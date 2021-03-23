@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,7 +24,7 @@ import proguard.classfile.Clazz;
 
 /**
  * This class stores some optimization information that can be attached to
- * a class.
+ * a class that can be analyzed in detail.
  *
  * @author Eric Lafortune
  */
@@ -63,7 +63,9 @@ extends      ClassOptimizationInfo
         return containsConstructors;
     }
 
-
+    /**
+     * Specifies that the class is instantiated in the known code.
+     */
     public void setInstantiated()
     {
         isInstantiated = true;
@@ -76,6 +78,10 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that the class is part of an 'instanceof' instruction in the
+     * known code.
+     */
     public void setInstanceofed()
     {
         isInstanceofed = true;
@@ -88,6 +94,10 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that the class is loaded with an 'ldc' instruction (a .class
+     * construct in Java) in the known code.
+     */
     public void setDotClassed()
     {
         isDotClassed = true;
@@ -100,6 +110,10 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that the class is a Throwable that is caught in an exception
+     * handler in the known code.
+     */
     public void setCaught()
     {
         isCaught = true;
@@ -112,6 +126,10 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies whether the class is an enum type that can be simplified to a
+     * primitive integer.
+     */
     public void setSimpleEnum(boolean simple)
     {
         isSimpleEnum = simple;
@@ -124,6 +142,11 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that instances of the class are escaping to the heap.
+     * Otherwise, any instances are just created locally and passed as
+     * parameters.
+     */
     public void setEscaping()
     {
         isEscaping = true;
@@ -136,6 +159,9 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that loading the class has side effects.
+     */
     public void setSideEffects()
     {
         hasSideEffects = true;
@@ -148,6 +174,9 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that the class contains package visible class members.
+     */
     public void setContainsPackageVisibleMembers()
     {
         containsPackageVisibleMembers = true;
@@ -160,6 +189,9 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that code in the class accesses package visible class members.
+     */
     public void setInvokesPackageVisibleMembers()
     {
         invokesPackageVisibleMembers = true;
@@ -172,6 +204,9 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies that the class may be not merged with other classes.
+     */
     public void setMayNotBeMerged()
     {
         mayBeMerged = false;
@@ -184,6 +219,10 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies the class for which this class is a simple wrapper without any
+     * additional functionality.
+     */
     public void setWrappedClass(Clazz wrappedClass)
     {
         this.wrappedClass = wrappedClass;
@@ -196,6 +235,9 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Specifies the class into which this class can be merged.
+     */
     public void setTargetClass(Clazz targetClass)
     {
         this.targetClass = targetClass;
@@ -208,6 +250,9 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Merges in the given information of a class that is merged.
+     */
     public void merge(ClassOptimizationInfo other)
     {
         this.isInstantiated                |= other.isInstantiated();
@@ -223,12 +268,18 @@ extends      ClassOptimizationInfo
     }
 
 
+    /**
+     * Creates and sets a ProgramClassOptimizationInfo instance on the given class.
+     */
     public static void setProgramClassOptimizationInfo(Clazz clazz)
     {
         clazz.setProcessingInfo(new ProgramClassOptimizationInfo());
     }
 
 
+    /**
+     * Returns the ProgramClassOptimizationInfo instance from the given class.
+     */
     public static ProgramClassOptimizationInfo getProgramClassOptimizationInfo(Clazz clazz)
     {
         return (ProgramClassOptimizationInfo)clazz.getProcessingInfo();
