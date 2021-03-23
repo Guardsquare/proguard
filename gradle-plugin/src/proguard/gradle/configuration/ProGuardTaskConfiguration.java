@@ -81,15 +81,7 @@ public class ProGuardTaskConfiguration {
         ClassPath programJars = config.programJars;
         for (int i = 0; i < programJars.size(); i++) {
             ClassPathEntry classPathEntry = programJars.get(i);
-            if (classPathEntry.isOutput() && classPathEntry.getFile().isFile()) {
-                files.from(classPathEntry.getFile());
-            }
-        }
-
-        ClassPath libraryJars = config.libraryJars;
-        for (int i = 0; i < libraryJars.size(); i++) {
-            ClassPathEntry classPathEntry = libraryJars.get(i);
-            if (classPathEntry.isOutput() && classPathEntry.getFile().isFile()) {
+            if (classPathEntry.isOutput() && !classPathEntry.isDirectory()) {
                 files.from(classPathEntry.getFile());
             }
         }
@@ -104,15 +96,7 @@ public class ProGuardTaskConfiguration {
         ClassPath programJars = config.programJars;
         for (int i = 0; i < programJars.size(); i++) {
             ClassPathEntry classPathEntry = programJars.get(i);
-            if (classPathEntry.isOutput() && classPathEntry.getFile().isDirectory()) {
-                files.from(classPathEntry.getFile());
-            }
-        }
-
-        ClassPath libraryJars = config.libraryJars;
-        for (int i = 0; i < libraryJars.size(); i++) {
-            ClassPathEntry classPathEntry = libraryJars.get(i);
-            if (classPathEntry.isOutput() && classPathEntry.getFile().isDirectory()) {
+            if (classPathEntry.isOutput() && classPathEntry.isDirectory()) {
                 files.from(classPathEntry.getFile());
             }
         }
