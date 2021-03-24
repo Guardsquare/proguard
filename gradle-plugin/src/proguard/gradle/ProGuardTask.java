@@ -71,7 +71,7 @@ public abstract class ProGuardTask extends DefaultTask
     protected abstract ObjectFactory getObjectFactory();
 
     @Nested
-    protected ProGuardTaskConfiguration getTaskConfiguration() {
+    public ProGuardTaskConfiguration getTaskConfiguration() {
         return ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
     }
 
