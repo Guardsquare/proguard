@@ -1408,7 +1408,7 @@ public abstract class ProGuardTask extends DefaultTask
         if (configuration.programJars != null) {
             return configuration;
         }
-        getLogger().warn("LOADING CONFIGURATION");
+        getLogger().info("Loading ProGuard configuration");
 
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.

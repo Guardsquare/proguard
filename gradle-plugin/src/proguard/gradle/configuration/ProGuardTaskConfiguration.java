@@ -66,14 +66,14 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Classpath
-    public Provider<FileCollection> getInputJars() {
-        return mappedProvider(config -> {
-            ConfigurableFileCollection files = objectFactory.fileCollection();
+    public FileCollection getInputJars() {
+        Provider<List<File>> inputJarsProvider = mappedProvider(config -> {
+            List<File> files = new ArrayList<>();
             ClassPath programJars = config.programJars;
             for (int i = 0; i < programJars.size(); i++) {
                 ClassPathEntry classPathEntry = programJars.get(i);
                 if (!classPathEntry.isOutput()) {
-                    files.from(classPathEntry.getFile());
+                    files.add(classPathEntry.getFile());
                 }
             }
 
@@ -81,11 +81,12 @@ public class ProGuardTaskConfiguration {
             for (int i = 0; i < libraryJars.size(); i++) {
                 ClassPathEntry classPathEntry = libraryJars.get(i);
                 if (!classPathEntry.isOutput()) {
-                    files.from(classPathEntry.getFile());
+                    files.add(classPathEntry.getFile());
                 }
             }
             return files;
         });
+        return objectFactory.fileCollection().from(inputJarsProvider);
     }
 
     @OutputFiles
