@@ -38,6 +38,9 @@ tasks.withType<Jar> {
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     verbose()
 
+    // Alternatively put your config in a separate file
+    // configuration("config.pro")
+
     // Use the jar task output as a input jar. This will automatically add the necessary task dependency.
     injars(tasks.named("jar"))
 
@@ -70,27 +73,4 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     """)
 }
 
-tasks.register<proguard.gradle.ProGuardTask>("proguardWithConfigFile") {
-    dependsOn("jar")
-
-    configuration("config.pro")
-}
-
-tasks.register("generateConfigFile") {
-    val outputFile = file("build/proguard/config.pro")
-    outputs.file(outputFile)
-
-    doLast {
-        file("build/proguard").mkdirs()
-        outputFile.writeText("-basedirectory ../..\n")
-        outputFile.appendText(file("config.pro").readText().replace("proguardWithConfigFile", "proguardWithGeneratedConfigFile"))
-    }
-}
-
-tasks.register<proguard.gradle.ProGuardTask>("proguardWithGeneratedConfigFile") {
-    dependsOn("jar")
-
-    // Consume the "generateConfigFile" output. This will automatically add the task dependency.
-    configuration(tasks.named("generateConfigFile"))
-}
 
