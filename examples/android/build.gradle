@@ -4,12 +4,11 @@ buildscript {
         jcenter() // For anything else.
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
+        classpath 'com.android.tools.build:gradle:4.1.3'
     }
     configurations.all {
         resolutionStrategy {
-            // Override the default version of ProGuard
-            // with the most recent one.
+            // Override the default version of ProGuard with the most recent one.
             dependencySubstitution {
                 substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.0.1')
             }
@@ -32,6 +31,8 @@ android {
     }
 
     defaultConfig {
+        minSdkVersion    11
+        targetSdkVersion 28
         signingConfig signingConfigs.debug
     }
 
