@@ -245,10 +245,20 @@ public class ClassPathEntry
         return hasExtension(".zip");
     }
 
-    public boolean isDirectory() {
-        return !isAar() && !isAab() && !isApk() && !isDex() && !isEar() && !isJar() && !isJmod() && !isZip();
+    /**
+     * Returns whether this data entry is a directory.
+     */
+    public boolean isDirectory()
+    {
+        return !isAar()  &&
+                !isAab()  &&
+                !isApk()  &&
+                !isDex()  &&
+                !isEar()  &&
+                !isJar()  &&
+                !isJmod() &&
+                !isZip();
     }
-
 
     /**
      * Returns whether this data entry has the given extension.

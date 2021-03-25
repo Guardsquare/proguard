@@ -1,21 +1,17 @@
 package proguard.gradle.configuration;
 
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
-import proguard.ClassPath;
 import proguard.ClassPathEntry;
 
-import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * A Gradle-aware wrapper for the ProGuard `ClassPathEntry`, representing all non-file details for an entry.
  */
-public class ProGuardTaskClassPathEntry implements Serializable {
+public class ProGuardTaskClassPathEntry implements Serializable
+{
     private String  featureName;
     private List    filter;
     private List    apkFilter;
@@ -27,7 +23,8 @@ public class ProGuardTaskClassPathEntry implements Serializable {
     private List    jmodFilter;
     private List    zipFilter;
 
-    public ProGuardTaskClassPathEntry(ClassPathEntry entry) {
+    public ProGuardTaskClassPathEntry(ClassPathEntry entry)
+    {
         this.featureName = entry.getFeatureName();
         this.filter = entry.getFilter();
         this.apkFilter = entry.getApkFilter();
@@ -42,61 +39,71 @@ public class ProGuardTaskClassPathEntry implements Serializable {
 
     @Optional
     @Input
-    public String getFeatureName() {
+    public String getFeatureName()
+    {
         return featureName;
     }
 
     @Optional
     @Input
-    public List getFilter() {
+    public List getFilter()
+    {
         return filter;
     }
 
     @Optional
     @Input
-    public List getJarFilter() {
+    public List getJarFilter()
+    {
         return jarFilter;
     }
 
     @Optional
     @Input
-    public List getWarFilter() {
+    public List getWarFilter()
+    {
         return warFilter;
     }
 
     @Optional
     @Input
-    public List getJmodFilter() {
+    public List getJmodFilter()
+    {
         return jmodFilter;
     }
 
     @Optional
     @Input
-    public List getZipFilter() {
+    public List getZipFilter()
+    {
         return zipFilter;
     }
 
     @Optional
     @Input
-    public List getApkFilter() {
+    public List getApkFilter()
+    {
         return apkFilter;
     }
 
     @Optional
     @Input
-    public List getAabFilter() {
+    public List getAabFilter()
+    {
         return aabFilter;
     }
 
     @Optional
     @Input
-    public List getAarFilter() {
+    public List getAarFilter()
+    {
         return aarFilter;
     }
 
     @Optional
     @Input
-    public List getEarFilter() {
+    public List getEarFilter()
+    {
         return earFilter;
     }
 }

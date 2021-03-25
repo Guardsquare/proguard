@@ -7,8 +7,10 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Provider;
 import proguard.Configuration;
 
-class ProGuardTaskConfigurationForGradle6 extends ProGuardTaskConfiguration {
-    public ProGuardTaskConfigurationForGradle6(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
+class ProGuardTaskConfigurationForGradle6 extends ProGuardTaskConfiguration
+{
+    public ProGuardTaskConfigurationForGradle6(Provider<Configuration> configurationProvider, ObjectFactory objectFactory)
+    {
         super(configurationProvider, objectFactory);
     }
 
@@ -17,15 +19,19 @@ class ProGuardTaskConfigurationForGradle6 extends ProGuardTaskConfiguration {
      * when constructing the task graph. This breaks Proguard, since we may not know all of the input files at this time.
      * This is a hack to workaround this limitation. It is not required for Gradle 7+.
      */
-    protected <T> Provider<T> mappedProvider(Transformer<T, Configuration> transformer) {
-        return new TransformBackedProvider<T, Configuration>(transformer, (ProviderInternal<? extends Configuration>) configurationProvider) {
+    protected <T> Provider<T> mappedProvider(Transformer<T, Configuration> transformer)
+    {
+        return new TransformBackedProvider<T, Configuration>(transformer, (ProviderInternal<? extends Configuration>) configurationProvider)
+        {
             @Override
-            public boolean isPresent() {
+            public boolean isPresent()
+            {
                 return true;
             }
 
             @Override
-            public T get() {
+            public T get()
+            {
                 return super.getOrNull();
             }
         };

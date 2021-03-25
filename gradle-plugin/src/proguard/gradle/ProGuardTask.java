@@ -58,8 +58,8 @@ public abstract class ProGuardTask extends DefaultTask
     private final List          libraryJarFilters  = new ArrayList();
 
     // Accumulated configuration.
-    protected final Configuration configuration      = new Configuration();
-    private final ProGuardTaskConfiguration taskConfiguration = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
+    protected final Configuration             configuration     = new Configuration();
+    private   final ProGuardTaskConfiguration taskConfiguration = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
 
     // Fields acting as parameters for the class member specification methods.
     private boolean            allowValues;
@@ -72,7 +72,8 @@ public abstract class ProGuardTask extends DefaultTask
     protected abstract ObjectFactory getObjectFactory();
 
     @Nested
-    public ProGuardTaskConfiguration getTaskConfiguration() {
+    public ProGuardTaskConfiguration getTaskConfiguration()
+    {
         return taskConfiguration;
     }
 
@@ -1383,19 +1384,23 @@ public abstract class ProGuardTask extends DefaultTask
 
     }
 
-    private Provider<Configuration> getConfigurationProvider() {
-        return getConfigurationFiles().getElements().map(configFiles -> {
-            try {
-                return getConfiguration(configFiles);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        });
+    private Provider<Configuration> getConfigurationProvider()
+    {
+        return getConfigurationFiles().getElements().map(this::getConfiguration);
     }
 
-    private synchronized Configuration getConfiguration(Collection<FileSystemLocation> configurationFiles) throws IOException, ParseException {
-        if (configuration.programJars == null) {
-            loadConfiguration(configurationFiles);
+    private synchronized Configuration getConfiguration(Collection<FileSystemLocation> configurationFiles)
+    {
+        if (configuration.programJars == null)
+        {
+            try
+            {
+                loadConfiguration(configurationFiles);
+            }
+            catch (IOException | ParseException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
         return configuration;
     }
@@ -1404,11 +1409,14 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the configuration collected so far, resolving files and
      * reading included configurations.
      */
-    private Configuration loadConfiguration(Collection<FileSystemLocation> configurationFiles) throws IOException, ParseException {
-        if (configuration.programJars != null) {
+    private Configuration loadConfiguration(Collection<FileSystemLocation> configurationFiles)
+    throws IOException, ParseException
+    {
+        if (configuration.programJars != null)
+        {
             return configuration;
         }
-        getLogger().info("Loading ProGuard configuration");
+        getLogger().debug("Loading ProGuard configuration. This should happen immediately prior to ProGuardTask execution.");
 
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.

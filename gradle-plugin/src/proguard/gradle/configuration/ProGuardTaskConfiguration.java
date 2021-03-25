@@ -34,7 +34,8 @@ import java.util.concurrent.Callable;
  * For clarity, fields on `Configuration` that are not task inputs or outputs are exposed with `@Internal`.
  * These methods could just as easily be removed from this type.
  */
-public class ProGuardTaskConfiguration {
+public class ProGuardTaskConfiguration
+{
     protected final Provider<Configuration> configurationProvider;
 
     private final FileCollection inputJars;
@@ -46,7 +47,8 @@ public class ProGuardTaskConfiguration {
     private final Provider<File> classObfuscationDictionary;
     private final Provider<File> packageObfuscationDictionary;
 
-    public ProGuardTaskConfiguration(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
+    public ProGuardTaskConfiguration(Provider<Configuration> configurationProvider, ObjectFactory objectFactory)
+    {
         this.configurationProvider = configurationProvider;
         this.inputJars = objectFactory.fileCollection().from(inputJars());
         this.outputJars = objectFactory.fileCollection().from(outputs(false));
@@ -58,37 +60,49 @@ public class ProGuardTaskConfiguration {
         this.packageObfuscationDictionary = mappedProvider(config -> optionalFile(config.packageObfuscationDictionary));
     }
 
-    public static ProGuardTaskConfiguration create(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
-        if (GradleVersionCheck.isAtLeastGradle7()) {
+    public static ProGuardTaskConfiguration create(Provider<Configuration> configurationProvider, ObjectFactory objectFactory)
+    {
+        if (GradleVersionCheck.isAtLeastGradle7())
+        {
             return new ProGuardTaskConfiguration(configurationProvider, objectFactory);
-        } else {
+        }
+        else
+        {
             return new ProGuardTaskConfigurationForGradle6(configurationProvider, objectFactory);
         }
     }
 
-    private Configuration getConfiguration() {
+    private Configuration getConfiguration()
+    {
         return configurationProvider.get();
     }
 
-    protected <T> Provider<T> mappedProvider(Transformer<T, Configuration> transformer) {
+    protected <T> Provider<T> mappedProvider(Transformer<T, Configuration> transformer)
+    {
         return configurationProvider.map(transformer);
     }
 
-    private Provider<List<File>> inputJars() {
-        return mappedProvider(config -> {
+    private Provider<List<File>> inputJars()
+    {
+        return mappedProvider(config ->
+        {
             List<File> files = new ArrayList<>();
             ClassPath programJars = config.programJars;
-            for (int i = 0; i < programJars.size(); i++) {
+            for (int i = 0; i < programJars.size(); i++)
+            {
                 ClassPathEntry classPathEntry = programJars.get(i);
-                if (!classPathEntry.isOutput()) {
+                if (!classPathEntry.isOutput())
+                {
                     files.add(classPathEntry.getFile());
                 }
             }
 
             ClassPath libraryJars = config.libraryJars;
-            for (int i = 0; i < libraryJars.size(); i++) {
+            for (int i = 0; i < libraryJars.size(); i++)
+            {
                 ClassPathEntry classPathEntry = libraryJars.get(i);
-                if (!classPathEntry.isOutput()) {
+                if (!classPathEntry.isOutput())
+                {
                     files.add(classPathEntry.getFile());
                 }
             }
@@ -96,13 +110,17 @@ public class ProGuardTaskConfiguration {
         });
     }
 
-    private Callable<List<File>> outputs(boolean directories) {
-        return () -> {
+    private Callable<List<File>> outputs(boolean directories)
+    {
+        return () ->
+        {
             List<File> files = new ArrayList<>();
             ClassPath programJars = getConfiguration().programJars;
-            for (int i = 0; i < programJars.size(); i++) {
+            for (int i = 0; i < programJars.size(); i++)
+            {
                 ClassPathEntry classPathEntry = programJars.get(i);
-                if (classPathEntry.isOutput() && classPathEntry.isDirectory() == directories) {
+                if (classPathEntry.isOutput() && classPathEntry.isDirectory() == directories)
+                {
                     files.add(classPathEntry.getFile());
                 }
             }
@@ -110,17 +128,21 @@ public class ProGuardTaskConfiguration {
         };
     }
 
-    private Provider<List<ProGuardTaskClassPathEntry>> fileFilters() {
-        return mappedProvider(config -> {
+    private Provider<List<ProGuardTaskClassPathEntry>> fileFilters()
+    {
+        return mappedProvider(config ->
+        {
             List<ProGuardTaskClassPathEntry> entries = new ArrayList<>();
             ClassPath programJars = config.programJars;
-            for (int i = 0; i < programJars.size(); i++) {
+            for (int i = 0; i < programJars.size(); i++)
+            {
                 ClassPathEntry classPathEntry = programJars.get(i);
                 entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
             }
 
             ClassPath libraryJars = config.libraryJars;
-            for (int i = 0; i < libraryJars.size(); i++) {
+            for (int i = 0; i < libraryJars.size(); i++)
+            {
                 ClassPathEntry classPathEntry = libraryJars.get(i);
                 entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
             }
@@ -133,57 +155,70 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Classpath
-    public FileCollection getInputJars() {
+    public FileCollection getInputJars()
+    {
         return inputJars;
     }
 
     @OutputFiles
-    public FileCollection getOutputFiles() {
+    public FileCollection getOutputFiles()
+    {
         return outputJars;
     }
 
     @OutputDirectories
-    public FileCollection getOutputDirectories() {
+    public FileCollection getOutputDirectories()
+    {
         return outputDirs;
     }
 
     @Input
-    public Provider<List<ProGuardTaskClassPathEntry>> getJarFilters() {
+    public Provider<List<ProGuardTaskClassPathEntry>> getJarFilters()
+    {
         return fileFilters;
     }
 
     @Input
-    public boolean isSkipNonPublicLibraryClasses() {
+    public boolean isSkipNonPublicLibraryClasses()
+    {
         return getConfiguration().skipNonPublicLibraryClasses;
     }
 
     @Input
-    public boolean isSkipNonPublicLibraryClassMembers() {
+    public boolean isSkipNonPublicLibraryClassMembers()
+    {
         return getConfiguration().skipNonPublicLibraryClassMembers;
     }
 
-    @Optional @Input
-    public List<String> getKeepDirectories() {
+    @Optional
+    @Input
+    public List<String> getKeepDirectories()
+    {
         return getConfiguration().keepDirectories;
     }
 
-    @Optional @Input
-    public List<String> getDontCompress() {
+    @Optional
+    @Input
+    public List<String> getDontCompress()
+    {
         return getConfiguration().dontCompress;
     }
 
     @Input
-    public int getZipAlign() {
+    public int getZipAlign()
+    {
         return getConfiguration().zipAlign;
     }
 
     @Input
-    public int getTargetClassVersion() {
+    public int getTargetClassVersion()
+    {
         return getConfiguration().targetClassVersion;
     }
 
     @Internal
-    public long getLastModified() {
+    public long getLastModified()
+    {
         return getConfiguration().lastModified;
     }
 
@@ -191,13 +226,17 @@ public class ProGuardTaskConfiguration {
     // Keep options for code.
     ///////////////////////////////////////////////////////////////////////////
 
-    @Optional @Input
-    public List<KeepClassSpecification> getKeep() {
+    @Optional
+    @Input
+    public List<KeepClassSpecification> getKeep()
+    {
         return getConfiguration().keep;
     }
 
-    @Optional @OutputFile
-    public File getPrintSeeds() {
+    @Optional
+    @OutputFile
+    public File getPrintSeeds()
+    {
         return optionalFile(getConfiguration().printSeeds);
     }
 
@@ -206,17 +245,22 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Input
-    public boolean isShrink() {
+    public boolean isShrink()
+    {
         return getConfiguration().shrink;
     }
 
-    @Optional @OutputFile
-    public File getPrintUsage() {
+    @Optional
+    @OutputFile
+    public File getPrintUsage()
+    {
         return optionalFile(getConfiguration().printUsage);
     }
 
-    @Optional @Input
-    public List<ClassSpecification> getWhyAreYouKeeping() {
+    @Optional
+    @Input
+    public List<ClassSpecification> getWhyAreYouKeeping()
+    {
         return getConfiguration().whyAreYouKeeping;
     }
 
@@ -225,52 +269,68 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Input
-    public boolean isOptimize() {
+    public boolean isOptimize()
+    {
         return getConfiguration().optimize;
     }
 
-    @Optional @Input
-    public List<String> getOptimizations() {
+    @Optional
+    @Input
+    public List<String> getOptimizations()
+    {
         return getConfiguration().optimizations;
     }
 
     @Input
-    public int getOptimizationPasses() {
+    public int getOptimizationPasses()
+    {
         return getConfiguration().optimizationPasses;
     }
 
-    @Optional @Input
-    public List<ClassSpecification> getAssumeNoSideEffects() {
+    @Optional
+    @Input
+    public List<ClassSpecification> getAssumeNoSideEffects()
+    {
         return getConfiguration().assumeNoSideEffects;
     }
 
-    @Optional @Input
-    public List<ClassSpecification> getAssumeNoExternalSideEffects() {
+    @Optional
+    @Input
+    public List<ClassSpecification> getAssumeNoExternalSideEffects()
+    {
         return getConfiguration().assumeNoExternalSideEffects;
     }
 
-    @Optional @Input
-    public List<ClassSpecification> getAssumeNoEscapingParameters() {
+    @Optional
+    @Input
+    public List<ClassSpecification> getAssumeNoEscapingParameters()
+    {
         return getConfiguration().assumeNoEscapingParameters;
     }
 
-    @Optional @Input
-    public List<ClassSpecification> getAssumeNoExternalReturnValues() {
+    @Optional
+    @Input
+    public List<ClassSpecification> getAssumeNoExternalReturnValues()
+    {
         return getConfiguration().assumeNoExternalReturnValues;
     }
 
-    @Optional @Input
-    public List<ClassSpecification> getAssumeValues() {
+    @Optional
+    @Input
+    public List<ClassSpecification> getAssumeValues()
+    {
         return getConfiguration().assumeValues;
     }
 
     @Input
-    public boolean isAllowAccessModification() {
+    public boolean isAllowAccessModification()
+    {
         return getConfiguration().allowAccessModification;
     }
 
     @Input
-    public boolean isMergeInterfacesAggressively() {
+    public boolean isMergeInterfacesAggressively()
+    {
         return getConfiguration().mergeInterfacesAggressively;
     }
 
@@ -279,96 +339,127 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Input
-    public boolean isObfuscate() {
+    public boolean isObfuscate()
+    {
         return getConfiguration().obfuscate;
     }
 
-    @Optional @OutputFile
-    public File getPrintMapping() {
+    @Optional
+    @OutputFile
+    public File getPrintMapping()
+    {
         return optionalFile(getConfiguration().printMapping);
     }
 
-    @Optional @InputFile
+    @Optional
+    @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public Provider<File> getApplyMapping() {
+    public Provider<File> getApplyMapping()
+    {
         return applyMapping;
     }
 
-    @Optional @InputFile
+    @Optional
+    @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public Provider<File> getObfuscationDictionary() {
+    public Provider<File> getObfuscationDictionary()
+    {
         return obfuscationDictionary;
     }
 
-    @Optional @InputFile
+    @Optional
+    @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public Provider<File> getClassObfuscationDictionary() {
+    public Provider<File> getClassObfuscationDictionary()
+    {
         return classObfuscationDictionary;
     }
 
-    @Optional @InputFile
+    @Optional
+    @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public Provider<File> getPackageObfuscationDictionary() {
+    public Provider<File> getPackageObfuscationDictionary()
+    {
         return packageObfuscationDictionary;
     }
 
     @Input
-    public boolean isOverloadAggressively() {
+    public boolean isOverloadAggressively()
+    {
         return getConfiguration().overloadAggressively;
     }
 
     @Input
-    public boolean isUseUniqueClassMemberNames() {
+    public boolean isUseUniqueClassMemberNames()
+    {
         return getConfiguration().useUniqueClassMemberNames;
     }
 
     @Input
-    public boolean isUseMixedCaseClassNames() {
+    public boolean isUseMixedCaseClassNames()
+    {
         return getConfiguration().useMixedCaseClassNames;
     }
 
-    @Optional @Input
-    public List<String> getKeepPackageNames() {
+    @Optional
+    @Input
+    public List<String> getKeepPackageNames()
+    {
         return getConfiguration().keepPackageNames;
     }
 
-    @Optional @Input
-    public String getFlattenPackageHierarchy() {
+    @Optional
+    @Input
+    public String getFlattenPackageHierarchy()
+    {
         return getConfiguration().flattenPackageHierarchy;
     }
 
-    @Optional @Input
-    public String getRepackageClasses() {
+    @Optional
+    @Input
+    public String getRepackageClasses()
+    {
         return getConfiguration().repackageClasses;
     }
 
-    @Optional @Input
-    public List<String> getKeepAttributes() {
+    @Optional
+    @Input
+    public List<String> getKeepAttributes()
+    {
         return getConfiguration().keepAttributes;
     }
 
     @Input
-    public boolean isKeepParameterNames() {
+    public boolean isKeepParameterNames()
+    {
         return getConfiguration().keepParameterNames;
     }
 
-    @Optional @Input
-    public String getNewSourceFileAttribute() {
+    @Optional
+    @Input
+    public String getNewSourceFileAttribute()
+    {
         return getConfiguration().newSourceFileAttribute;
     }
 
-    @Optional @Input
-    public List<String> getAdaptClassStrings() {
+    @Optional
+    @Input
+    public List<String> getAdaptClassStrings()
+    {
         return getConfiguration().adaptClassStrings;
     }
 
-    @Optional @Input
-    public List<String> getAdaptResourceFileNames() {
+    @Optional
+    @Input
+    public List<String> getAdaptResourceFileNames()
+    {
         return getConfiguration().adaptResourceFileNames;
     }
 
-    @Optional @Input
-    public List<String> getAdaptResourceFileContents() {
+    @Optional
+    @Input
+    public List<String> getAdaptResourceFileContents()
+    {
         return getConfiguration().adaptResourceFileContents;
     }
 
@@ -377,17 +468,20 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Input
-    public boolean isPreverify() {
+    public boolean isPreverify()
+    {
         return getConfiguration().preverify;
     }
 
     @Input
-    public boolean isMicroEdition() {
+    public boolean isMicroEdition()
+    {
         return getConfiguration().microEdition;
     }
 
     @Input
-    public boolean isAndroid() {
+    public boolean isAndroid()
+    {
         return getConfiguration().android;
     }
 
@@ -396,22 +490,26 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Internal
-    public List<File> getKeyStores() {
+    public List<File> getKeyStores()
+    {
         return getConfiguration().keyStores;
     }
 
     @Internal
-    public List<String> getKeyStorePasswords() {
+    public List<String> getKeyStorePasswords()
+    {
         return getConfiguration().keyStorePasswords;
     }
 
     @Internal
-    public List<String> getKeyAliases() {
+    public List<String> getKeyAliases()
+    {
         return getConfiguration().keyAliases;
     }
 
     @Internal
-    public List<String> getKeyPasswords() {
+    public List<String> getKeyPasswords()
+    {
         return getConfiguration().keyPasswords;
     }
 
@@ -420,52 +518,66 @@ public class ProGuardTaskConfiguration {
     ///////////////////////////////////////////////////////////////////////////
 
     @Internal
-    public boolean isVerbose() {
+    public boolean isVerbose()
+    {
         return getConfiguration().verbose;
     }
 
-    @Optional @Input
-    public List<String> getNote() {
+    @Optional
+    @Input
+    public List<String> getNote()
+    {
         return getConfiguration().note;
     }
 
-    @Optional @Input
-    public List<String> getWarn() {
+    @Optional
+    @Input
+    public List<String> getWarn()
+    {
         return getConfiguration().warn;
     }
 
     @Input
-    public boolean isIgnoreWarnings() {
+    public boolean isIgnoreWarnings()
+    {
         return getConfiguration().ignoreWarnings;
     }
 
-    @Optional @OutputFile
-    public File getPrintConfiguration() {
+    @Optional
+    @OutputFile
+    public File getPrintConfiguration()
+    {
         return optionalFile(getConfiguration().printConfiguration);
     }
 
-    @Optional @OutputFile
-    public File getDump() {
+    @Optional
+    @OutputFile
+    public File getDump()
+    {
         return optionalFile(getConfiguration().dump);
     }
 
     @Input
-    public boolean isAddConfigurationDebugging() {
+    public boolean isAddConfigurationDebugging()
+    {
         return getConfiguration().addConfigurationDebugging;
     }
 
     @Input
-    public boolean isBackport() {
+    public boolean isBackport()
+    {
         return getConfiguration().backport;
     }
 
     @Input
-    public boolean isKeepKotlinMetadata() {
+    public boolean isKeepKotlinMetadata()
+    {
         return getConfiguration().keepKotlinMetadata;
     }
 
     @Input
-    public boolean isEnableKotlinAsserter() {
+    public boolean isEnableKotlinAsserter()
+    {
         return getConfiguration().enableKotlinAsserter;
     }
 
@@ -473,15 +585,21 @@ public class ProGuardTaskConfiguration {
     // Utility methods.
     ///////////////////////////////////////////////////////////////////////////
 
-    private static File optionalFile(File input) {
-        if (input == null || input == Configuration.STD_OUT) {
+    private static File optionalFile(File input)
+    {
+        if (input == null ||
+            input == Configuration.STD_OUT)
+        {
             return null;
         }
         return input;
     }
 
-    private static File optionalFile(URL input) {
-        if (input == null || input.getFile().isEmpty()) {
+    private static File optionalFile(URL input)
+    {
+        if (input == null ||
+            input.getFile().isEmpty())
+        {
             return null;
         }
         return new File(input.getFile());
