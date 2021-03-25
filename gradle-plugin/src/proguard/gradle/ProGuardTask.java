@@ -59,6 +59,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     // Accumulated configuration.
     protected final Configuration configuration      = new Configuration();
+    private final ProGuardTaskConfiguration taskConfiguration = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
 
     // Fields acting as parameters for the class member specification methods.
     private boolean            allowValues;
@@ -72,7 +73,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     @Nested
     public ProGuardTaskConfiguration getTaskConfiguration() {
-        return ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
+        return taskConfiguration;
     }
 
     // Gradle task inputs and outputs, because annotations on the List fields
@@ -94,16 +95,15 @@ public abstract class ProGuardTask extends DefaultTask
     }
 
     // Do not need to track outputs separately, since they do not carry task dependency information.
-    // This method could be removed.
     @Internal
     protected FileCollection getOutJarFileCollection()
     {
         return getProject().files(outJarFiles);
     }
 
-    // Configuration files are genuine, direct inputs to this task
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
+    // Do not need to track configuration files directly, since they are mapped to the `Configuration` instance.
+    // The resulting `Configuration` instance is tracked as a task input.
+    @Internal
     protected abstract ConfigurableFileCollection getConfigurationFiles();
 
     // Convenience methods to retrieve settings from outside the task.
@@ -1379,7 +1379,7 @@ public abstract class ProGuardTask extends DefaultTask
         loggingManager.captureStandardError(LogLevel.WARN);
 
         // Run ProGuard with the collected configuration.
-        new ProGuard(getConfiguration(getConfigurationFiles().getElements().get())).execute();
+        new ProGuard(getConfigurationProvider().get()).execute();
 
     }
 

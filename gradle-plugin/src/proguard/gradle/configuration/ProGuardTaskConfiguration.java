@@ -1,7 +1,6 @@
 package proguard.gradle.configuration;
 
 import org.gradle.api.Transformer;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Provider;
@@ -25,6 +24,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * A Gradle-aware wrapper for the ProGuard `Configuration`, allowing all inputs and outputs
@@ -36,11 +36,26 @@ import java.util.List;
  */
 public class ProGuardTaskConfiguration {
     protected final Provider<Configuration> configurationProvider;
-    private final ObjectFactory objectFactory;
+
+    private final FileCollection inputJars;
+    private final FileCollection outputJars;
+    private final FileCollection outputDirs;
+    private final Provider<List<ProGuardTaskClassPathEntry>> fileFilters;
+    private final Provider<File> applyMapping;
+    private final Provider<File> obfuscationDictionary;
+    private final Provider<File> classObfuscationDictionary;
+    private final Provider<File> packageObfuscationDictionary;
 
     public ProGuardTaskConfiguration(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
         this.configurationProvider = configurationProvider;
-        this.objectFactory = objectFactory;
+        this.inputJars = objectFactory.fileCollection().from(inputJars());
+        this.outputJars = objectFactory.fileCollection().from(outputs(false));
+        this.outputDirs = objectFactory.fileCollection().from(outputs(true));
+        this.fileFilters = fileFilters();
+        this.applyMapping = mappedProvider(config -> optionalFile(config.applyMapping));
+        this.obfuscationDictionary = mappedProvider(config -> optionalFile(config.obfuscationDictionary));
+        this.classObfuscationDictionary = mappedProvider(config -> optionalFile(config.classObfuscationDictionary));
+        this.packageObfuscationDictionary = mappedProvider(config -> optionalFile(config.packageObfuscationDictionary));
     }
 
     public static ProGuardTaskConfiguration create(Provider<Configuration> configurationProvider, ObjectFactory objectFactory) {
@@ -59,13 +74,8 @@ public class ProGuardTaskConfiguration {
         return configurationProvider.map(transformer);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Input and output options.
-    ///////////////////////////////////////////////////////////////////////////
-
-    @Classpath
-    public FileCollection getInputJars() {
-        Provider<List<File>> inputJarsProvider = mappedProvider(config -> {
+    private Provider<List<File>> inputJars() {
+        return mappedProvider(config -> {
             List<File> files = new ArrayList<>();
             ClassPath programJars = config.programJars;
             for (int i = 0; i < programJars.size(); i++) {
@@ -84,56 +94,62 @@ public class ProGuardTaskConfiguration {
             }
             return files;
         });
-        return objectFactory.fileCollection().from(inputJarsProvider);
+    }
+
+    private Callable<List<File>> outputs(boolean directories) {
+        return () -> {
+            List<File> files = new ArrayList<>();
+            ClassPath programJars = getConfiguration().programJars;
+            for (int i = 0; i < programJars.size(); i++) {
+                ClassPathEntry classPathEntry = programJars.get(i);
+                if (classPathEntry.isOutput() && classPathEntry.isDirectory() == directories) {
+                    files.add(classPathEntry.getFile());
+                }
+            }
+            return files;
+        };
+    }
+
+    private Provider<List<ProGuardTaskClassPathEntry>> fileFilters() {
+        return mappedProvider(config -> {
+            List<ProGuardTaskClassPathEntry> entries = new ArrayList<>();
+            ClassPath programJars = config.programJars;
+            for (int i = 0; i < programJars.size(); i++) {
+                ClassPathEntry classPathEntry = programJars.get(i);
+                entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
+            }
+
+            ClassPath libraryJars = config.libraryJars;
+            for (int i = 0; i < libraryJars.size(); i++) {
+                ClassPathEntry classPathEntry = libraryJars.get(i);
+                entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
+            }
+            return entries;
+        });
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Input and output options.
+    ///////////////////////////////////////////////////////////////////////////
+
+    @Classpath
+    public FileCollection getInputJars() {
+        return inputJars;
     }
 
     @OutputFiles
     public FileCollection getOutputFiles() {
-        Configuration config = getConfiguration();
-
-        ConfigurableFileCollection files = objectFactory.fileCollection();
-        ClassPath programJars = config.programJars;
-        for (int i = 0; i < programJars.size(); i++) {
-            ClassPathEntry classPathEntry = programJars.get(i);
-            if (classPathEntry.isOutput() && !classPathEntry.isDirectory()) {
-                files.from(classPathEntry.getFile());
-            }
-        }
-        return files;
+        return outputJars;
     }
 
     @OutputDirectories
     public FileCollection getOutputDirectories() {
-        Configuration config = getConfiguration();
-
-        ConfigurableFileCollection files = objectFactory.fileCollection();
-        ClassPath programJars = config.programJars;
-        for (int i = 0; i < programJars.size(); i++) {
-            ClassPathEntry classPathEntry = programJars.get(i);
-            if (classPathEntry.isOutput() && classPathEntry.isDirectory()) {
-                files.from(classPathEntry.getFile());
-            }
-        }
-        return files;
+        return outputDirs;
     }
 
     @Input
-    public List<ProGuardTaskClassPathEntry> getJarFilters() {
-        Configuration config = getConfiguration();
-
-        List<ProGuardTaskClassPathEntry> entries = new ArrayList<>();
-        ClassPath programJars = config.programJars;
-        for (int i = 0; i < programJars.size(); i++) {
-            ClassPathEntry classPathEntry = programJars.get(i);
-            entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
-        }
-
-        ClassPath libraryJars = config.libraryJars;
-        for (int i = 0; i < libraryJars.size(); i++) {
-            ClassPathEntry classPathEntry = libraryJars.get(i);
-            entries.add(new ProGuardTaskClassPathEntry(classPathEntry));
-        }
-        return entries;
+    public Provider<List<ProGuardTaskClassPathEntry>> getJarFilters() {
+        return fileFilters;
     }
 
     @Input
@@ -275,25 +291,25 @@ public class ProGuardTaskConfiguration {
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getApplyMapping() {
-        return mappedProvider(config -> optionalFile(config.applyMapping));
+        return applyMapping;
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getObfuscationDictionary() {
-        return mappedProvider(config -> optionalFile(config.obfuscationDictionary));
+        return obfuscationDictionary;
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getClassObfuscationDictionary() {
-        return mappedProvider(config -> optionalFile(config.classObfuscationDictionary));
+        return classObfuscationDictionary;
     }
 
     @Optional @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public Provider<File> getPackageObfuscationDictionary() {
-        return mappedProvider(config -> optionalFile(config.packageObfuscationDictionary));
+        return packageObfuscationDictionary;
     }
 
     @Input
