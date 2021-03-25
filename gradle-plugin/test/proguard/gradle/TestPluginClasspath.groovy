@@ -12,4 +12,14 @@ class TestPluginClasspath {
         buildGradle.text = buildGradle.text.replaceAll("(?ms)buildscript\\s+\\{.*?^\\}", '')
                 .replaceAll("id 'java'", "id 'java'\n    id 'proguard' apply false")
     }
+    /**
+     * Replaces the buildscript block in the root build.gradle.kts file with nothing and applies the proguard plugin
+     * in the plugins block.
+     * @param projectDir the root project dir where the build.gradle file is located
+     */
+    static void applyToRootGradleKts(def projectDir) {
+        def buildGradle = new File(projectDir, 'build.gradle.kts')
+        buildGradle.text = buildGradle.text.replaceAll("(?ms)buildscript\\s+\\{.*?^\\}", '')
+                .replaceFirst("java", "java\n    id(\"proguard\").apply(false)")
+    }
 }

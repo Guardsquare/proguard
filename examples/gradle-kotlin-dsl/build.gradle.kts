@@ -36,16 +36,12 @@ tasks.withType<Jar> {
 }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
-    dependsOn("jar")
-
-    // Alternatively put your config in a separate file
-    // configuration("config.pro")
-
     verbose()
 
-    injars("build/libs/gradlekotlindsl.jar")
+    // Use the jar task output as a input jar. This will automatically add the necessary task dependency.
+    injars(tasks.named("jar"))
 
-    outjars("build/libs/gradlekotlindsl-obfuscated.jar")
+    outjars("build/proguard-obfuscated.jar")
 
     val javaHome = System.getProperty("java.home")
     // Automatically handle the Java version of this build.
@@ -66,11 +62,35 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
 
     repackageclasses("")
 
-    printmapping("build/mapping.txt")
+    printmapping("build/proguard-mapping.txt")
 
     keep("""class gradlekotlindsl.App {
                 public static void main(java.lang.String[]);
             }
     """)
+}
+
+tasks.register<proguard.gradle.ProGuardTask>("proguardWithConfigFile") {
+    dependsOn("jar")
+
+    configuration("config.pro")
+}
+
+tasks.register("generateConfigFile") {
+    val outputFile = file("build/proguard/config.pro")
+    outputs.file(outputFile)
+
+    doLast {
+        file("build/proguard").mkdirs()
+        outputFile.writeText("-basedirectory ../..\n")
+        outputFile.appendText(file("config.pro").readText().replace("proguardWithConfigFile", "proguardWithGeneratedConfigFile"))
+    }
+}
+
+tasks.register<proguard.gradle.ProGuardTask>("proguardWithGeneratedConfigFile") {
+    dependsOn("jar")
+
+    // Consume the "generateConfigFile" output. This will automatically add the task dependency.
+    configuration(tasks.named("generateConfigFile"))
 }
 
