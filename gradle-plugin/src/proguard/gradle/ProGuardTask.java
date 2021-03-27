@@ -1464,7 +1464,8 @@ public abstract class ProGuardTask extends DefaultTask
         }
 
         // Lazily apply the external configuration files.
-        for (FileSystemLocation configFile : configurationFiles) {
+        for (FileSystemLocation configFile : configurationFiles)
+        {
 
             File file = configFile.getAsFile();
 
@@ -1499,7 +1500,8 @@ public abstract class ProGuardTask extends DefaultTask
                     parser.close();
                 }
             }
-            else {
+            else
+            {
                 getLogger().info("Loading configuration file " +
                         file.getAbsolutePath());
 
@@ -1507,9 +1509,12 @@ public abstract class ProGuardTask extends DefaultTask
                         new ConfigurationParser(file,
                                 System.getProperties());
 
-                try {
+                try
+                {
                     parser.parse(configuration);
-                } finally {
+                }
+                finally
+                {
                     parser.close();
                 }
             }
