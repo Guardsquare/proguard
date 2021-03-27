@@ -5,6 +5,8 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.0  | PGD-0139 | GRADLE   | Improved handling of Gradle task inputs and outputs.
+| 7.1.0  | PGD-0136 | GRADLE   | Fixed Gradle task compatibility with Gradle 7.
 | 7.1.0  | DGD-3036 | CORE     | Fixed potential incorrect removal of exception handlers during optimization.
 | 7.1.0  | DGD-3110 | CORE     | Improved GSON support.
 | 7.1.0  | DGD-3289 | CORE     | Fixed potential, incorrect advanced code optimizations.
