@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,18 +22,13 @@ package proguard.optimize.gson;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.Annotation;
-import proguard.classfile.attribute.annotation.visitor.AllAnnotationVisitor;
-import proguard.classfile.attribute.annotation.visitor.AnnotationTypeFilter;
-import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
+import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.util.ClassUtil;
-import proguard.classfile.util.WarningPrinter;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.util.ProcessingFlags;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * This class visitor determines whether a given domain class can be optimized

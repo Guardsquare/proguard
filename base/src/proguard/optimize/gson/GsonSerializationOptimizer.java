@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -63,9 +63,12 @@ implements   MemberVisitor,
     private final ClassPool             programClassPool;
     private final ClassPool             libraryClassPool;
     private final GsonRuntimeSettings   gsonRuntimeSettings;
+//    private final CodeAttributeEditor   codeAttributeEditor;
     private final OptimizedJsonInfo     serializationInfo;
     private final boolean               supportExposeAnnotation;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
+
+//    private InstructionSequenceBuilder ____;
 
     static
     {
@@ -149,22 +152,22 @@ implements   MemberVisitor,
             100,
             ____ -> ____
                 // Begin Json object.
-                .aload(ToJsonLocals.JSON_WRITER)
+                .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
                                GsonClassConstants.METHOD_NAME_WRITER_BEGIN_OBJECT,
                                GsonClassConstants.METHOD_TYPE_WRITER_BEGIN_OBJECT)
 
                 // Invoke toJsonBody$.
-                .aload(ToJsonLocals.THIS)
-                .aload(ToJsonLocals.GSON)
-                .aload(ToJsonLocals.JSON_WRITER)
-                .aload(ToJsonLocals.OPTIMIZED_JSON_WRITER)
+                .aload(OptimizedClassConstants.ToJsonLocals.THIS)
+                .aload(OptimizedClassConstants.ToJsonLocals.GSON)
+                .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
+                .aload(OptimizedClassConstants.ToJsonLocals.OPTIMIZED_JSON_WRITER)
                 .invokevirtual(programClass.getName(),
                                methodNameToJsonBody,
                                METHOD_TYPE_TO_JSON_BODY)
 
                 // End Json object.
-                .aload(ToJsonLocals.JSON_WRITER)
+                .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                 .invokevirtual(GsonClassConstants.NAME_JSON_WRITER,
                                GsonClassConstants.METHOD_NAME_WRITER_END_OBJECT,
                                GsonClassConstants.METHOD_TYPE_WRITER_END_OBJECT)
@@ -220,10 +223,10 @@ implements   MemberVisitor,
                             serializationInfo.classIndices.get(programClass.getSuperClass().getName());
                         String superMethodNameToJsonBody = METHOD_NAME_TO_JSON_BODY + superClassIndex;
 
-                        ____.aload(ToJsonLocals.THIS)
-                            .aload(ToJsonLocals.GSON)
-                            .aload(ToJsonLocals.JSON_WRITER)
-                            .aload(ToJsonLocals.OPTIMIZED_JSON_WRITER)
+                        ____.aload(OptimizedClassConstants.ToJsonLocals.THIS)
+                            .aload(OptimizedClassConstants.ToJsonLocals.GSON)
+                            .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
+                            .aload(OptimizedClassConstants.ToJsonLocals.OPTIMIZED_JSON_WRITER)
                             .invokevirtual(programClass.getSuperClass().getName(),
                                            superMethodNameToJsonBody,
                                            METHOD_TYPE_TO_JSON_BODY);
@@ -275,8 +278,8 @@ implements   MemberVisitor,
                 if(ClassUtil.isInternalClassType(fieldDescriptor))
                 {
                     CompactCodeAttributeComposer.Label noRecursion = ____.createLabel();
-                    ____.aload(ToJsonLocals.THIS)
-                        .aload(ToJsonLocals.THIS)
+                    ____.aload(OptimizedClassConstants.ToJsonLocals.THIS)
+                        .aload(OptimizedClassConstants.ToJsonLocals.THIS)
                         .getfield(programClass, programField)
                         .ifacmpne(noRecursion)
                         .goto_(end)
@@ -295,8 +298,8 @@ implements   MemberVisitor,
 
                 // Write field name.
                 Integer fieldIndex = serializationInfo.jsonFieldIndices.get(jsonFieldNames[0]);
-                ____.aload(ToJsonLocals.OPTIMIZED_JSON_WRITER)
-                    .aload(ToJsonLocals.JSON_WRITER)
+                ____.aload(OptimizedClassConstants.ToJsonLocals.OPTIMIZED_JSON_WRITER)
+                    .aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                     .ldc(fieldIndex.intValue())
                     .invokeinterface(OptimizedClassConstants.NAME_OPTIMIZED_JSON_WRITER,
                                      OptimizedClassConstants.METHOD_NAME_NAME,
@@ -316,7 +319,7 @@ implements   MemberVisitor,
                 else
                 {
                     // Write value to Json writer based on declared type and runtime value/type.
-                    ____.aload(ToJsonLocals.GSON);
+                    ____.aload(OptimizedClassConstants.ToJsonLocals.GSON);
 
                     switch (fieldDescriptor.charAt(0))
                     {
@@ -397,7 +400,7 @@ implements   MemberVisitor,
                         }
                     }
 
-                    ____.aload(ToJsonLocals.THIS)
+                    ____.aload(OptimizedClassConstants.ToJsonLocals.THIS)
                         .getfield(programClass, programField);
 
                     // Box primitive value before passing it to type adapter.
@@ -464,7 +467,7 @@ implements   MemberVisitor,
                     }
 
                     // Write value using type adapter.
-                    ____.aload(ToJsonLocals.JSON_WRITER)
+                    ____.aload(OptimizedClassConstants.ToJsonLocals.JSON_WRITER)
                         .aload(VALUE_VARIABLE_INDEX)
                         .invokevirtual(GsonClassConstants.NAME_TYPE_ADAPTER,
                                        GsonClassConstants.METHOD_NAME_WRITE,

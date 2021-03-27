@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,7 +18,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-package proguard.evaluation;
+package proguard.optimize.evaluation;
 
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
@@ -30,11 +30,12 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
+import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.info.*;
 import proguard.util.ArrayUtil;
 
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * This AttributeVisitor marks necessary instructions in the code attributes
@@ -53,13 +54,8 @@ import java.util.Arrays;
 public class InstructionUsageMarker
 implements   AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG          = false;
-    private static final boolean DEBUG_RESULTS  = false;
-    /*/
-    private static boolean DEBUG          = System.getProperty("ium") != null;
-    private static boolean DEBUG_RESULTS  = DEBUG;
-    //*/
+    private static final boolean DEBUG = System.getProperty("ium") != null;
+    private static final boolean DEBUG_RESULTS = DEBUG;
 
     private final PartialEvaluator                partialEvaluator;
     private final boolean                         runPartialEvaluator;
@@ -88,13 +84,11 @@ implements   AttributeVisitor
      */
     public InstructionUsageMarker()
     {
-        this(new PartialEvaluator(), true);
+        this(new PartialEvaluator(), true, true);
     }
-
 
     /**
      * Creates a new InstructionUsageMarker.
-     *
      * @param partialEvaluator    the evaluator to be used for the analysis.
      * @param runPartialEvaluator specifies whether to run this evaluator on
      *                            every code attribute that is visited.
@@ -105,10 +99,8 @@ implements   AttributeVisitor
         this(partialEvaluator, runPartialEvaluator, true);
     }
 
-
     /**
      * Creates a new InstructionUsageMarker.
-     *
      * @param partialEvaluator         the evaluator to be used for the analysis.
      * @param runPartialEvaluator      specifies whether to run this evaluator on
      *                                 every code attribute that is visited.
@@ -121,8 +113,8 @@ implements   AttributeVisitor
                                   boolean          runPartialEvaluator,
                                   boolean          ensureSafetyForVerifier)
     {
-        this.partialEvaluator        = partialEvaluator;
-        this.runPartialEvaluator     = runPartialEvaluator;
+        this.partialEvaluator    = partialEvaluator;
+        this.runPartialEvaluator = runPartialEvaluator;
         this.ensureSafetyForVerifier = ensureSafetyForVerifier;
         if (ensureSafetyForVerifier)
         {
@@ -406,9 +398,6 @@ implements   AttributeVisitor
             // Evaluate the method the way the JVM verifier would do it.
             simplePartialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
         }
-
-        // Evaluate the method the way the JVM verifier would do it.
-        simplePartialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
 
         int codeLength = codeAttribute.u4codeLength;
 
@@ -833,15 +822,15 @@ implements   AttributeVisitor
 
         public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
         {
-            Method referencedMethod = anyMethodrefConstant.referencedMethod;
+            Method referencedMethod = (Method)anyMethodrefConstant.referencedMethod;
 
 //            if (referencedMethod != null)
 //            {
-//                System.out.println("InstructionUsageMarker$MyInitialUsageMarker.visitAnyMethodrefConstant [" + refConstant.getClassName(clazz) + "." + refConstant.getName(clazz) +
+//                System.out.println("InstructionUsageMarker$MyInitialUsageMarker.visitAnyMethodrefConstant [" + anyMethodrefConstant.getClassName(clazz) + "." + anyMethodrefConstant.getName(clazz) +
 //                                   "]: mark! esc = " + ParameterEscapeMarker.getEscapingParameters(referencedMethod) +
 //                                   ", mod = " + ParameterEscapeMarker.modifiesAnything(referencedMethod) +
 //                                   ", side = " + SideEffectClassChecker.mayHaveSideEffects(clazz,
-//                                                                                           refConstant.referencedClass,
+//                                                                                           anyMethodrefConstant.referencedClass,
 //                                                                                           referencedMethod));
 //            }
 
@@ -871,7 +860,7 @@ implements   AttributeVisitor
             {
                 if (DEBUG)
                 {
-                    System.out.println("  [" + referencingOffset + "] Checking parameters of [" + anyMethodrefConstant.getClassName(clazz) + "." + anyMethodrefConstant.getName(clazz) + anyMethodrefConstant.getType(clazz) + "] (pop count = " + referencingPopCount + ")");
+                    System.out.println("  ["+referencingOffset+"] Checking parameters of ["+anyMethodrefConstant.getClassName(clazz)+"."+anyMethodrefConstant.getName(clazz)+anyMethodrefConstant.getType(clazz)+"] (pop count = "+referencingPopCount+")");
                 }
 
                 // Create reverse dependencies for reference parameters that

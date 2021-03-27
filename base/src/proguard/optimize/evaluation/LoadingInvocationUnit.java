@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -68,18 +68,19 @@ extends      BasicInvocationUnit
 
     // Implementations for BasicInvocationUnit.
 
-    public Value getFieldClassValue(Clazz       clazz,
-                                    FieldrefConstant fieldrefConstant,
-                                    String      type)
+    @Override
+    public Value getFieldClassValue(Clazz            clazz,
+                                    FieldrefConstant refConstant,
+                                    String           type)
     {
         if (loadFieldValues)
         {
             // Do we know this field?
-            Field referencedField = fieldrefConstant.referencedField;
-            if (referencedField != null)
+            Field referencedMember = refConstant.referencedField;
+            if (referencedMember != null)
             {
                 // Retrieve the stored field class value.
-                ReferenceValue value = StoringInvocationUnit.getFieldClassValue((Field)referencedField);
+                ReferenceValue value = StoringInvocationUnit.getFieldClassValue(referencedMember);
                 if (value != null)
                 {
                     return value;
@@ -87,22 +88,23 @@ extends      BasicInvocationUnit
             }
         }
 
-        return super.getFieldClassValue(clazz, fieldrefConstant, type);
+        return super.getFieldClassValue(clazz, refConstant, type);
     }
 
 
+    @Override
     public Value getFieldValue(Clazz            clazz,
-                               FieldrefConstant fieldrefConstant,
+                               FieldrefConstant refConstant,
                                String           type)
     {
         if (loadFieldValues)
         {
             // Do we know this field?
-            Field referencedField = fieldrefConstant.referencedField;
-            if (referencedField != null)
+            Field referencedMember = refConstant.referencedField;
+            if (referencedMember != null)
             {
                 // Retrieve the stored field value.
-                Value value = StoringInvocationUnit.getFieldValue((Field)referencedField);
+                Value value = StoringInvocationUnit.getFieldValue(referencedMember);
                 if (value != null)
                 {
                     return value;
@@ -110,10 +112,11 @@ extends      BasicInvocationUnit
             }
         }
 
-        return super.getFieldValue(clazz, fieldrefConstant, type);
+        return super.getFieldValue(clazz, refConstant, type);
     }
 
 
+    @Override
     public Value getMethodParameterValue(Clazz  clazz,
                                          Method method,
                                          int    parameterIndex,
@@ -138,18 +141,19 @@ extends      BasicInvocationUnit
     }
 
 
+    @Override
     public Value getMethodReturnValue(Clazz                clazz,
-                                      AnyMethodrefConstant anyMethodrefConstant,
+                                      AnyMethodrefConstant refConstant,
                                       String               type)
     {
         if (loadMethodReturnValues)
         {
             // Do we know this method?
-            Method referencedMethod = anyMethodrefConstant.referencedMethod;
-            if (referencedMethod != null)
+            Method referencedMember = refConstant.referencedMethod;
+            if (referencedMember != null)
             {
                 // Retrieve the stored method return value.
-                Value value = StoringInvocationUnit.getMethodReturnValue((Method)referencedMethod);
+                Value value = StoringInvocationUnit.getMethodReturnValue(referencedMember);
                 if (value != null)
                 {
                     return value;
@@ -158,7 +162,7 @@ extends      BasicInvocationUnit
         }
 
         return super.getMethodReturnValue(clazz,
-                                          anyMethodrefConstant,
+                                          refConstant,
                                           type);
     }
 }

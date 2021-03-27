@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,11 +25,12 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.*;
-import proguard.optimize.OptimizationInfoClassFilter;
+import proguard.optimize.*;
 
 /**
  * This MemberVisitor and InstructionVisitor marks all methods and classes
- * that have side effects.
+ * that have side effects. This includes invoking other methods that have side
+ * effects, writing to fields that are not write-only, and throwing exceptions.
  *
  * @see NoSideEffectMethodMarker
  * @author Eric Lafortune
@@ -38,20 +39,31 @@ public class SideEffectMethodMarker
 implements   MemberVisitor,
              InstructionVisitor
 {
-    private final MutableBoolean repeatTrigger;
+    private static final boolean DEBUG = System.getProperty("semm") != null;
+
+
+    private final MemberVisitor extraMemberVisitor;
 
     private final SideEffectInstructionChecker sideEffectInstructionChecker = new SideEffectInstructionChecker(false, true);
     private final ClassVisitor                 sideEffectClassMarker        = new OptimizationInfoClassFilter(
                                                                               new SideEffectClassMarker());
 
 
+    /**
+     * Creates a new SideEffectMethodMarker.
+     */
+    public SideEffectMethodMarker()
+    {
+        this(null);
+    }
+
 
     /**
      * Creates a new SideEffectMethodMarker.
      */
-    public SideEffectMethodMarker(MutableBoolean repeatTrigger)
+    public SideEffectMethodMarker(MemberVisitor extraMemberVisitor)
     {
-        this.repeatTrigger = repeatTrigger;
+        this.extraMemberVisitor = extraMemberVisitor;
     }
 
 
@@ -99,7 +111,15 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.hasSideEffects())
             {
-                repeatTrigger.set();
+                if (DEBUG)
+                {
+                    System.out.println("SideEffectMethodMarker: marking for side-effects: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
+                }
+
+                if (extraMemberVisitor != null)
+                {
+                    method.accept(clazz, extraMemberVisitor);
+                }
 
                 // Also mark the class if the method is a static initializer.
                 if (method.getName(clazz).equals(ClassConstants.METHOD_NAME_CLINIT))

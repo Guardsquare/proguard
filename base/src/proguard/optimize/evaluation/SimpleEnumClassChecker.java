@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -41,13 +41,12 @@ implements   ClassVisitor
     //*/
 
 
-    private final ClassVisitor  simpleEnumMarker     = new OptimizationInfoClassFilter(
-                                                       new SimpleEnumMarker(true));
-    private final MemberVisitor virtualMemberChecker = new MemberAccessFilter(0,
-                                                                              AccessConstants.PRIVATE |
-                                                                              AccessConstants.STATIC,
-                                                       new MemberToClassVisitor(
-                                                       new SimpleEnumMarker(false)));
+    private final ClassVisitor  simpleEnumMarker      = new OptimizationInfoClassFilter(
+                                                        new SimpleEnumMarker(true));
+    private final MemberVisitor instanceMemberChecker = new MemberAccessFilter(0,
+                                                                               AccessConstants.STATIC,
+                                                        new MemberToClassVisitor(
+                                                        new SimpleEnumMarker(false)));
 
 
     // Implementations for ClassVisitor.
@@ -71,10 +70,10 @@ implements   ClassVisitor
             // Mark it.
             simpleEnumMarker.visitProgramClass(programClass);
 
-            // However, unmark it again if it has any non-private, non-static
-            // fields or methods.
-            programClass.fieldsAccept(virtualMemberChecker);
-            programClass.methodsAccept(virtualMemberChecker);
+            // Unmark it again if it has any instance fields
+            // or methods.
+            programClass.fieldsAccept(instanceMemberChecker);
+            programClass.methodsAccept(instanceMemberChecker);
         }
     }
 }

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -64,7 +64,7 @@ implements   MemberVisitor,
     //*/
 
 
-    private final MutableBoolean         repeatTrigger;
+    private final MemberVisitor          extraMemberVisitor;
     private final PartialEvaluator       partialEvaluator;
     private final boolean                runPartialEvaluator;
     private final ReferenceEscapeChecker referenceEscapeChecker;
@@ -73,6 +73,7 @@ implements   MemberVisitor,
     private final MemberVisitor parameterMarker = new AllParameterVisitor(true, this);
 
     // Parameters and values for visitor methods.
+    private Clazz   referencingClass;
     private Method  referencingMethod;
     private int     referencingOffset;
     private int     referencingPopCount;
@@ -83,66 +84,72 @@ implements   MemberVisitor,
     /**
      * Creates a new ParameterEscapeMarker.
      */
-    public ParameterEscapeMarker(MutableBoolean repeatTrigger)
+    public ParameterEscapeMarker()
     {
-        this(repeatTrigger,
-             new BasicValueFactory());
+        this(null);
+    }
+
+    /**
+     * Creates a new ParameterEscapeMarker.
+     */
+    public ParameterEscapeMarker(MemberVisitor extraMemberVisitor)
+    {
+        this(new BasicValueFactory(), extraMemberVisitor
+        );
     }
 
 
     /**
      * Creates a new ParameterEscapeMarker.
      */
-    public ParameterEscapeMarker(MutableBoolean repeatTrigger,
-                                 ValueFactory   valueFactory)
+    public ParameterEscapeMarker(ValueFactory valueFactory, MemberVisitor extraMemberVisitor)
     {
-        this(repeatTrigger,
-             valueFactory,
-             new ReferenceTracingValueFactory(valueFactory));
+        this(valueFactory, new ReferenceTracingValueFactory(valueFactory), extraMemberVisitor
+        );
     }
 
 
     /**
      * Creates a new ParameterEscapeMarker.
      */
-    public ParameterEscapeMarker(MutableBoolean               repeatTrigger,
-                                 ValueFactory                 valueFactory,
-                                 ReferenceTracingValueFactory tracingValueFactory)
+    public ParameterEscapeMarker(ValueFactory                 valueFactory,
+                                 ReferenceTracingValueFactory tracingValueFactory,
+                                 MemberVisitor                extraMemberVisitor)
     {
-        this(repeatTrigger,
-             new PartialEvaluator(tracingValueFactory,
-                                  new ParameterTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)),
-                                  true,
-                                  tracingValueFactory),
-             true);
+        this(new PartialEvaluator(tracingValueFactory,
+                             new ParameterTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)),
+                             true,
+                             tracingValueFactory), true, extraMemberVisitor
+        );
     }
 
 
     /**
      * Creates a new ParameterEscapeMarker.
      */
-    public ParameterEscapeMarker(MutableBoolean   repeatTrigger,
-                                 PartialEvaluator partialEvaluator,
-                                 boolean          runPartialEvaluator)
+    public ParameterEscapeMarker(PartialEvaluator partialEvaluator,
+                                 boolean          runPartialEvaluator,
+                                 MemberVisitor    extraMemberVisitor)
     {
-        this(repeatTrigger,
-             partialEvaluator,
+        this(partialEvaluator,
              runPartialEvaluator,
              new ReferenceEscapeChecker(partialEvaluator, false),
-             true);
+             true,
+             extraMemberVisitor
+        );
     }
 
 
     /**
      * Creates a new ParameterEscapeMarker.
      */
-    public ParameterEscapeMarker(MutableBoolean         repeatTrigger,
-                                 PartialEvaluator       partialEvaluator,
+    public ParameterEscapeMarker(PartialEvaluator       partialEvaluator,
                                  boolean                runPartialEvaluator,
                                  ReferenceEscapeChecker referenceEscapeChecker,
-                                 boolean                runReferenceEscapeChecker)
+                                 boolean                runReferenceEscapeChecker,
+                                 MemberVisitor          extraMemberVisitor)
     {
-        this.repeatTrigger             = repeatTrigger;
+        this.extraMemberVisitor = extraMemberVisitor;
         this.partialEvaluator          = partialEvaluator;
         this.runPartialEvaluator       = runPartialEvaluator;
         this.referenceEscapeChecker    = referenceEscapeChecker;
@@ -160,10 +167,10 @@ implements   MemberVisitor,
         if ((accessFlags & AccessConstants.NATIVE) != 0)
         {
             // Mark all parameters.
-            markModifiedParameters(programMethod, -1L);
-            markEscapingParameters(programMethod, -1L);
-            markReturnedParameters(programMethod, -1L);
-            markAnythingModified(programMethod);
+            markModifiedParameters(programClass, programMethod, -1L);
+            markEscapingParameters(programClass, programMethod, -1L);
+            markReturnedParameters(programClass, programMethod, -1L);
+            markAnythingModified(programClass, programMethod);
         }
     }
 
@@ -224,12 +231,13 @@ implements   MemberVisitor,
         {
             case Instruction.OP_AASTORE:
                 // Mark array parameters whose element is modified.
-                markModifiedParameters(method,
+                markModifiedParameters(clazz,
+                                       method,
                                        offset,
                                        simpleInstruction.stackPopCount(clazz) - 1);
 
                 // Mark reference values that are put in the array.
-                markEscapingParameters(method, offset, 0);
+                markEscapingParameters(clazz, method, offset, 0);
                 break;
 
             case Instruction.OP_IASTORE:
@@ -240,7 +248,8 @@ implements   MemberVisitor,
             case Instruction.OP_CASTORE:
             case Instruction.OP_SASTORE:
                 // Mark array parameters whose element is modified.
-                markModifiedParameters(method,
+                markModifiedParameters(clazz,
+                                       method,
                                        offset,
                                        simpleInstruction.stackPopCount(clazz) - 1);
                 break;
@@ -252,7 +261,7 @@ implements   MemberVisitor,
 
             case Instruction.OP_ATHROW:
                 // Mark the escaping reference values.
-                markEscapingParameters(method, offset, 0);
+                markEscapingParameters(clazz, method, offset, 0);
                 break;
         }
     }
@@ -269,6 +278,7 @@ implements   MemberVisitor,
             case Instruction.OP_MULTIANEWARRAY:
             case Instruction.OP_GETSTATIC:
                 // Mark possible modifications due to initializers.
+                referencingClass  = clazz;
                 referencingMethod = method;
                 referencingOffset = offset;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -276,26 +286,27 @@ implements   MemberVisitor,
 
             case Instruction.OP_PUTSTATIC:
                 // Mark some global modification.
-                markAnythingModified(method);
+                markAnythingModified(clazz, method);
 
                 // Mark reference values that are put in the field.
-                markEscapingParameters(method, offset, 0);
+                markEscapingParameters(clazz, method, offset, 0);
                 break;
 
             case Instruction.OP_GETFIELD:
                 // Mark the owner of the field. The owner sort of escapes when
-                // the field is retrieved. [DGD-1279] (test2181)
-                markEscapingParameters(method, offset, 0);
+                // the field is retrieved. [DGD-1298] (test2181)
+                markEscapingParameters(clazz, method, offset, 0);
                 break;
 
             case Instruction.OP_PUTFIELD:
                 // Mark reference parameters whose field is modified.
-                markModifiedParameters(method,
+                markModifiedParameters(clazz,
+                                       method,
                                        offset,
                                        constantInstruction.stackPopCount(clazz) - 1);
 
                 // Mark reference values that are put in the field.
-                markEscapingParameters(method, offset, 0);
+                markEscapingParameters(clazz, method, offset, 0);
                 break;
 
             case Instruction.OP_INVOKEVIRTUAL:
@@ -308,6 +319,7 @@ implements   MemberVisitor,
                 // Mark reference values that are escaping as parameters
                 // of the invoked method.
                 // Mark escaped reference parameters in the invoked method.
+                referencingClass    = clazz;
                 referencingMethod   = method;
                 referencingOffset   = offset;
                 referencingPopCount = constantInstruction.stackPopCount(clazz);
@@ -332,7 +344,7 @@ implements   MemberVisitor,
             SideEffectClassChecker.mayHaveSideEffects(clazz,
                                                       referencedClass))
         {
-            markAnythingModified(referencingMethod);
+            markAnythingModified(referencingClass, referencingMethod);
         }
     }
 
@@ -347,14 +359,14 @@ implements   MemberVisitor,
             SideEffectClassChecker.mayHaveSideEffects(clazz,
                                                       referencedClass))
         {
-            markAnythingModified(referencingMethod);
+            markAnythingModified(referencingClass, referencingMethod);
         }
     }
 
 
     public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant)
     {
-        markAnythingModified(referencingMethod);
+        markAnythingModified(referencingClass, referencingMethod);
     }
 
 
@@ -366,7 +378,7 @@ implements   MemberVisitor,
 
     public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        Method referencedMethod = anyMethodrefConstant.referencedMethod;
+        Method referencedMethod = (Method)anyMethodrefConstant.referencedMethod;
 
         // If the referenced method or a static initializer may modify anything,
         // so does the referencing method.
@@ -376,7 +388,7 @@ implements   MemberVisitor,
                                                       anyMethodrefConstant.referencedClass,
                                                       referencedMethod))
         {
-            markAnythingModified(referencingMethod);
+            markAnythingModified(referencingClass, referencingMethod);
         }
 
         // Do we know the invoked method?
@@ -389,11 +401,13 @@ implements   MemberVisitor,
             {
                 int stackEntryIndex = referencingPopCount - parameterOffset - 1;
 
-                markEscapingParameters(referencingMethod,
+                markEscapingParameters(referencingClass,
+                                       referencingMethod,
                                        referencingOffset,
                                        stackEntryIndex);
 
-                markModifiedParameters(referencingMethod,
+                markModifiedParameters(referencingClass,
+                                       referencingMethod,
                                        referencingOffset,
                                        stackEntryIndex);
             }
@@ -429,7 +443,8 @@ implements   MemberVisitor,
                 (isParameterReturned(method, parameterIndex) &&
                  isReturnValueEscaping))
             {
-                markEscapingParameters(referencingMethod,
+                markEscapingParameters(referencingClass,
+                                       referencingMethod,
                                        referencingOffset,
                                        parameterSize - parameterOffset - 1);
             }
@@ -440,7 +455,8 @@ implements   MemberVisitor,
                 (isParameterReturned(method, parameterIndex) &&
                  isReturnValueModified))
             {
-                markModifiedParameters(referencingMethod,
+                markModifiedParameters(referencingClass,
+                                       referencingMethod,
                                        referencingOffset,
                                        parameterSize - parameterOffset - 1);
             }
@@ -450,11 +466,20 @@ implements   MemberVisitor,
 
     // Small utility methods.
 
+    private void reportSideEffect(Clazz clazz, Method method)
+    {
+        if (extraMemberVisitor != null)
+        {
+            method.accept(clazz, extraMemberVisitor);
+        }
+    }
+
     /**
      * Marks the producing reference parameters (and the classes) of the
      * specified stack entry at the given instruction offset.
      */
-    private void markEscapingParameters(Method method,
+    private void markEscapingParameters(Clazz  clazz,
+                                        Method method,
                                         int    consumerOffset,
                                         int    stackEntryIndex)
     {
@@ -468,7 +493,7 @@ implements   MemberVisitor,
             // The null reference value may not have a trace value.
             if (referenceValue.isNull() != Value.ALWAYS)
             {
-                markEscapingParameters(method, referenceValue);
+                markEscapingParameters(clazz, method, referenceValue);
             }
         }
     }
@@ -478,7 +503,8 @@ implements   MemberVisitor,
      * Marks the producing parameters (and the classes) of the given
      * reference value.
      */
-    private void markEscapingParameters(Method         method,
+    private void markEscapingParameters(Clazz          clazz,
+                                        Method         method,
                                         ReferenceValue referenceValue)
     {
         TracedReferenceValue   tracedReferenceValue = (TracedReferenceValue)referenceValue;
@@ -490,7 +516,7 @@ implements   MemberVisitor,
             if (producers.isMethodParameter(index))
             {
                 // We know exactly which parameter is escaping.
-                markParameterEscaping(method, producers.methodParameter(index));
+                markParameterEscaping(clazz, method, producers.methodParameter(index));
             }
         }
     }
@@ -499,7 +525,7 @@ implements   MemberVisitor,
     /**
      * Marks the given parameter as escaping from the given method.
      */
-    private void markParameterEscaping(Method method, int parameterIndex)
+    private void markParameterEscaping(Clazz clazz, Method method, int parameterIndex)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -512,7 +538,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.isParameterEscaping(parameterIndex))
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -521,7 +547,7 @@ implements   MemberVisitor,
     /**
      * Marks the given parameters as escaping from the given method.
      */
-    private void markEscapingParameters(Method method, long escapingParameters)
+    private void markEscapingParameters(Clazz clazz, Method method, long escapingParameters)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -537,7 +563,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.getEscapingParameters() != oldEscapingParameters)
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -581,7 +607,7 @@ implements   MemberVisitor,
             if (referenceValue.isNull() != Value.ALWAYS &&
                 mayReturnType(clazz, method, referenceValue))
             {
-                markReturnedParameters(method, referenceValue);
+                markReturnedParameters(clazz, method, referenceValue);
             }
         }
     }
@@ -591,7 +617,8 @@ implements   MemberVisitor,
      * Marks the method and the producing parameters of the given reference
      * value.
      */
-    private void markReturnedParameters(Method         method,
+    private void markReturnedParameters(Clazz          clazz,
+                                        Method         method,
                                         ReferenceValue referenceValue)
     {
         TracedReferenceValue   tracedReferenceValue = (TracedReferenceValue)referenceValue;
@@ -603,16 +630,16 @@ implements   MemberVisitor,
             if (producers.isMethodParameter(index))
             {
                 // We know exactly which parameter is returned.
-                markParameterReturned(method, producers.methodParameter(index));
+                markParameterReturned(clazz, method, producers.methodParameter(index));
             }
             else if (producers.isFieldValue(index))
             {
-                markReturnsExternalValues(method);
+                markReturnsExternalValues(clazz, method);
             }
             else if (producers.isNewinstance(index) ||
                      producers.isExceptionHandler(index))
             {
-                markReturnsNewInstances(method);
+                markReturnsNewInstances(clazz, method);
             }
         }
     }
@@ -621,7 +648,7 @@ implements   MemberVisitor,
     /**
      * Marks the given parameter as returned from the given method.
      */
-    private void markParameterReturned(Method method, int parameterIndex)
+    private void markParameterReturned(Clazz clazz, Method method, int parameterIndex)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -634,7 +661,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.returnsParameter(parameterIndex))
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -643,7 +670,7 @@ implements   MemberVisitor,
     /**
      * Marks the given parameters as returned from the given method.
      */
-    private void markReturnedParameters(Method method, long returnedParameters)
+    private void markReturnedParameters(Clazz clazz, Method method, long returnedParameters)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -659,7 +686,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.getReturnedParameters() != oldReturnedParameters)
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -687,7 +714,7 @@ implements   MemberVisitor,
      * Marks that the given method returns new instances (created inside the
      * method).
      */
-    private void markReturnsNewInstances(Method method)
+    private void markReturnsNewInstances(Clazz clazz, Method method)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -700,7 +727,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.returnsNewInstances())
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -720,7 +747,7 @@ implements   MemberVisitor,
      * Marks that the given method returns external reference values (not
      * parameter or new instance).
      */
-    private void markReturnsExternalValues(Method method)
+    private void markReturnsExternalValues(Clazz clazz, Method method)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -733,7 +760,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.returnsExternalValues())
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -778,7 +805,8 @@ implements   MemberVisitor,
      * Marks the producing reference parameters of the specified stack entry at
      * the given instruction offset.
      */
-    private void markModifiedParameters(Method method,
+    private void markModifiedParameters(Clazz clazz,
+                                        Method method,
                                         int    offset,
                                         int    stackEntryIndex)
     {
@@ -792,7 +820,7 @@ implements   MemberVisitor,
             // The null reference value may not have a trace value.
             if (referenceValue.isNull() != Value.ALWAYS)
             {
-                markModifiedParameters(method, referenceValue);
+                markModifiedParameters(clazz, method, referenceValue);
             }
         }
     }
@@ -801,7 +829,8 @@ implements   MemberVisitor,
     /**
      * Marks the producing parameters of the given reference value.
      */
-    private void markModifiedParameters(Method         method,
+    private void markModifiedParameters(Clazz clazz,
+                                        Method         method,
                                         ReferenceValue referenceValue)
     {
         TracedReferenceValue   tracedReferenceValue = (TracedReferenceValue)referenceValue;
@@ -813,15 +842,15 @@ implements   MemberVisitor,
             if (producers.isMethodParameter(index))
             {
                 // We know exactly which parameter is being modified.
-                markParameterModified(method, producers.methodParameter(index));
+                markParameterModified(clazz, method, producers.methodParameter(index));
             }
             else if (!producers.isNewinstance(index) &&
                      !producers.isExceptionHandler(index))
             {
                 // If some unknown instance is modified, any escaping parameters
                 // may be modified.
-                markModifiedParameters(method, getEscapingParameters(method));
-                markAnythingModified(method);
+                markModifiedParameters(clazz, method, getEscapingParameters(method));
+                markAnythingModified(clazz, method);
             }
         }
     }
@@ -830,7 +859,7 @@ implements   MemberVisitor,
     /**
      * Marks the given parameter as modified by the given method.
      */
-    private void markParameterModified(Method method, int parameterIndex)
+    private void markParameterModified(Clazz clazz, Method method, int parameterIndex)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -843,7 +872,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.isParameterModified(parameterIndex))
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -852,7 +881,7 @@ implements   MemberVisitor,
     /**
      * Marks the given parameters as modified by the given method.
      */
-    private void markModifiedParameters(Method method, long modifiedParameters)
+    private void markModifiedParameters(Clazz clazz, Method method, long modifiedParameters)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -868,7 +897,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.getModifiedParameters() != oldModifiedParameters)
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }
@@ -895,7 +924,7 @@ implements   MemberVisitor,
     /**
      * Marks that anything may be modified by the given method.
      */
-    private void markAnythingModified(Method method)
+    private void markAnythingModified(Clazz clazz, Method method)
     {
         MethodOptimizationInfo methodOptimizationInfo =
             MethodOptimizationInfo.getMethodOptimizationInfo(method);
@@ -908,7 +937,7 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.modifiesAnything())
             {
-                repeatTrigger.set();
+                reportSideEffect(clazz, method);
             }
         }
     }

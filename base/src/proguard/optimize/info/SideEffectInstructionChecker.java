@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,8 +29,14 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
 /**
- * This class can tell whether an instruction has any side effects. Return
- * instructions and array store instructions can be included or not.
+ * This class can tell whether an instruction has any side effects. This
+ * includes invoking methods that have side effects, writing to fields that
+ * are not write-only, and throwing exceptions. Return instructions and
+ * array store instructions can be included or not.
+ *
+ * With the environment setting "optimize.conservatively", it also accounts for
+ * all possible NullPointerExceptions, ArrayIndexOutOfBoundExceptions, etc.,
+ * which are typically accidental, not intentional.
  *
  * @see ReadWriteFieldMarker
  * @see SideEffectClassMarker

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,7 +32,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.*;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
-import proguard.optimize.evaluation.ParameterTracingInvocationUnit;
+import proguard.optimize.evaluation.*;
 import proguard.util.ArrayUtil;
 
 /**
@@ -293,7 +293,7 @@ implements   AttributeVisitor,
 
     public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
     {
-        Method referencedMethod = anyMethodrefConstant.referencedMethod;
+        Method referencedMethod = (Method)anyMethodrefConstant.referencedMethod;
 
         // Mark reference reference values that are passed to the method.
         for (int index = 0; index < referencingPopCount; index++)

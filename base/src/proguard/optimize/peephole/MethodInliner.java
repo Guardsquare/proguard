@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,6 +32,8 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.optimize.*;
 import proguard.optimize.info.*;
+import proguard.util.ProcessingFlagSetter;
+import proguard.util.ProcessingFlags;
 
 import java.util.Stack;
 
@@ -233,6 +235,7 @@ implements   AttributeVisitor,
                 codeAttributeComposer.visitCodeAttribute(clazz, method, codeAttribute);
 
                 // Update the super/private/package/protected accessing flags.
+
                 method.accept(clazz, accessMethodMarker);
             }
 
@@ -242,12 +245,7 @@ implements   AttributeVisitor,
         }
 
         // Only inline the method if it is invoked once or if it is short.
-        else if ((inlineSingleInvocations ?
-                      MethodInvocationMarker.getInvocationCount(method) == 1 :
-                      codeAttribute.u4codeLength <=
-                      (android?
-                           MAXIMUM_INLINED_CODE_LENGTH_android:
-                           MAXIMUM_INLINED_CODE_LENGTH_JVM)) &&
+        else if (shouldInline(clazz, method, codeAttribute) &&
                  estimatedResultingCodeLength + codeAttribute.u4codeLength <
                  (microEdition ?
                      MAXIMUM_RESULTING_CODE_LENGTH_JME :
@@ -397,6 +395,9 @@ implements   AttributeVisitor,
 
         // Copy the exceptions.
         codeAttribute.exceptionsAccept(clazz, method, exceptionInfoAdder);
+
+        // Copy the processing flags that need to be copied as well.
+        targetMethod.accept(targetClass, new ProcessingFlagSetter(method.getProcessingFlags() & ProcessingFlags.COPYABLE_PROCESSING_FLAGS));
 
         // Copy the line numbers.
         copiedLineNumbers = false;
@@ -787,6 +788,18 @@ implements   AttributeVisitor,
         }
     }
 
+
+    // Implementations for ExceptionInfoVisitor.
+
+    public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
+    {
+        exceptionInfoCount++;
+        coveredByCatchAllHandler |= exceptionInfo.u2catchType == 0;
+    }
+
+
+    // Small helper methods.
+
     /**
      * Returns true, while printing out the given debug message.
      */
@@ -801,11 +814,38 @@ implements   AttributeVisitor,
     }
 
 
-    // Implementations for ExceptionInfoVisitor.
-
-    public void visitExceptionInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, ExceptionInfo exceptionInfo)
+    /**
+     * Returns whether the method with the given descriptor returns an int-like (boolean,
+     * byte, char or short) value.
+     */
+    private boolean returnsIntLike(String methodDescriptor)
     {
-        exceptionInfoCount++;
-        coveredByCatchAllHandler |= exceptionInfo.u2catchType == 0;
+        char   returnChar =  methodDescriptor.charAt(methodDescriptor.length() - 1);
+        return returnChar == TypeConstants.BOOLEAN ||
+               returnChar == TypeConstants.BYTE    ||
+               returnChar == TypeConstants.CHAR    ||
+               returnChar == TypeConstants.SHORT;
+    }
+
+
+    /**
+     * Indicates whether this method should be inlined. By default, this method uses
+     * the `inlineSingleInvocations` constructor parameter. Subclasses can overwrite
+     * this method to change which methods are inlined.
+     *
+     * Note that the method will still always first be tested on whether they can technically
+     * be inlined (see `visitProrgamMethod`) and only then will this method be called to decide
+     * whether to actually inline or not.
+     *
+     * @param method the method that is eligible for inlining
+     */
+    protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute)
+    {
+        return inlineSingleInvocations ?
+            MethodInvocationMarker.getInvocationCount(method) == 1 :
+            codeAttribute.u4codeLength <=
+            (android ?
+                 MAXIMUM_INLINED_CODE_LENGTH_android:
+                 MAXIMUM_INLINED_CODE_LENGTH_JVM);
     }
 }

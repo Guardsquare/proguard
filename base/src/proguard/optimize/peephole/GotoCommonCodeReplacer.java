@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,7 +26,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
+import proguard.classfile.util.BranchTargetFinder;
 
 /**
  * This AttributeVisitor redirects unconditional branches so any common code
@@ -83,7 +83,7 @@ implements   AttributeVisitor,
         // Remap the variables of the instructions.
         codeAttribute.instructionsAccept(clazz, method, this);
 
-        // Apply the code atribute editor.
+        // Apply the code attribute editor.
         codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
     }
 

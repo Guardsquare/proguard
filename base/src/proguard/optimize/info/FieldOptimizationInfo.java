@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -34,54 +34,84 @@ public class FieldOptimizationInfo
     protected Value value;
 
 
+    /**
+     * Returns whether the method is kept.
+     */
+    // TODO: This information is now available from the processing flags.
     public boolean isKept()
     {
         return true;
     }
 
 
+    /**
+     * Returns whether the field is ever written to.
+     */
     public boolean isWritten()
     {
         return true;
     }
 
 
+    /**
+     * Returns whether the field is ever read.
+     */
     public boolean isRead()
     {
         return true;
     }
 
 
+    /**
+     * Returns whether the field can be made private.
+     */
     public boolean canBeMadePrivate()
     {
         return false;
     }
 
 
+    /**
+     * Returns a representation of the class through which the field is
+     * accessed, or null if it is unknown.
+     */
     public ReferenceValue getReferencedClass()
     {
         return null;
     }
 
 
+    /**
+     * Specifies the value of the field.
+     */
     public void setValue(Value value)
     {
         this.value = value;
     }
 
 
+    /**
+     * Returns a representation of the value of the field, or null
+     * if it is unknown.
+     */
     public Value getValue()
     {
         return value;
     }
 
 
+    /**
+     * Creates and sets a FieldOptimizationInfo instance on the given field.
+     */
     public static void setFieldOptimizationInfo(Clazz clazz, Field field)
     {
         field.setProcessingInfo(new FieldOptimizationInfo());
     }
 
 
+    /**
+     * Returns the FieldOptimizationInfo instance from the given field.
+     */
     public static FieldOptimizationInfo getFieldOptimizationInfo(Field field)
     {
         return (FieldOptimizationInfo)field.getProcessingInfo();

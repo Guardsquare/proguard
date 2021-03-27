@@ -56,6 +56,12 @@ optimizations are added and reorganized.
 `field/marking/private`
 : Marks fields as private, whenever possible.
 
+`field/generalization/class`
+: Generalizes the classes of field accesses, whenever possible.
+
+`field/specialization/type`
+: Specializes the types of fields, whenever possible
+
 `field/propagation/value`<div>(⇒ `code/simplification/advanced`)</div>
 : Propagates the values of fields across methods.
 
@@ -73,6 +79,15 @@ optimizations are added and reorganized.
 
 `method/removal/parameter`<div>(⇒ `code/removal/advanced`)</div>
 : Removes unused method parameters.
+
+`method/generalization/class`
+: Generalizes the classes of method invocations, whenever possible.
+
+`method/specialization/parametertype`
+: Specializes the types of method parameters, whenever possible.
+
+`method/specialization/returntype`
+: Specializes the types of method return values, whenever possible.
 
 `method/propagation/parameter`<div>(⇒ `code/simplification/advanced`)</div>
 : Propagates the values of method parameters from method invocations to the

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -72,7 +72,7 @@ implements   ClassVisitor
         if ((programClass.u2accessFlags & (AccessConstants.FINAL     |
                                            AccessConstants.INTERFACE |
                                            AccessConstants.ABSTRACT)) == 0 &&
-            !KeepMarker.isKept(programClass)                               &&
+            !KeepMarker.isKept(programClass)                                  &&
             programClass.subClassCount == 0)
         {
             programClass.u2accessFlags |= AccessConstants.FINAL;

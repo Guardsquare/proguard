@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -70,47 +70,50 @@ extends      BasicInvocationUnit
 
     // Implementations for BasicInvocationUnit.
 
+    @Override
     public void setFieldClassValue(Clazz            clazz,
-                                   FieldrefConstant fieldrefConstant,
+                                   FieldrefConstant refConstant,
                                    ReferenceValue   value)
     {
         if (storeFieldValues)
         {
-            Field referencedField = fieldrefConstant.referencedField;
-            if (referencedField != null)
+            Field referencedMember = refConstant.referencedField;
+            if (referencedMember != null)
             {
-                generalizeFieldClassValue(referencedField, value);
+                generalizeFieldClassValue(referencedMember, value);
             }
         }
     }
 
 
+    @Override
     public void setFieldValue(Clazz            clazz,
-                              FieldrefConstant fieldrefConstant,
+                              FieldrefConstant refConstant,
                               Value            value)
     {
         if (storeFieldValues)
         {
-            Field referencedField = fieldrefConstant.referencedField;
-            if (referencedField != null)
+            Field referencedMember = refConstant.referencedField;
+            if (referencedMember != null)
             {
-                generalizeFieldValue((Field)referencedField, value);
+                generalizeFieldValue(referencedMember, value);
             }
         }
     }
 
 
-    public void setMethodParameterValue(Clazz       clazz,
-                                        AnyMethodrefConstant anyMethodrefConstant,
-                                        int         parameterIndex,
-                                        Value       value)
+    @Override
+    public void setMethodParameterValue(Clazz                clazz,
+                                        AnyMethodrefConstant refConstant,
+                                        int                  parameterIndex,
+                                        Value                value)
     {
         if (storeMethodParameterValues)
         {
-            Method referencedMethod = anyMethodrefConstant.referencedMethod;
-            if (referencedMethod != null)
+            Method referencedMember = refConstant.referencedMethod;
+            if (referencedMember != null)
             {
-                generalizeMethodParameterValue(referencedMethod,
+                generalizeMethodParameterValue(referencedMember,
                                                parameterIndex,
                                                value);
             }
@@ -118,6 +121,7 @@ extends      BasicInvocationUnit
     }
 
 
+    @Override
     public void setMethodReturnValue(Clazz  clazz,
                                      Method method,
                                      Value  value)

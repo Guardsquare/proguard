@@ -7,6 +7,19 @@
 |--------|----------|----------|----------------------------------
 | 7.1.0  | PGD-0139 | GRADLE   | Improved handling of Gradle task inputs and outputs.
 | 7.1.0  | PGD-0136 | GRADLE   | Fixed Gradle task compatibility with Gradle 7.
+| 7.1.0  | DGD-1995 | CORE     | Fixed potential class merging optimization issue resulting in `ArrayIndexOutOfBoundsException` during build.
+| 7.1.0  | DGD-0567 | CORE     | Fixed enum unboxing for already obfuscated code.
+| 7.1.0  | PGD-0018, PGD-0019 | CORE | Fixed potential parameter removal optimization issue when optimizing constructors.
+| 7.1.0  |          | CORE     | Added optimization `method/specialization/returntype`.
+| 7.1.0  |          | CORE     | Added optimization `method/specialization/parametertype`.
+| 7.1.0  |          | CORE     | Added optimization `method/generalization/class`.
+| 7.1.0  |          | CORE     | Added optimization `field/specialization/type`.
+| 7.1.0  |          | CORE     | Added optimization `field/generalization/class`.
+| 7.1.0  | DGD-2587 | CORE     | Fixed potential `IllegalArgumentException (Stack size becomes negative) in `class/merging/wrapper` optimization.
+| 7.1.0  | DGD-1564 | CORE     | Fixed wrapper class merging with `new`/`dup`/`astore` sequences.
+| 7.1.0  |          | CORE     | Prevent injected classes from being merged into other classes.
+| 7.1.0  | DGD-1471 | CORE     | Improved speed of horizontal class merging.
+| 7.1.0  |          | CORE     | Improved general performance and stability of optimization.
 | 7.1.0  | DGD-3036 | CORE     | Fixed potential incorrect removal of exception handlers during optimization.
 | 7.1.0  | DGD-3110 | CORE     | Improved GSON support.
 | 7.1.0  | DGD-3289 | CORE     | Fixed potential, incorrect advanced code optimizations.
@@ -20,7 +33,7 @@
 | 7.1.0  | PGD-0064 | CORE     | Added support for record attributes.
 | 7.1.0  | DGD-2390 | CORE     | Fixed storage and alignment of uncompressed zip entries.
 | 7.1.0  | DGD-2338 | CORE     | Fixed processing of constant boolean arrays.
-| 7.1.0  | PGD-66   | CORE     | Removed Gradle plugin dependency on Android build tools.
+| 7.1.0  | PGD-0066 | CORE     | Removed Gradle plugin dependency on Android build tools.
 
 ## Version 7.0 (Jun 2020)
 

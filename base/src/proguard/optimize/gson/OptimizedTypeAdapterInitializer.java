@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,28 +21,16 @@
 package proguard.optimize.gson;
 
 import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.LocalVariableInfo;
-import proguard.classfile.attribute.LocalVariableTableAttribute;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.attribute.visitor.LocalVariableInfoVisitor;
-import proguard.classfile.constant.ClassConstant;
-import proguard.classfile.constant.Constant;
+import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.*;
 import proguard.classfile.editor.CodeAttributeEditor.Label;
-import proguard.classfile.editor.ConstantPoolEditor;
-import proguard.classfile.editor.InstructionSequenceBuilder;
-import proguard.classfile.util.ClassUtil;
-import proguard.classfile.visitor.ClassVisitor;
-import proguard.classfile.visitor.MemberNameFilter;
+import proguard.classfile.util.*;
+import proguard.classfile.visitor.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class visitor transforms the template _OptimizedTypeAdapter into a full
@@ -253,7 +241,7 @@ implements   ClassVisitor
                 jumpOffsets[index] = switchCases.get(index).label.offset();
             }
 
-            Label defaultCase = codeAttributeEditor.label();
+            CodeAttributeEditor.Label defaultCase = codeAttributeEditor.label();
 
             ____.aload(OptimizedClassConstants.ReadLocals.THIS)
                 .getfield(typeAdapterClassName,
@@ -333,7 +321,7 @@ implements   ClassVisitor
             Integer classIndex         = deserializationIndexMap.classIndices.get(objectClassName);
             String  methodNameFromJson = OptimizedClassConstants.METHOD_NAME_FROM_JSON + classIndex;
 
-            Label nonNull = codeAttributeEditor.label();
+            CodeAttributeEditor.Label nonNull = codeAttributeEditor.label();
 
             // Peek the next value and check if it is null.
             ____.aload(OptimizedClassConstants.ReadLocals.JSON_READER)
@@ -516,8 +504,8 @@ implements   ClassVisitor
             Integer classIndex       = serializationIndexMap.classIndices.get(objectClassName);
             String  methodNameToJson = OptimizedClassConstants.METHOD_NAME_TO_JSON + classIndex;
 
-            Label nonNull = codeAttributeEditor.label();
-            Label end     = codeAttributeEditor.label();
+            CodeAttributeEditor.Label nonNull = codeAttributeEditor.label();
+            CodeAttributeEditor.Label end     = codeAttributeEditor.label();
 
             // Check if the passed value is null.
             ____.aload(OptimizedClassConstants.WriteLocals.VALUE)
