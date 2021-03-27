@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -245,6 +245,20 @@ public class ClassPathEntry
         return hasExtension(".zip");
     }
 
+    /**
+     * Returns whether this data entry is a directory.
+     */
+    public boolean isDirectory()
+    {
+        return !isAar()  &&
+                !isAab()  &&
+                !isApk()  &&
+                !isDex()  &&
+                !isEar()  &&
+                !isJar()  &&
+                !isJmod() &&
+                !isZip();
+    }
 
     /**
      * Returns whether this data entry has the given extension.

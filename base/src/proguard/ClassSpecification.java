@@ -20,6 +20,7 @@
  */
 package proguard;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -30,7 +31,7 @@ import java.util.*;
  *
  * @author Eric Lafortune
  */
-public class ClassSpecification implements Cloneable
+public class ClassSpecification implements Cloneable, Serializable
 {
     public final String comments;
     public       String memberComments;

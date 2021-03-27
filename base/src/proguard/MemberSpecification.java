@@ -20,6 +20,7 @@
  */
 package proguard;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ import java.util.List;
  *
  * @author Eric Lafortune
  */
-public class MemberSpecification
+public class MemberSpecification implements Serializable
 {
     public       int    requiredSetAccessFlags;
     public       int    requiredUnsetAccessFlags;

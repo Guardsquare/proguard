@@ -5,6 +5,9 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.0  | PGD-0139 | GRADLE   | Improved handling of Gradle task inputs and outputs.
+| 7.1.0  | PGD-0106 | GRADLE   | Fixed Gradle task error when using an existing `-outjar` directory.
+| 7.1.0  | PGD-0136 | GRADLE   | Fixed Gradle task compatibility with Gradle 7.
 | 7.1.0  | DGD-1995 | CORE     | Fixed potential class merging optimization issue resulting in `ArrayIndexOutOfBoundsException` during build.
 | 7.1.0  | DGD-0567 | CORE     | Fixed enum unboxing for already obfuscated code.
 | 7.1.0  | PGD-0018, PGD-0019 | CORE | Fixed potential parameter removal optimization issue when optimizing constructors.

@@ -107,13 +107,7 @@ public class ConfigurationChecker
                         // Is it an output directory?
                         ClassPathEntry entry = programJars.get(index);
                         if (entry.isOutput() &&
-                            !entry.isApk()   &&
-                            !entry.isJar()   &&
-                            !entry.isAar()   &&
-                            !entry.isWar()   &&
-                            !entry.isEar()   &&
-                            !entry.isJmod()  &&
-                            !entry.isZip())
+                            entry.isDirectory())
                         {
                             out.println("Note: you're writing the processed class files to a directory [" + entry.getName() +"].");
                             out.println("      This will likely cause problems with obfuscated mixed-case class names.");
