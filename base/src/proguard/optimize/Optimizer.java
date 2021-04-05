@@ -1059,7 +1059,10 @@ public class Optimizer
                     new WrapperClassMarker(),
 
                     new AllConstantVisitor(
-                    new PackageVisibleMemberInvokingClassMarker())
+                    new PackageVisibleMemberInvokingClassMarker()),
+
+                    new AllMemberVisitor(
+                    new ContainsConstructorsMarker())
                 )),
 
                 // Mark methods.
