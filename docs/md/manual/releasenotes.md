@@ -5,6 +5,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.0  | DGD-0013 | CORE     | Improved error message when missing classes result in an incomplete class hierarchy.
 | 7.1.0  | PGD-0139 | GRADLE   | Improved handling of Gradle task inputs and outputs.
 | 7.1.0  | PGD-0106 | GRADLE   | Fixed Gradle task error when using an existing `-outjar` directory.
 | 7.1.0  | PGD-0136 | GRADLE   | Fixed Gradle task compatibility with Gradle 7.

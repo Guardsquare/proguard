@@ -30,6 +30,7 @@ import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
+import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.mark.Marker;
 import proguard.obfuscate.Obfuscator;
@@ -87,166 +88,176 @@ public class ProGuard
 
         GPL.check();
 
-        if (configuration.printConfiguration != null)
+        try
         {
-            printConfiguration();
-        }
-
-        new ConfigurationChecker(configuration).check();
-
-        if (configuration.programJars != null     &&
-            configuration.programJars.hasOutput() &&
-            new UpToDateChecker(configuration).check())
-        {
-            return;
-        }
-
-        if (configuration.targetClassVersion != 0)
-        {
-            configuration.backport = true;
-        }
-
-        readInput();
-
-        if (configuration.shrink    ||
-            configuration.optimize  ||
-            configuration.obfuscate ||
-            configuration.preverify)
-        {
-            clearPreverification();
-        }
-
-        if (configuration.printSeeds != null        ||
-            configuration.backport                  ||
-            configuration.shrink                    ||
-            configuration.optimize                  ||
-            configuration.obfuscate                 ||
-            configuration.preverify                 ||
-            configuration.addConfigurationDebugging ||
-            configuration.keepKotlinMetadata)
-        {
-            initialize();
-            mark();
-        }
-
-        if (configuration.keepKotlinMetadata)
-        {
-            stripKotlinMetadataAnnotations();
-        }
-
-        if (configuration.optimize ||
-            configuration.obfuscate)
-        {
-            introducePrimitiveArrayConstants();
-        }
-
-        if (configuration.backport)
-        {
-            backport();
-        }
-
-        if (configuration.addConfigurationDebugging)
-        {
-            addConfigurationLogging();
-        }
-
-        if (configuration.printSeeds != null)
-        {
-            printSeeds();
-        }
-
-        if (configuration.preverify ||
-            configuration.android)
-        {
-            inlineSubroutines();
-        }
-
-        if (configuration.shrink)
-        {
-            shrink();
-        }
-
-        if (configuration.optimize)
-        {
-            optimizeGson();
-        }
-
-        if (configuration.optimize)
-        {
-            for (int optimizationPass = 0;
-                 optimizationPass < configuration.optimizationPasses;
-                 optimizationPass++)
+            if (configuration.printConfiguration != null)
             {
-                if (!optimize(optimizationPass+1, configuration.optimizationPasses))
-                {
-                    // Stop optimizing if the code doesn't improve any further.
-                    break;
-                }
-
-                // Shrink again, if we may.
-                if (configuration.shrink)
-                {
-                    // Don't print any usage this time around.
-                    configuration.printUsage       = null;
-                    configuration.whyAreYouKeeping = null;
-
-                    shrink();
-                }
+                printConfiguration();
             }
 
-            linearizeLineNumbers();
-        }
+            new ConfigurationChecker(configuration).check();
 
-        if (configuration.obfuscate)
-        {
-            obfuscate();
-        }
+            if (configuration.programJars != null     &&
+                configuration.programJars.hasOutput() &&
+                new UpToDateChecker(configuration).check())
+            {
+                return;
+            }
 
-        if (configuration.keepKotlinMetadata)
-        {
-            keepKotlinMetadata();
-        }
+            if (configuration.targetClassVersion != 0)
+            {
+                configuration.backport = true;
+            }
 
-        if (configuration.optimize ||
-            configuration.obfuscate)
-        {
-            expandPrimitiveArrayConstants();
-        }
+            readInput();
 
-        if (configuration.targetClassVersion != 0)
-        {
-            target();
-        }
+            if (configuration.shrink    ||
+                configuration.optimize  ||
+                configuration.obfuscate ||
+                configuration.preverify)
+            {
+                clearPreverification();
+            }
 
-        if (configuration.preverify)
-        {
-            preverify();
-        }
+            if (configuration.printSeeds != null        ||
+                configuration.backport                  ||
+                configuration.shrink                    ||
+                configuration.optimize                  ||
+                configuration.obfuscate                 ||
+                configuration.preverify                 ||
+                configuration.addConfigurationDebugging ||
+                configuration.keepKotlinMetadata)
+            {
+                initialize();
+                mark();
+            }
 
-        // Trim line numbers after preverification as this might
-        // also remove some instructions.
-        if (configuration.optimize ||
-            configuration.preverify)
-        {
-            trimLineNumbers();
-        }
+            if (configuration.keepKotlinMetadata)
+            {
+                stripKotlinMetadataAnnotations();
+            }
 
-        if (configuration.shrink    ||
-            configuration.optimize  ||
-            configuration.obfuscate ||
-            configuration.preverify)
-        {
-            sortClassElements();
-        }
+            if (configuration.optimize ||
+                configuration.obfuscate)
+            {
+                introducePrimitiveArrayConstants();
+            }
 
-        if (configuration.programJars.hasOutput())
-        {
-            writeOutput();
-        }
+            if (configuration.backport)
+            {
+                backport();
+            }
 
-        if (configuration.dump != null)
+            if (configuration.addConfigurationDebugging)
+            {
+                addConfigurationLogging();
+            }
+
+            if (configuration.printSeeds != null)
+            {
+                printSeeds();
+            }
+
+            if (configuration.preverify ||
+                configuration.android)
+            {
+                inlineSubroutines();
+            }
+
+            if (configuration.shrink)
+            {
+                shrink();
+            }
+
+            if (configuration.optimize)
+            {
+                optimizeGson();
+            }
+
+            if (configuration.optimize)
+            {
+                for (int optimizationPass = 0;
+                     optimizationPass < configuration.optimizationPasses;
+                     optimizationPass++)
+                {
+                    if (!optimize(optimizationPass+1, configuration.optimizationPasses))
+                    {
+                        // Stop optimizing if the code doesn't improve any further.
+                        break;
+                    }
+
+                    // Shrink again, if we may.
+                    if (configuration.shrink)
+                    {
+                        // Don't print any usage this time around.
+                        configuration.printUsage       = null;
+                        configuration.whyAreYouKeeping = null;
+
+                        shrink();
+                    }
+                }
+
+                linearizeLineNumbers();
+            }
+
+            if (configuration.obfuscate)
+            {
+                obfuscate();
+            }
+
+            if (configuration.keepKotlinMetadata)
+            {
+                keepKotlinMetadata();
+            }
+
+            if (configuration.optimize ||
+                configuration.obfuscate)
+            {
+                expandPrimitiveArrayConstants();
+            }
+
+            if (configuration.targetClassVersion != 0)
+            {
+                target();
+            }
+
+            if (configuration.preverify)
+            {
+                preverify();
+            }
+
+            // Trim line numbers after preverification as this might
+            // also remove some instructions.
+            if (configuration.optimize ||
+                configuration.preverify)
+            {
+                trimLineNumbers();
+            }
+
+            if (configuration.shrink    ||
+                configuration.optimize  ||
+                configuration.obfuscate ||
+                configuration.preverify)
+            {
+                sortClassElements();
+            }
+
+            if (configuration.programJars.hasOutput())
+            {
+                writeOutput();
+            }
+
+            if (configuration.dump != null)
+            {
+                dump();
+            }
+        }
+        catch (IncompleteClassHierarchyException e)
         {
-            dump();
+            System.err.println();
+            System.err.println("It appears you are missing some classes resulting in an incomplete class hierarchy, " + System.lineSeparator() +
+                               "please refer to the troubleshooting page in the manual: " + System.lineSeparator() +
+                               "https://www.guardsquare.com/en/products/proguard/manual/troubleshooting#superclass");
         }
     }
 
