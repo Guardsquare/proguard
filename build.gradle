@@ -25,12 +25,11 @@ allprojects { Project project ->
                 publications {
                     create(project.name, MavenPublication) {
                         pom {
-                            name = "[$group] $artifactId"
+                            name = "$group:$artifactId"
                             developers {
                                 developer {
                                     id = 'lafortune'
                                     name = 'Eric Lafortune'
-                                    url = 'https://www.guardsquare.com/proguard'
                                     organization = 'Guardsquare'
                                     organizationUrl = 'https://www.guardsquare.com/'
                                     roles = ['Project Administrator', 'Developer']
