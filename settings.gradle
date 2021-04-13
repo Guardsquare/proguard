@@ -16,7 +16,7 @@ if (hasProperty('proguardCoreDir'))
     includeBuild proguardCoreDir
 }
 
-rootProject.name = 'parent'
+rootProject.name = 'proguard'
 
 include 'base'
 include 'retrace'
