@@ -75,10 +75,16 @@ dependencies {
     testImplementation "commons-io:commons-io:2.8.0"
 }
 
-publishing {
-    publications {
-        getByName('gradle-plugin') {
-            artifactId = 'proguard-gradle'
-        }
+afterEvaluate {
+    /*  This project gets two publications:
+        - "pluginMaven" is the default from `java-gradle-plugin`
+          and must not be automatically published.
+        - "<project.name>" is created by ProGuard custom logic
+          and should have its artifact ID adjusted.
+     */
+    tasks.withType(AbstractPublishToMaven).matching { task ->
+        task.publication.name == 'pluginMaven'
+    } each {task ->
+        task.enabled = false
     }
 }

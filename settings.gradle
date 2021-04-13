@@ -24,3 +24,5 @@ include 'gui'
 include 'gradle-plugin'
 include 'ant'
 include 'annotations'
+
+project(':gradle-plugin').name = 'gradle'
