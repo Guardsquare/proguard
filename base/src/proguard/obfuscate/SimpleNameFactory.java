@@ -20,9 +20,6 @@
  */
 package proguard.obfuscate;
 
-import java.util.*;
-
-
 /**
  * This <code>NameFactory</code> generates unique short names, using mixed-case
  * characters or lower-case characters only.
@@ -33,12 +30,8 @@ public class SimpleNameFactory implements NameFactory
 {
     private static final int CHARACTER_COUNT = 26;
 
-    private static final List cachedMixedCaseNames = new ArrayList();
-    private static final List cachedLowerCaseNames = new ArrayList();
-
     private final boolean generateMixedCaseNames;
     private int     index = 0;
-
 
     /**
      * Creates a new <code>SimpleNameFactory</code> that generates mixed-case names.
@@ -79,22 +72,8 @@ public class SimpleNameFactory implements NameFactory
      */
     private String name(int index)
     {
-        // Which cache do we need?
-        List cachedNames = generateMixedCaseNames ?
-            cachedMixedCaseNames :
-            cachedLowerCaseNames;
-
-        // Do we have the name in the cache?
-        if (index < cachedNames.size())
-        {
-            return (String)cachedNames.get(index);
-        }
-
-        // Create a new name and cache it.
-        String name = newName(index);
-        cachedNames.add(index, name);
-
-        return name;
+        // Create a new name for this index
+        return newName(index);
     }
 
 
