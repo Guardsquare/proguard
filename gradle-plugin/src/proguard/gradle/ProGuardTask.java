@@ -58,9 +58,10 @@ public abstract class ProGuardTask extends DefaultTask
     private final List          libraryJarFilters  = new ArrayList();
 
     // Raw configuration containing configuration options provided via Gradle task
-    protected final Configuration             configuration       = new Configuration();
+    protected final Configuration             rawConfiguration    = new Configuration();
     // Merged configuration, combining configuration values from all sources, including external configuration files
     private         Configuration             mergedConfiguration = null;
+    // Proguard task configuration, represented in a format usable by Gradle to track all inputs and outputs.
     private   final ProGuardTaskConfiguration taskConfiguration   = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
 
     // Fields acting as parameters for the class member specification methods.
@@ -193,6 +194,8 @@ public abstract class ProGuardTask extends DefaultTask
     throws ParseException, IOException
     {
         getConfigurationFiles().from(configurationFiles);
+
+        invalidateMergedConfiguration();
     }
 
     public void injars(Object inJarFiles)
@@ -207,6 +210,8 @@ public abstract class ProGuardTask extends DefaultTask
         // Just collect the arguments, so they can be resolved lazily.
         this.inJarFiles.add(inJarFiles);
         this.inJarFilters.add(filterArgs);
+
+        invalidateMergedConfiguration();
     }
 
     public void outjars(Object outJarFiles)
@@ -222,6 +227,8 @@ public abstract class ProGuardTask extends DefaultTask
         this.outJarFiles.add(outJarFiles);
         this.outJarFilters.add(filterArgs);
         this.inJarCounts.add(Integer.valueOf(inJarFiles.size()));
+
+        invalidateMergedConfiguration();
     }
 
     public void libraryjars(Object libraryJarFiles)
@@ -236,6 +243,8 @@ public abstract class ProGuardTask extends DefaultTask
         // Just collect the arguments, so they can be resolved lazily.
         this.libraryJarFiles.add(libraryJarFiles);
         this.libraryJarFilters.add(filterArgs);
+
+        invalidateMergedConfiguration();
     }
 
     // Hack: support the keyword without parentheses in Groovy.
@@ -248,7 +257,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void skipnonpubliclibraryclasses()
     {
-        configuration.skipNonPublicLibraryClasses = true;
+        modifyConfiguration().skipNonPublicLibraryClasses = true;
     }
 
     @Internal
@@ -261,7 +270,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontskipnonpubliclibraryclassmembers()
     {
-        configuration.skipNonPublicLibraryClassMembers = false;
+        modifyConfiguration().skipNonPublicLibraryClassMembers = false;
     }
 
     @Internal
@@ -279,13 +288,13 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void keepdirectories(String filter)
     {
-        configuration.keepDirectories =
-            extendFilter(configuration.keepDirectories, filter);
+        modifyConfiguration().keepDirectories =
+            extendFilter(rawConfiguration.keepDirectories, filter);
     }
 
     public void target(String targetClassVersion)
     {
-        configuration.targetClassVersion =
+        modifyConfiguration().targetClassVersion =
             ClassUtil.internalClassVersion(targetClassVersion);
     }
 
@@ -299,7 +308,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void forceprocessing()
     {
-        configuration.lastModified = Long.MAX_VALUE;
+        modifyConfiguration().lastModified = Long.MAX_VALUE;
     }
 
     public void keep(String classSpecificationString)
@@ -312,9 +321,9 @@ public abstract class ProGuardTask extends DefaultTask
                      String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(false,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(false,
                                          false,
                                          false,
                                          true,
@@ -336,9 +345,9 @@ public abstract class ProGuardTask extends DefaultTask
                      Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(false,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(false,
                                          false,
                                          false,
                                          true,
@@ -360,9 +369,9 @@ public abstract class ProGuardTask extends DefaultTask
                                  String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(false,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(false,
                                          false,
                                          false,
                                          true,
@@ -384,9 +393,9 @@ public abstract class ProGuardTask extends DefaultTask
                                  Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(false,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(false,
                                          false,
                                          false,
                                          true,
@@ -408,9 +417,9 @@ public abstract class ProGuardTask extends DefaultTask
                                        String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(false,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(false,
                                          false,
                                          false,
                                          true,
@@ -432,9 +441,9 @@ public abstract class ProGuardTask extends DefaultTask
                                        Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(false,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(false,
                                          false,
                                          false,
                                          true,
@@ -456,9 +465,9 @@ public abstract class ProGuardTask extends DefaultTask
                           String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -480,9 +489,9 @@ public abstract class ProGuardTask extends DefaultTask
                           Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -504,9 +513,9 @@ public abstract class ProGuardTask extends DefaultTask
                                      String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -528,9 +537,9 @@ public abstract class ProGuardTask extends DefaultTask
                                      Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -552,9 +561,9 @@ public abstract class ProGuardTask extends DefaultTask
                                            String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -576,9 +585,9 @@ public abstract class ProGuardTask extends DefaultTask
                                            Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -600,9 +609,9 @@ public abstract class ProGuardTask extends DefaultTask
                          String classSpecificationString)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -624,9 +633,9 @@ public abstract class ProGuardTask extends DefaultTask
                          Closure classMembersClosure)
     throws ParseException
     {
-        configuration.keep =
-            extendClassSpecifications(configuration.keep,
-            createKeepClassSpecification(true,
+        modifyConfiguration().keep =
+            extendClassSpecifications(rawConfiguration.keep,
+                                      createKeepClassSpecification(true,
                                          false,
                                          false,
                                          true,
@@ -648,13 +657,13 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void printseeds()
     {
-        configuration.printSeeds = Configuration.STD_OUT;
+        modifyConfiguration().printSeeds = Configuration.STD_OUT;
     }
 
     public void printseeds(Object printSeeds)
     throws ParseException
     {
-        configuration.printSeeds = getProject().file(printSeeds);
+        modifyConfiguration().printSeeds = getProject().file(printSeeds);
     }
 
     @Internal
@@ -667,7 +676,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontshrink()
     {
-        configuration.shrink = false;
+        modifyConfiguration().shrink = false;
     }
 
     @Internal
@@ -680,20 +689,20 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void printusage()
     {
-        configuration.printUsage = Configuration.STD_OUT;
+        modifyConfiguration().printUsage = Configuration.STD_OUT;
     }
 
     public void printusage(Object printUsage)
     throws ParseException
     {
-        configuration.printUsage = getProject().file(printUsage);
+        modifyConfiguration().printUsage = getProject().file(printUsage);
     }
 
     public void whyareyoukeeping(String classSpecificationString)
     throws ParseException
     {
-        configuration.whyAreYouKeeping =
-            extendClassSpecifications(configuration.whyAreYouKeeping,
+        modifyConfiguration().whyAreYouKeeping =
+            extendClassSpecifications(rawConfiguration.whyAreYouKeeping,
                                       createClassSpecification(false,
                                                                classSpecificationString));
     }
@@ -708,8 +717,8 @@ public abstract class ProGuardTask extends DefaultTask
                                  Closure classMembersClosure)
     throws ParseException
     {
-        configuration.whyAreYouKeeping =
-            extendClassSpecifications(configuration.whyAreYouKeeping,
+        modifyConfiguration().whyAreYouKeeping =
+            extendClassSpecifications(rawConfiguration.whyAreYouKeeping,
                                       createClassSpecification(false,
                                                                classSpecificationArgs,
                                                                classMembersClosure));
@@ -725,27 +734,27 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontoptimize()
     {
-        configuration.optimize = false;
+        modifyConfiguration().optimize = false;
     }
 
     public void optimizations(String filter)
     {
-        configuration.optimizations =
-            extendFilter(configuration.optimizations, filter);
+        modifyConfiguration().optimizations =
+            extendFilter(rawConfiguration.optimizations, filter);
     }
 
 
     public void optimizationpasses(int optimizationPasses)
     {
-        configuration.optimizationPasses = optimizationPasses;
+        modifyConfiguration().optimizationPasses = optimizationPasses;
     }
 
     public void assumenosideeffects(String classSpecificationString)
     throws ParseException
     {
-        configuration.assumeNoSideEffects =
-            extendClassSpecifications(configuration.assumeNoSideEffects,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoSideEffects =
+            extendClassSpecifications(rawConfiguration.assumeNoSideEffects,
+                                      createClassSpecification(true,
                                      classSpecificationString));
     }
 
@@ -753,9 +762,9 @@ public abstract class ProGuardTask extends DefaultTask
                                     Closure classMembersClosure)
     throws ParseException
     {
-        configuration.assumeNoSideEffects =
-            extendClassSpecifications(configuration.assumeNoSideEffects,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoSideEffects =
+            extendClassSpecifications(rawConfiguration.assumeNoSideEffects,
+                                      createClassSpecification(true,
                                      classSpecificationArgs,
                                      classMembersClosure));
     }
@@ -763,9 +772,9 @@ public abstract class ProGuardTask extends DefaultTask
     public void assumenoexternalsideeffects(String classSpecificationString)
     throws ParseException
     {
-        configuration.assumeNoExternalSideEffects =
-            extendClassSpecifications(configuration.assumeNoExternalSideEffects,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoExternalSideEffects =
+            extendClassSpecifications(rawConfiguration.assumeNoExternalSideEffects,
+                                      createClassSpecification(true,
                                      classSpecificationString));
     }
 
@@ -773,9 +782,9 @@ public abstract class ProGuardTask extends DefaultTask
                                             Closure classMembersClosure)
     throws ParseException
     {
-        configuration.assumeNoExternalSideEffects =
-            extendClassSpecifications(configuration.assumeNoExternalSideEffects,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoExternalSideEffects =
+            extendClassSpecifications(rawConfiguration.assumeNoExternalSideEffects,
+                                      createClassSpecification(true,
                                      classSpecificationArgs,
                                      classMembersClosure));
     }
@@ -783,9 +792,9 @@ public abstract class ProGuardTask extends DefaultTask
     public void assumenoescapingparameters(String classSpecificationString)
     throws ParseException
     {
-        configuration.assumeNoEscapingParameters =
-            extendClassSpecifications(configuration.assumeNoEscapingParameters,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoEscapingParameters =
+            extendClassSpecifications(rawConfiguration.assumeNoEscapingParameters,
+                                      createClassSpecification(true,
                                      classSpecificationString));
     }
 
@@ -793,9 +802,9 @@ public abstract class ProGuardTask extends DefaultTask
                                            Closure classMembersClosure)
     throws ParseException
     {
-        configuration.assumeNoEscapingParameters =
-            extendClassSpecifications(configuration.assumeNoEscapingParameters,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoEscapingParameters =
+            extendClassSpecifications(rawConfiguration.assumeNoEscapingParameters,
+                                      createClassSpecification(true,
                                      classSpecificationArgs,
                                      classMembersClosure));
     }
@@ -803,9 +812,9 @@ public abstract class ProGuardTask extends DefaultTask
     public void assumenoexternalreturnvalues(String classSpecificationString)
     throws ParseException
     {
-        configuration.assumeNoExternalReturnValues =
-            extendClassSpecifications(configuration.assumeNoExternalReturnValues,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoExternalReturnValues =
+            extendClassSpecifications(rawConfiguration.assumeNoExternalReturnValues,
+                                      createClassSpecification(true,
                                      classSpecificationString));
     }
 
@@ -813,9 +822,9 @@ public abstract class ProGuardTask extends DefaultTask
                                              Closure classMembersClosure)
     throws ParseException
     {
-        configuration.assumeNoExternalReturnValues =
-            extendClassSpecifications(configuration.assumeNoExternalReturnValues,
-            createClassSpecification(true,
+        modifyConfiguration().assumeNoExternalReturnValues =
+            extendClassSpecifications(rawConfiguration.assumeNoExternalReturnValues,
+                                      createClassSpecification(true,
                                      classSpecificationArgs,
                                      classMembersClosure));
     }
@@ -823,9 +832,9 @@ public abstract class ProGuardTask extends DefaultTask
     public void assumevalues(String classSpecificationString)
     throws ParseException
     {
-        configuration.assumeValues =
-            extendClassSpecifications(configuration.assumeValues,
-            createClassSpecification(true,
+        modifyConfiguration().assumeValues =
+            extendClassSpecifications(rawConfiguration.assumeValues,
+                                      createClassSpecification(true,
                                      classSpecificationString));
     }
 
@@ -833,9 +842,9 @@ public abstract class ProGuardTask extends DefaultTask
                              Closure classMembersClosure)
     throws ParseException
     {
-        configuration.assumeValues =
-            extendClassSpecifications(configuration.assumeValues,
-            createClassSpecification(true,
+        modifyConfiguration().assumeValues =
+            extendClassSpecifications(rawConfiguration.assumeValues,
+                                      createClassSpecification(true,
                                      classSpecificationArgs,
                                      classMembersClosure));
     }
@@ -850,7 +859,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void allowaccessmodification()
     {
-        configuration.allowAccessModification = true;
+        modifyConfiguration().allowAccessModification = true;
     }
 
     @Internal
@@ -863,7 +872,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void mergeinterfacesaggressively()
     {
-        configuration.mergeInterfacesAggressively = true;
+        modifyConfiguration().mergeInterfacesAggressively = true;
     }
 
     @Internal
@@ -876,7 +885,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontobfuscate()
     {
-        configuration.obfuscate = false;
+        modifyConfiguration().obfuscate = false;
     }
 
     @Internal
@@ -889,39 +898,39 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void printmapping()
     {
-        configuration.printMapping = Configuration.STD_OUT;
+        modifyConfiguration().printMapping = Configuration.STD_OUT;
     }
 
     public void printmapping(Object printMapping)
     throws ParseException
     {
-        configuration.printMapping = getProject().file(printMapping);
+        modifyConfiguration().printMapping = getProject().file(printMapping);
     }
 
     public void applymapping(Object applyMapping)
     throws ParseException
     {
-        configuration.applyMapping = getProject().file(applyMapping);
+        modifyConfiguration().applyMapping = getProject().file(applyMapping);
     }
 
     public void obfuscationdictionary(Object obfuscationDictionary)
     throws ParseException, MalformedURLException
     {
-        configuration.obfuscationDictionary =
+        modifyConfiguration().obfuscationDictionary =
             url(obfuscationDictionary);
     }
 
     public void classobfuscationdictionary(Object classObfuscationDictionary)
     throws ParseException, MalformedURLException
     {
-        configuration.classObfuscationDictionary =
+        modifyConfiguration().classObfuscationDictionary =
             url(classObfuscationDictionary);
     }
 
     public void packageobfuscationdictionary(Object packageObfuscationDictionary)
     throws ParseException, MalformedURLException
     {
-        configuration.packageObfuscationDictionary =
+        modifyConfiguration().packageObfuscationDictionary =
             url(packageObfuscationDictionary);
     }
 
@@ -935,7 +944,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void overloadaggressively()
     {
-        configuration.overloadAggressively = true;
+        modifyConfiguration().overloadAggressively = true;
     }
 
     @Internal
@@ -948,7 +957,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void useuniqueclassmembernames()
     {
-        configuration.useUniqueClassMemberNames = true;
+        modifyConfiguration().useUniqueClassMemberNames = true;
     }
 
     @Internal
@@ -961,7 +970,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontusemixedcaseclassnames()
     {
-        configuration.useMixedCaseClassNames = false;
+        modifyConfiguration().useMixedCaseClassNames = false;
     }
 
     @Internal
@@ -979,8 +988,8 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void keeppackagenames(String filter)
     {
-        configuration.keepPackageNames =
-            extendFilter(configuration.keepPackageNames, filter, true);
+        modifyConfiguration().keepPackageNames =
+            extendFilter(rawConfiguration.keepPackageNames, filter, true);
     }
 
     @Internal
@@ -998,7 +1007,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void flattenpackagehierarchy(String flattenPackageHierarchy)
     {
-        configuration.flattenPackageHierarchy =
+        modifyConfiguration().flattenPackageHierarchy =
             ClassUtil.internalClassName(flattenPackageHierarchy);
     }
 
@@ -1017,7 +1026,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void repackageclasses(String repackageClasses)
     {
-        configuration.repackageClasses =
+        modifyConfiguration().repackageClasses =
             ClassUtil.internalClassName(repackageClasses);
     }
 
@@ -1036,8 +1045,8 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void keepattributes(String filter)
     {
-        configuration.keepAttributes =
-            extendFilter(configuration.keepAttributes, filter);
+        modifyConfiguration().keepAttributes =
+            extendFilter(rawConfiguration.keepAttributes, filter);
     }
 
     @Internal
@@ -1050,7 +1059,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void keepparameternames()
     {
-        configuration.keepParameterNames = true;
+        modifyConfiguration().keepParameterNames = true;
     }
 
     @Internal
@@ -1068,7 +1077,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void renamesourcefileattribute(String newSourceFileAttribute)
     {
-        configuration.newSourceFileAttribute = newSourceFileAttribute;
+        modifyConfiguration().newSourceFileAttribute = newSourceFileAttribute;
     }
 
     @Internal
@@ -1086,8 +1095,8 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void adaptclassstrings(String filter)
     {
-        configuration.adaptClassStrings =
-            extendFilter(configuration.adaptClassStrings, filter, true);
+        modifyConfiguration().adaptClassStrings =
+            extendFilter(rawConfiguration.adaptClassStrings, filter, true);
     }
 
     @Internal
@@ -1100,7 +1109,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void keepkotlinmetadata()
     {
-        configuration.keepKotlinMetadata = true;
+        modifyConfiguration().keepKotlinMetadata = true;
     }
 
     @Internal
@@ -1118,8 +1127,8 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void adaptresourcefilenames(String filter)
     {
-        configuration.adaptResourceFileNames =
-            extendFilter(configuration.adaptResourceFileNames, filter);
+        modifyConfiguration().adaptResourceFileNames =
+            extendFilter(rawConfiguration.adaptResourceFileNames, filter);
     }
 
     @Internal
@@ -1137,8 +1146,8 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void adaptresourcefilecontents(String filter)
     {
-        configuration.adaptResourceFileContents =
-            extendFilter(configuration.adaptResourceFileContents, filter);
+        modifyConfiguration().adaptResourceFileContents =
+            extendFilter(rawConfiguration.adaptResourceFileContents, filter);
     }
 
     @Internal
@@ -1151,7 +1160,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontpreverify()
     {
-        configuration.preverify = false;
+        modifyConfiguration().preverify = false;
     }
 
     @Internal
@@ -1164,7 +1173,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void microedition()
     {
-        configuration.microEdition = true;
+        modifyConfiguration().microEdition = true;
     }
 
     @Internal
@@ -1177,31 +1186,31 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void android()
     {
-        configuration.android = true;
+        modifyConfiguration().android = true;
     }
 
     public void keystore(Object keyStore)
     {
-        configuration.keyStores =
-            extendList(configuration.keyStores, getProject().file(keyStore));
+        modifyConfiguration().keyStores =
+            extendList(rawConfiguration.keyStores, getProject().file(keyStore));
     }
 
     public void keystorepassword(String keyStorePassword)
     {
-        configuration.keyStorePasswords =
-            extendList(configuration.keyStorePasswords, keyStorePassword);
+        modifyConfiguration().keyStorePasswords =
+            extendList(rawConfiguration.keyStorePasswords, keyStorePassword);
     }
 
     public void keyalias(String keyAlias)
     {
-        configuration.keyAliases =
-            extendList(configuration.keyAliases, keyAlias);
+        modifyConfiguration().keyAliases =
+            extendList(rawConfiguration.keyAliases, keyAlias);
     }
 
     public void keypassword(String keyPassword)
     {
-        configuration.keyPasswords =
-            extendList(configuration.keyPasswords, keyPassword);
+        modifyConfiguration().keyPasswords =
+            extendList(rawConfiguration.keyPasswords, keyPassword);
     }
 
     @Internal
@@ -1214,7 +1223,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void verbose()
     {
-        configuration.verbose = true;
+        modifyConfiguration().verbose = true;
     }
 
     @Internal
@@ -1232,7 +1241,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontnote(String filter)
     {
-        configuration.note = extendFilter(configuration.note, filter, true);
+        modifyConfiguration().note = extendFilter(rawConfiguration.note, filter, true);
     }
 
 
@@ -1251,7 +1260,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dontwarn(String filter)
     {
-        configuration.warn = extendFilter(configuration.warn, filter, true);
+        modifyConfiguration().warn = extendFilter(rawConfiguration.warn, filter, true);
     }
 
 
@@ -1265,7 +1274,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void ignorewarnings()
     {
-        configuration.ignoreWarnings = true;
+        modifyConfiguration().ignoreWarnings = true;
     }
 
     @Internal
@@ -1278,13 +1287,13 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void printconfiguration()
     {
-        configuration.printConfiguration = Configuration.STD_OUT;
+        modifyConfiguration().printConfiguration = Configuration.STD_OUT;
     }
 
     public void printconfiguration(Object printConfiguration)
     throws ParseException
     {
-        configuration.printConfiguration =
+        modifyConfiguration().printConfiguration =
             getProject().file(printConfiguration);
     }
 
@@ -1298,13 +1307,13 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void dump()
     {
-        configuration.dump = Configuration.STD_OUT;
+        modifyConfiguration().dump = Configuration.STD_OUT;
     }
 
     public void dump(Object dump)
     throws ParseException
     {
-        configuration.dump = getProject().file(dump);
+        modifyConfiguration().dump = getProject().file(dump);
     }
 
 
@@ -1318,7 +1327,7 @@ public abstract class ProGuardTask extends DefaultTask
 
     public void addconfigurationdebugging()
     {
-        configuration.addConfigurationDebugging = true;
+        modifyConfiguration().addConfigurationDebugging = true;
     }
 
 
@@ -1381,14 +1390,27 @@ public abstract class ProGuardTask extends DefaultTask
         loggingManager.captureStandardOutput(LogLevel.INFO);
         loggingManager.captureStandardError(LogLevel.WARN);
 
-        // Run ProGuard with the collected configuration.
+        // Run ProGuard with the merged configuration.
         new ProGuard(getConfigurationProvider().get()).execute();
+    }
 
+    private Configuration modifyConfiguration()
+    {
+        invalidateMergedConfiguration();
+        return rawConfiguration;
     }
 
     private Provider<Configuration> getConfigurationProvider()
     {
         return getConfigurationFiles().getElements().map(this::getMergedConfiguration);
+    }
+    
+    private synchronized void invalidateMergedConfiguration() {
+        if (mergedConfiguration != null) {
+            getLogger().warn("WARNING: Proguard task configuration has been updated after task dependencies calculated.\n" +
+                             "         Configuration will be re-loaded, but additional settings will not be correctly tracked as task inputs.");
+            mergedConfiguration = null;
+        }
     }
 
     private synchronized Configuration getMergedConfiguration(Collection<FileSystemLocation> configurationFiles)
@@ -1414,9 +1436,9 @@ public abstract class ProGuardTask extends DefaultTask
     private Configuration loadConfiguration(Collection<FileSystemLocation> externalConfigurationFiles)
     throws IOException, ParseException
     {
-        getLogger().debug("Loading ProGuard configuration. This should happen immediately prior to ProGuardTask execution.");
+        getLogger().debug("Loading ProGuard configuration(). This should happen immediately prior to ProGuardTask execution.");
 
-        Configuration mergedConfiguration = ConfigurationCloner.cloneConfiguration(configuration);
+        Configuration mergedConfiguration = ConfigurationCloner.cloneConfiguration(rawConfiguration);
 
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.
