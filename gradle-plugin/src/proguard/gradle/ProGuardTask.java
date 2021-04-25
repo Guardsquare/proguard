@@ -57,9 +57,11 @@ public abstract class ProGuardTask extends DefaultTask
     private final List          libraryJarFiles    = new ArrayList();
     private final List          libraryJarFilters  = new ArrayList();
 
-    // Accumulated configuration.
-    protected final Configuration             configuration     = new Configuration();
-    private   final ProGuardTaskConfiguration taskConfiguration = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
+    // Raw configuration containing configuration options provided via Gradle task
+    protected final Configuration             configuration       = new Configuration();
+    // Merged configuration, combining configuration values from all sources, including external configuration files
+    private         Configuration             mergedConfiguration = null;
+    private   final ProGuardTaskConfiguration taskConfiguration   = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
 
     // Fields acting as parameters for the class member specification methods.
     private boolean            allowValues;
@@ -1386,41 +1388,39 @@ public abstract class ProGuardTask extends DefaultTask
 
     private Provider<Configuration> getConfigurationProvider()
     {
-        return getConfigurationFiles().getElements().map(this::getConfiguration);
+        return getConfigurationFiles().getElements().map(this::getMergedConfiguration);
     }
 
-    private synchronized Configuration getConfiguration(Collection<FileSystemLocation> configurationFiles)
+    private synchronized Configuration getMergedConfiguration(Collection<FileSystemLocation> configurationFiles)
     {
-        if (configuration.programJars == null)
+        if (mergedConfiguration == null)
         {
             try
             {
-                loadConfiguration(configurationFiles);
+                mergedConfiguration = loadConfiguration(configurationFiles);
             }
             catch (IOException | ParseException e)
             {
                 throw new RuntimeException(e);
             }
         }
-        return configuration;
+        return mergedConfiguration;
     }
 
     /**
      * Returns the configuration collected so far, resolving files and
      * reading included configurations.
      */
-    private Configuration loadConfiguration(Collection<FileSystemLocation> configurationFiles)
+    private Configuration loadConfiguration(Collection<FileSystemLocation> externalConfigurationFiles)
     throws IOException, ParseException
     {
-        if (configuration.programJars != null)
-        {
-            return configuration;
-        }
         getLogger().debug("Loading ProGuard configuration. This should happen immediately prior to ProGuardTask execution.");
+
+        Configuration mergedConfiguration = ConfigurationCloner.cloneConfiguration(configuration);
 
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.
-        configuration.programJars = new ClassPath();
+        mergedConfiguration.programJars = new ClassPath();
 
         int outJarIndex = 0;
 
@@ -1429,16 +1429,16 @@ public abstract class ProGuardTask extends DefaultTask
 
         for (int inJarIndex = 0; inJarIndex < inJarFiles.size(); inJarIndex++)
         {
-            configuration.programJars =
-                extendClassPath(configuration.programJars,
+            mergedConfiguration.programJars =
+                extendClassPath(mergedConfiguration.programJars,
                                 inJarFiles.get(inJarIndex),
                                 (Map)inJarFilters.get(inJarIndex),
                                 false);
 
             while (inJarIndex == inJarCount - 1)
             {
-                configuration.programJars =
-                    extendClassPath(configuration.programJars,
+                mergedConfiguration.programJars =
+                    extendClassPath(mergedConfiguration.programJars,
                                     outJarFiles.get(outJarIndex),
                                     (Map)outJarFilters.get(outJarIndex),
                                     true);
@@ -1452,19 +1452,19 @@ public abstract class ProGuardTask extends DefaultTask
 
         // Copy the library jars into a single class path, with lazy resolution
         // of the files.
-        configuration.libraryJars = new ClassPath();
+        mergedConfiguration.libraryJars = new ClassPath();
 
         for (int libraryJarIndex = 0; libraryJarIndex < libraryJarFiles.size(); libraryJarIndex++)
         {
-            configuration.libraryJars =
-                extendClassPath(configuration.libraryJars,
+            mergedConfiguration.libraryJars =
+                extendClassPath(mergedConfiguration.libraryJars,
                                 libraryJarFiles.get(libraryJarIndex),
                                 (Map)libraryJarFilters.get(libraryJarIndex),
                                 false);
         }
 
         // Lazily apply the external configuration files.
-        for (FileSystemLocation configFile : configurationFiles)
+        for (FileSystemLocation configFile : externalConfigurationFiles)
         {
 
             File file = configFile.getAsFile();
@@ -1493,7 +1493,7 @@ public abstract class ProGuardTask extends DefaultTask
 
                 try
                 {
-                    parser.parse(configuration);
+                    parser.parse(mergedConfiguration);
                 }
                 finally
                 {
@@ -1511,7 +1511,7 @@ public abstract class ProGuardTask extends DefaultTask
 
                 try
                 {
-                    parser.parse(configuration);
+                    parser.parse(mergedConfiguration);
                 }
                 finally
                 {
@@ -1522,9 +1522,9 @@ public abstract class ProGuardTask extends DefaultTask
 
         // Make sure the code is processed. Gradle has already checked that it
         // was necessary.
-        configuration.lastModified = Long.MAX_VALUE;
+        mergedConfiguration.lastModified = Long.MAX_VALUE;
 
-        return configuration;
+        return mergedConfiguration;
     }
 
 
