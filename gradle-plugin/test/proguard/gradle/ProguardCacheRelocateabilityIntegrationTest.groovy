@@ -8,12 +8,16 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class ProguardCacheRelocateabilityIntegrationTest extends Specification {
-    @Rule TemporaryFolder temporaryFolder
-    @Rule TemporaryFolder cacheFolder
+class ProguardCacheRelocateabilityIntegrationTest extends Specification
+{
+    @Rule
+    TemporaryFolder temporaryFolder
+    @Rule
+    TemporaryFolder cacheFolder
 
     @Unroll
-    def "proguard task can be relocated"() {
+    def "proguard task can be relocated"()
+    {
         def cacheDir = cacheFolder.newFolder()
         def fixture = new File(getClass().classLoader.getResource('spring-boot').path)
 
@@ -45,7 +49,8 @@ class ProguardCacheRelocateabilityIntegrationTest extends Specification {
         result2.task(':proguard').outcome == TaskOutcome.FROM_CACHE
     }
 
-    def writeSettingsGradle(def projectDir, def cacheDir) {
+    def writeSettingsGradle(def projectDir, def cacheDir)
+    {
         new File(projectDir, "settings.gradle").text = """
             rootProject.name = 'demo'
             buildCache {
