@@ -47,17 +47,14 @@ sourceSets.test {
     }
 }
 
-// Copies selected directories from examples into the test resources to compile during an integration test.
-tasks.register('copyExamples', Copy) {
-    from("$rootProject.rootDir/examples") {
-        include 'spring-boot/**'
-        include 'gradle-kotlin-dsl/**'
-    }
-    into "$buildDir/fixtures"
+// Copies examples/spring-boot in to the test resources to compile during an integration test.
+tasks.register('copySpringBootSample', Copy) {
+    from "$rootProject.rootDir/examples/spring-boot"
+    into "$buildDir/fixtures/spring-boot"
 }
 
 tasks.withType(Test).configureEach {
-    dependsOn copyExamples
+    dependsOn copySpringBootSample
 }
 
 jar {

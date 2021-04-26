@@ -36,15 +36,16 @@ tasks.withType<Jar> {
 }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
-    verbose()
+    dependsOn("jar")
 
     // Alternatively put your config in a separate file
     // configuration("config.pro")
 
-    // Use the jar task output as a input jar. This will automatically add the necessary task dependency.
-    injars(tasks.named("jar"))
+    verbose()
 
-    outjars("build/proguard-obfuscated.jar")
+    injars("build/libs/gradlekotlindsl.jar")
+
+    outjars("build/libs/gradlekotlindsl-obfuscated.jar")
 
     val javaHome = System.getProperty("java.home")
     // Automatically handle the Java version of this build.
@@ -65,12 +66,11 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
 
     repackageclasses("")
 
-    printmapping("build/proguard-mapping.txt")
+    printmapping("build/mapping.txt")
 
     keep("""class gradlekotlindsl.App {
                 public static void main(java.lang.String[]);
             }
     """)
 }
-
 
