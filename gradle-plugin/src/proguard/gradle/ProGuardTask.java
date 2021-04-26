@@ -25,6 +25,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.Optional;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
@@ -659,6 +660,12 @@ public abstract class ProGuardTask extends DefaultTask
         configuration.printSeeds = getProject().file(printSeeds);
     }
 
+    @Optional
+    @OutputFile
+    public File getPrintSeedsFile() {
+        return optionalFile(configuration.printSeeds);
+    }
+
     @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontshrink()
@@ -689,6 +696,12 @@ public abstract class ProGuardTask extends DefaultTask
     throws ParseException
     {
         configuration.printUsage = getProject().file(printUsage);
+    }
+
+    @Optional
+    @OutputFile
+    public File getPrintUsageFile() {
+        return optionalFile(configuration.printUsage);
     }
 
     public void whyareyoukeeping(String classSpecificationString)
@@ -898,6 +911,12 @@ public abstract class ProGuardTask extends DefaultTask
     throws ParseException
     {
         configuration.printMapping = getProject().file(printMapping);
+    }
+
+    @Optional
+    @OutputFile
+    public File getPrintMappingFile() {
+        return optionalFile(configuration.printMapping);
     }
 
     public void applymapping(Object applyMapping)
@@ -1290,6 +1309,12 @@ public abstract class ProGuardTask extends DefaultTask
             getProject().file(printConfiguration);
     }
 
+    @Optional
+    @OutputFile
+    public File getPrintConfigurationFile() {
+        return optionalFile(configuration.printConfiguration);
+    }
+
     @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdump()
@@ -1309,6 +1334,11 @@ public abstract class ProGuardTask extends DefaultTask
         configuration.dump = getProject().file(dump);
     }
 
+    @Optional
+    @OutputFile
+    public File getDumpFile() {
+        return optionalFile(configuration.dump);
+    }
 
     @Internal
     // Hack: support the keyword without parentheses in Groovy.
@@ -2263,4 +2293,18 @@ public abstract class ProGuardTask extends DefaultTask
             !file.exists()            ? ProGuardTask.class.getResource((String)fileObject) :
                                         file.toURI().toURL();
     }
+
+    /**
+     * Returns null if the file does not represent a real file. Returns the file otherwise.
+     */
+    private static File optionalFile(File input)
+    {
+        if (input == null ||
+            input == Configuration.STD_OUT)
+        {
+            return null;
+        }
+        return input;
+    }
+
 }
