@@ -1,5 +1,4 @@
 plugins {
-    id 'com.jfrog.bintray'
     id 'java'
     id 'maven-publish'
 }
