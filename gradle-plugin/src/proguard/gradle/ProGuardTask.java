@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2020 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,17 +24,13 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
-import org.gradle.api.model.*;
-import org.gradle.api.provider.*;
 import org.gradle.api.tasks.*;
-
+import org.gradle.api.tasks.Optional;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
-import proguard.gradle.configuration.ProGuardTaskConfiguration;
 import proguard.util.ListUtil;
 
-import javax.inject.Inject;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -56,10 +52,10 @@ public abstract class ProGuardTask extends DefaultTask
     private final List          inJarCounts        = new ArrayList();
     private final List          libraryJarFiles    = new ArrayList();
     private final List          libraryJarFilters  = new ArrayList();
+    private final List          configurationFiles = new ArrayList();
 
     // Accumulated configuration.
-    protected final Configuration             configuration     = new Configuration();
-    private   final ProGuardTaskConfiguration taskConfiguration = ProGuardTaskConfiguration.create(getConfigurationProvider(), getObjectFactory());
+    protected final Configuration configuration      = new Configuration();
 
     // Fields acting as parameters for the class member specification methods.
     private boolean            allowValues;
@@ -68,25 +64,21 @@ public abstract class ProGuardTask extends DefaultTask
     private static final String CONFIGURATION_FILE_NAME_PREFIX      = "/proguard/gradle/proguard-";
     private              String resolvedConfigurationFileNamePrefix = getProject().file(CONFIGURATION_FILE_NAME_PREFIX).toString();
 
-    @Inject
-    protected abstract ObjectFactory getObjectFactory();
-
-    @Nested
-    public ProGuardTaskConfiguration getTaskConfiguration()
-    {
-        return taskConfiguration;
-    }
 
     // Gradle task inputs and outputs, because annotations on the List fields
     // (private or not) don't seem to work. Private methods don't work either,
     // but package visible or protected methods are ok.
 
-    // Need to track injar and libraryjar files separately, even though they are also tracked as part of ProGuardTaskConfiguration.
-    // This is required to correctly add task dependencies for any file inputs, without requiring loading the configuration files early.
     @Classpath
     protected FileCollection getInJarFileCollection()
     {
         return getProject().files(inJarFiles);
+    }
+
+    @OutputFiles
+    protected FileCollection getOutJarFileCollection()
+    {
+        return getProject().files(outJarFiles);
     }
 
     @Classpath
@@ -95,17 +87,12 @@ public abstract class ProGuardTask extends DefaultTask
         return getProject().files(libraryJarFiles);
     }
 
-    // Do not need to track outputs separately, since they do not carry task dependency information.
-    @Internal
-    protected FileCollection getOutJarFileCollection()
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    protected FileCollection getConfigurationFileCollection()
     {
-        return getProject().files(outJarFiles);
+        return getProject().files(configurationFiles);
     }
-
-    // Do not need to track configuration files directly, since they are mapped to the `Configuration` instance.
-    // The resulting `Configuration` instance is tracked as a task input.
-    @Internal
-    protected abstract ConfigurableFileCollection getConfigurationFiles();
 
     // Convenience methods to retrieve settings from outside the task.
 
@@ -123,7 +110,7 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of input files.
      */
-    @Internal
+    @Input
     public List getInJarFilters()
     {
         return inJarFilters;
@@ -143,7 +130,7 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of output files.
      */
-    @Internal
+    @Input
     public List getOutJarFilters()
     {
         return outJarFilters;
@@ -177,12 +164,21 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the collected list of filters (represented as argument Maps)
      * corresponding to the list of library files.
      */
-    @Internal
+    @Input
     public List getLibraryJarFilters()
     {
         return libraryJarFilters;
     }
 
+    /**
+     * Returns the collected list of configuration files to be included
+     * (represented as Object, String, File, etc).
+     */
+    @Internal
+    public List getConfigurationFiles()
+    {
+        return configurationFiles;
+    }
 
 
     // Gradle task settings corresponding to all ProGuard options.
@@ -190,7 +186,16 @@ public abstract class ProGuardTask extends DefaultTask
     public void configuration(Object configurationFiles)
     throws ParseException, IOException
     {
-        getConfigurationFiles().from(configurationFiles);
+        // Just collect the arguments, so they can be resolved lazily.
+        // Flatten collections, so they are easier to analyze later on.
+        if (configurationFiles instanceof Collection)
+        {
+            this.configurationFiles.addAll((Collection)configurationFiles);
+        }
+        else
+        {
+            this.configurationFiles.add(configurationFiles);
+        }
     }
 
     public void injars(Object inJarFiles)
@@ -655,6 +660,12 @@ public abstract class ProGuardTask extends DefaultTask
         configuration.printSeeds = getProject().file(printSeeds);
     }
 
+    @Optional
+    @OutputFile
+    public File getPrintSeedsFile() {
+        return optionalFile(configuration.printSeeds);
+    }
+
     @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdontshrink()
@@ -685,6 +696,12 @@ public abstract class ProGuardTask extends DefaultTask
     throws ParseException
     {
         configuration.printUsage = getProject().file(printUsage);
+    }
+
+    @Optional
+    @OutputFile
+    public File getPrintUsageFile() {
+        return optionalFile(configuration.printUsage);
     }
 
     public void whyareyoukeeping(String classSpecificationString)
@@ -894,6 +911,12 @@ public abstract class ProGuardTask extends DefaultTask
     throws ParseException
     {
         configuration.printMapping = getProject().file(printMapping);
+    }
+
+    @Optional
+    @OutputFile
+    public File getPrintMappingFile() {
+        return optionalFile(configuration.printMapping);
     }
 
     public void applymapping(Object applyMapping)
@@ -1286,6 +1309,12 @@ public abstract class ProGuardTask extends DefaultTask
             getProject().file(printConfiguration);
     }
 
+    @Optional
+    @OutputFile
+    public File getPrintConfigurationFile() {
+        return optionalFile(configuration.printConfiguration);
+    }
+
     @Internal
     // Hack: support the keyword without parentheses in Groovy.
     public Object getdump()
@@ -1305,6 +1334,11 @@ public abstract class ProGuardTask extends DefaultTask
         configuration.dump = getProject().file(dump);
     }
 
+    @Optional
+    @OutputFile
+    public File getDumpFile() {
+        return optionalFile(configuration.dump);
+    }
 
     @Internal
     // Hack: support the keyword without parentheses in Groovy.
@@ -1380,44 +1414,17 @@ public abstract class ProGuardTask extends DefaultTask
         loggingManager.captureStandardError(LogLevel.WARN);
 
         // Run ProGuard with the collected configuration.
-        new ProGuard(getConfigurationProvider().get()).execute();
+        new ProGuard(getConfiguration()).execute();
 
     }
 
-    private Provider<Configuration> getConfigurationProvider()
-    {
-        return getConfigurationFiles().getElements().map(this::getConfiguration);
-    }
-
-    private synchronized Configuration getConfiguration(Collection<FileSystemLocation> configurationFiles)
-    {
-        if (configuration.programJars == null)
-        {
-            try
-            {
-                loadConfiguration(configurationFiles);
-            }
-            catch (IOException | ParseException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-        return configuration;
-    }
 
     /**
      * Returns the configuration collected so far, resolving files and
      * reading included configurations.
      */
-    private Configuration loadConfiguration(Collection<FileSystemLocation> configurationFiles)
-    throws IOException, ParseException
+    private Configuration getConfiguration() throws IOException, ParseException
     {
-        if (configuration.programJars != null)
-        {
-            return configuration;
-        }
-        getLogger().debug("Loading ProGuard configuration. This should happen immediately prior to ProGuardTask execution.");
-
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.
         configuration.programJars = new ClassPath();
@@ -1464,58 +1471,68 @@ public abstract class ProGuardTask extends DefaultTask
         }
 
         // Lazily apply the external configuration files.
-        for (FileSystemLocation configFile : configurationFiles)
+        for (int index = 0; index < configurationFiles.size(); index++)
         {
+            Object fileObject = configurationFiles.get(index);
 
-            File file = configFile.getAsFile();
+            ConfigurableFileCollection fileCollection =
+                getProject().files(fileObject);
 
-            // Check if this is the name of an internal configuration file.
-            if (isInternalConfigurationFile(file))
+            // Parse the configuration as a collection of files.
+            Iterator<File> files = fileCollection.iterator();
+
+            while (files.hasNext())
             {
-                getLogger().info("Loading default configuration file " +
-                                 file.getAbsolutePath());
+                File file = files.next();
 
-                String internalConfigFileName =
-                    internalConfigurationFileName(file);
-
-                URL configurationURL =
-                    ProGuardTask.class.getResource(internalConfigFileName);
-
-                if (configurationURL == null)
+                // Check if this is the name of an internal configuration file.
+                if (isInternalConfigurationFile(file))
                 {
-                    throw new FileNotFoundException("'" + file.getAbsolutePath() + "'");
+                    getLogger().info("Loading default configuration file " +
+                                     file.getAbsolutePath());
+
+                    String internalConfigFileName =
+                        internalConfigurationFileName(file);
+
+                    URL configurationURL =
+                        ProGuardTask.class.getResource(internalConfigFileName);
+
+                    if (configurationURL == null)
+                    {
+                        throw new FileNotFoundException("'" + file.getAbsolutePath() + "'");
+                    }
+
+                    // Parse the configuration as a URL.
+                    ConfigurationParser parser =
+                        new ConfigurationParser(configurationURL,
+                                                System.getProperties());
+
+                    try
+                    {
+                        parser.parse(configuration);
+                    }
+                    finally
+                    {
+                        parser.close();
+                    }
                 }
-
-                // Parse the configuration as a URL.
-                ConfigurationParser parser =
-                    new ConfigurationParser(configurationURL,
-                                            System.getProperties());
-
-                try
+                else
                 {
-                    parser.parse(configuration);
-                }
-                finally
-                {
-                    parser.close();
-                }
-            }
-            else
-            {
-                getLogger().info("Loading configuration file " +
-                        file.getAbsolutePath());
+                    getLogger().info("Loading configuration file " +
+                                     file.getAbsolutePath());
 
-                ConfigurationParser parser =
+                    ConfigurationParser parser =
                         new ConfigurationParser(file,
-                                System.getProperties());
+                                                System.getProperties());
 
-                try
-                {
-                    parser.parse(configuration);
-                }
-                finally
-                {
-                    parser.close();
+                    try
+                    {
+                        parser.parse(configuration);
+                    }
+                    finally
+                    {
+                        parser.close();
+                    }
                 }
             }
         }
@@ -2276,4 +2293,18 @@ public abstract class ProGuardTask extends DefaultTask
             !file.exists()            ? ProGuardTask.class.getResource((String)fileObject) :
                                         file.toURI().toURL();
     }
+
+    /**
+     * Returns null if the file does not represent a real file. Returns the file otherwise.
+     */
+    private static File optionalFile(File input)
+    {
+        if (input == null ||
+            input == Configuration.STD_OUT)
+        {
+            return null;
+        }
+        return input;
+    }
+
 }

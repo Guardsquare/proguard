@@ -73,4 +73,3 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     """)
 }
 
-

@@ -104,6 +104,11 @@ class GradlePluginIntegrationTest extends Specification
         buildFile << """
 tasks.register<proguard.gradle.ProGuardTask>("proguardWithConfigFile") {
     dependsOn("jar")
+    
+    // Inputs and outputs declared in external config file are not automatically tracked
+    inputs.file("build/libs/gradle-kotlin-dsl.jar")
+    outputs.file("build/proguardWithConfigFile-obfuscated.jar")
+    outputs.file("build/proguardWithConfigFile-mapping.txt")
 
     configuration("config.pro")
 }
@@ -121,6 +126,11 @@ tasks.register("generateConfigFile") {
 
 tasks.register<proguard.gradle.ProGuardTask>("proguardWithGeneratedConfigFile") {
     dependsOn("jar")
+    
+    // Inputs and outputs declared in external config file are not automatically tracked
+    inputs.file("build/libs/gradle-kotlin-dsl.jar")
+    outputs.file("build/proguardWithGeneratedConfigFile-obfuscated.jar")
+    outputs.file("build/proguardWithGeneratedConfigFile-mapping.txt")
 
     // Consume the "generateConfigFile" output. This will automatically add the task dependency.
     configuration(tasks.named("generateConfigFile"))
