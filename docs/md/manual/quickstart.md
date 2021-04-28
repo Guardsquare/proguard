@@ -37,8 +37,7 @@ For more detailed information see [standalone mode](setup/standalone.md).
 
 ## Integrated
 
-The ProGuard artifacts are hosted at [JCenter](https://bintray.com/guardsquare/proguard) 
-or [Maven Central](https://search.maven.org/search?q=g:com.guardsquare).
+The ProGuard artifacts are hosted at [Maven Central](https://search.maven.org/search?q=g:com.guardsquare).
 
 ### Android Gradle project
 

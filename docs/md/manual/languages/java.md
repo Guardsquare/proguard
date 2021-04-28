@@ -73,7 +73,7 @@ Furthermore, you need to add the *streamsupport* library as dependency to your
 project, e.g. like this:
 ```Groovy
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -132,7 +132,7 @@ Furthermore, you need to add the *threetenbp* library as dependency to your
 project, e.g. like this:
 ```Groovy
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {

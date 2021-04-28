@@ -1,7 +1,7 @@
 buildscript {
     repositories {
-        google()  // For the Android plugin.
-        jcenter() // For anything else.
+        google()       // For the Android plugin.
+        mavenCentral() // For anything else.
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.3'
@@ -63,6 +63,6 @@ android {
 }
 
 repositories {
-    google()  // For the Android plugin.
-    jcenter() // For anything else.
+    google()       // For the Android plugin.
+    mavenCentral() // For anything else.
 }

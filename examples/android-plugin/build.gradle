@@ -5,11 +5,11 @@ buildscript {
     repositories {
         //flatDir dirs: '../../lib' // For the local copy of the ProGuard plugin.
         google()                    // For the Android Gradle plugin.
-        jcenter()                   // For anything else.
+        mavenCentral()              // For anything else.
     }
     dependencies {
         //classpath ':proguard:'    // For the local copy of the ProGuard plugin.
-        classpath 'com.guardsquare:proguard-gradle:7.0.1' // For the copy from Jcenter.
+        classpath 'com.guardsquare:proguard-gradle:7.0.1'
         classpath 'com.android.tools.build:gradle:3.3.0'
     }
 }
@@ -62,6 +62,6 @@ android {
 }
 
 repositories {
-    google()  // For the Android plugin.
-    jcenter() // For anything else.
+    google()       // For the Android plugin.
+    mavenCentral() // For anything else.
 }
