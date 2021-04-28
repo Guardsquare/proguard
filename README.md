@@ -1,9 +1,9 @@
 <p align="center">
   <br />
   <br />
-  <a href="https://www.guardsquare.com/en/products/proguard">
+  <a href="https://www.guardsquare.com/proguard">
     <img
-      src="https://www.guardsquare.com/sites/default/files/media/ProGuard-RGB-1500x436.png"
+      src="https://www.guardsquare.com/hubfs/Logos/ProGuard-Logo-Email.png"
       alt="ProGuard" width="400">
   </a>
 </p>
