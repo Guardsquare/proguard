@@ -1,6 +1,6 @@
 plugins {
-    id 'com.jfrog.bintray'
     id 'distribution'
+    id 'io.github.gradle-nexus.publish-plugin'
     id 'signing'
 }
 
@@ -17,7 +17,16 @@ task buildDocumentation(type: Exec) {
     args '-c', "docker run --volume $rootDir/docs:/docs --rm squidfunk/mkdocs-material:5.2.2 build"
 }
 
-// Add repositories
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = findProperty('PROGUARD_STAGING_USERNAME')
+            password = findProperty('PROGUARD_STAGING_PASSWORD')
+        }
+    }
+}
+
+// Add Maven repositories
 allprojects { Project project ->
     afterEvaluate {
         if (pluginManager.hasPlugin('maven-publish')) {
@@ -30,14 +39,6 @@ allprojects { Project project ->
                             credentials {
                                 username = project.findProperty('PROGUARD_GITHUB_USERNAME')
                                 password = project.findProperty('PROGUARD_GITHUB_TOKEN')
-                            }
-                        }
-                        maven {
-                            name = 'Sonatype'
-                            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-                            credentials(PasswordCredentials) {
-                                username = findProperty('PROGUARD_STAGING_USERNAME')
-                                password = findProperty('PROGUARD_STAGING_PASSWORD')
                             }
                         }
                     }
@@ -118,38 +119,6 @@ allprojects { Project project ->
                     publications {
                         getByName(project.name) {
                             from components.java
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Configure bintray
-allprojects { Project project ->
-    afterEvaluate {
-        if (pluginManager.hasPlugin('maven-publish') && pluginManager.hasPlugin('com.jfrog.bintray')) {
-            configure(project) {
-                bintray {
-                    Publication pub = publishing.publications.getByName(project.name)
-                    user = findProperty('PROGUARD_BINTRAY_USER')
-                    key = findProperty('PROGUARD_BINTRAY_KEY')
-                    publications = [project.name]
-                    dryRun = false
-                    override = true
-                    pkg {
-                        repo = 'proguard'
-                        name = "$project.group:$pub.artifactId"
-                        desc = pub.artifactId
-                        licenses = ['GPL-2.0']
-                        websiteUrl = pub.pom.url.get()
-                        issueTrackerUrl = pub.pom.issueManagement.url.get()
-                        vcsUrl = pub.pom.scm.url.get()
-                        version {
-                            name = project.version
-                            gpg.sign = true
-                            released = new Date()
                         }
                     }
                 }

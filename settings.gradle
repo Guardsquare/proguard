@@ -4,8 +4,8 @@ pluginManagement {
             if (requested.id.id == 'com.github.johnrengelman.shadow') {
                 useVersion '5.2.0'
             }
-            if (requested.id.id == 'com.jfrog.bintray') {
-                useVersion '1.8.5'
+            if (requested.id.id == 'io.github.gradle-nexus.publish-plugin') {
+                useVersion '1.1.0'
             }
         }
     }

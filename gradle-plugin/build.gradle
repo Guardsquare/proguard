@@ -1,5 +1,4 @@
 plugins {
-    id 'com.jfrog.bintray'
     id 'java-gradle-plugin'
     id 'groovy'
     id 'maven-publish'
