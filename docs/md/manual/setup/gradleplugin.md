@@ -59,7 +59,7 @@ project as follows:
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.0'
@@ -78,7 +78,7 @@ buildscript {
     repositories {
         flatDir dirs: '/usr/local/java/proguard/lib'
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.0'

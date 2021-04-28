@@ -7,7 +7,7 @@ line to your **`build.gradle`** file:
 ```Groovy
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.guardsquare:proguard-gradle:7.0.1'

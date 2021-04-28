@@ -6,7 +6,7 @@ plugins {
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
 sourceCompatibility = "${target}"
