@@ -15,11 +15,6 @@
     <img src="https://github.com/Guardsquare/proguard/workflows/Continuous%20Integration/badge.svg">
   </a>
   
-  <!-- jcenter -->
-  <a href='https://bintray.com/guardsquare/proguard/com.guardsquare%3Aproguard-base/_latestVersion'>
-    <img alt="jcenter" src="https://img.shields.io/bintray/v/guardsquare/proguard/com.guardsquare:proguard-base?label=jcenter">
-  </a>
-
   <!-- Github version -->
   <!--
   <a href="releases">
@@ -28,11 +23,9 @@
   -->
     
   <!-- Maven -->
-  <!--
   <a href="https://search.maven.org/search?q=g:com.guardsquare">
-    <img src="https://img.shields.io/maven-central/v/com.guardsquare/proguard-parent">
+    <img src="https://img.shields.io/maven-central/v/com.guardsquare/proguard-base">
   </a>
-  -->
   
   <!-- License -->
   <a href="LICENSE">
