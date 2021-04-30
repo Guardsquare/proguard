@@ -87,3 +87,13 @@ afterEvaluate {
         task.enabled = false
     }
 }
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = 'Gradle plugin for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
+            }
+        }
+    }
+}

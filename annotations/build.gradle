@@ -18,3 +18,13 @@ sourceSets.main {
         include '**/*.pro'
     }
 }
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = 'Java annotations to configure ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
+            }
+        }
+    }
+}
