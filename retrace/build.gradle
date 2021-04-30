@@ -43,3 +43,13 @@ task fatJar(type: ShadowJar) {
 }
 
 assemble.dependsOn fatJar
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = "ReTrace is a companion tool for ProGuard and DexGuard that 'de-obfuscates' stack traces."
+            }
+        }
+    }
+}
