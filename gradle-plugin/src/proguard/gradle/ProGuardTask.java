@@ -70,26 +70,26 @@ public abstract class ProGuardTask extends DefaultTask
     // but package visible or protected methods are ok.
 
     @Classpath
-    protected FileCollection getInJarFileCollection()
+    public FileCollection getInJarFileCollection()
     {
         return getProject().files(inJarFiles);
     }
 
     @OutputFiles
-    protected FileCollection getOutJarFileCollection()
+    public FileCollection getOutJarFileCollection()
     {
         return getProject().files(outJarFiles);
     }
 
     @Classpath
-    protected FileCollection getLibraryJarFileCollection()
+    public FileCollection getLibraryJarFileCollection()
     {
         return getProject().files(libraryJarFiles);
     }
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    protected FileCollection getConfigurationFileCollection()
+    public FileCollection getConfigurationFileCollection()
     {
         return getProject().files(configurationFiles);
     }
