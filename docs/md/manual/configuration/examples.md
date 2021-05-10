@@ -200,8 +200,8 @@ files](#resourcefiles).
 
 ### A complete Android application {: #android}
 
-!!! note ""
-![android](../android_small.png){: .icon} The standard build processes of the
+!!! android "Android"
+    The standard build processes of the
     Android SDK (with Ant, Gradle, Android Studio, and Eclipse) already
     integrate ProGuard with all the proper settings. You only need to enable
     ProGuard by uncommenting the line "`proguard.config=.....`" in the file
