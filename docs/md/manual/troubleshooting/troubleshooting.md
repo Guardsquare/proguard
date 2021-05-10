@@ -102,9 +102,8 @@ ProGuard may print out some notes and non-fatal warnings:
   specifying filters on the input jars or library jars. You can switch off
   these notes by specifying the [`-dontnote`](../configuration/usage.md#dontnote) option.
 
-!!! note ""
-![android](../android_small.png){: .icon} The
-    standard Android build process automatically specifies the input
+!!! android "Android"
+    The standard Android build process automatically specifies the input
     jars for you. There may not be an easy way to filter them to remove
     these notes. You could remove the duplicate classes manually from
     your libraries. You should never explicitly specify the input jars
@@ -124,9 +123,8 @@ ProGuard may print out some notes and non-fatal warnings:
   convenient way to do so is by specifying filters on the input jars. There is
   no option to switch off these warnings.
 
-!!! note ""
-![android](../android_small.png){: .icon} The
-    standard Android build process automatically specifies the input
+!!! android "Android"
+    The standard Android build process automatically specifies the input
     jars for you. There may not be an easy way to filter them to remove
     these warnings. You could remove the duplicate resource files
     manually from the input and the libraries.
@@ -180,9 +178,8 @@ or some more serious warnings:
         options if you really know what you're doing though.
 
 
-!!! note ""
-![android](../android_small.png){: .icon} The
-    standard Android build process automatically specifies the input
+!!! android "Android"
+    The standard Android build process automatically specifies the input
     jars for you. Unfortunately, many pre-compiled third-party libraries
     refer to other libraries that are not actually used and therefore
     not present. This works fine in debug builds, but in release builds,
@@ -251,8 +248,7 @@ or some more serious warnings:
     code contains a class to optionally support recent versions of
     Android, you can specify "`-dontwarn mypackage.MySupportClass`".
 
-!!! note ""
-![android](../android_small.png){: .icon} If
+!!! android "Android"
     If you're developing for Android, and ProGuard complains that it can't
     find a run-time method that is only available in recent versions of
     Android, you should change the target to that recent version in your
@@ -277,9 +273,8 @@ or some more serious warnings:
   program code (specified with [`-injars`](../configuration/usage.md#injars)) and library code
   (specified with [`-libraryjars`](../configuration/usage.md#libraryjars)), and try again.
 
-!!! note ""
-![android](../android_small.png){: .icon} In
-    Android development, sloppy libraries may contain duplicates of
+!!! android "Android"
+    In Android development, sloppy libraries may contain duplicates of
     classes that are already present in the Android run-time (notably
     `org.w3c.dom`, `org.xml.sax`, `org.xmlpull.v1`,
     `org.apache.commons.logging.Log`, `org.apache.http`, and

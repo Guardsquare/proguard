@@ -23,6 +23,7 @@ site_dir: html
 
 extra_css:
   - css/extra.css
+  - css/admonition.css
 
 use_directory_urls: false
 #strict: true # broken links are errors
