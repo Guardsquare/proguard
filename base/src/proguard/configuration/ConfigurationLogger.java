@@ -59,7 +59,7 @@ public class ConfigurationLogger implements Runnable
     private static final String METHOD_GET_DECLARED_METHOD      = "getDeclaredMethod";
     private static final String METHOD_GET_METHOD               = "getMethod";
 
-    // DexGuard configuration constants.
+    // Configuration constants.
     private static final String KEEP                = "-keep";
     private static final String KEEP_CLASS_MEMBERS  = "-keepclassmembers";
 
@@ -172,7 +172,7 @@ public class ConfigurationLogger implements Runnable
     {
         ClassInfo classInfo = sObfuscatedClassNameInfoMap.get(reflectedClassName);
 
-        //classInfo will be null if the class was unavailable to Dexguard or is a library class,
+        //classInfo will be null if the class was unavailable or is a library class,
         //in this case a keep rule doesn't make sense anyway
         if (classInfo == null) {
             return;
