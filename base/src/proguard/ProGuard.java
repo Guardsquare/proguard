@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,6 +31,7 @@ import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
+import proguard.configuration.InitialStateInfo;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.mark.Marker;
 import proguard.obfuscate.Obfuscator;
@@ -44,10 +45,6 @@ import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.*;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * Tool for shrinking, optimizing, obfuscating, and preverifying Java classes.
@@ -64,6 +61,10 @@ public class ProGuard
     private       ClassPool        programClassPool = new ClassPool();
     private final ClassPool        libraryClassPool = new ClassPool();
     private final ResourceFilePool resourceFilePool = new ResourceFilePool();
+
+    // Stores information about the original state of the program class pool
+    // used for configuration debugging.
+    private InitialStateInfo initialStateInfo;
 
     // All injected data entries.
     private final ExtraDataEntryNameMap extraDataEntryNameMap = new ExtraDataEntryNameMap();
@@ -130,6 +131,13 @@ public class ProGuard
             {
                 initialize();
                 mark();
+            }
+
+            if (configuration.addConfigurationDebugging)
+            {
+                // Remember the initial state of the program classpool and resource filepool
+                // before shrinking / obfuscation / optimization.
+                initialStateInfo = new InitialStateInfo(programClassPool);
             }
 
             if (configuration.keepKotlinMetadata)
@@ -381,11 +389,11 @@ public class ProGuard
      * Adds configuration logging code, providing suggestions on improving
      * the ProGuard configuration.
      */
-    private void addConfigurationLogging()
+    private void addConfigurationLogging() throws IOException
     {
-        new ConfigurationLoggingAdder(configuration).execute(programClassPool,
-                                                             libraryClassPool,
-                                                             extraDataEntryNameMap);
+        new ConfigurationLoggingAdder().execute(programClassPool,
+                                                libraryClassPool,
+                                                extraDataEntryNameMap);
     }
 
 
@@ -627,6 +635,7 @@ public class ProGuard
 
         // Write out the program class pool.
         new OutputWriter(configuration).execute(programClassPool,
+                                                initialStateInfo,
                                                 resourceFilePool,
                                                 extraDataEntryNameMap);
     }

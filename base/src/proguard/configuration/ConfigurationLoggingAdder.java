@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,21 +21,29 @@
 package proguard.configuration;
 
 
-import proguard.*;
 import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.editor.*;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.PeepholeEditor;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
-import proguard.io.*;
-import proguard.util.MultiValueMap;
+import proguard.classfile.util.BranchTargetFinder;
+import proguard.classfile.util.ClassReferenceInitializer;
+import proguard.classfile.util.ClassSubHierarchyInitializer;
+import proguard.classfile.visitor.AllMethodVisitor;
+import proguard.classfile.visitor.ClassPoolFiller;
+import proguard.classfile.visitor.ClassProcessingFlagFilter;
+import proguard.classfile.visitor.MultiClassVisitor;
+import proguard.io.ClassPathDataEntry;
+import proguard.io.ClassReader;
+import proguard.io.ExtraDataEntryNameMap;
+import proguard.util.ProcessingFlagSetter;
+import proguard.util.ProcessingFlags;
 
 import java.io.IOException;
 
-import static proguard.classfile.util.ClassUtil.internalClassName;
+import static proguard.configuration.ConfigurationLoggingInstructionSequenceConstants.*;
 
 /**
  * This class can add configuration debug logging code to all code that
@@ -46,30 +54,13 @@ import static proguard.classfile.util.ClassUtil.internalClassName;
  * @author Johan Leys
  */
 public class ConfigurationLoggingAdder
-implements   // Implementation interfaces.
-             InstructionVisitor
 {
-    private final Configuration configuration;
-
-    // Field acting as parameter for the visitor methods.
-    private  ExtraDataEntryNameMap extraDataEntryNameMap;
-
-
-    /**
-     * Creates a new ConfigurationLoggingAdder.
-     */
-    public ConfigurationLoggingAdder(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-
     /**
      * Instruments the given program class pool.
      */
-    public void execute(ClassPool             programClassPool,
-                        ClassPool             libraryClassPool,
-                        ExtraDataEntryNameMap extraDataEntryNameMap)
+    public void execute(ClassPool programClassPool,
+                        ClassPool libraryClassPool,
+                        ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
         // Load the logging utility classes in the program class pool.
         // TODO: The initialization could be incomplete if the loaded classes depend on one another.
@@ -78,18 +69,16 @@ implements   // Implementation interfaces.
             new MultiClassVisitor(
                 new ClassPoolFiller(programClassPool),
                 new ClassReferenceInitializer(programClassPool, libraryClassPool),
-                new ClassSubHierarchyInitializer()
-            ));
+                new ClassSubHierarchyInitializer(),
+                new ProcessingFlagSetter(ProcessingFlags.INJECTED
+            )));
 
-        try
-        {
-            classReader.read(new ClassPathDataEntry(ConfigurationLogger.MethodSignature.class));
-            classReader.read(new ClassPathDataEntry(ConfigurationLogger.class));
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        classReader.read(new ClassPathDataEntry(ConfigurationLogger.ClassInfo.class));
+        classReader.read(new ClassPathDataEntry(ConfigurationLogger.MemberInfo.class));
+        classReader.read(new ClassPathDataEntry(ConfigurationLogger.class));
+
+        // Initialize the ConfigurationLogger class with the actual packageName.
+        initializeConfigurationLogger(programClassPool);
 
         // Set up the instruction sequences and their replacements.
         ConfigurationLoggingInstructionSequenceConstants constants =
@@ -99,12 +88,11 @@ implements   // Implementation interfaces.
         BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
         CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
 
-        // Set the injected class map for the extra visitor.
-        this.extraDataEntryNameMap = extraDataEntryNameMap;
-
-        // Replace the instruction sequences in all non-ProGuard classes.
+        // Replace the instruction sequences in all classes.
+        // Do not add configuration debugging to any ProGuard runtime classes,
+        // to avoid false positives.
         programClassPool.classesAccept(
-            new ClassNameFilter("!proguard/**",
+            new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
             new AllMethodVisitor(
             new AllAttributeVisitor(
             new PeepholeEditor(branchTargetFinder, codeAttributeEditor,
@@ -112,16 +100,45 @@ implements   // Implementation interfaces.
                                                                  constants.RESOURCE,
                                                                  branchTargetFinder,
                                                                  codeAttributeEditor,
-                                                                 this))))));
+                                                                 new ExtraClassAdder(extraDataEntryNameMap)))))));
     }
 
 
-    // Implementations for InstructionVisitor.
-
-    public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
+    /**
+     * Initialized the ConfigurationLogger class by injecting the actual packageName.
+     */
+    private void initializeConfigurationLogger(ClassPool programClassPool)
     {
-        // Add a dependency from the modified class on the logging class.
-        extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.class);
-        extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.MethodSignature.class);
+        ProgramClass configurationLoggerClass =
+            (ProgramClass) programClassPool.getClass(LOGGER_CLASS_NAME);
+
+        if (configurationLoggerClass == null)
+        {
+            throw new RuntimeException("ConfigurationLogger class could not be found in the program classpool.");
+        }
+    }
+
+
+    private static class ExtraClassAdder
+    implements           InstructionVisitor
+    {
+        private final ExtraDataEntryNameMap extraDataEntryNameMap;
+
+
+        ExtraClassAdder(ExtraDataEntryNameMap extraDataEntryNameMap)
+        {
+            this.extraDataEntryNameMap = extraDataEntryNameMap;
+        }
+
+
+        // Implementations for InstructionVisitor.
+
+        public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
+        {
+            // Add a dependency from the modified class on the logging class.
+            extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.class);
+            extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.ClassInfo.class);
+            extraDataEntryNameMap.addExtraClassToClass(clazz, ConfigurationLogger.MemberInfo.class);
+        }
     }
 }

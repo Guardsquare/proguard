@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -25,6 +25,7 @@ import proguard.classfile.io.visitor.ProcessingFlagDataEntryFilter;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassUtil;
 import proguard.configuration.ConfigurationLogger;
+import proguard.configuration.InitialStateInfo;
 import proguard.io.*;
 import proguard.resources.file.ResourceFilePool;
 import proguard.resources.file.util.ResourceFilePoolNameFunction;
@@ -63,6 +64,7 @@ public class OutputWriter
      * configuration.
      */
     public void execute(ClassPool             programClassPool,
+                        InitialStateInfo      initialStateInfo,
                         ResourceFilePool      resourceFilePool,
                         ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
@@ -123,6 +125,7 @@ public class OutputWriter
                     // Write the processed input entries to the output entries.
                     writeOutput(dataEntryWriterFactory,
                                 programClassPool,
+                                initialStateInfo,
                                 resourceFilePool,
                                 extraDataEntryNameMap,
                                 programJars,
@@ -263,6 +266,7 @@ public class OutputWriter
      */
     private void writeOutput(DataEntryWriterFactory dataEntryWriterFactory,
                              ClassPool              programClassPool,
+                             InitialStateInfo       initialStateInfo,
                              ResourceFilePool       resourceFilePool,
                              ExtraDataEntryNameMap  extraDataEntryNameMap,
                              ClassPath              classPath,
@@ -284,15 +288,6 @@ public class OutputWriter
                                                              fromOutputIndex,
                                                              toOutputIndex,
                                                              null);
-
-            if (configuration.addConfigurationDebugging)
-            {
-                writer = new ExtraDataEntryWriter(ConfigurationLogger.CLASS_MAP_FILENAME,
-                    writer,
-                    new ClassMapDataEntryWriter(programClassPool, writer));
-                System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
-                System.err.println("It should only be used for debugging purposes.");
-            }
 
             DataEntryWriter resourceWriter = writer;
 
@@ -357,6 +352,14 @@ public class OutputWriter
                                  resourceCopier,
                                  resourceRewriter);
 
+            // Write extra configuration files.
+            reader =
+                writeExtraConfigurationFiles(programClassPool,
+                                             initialStateInfo,
+                                             extraDataEntryNameMap,
+                                             reader,
+                                             writer);
+
             // Trigger writing classes.
             reader =
                 new ClassFilter(new IdleRewriter(writer),
@@ -381,6 +384,33 @@ public class OutputWriter
         {
             throw (IOException)new IOException("Can't write [" + classPath.get(fromOutputIndex).getName() + "] (" + ex.getMessage() + ")").initCause(ex);
         }
+    }
+
+    /**
+     * Returns a resource writer that writes all extra configuration files to the given extra writer,
+     * and delegates all other resources to the given resource writer.
+     */
+    private DataEntryReader writeExtraConfigurationFiles(ClassPool             programClassPool,
+                                                         InitialStateInfo      initialStateInfo,
+                                                         ExtraDataEntryNameMap extraDataEntryNameMap,
+                                                         DataEntryReader       resourceCopier,
+                                                         DataEntryWriter       extraFileWriter)
+    {
+        if (configuration.addConfigurationDebugging)
+        {
+            extraDataEntryNameMap.addExtraDataEntry(ConfigurationLogger.CLASS_MAP_FILENAME);
+
+            resourceCopier =
+                new NameFilteredDataEntryReader(ConfigurationLogger.CLASS_MAP_FILENAME,
+                    new ClassMapDataEntryReplacer(programClassPool, initialStateInfo,
+                                                  extraFileWriter),
+                resourceCopier);
+
+            System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
+            System.err.println("It should only be used for debugging purposes.");
+        }
+
+        return resourceCopier;
     }
 
 

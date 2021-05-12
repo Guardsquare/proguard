@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,21 +18,25 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+
 package proguard.configuration;
 
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.constant.Constant;
-import proguard.classfile.editor.*;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.editor.InstructionSequenceReplacer;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
-import proguard.optimize.peephole.*;
+import proguard.classfile.util.BranchTargetFinder;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.InstructionSequenceMatcher;
 
-import static proguard.configuration.ConfigurationLoggingInstructionSequenceConstants.LOCAL_VARIABLE_INDEX_1;
-import static proguard.configuration.ConfigurationLoggingInstructionSequenceConstants.LOCAL_VARIABLE_INDEX_2;
-import static proguard.configuration.ConfigurationLoggingInstructionSequenceConstants.LOCAL_VARIABLE_INDEX_3;
+import static proguard.configuration.ConfigurationLoggingInstructionSequenceConstants.*;
 
 /**
  * This InstructionSequencesReplacer appends logging instructions to all
