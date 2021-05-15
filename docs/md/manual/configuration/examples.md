@@ -756,7 +756,7 @@ are used, they may require special attention:
         java.lang.Object writeReplace();
         java.lang.Object readResolve();
     }
-````
+```
 
     The `serialVersionUID` and `serialPersistentFields` lines makes sure those
     fields are preserved, if they are present. The `<fields>` line preserves
