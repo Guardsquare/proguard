@@ -68,6 +68,12 @@ public class OutputWriter
                         ResourceFilePool      resourceFilePool,
                         ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
+        if (configuration.addConfigurationDebugging)
+        {
+            System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
+            System.err.println("It should only be used for debugging purposes.");
+        }
+
         ClassPath programJars = configuration.programJars;
 
         // Construct a filter for files that shouldn't be compressed.
@@ -405,9 +411,6 @@ public class OutputWriter
                     new ClassMapDataEntryReplacer(programClassPool, initialStateInfo,
                                                   extraFileWriter),
                 resourceCopier);
-
-            System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
-            System.err.println("It should only be used for debugging purposes.");
         }
 
         return resourceCopier;
