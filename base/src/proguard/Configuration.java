@@ -418,9 +418,17 @@ public class Configuration
      */
     public boolean                      keepKotlinMetadata               = false;
 
+    // INTERNAL OPTIONS
+
     /**
      * Enables of disables the Kotlin asserter. This is a hidden option,
      * not available via the configuration file.
      */
     public boolean                      enableKotlinAsserter             = true;
+
+    /**
+     * File to write extra data entries to; instead of writing them to
+     * their respective jars. See {@link proguard.io.ExtraDataEntryNameMap}.
+     */
+    public File extraJar;
 }

@@ -107,6 +107,19 @@ public class OutputWriter
                                        privateKeyEntries,
                                        configuration.verbose);
 
+        DataEntryWriter extraDataEntryWriter = null;
+        if (configuration.extraJar != null)
+        {
+            // Extra data entries can optionally be written to a separate jar file.
+            // This prevents duplicates if there are multiple -outjars that are later
+            // combined together, after ProGuard processing.
+            ClassPath extraClassPath = new ClassPath();
+            extraClassPath.add(new ClassPathEntry(configuration.extraJar, true));
+            extraDataEntryWriter =
+                    new UniqueDataEntryWriter(
+                    dataEntryWriterFactory.createDataEntryWriter(extraClassPath, 0, 1, null));
+        }
+
         int firstInputIndex = 0;
         int lastInputIndex  = 0;
 
@@ -133,6 +146,12 @@ public class OutputWriter
                                 programClassPool,
                                 initialStateInfo,
                                 resourceFilePool,
+                                extraDataEntryWriter != null ?
+                                        // The extraDataEntryWriter must be remain open
+                                        // until all outputs have been written.
+                                        new NonClosingDataEntryWriter(extraDataEntryWriter) :
+                                        // no extraDataEntryWriter supplied
+                                        null,
                                 extraDataEntryNameMap,
                                 programJars,
                                 firstInputIndex,
@@ -143,6 +162,11 @@ public class OutputWriter
                     firstInputIndex = nextIndex;
                 }
             }
+        }
+
+        if (extraDataEntryWriter != null)
+        {
+            extraDataEntryWriter.close();
         }
     }
 
@@ -274,6 +298,7 @@ public class OutputWriter
                              ClassPool              programClassPool,
                              InitialStateInfo       initialStateInfo,
                              ResourceFilePool       resourceFilePool,
+                             DataEntryWriter        extraDataEntryWriter,
                              ExtraDataEntryNameMap  extraDataEntryNameMap,
                              ClassPath              classPath,
                              int                    fromInputIndex,
@@ -364,16 +389,18 @@ public class OutputWriter
                                              initialStateInfo,
                                              extraDataEntryNameMap,
                                              reader,
-                                             writer);
+                                             extraDataEntryWriter != null ? extraDataEntryWriter : writer);
 
-            // Trigger writing classes.
-            reader =
-                new ClassFilter(new IdleRewriter(writer),
-                                reader);
+            // Write classes.
+            DataEntryReader classReader = new ClassFilter(new IdleRewriter(writer), reader);
 
-            // Inject any attached data entries.
-            reader = new ExtraDataEntryReader(extraDataEntryNameMap,
-                                              reader);
+            // Write classes attached as extra data entries.
+            DataEntryReader extraClassReader = extraDataEntryWriter != null ?
+                    new ClassFilter(new IdleRewriter(extraDataEntryWriter), reader) :
+                    classReader;
+
+            // Write any attached data entries.
+            reader = new ExtraDataEntryReader(extraDataEntryNameMap, classReader, extraClassReader);
 
             // Go over the specified input entries and write their processed
             // versions.

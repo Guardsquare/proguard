@@ -64,6 +64,8 @@ public abstract class ProGuardTask extends DefaultTask
     private static final String CONFIGURATION_FILE_NAME_PREFIX      = "/proguard/gradle/proguard-";
     private              String resolvedConfigurationFileNamePrefix = getProject().file(CONFIGURATION_FILE_NAME_PREFIX).toString();
 
+    // INTERNAL USE ONLY - write extra data entries to this jar
+    private File extraJar;
 
     // Gradle task inputs and outputs, because annotations on the List fields
     // (private or not) don't seem to work. Private methods don't work either,
@@ -239,6 +241,11 @@ public abstract class ProGuardTask extends DefaultTask
         // Just collect the arguments, so they can be resolved lazily.
         this.libraryJarFiles.add(libraryJarFiles);
         this.libraryJarFilters.add(filterArgs);
+    }
+
+    public void extraJar(File extraJar)
+    {
+        configuration.extraJar = extraJar;
     }
 
     // Hack: support the keyword without parentheses in Groovy.
