@@ -1,6 +1,10 @@
 **ProGuard** can be run as a task in the Java-based build tool Gradle
 (version 2.1 or higher).
 
+!!! android "Android projects"
+    If you have an Android project, you can find instructions [here](gradleplugin.md).
+
+
 Before you can use the **`proguard`** task, you have to make sure Gradle can
 find it in its class path at build time. One way is to add the following
 line to your **`build.gradle`** file:
@@ -10,7 +14,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.0.1'
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
     }
 }
 ```

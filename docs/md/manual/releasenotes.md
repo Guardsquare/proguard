@@ -5,6 +5,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.0  |          | GRADLE   | New AGP 7.0 compatible [Gradle plugin](setup/gradleplugin.md).
 | 7.1.0  | DGD-3264 | CORE     | Reduced false positives when using `-addconfigurationdebugging`.
 | 7.1.0  | DGD-0013 | CORE     | Improved error message when missing classes result in an incomplete class hierarchy.
 | 7.1.0  | PGD-0106 | GRADLE   | Fixed Gradle task error when using an existing `-outjar` directory.

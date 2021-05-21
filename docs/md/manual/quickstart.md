@@ -29,11 +29,8 @@ ProGuard can then be executed directly from the command line by calling a script
                      -outjars path/to/obfuscated-application.jar ^
                      -libraryjars path/to/java/home/lib/rt.jar
     ```
-
-
  
 For more detailed information see [standalone mode](setup/standalone.md).
-
 
 ## Integrated
 
@@ -41,12 +38,12 @@ The ProGuard artifacts are hosted at [Maven Central](https://search.maven.org/se
 
 ### Android Gradle project
 
-When working on your Android app (apk, aab) or library (aar), you can include ProGuard in your Gradle build as follows:
+When working on your Android application (apk, aab) or library (aar), you can include ProGuard in your Gradle build by:
 
-1. Either directly use ProGuard by disabling R8 in your `gradle.properties`.
-2. Or use ProGuard's built-in Gradle plugin, which you can apply in your `build.gradle`.
+- Using ProGuard's Gradle plugin, which you can apply in your `build.gradle` file.
+- Using the integrated ProGuard by disabling R8 in your `gradle.properties` (only applicable for AGP < 7).
 
-For more detailed information see  [Android Gradle](setup/gradleplugin.md).
+For more detailed information see [Android Gradle](setup/gradleplugin.md).
 
 ### Java or Kotlin Gradle project
 

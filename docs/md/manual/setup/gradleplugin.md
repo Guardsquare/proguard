@@ -1,5 +1,153 @@
-ProGuard is integrated in Google's Android SDK. If you have an Android Gradle
-project you can enable ProGuard instead of the default R8 compiler:
+
+This page will guide you through to the basic steps of processing your Android application or library with ProGuard.
+
+!!! tip "Java / Kotlin desktop or server projects"
+    If you have a Java / Kotlin desktop or server project, you can find instructions [here](gradle.md).
+
+## ProGuard Gradle Plugin (AGP version 4+)
+
+You can add the ProGuard plugin to your project by
+including the following in your root level `build.gradle(.kts)` file:
+
+=== "Groovy"
+    ```Groovy
+    buildscript {
+        repositories {
+            google()       // For the Android Gradle plugin.
+            mavenCentral() // For the ProGuard Gradle Plugin and anything else.
+        }
+        dependencies {
+            classpath 'com.android.tools.build:gradle:x.y.z'    // The Android Gradle plugin.
+            classpath 'com.guardsquare:proguard-gradle:7.1.0'  // The ProGuard Gradle plugin.
+        }
+    }
+    ```
+=== "Kotlin"
+    ```kotlin
+    buildscript {
+        repositories {
+            google()       // For the Android Gradle plugin.
+            mavenCentral() // For the ProGuard Gradle Plugin and anything else.
+        }
+        dependencies {
+            classpath("com.android.tools.build:gradle:x.y.z")  // The Android Gradle plugin.
+            classpath("com.guardsquare:proguard-gradle:7.1.0") // The ProGuard Gradle plugin.
+        }
+    }
+    ```
+
+To actually apply the plugin to your project,
+just add the line to your module level `build.gradle(.kts)` file after applying the Android Gradle plugin as shown below.
+
+=== "Groovy"
+    ```Groovy
+     apply plugin: 'com.android.application'
+     apply plugin: 'proguard'
+    ```
+=== "Kotlin"
+    ```kotlin
+    plugins {
+        id("com.android.application")
+        id("proguard")
+    }
+    ```
+
+ProGuard expects unobfuscated class files as input. Therefore, other obfuscators such as R8 have to be disabled.
+
+=== "Groovy"
+    ```Groovy
+    android {
+        ...
+        buildTypes {
+           release {
+              // Deactivate R8.
+              minifyEnabled false
+           }
+        }
+    }
+    ```
+=== "Kotlin"
+    ```kotlin
+    android {
+        ...
+        buildTypes {
+            getByName("release") {
+                // Deactivate R8.
+                isMinifyEnabled = false
+            }
+        }
+    }
+    ```
+
+ProGuard can be executed automatically whenever you build any of the configured variants.
+You can configure a variant using the `proguard` block in your module level `build.gradle(.kts)` files. 
+This is a top-level block and should be placed outside the `android` block.
+
+For example, in the snippet below, ProGuard is configured to only process the release variant of the application,
+using a configuration provided by the user (`proguard-project.txt`) and a [default configuration](#default-configurations) (`proguard-android-optimize.txt`). 
+
+=== "Groovy"
+    ```Groovy
+    android {
+        ...
+    }
+
+    proguard {
+       configurations {
+          release {
+             defaultConfiguration 'proguard-android-optimize.txt'
+             configuration 'proguard-project.txt'
+          }
+       }
+    }
+    ```
+=== "Kotlin"
+    ```kotlin
+    android {
+        ...
+    }
+
+    proguard {
+       configurations {
+          register("release") {
+             defaultConfiguration("proguard-android-optimize.txt")
+             configuration("proguard-project.txt")
+          }
+       }
+    }
+    ```
+
+You can then build your application as usual:
+
+=== "Linux/macOS"
+    ```sh
+    ./gradlew assembleRelease
+    ```
+=== "Windows"
+    ```
+    gradlew assembleRelease
+    ```
+
+### Default configurations
+
+There are three default configurations available:
+
+| Default configuration | Description |
+|-----------------------|-------------|
+| `proguard-android.txt`          | ProGuard will obfuscate and shrink your application |
+| `proguard-android-optimize.txt` | ProGuard will obfuscate, shrink and optimize your application |
+| `proguard-android-debug.txt`    | ProGuard will process the application without any obfuscation,<br>optimization or shrinking |
+
+### Example
+
+The example [`android-plugin`](https://github.com/Guardsquare/proguard/tree/master/examples/android-plugin)
+has a small working Android project using the ProGuard Gradle Plugin.
+
+## AGP Integrated ProGuard (AGP version <7)
+
+ProGuard is integrated with older versions of the Android Gradle plugin. 
+If you have an Android Gradle project that uses such an AGP version, 
+you can enable ProGuard instead of the default `R8` obfuscator as follows:
 
 1. Disable R8 in your `gradle.properties`:
 ```ini
@@ -15,7 +163,7 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.0.1')
+                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.1.0')
             }
         }
     }
@@ -37,112 +185,30 @@ android {
 }
 ```
 
+    There are two default configurations available when using the integrated ProGuard:
+
+    | Default configuration | Description |
+    |-----------------------|-------------|
+    | `proguard-android.txt` | ProGuard will obfuscate and shrink your application |
+    | `proguard-android-optimize.txt` | ProGuard will obfuscate, shrink and optimize your application |
+
 4. Add any necessary configuration to your `proguard-project.txt`.
 
 You can then build your application as usual:
-```sh
-gradle assembleRelease
-```
 
-The repository contains some sample configurations in the [examples](examples)
-directory. Notably, [examples/android](examples/android) has a small working
-Android project.
-You can enable ProGuard in your Android Gradle build process, by enabling
+=== "Linux/macOS"
+    ```sh
+    ./gradlew assembleRelease
+    ```
+=== "Windows"
+    ```
+    gradlew assembleRelease
+    ```
 
-## ProGuard Gradle Plugin
+### Example
 
-Alternatively, you can enable ProGuard in the Android Gradle build process
-using ProGuard's own tuned plugin, by changing the `build.gradle` file of your
-project as follows:
+The example [`android-agp3-agp4`](https://github.com/Guardsquare/proguard/tree/master/examples/android-agp3-agp4) 
+has a small working Android project for AGP < 7.
 
-```Groovy
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath 'com.guardsquare:proguard-gradle:7.0.1'
-    }
-}
 
-apply plugin: 'com.android.application'
-apply plugin: 'proguard'
-```
 
-Or if you want to use your local copy of the plugin:
-
-```Groovy
-buildscript {
-    repositories {
-        flatDir dirs: '/usr/local/java/proguard/lib'
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath ':proguard:'
-    }
-}
-
-apply plugin: 'com.android.application'
-apply plugin: 'proguard'
-```
-
-Please make sure the repository path in the build script is set correctly for
-your system.
-
-Each build type that should be processed by ProGuard needs to have a set of
-configuration files, as shown below:
-
-```Groovy
-android {
-    .....
-    buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFile getTunedProGuardFile('proguard-android-debug.pro')
-            proguardFile 'proguard-project.txt'
-        }
-        release {
-            minifyEnabled false
-            proguardFile getTunedProGuardFile('proguard-android-release.pro')
-            proguardFile 'proguard-project.txt'
-        }
-    }
-}
-```
-
-The setting "`minifyEnabled=false`" is needed to disable the
-obfuscation/shrinking capability of the standard gradle plugin to avoid that
-the project is obfuscated multiple times.
-
-The lines with "`proguardFile getTunedProGuardFile`" are important. They apply
-optimized minimal settings for the Android platform. Your own configuration
-files then only need to contain project-specific settings.
-
-You can find a complete sample project in `examples/android-plugin` in the
-ProGuard distribution.
-
-## Settings {: #proguard}
-
-The **ProGuard plugin** supports various settings that can be added to the
-*build.gradle* file to control its behavior:
-
-```Groovy
-proguard {
-    incremental                false
-    transformExternalLibraries true
-    transformSubprojects       true
-}
-```
-
-`incremental:`
-: Support incremental builds, default: `false`
-
-`transformExternalLibraries:`
-: Processing also all external libraries, default: `true`
-
-`transformSubproject:`
-: Processing also all subprojects, default: `true`
