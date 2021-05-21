@@ -26,6 +26,12 @@ class ConsumerRulesFilterTest : FreeSpec({
             }
             android {
                 compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled false
+                    }
+                }
             }
 
             proguard {

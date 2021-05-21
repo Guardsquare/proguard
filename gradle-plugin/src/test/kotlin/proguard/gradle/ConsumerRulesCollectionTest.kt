@@ -34,8 +34,12 @@ class ConsumerRulesCollectionTest : FreeSpec({
                 compileSdkVersion 30
 
                 buildTypes {
-                    release {}
-                    debug   {}
+                    release {
+                        minifyEnabled false
+                    }
+                    debug {
+                        minifyEnabled false
+                    }
                 }
             }
 

@@ -63,16 +63,18 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             }
 
             when (androidExtension) {
-                is AppExtension -> {
-                    androidExtension.applicationVariants.all { applicationVariant ->
-                        collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
-                                project,
-                                applicationVariant,
-                                createConsumerRulesConfiguration(project, applicationVariant),
-                                File("${project.buildDir}/intermediates/proguard/configs")))
-                    }
+                is AppExtension -> androidExtension.applicationVariants.all { applicationVariant ->
+                    verifyNotMinified(applicationVariant)
+
+                    collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
+                            project,
+                            applicationVariant,
+                            createConsumerRulesConfiguration(project, applicationVariant),
+                            File("${project.buildDir}/intermediates/proguard/configs")))
                 }
                 is LibraryExtension -> androidExtension.libraryVariants.all { libraryVariant ->
+                    verifyNotMinified(libraryVariant)
+
                     collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
                             project,
                             libraryVariant,
@@ -111,6 +113,13 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         files.forEach { fileName ->
             val file = project.file(fileName)
             if (!file.exists()) throw GradleException("ProGuard configuration file ${file.absolutePath} was set but does not exist.")
+        }
+    }
+
+    private fun verifyNotMinified(variant: BaseVariant) {
+        if (variant.buildType.isMinifyEnabled) {
+            throw GradleException(
+                    "The option 'minifyEnabled' is set to 'true' for variant '${variant.name}', but should be 'false' for variants processed by ProGuard")
         }
     }
 
