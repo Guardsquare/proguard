@@ -8,7 +8,9 @@
 package proguard.gradle.plugin.android.dsl
 
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import org.gradle.testkit.runner.TaskOutcome
 import testutils.AndroidProject
 import testutils.applicationModule
 import testutils.createGradleRunner
@@ -48,6 +50,42 @@ class ConfigurationTest : FreeSpec({
 
             "Then the build should fail with an error message" {
                 result.output shouldContain "ProGuard configuration file .*non-existing-file.txt was set but does not exist.".toRegex()
+            }
+        }
+    }
+
+    "Given a project with a configuration for a minified variant that is not configured" - {
+        val project = autoClose(AndroidProject().apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled true
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                    debug {
+                        defaultConfiguration 'proguard-android-debug.txt'
+                    }
+                }
+            }""".trimIndent()))
+        }.create())
+
+
+        "When the project is evaluated" - {
+            val result = createGradleRunner(project.rootDir, testKitDir, "assemble").build()
+
+            "Then the build should succeed" {
+                result.task(":app:assemble")?.outcome shouldBe TaskOutcome.SUCCESS
             }
         }
     }

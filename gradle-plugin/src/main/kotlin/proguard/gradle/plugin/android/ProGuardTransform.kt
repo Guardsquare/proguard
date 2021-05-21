@@ -137,8 +137,3 @@ class ProGuardTransform(
 
 typealias ProGuardIOEntry = Pair<File, File>
 
-private fun Iterable<VariantConfiguration>.findVariantConfiguration(variant: VariantInfo) =
-    find { it.name == variant.fullVariantName } ?: find { it.name == variant.buildTypeName }
-
-private fun Iterable<VariantConfiguration>.findVariantConfiguration(variantName: String) =
-    find { it.name == variantName } ?: find { variantName.endsWith(it.name.capitalize()) }

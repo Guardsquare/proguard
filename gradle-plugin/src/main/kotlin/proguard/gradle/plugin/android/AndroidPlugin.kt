@@ -21,6 +21,7 @@
 
 package proguard.gradle.plugin.android
 
+import com.android.build.api.variant.VariantInfo
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -36,6 +37,7 @@ import org.gradle.api.tasks.TaskProvider
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
+import proguard.gradle.plugin.android.dsl.VariantConfiguration
 import proguard.gradle.plugin.android.tasks.CollectConsumerRulesTask
 import proguard.gradle.plugin.android.transforms.AndroidConsumerRulesTransform
 import proguard.gradle.plugin.android.transforms.ArchiveConsumerRulesTransform
@@ -64,7 +66,8 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
 
             when (androidExtension) {
                 is AppExtension -> androidExtension.applicationVariants.all { applicationVariant ->
-                    verifyNotMinified(applicationVariant)
+                    if (proguardBlock.configurations.hasVariantConfiguration(applicationVariant.name))
+                        verifyNotMinified(applicationVariant)
 
                     collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
                             project,
@@ -73,7 +76,8 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
                             File("${project.buildDir}/intermediates/proguard/configs")))
                 }
                 is LibraryExtension -> androidExtension.libraryVariants.all { libraryVariant ->
-                    verifyNotMinified(libraryVariant)
+                    if (proguardBlock.configurations.hasVariantConfiguration(libraryVariant.name))
+                        verifyNotMinified(libraryVariant)
 
                     collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
                             project,
@@ -158,3 +162,12 @@ enum class AndroidProjectType {
     ANDROID_APPLICATION,
     ANDROID_LIBRARY;
 }
+
+fun Iterable<VariantConfiguration>.findVariantConfiguration(variant: VariantInfo) =
+    find { it.name == variant.fullVariantName } ?: find { it.name == variant.buildTypeName }
+
+fun Iterable<VariantConfiguration>.findVariantConfiguration(variantName: String) =
+    find { it.name == variantName } ?: find { variantName.endsWith(it.name.capitalize()) }
+
+fun Iterable<VariantConfiguration>.hasVariantConfiguration(variantName: String) =
+        this.findVariantConfiguration(variantName) != null
