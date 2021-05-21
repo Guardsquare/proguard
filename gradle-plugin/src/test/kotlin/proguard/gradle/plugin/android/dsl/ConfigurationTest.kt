@@ -80,7 +80,6 @@ class ConfigurationTest : FreeSpec({
             }""".trimIndent()))
         }.create())
 
-
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "assemble").build()
 
@@ -115,7 +114,6 @@ class ConfigurationTest : FreeSpec({
                 }
             }""".trimIndent()))
         }.create())
-
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()

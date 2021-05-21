@@ -47,7 +47,6 @@ import proguard.gradle.plugin.android.AndroidPlugin.Companion.COLLECT_CONSUMER_R
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
-import proguard.gradle.plugin.android.dsl.VariantConfiguration
 
 class ProGuardTransform(
     private val project: Project,
@@ -136,4 +135,3 @@ class ProGuardTransform(
 }
 
 typealias ProGuardIOEntry = Pair<File, File>
-
