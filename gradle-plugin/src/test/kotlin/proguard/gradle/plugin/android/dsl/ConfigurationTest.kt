@@ -123,4 +123,162 @@ class ConfigurationTest : FreeSpec({
             }
         }
     }
+
+    "Given a project no configured variants" - {
+        val project = autoClose(AndroidProject().apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled true
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                }
+            }""".trimIndent()))
+        }.create())
+
+
+        "When the project is evaluated" - {
+            val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
+
+            "Then the build should fail with an error message" {
+                result.output shouldContain "There are no configured variants in the 'proguard' block"
+            }
+        }
+    }
+
+    "Given a project configured with a variant that does not exist" - {
+        val project = autoClose(AndroidProject().apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled true
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                    foo {
+                        defaultConfiguration 'proguard-android.txt'
+                    }
+                }
+            }""".trimIndent()))
+        }.create())
+
+
+        "When the project is evaluated" - {
+            val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
+
+            "Then the build should fail with an error message" {
+                result.output shouldContain "The configured variant 'foo' does not exist"
+            }
+        }
+    }
+
+    "Given a project configured with multiple variants that do not exist" - {
+        val project = autoClose(AndroidProject().apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled true
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                    foo {
+                        defaultConfiguration 'proguard-android.txt'
+                    }
+                    bar {
+                        defaultConfiguration 'proguard-android.txt'
+                    }
+                }
+            }""".trimIndent()))
+        }.create())
+
+
+        "When the project is evaluated" - {
+            val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
+
+            "Then the build should fail with an error message" {
+                result.output shouldContain "The configured variants (('foo', 'bar')|('bar', 'foo')) do not exist".toRegex()
+            }
+        }
+    }
+
+    "Given a project configured with a flavor variant that does not exist" - {
+        val project = autoClose(AndroidProject().apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled true
+                    }
+                }
+
+                flavorDimensions "version"
+                productFlavors {
+                    demo {
+                        dimension "version"
+                        applicationIdSuffix ".demo"
+                        versionNameSuffix "-demo"
+                    }
+                    full {
+                        dimension "version"
+                        applicationIdSuffix ".full"
+                        versionNameSuffix "-full"
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                    fooRelease {
+                        defaultConfiguration 'proguard-android.txt'
+                    }
+                }
+            }""".trimIndent()))
+        }.create())
+
+
+        "When the project is evaluated" - {
+            val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
+
+            "Then the build should fail with an error message" {
+                result.output shouldContain "The configured variant 'fooRelease' does not exist"
+            }
+        }
+    }
 })

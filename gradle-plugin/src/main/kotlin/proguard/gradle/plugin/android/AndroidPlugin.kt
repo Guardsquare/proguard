@@ -63,23 +63,40 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
                 collectConsumerRulesTask)
 
         project.afterEvaluate {
+            if (proguardBlock.configurations.isEmpty())
+                throw GradleException("There are no configured variants in the 'proguard' block")
+
+            val matchedConfigurations = mutableListOf<VariantConfiguration>()
+
+            when (androidExtension) {
+                is AppExtension -> androidExtension.applicationVariants.all { applicationVariant ->
+                    setupVariant(proguardBlock, applicationVariant, collectConsumerRulesTask, project)?.let {
+                        matchedConfigurations.add(it)
+                    }
+                }
+                is LibraryExtension -> androidExtension.libraryVariants.all { libraryVariant ->
+                    setupVariant(proguardBlock, libraryVariant, collectConsumerRulesTask, project)?.let {
+                        matchedConfigurations.add(it)
+                    }
+                }
+            }
+
             proguardBlock.configurations.forEach {
                 checkConfigurationFile(project, it.configurations)
             }
 
-            when (androidExtension) {
-                is AppExtension -> androidExtension.applicationVariants.all { applicationVariant ->
-                    setupVariant(proguardBlock, applicationVariant, collectConsumerRulesTask, project)
-                }
-                is LibraryExtension -> androidExtension.libraryVariants.all { libraryVariant ->
-                    setupVariant(proguardBlock, libraryVariant, collectConsumerRulesTask, project)
+            (proguardBlock.configurations - matchedConfigurations).apply {
+                if (isNotEmpty()) when (size) {
+                    1 -> throw GradleException("The configured variant '${first().name}' does not exist")
+                    else -> throw GradleException("The configured variants ${joinToString(separator = "', '", prefix = "'", postfix = "'") { it.name }} do not exist")
                 }
             }
         }
     }
 
-    private fun setupVariant(proguardBlock: ProGuardAndroidExtension, variant: BaseVariant, collectConsumerRulesTask: TaskProvider<Task>, project: Project) {
-        if (proguardBlock.configurations.hasVariantConfiguration(variant.name)) {
+    private fun setupVariant(proguardBlock: ProGuardAndroidExtension, variant: BaseVariant, collectConsumerRulesTask: TaskProvider<Task>, project: Project): VariantConfiguration? {
+        val matchingConfiguration = proguardBlock.configurations.findVariantConfiguration(variant.name)
+        if (matchingConfiguration != null) {
             verifyNotMinified(variant)
 
             collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
@@ -88,6 +105,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
                     createConsumerRulesConfiguration(project, variant),
                     File("${project.buildDir}/intermediates/proguard/configs")))
         }
+        return matchingConfiguration
     }
 
     private fun createCollectConsumerRulesTask(
