@@ -25,6 +25,7 @@ import com.android.build.gradle.BaseExtension
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.util.VersionNumber
 import proguard.gradle.plugin.android.AndroidPlugin
 
 class ProGuardPlugin : Plugin<Project> {
@@ -41,6 +42,13 @@ class ProGuardPlugin : Plugin<Project> {
                                 |     }""".trimMargin()
         when {
             androidExtension != null -> {
+                if (!isAGPVersionSupported(project)) {
+                    throw GradleException(
+                            """The ProGuard plugin only supports Android plugin 4 and higher.
+                              |For Android plugin version 3 and lower, you can use ProGuard through the Android plugin integration.
+                              |Please refer to the manual for further details: https://www.guardsquare.com/manual/setup/gradleplugin
+                            """.trimMargin())
+                }
                 AndroidPlugin(androidExtension).apply(project)
             }
             javaExtension != null -> {
@@ -56,5 +64,14 @@ class ProGuardPlugin : Plugin<Project> {
                       """.trimMargin())
             }
         }
+    }
+
+    private fun isAGPVersionSupported(project: Project): Boolean {
+        val version = project.rootProject.buildscript.configurations.getByName("classpath").resolvedConfiguration.resolvedArtifacts.find { module ->
+            module.moduleVersion.id.group.equals("com.android.tools.build")
+        }?.moduleVersion?.id?.version
+        return version?.let {
+            return VersionNumber.parse(it).major >= 4
+        } ?: false
     }
 }

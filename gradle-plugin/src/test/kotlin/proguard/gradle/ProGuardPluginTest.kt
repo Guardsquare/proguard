@@ -34,4 +34,58 @@ class ProGuardPluginTest : FreeSpec({
             }
         }
     }
+
+    "Given a project with an old Android Gradle plugin" - {
+        val project = autoClose(AndroidProject("""
+            buildscript {
+                repositories {
+                    mavenCentral() // For anything else.
+                    google()       // For the Android plugin.
+                    flatDir {
+                        dirs "${System.getProperty("local.repo")}"
+                    }
+                }
+                dependencies {
+                    classpath "com.android.tools.build:gradle:3.6.3"
+                    classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
+                }
+            }
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+            """.trimIndent()).apply {
+                addModule(applicationModule("app", buildDotGradle = """
+                            plugins {
+                                id 'com.android.application'
+                                id 'proguard'
+                            }
+
+                            android {
+                                compileSdkVersion 30
+
+                                buildTypes {
+                                    release {}
+                                    debug   {}
+                                }
+                            }
+
+                            proguard {
+                                configurations {
+                                    release {}
+                                }
+                            }
+                            """.trimIndent()))
+            }.create())
+
+        "When the project is evaluated" - {
+            val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
+
+            "Then the build should fail" {
+                result.output shouldContain "The ProGuard plugin only supports Android plugin 4 and higher."
+            }
+        }
+    }
 })
