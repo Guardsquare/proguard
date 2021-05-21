@@ -80,6 +80,7 @@ nav:
     - Android Gradle:      manual/setup/gradleplugin.md
     - Java/Kotlin Gradle:  manual/setup/gradle.md
     - Ant Task:            manual/setup/ant.md
+    - Upgrading:           manual/setup/upgrading.md
 - Configuration:
     - Usage:           manual/configuration/usage.md
     - Attributes:      manual/configuration/attributes.md
