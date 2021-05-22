@@ -17,7 +17,7 @@ interface ProjectFile {
     fun create(moduleDir: File)
 }
 
-class SourceFile(override val path: String, val source: String) : ProjectFile {
+class SourceFile(override val path: String, val source: String = "") : ProjectFile {
     override fun create(moduleDir: File) {
         val file = File(moduleDir, path)
         file.parentFile.mkdirs()

@@ -37,6 +37,8 @@ import org.gradle.api.tasks.TaskProvider
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
+import proguard.gradle.plugin.android.dsl.ProGuardConfiguration
+import proguard.gradle.plugin.android.dsl.UserProGuardConfiguration
 import proguard.gradle.plugin.android.dsl.VariantConfiguration
 import proguard.gradle.plugin.android.tasks.CollectConsumerRulesTask
 import proguard.gradle.plugin.android.transforms.AndroidConsumerRulesTransform
@@ -113,9 +115,9 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             it.attributes.attribute(ATTRIBUTE_ARTIFACT_TYPE, ARTIFACT_TYPE_CONSUMER_RULES)
         }
 
-    private fun checkConfigurationFile(project: Project, files: List<String>) {
-        files.forEach { fileName ->
-            val file = project.file(fileName)
+    private fun checkConfigurationFile(project: Project, files: List<ProGuardConfiguration>) {
+        files.filterIsInstance<UserProGuardConfiguration>().forEach {
+            val file = project.file(it.path)
             if (!file.exists()) throw GradleException("ProGuard configuration file ${file.absolutePath} was set but does not exist.")
         }
     }

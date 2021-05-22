@@ -42,7 +42,6 @@ import com.android.build.gradle.BaseExtension
 import java.io.File
 import org.gradle.api.Project
 import proguard.gradle.ProGuardTask
-import proguard.gradle.ProGuardTask.DEFAULT_CONFIG_RESOURCE_PREFIX
 import proguard.gradle.plugin.android.AndroidPlugin.Companion.COLLECT_CONSUMER_RULES_TASK_NAME
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
@@ -74,8 +73,7 @@ class ProGuardTransform(
 
         // TODO: collect aapt rules
         proguardTask.configuration(project.tasks.getByPath(COLLECT_CONSUMER_RULES_TASK_NAME + variantName.capitalize()).outputs.files)
-        proguardTask.configuration(variantBlock.configurations.map { project.file(it) })
-        proguardTask.configuration(variantBlock.defaultConfigurations.map { "$DEFAULT_CONFIG_RESOURCE_PREFIX/${it.filename}" })
+        proguardTask.configuration(variantBlock.configurations.map { project.file(it.path) })
 
         val mappingDir = File("${project.buildDir.absolutePath}/outputs/proguard/$variantName/mapping")
         if (!mappingDir.exists()) mappingDir.mkdirs()

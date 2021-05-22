@@ -22,8 +22,7 @@
 package proguard.gradle.plugin.android.dsl
 
 class VariantConfiguration(val name: String) {
-    var configurations = mutableListOf<String>()
-    var defaultConfigurations = mutableListOf<DefaultConfiguration>()
+    var configurations = mutableListOf<ProGuardConfiguration>()
     var consumerRuleFilter = mutableListOf<String>()
 
     fun configurations(vararg configs: String) {
@@ -31,7 +30,7 @@ class VariantConfiguration(val name: String) {
     }
 
     fun configuration(config: String) {
-        configurations.add(config)
+        configurations.add(UserProGuardConfiguration(config))
     }
 
     fun defaultConfigurations(vararg configs: String) {
@@ -39,7 +38,7 @@ class VariantConfiguration(val name: String) {
     }
 
     fun defaultConfiguration(config: String) {
-        defaultConfigurations.add(DefaultConfiguration.fromString(config))
+        configurations.add(DefaultProGuardConfiguration.fromString(config))
     }
 
     fun consumerRuleFilter(vararg filters: String) {
