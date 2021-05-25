@@ -147,7 +147,6 @@ class ConfigurationTest : FreeSpec({
             }""".trimIndent()))
         }.create())
 
-
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
 
@@ -182,7 +181,6 @@ class ConfigurationTest : FreeSpec({
                 }
             }""".trimIndent()))
         }.create())
-
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
@@ -221,7 +219,6 @@ class ConfigurationTest : FreeSpec({
                 }
             }""".trimIndent()))
         }.create())
-
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
@@ -271,7 +268,6 @@ class ConfigurationTest : FreeSpec({
                 }
             }""".trimIndent()))
         }.create())
-
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
