@@ -211,5 +211,5 @@ When one of the above Gson features is used, ProGuard automatically preserves
 the original Gson implementation for all affected domain classes.
 
 This means that the serialized fields of these domain classes need to be
-explicitely kept again  in the DexGuard configuration so that they can be
+explicitly kept again  in the DexGuard configuration so that they can be
 safely accessed through reflection.
