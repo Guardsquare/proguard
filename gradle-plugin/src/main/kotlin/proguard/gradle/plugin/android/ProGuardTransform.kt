@@ -33,6 +33,7 @@ import com.android.build.api.transform.QualifiedContent.Scope.EXTERNAL_LIBRARIES
 import com.android.build.api.transform.QualifiedContent.Scope.PROJECT
 import com.android.build.api.transform.QualifiedContent.Scope.PROVIDED_ONLY
 import com.android.build.api.transform.QualifiedContent.Scope.SUB_PROJECTS
+import com.android.build.api.transform.SecondaryFile
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
@@ -46,6 +47,7 @@ import proguard.gradle.plugin.android.AndroidPlugin.Companion.COLLECT_CONSUMER_R
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
+import proguard.gradle.plugin.android.dsl.UserProGuardConfiguration
 
 class ProGuardTransform(
     private val project: Project,
@@ -105,6 +107,14 @@ class ProGuardTransform(
 
     override fun applyToVariant(variant: VariantInfo?): Boolean =
             variant?.let { proguardBlock.configurations.findVariantConfiguration(it) } != null
+
+    override fun getSecondaryFiles(): MutableCollection<SecondaryFile> =
+            proguardBlock
+            .configurations
+            .flatMap { it.configurations }
+            .filterIsInstance<UserProGuardConfiguration>()
+            .map { SecondaryFile(project.file(it.path), false) }
+            .toMutableSet()
 
     private fun createIOEntries(
         inputs: Collection<TransformInput>,
