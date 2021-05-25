@@ -31,6 +31,7 @@ import java.io.File
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.TaskProvider
@@ -68,26 +69,24 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
 
             when (androidExtension) {
                 is AppExtension -> androidExtension.applicationVariants.all { applicationVariant ->
-                    if (proguardBlock.configurations.hasVariantConfiguration(applicationVariant.name))
-                        verifyNotMinified(applicationVariant)
-
-                    collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
-                            project,
-                            applicationVariant,
-                            createConsumerRulesConfiguration(project, applicationVariant),
-                            File("${project.buildDir}/intermediates/proguard/configs")))
+                    setupVariant(proguardBlock, applicationVariant, collectConsumerRulesTask, project)
                 }
                 is LibraryExtension -> androidExtension.libraryVariants.all { libraryVariant ->
-                    if (proguardBlock.configurations.hasVariantConfiguration(libraryVariant.name))
-                        verifyNotMinified(libraryVariant)
-
-                    collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
-                            project,
-                            libraryVariant,
-                            createConsumerRulesConfiguration(project, libraryVariant),
-                            File("${project.buildDir}/intermediates/proguard/configs")))
+                    setupVariant(proguardBlock, libraryVariant, collectConsumerRulesTask, project)
                 }
             }
+        }
+    }
+
+    private fun setupVariant(proguardBlock: ProGuardAndroidExtension, variant: BaseVariant, collectConsumerRulesTask: TaskProvider<Task>, project: Project) {
+        if (proguardBlock.configurations.hasVariantConfiguration(variant.name)) {
+            verifyNotMinified(variant)
+
+            collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
+                    project,
+                    variant,
+                    createConsumerRulesConfiguration(project, variant),
+                    File("${project.buildDir}/intermediates/proguard/configs")))
         }
     }
 

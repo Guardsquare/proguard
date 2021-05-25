@@ -9,6 +9,7 @@ package proguard.gradle
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.file.shouldExist
+import io.kotest.matchers.file.shouldNotExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -22,7 +23,7 @@ import testutils.createTestKitDir
 class ConsumerRulesCollectionTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
-    "Given an Android project" - {
+    "Given an Android project with one configured variant" - {
         val project = autoClose(AndroidProject().apply {
             addModule(applicationModule("app", buildDotGradle = """
             plugins {
@@ -68,14 +69,14 @@ class ConsumerRulesCollectionTest : FreeSpec({
         }
 
         "When the tasks 'clean' and 'collectConsumerRulesDebug' are executed " - {
-            val result = createGradleRunner(project.rootDir, testKitDir, "clean", "collectConsumerRulesDebug").build()
+            val result = createGradleRunner(project.rootDir, testKitDir, "clean", "collectConsumerRulesDebug").buildAndFail()
 
-            "Then the task 'collectConsumerRulesDebug' is successful" {
-                result.task(":app:collectConsumerRulesDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+            "Then the task 'collectConsumerRulesDebug' is not executed" {
+                result.task(":app:collectConsumerRulesDebug")?.outcome shouldBe null
             }
 
-            "Then a subdirectory of the build directory should contain the consumer rules" {
-                File("${project.rootDir}/app/build/intermediates/proguard/configs/debug/consumer-rules.pro").shouldExist()
+            "Then a subdirectory of the build directory should not contain the consumer rules" {
+                File("${project.rootDir}/app/build/intermediates/proguard/configs/debug/consumer-rules.pro").shouldNotExist()
             }
         }
 
