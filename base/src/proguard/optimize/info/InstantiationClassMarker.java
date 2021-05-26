@@ -26,7 +26,7 @@ import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.*;
 import proguard.optimize.OptimizationInfoClassFilter;
 
 /**
@@ -61,7 +61,8 @@ implements   InstructionVisitor,
 
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
-        classConstant.referencedClassAccept(filteredClassMarker);
+        classConstant.referencedClassAccept(
+            new ClassHierarchyTraveler(true, true, false, false, filteredClassMarker));
     }
 
 

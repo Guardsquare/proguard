@@ -157,13 +157,19 @@ implements   ClassVisitor,
     {
         if (!programClass.equals(targetClass) &&
 
+            (!DETAILS || print(programClass, "isKept?")) &&
+
             // Don't merge classes that must be preserved.
             !KeepMarker.isKept(programClass) &&
             !KeepMarker.isKept(targetClass) &&
 
+            (!DETAILS || print(programClass, "already retargeted?")) &&
+
             // Only merge classes that haven't been retargeted yet.
             getTargetClass(programClass) == null &&
             getTargetClass(targetClass)  == null &&
+
+            (!DETAILS || print(programClass, "isAnnotation?")) &&
 
             // Don't merge annotation classes, with all their reflection and
             // infinite recursion.
@@ -316,6 +322,8 @@ implements   ClassVisitor,
             if (DEBUG)
             {
                 System.out.println("ClassMerger ["+programClass.getName()+"] -> ["+targetClass.getName()+"]");
+                System.out.println("  Source instantiated? [ " + InstantiationClassMarker.isInstantiated(programClass) + "]");
+                System.out.println("  Target instantiated? [ " + InstantiationClassMarker.isInstantiated(targetClass) + "]");
                 System.out.println("  Source interface? ["+((programClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
                 System.out.println("  Target interface? ["+((targetClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
                 System.out.println("  Source subclasses ("+programClass.subClassCount+")");
@@ -323,9 +331,12 @@ implements   ClassVisitor,
                 System.out.println("  Source superclass ["+programClass.getSuperClass().getName()+"]");
                 System.out.println("  Target superclass ["+targetClass.getSuperClass().getName()+"]");
 
-                //System.out.println("=== Before ===");
-                //programClass.accept(new ClassPrinter());
-                //targetClass.accept(new ClassPrinter());
+                if (DETAILS)
+                {
+                    System.out.println("=== Before ===");
+                    programClass.accept(new ClassPrinter());
+                    targetClass.accept(new ClassPrinter());
+                }
             }
 
             // Combine the access flags.
@@ -404,20 +415,22 @@ implements   ClassVisitor,
                 new AttributeAdder(targetClass, true)));
 
             // Update the optimization information of the target class.
+            if (DEBUG)
+            {
+                System.out.println("merging optimization info for " + targetClass.getName() + " and " + programClass.getName());
+            }
+
             ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(targetClass)
                 .merge(ClassOptimizationInfo.getClassOptimizationInfo(programClass));
 
             // Remember to replace the inlined class by the target class.
             setTargetClass(programClass, targetClass);
 
-            //if (DEBUG)
-            //{
-            //    System.out.println("=== After ====");
-            //    targetClass.accept(new ClassPrinter());
-            //}
-
-            if (DEBUG)
+            if (DETAILS)
             {
+                System.out.println("=== After ====");
+                System.out.println("Target instantiated? " + InstantiationClassMarker.isInstantiated(targetClass));
+                targetClass.accept(new ClassPrinter());
                 System.out.println("  Interfaces:");
                 targetClass.interfaceConstantsAccept(new ClassPrinter());
             }
