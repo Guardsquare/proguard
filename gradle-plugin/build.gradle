@@ -17,7 +17,7 @@ def agpVersion = '4.1.0'
 
 gradlePlugin {
     plugins {
-        simplePlugin {
+        proguardPlugin {
             id = 'proguard'
             implementationClass = 'proguard.gradle.plugin.ProGuardPlugin'
         }
@@ -103,9 +103,11 @@ afterEvaluate {
           and must not be automatically published.
         - "<project.name>" is created by ProGuard custom logic
           and should have its artifact ID adjusted.
+        - we also disable publishing of plugin markers.
      */
     tasks.withType(AbstractPublishToMaven).matching { task ->
-        task.publication.name == 'pluginMaven'
+        task.publication.name == 'pluginMaven' ||
+            task.name =~ /^publish(.*)PluginMarkerMavenPublicationTo(GithubRepository|MavenLocal|SonatypeRepository)$/
     } each {task ->
         task.enabled = false
     }
