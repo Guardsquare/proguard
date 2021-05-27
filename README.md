@@ -69,8 +69,78 @@ Please use <a href="https://github.com/guardsquare/proguard/issues">**the issue 
 
 ## 🚀 Quick Start
 
-ProGuard is integrated in Google's Android SDK. If you have an Android Gradle
-project you can enable ProGuard instead of the default R8 compiler:
+ProGuard has its own Gradle plugin, allowing you to shrink, optimize and obfuscate Android projects. 
+
+### ProGuard Gradle Plugin
+
+You can apply the ProGuard Gradle plugin in AGP 4+ projects by following these steps:
+
+1. Add a `classpath` dependency in your root level `build.gradle` file:
+
+```Groovy
+buildscript {
+    repositories {
+        google()       // For the Android Gradle plugin.
+        mavenCentral() // For the ProGuard Gradle Plugin and anything else.
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:x.y.z'    // The Android Gradle plugin.
+        classpath 'com.guardsquare:proguard-gradle:7.1.0-beta5'  // The ProGuard Gradle plugin.
+    }
+}
+```
+
+2. Apply the `proguard` plugin after applying the Android Gradle plugin as shown below:
+
+```Groovy
+ apply plugin: 'com.android.application'
+ apply plugin: 'proguard'
+```
+
+3. ProGuard expects unobfuscated class files as input. Therefore, other obfuscators such as R8 have to be disabled.
+
+```Groovy
+android {
+    ...
+    buildTypes {
+       release {
+          // Deactivate R8.
+          minifyEnabled false
+       }
+    }
+}
+```
+
+4. Configure variants to be processed with ProGuard using the `proguard` block:
+
+```Groovy
+android {
+    ...
+}
+
+proguard {
+   configurations {
+      release {
+         defaultConfiguration 'proguard-android-optimize.txt'
+         configuration 'proguard-project.txt'
+      }
+   }
+}
+```
+
+You can then build your application as usual:
+
+```shell
+gradle assembleRelease
+```
+
+The repository contains some sample configurations in the [examples](examples)
+directory. Notably, [examples/android](examples/android-plugin) has a small working
+Android project that applies the ProGuard Gradle plugin.
+
+### Integrated ProGuard (AGP < 7.0)
+
+If you have an older Android Gradle project you can enable ProGuard instead of the default R8 compiler:
 
 1. Disable R8 in your `gradle.properties`:
 
@@ -88,7 +158,7 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.0.1')
+                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.1.0-beta5')
             }
         }
     }
@@ -120,8 +190,8 @@ gradle assembleRelease
 ```
 
 The repository contains some sample configurations in the [examples](examples)
-directory. Notably, [examples/android](examples/android) has a small working
-Android project.
+directory. Notably, [examples/android-agp3-agp4](examples/android-agp3-agp4) has a small working
+Android project that uses the old integration.
 
 ## ✨ Features
 
