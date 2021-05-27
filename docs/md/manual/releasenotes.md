@@ -6,38 +6,38 @@
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
 | 7.1.0  | DGD-3377 | CORE     | Fix potentially incorrect class merging optimizations that could cause a run-time `NullPointerException`.
-| 7.1.0  |          | GRADLE   | New AGP 7.0 compatible [Gradle plugin](setup/gradleplugin.md).
-| 7.1.0  | DGD-3264 | CORE     | Reduced false positives when using `-addconfigurationdebugging`.
-| 7.1.0  | DGD-0013 | CORE     | Improved error message when missing classes result in an incomplete class hierarchy.
-| 7.1.0  | PGD-0106 | GRADLE   | Fixed Gradle task error when using an existing `-outjar` directory.
-| 7.1.0  | PGD-0136 | GRADLE   | Fixed Gradle task compatibility with Gradle 7.
-| 7.1.0  | DGD-1995 | CORE     | Fixed potential class merging optimization issue resulting in `ArrayIndexOutOfBoundsException` during build.
-| 7.1.0  | DGD-0567 | CORE     | Fixed enum unboxing for already obfuscated code.
-| 7.1.0  | PGD-0018, PGD-0019 | CORE | Fixed potential parameter removal optimization issue when optimizing constructors.
-| 7.1.0  |          | CORE     | Added optimization `method/specialization/returntype`.
-| 7.1.0  |          | CORE     | Added optimization `method/specialization/parametertype`.
-| 7.1.0  |          | CORE     | Added optimization `method/generalization/class`.
-| 7.1.0  |          | CORE     | Added optimization `field/specialization/type`.
-| 7.1.0  |          | CORE     | Added optimization `field/generalization/class`.
-| 7.1.0  | DGD-2587 | CORE     | Fixed potential `IllegalArgumentException (Stack size becomes negative) in `class/merging/wrapper` optimization.
-| 7.1.0  | DGD-1564 | CORE     | Fixed wrapper class merging with `new`/`dup`/`astore` sequences.
+| 7.1.0  |          | GRADLE   | Add new AGP 7.0 compatible [Gradle plugin](setup/gradleplugin.md).
+| 7.1.0  | DGD-3264 | CORE     | Reduce false positives when using `-addconfigurationdebugging`.
+| 7.1.0  | DGD-0013 | CORE     | Improve error message when missing classes result in an incomplete class hierarchy.
+| 7.1.0  | PGD-0106 | GRADLE   | Fix Gradle task error when using an existing `-outjar` directory.
+| 7.1.0  | PGD-0136 | GRADLE   | Fix Gradle task compatibility with Gradle 7.
+| 7.1.0  | DGD-1995 | CORE     | Fix potential class merging optimization issue resulting in `ArrayIndexOutOfBoundsException` during build.
+| 7.1.0  | DGD-0567 | CORE     | Fix enum unboxing for already obfuscated code.
+| 7.1.0  | PGD-0018, PGD-0019 | CORE | Fix potential parameter removal optimization issue when optimizing constructors.
+| 7.1.0  |          | CORE     | Add optimization `method/specialization/returntype`.
+| 7.1.0  |          | CORE     | Add optimization `method/specialization/parametertype`.
+| 7.1.0  |          | CORE     | Add optimization `method/generalization/class`.
+| 7.1.0  |          | CORE     | Add optimization `field/specialization/type`.
+| 7.1.0  |          | CORE     | Add optimization `field/generalization/class`.
+| 7.1.0  | DGD-2587 | CORE     | Fix potential `IllegalArgumentException (Stack size becomes negative) in `class/merging/wrapper` optimization.
+| 7.1.0  | DGD-1564 | CORE     | Fix wrapper class merging with `new`/`dup`/`astore` sequences.
 | 7.1.0  |          | CORE     | Prevent injected classes from being merged into other classes.
-| 7.1.0  | DGD-1471 | CORE     | Improved speed of horizontal class merging.
-| 7.1.0  |          | CORE     | Improved general performance and stability of optimization.
-| 7.1.0  | DGD-3036 | CORE     | Fixed potential incorrect removal of exception handlers during optimization.
-| 7.1.0  | DGD-3110 | CORE     | Improved GSON support.
-| 7.1.0  | DGD-3289 | CORE     | Fixed potential, incorrect advanced code optimizations.
-| 7.1.0  | PGD-0037 | CORE     | Disallowed merging of nest hosts or members during class merging optimization.
-| 7.1.0  | PGD-0052 | CORE     | Fixed packaging of Ant plugin.
-| 7.1.0  | PGD-0047 | CORE     | Fixed potential IllegalArgumentException in GSON optimization.
-| 7.1.0  | PGD-0110 | CORE     | Fixed writing of kept directories.
-| 7.1.0  | PGC-0015 | CORE     | Added support for Java 16.
-| 7.1.0  | PGD-0064 | CORE     | Added support for Java 14 and 15.
-| 7.1.0  | PGD-0064 | CORE     | Added support for sealed classes (permitted subclasses attributes).
-| 7.1.0  | PGD-0064 | CORE     | Added support for record attributes.
-| 7.1.0  | DGD-2390 | CORE     | Fixed storage and alignment of uncompressed zip entries.
-| 7.1.0  | DGD-2338 | CORE     | Fixed processing of constant boolean arrays.
-| 7.1.0  | PGD-0066 | CORE     | Removed Gradle plugin dependency on Android build tools.
+| 7.1.0  | DGD-1471 | CORE     | Improve speed of horizontal class merging.
+| 7.1.0  |          | CORE     | Improve general performance and stability of optimization.
+| 7.1.0  | DGD-3036 | CORE     | Fix potential incorrect removal of exception handlers during optimization.
+| 7.1.0  | DGD-3110 | CORE     | Improve GSON support.
+| 7.1.0  | DGD-3289 | CORE     | Fix potential, incorrect advanced code optimizations.
+| 7.1.0  | PGD-0037 | CORE     | Disallow merging of nest hosts or members during class merging optimization.
+| 7.1.0  | PGD-0052 | CORE     | Fix packaging of Ant plugin.
+| 7.1.0  | PGD-0047 | CORE     | Fix potential IllegalArgumentException in GSON optimization.
+| 7.1.0  | PGD-0110 | CORE     | Fix writing of kept directories.
+| 7.1.0  | PGC-0015 | CORE     | Add support for Java 16.
+| 7.1.0  | PGD-0064 | CORE     | Add support for Java 14 and 15.
+| 7.1.0  | PGD-0064 | CORE     | Add support for sealed classes (permitted subclasses attributes).
+| 7.1.0  | PGD-0064 | CORE     | Add support for record attributes.
+| 7.1.0  | DGD-2390 | CORE     | Fix storage and alignment of uncompressed zip entries.
+| 7.1.0  | DGD-2338 | CORE     | Fix processing of constant boolean arrays.
+| 7.1.0  | PGD-0066 | CORE     | Remove Gradle plugin dependency on Android build tools.
 
 ## Version 7.0 (Jun 2020)
 
