@@ -156,6 +156,8 @@ distributions {
             from(rootDir) {
                 include 'bin/'
                 include 'examples/'
+                exclude 'examples/*/build'
+                exclude 'examples/*/.gradle'
                 include 'LICENSE'
                 include 'LICENSE_exception.md'
             }
