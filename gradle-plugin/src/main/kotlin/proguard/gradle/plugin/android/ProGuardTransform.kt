@@ -73,9 +73,10 @@ class ProGuardTransform(
 
         proguardTask.libraryjars(createLibraryJars(transformInvocation.referencedInputs))
 
-        // TODO: collect aapt rules
         proguardTask.configuration(project.tasks.getByPath(COLLECT_CONSUMER_RULES_TASK_NAME + variantName.capitalize()).outputs.files)
         proguardTask.configuration(variantBlock.configurations.map { project.file(it.path) })
+
+        getAaptRulesFile()?.let { proguardTask.configuration(it) }
 
         val mappingDir = File("${project.buildDir.absolutePath}/outputs/proguard/$variantName/mapping")
         if (!mappingDir.exists()) mappingDir.mkdirs()
@@ -114,7 +115,9 @@ class ProGuardTransform(
             .flatMap { it.configurations }
             .filterIsInstance<UserProGuardConfiguration>()
             .map { SecondaryFile(project.file(it.path), false) }
-            .toMutableSet()
+            .toMutableSet().apply {
+                getAaptRulesFile()?.let { this.add(SecondaryFile(project.file(it), false)) }
+            }
 
     private fun createIOEntries(
         inputs: Collection<TransformInput>,
@@ -140,6 +143,11 @@ class ProGuardTransform(
                 androidExtension.libraryRequests.map {
                     File(androidExtension.sdkDirectory, "platforms/${androidExtension.compileSdkVersion}/optional/${it.name}.jar")
                 }
+
+    private fun getAaptRulesFile() = androidExtension.aaptAdditionalParameters
+            .zipWithNext { cmd, param -> if (cmd == "--proguard") param else null }
+            .filterNotNull()
+            .firstOrNull()
 }
 
 typealias ProGuardIOEntry = Pair<File, File>

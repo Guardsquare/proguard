@@ -35,6 +35,7 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.util.VersionNumber
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
@@ -57,6 +58,8 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             is LibraryExtension -> ANDROID_LIBRARY
             else -> throw GradleException("The ProGuard Gradle plugin can only be used on Android application and library projects")
         }
+
+        configureAapt(project)
 
         androidExtension.registerTransform(
                 ProGuardTransform(project, proguardBlock, projectType, androidExtension),
@@ -91,6 +94,19 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
                     else -> throw GradleException("The configured variants ${joinToString(separator = "', '", prefix = "'", postfix = "'") { it.name }} do not exist")
                 }
             }
+        }
+    }
+
+    private fun configureAapt(project: Project) {
+        File("${project.buildDir.absolutePath}/intermediates/proguard/configs").mkdirs()
+        if (!androidExtension.aaptAdditionalParameters.contains("--proguard")) {
+            androidExtension.aaptAdditionalParameters.addAll(listOf(
+                    "--proguard",
+                    "${project.buildDir.absolutePath}/intermediates/proguard/configs/aapt_rules.pro"))
+        }
+
+        if (!androidExtension.aaptAdditionalParameters.contains("--proguard-conditional-keep-rules")) {
+            androidExtension.aaptAdditionalParameters.add("--proguard-conditional-keep-rules")
         }
     }
 
@@ -190,3 +206,34 @@ fun Iterable<VariantConfiguration>.findVariantConfiguration(variantName: String)
 
 fun Iterable<VariantConfiguration>.hasVariantConfiguration(variantName: String) =
         this.findVariantConfiguration(variantName) != null
+
+val agpVersion: VersionNumber
+    get() { // TODO update to use AGP7 version API
+        return try {
+            val clazz = Class.forName("com.android.builder.model.Version")
+            val version = clazz.fields.first { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }.get(null) as String
+            return VersionNumber.parse(version)
+        } catch (e: ClassNotFoundException) {
+            VersionNumber.UNKNOWN
+        }
+    }
+
+/**
+ * Extension property that wraps the aapt additional parameters, to take into account
+ * API changes.
+ */
+@Suppress("UNCHECKED_CAST")
+val BaseExtension.aaptAdditionalParameters: MutableCollection<String>
+    get() {
+        val aaptOptionsGetter = if (agpVersion.major >= 7) "getAndroidResources" else "getAaptOptions"
+        val aaptOptions = this.javaClass.methods.first { it.name == aaptOptionsGetter }.invoke(this)
+        val additionalParameters = aaptOptions.javaClass.methods.first { it.name == "getAdditionalParameters" }.invoke(aaptOptions)
+        return if (additionalParameters != null) {
+            additionalParameters as MutableCollection<String>
+        } else {
+            // additionalParameters may be null because AGP 4.0.0 does not set a default empty list
+            val newAdditionalParameters = ArrayList<String>()
+            aaptOptions.javaClass.methods.first { it.name == "setAdditionalParameters" }.invoke(aaptOptions, newAdditionalParameters)
+            newAdditionalParameters
+        }
+    }

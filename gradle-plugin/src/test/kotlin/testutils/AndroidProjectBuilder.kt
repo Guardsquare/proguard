@@ -108,6 +108,12 @@ class AndroidProject(
         modules.add(module)
     }
 
+    fun module(name: String): Module? = modules.find { it.name == name }
+
+    fun moduleBuildDir(name: String): File? = with(module(name)) {
+        if (this != null) File(rootDir, "${this.name}/build") else null
+    }
+
     fun create(): AndroidProject {
         rootDir.mkdirs()
         File(rootDir, "build.gradle").writeText(buildDotGradle)
