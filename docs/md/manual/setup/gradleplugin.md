@@ -18,7 +18,7 @@ including the following in your root level `build.gradle(.kts)` file:
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:x.y.z'    // The Android Gradle plugin.
-            classpath 'com.guardsquare:proguard-gradle:7.1.0'  // The ProGuard Gradle plugin.
+            classpath 'com.guardsquare:proguard-gradle:7.1.0-beta05'  // The ProGuard Gradle plugin.
         }
     }
     ```
@@ -31,7 +31,7 @@ including the following in your root level `build.gradle(.kts)` file:
         }
         dependencies {
             classpath("com.android.tools.build:gradle:x.y.z")  // The Android Gradle plugin.
-            classpath("com.guardsquare:proguard-gradle:7.1.0") // The ProGuard Gradle plugin.
+            classpath("com.guardsquare:proguard-gradle:7.1.0-beta05") // The ProGuard Gradle plugin.
         }
     }
     ```
@@ -163,7 +163,7 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.1.0')
+                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.1.0-beta05')
             }
         }
     }
