@@ -160,6 +160,7 @@ public class GPL
     private static boolean isKnown(String packageName)
     {
         return packageName.startsWith("java")                   ||
+               packageName.startsWith("jdk.internal.reflect")   ||
                packageName.startsWith("sun.reflect")            ||
                packageName.startsWith("proguard")               ||
                packageName.startsWith("org.apache.tools.ant")   ||
