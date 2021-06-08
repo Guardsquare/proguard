@@ -26,6 +26,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.BaseVariant
+import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import java.io.File
 import org.gradle.api.GradleException
@@ -43,6 +44,7 @@ import proguard.gradle.plugin.android.dsl.ProGuardConfiguration
 import proguard.gradle.plugin.android.dsl.UserProGuardConfiguration
 import proguard.gradle.plugin.android.dsl.VariantConfiguration
 import proguard.gradle.plugin.android.tasks.CollectConsumerRulesTask
+import proguard.gradle.plugin.android.tasks.PrepareProguardConfigDirectoryTask
 import proguard.gradle.plugin.android.transforms.AndroidConsumerRulesTransform
 import proguard.gradle.plugin.android.transforms.ArchiveConsumerRulesTransform
 
@@ -98,7 +100,10 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
     }
 
     private fun configureAapt(project: Project) {
-        File("${project.buildDir.absolutePath}/intermediates/proguard/configs").mkdirs()
+        val createDirectoryTask = project.tasks.register("prepareProguardConfigDirectory", PrepareProguardConfigDirectoryTask::class.java)
+        project.tasks.withType(LinkApplicationAndroidResourcesTask::class.java) {
+            it.dependsOn(createDirectoryTask)
+        }
         if (!androidExtension.aaptAdditionalParameters.contains("--proguard")) {
             androidExtension.aaptAdditionalParameters.addAll(listOf(
                     "--proguard",
