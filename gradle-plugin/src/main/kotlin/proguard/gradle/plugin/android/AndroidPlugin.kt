@@ -63,6 +63,8 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
 
         configureAapt(project)
 
+        warnOldProguardVersion(project)
+
         androidExtension.registerTransform(
                 ProGuardTransform(project, proguardBlock, projectType, androidExtension),
                 collectConsumerRulesTask)
@@ -186,6 +188,34 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         project.dependencies.registerTransform(AndroidConsumerRulesTransform::class.java) {
             it.from.attribute(ATTRIBUTE_ARTIFACT_TYPE, "android-consumer-proguard-rules")
             it.to.attribute(ATTRIBUTE_ARTIFACT_TYPE, ARTIFACT_TYPE_CONSUMER_RULES)
+        }
+    }
+
+    private fun warnOldProguardVersion(project: Project) {
+        if (agpVersion.major >= 7) return
+        project.rootProject.buildscript.configurations.all {
+            it.resolvedConfiguration.resolvedArtifacts.find {
+                it.moduleVersion.id.module.group.equals("net.sf.proguard") && it.moduleVersion.id.module.name.equals("proguard-gradle")
+            }?.let {
+                project.logger.warn(
+"""An older version of ProGuard has been detected on the classpath which can clash with ProGuard Gradle Plugin.
+This is likely due to a transitive dependency introduced by Android Gradle plugin.
+
+Please update your configuration to exclude the old version of ProGuard:
+
+buildscript {
+    // ... 
+    dependencies {
+        // ...
+        classpath("com.android.tools.build:gradle:x.y.z") {
+            exclude group: "net.sf.proguard", module: "proguard-gradle"
+            // or for kotlin (build.gradle.kts):
+            // exclude(group = "net.sf.proguard", module = "proguard-gradle")
+        }
+   }
+}"""
+                )
+            }
         }
     }
 
