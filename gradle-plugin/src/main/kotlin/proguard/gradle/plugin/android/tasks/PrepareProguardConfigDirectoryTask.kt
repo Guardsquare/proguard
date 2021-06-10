@@ -1,10 +1,9 @@
 package proguard.gradle.plugin.android.tasks
 
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 
 abstract class PrepareProguardConfigDirectoryTask : DefaultTask() {
 
