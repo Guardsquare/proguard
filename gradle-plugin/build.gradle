@@ -18,7 +18,7 @@ def agpVersion = '4.1.0'
 gradlePlugin {
     plugins {
         proguardPlugin {
-            id = 'proguard'
+            id = 'com.guardsquare.proguard'
             implementationClass = 'proguard.gradle.plugin.ProGuardPlugin'
         }
     }

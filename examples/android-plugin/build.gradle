@@ -14,7 +14,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'proguard'
+apply plugin: 'com.guardsquare.proguard'
 
 repositories {
     google()       // For the Android plugin.

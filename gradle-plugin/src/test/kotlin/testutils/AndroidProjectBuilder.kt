@@ -173,7 +173,7 @@ enum class ProjectType(val plugin: String) {
 private fun defaultBuildDotGradle(type: ProjectType) = """
     plugins {
         id '${type.plugin}'
-        id 'proguard'
+        id 'com.guardsquare.proguard'
     }
     android {
         compileSdkVersion 29
@@ -192,7 +192,7 @@ private fun defaultBuildDotGradle(type: ProjectType) = """
 private val defaultBaseFeatureBuildDotGradle = """
     plugins {
         id 'com.android.application'
-        id 'proguard'
+        id 'com.guardsquare.proguard
     }
     android {
         compileSdkVersion 29
@@ -212,7 +212,7 @@ private val defaultBaseFeatureBuildDotGradle = """
 private val defaultDynamicFeatureBuildDotGradle = """
     plugins {
         id 'com.android.dynamic-feature'
-        id 'proguard'
+        id 'com.guardsquare.proguard'
     }
     android {
         compileSdkVersion 29

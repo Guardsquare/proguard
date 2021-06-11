@@ -21,7 +21,7 @@ class ProGuardPluginTest : FreeSpec({
         val project = autoClose(AndroidProject().apply {
             addModule(applicationModule("app", buildDotGradle = """
                     plugins {
-                        id 'proguard'
+                        id 'com.guardsquare.proguard'
                     }
                     """.trimIndent()))
         }.create())
@@ -30,7 +30,7 @@ class ProGuardPluginTest : FreeSpec({
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
 
             "Then the build should fail" {
-                result.output shouldContain "Failed to apply plugin 'proguard'"
+                result.output shouldContain "Failed to apply plugin 'com.guardsquare.proguard'"
             }
         }
     }
@@ -60,7 +60,7 @@ class ProGuardPluginTest : FreeSpec({
                 addModule(applicationModule("app", buildDotGradle = """
                             plugins {
                                 id 'com.android.application'
-                                id 'proguard'
+                                id 'com.guardsquare.proguard'
                             }
 
                             android {

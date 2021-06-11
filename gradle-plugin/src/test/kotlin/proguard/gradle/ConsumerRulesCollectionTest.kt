@@ -28,7 +28,7 @@ class ConsumerRulesCollectionTest : FreeSpec({
             addModule(applicationModule("app", buildDotGradle = """
             plugins {
                 id 'com.android.application'
-                id 'proguard'
+                id 'com.guardsquare.proguard'
             }
 
             android {

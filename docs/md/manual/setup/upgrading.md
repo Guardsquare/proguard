@@ -67,7 +67,7 @@ deprecated:
     === "Groovy"
         ```Groovy
         apply plugin: 'com.android.application'
-        apply plugin: 'proguard'
+        apply plugin: 'com.guardsquare.proguard'
         ```
 
     === "Kotlin"

@@ -94,7 +94,7 @@ buildscript {
 
 ```Groovy
  apply plugin: 'com.android.application'
- apply plugin: 'proguard'
+ apply plugin: 'com.guardsquare.proguard'
 ```
 
 3. ProGuard expects unobfuscated class files as input. Therefore, other obfuscators such as R8 have to be disabled.
