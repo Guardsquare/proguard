@@ -84,6 +84,49 @@ public class KeepClassSpecification extends ClassSpecification
     }
 
 
+    /**
+     * Creates a new KeepClassSpecification.
+     *
+     * @param markClassesAndMembers specifies whether to mark the classes.
+     * @param markConditionally     specifies whether to mark the classes and
+     *                              class members conditionally. If true,
+     *                              classes and class members are marked, on
+     *                              the condition that all specified class
+     *                              members are present.
+     * @param markDescriptorClasses specifies whether to mark the classes in
+     *                              the descriptors of the marked class members.
+     * @param markCodeAttributes    specified whether to mark the code attributes
+     *                              of the marked class methods.
+     * @param allowShrinking        specifies whether shrinking is allowed.
+     * @param allowOptimization     specifies whether optimization is allowed.
+     * @param allowObfuscation      specifies whether obfuscation is allowed.
+     * @param condition             an optional extra condition.
+     * @param classSpecification    the specification of classes and class
+     *                              members.
+     */
+    @Deprecated
+    public KeepClassSpecification(boolean            markClassesAndMembers,
+                                  boolean            markConditionally,
+                                  boolean            markDescriptorClasses,
+                                  boolean            markCodeAttributes,
+                                  boolean            allowShrinking,
+                                  boolean            allowOptimization,
+                                  boolean            allowObfuscation,
+                                  ClassSpecification condition,
+                                  ClassSpecification classSpecification)
+    {
+        this(markClassesAndMembers,
+             markClassesAndMembers,
+             markConditionally,
+             markDescriptorClasses,
+             markCodeAttributes,
+             allowShrinking,
+             allowOptimization,
+             allowObfuscation,
+             condition,
+             classSpecification);
+    }
+
     // Implementations for Object.
 
     @Override
