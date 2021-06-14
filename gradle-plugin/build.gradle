@@ -69,6 +69,11 @@ task fatJar(type: ShadowJar) {
     archiveFileName.set("proguard-gradle-${version}.jar")
     from sourceSets.main.output
     configurations = [project.configurations.fatJar]
+    manifest {
+        attributes(
+                'Main-Class': 'proguard.ProGuard',
+                'Implementation-Version': archiveVersion.get())
+    }
 }
 
 tasks.withType(Test).configureEach {
