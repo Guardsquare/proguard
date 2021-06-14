@@ -193,15 +193,12 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
 
     private fun warnOldProguardVersion(project: Project) {
         if (agpVersion.major >= 7) return
-        project.rootProject.buildscript.configurations.all {
-            it.resolvedConfiguration.resolvedArtifacts.find {
-                it.moduleVersion.id.module.group.equals("net.sf.proguard") && it.moduleVersion.id.module.name.equals("proguard-gradle")
-            }?.let {
-                project.logger.warn(
+
+        val message =
 """An older version of ProGuard has been detected on the classpath which can clash with ProGuard Gradle Plugin.
 This is likely due to a transitive dependency introduced by Android Gradle plugin.
 
-Please update your configuration to exclude the old version of ProGuard:
+Please update your configuration to exclude the old version of ProGuard, for example:
 
 buildscript {
     // ... 
@@ -214,7 +211,19 @@ buildscript {
         }
    }
 }"""
-                )
+        val proguardTask = Class.forName("proguard.gradle.ProGuardTask")
+        // This method does not exist in the ProGuard version distributed with AGP.
+        // It's used by `ProGuardTransform`, so throw an exception if it doesn't exist.
+        if (proguardTask.methods.count { it.name == "extraJar" } == 0) {
+            throw GradleException(message)
+        }
+
+        // Otherwise, only print a warning since it may or may not cause a problem
+        project.rootProject.buildscript.configurations.all {
+            it.resolvedConfiguration.resolvedArtifacts.find {
+                it.moduleVersion.id.module.group.equals("net.sf.proguard") && it.moduleVersion.id.module.name.equals("proguard-gradle")
+            }?.let {
+                project.logger.warn(message)
             }
         }
     }
