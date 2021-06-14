@@ -118,4 +118,145 @@ class AaptRulesTest : FreeSpec({
             }
         }
     }
+
+    "Given a project with a configuration for a variant in a project that has caching enabled" - {
+        val project = autoClose(AndroidProject(gradleDotProperties = "org.gradle.caching=true").apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'com.guardsquare.proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                defaultConfig {
+                    versionCode 1
+                }
+
+                buildTypes {
+                    release {
+                        minifyEnabled false
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                    debug {
+                        defaultConfiguration 'proguard-android-debug.txt'
+                    }
+                }
+            }""".trimIndent()))
+        }.create())
+
+        "When assembleDebug is executed" - {
+            val aaptRules = File("${project.moduleBuildDir("app")}/intermediates/proguard/configs/aapt_rules.pro")
+            // run once, then delete the aapt_rules file
+            val result0 = createGradleRunner(project.rootDir, testKitDir, "assembleDebug").build()
+            aaptRules.delete()
+            // running again should re-generate the rules file
+            val result = createGradleRunner(project.rootDir, testKitDir, "clean", "assembleDebug", "--info").build()
+
+            "The build should succeed" {
+                result0.task(":app:assembleDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+                result.task(":app:assembleDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+
+            "The rules file should be passed to ProGuard" {
+                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+            }
+
+            "The the AAPT rules should be generated" {
+                aaptRules.shouldExist()
+                aaptRules.readText() shouldContain "-keep class com.example.app.MainActivity { <init>(); }"
+            }
+        }
+
+        "When bundleDebug is executed" - {
+            val aaptRules = File("${project.moduleBuildDir("app")}/intermediates/proguard/configs/aapt_rules.pro")
+            // run once, then delete the aapt_rules file
+            val result0 = createGradleRunner(project.rootDir, testKitDir, "clean", "bundleDebug").build()
+            aaptRules.delete()
+            // running again should re-generate the rules file
+            val result = createGradleRunner(project.rootDir, testKitDir, "clean", "bundleDebug", "--info").build()
+
+            "The build should succeed" {
+                result0.task(":app:bundleDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+                result.task(":app:bundleDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+
+            "The rules file should be passed to ProGuard" {
+                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+            }
+
+            "The the AAPT rules should be generated" {
+                aaptRules.shouldExist()
+                aaptRules.readText() shouldContain "-keep class com.example.app.MainActivity { <init>(); }"
+            }
+        }
+    }
+
+    "Given a project with a flavor configuration for a variant in a project that has caching enabled" - {
+        val project = autoClose(AndroidProject(gradleDotProperties = "org.gradle.caching=true").apply {
+            addModule(applicationModule("app", buildDotGradle = """
+            plugins {
+                id 'com.android.application'
+                id 'com.guardsquare.proguard'
+            }
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled false
+                    }
+                }
+
+                flavorDimensions "version"
+                productFlavors {
+                    demo {
+                        dimension "version"
+                        applicationIdSuffix ".demo"
+                        versionNameSuffix "-demo"
+                    }
+                    full {
+                        dimension "version"
+                        applicationIdSuffix ".full"
+                        versionNameSuffix "-full"
+                    }
+                }
+            }
+
+            proguard {
+                configurations {
+                    demoDebug {
+                        defaultConfiguration 'proguard-android-debug.txt'
+                    }
+                }
+            }""".trimIndent()))
+        }.create())
+
+        "When the project is evaluated" - {
+            val aaptRules = File("${project.moduleBuildDir("app")}/intermediates/proguard/configs/aapt_rules.pro")
+            // run once, then delete the aapt_rules file
+            val result0 = createGradleRunner(project.rootDir, testKitDir, "assembleDebug").build()
+            aaptRules.delete()
+            // running again should re-generate the rules file
+            val result = createGradleRunner(project.rootDir, testKitDir, "clean", "assembleDebug", "--info").build()
+
+            "The build should succeed" {
+                result0.task(":app:assembleDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+                result.task(":app:assembleDebug")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+
+            "The rules file should be passed to ProGuard" {
+                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+            }
+
+            "The the AAPT rules should be generated" {
+                aaptRules.shouldExist()
+                aaptRules.readText() shouldContain "-keep class com.example.app.MainActivity { <init>(); }"
+            }
+        }
+    }
 })

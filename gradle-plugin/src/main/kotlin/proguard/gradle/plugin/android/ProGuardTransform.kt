@@ -76,7 +76,12 @@ class ProGuardTransform(
         proguardTask.configuration(project.tasks.getByPath(COLLECT_CONSUMER_RULES_TASK_NAME + variantName.capitalize()).outputs.files)
         proguardTask.configuration(variantBlock.configurations.map { project.file(it.path) })
 
-        getAaptRulesFile()?.let { proguardTask.configuration(it) }
+        val aaptRulesFile = getAaptRulesFile()
+        if (aaptRulesFile != null && File(aaptRulesFile).exists()) {
+            proguardTask.configuration(aaptRulesFile)
+        } else {
+            project.logger.warn("AAPT rules file not found: you may need to apply some extra keep rules for classes referenced from resources in your own ProGuard configuration.")
+        }
 
         val mappingDir = File("${project.buildDir.absolutePath}/outputs/proguard/$variantName/mapping")
         if (!mappingDir.exists()) mappingDir.mkdirs()
@@ -147,7 +152,7 @@ class ProGuardTransform(
     private fun getAaptRulesFile() = androidExtension.aaptAdditionalParameters
             .zipWithNext { cmd, param -> if (cmd == "--proguard") param else null }
             .filterNotNull()
-            .firstOrNull()
+            .firstOrNull { File(it).exists() }
 }
 
 typealias ProGuardIOEntry = Pair<File, File>

@@ -121,6 +121,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         val matchingConfiguration = proguardBlock.configurations.findVariantConfiguration(variant.name)
         if (matchingConfiguration != null) {
             verifyNotMinified(variant)
+            disableAaptOutputCaching(project, variant)
 
             collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
                     project,
@@ -188,6 +189,21 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         project.dependencies.registerTransform(AndroidConsumerRulesTransform::class.java) {
             it.from.attribute(ATTRIBUTE_ARTIFACT_TYPE, "android-consumer-proguard-rules")
             it.to.attribute(ATTRIBUTE_ARTIFACT_TYPE, ARTIFACT_TYPE_CONSUMER_RULES)
+        }
+    }
+
+    // TODO: improve loading AAPT rules so that we don't rely on this
+    private fun disableAaptOutputCaching(project: Project, variant: BaseVariant) {
+        val cachingEnabled = project.hasProperty("org.gradle.caching") &&
+                (project.findProperty("org.gradle.caching") as String).toBoolean()
+
+        if (cachingEnabled) {
+            // ensure that the aapt_rules.pro has been generated, so ProGuard can use it
+            val processResourcesTask = project.tasks.findByName("process${variant.name.capitalize()}Resources")
+            processResourcesTask?.outputs?.doNotCacheIf("We need to regenerate the aapt_rules.pro file, sorry!") {
+                project.logger.debug("Disabling AAPT caching for ${variant.name}")
+                !File("${project.buildDir.absolutePath}/intermediates/proguard/configs/aapt_rules.pro").exists()
+            }
         }
     }
 

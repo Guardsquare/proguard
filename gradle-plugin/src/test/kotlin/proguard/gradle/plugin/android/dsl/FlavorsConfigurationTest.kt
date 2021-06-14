@@ -8,7 +8,10 @@
 package proguard.gradle.plugin.android.dsl
 
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import java.io.File
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import testutils.AndroidProject
 import testutils.applicationModule
@@ -81,6 +84,12 @@ class FlavorsConfigurationTest : FreeSpec({
 
             "ProGuard should not be executed for non-matching build variants" {
                 buildResult.task(":app:transformClassesAndResourcesWithProguardTransformForFullDebug")?.outcome shouldBe null
+            }
+
+            "AAPT rules should be generated" - {
+                val aaptRules = File("${project.moduleBuildDir("app")}/intermediates/proguard/configs/aapt_rules.pro")
+                aaptRules.shouldExist()
+                aaptRules.readText() shouldContain "-keep class com.example.app.MainActivity { <init>(); }"
             }
         }
     }

@@ -8,11 +8,15 @@
 package proguard.gradle
 
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import org.gradle.testkit.runner.TaskOutcome
 import testutils.AndroidProject
+import testutils.SourceFile
 import testutils.applicationModule
 import testutils.createGradleRunner
 import testutils.createTestKitDir
+import testutils.libraryModule
 
 class ProGuardPluginTest : FreeSpec({
     val testKitDir = createTestKitDir()
@@ -85,6 +89,46 @@ class ProGuardPluginTest : FreeSpec({
 
             "Then the build should fail" {
                 result.output shouldContain "The ProGuard plugin only supports Android plugin 4 and higher."
+            }
+        }
+    }
+
+    "Given a library project" - {
+        val project = autoClose(AndroidProject().apply {
+            addModule(libraryModule("lib", buildDotGradle = """
+            plugins {
+                id 'com.android.library'
+                id 'com.guardsquare.proguard'
+            }
+
+            android {
+                compileSdkVersion 30
+
+                buildTypes {
+                    release {
+                        minifyEnabled false
+                    }
+                    debug   {}
+                }
+            }
+
+            proguard {
+                configurations {
+                    release {
+                        defaultConfiguration 'proguard-android.txt'
+                        configuration 'proguard-project.txt'
+                    }
+                }
+            }
+            """.trimIndent(),
+            additionalFiles = listOf(SourceFile("proguard-project.txt", "-keep class **"))))
+        }.create())
+
+        "When the project is assembled" - {
+            val result = createGradleRunner(project.rootDir, testKitDir, "assembleRelease").build()
+
+            "Then the build should succeed" {
+                result.task(":lib:assembleRelease")?.outcome shouldBe TaskOutcome.SUCCESS
             }
         }
     }
