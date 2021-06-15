@@ -39,7 +39,7 @@ import proguard.classfile.visitor.*;
  *
  * @author Eric Lafortune
  */
-class      NameMarker
+public class      NameMarker
 implements ClassVisitor,
            MemberVisitor,
            AttributeVisitor,
