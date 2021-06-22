@@ -42,20 +42,17 @@ implements   ClassPoolVisitor
     private static final int THREAD_COUNT;
     static
     {
-        Integer threads = null;
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int threads = Math.min(1, availableProcessors - 1);
         try
         {
             String threadCountString = System.getProperty("parallel.threads");
             if (threadCountString != null)
             {
-                threads = Integer.parseInt(threadCountString);
+                threads = Math.min(Integer.parseInt(threadCountString), availableProcessors);
             }
         }
         catch (Exception ignored) {}
-
-        threads = threads == null ?
-            Runtime.getRuntime().availableProcessors() - 1 :
-            Math.min(threads, Runtime.getRuntime().availableProcessors());
 
         THREAD_COUNT = threads;
     }
