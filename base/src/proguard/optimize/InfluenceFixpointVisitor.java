@@ -57,7 +57,7 @@ implements   ClassPoolVisitor
             Runtime.getRuntime().availableProcessors() - 1 :
             Math.min(threads, Runtime.getRuntime().availableProcessors());
 
-        THREAD_COUNT = threads;
+        THREAD_COUNT = Math.max(1, threads);
     }
 
 

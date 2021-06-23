@@ -5,6 +5,7 @@
 
 | Version| Issue    | Module   | Explanation
 |--------|----------|----------|----------------------------------
+| 7.1.0  | T3796    | CORE     | Prevent potential `IllegalArgumentException` during optimisation on single-threaded machines.
 | 7.1.0  | DGD-3377 | CORE     | Fix potentially incorrect class merging optimizations that could cause a run-time `NullPointerException`.
 | 7.1.0  |          | GRADLE   | Add new AGP 7.0 compatible [Gradle plugin](setup/gradleplugin.md).
 | 7.1.0  | DGD-3264 | CORE     | Reduce false positives when using `-addconfigurationdebugging`.
