@@ -595,7 +595,7 @@ public class Obfuscator
         MemberCounter obfuscatedMethodCounter = new MemberCounter();
 
         ClassVisitor classRenamer =
-            new ClassRenamer(
+            new proguard.obfuscate.ClassRenamer(
                 new ProgramClassFilter(
                 obfuscatedClassCounter),
 

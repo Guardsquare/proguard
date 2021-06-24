@@ -39,7 +39,7 @@ import java.util.*;
  * classes it visits, and for their class members. The actual renaming is
  * done afterward.
  *
- * @see ClassRenamer
+ * @see proguard.obfuscate.ClassRenamer
  *
  * @author Eric Lafortune
  */

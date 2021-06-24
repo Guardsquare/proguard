@@ -35,7 +35,7 @@ import java.util.Stack;
  * This ClassVisitor prints out the renamed classes and class members with
  * their old names and new names.
  *
- * @see ClassRenamer
+ * @see proguard.obfuscate.ClassRenamer
  *
  * @author Eric Lafortune
  */
