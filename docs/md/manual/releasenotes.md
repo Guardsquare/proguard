@@ -1,44 +1,86 @@
-!!! warning
-    Version 7.1 is currently in development and not yet released. The release notes below show the upcoming fixes that will be in 7.1. You can already try 7.1 out by [building ProGuard yourself](building.md).
+## Version 7.1 (June 2021)
 
-## Version 7.1
+### AGP 7 compatible Gradle plugin
 
-| Version| Issue    | Module   | Explanation
-|--------|----------|----------|----------------------------------
-| 7.1.0  | T3796    | CORE     | Prevent potential `IllegalArgumentException` during optimisation on single-threaded machines.
-| 7.1.0  | DGD-3377 | CORE     | Fix potentially incorrect class merging optimizations that could cause a run-time `NullPointerException`.
-| 7.1.0  |          | GRADLE   | Add new AGP 7.0 compatible [Gradle plugin](setup/gradleplugin.md).
-| 7.1.0  | DGD-3264 | CORE     | Reduce false positives when using `-addconfigurationdebugging`.
-| 7.1.0  | DGD-0013 | CORE     | Improve error message when missing classes result in an incomplete class hierarchy.
-| 7.1.0  | PGD-0106 | GRADLE   | Fix Gradle task error when using an existing `-outjar` directory.
-| 7.1.0  | PGD-0136 | GRADLE   | Fix Gradle task compatibility with Gradle 7.
-| 7.1.0  | DGD-1995 | CORE     | Fix potential class merging optimization issue resulting in `ArrayIndexOutOfBoundsException` during build.
-| 7.1.0  | DGD-0567 | CORE     | Fix enum unboxing for already obfuscated code.
-| 7.1.0  | PGD-0018, PGD-0019 | CORE | Fix potential parameter removal optimization issue when optimizing constructors.
-| 7.1.0  |          | CORE     | Add optimization `method/specialization/returntype`.
-| 7.1.0  |          | CORE     | Add optimization `method/specialization/parametertype`.
-| 7.1.0  |          | CORE     | Add optimization `method/generalization/class`.
-| 7.1.0  |          | CORE     | Add optimization `field/specialization/type`.
-| 7.1.0  |          | CORE     | Add optimization `field/generalization/class`.
-| 7.1.0  | DGD-2587 | CORE     | Fix potential `IllegalArgumentException (Stack size becomes negative) in `class/merging/wrapper` optimization.
-| 7.1.0  | DGD-1564 | CORE     | Fix wrapper class merging with `new`/`dup`/`astore` sequences.
-| 7.1.0  |          | CORE     | Prevent injected classes from being merged into other classes.
-| 7.1.0  | DGD-1471 | CORE     | Improve speed of horizontal class merging.
-| 7.1.0  |          | CORE     | Improve general performance and stability of optimization.
-| 7.1.0  | DGD-3036 | CORE     | Fix potential incorrect removal of exception handlers during optimization.
-| 7.1.0  | DGD-3110 | CORE     | Improve GSON support.
-| 7.1.0  | DGD-3289 | CORE     | Fix potential, incorrect advanced code optimizations.
-| 7.1.0  | PGD-0037 | CORE     | Disallow merging of nest hosts or members during class merging optimization.
-| 7.1.0  | PGD-0052 | CORE     | Fix packaging of Ant plugin.
-| 7.1.0  | PGD-0047 | CORE     | Fix potential IllegalArgumentException in GSON optimization.
-| 7.1.0  | PGD-0110 | CORE     | Fix writing of kept directories.
-| 7.1.0  | PGC-0015 | CORE     | Add support for Java 16.
-| 7.1.0  | PGD-0064 | CORE     | Add support for Java 14 and 15.
-| 7.1.0  | PGD-0064 | CORE     | Add support for sealed classes (permitted subclasses attributes).
-| 7.1.0  | PGD-0064 | CORE     | Add support for record attributes.
-| 7.1.0  | DGD-2390 | CORE     | Fix storage and alignment of uncompressed zip entries.
-| 7.1.0  | DGD-2338 | CORE     | Fix processing of constant boolean arrays.
-| 7.1.0  | PGD-0066 | CORE     | Remove Gradle plugin dependency on Android build tools.
+The way ProGuard is integrated into Android projects is changing because AGP 7 will no longer allow developers to disable R8 with the `android.enableR8` Gradle property.
+
+ProGuard 7.1 includes a new Gradle plugin which allows for a seamless integration with this new AGP version. A detailed and step-by-step guide for transition from the previous plugin is provided in the [upgrading guide](setup/upgrading.md).
+
+- Simple integration with Android Gradle Projects by adding a dependency on the
+[ProGuard Gradle Plugin artifact](https://mvnrepository.com/artifact/com.guardsquare/proguard-gradle/7.1.0) and applying the `com.guardsquare.proguard` plugin, as presented in the [gradle setup instructions](setup/gradle.md).
+
+### Java support
+
+New Java versions are released every 6 months. 
+To allow ProGuard to continue to optimize, obfuscate and shrink Java class files we have added support for the latest releases, up to Java 16.
+This includes 
+
+- Add support for processing Java 14, 15 and 16 class files. (`PGC-0015`, `PGD-0064`)
+- Add support for Java 14 sealed classes. (`PGD-0064`)
+- Add support for records (previewed in Java 15/16, targeted for Java 17). (`PGD-0064`)
+
+### New optimizations
+
+ProGuard 7.1 adds 5 new code [optimizations](configuration/optimizations.md). 
+These optimization aim at reducing the number of classes required by the application and help pinpointing the specialized type wherever possible. This can have a positive impact on code shrinking and application performances. 
+
+ - `method/specialization/returntype` - specializes the types of method return values, whenever possible.
+ - `method/specialization/parametertype` - specializes the types of method parameters, whenever possible.
+ - `method/generalization/class` - generalizes the classes of method invocations, whenever possible.
+ - `field/specialization/type` - specializes the types of fields, whenever possible.
+ - `field/generalization/class` - generalizes the classes of field accesses, whenever possible.
+
+### Maven central
+
+ProGuard was previously hosted at JCenter, but this repository has recently been removed. 
+ProGuard is now published to [Maven Central](https://mvnrepository.com/artifact/com.guardsquare/proguard-gradle/7.1.0).
+
+ - Simple integration : follow the [gradle setup instructions](setup/gradle.md) to select the `mavenCentral()` repository and dependencies to the `proguard-gradle` artifact.
+
+### Easier configuration
+
+The [`-addconfigurationdebugging`](configuration/usage.md#addconfigurationdebugging) allows to help configuring ProGuard `-keep` rules. 
+For more details and to see this in action have a look at [Configuring ProGuard, an Easy Step-by-Step Tutorial](https://www.guardsquare.com/blog/configuring-proguard-an-easy-step-by-step-tutorial).
+
+`-addconfigurationdebugging` previously reported `-keep` rule suggestions for classes, methods or fields that did not exist in the app. Such `-keep` rules are not necessary.
+
+ProGuard 7.1 improves the suggestion of `-keep` rules by only suggesting rules for classes, methods and fields that were actually in the original application (`DGD-3264`).
+
+- More precise keep rule suggestions provided by `-addconfigurationdebugging`. 
+- Easier ProGuard -keep rules configuration.
+- Reduced ProGuard configuration size.
+
+### Miscellaneous
+
+#### Improvements
+
+ - Remove Gradle plugin dependency on Android build tools. (`PGD-0066`)
+ - Improve error message when missing classes result in an incomplete class hierarchy. (`DGD-0013`)
+ - Improve speed of horizontal class merging. (`DGD-1471`)
+ - Fix potential `NullPointerException` during GSON optimization. (`T3568`, `T3607`)
+ - Fix potential dangling switch labels and next local index in `GsonDeserializationOptimizer`.
+ - Fix potential `NoClassDefFoundError` at runtime after applying Gson optimization to library project. (`T2374`)
+ - Improve general performance and stability of optimization.
+ 
+#### Bug fixes
+
+ - Fix `ProGuardTask` Gradle task compatibility with Gradle 7. (`PGD-0136`)
+ - Fix potentially incorrect class merging optimizations that could cause a run-time `NullPointerException`. (`DGD-3377`)
+ - Fix Gradle task error when using an existing `-outjar` directory. (`PGD-0106`)
+ - Fix potential class merging optimization issue resulting in `ArrayIndexOutOfBoundsException` during build. (`DGD-1995`)
+ - Fix enum unboxing for already obfuscated code. (`DGD-0567`)
+ - Fix potential parameter removal optimization issue when optimizing constructors. (`PGD-0018`, `PGD-0019`)
+ - Fix potential `IllegalArgumentException` (Stack size becomes negative) in `class/merging/wrapper` optimization. (`DGD-2587`)
+ - Fix wrapper class merging with `new`/`dup`/`astore` sequences. (`DGD-1564`)
+ - Fix potential incorrect removal of exception handlers during optimization. (`DGD-3036`)
+ - Fix potential, incorrect advanced code optimizations. (`DGD-3289`)
+ - Disallow merging of nest hosts or members during class merging optimization. (`PGD-0037`)
+ - Fix packaging of Ant plugin. (`PGD-0052`)
+ - Fix potential IllegalArgumentException in GSON optimization. (`PGD-0047`)
+ - Fix writing of kept directories. (`PGD-0110`)
+ - Fix storage and alignment of uncompressed zip entries. (`DGD-2390`)
+ - Fix processing of constant boolean arrays. (`DGD-2338`)
+ - Prevent injected classes from being merged into other classes.
 
 ## Version 7.0 (Jun 2020)
 
