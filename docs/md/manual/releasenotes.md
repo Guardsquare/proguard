@@ -7,7 +7,7 @@ The way ProGuard is integrated into Android projects is changing because AGP 7 w
 ProGuard 7.1 includes a new Gradle plugin which allows for a seamless integration with this new AGP version. A detailed and step-by-step guide for transition from the previous plugin is provided in the [upgrading guide](setup/upgrading.md).
 
 - Simple integration with Android Gradle Projects by adding a dependency on the
-[ProGuard Gradle Plugin artifact](https://mvnrepository.com/artifact/com.guardsquare/proguard-gradle/7.1.0) and applying the `com.guardsquare.proguard` plugin, as presented in the [gradle setup instructions](setup/gradle.md).
+[ProGuard Gradle Plugin artifact](https://mvnrepository.com/artifact/com.guardsquare/proguard-gradle/7.1.0) and applying the `com.guardsquare.proguard` plugin, as presented in the [Gradle plugin setup instructions](setup/gradleplugin.md).
 
 ### Java support
 
@@ -35,7 +35,7 @@ These optimization aim at reducing the number of classes required by the applica
 ProGuard was previously hosted at JCenter, but this repository has recently been removed. 
 ProGuard is now published to [Maven Central](https://mvnrepository.com/artifact/com.guardsquare/proguard-gradle/7.1.0).
 
- - Simple integration : follow the [gradle setup instructions](setup/gradle.md) to select the `mavenCentral()` repository and dependencies to the `proguard-gradle` artifact.
+ - Simple integration : follow the [Gradle plugin setup instructions](setup/gradleplugin.md) to select the `mavenCentral()` repository and dependencies to the `proguard-gradle` artifact.
 
 ### Easier configuration
 
