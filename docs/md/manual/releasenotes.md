@@ -1,3 +1,11 @@
+## Version 7.1.1
+
+### Miscellaneous
+
+#### Bug fixes
+
+- Fail build when `IncompleteClassHierarchyException` is encountered. (`T5007`)
+
 ## Version 7.1 (June 2021)
 
 ### AGP 7 compatible Gradle plugin

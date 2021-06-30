@@ -262,10 +262,12 @@ public class ProGuard
         }
         catch (IncompleteClassHierarchyException e)
         {
-            System.err.println();
-            System.err.println("It appears you are missing some classes resulting in an incomplete class hierarchy, " + System.lineSeparator() +
-                               "please refer to the troubleshooting page in the manual: " + System.lineSeparator() +
-                               "https://www.guardsquare.com/en/products/proguard/manual/troubleshooting#superclass");
+            throw new RuntimeException(
+                System.lineSeparator() + System.lineSeparator() +
+                "It appears you are missing some classes resulting in an incomplete class hierarchy, " + System.lineSeparator() +
+                "please refer to the troubleshooting page in the manual: " + System.lineSeparator() +
+                "https://www.guardsquare.com/en/products/proguard/manual/troubleshooting#superclass" + System.lineSeparator()
+            );
         }
     }
 
