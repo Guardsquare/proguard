@@ -1,7 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
-    id 'com.github.johnrengelman.shadow'
     id 'java-library'
     id 'maven-publish'
 }
@@ -19,20 +16,6 @@ dependencies {
 }
 
 jar.manifest.attributes('Implementation-Version': version)
-
-task fatJar(type: ShadowJar) {
-    destinationDirectory.set(file("$rootDir/lib"))
-    archiveFileName.set('proguard.jar')
-    from sourceSets.main.output
-    configurations = [project.configurations.runtimeClasspath]
-    manifest {
-        attributes(
-                'Main-Class': 'proguard.ProGuard',
-                'Implementation-Version': archiveVersion.get())
-    }
-}
-
-assemble.dependsOn fatJar
 
 afterEvaluate {
     publishing {

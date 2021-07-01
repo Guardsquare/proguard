@@ -1,0 +1,34 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'com.github.johnrengelman.shadow'
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = "${target}"
+targetCompatibility = "${target}"
+
+dependencies {
+   implementation project(':base')
+}
+
+jar.manifest.attributes('Implementation-Version': version)
+
+task fatJar(type: ShadowJar) {
+    mainClassName = 'proguard.ProGuard'
+    destinationDirectory.set(file("$rootDir/lib"))
+    archiveFileName.set('proguard.jar')
+    configurations = [project.configurations.runtimeClasspath]
+    manifest {
+        attributes(
+                'Main-Class': 'proguard.ProGuard',
+                'Implementation-Version': archiveVersion.get())
+    }
+}
+
+assemble.dependsOn fatJar

@@ -19,6 +19,7 @@ if (hasProperty('proguardCoreDir'))
 rootProject.name = 'proguard'
 
 include 'base'
+include 'proguard-app'
 include 'retrace'
 include 'gui'
 include 'gradle-plugin'
