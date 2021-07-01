@@ -13,19 +13,6 @@ repositories {
 sourceCompatibility = "${target}"
 targetCompatibility = "${target}"
 
-sourceSets.main {
-    java {
-        srcDirs = ['src']
-    }
-    resources {
-        srcDirs = ['src']
-        include '**/*.properties'
-        include '**/*.gif'
-        include '**/*.png'
-        include '**/*.pro'
-    }
-}
-
 dependencies {
     api "com.guardsquare:proguard-core:${proguardCoreVersion}"
     implementation "com.google.code.gson:gson:${gsonVersion}"
