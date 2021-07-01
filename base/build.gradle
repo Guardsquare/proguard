@@ -1,21 +1,63 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
+    id 'com.adarshr.test-logger' version '3.0.0'
+    id 'de.jansauer.printcoverage' version '2.0.0'
+    id 'jacoco'
+    id "org.jlleitschuh.gradle.ktlint" version '10.1.0'
 }
 
 repositories {
     mavenCentral()
 }
 
-sourceCompatibility = "${target}"
-targetCompatibility = "${target}"
+java {
+    sourceCompatibility = JavaVersion.toVersion("${target}")
+    targetCompatibility = JavaVersion.toVersion("${target}")
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+  kotlinOptions {
+    jvmTarget = "${target}"
+  }
+}
 
 dependencies {
     api "com.guardsquare:proguard-core:${proguardCoreVersion}"
     implementation "com.google.code.gson:gson:${gsonVersion}"
+
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.2.7'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:4.3.2' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.3.2' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:4.3.2' // for kotest property test
+    testImplementation "io.mockk:mockk:1.10.0" // for mocking
 }
 
 jar.manifest.attributes('Implementation-Version': version)
+
+test {
+    useJUnitPlatform()
+
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    // Define which classes need to be monitored
+    def sources = files(project.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom(sources)
+    additionalSourceDirs.setFrom(sources)
+    sourceDirectories.setFrom(sources)
+    def classes = files(project.sourceSets.main.output.classesDirs)
+    classDirectories.setFrom(classes)
+
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/reports/coverage")
+    }
+}
 
 afterEvaluate {
     publishing {
