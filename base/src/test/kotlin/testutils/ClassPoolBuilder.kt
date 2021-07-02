@@ -11,6 +11,7 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.AutoScan
 import io.kotest.core.test.TestCase
+import proguard.JbcReader
 import proguard.classfile.ClassPool
 import proguard.classfile.Clazz
 import proguard.classfile.attribute.Attribute.RUNTIME_VISIBLE_ANNOTATIONS
@@ -30,9 +31,13 @@ import proguard.io.ClassReader
 import proguard.io.DataEntryReader
 import proguard.io.FileDataEntry
 import proguard.io.JarReader
+import proguard.io.NameFilteredDataEntryReader
+import proguard.io.StreamingDataEntry
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import javax.lang.model.SourceVersion
 
@@ -72,7 +77,7 @@ class ClassPoolBuilder {
             kotlincArguments: List<String> = emptyList()
         ): ClassPool {
             compiler.apply {
-                this.sources = source.map { it.asSourceFile() }
+                this.sources = source.filterNot { it is AssemblerSource }.map { it.asSourceFile() }
                 this.inheritClassPath = false
                 this.javacArguments = (listOf("-source", "1.8", "-target", "1.8") + javacArguments).toMutableList()
                 this.kotlincArguments = kotlincArguments
@@ -83,17 +88,25 @@ class ClassPoolBuilder {
 
             val programClassPool = ClassPool()
 
-            val classReader: DataEntryReader = ClassReader(
-                false,
-                false,
-                false,
-                true,
-                WarningPrinter(PrintWriter(System.err)),
-                ClassPoolFiller(programClassPool)
+            val classReader: DataEntryReader = NameFilteredDataEntryReader(
+                "**.jbc",
+                JbcReader(ClassPoolFiller(programClassPool)),
+                ClassReader(
+                    false,
+                    false,
+                    false,
+                    true,
+                    WarningPrinter(PrintWriter(System.err)),
+                    ClassPoolFiller(programClassPool)
+                )
             )
 
             result.compiledClassAndResourceFiles.filter { it.isClassFile() }.forEach {
                 classReader.read(FileDataEntry(it))
+            }
+
+            source.filterIsInstance<AssemblerSource>().forEach {
+                classReader.read(StreamingDataEntry(it.filename, it.getInputStream()))
             }
 
             if (source.count { it is KotlinSource } > 0) initializeKotlinMetadata(programClassPool)
@@ -178,3 +191,6 @@ internal fun initializeKotlinMetadata(classPool: ClassPool) {
 
     classPool.classesAccept(kotlinMetadataInitializer)
 }
+
+private fun AssemblerSource.getInputStream() =
+    ByteArrayInputStream(this.contents.toByteArray(UTF_8))

@@ -10,6 +10,7 @@ package testutils
 import com.tschuchort.compiletesting.SourceFile
 import org.intellij.lang.annotations.Language
 import java.io.File
+import java.lang.IllegalStateException
 
 sealed class TestSource {
     companion object {
@@ -35,4 +36,8 @@ class KotlinSource(val filename: String, @Language("Kotlin") val contents: Strin
 
 class FileSource(val file: File) : TestSource() {
     override fun asSourceFile(): SourceFile = SourceFile.fromPath(file)
+}
+
+class AssemblerSource(val filename: String, val contents: String) : TestSource() {
+    override fun asSourceFile(): SourceFile = throw IllegalStateException("Should not be called")
 }
