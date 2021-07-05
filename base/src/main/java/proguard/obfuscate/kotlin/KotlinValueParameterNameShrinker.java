@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -29,23 +29,99 @@ import proguard.classfile.kotlin.visitor.*;
  * {@link KotlinValueParameterUsageMarker}.
  */
 public class   KotlinValueParameterNameShrinker
-    implements KotlinValueParameterVisitor
+    implements KotlinMetadataVisitor,
+               KotlinConstructorVisitor,
+               KotlinPropertyVisitor,
+               KotlinFunctionVisitor
 {
-    private int parameterNumber = 0;
 
-    // Implementations for KotlinValueParameterVisitor.
+    // Implementations for KotlinMetadataVisitor.
+
     @Override
-    public void onNewFunctionStart()
+    public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {}
+
+
+    @Override
+    public void visitKotlinDeclarationContainerMetadata(Clazz                              clazz,
+                                                        KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata)
     {
-        parameterNumber = 0;
+        kotlinDeclarationContainerMetadata.functionsAccept(clazz, this);
+        kotlinDeclarationContainerMetadata.propertiesAccept(clazz,this);
     }
 
+
     @Override
-    public void visitAnyValueParameter(Clazz clazz, KotlinValueParameterMetadata kotlinValueParameterMetadata)
+    public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
     {
-        if (!KotlinValueParameterUsageMarker.isUsed(kotlinValueParameterMetadata))
+        kotlinClassKindMetadata.constructorsAccept(clazz, this);
+        visitKotlinDeclarationContainerMetadata(clazz, kotlinClassKindMetadata);
+    }
+
+
+    @Override
+    public void visitKotlinSyntheticClassMetadata(Clazz                            clazz,
+                                                  KotlinSyntheticClassKindMetadata kotlinSyntheticClassKindMetadata)
+    {
+        kotlinSyntheticClassKindMetadata.functionsAccept(clazz, this);
+    }
+
+
+    // Implementations for KotlinConstructorVisitor.
+
+
+    @Override
+    public void visitConstructor(Clazz                     clazz,
+                                 KotlinClassKindMetadata   kotlinClassKindMetadata,
+                                 KotlinConstructorMetadata kotlinConstructorMetadata)
+    {
+        kotlinConstructorMetadata.valueParametersAccept(clazz,
+                                                        kotlinClassKindMetadata,
+                                                        new MyValueParameterShrinker());
+    }
+
+
+    // Implementations for KotlinPropertyVisitor.
+
+
+    @Override
+    public void visitAnyProperty(Clazz                              clazz,
+                                 KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                 KotlinPropertyMetadata             kotlinPropertyMetadata)
+    {
+        kotlinPropertyMetadata.setterParametersAccept(clazz,
+                                                      kotlinDeclarationContainerMetadata,
+                                                      new MyValueParameterShrinker());
+    }
+
+
+    // Implementations for KotlinFunctionVisitor.
+
+
+    @Override
+    public void visitAnyFunction(Clazz                  clazz,
+                                 KotlinMetadata         kotlinMetadata,
+                                 KotlinFunctionMetadata kotlinFunctionMetadata)
+    {
+        kotlinFunctionMetadata.valueParametersAccept(clazz,
+                                                     kotlinMetadata,
+                                                     new MyValueParameterShrinker());
+    }
+
+
+    private static class MyValueParameterShrinker implements KotlinValueParameterVisitor
+    {
+        private int parameterNumber = 0;
+
+        @Override
+        public void onNewFunctionStart() { }
+
+        @Override
+        public void visitAnyValueParameter(Clazz clazz, KotlinValueParameterMetadata kotlinValueParameterMetadata)
         {
-            kotlinValueParameterMetadata.parameterName = "p" + parameterNumber++;
+            if (!KotlinValueParameterUsageMarker.isUsed(kotlinValueParameterMetadata))
+            {
+                kotlinValueParameterMetadata.parameterName = "p" + parameterNumber++;
+            }
         }
     }
 }

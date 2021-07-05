@@ -194,8 +194,7 @@ public class Obfuscator
         {
             programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
-                new AllValueParameterVisitor(
-                new KotlinValueParameterNameShrinker())));
+                new KotlinValueParameterNameShrinker()));
 
             // Keep SourceDebugExtension annotations on Kotlin synthetic classes but obfuscate them.
             programClassPool.classesAccept(
