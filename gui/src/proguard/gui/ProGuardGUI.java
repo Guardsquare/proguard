@@ -1769,6 +1769,7 @@ public class ProGuardGUI extends JFrame
 
                 // Run it in this thread, because it won't take long anyway.
                 reTraceRunnable.run();
+                systemOutRedirected = false;
             }
         }
     }
