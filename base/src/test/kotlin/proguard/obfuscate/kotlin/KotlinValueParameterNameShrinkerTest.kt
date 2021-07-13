@@ -48,7 +48,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
     // InstancePerTest so the names are reset before every test
     isolationMode = IsolationMode.InstancePerTest
 
-    val programClassPool = ClassPoolBuilder.fromSource(
+    val (programClassPool, _) = ClassPoolBuilder.fromSource(
         KotlinSource(
             "Test.kt",
             """

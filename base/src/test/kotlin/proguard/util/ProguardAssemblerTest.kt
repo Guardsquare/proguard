@@ -17,7 +17,7 @@ import testutils.ClassPoolBuilder
 
 class ProguardAssemblerTest : FreeSpec({
     "Given Java bytecode" - {
-        val programClassPool = ClassPoolBuilder.fromSource(
+        val (programClassPool, _) = ClassPoolBuilder.fromSource(
             AssemblerSource(
                 "A.jbc",
                 """

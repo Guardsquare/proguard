@@ -37,21 +37,19 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
-import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.Objects
 import javax.lang.model.SourceVersion
+import kotlin.reflect.KProperty
 
-class ClassPoolBuilder {
+data class ClassPools(val programClassPool: ClassPool, val libraryClassPool: ClassPool)
+
+class ClassPoolBuilder private constructor() {
 
     companion object {
         private val compiler = KotlinCompilation()
-
-        val libraryClassPool by lazy {
-            val libraryClassPool = getJavaRuntimeClassPool(compiler.jdkHome)
-            compiler.kotlinStdLibJar?.let { libraryClassPool.fromFile(it) }
-            compiler.kotlinReflectJar?.let { libraryClassPool.fromFile(it) }
-            return@lazy libraryClassPool
-        }
+        private val libraryClassPool by LibraryClassPoolBuilder(compiler)
 
         fun fromClasses(vararg clazz: Clazz): ClassPool {
             return ClassPool().apply {
@@ -60,7 +58,7 @@ class ClassPoolBuilder {
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun fromDirectory(dir: File): ClassPool =
+        fun fromDirectory(dir: File): ClassPools =
             fromSource(
                 *Files.walk(dir.toPath())
                     .filter { it.isJavaFile() || it.isKotlinFile() }
@@ -68,20 +66,23 @@ class ClassPoolBuilder {
                     .toArray() as Array<out TestSource>
             )
 
-        fun fromFiles(vararg file: File): ClassPool =
+        fun fromFiles(vararg file: File): ClassPools =
             fromSource(*file.map { TestSource.fromFile(it) }.toTypedArray())
 
         fun fromSource(
             vararg source: TestSource,
-            javacArguments: List<String> = emptyList(),
-            kotlincArguments: List<String> = emptyList()
-        ): ClassPool {
+            javacArguments: List<String> = listOf("-source", "8", "-target", "8"),
+            kotlincArguments: List<String> = emptyList(),
+            jdkHome: File = getCurrentJavaHome()
+        ): ClassPools {
+
             compiler.apply {
                 this.sources = source.filterNot { it is AssemblerSource }.map { it.asSourceFile() }
                 this.inheritClassPath = false
-                this.javacArguments = (listOf("-source", "1.8", "-target", "1.8") + javacArguments).toMutableList()
+                this.javacArguments = javacArguments.toMutableList()
                 this.kotlincArguments = kotlincArguments
                 this.verbose = false
+                this.jdkHome = jdkHome
             }
 
             val result = compiler.compile()
@@ -109,65 +110,31 @@ class ClassPoolBuilder {
                 classReader.read(StreamingDataEntry(it.filename, it.getInputStream()))
             }
 
+            val classReferenceInitializer = ClassReferenceInitializer(programClassPool, libraryClassPool)
+            val classSuperHierarchyInitializer = ClassSuperHierarchyInitializer(programClassPool, libraryClassPool)
+            val classSubHierarchyInitializer = ClassSubHierarchyInitializer()
+
+            programClassPool.classesAccept(classSuperHierarchyInitializer)
+            libraryClassPool.classesAccept(classSuperHierarchyInitializer)
+
             if (source.count { it is KotlinSource } > 0) initializeKotlinMetadata(programClassPool)
 
-            programClassPool.classesAccept(ClassReferenceInitializer(programClassPool, libraryClassPool))
-            programClassPool.classesAccept(ClassSuperHierarchyInitializer(programClassPool, libraryClassPool))
-            programClassPool.accept(ClassSubHierarchyInitializer())
+            programClassPool.classesAccept(classReferenceInitializer)
+            libraryClassPool.classesAccept(classReferenceInitializer)
 
-            return programClassPool
-        }
-    }
+            programClassPool.accept(classSubHierarchyInitializer)
+            libraryClassPool.accept(classSubHierarchyInitializer)
 
-    @AutoScan
-    object LibraryClassPoolProcessingInfoCleaningListener : TestListener {
-        override suspend fun beforeTest(testCase: TestCase) {
-            libraryClassPool.classesAccept { clazz ->
-                clazz.processingInfo = null
-                clazz.processingFlags = 0
-            }
+            return ClassPools(programClassPool, libraryClassPool)
         }
     }
 }
 
 internal fun isJava9OrLater(): Boolean = SourceVersion.latestSupported() > SourceVersion.RELEASE_8
 
-internal fun getJavaRuntimeClassPool(jdkHome: File?): ClassPool {
-    val libraryClassPool = ClassPool()
-
-    if (jdkHome != null && jdkHome.exists()) {
-        if (isJava9OrLater()) {
-            jdkHome.resolve("jmods").listFiles().filter {
-                it.name == "java.base.jmod"
-            }.forEach {
-                libraryClassPool.fromFile(it)
-            }
-        } else {
-            val runtimeJar = if (jdkHome.resolve("jre").exists()) {
-                jdkHome.resolve("jre").resolve("lib").resolve("rt.jar")
-            } else {
-                jdkHome.resolve("lib").resolve("rt.jar")
-            }
-
-            libraryClassPool.fromFile(runtimeJar)
-        }
-    }
-
-    return libraryClassPool
-}
-
-internal fun ClassPool.fromFile(file: File) {
-    val classReader: DataEntryReader = ClassReader(
-        true,
-        false,
-        false,
-        true,
-        null,
-        ClassPoolFiller(this)
-    )
-
-    JarReader(ClassFilter(classReader)).read(FileDataEntry(file))
-}
+internal fun getCurrentJavaHome(): File =
+    if (isJava9OrLater()) File(System.getProperty("java.home"))
+    else File(System.getProperty("java.home")).parentFile
 
 internal fun initializeKotlinMetadata(classPool: ClassPool) {
     val kotlinMetadataInitializer =
@@ -180,7 +147,7 @@ internal fun initializeKotlinMetadata(classPool: ClassPool) {
                         KotlinMetadataInitializer(
                             WarningPrinter(
                                 PrintWriter(object : OutputStream() {
-                                    override fun write(b: Int) {}
+                                    override fun write(b: Int) { }
                                 })
                             )
                         )
@@ -193,4 +160,74 @@ internal fun initializeKotlinMetadata(classPool: ClassPool) {
 }
 
 private fun AssemblerSource.getInputStream() =
-    ByteArrayInputStream(this.contents.toByteArray(UTF_8))
+    ByteArrayInputStream(this.contents.toByteArray(StandardCharsets.UTF_8))
+
+private class LibraryClassPoolBuilder(private val compiler: KotlinCompilation) {
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): ClassPool {
+        val key = Objects.hash(compiler.jdkHome, compiler.kotlinStdLibJdkJar, compiler.kotlinStdLibJdkJar)
+
+        if (!libraryClassPools.containsKey(key)) {
+            val libraryClassPool = getJavaRuntimeClassPool(compiler.jdkHome)
+            compiler.kotlinStdLibJar?.let { libraryClassPool.fromFile(it) }
+            compiler.kotlinReflectJar?.let { libraryClassPool.fromFile(it) }
+            libraryClassPools[key] = libraryClassPool
+        }
+
+        return libraryClassPools[key]!!
+    }
+
+    private fun getJavaRuntimeClassPool(jdkHome: File?): ClassPool {
+        val libraryClassPool = ClassPool()
+
+        if (jdkHome != null && jdkHome.exists()) {
+            if (jdkHome.resolve("jmods").exists()) {
+                jdkHome.resolve("jmods").listFiles().filter {
+                    it.name == "java.base.jmod"
+                }.forEach {
+                    libraryClassPool.fromFile(it)
+                }
+            } else {
+                val runtimeJar = if (jdkHome.resolve("jre").exists()) {
+                    jdkHome.resolve("jre").resolve("lib").resolve("rt.jar")
+                } else {
+                    jdkHome.resolve("lib").resolve("rt.jar")
+                }
+
+                libraryClassPool.fromFile(runtimeJar)
+            }
+        }
+
+        return libraryClassPool
+    }
+
+    private fun ClassPool.fromFile(file: File) {
+        val classReader: DataEntryReader = ClassReader(
+            true,
+            false,
+            false,
+            true,
+            null,
+            ClassPoolFiller(this)
+        )
+
+        JarReader(ClassFilter(classReader)).read(FileDataEntry(file))
+    }
+
+    companion object {
+
+        private val libraryClassPools: MutableMap<Int, ClassPool> = mutableMapOf()
+
+        @AutoScan
+        object LibraryClassPoolProcessingInfoCleaningListener : TestListener {
+            override suspend fun beforeTest(testCase: TestCase) {
+                libraryClassPools.values.forEach {
+                    it.classesAccept { clazz ->
+                        clazz.processingInfo = null
+                        clazz.processingFlags = 0
+                    }
+                }
+            }
+        }
+    }
+}
