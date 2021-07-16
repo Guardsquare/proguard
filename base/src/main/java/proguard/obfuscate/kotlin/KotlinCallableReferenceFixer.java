@@ -21,35 +21,37 @@
 
 package proguard.obfuscate.kotlin;
 
-import proguard.classfile.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.InstructionSequenceBuilder;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.KotlinConstants;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.KotlinSyntheticClassKindMetadata;
 import proguard.classfile.kotlin.reflect.visitor.CallableReferenceInfoToOwnerVisitor;
-import proguard.classfile.kotlin.visitor.filter.KotlinDeclarationContainerFilter;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.filter.KotlinDeclarationContainerFilter;
 import proguard.classfile.util.InstructionSequenceMatcher;
-import proguard.classfile.visitor.*;
-import proguard.obfuscate.util.*;
+import proguard.classfile.visitor.MultiClassVisitor;
+import proguard.classfile.visitor.NamedMethodVisitor;
+import proguard.obfuscate.util.InstructionSequenceObfuscator;
+import proguard.obfuscate.util.ReplacementSequences;
 import proguard.resources.kotlinmodule.visitor.KotlinMetadataToModuleVisitor;
+
+import static proguard.classfile.ClassConstants.METHOD_NAME_INIT;
+import static proguard.classfile.util.InstructionSequenceMatcher.*;
 
 /**
  * This class fixes the CallableReference implementations of function and property references.
- *
- *    public String getName();
- *    public String getSignature();
- *    public KDeclarationContainer getOwner();
- *
- * See https://github.com/JetBrains/kotlin/blob/4718ae418672a3e1927f29403fd4a8c916bc08ff/libraries/stdlib/jvm/runtime/kotlin/jvm/internal/CallableReference.java#L25
  *
  * @author James Hamilton
  */
 public class KotlinCallableReferenceFixer
 implements   KotlinMetadataVisitor
 {
-    private ClassPool programClassPool;
-    private ClassPool libraryClassPool;
+    private final ClassPool programClassPool;
+    private final ClassPool libraryClassPool;
 
     public KotlinCallableReferenceFixer(ClassPool programClassPool, ClassPool libraryClassPool)
     {
@@ -67,43 +69,56 @@ implements   KotlinMetadataVisitor
     {
         if (syntheticClass.callableReferenceInfo != null)
         {
-            clazz.accept(
-                new MultiClassVisitor(
-                    new NamedMethodVisitor(
-                        KotlinConstants.REFLECTION.GETNAME_METHOD_NAME,
-                        KotlinConstants.REFLECTION.GETNAME_METHOD_DESC,
-                        // getName() returns the Kotlin name of the callable, the one which was declared in the source code (@JvmName doesn't change it).
-                        new InstructionSequenceObfuscator(
-                        new NameOrSignatureReplacementSequences(
-                            syntheticClass.callableReferenceInfo.getName(), programClassPool, libraryClassPool))),
+            if (syntheticClass.mv[0] == 1 && syntheticClass.mv[1] > 3)
+            {
+                clazz.methodAccept(METHOD_NAME_INIT,null,
+                new InstructionSequenceObfuscator(
+                        new NameAndSignatureReplacementSequences(
+                            syntheticClass.callableReferenceInfo.getName(),
+                            syntheticClass.callableReferenceInfo.getSignature(),
+                            programClassPool,
+                            libraryClassPool)));
+            }
+            else
+            {
+                clazz.accept(
+                    new MultiClassVisitor(
+                        new NamedMethodVisitor(
+                            KotlinConstants.REFLECTION.GETNAME_METHOD_NAME,
+                            KotlinConstants.REFLECTION.GETNAME_METHOD_DESC,
+                            // getName() returns the Kotlin name of the callable, the one which was declared in the source code (@JvmName doesn't change it).
+                            new InstructionSequenceObfuscator(
+                            new NameOrSignatureReplacementSequences(
+                                syntheticClass.callableReferenceInfo.getName(), programClassPool, libraryClassPool))),
 
-                    new NamedMethodVisitor(
-                        KotlinConstants.REFLECTION.GETSIGNATURE_METHOD_NAME,
-                        KotlinConstants.REFLECTION.GETSIGNATURE_METHOD_DESC,
-                        //getSignature() returns the signature.
-                        new InstructionSequenceObfuscator(
-                        new NameOrSignatureReplacementSequences(
-                            syntheticClass.callableReferenceInfo.getSignature(), programClassPool, libraryClassPool)))
-                    ));
+                        new NamedMethodVisitor(
+                            KotlinConstants.REFLECTION.GETSIGNATURE_METHOD_NAME,
+                            KotlinConstants.REFLECTION.GETSIGNATURE_METHOD_DESC,
+                            //getSignature() returns the signature.
+                            new InstructionSequenceObfuscator(
+                            new NameOrSignatureReplacementSequences(
+                                syntheticClass.callableReferenceInfo.getSignature(), programClassPool, libraryClassPool)))
+                        ));
 
-            // getOwner() returns the Kotlin class or package (for file facades and multi-file class parts)
-            // where the callable should be located, usually specified on the LHS of the '::' operator but it could also be a superclass.
-            // We update getOwner() only for file facades and multi-file class parts because creating a Kotlin package
-            // requires the module name.
+                // getOwner() returns the Kotlin class or package (for file facades and multi-file class parts)
+                // where the callable should be located, usually specified on the LHS of the '::' operator but it could also be a superclass.
+                // We update getOwner() only for file facades and multi-file class parts because creating a Kotlin package
+                // requires the module name.
 
-            syntheticClass.callableReferenceInfoAccept(
-                new CallableReferenceInfoToOwnerVisitor(
-                new KotlinDeclarationContainerFilter(
-                    declarationContainer -> declarationContainer.k == KotlinConstants.METADATA_KIND_FILE_FACADE ||
-                                            declarationContainer.k == KotlinConstants.METADATA_KIND_MULTI_FILE_CLASS_PART,
-                new KotlinMetadataToModuleVisitor(
-                    kotlinModule         -> clazz.accept(
-                                                new NamedMethodVisitor(
-                                                    KotlinConstants.REFLECTION.GETOWNER_METHOD_NAME,
-                                                    KotlinConstants.REFLECTION.GETOWNER_METHOD_DESC,
-                                                    new InstructionSequenceObfuscator(
-                                                    new OwnerReplacementSequences(
-                                                        kotlinModule.name, programClassPool, libraryClassPool))))))));
+                syntheticClass.callableReferenceInfoAccept(
+                    new CallableReferenceInfoToOwnerVisitor(
+                    new KotlinDeclarationContainerFilter(
+                        declarationContainer -> declarationContainer.k == KotlinConstants.METADATA_KIND_FILE_FACADE ||
+                                                declarationContainer.k == KotlinConstants.METADATA_KIND_MULTI_FILE_CLASS_PART,
+                    new KotlinMetadataToModuleVisitor(
+                        kotlinModule         -> clazz.accept(
+                                                    new NamedMethodVisitor(
+                                                        KotlinConstants.REFLECTION.GETOWNER_METHOD_NAME,
+                                                        KotlinConstants.REFLECTION.GETOWNER_METHOD_DESC,
+                                                        new InstructionSequenceObfuscator(
+                                                        new OwnerReplacementSequences(
+                                                            kotlinModule.name, programClassPool, libraryClassPool))))))));
+            }
         }
     }
 
@@ -126,6 +141,53 @@ implements   KotlinMetadataVisitor
                     ____
                         .ldc(name)
                         .areturn().__()
+                },
+            };
+
+            CONSTANTS = ____.constants();
+        }
+
+        @Override
+        public Instruction[][][] getSequences()
+        {
+            return SEQUENCES;
+        }
+
+        @Override
+        public Constant[] getConstants()
+        {
+            return CONSTANTS;
+        }
+    }
+
+    public static final class NameAndSignatureReplacementSequences
+    implements                ReplacementSequences
+    {
+        private static final int OWNER_INDEX     = A;
+        private static final int NAME_INDEX      = B;
+        private static final int SIGNATURE_INDEX = C;
+        private static final int FLAGS_INDEX     = D;
+
+        private final Instruction[][][] SEQUENCES;
+        private final Constant[]        CONSTANTS;
+
+        NameAndSignatureReplacementSequences(String name, String signature, ClassPool programClassPool, ClassPool libraryClassPool)
+        {
+            InstructionSequenceBuilder ____ = new InstructionSequenceBuilder(programClassPool, libraryClassPool);
+
+            SEQUENCES = new Instruction[][][] {
+                {
+                    ____.ldc_(OWNER_INDEX)
+                        .ldc_(NAME_INDEX)
+                        .ldc_(SIGNATURE_INDEX)
+                        .ldc_(FLAGS_INDEX)
+                        .invokespecial(X).__(),
+
+                    ____.ldc_(OWNER_INDEX)
+                        .ldc(name)
+                        .ldc(signature)
+                        .ldc_(FLAGS_INDEX)
+                        .invokespecial(X).__(),
                 },
             };
 
