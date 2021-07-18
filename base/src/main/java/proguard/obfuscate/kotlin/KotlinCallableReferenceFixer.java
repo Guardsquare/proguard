@@ -189,6 +189,19 @@ implements   KotlinMetadataVisitor
                         .ldc_(FLAGS_INDEX)
                         .invokespecial(X).__(),
                 },
+                {
+                    ____.ldc_(OWNER_INDEX)
+                            .ldc_(NAME_INDEX)
+                            .ldc_(SIGNATURE_INDEX)
+                            .iconst(I)
+                            .invokespecial(X).__(),
+
+                    ____.ldc_(OWNER_INDEX)
+                            .ldc(name)
+                            .ldc(signature)
+                            .iconst(I)
+                            .invokespecial(X).__(),
+                },
             };
 
             CONSTANTS = ____.constants();
