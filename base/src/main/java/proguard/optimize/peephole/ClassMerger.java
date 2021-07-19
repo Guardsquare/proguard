@@ -33,6 +33,9 @@ import proguard.util.*;
 
 import java.util.*;
 
+import static proguard.classfile.attribute.Attribute.NEST_HOST;
+import static proguard.classfile.attribute.Attribute.NEST_MEMBERS;
+
 /**
  * This ClassVisitor inlines the classes that it visits in a given target class,
  * whenever possible.
@@ -155,165 +158,7 @@ implements   ClassVisitor,
 
     private void visitProgramClass0(ProgramClass programClass)
     {
-        if (!programClass.equals(targetClass) &&
-
-            (!DETAILS || print(programClass, "isKept?")) &&
-
-            // Don't merge classes that must be preserved.
-            !KeepMarker.isKept(programClass) &&
-            !KeepMarker.isKept(targetClass) &&
-
-            (!DETAILS || print(programClass, "already retargeted?")) &&
-
-            // Only merge classes that haven't been retargeted yet.
-            getTargetClass(programClass) == null &&
-            getTargetClass(targetClass)  == null &&
-
-            (!DETAILS || print(programClass, "isAnnotation?")) &&
-
-            // Don't merge annotation classes, with all their reflection and
-            // infinite recursion.
-            (programClass.getAccessFlags() & AccessConstants.ANNOTATION) == 0 &&
-
-            (!DETAILS || print(programClass, "Version?")) &&
-
-            // Only merge classes with equal class versions.
-            programClass.u4version == targetClass.u4version &&
-
-            (!DETAILS || print(programClass, "Nest host or member?")) &&
-
-            // Don't merge nest hosts or members.
-            !isNestHostOrMember(programClass) &&
-
-            (!DETAILS || print(programClass, "No non-copiable attributes?")) &&
-
-            // The class to be merged into the target class must not have
-            // non-copiable attributes (InnerClass, EnclosingMethod),
-            // unless it is a synthetic class.
-            (mergeWrapperClasses                                                 ||
-             (programClass.getAccessFlags() & AccessConstants.SYNTHETIC) != 0 ||
-             !hasNonCopiableAttributes(programClass)) &&
-
-            (!DETAILS || print(programClass, "Package visibility?")) &&
-
-            // Only merge classes if we can change the access permissions, or
-            // if they are in the same package, or
-            // if they are public and don't contain or invoke package visible
-            // class members.
-            (allowAccessModification                                                        ||
-             ((programClass.getAccessFlags() &
-               targetClass.getAccessFlags()  &
-               AccessConstants.PUBLIC) != 0 &&
-              !PackageVisibleMemberContainingClassMarker.containsPackageVisibleMembers(programClass) &&
-              !PackageVisibleMemberInvokingClassMarker.invokesPackageVisibleMembers(programClass)) ||
-             ClassUtil.internalPackageName(programClass.getName()).equals(
-             ClassUtil.internalPackageName(targetClass.getName()))) &&
-
-            (!DETAILS || print(programClass, "Interface/abstract/single?")) &&
-
-            // Only merge two classes or two interfaces or two abstract classes,
-            // or a single implementation into its interface.
-            ((programClass.getAccessFlags() &
-              (AccessConstants.INTERFACE |
-               AccessConstants.ABSTRACT)) ==
-             (targetClass.getAccessFlags()  &
-              (AccessConstants.INTERFACE |
-               AccessConstants.ABSTRACT)) ||
-             (isOnlySubClass(programClass, targetClass) &&
-              programClass.getSuperClass() != null      &&
-              (programClass.getSuperClass().equals(targetClass) ||
-               programClass.getSuperClass().equals(targetClass.getSuperClass())))) &&
-
-            (!DETAILS || print(programClass, "Indirect implementation?")) &&
-
-            // One class must not implement the other class indirectly.
-            !indirectlyImplementedInterfaces(programClass).contains(targetClass) &&
-            !targetClass.extendsOrImplements(programClass) &&
-
-            (!DETAILS || print(programClass, "Interfaces same subinterfaces?")) &&
-
-            // Interfaces must have exactly the same subinterfaces, not
-            // counting themselves, to avoid any loops in the interface
-            // hierarchy.
-            ((programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 ||
-             (targetClass.getAccessFlags()  & AccessConstants.INTERFACE) == 0 ||
-             subInterfaces(programClass, targetClass).equals(subInterfaces(targetClass, programClass))) &&
-
-            (!DETAILS || print(programClass, "Same initialized superclasses?")) &&
-
-            // The two classes must have the same superclasses and interfaces
-            // with static initializers.
-            sideEffectSuperClasses(programClass).equals(sideEffectSuperClasses(targetClass)) &&
-
-            (!DETAILS || print(programClass, "Same instanceofed superclasses?")) &&
-
-            // The two classes must have the same superclasses and interfaces
-            // that are tested with 'instanceof'.
-            instanceofedSuperClasses(programClass).equals(instanceofedSuperClasses(targetClass)) &&
-
-            (!DETAILS || print(programClass, "Same caught superclasses?")) &&
-
-            // The two classes must have the same superclasses that are caught
-            // as exceptions.
-            caughtSuperClasses(programClass).equals(caughtSuperClasses(targetClass)) &&
-
-            (!DETAILS || print(programClass, "Not .classed?")) &&
-
-            // The two classes must not both be part of a .class construct.
-            !(DotClassMarker.isDotClassed(programClass) &&
-              DotClassMarker.isDotClassed(targetClass)) &&
-
-            (!DETAILS || print(programClass, "No clashing fields?")) &&
-
-            // The classes must not have clashing fields.
-            (mergeWrapperClasses ||
-             !haveAnyIdenticalFields(programClass, targetClass)) &&
-
-            (!DETAILS || print(programClass, "No unwanted fields?")) &&
-
-            // The two classes must not introduce any unwanted fields.
-            (mergeWrapperClasses ||
-             !introducesUnwantedFields(programClass, targetClass) &&
-             !introducesUnwantedFields(targetClass, programClass)) &&
-
-            (!DETAILS || print(programClass, "No shadowed fields?")) &&
-
-            // The two classes must not shadow each others fields.
-            (mergeWrapperClasses ||
-             !shadowsAnyFields(programClass, targetClass) &&
-             !shadowsAnyFields(targetClass, programClass)) &&
-
-            (!DETAILS || print(programClass, "No clashing methods?")) &&
-
-            // The classes must not have clashing methods.
-            !haveAnyIdenticalMethods(programClass, targetClass) &&
-
-            (!DETAILS || print(programClass, "No abstract methods?")) &&
-
-            // The classes must not introduce abstract methods, unless
-            // explicitly allowed.
-            (mergeInterfacesAggressively ||
-             (!introducesUnwantedAbstractMethods(programClass, targetClass) &&
-              !introducesUnwantedAbstractMethods(targetClass, programClass))) &&
-
-            (!DETAILS || print(programClass, "No overridden methods?")) &&
-
-            // The classes must not override each others concrete methods.
-            !overridesAnyMethods(programClass, targetClass) &&
-            !overridesAnyMethods(targetClass, programClass) &&
-
-            (!DETAILS || print(programClass, "No shadowed methods?")) &&
-
-            // The classes must not shadow each others non-private methods.
-            !shadowsAnyMethods(programClass, targetClass) &&
-            !shadowsAnyMethods(targetClass, programClass) &&
-
-            (!DETAILS || print(programClass, "No type variables/parameterized types?")) &&
-
-            // The two classes must not have a signature attribute as type variables
-            // and/or parameterized types can not always be merged.
-            !hasSignatureAttribute(programClass) &&
-            !hasSignatureAttribute(targetClass))
+        if (isMergeable(programClass))
         {
             // We're not actually merging the classes, but only copying the
             // contents from the source class to the target class. We'll
@@ -444,7 +289,171 @@ implements   ClassVisitor,
     }
 
 
-    private boolean print(ProgramClass programClass, String message)
+    public boolean isMergeable(ProgramClass programClass)
+    {
+        return !programClass.equals(targetClass) &&
+
+               (!DETAILS || print(programClass, "isKept?")) &&
+
+               // Don't merge classes that must be preserved.
+               !KeepMarker.isKept(programClass) &&
+               !KeepMarker.isKept(targetClass) &&
+
+               (!DETAILS || print(programClass, "already retargeted?")) &&
+
+               // Only merge classes that haven't been retargeted yet.
+               getTargetClass(programClass) == null &&
+               getTargetClass(targetClass) == null &&
+
+               (!DETAILS || print(programClass, "isAnnotation?")) &&
+
+               // Don't merge annotation classes, with all their reflection and
+               // infinite recursion.
+               (programClass.getAccessFlags() & AccessConstants.ANNOTATION) == 0 &&
+
+               (!DETAILS || print(programClass, "Version?")) &&
+
+               // Only merge classes with equal class versions.
+               programClass.u4version == targetClass.u4version &&
+
+               (!DETAILS || print(programClass, "Nest host or member?")) &&
+
+               // Don't merge nest hosts or members.
+               !isNestHostOrMember(programClass) &&
+
+               (!DETAILS || print(programClass, "No non-copiable attributes?")) &&
+
+               // The class to be merged into the target class must not have
+               // non-copiable attributes (InnerClass, EnclosingMethod),
+               // unless it is a synthetic class.
+               (mergeWrapperClasses ||
+                (programClass.getAccessFlags() & AccessConstants.SYNTHETIC) != 0 ||
+                !hasNonCopiableAttributes(programClass)) &&
+
+               (!DETAILS || print(programClass, "Package visibility?")) &&
+
+               // Only merge classes if we can change the access permissions, or
+               // if they are in the same package, or
+               // if they are public and don't contain or invoke package visible
+               // class members.
+               (allowAccessModification ||
+                ((programClass.getAccessFlags() &
+                  targetClass.getAccessFlags() &
+                  AccessConstants.PUBLIC) != 0 &&
+                 !PackageVisibleMemberContainingClassMarker.containsPackageVisibleMembers(programClass) &&
+                 !PackageVisibleMemberInvokingClassMarker.invokesPackageVisibleMembers(programClass)) ||
+                ClassUtil.internalPackageName(programClass.getName()).equals(
+                    ClassUtil.internalPackageName(targetClass.getName()))) &&
+
+               (!DETAILS || print(programClass, "Interface/abstract/single?")) &&
+
+               // Only merge two classes or two interfaces or two abstract classes,
+               // or a single implementation into its interface.
+               ((programClass.getAccessFlags() &
+                 (AccessConstants.INTERFACE |
+                  AccessConstants.ABSTRACT)) ==
+                (targetClass.getAccessFlags() &
+                 (AccessConstants.INTERFACE |
+                  AccessConstants.ABSTRACT)) ||
+                (isOnlySubClass(programClass, targetClass) &&
+                 programClass.getSuperClass() != null &&
+                 (programClass.getSuperClass().equals(targetClass) ||
+                  programClass.getSuperClass().equals(targetClass.getSuperClass())))) &&
+
+               (!DETAILS || print(programClass, "Indirect implementation?")) &&
+
+               // One class must not implement the other class indirectly.
+               !indirectlyImplementedInterfaces(programClass).contains(targetClass) &&
+               !targetClass.extendsOrImplements(programClass) &&
+
+               (!DETAILS || print(programClass, "Interfaces same subinterfaces?")) &&
+
+               // Interfaces must have exactly the same subinterfaces, not
+               // counting themselves, to avoid any loops in the interface
+               // hierarchy.
+               ((programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 ||
+                (targetClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 ||
+                subInterfaces(programClass, targetClass).equals(subInterfaces(targetClass, programClass))) &&
+
+               (!DETAILS || print(programClass, "Same initialized superclasses?")) &&
+
+               // The two classes must have the same superclasses and interfaces
+               // with static initializers.
+               sideEffectSuperClasses(programClass).equals(sideEffectSuperClasses(targetClass)) &&
+
+               (!DETAILS || print(programClass, "Same instanceofed superclasses?")) &&
+
+               // The two classes must have the same superclasses and interfaces
+               // that are tested with 'instanceof'.
+               instanceofedSuperClasses(programClass).equals(instanceofedSuperClasses(targetClass)) &&
+
+               (!DETAILS || print(programClass, "Same caught superclasses?")) &&
+
+               // The two classes must have the same superclasses that are caught
+               // as exceptions.
+               caughtSuperClasses(programClass).equals(caughtSuperClasses(targetClass)) &&
+
+               (!DETAILS || print(programClass, "Not .classed?")) &&
+
+               // The two classes must not both be part of a .class construct.
+               !(DotClassMarker.isDotClassed(programClass) &&
+                 DotClassMarker.isDotClassed(targetClass)) &&
+
+               (!DETAILS || print(programClass, "No clashing fields?")) &&
+
+               // The classes must not have clashing fields.
+               (mergeWrapperClasses ||
+                !haveAnyIdenticalFields(programClass, targetClass)) &&
+
+               (!DETAILS || print(programClass, "No unwanted fields?")) &&
+
+               // The two classes must not introduce any unwanted fields.
+               (mergeWrapperClasses ||
+                !introducesUnwantedFields(programClass, targetClass) &&
+                !introducesUnwantedFields(targetClass, programClass)) &&
+
+               (!DETAILS || print(programClass, "No shadowed fields?")) &&
+
+               // The two classes must not shadow each others fields.
+               (mergeWrapperClasses ||
+                !shadowsAnyFields(programClass, targetClass) &&
+                !shadowsAnyFields(targetClass, programClass)) &&
+
+               (!DETAILS || print(programClass, "No clashing methods?")) &&
+
+               // The classes must not have clashing methods.
+               !haveAnyIdenticalMethods(programClass, targetClass) &&
+
+               (!DETAILS || print(programClass, "No abstract methods?")) &&
+
+               // The classes must not introduce abstract methods, unless
+               // explicitly allowed.
+               (mergeInterfacesAggressively ||
+                (!introducesUnwantedAbstractMethods(programClass, targetClass) &&
+                 !introducesUnwantedAbstractMethods(targetClass, programClass))) &&
+
+               (!DETAILS || print(programClass, "No overridden methods?")) &&
+
+               // The classes must not override each others concrete methods.
+               !overridesAnyMethods(programClass, targetClass) &&
+               !overridesAnyMethods(targetClass, programClass) &&
+
+               (!DETAILS || print(programClass, "No shadowed methods?")) &&
+
+               // The classes must not shadow each others non-private methods.
+               !shadowsAnyMethods(programClass, targetClass) &&
+               !shadowsAnyMethods(targetClass, programClass) &&
+
+               (!DETAILS || print(programClass, "No type variables/parameterized types?")) &&
+
+               // The two classes must not have a signature attribute as type variables
+               // and/or parameterized types can not always be merged.
+               !hasSignatureAttribute(programClass) &&
+               !hasSignatureAttribute(targetClass);
+    }
+    
+
+private boolean print(ProgramClass programClass, String message)
     {
         System.out.println("Merge ["+targetClass.getName()+"] <- ["+programClass.getName()+"] "+message);
 
@@ -806,7 +815,7 @@ implements   ClassVisitor,
     }
 
 
-    private boolean isNestHostOrMember(Clazz clazz)
+    public static boolean isNestHostOrMember(Clazz clazz)
     {
         AttributeCounter counter = new AttributeCounter();
 
@@ -818,7 +827,6 @@ implements   ClassVisitor,
 
         return counter.getCount() > 0;
     }
-
 
     public static void setTargetClass(Clazz clazz, Clazz targetClass)
     {
