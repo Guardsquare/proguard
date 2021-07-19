@@ -108,6 +108,7 @@ implements   ClassPoolVisitor
         }
         catch (InterruptedException e)
         {
+            Thread.currentThread().interrupt();
             throw new RuntimeException("Parallel execution is taking too long", e);
         }
 

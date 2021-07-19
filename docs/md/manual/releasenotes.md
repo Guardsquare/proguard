@@ -5,6 +5,7 @@
 #### Bug fixes
 
 - Fail build when `IncompleteClassHierarchyException` is encountered. (`T5007`)
+- Fix potential hanging of ProGuard process during optimization or obfuscation.
 
 ## Version 7.1 (June 2021)
 
