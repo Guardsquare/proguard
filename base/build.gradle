@@ -80,7 +80,7 @@ jacocoTestReport {
     sourceDirectories.setFrom(sources)
     def classes = files(project.sourceSets.main.output.classesDirs)
     classDirectories.setFrom(classes)
-
+    executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/*.exec')
     reports {
         xml.enabled true
         csv.enabled false
