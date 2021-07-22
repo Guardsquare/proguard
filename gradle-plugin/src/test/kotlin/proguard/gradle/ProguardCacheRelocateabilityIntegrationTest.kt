@@ -68,8 +68,8 @@ fun writeSettingsGradle(projectDir: File, cacheDir: File) {
     File(projectDir, "settings.gradle").writeText("""
         rootProject.name = 'demo'
         buildCache {
-            local(DirectoryBuildCache) {
-                directory = "${cacheDir.absolutePath.replace(File.separatorChar, '/')}"
+            local {
+                directory = "${cacheDir.absolutePath.replace(File.separatorChar, '/')}"           
             }
         }
         """.trimIndent())
