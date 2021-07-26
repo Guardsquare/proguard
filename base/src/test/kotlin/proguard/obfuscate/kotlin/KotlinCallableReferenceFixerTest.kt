@@ -40,7 +40,7 @@ import proguard.classfile.kotlin.KotlinFileFacadeKindMetadata
 import proguard.classfile.kotlin.KotlinMetadata
 import proguard.classfile.kotlin.KotlinSyntheticClassKindMetadata
 import proguard.classfile.kotlin.reflect.visitor.CallableReferenceInfoVisitor
-import proguard.classfile.kotlin.visitor.AllKotlinPropertiesVisitor
+import proguard.classfile.kotlin.visitor.AllPropertyVisitor
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor
 import proguard.classfile.util.ClassRenamer
@@ -148,7 +148,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                             }
                         ),
                         ReferencedKotlinMetadataVisitor(
-                            AllKotlinPropertiesVisitor
+                            AllPropertyVisitor
                             { _, _, property ->
                                 if (property.name == "original") property.name = "obfuscated"
                             }

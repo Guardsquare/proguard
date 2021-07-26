@@ -533,7 +533,7 @@ public class Obfuscator
                 // Ensure object classes have the INSTANCE field.
                 new KotlinObjectFixer(),
 
-                new AllFunctionsVisitor(
+                new AllFunctionVisitor(
                     // Ensure that all default interface implementations of methods have the same names.
                     new KotlinDefaultImplsMethodNameEqualizer(),
                     // Ensure all $default methods match their counterpart but with a $default suffix.
@@ -621,7 +621,7 @@ public class Obfuscator
             // Apply new names to Kotlin properties.
             programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
-                new AllKotlinPropertiesVisitor(
+                new AllPropertyVisitor(
                 new KotlinPropertyRenamer())));
         }
 

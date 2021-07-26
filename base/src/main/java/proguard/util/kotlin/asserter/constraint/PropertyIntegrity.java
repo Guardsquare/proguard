@@ -36,7 +36,7 @@ extends      AbstractKotlinMetadataConstraint
     @Override
     public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata)
     {
-        kotlinMetadata.accept(clazz, new AllKotlinPropertiesVisitor(this));
+        kotlinMetadata.accept(clazz, new AllPropertyVisitor(this));
     }
 
     // Implementations for KotlinPropertyVisitor.
