@@ -7,6 +7,9 @@ plugins {
 allprojects {
     group = 'com.guardsquare'
     version = proguardVersion
+    repositories {
+        mavenLocal()
+    }
 }
 
 task buildDocumentation(type: Exec) {

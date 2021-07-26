@@ -4,6 +4,7 @@
 
 #### Bug fixes
 
+- Fix initialization and obfuscation of Kotlin callable references when using Kotlin 1.4. (`T5631`)
 - Fail build when `IncompleteClassHierarchyException` is encountered. (`T5007`)
 - Fix potential hanging of ProGuard process during optimization or obfuscation.
 
