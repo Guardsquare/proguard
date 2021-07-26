@@ -42,7 +42,13 @@ dependencies {
     }
 }
 
-jar.manifest.attributes('Implementation-Version': version)
+jar {
+    manifest {
+        attributes(
+                'Multi-Release': true,
+                'Implementation-Version': archiveVersion.get())
+    }
+}
 
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814

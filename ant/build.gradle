@@ -40,6 +40,7 @@ task fatJar(type: ShadowJar) {
     manifest {
         attributes(
                 'Manifest-Version': '1.0',
+                'Multi-Release': true,
                 'Implementation-Version': archiveVersion.get())
     }
 }

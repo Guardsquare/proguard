@@ -38,6 +38,7 @@ task fatJar(type: ShadowJar) {
     manifest {
         attributes(
                 'Manifest-Version': '1.0',
+                'Multi-Release': true,
                 'Main-Class': 'proguard.retrace.ReTrace')
     }
 }
