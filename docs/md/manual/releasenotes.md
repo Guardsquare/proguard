@@ -15,6 +15,11 @@ To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated
 
 - Add support for processing Kotlin 1.5 metadata. (`PGD-179`, `DGD-3467`)
 
+### Bug fixes
+
+- Fix potential `NullPointerException` when initializing Kotlin callable references. (`T5899`)
+- Prevent requiring `--enable-preview` on a JVM for Java 16 class files (write class file version `60.0` instead of `60.65535`).
+
 ## Version 7.1.1
 
 ### Miscellaneous
