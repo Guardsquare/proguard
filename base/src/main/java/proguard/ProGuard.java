@@ -33,6 +33,7 @@ import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
 import proguard.io.ExtraDataEntryNameMap;
+import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.Optimizer;
@@ -85,6 +86,8 @@ public class ProGuard
      */
     public void execute() throws IOException
     {
+        Logging.configureVerbosity(configuration.verbose);
+
         System.out.println(VERSION);
 
         GPL.check();
