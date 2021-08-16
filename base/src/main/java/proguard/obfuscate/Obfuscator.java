@@ -20,6 +20,8 @@
  */
 package proguard.obfuscate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
@@ -50,6 +52,7 @@ import java.util.*;
  */
 public class Obfuscator
 {
+    private static final Logger logger = LogManager.getLogger(Obfuscator.class);
     private final Configuration configuration;
 
 
@@ -80,7 +83,6 @@ public class Obfuscator
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);
-        PrintWriter err = new PrintWriter(System.err, true);
 
         // Clean up any old processing info.
         programClassPool.classesAccept(new ClassCleaner());
@@ -224,14 +226,9 @@ public class Obfuscator
         // override the names of library classes and of library class members.
         if (configuration.applyMapping != null)
         {
-            if (configuration.verbose)
-            {
-                out.println("Applying mapping from [" +
-                            PrintWriterUtil.fileName(configuration.applyMapping) +
-                            "]...");
-            }
+            logger.info("Applying mapping from [{}]...", PrintWriterUtil.fileName(configuration.applyMapping));
 
-            WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+            WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
 
             MappingReader reader = new MappingReader(configuration.applyMapping);
 
@@ -248,17 +245,17 @@ public class Obfuscator
             int warningCount = warningPrinter.getWarningCount();
             if (warningCount > 0)
             {
-                err.println("Warning: there were " + warningCount +
-                            " kept classes and class members that were remapped anyway.");
-                err.println("         You should adapt your configuration or edit the mapping file.");
+                logger.warn("Warning: there were {} kept classes and class members that were remapped anyway.",
+                             warningCount);
+                logger.warn("         You should adapt your configuration or edit the mapping file.");
 
                 if (!configuration.ignoreWarnings)
                 {
-                    err.println("         If you are sure this remapping won't hurt,");
-                    err.println("         you could try your luck using the '-ignorewarnings' option.");
+                    logger.warn("         If you are sure this remapping won't hurt,");
+                    logger.warn("         you could try your luck using the '-ignorewarnings' option.");
                 }
 
-                err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict1)");
+                logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict1)");
 
                 if (!configuration.ignoreWarnings)
                 {
@@ -297,7 +294,7 @@ public class Obfuscator
                                           nameFactory);
         }
 
-        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+        WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
 
         // Maintain a map of names to avoid [descriptor - new name - old name].
         Map descriptorMap = new HashMap();
@@ -493,17 +490,16 @@ public class Obfuscator
         int warningCount = warningPrinter.getWarningCount();
         if (warningCount > 0)
         {
-            err.println("Warning: there were " + warningCount +
-                               " conflicting class member name mappings.");
-            err.println("         Your configuration may be inconsistent.");
+            logger.warn("Warning: there were {} conflicting class member name mappings.", warningCount);
+            logger.warn("         Your configuration may be inconsistent.");
 
             if (!configuration.ignoreWarnings)
             {
-                err.println("         If you are sure the conflicts are harmless,");
-                err.println("         you could try your luck using the '-ignorewarnings' option.");
+                logger.warn("         If you are sure the conflicts are harmless,");
+                logger.warn("         you could try your luck using the '-ignorewarnings' option.");
             }
 
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict2)");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict2)");
 
             if (!configuration.ignoreWarnings)
             {
@@ -559,12 +555,7 @@ public class Obfuscator
         // Print out the mapping, if requested.
         if (configuration.printMapping != null)
         {
-            if (configuration.verbose)
-            {
-                out.println("Printing mapping to [" +
-                            PrintWriterUtil.fileName(configuration.printMapping) +
-                            "]...");
-            }
+            logger.info("Printing mapping to [{}]...", PrintWriterUtil.fileName(configuration.printMapping));
 
             PrintWriter mappingWriter =
                 PrintWriterUtil.createPrintWriter(configuration.printMapping, out);
@@ -684,12 +675,9 @@ public class Obfuscator
                 new ResourceFileNameObfuscator(new ClassNameAdapterFunction(programClassPool), true));
         }
 
-        if (configuration.verbose)
-        {
-            System.out.println("  Number of obfuscated classes:                  " + obfuscatedClassCounter.getCount());
-            System.out.println("  Number of obfuscated fields:                   " + obfuscatedFieldCounter.getCount());
-            System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
-        }
+        logger.info("  Number of obfuscated classes:                  {}", obfuscatedClassCounter.getCount());
+        logger.info("  Number of obfuscated fields:                   {}", obfuscatedFieldCounter.getCount());
+        logger.info("  Number of obfuscated methods:                  {}", obfuscatedMethodCounter.getCount());
 
         if (configuration.keepKotlinMetadata)
         {

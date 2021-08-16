@@ -20,6 +20,8 @@
  */
 package proguard.backport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -59,7 +61,7 @@ implements ClassVisitor,
            AnnotationVisitor,
            ElementValueVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getFormatterLogger(AbstractAPIConverter.class);
 
     private final ClassPool          programClassPool;
     private final ClassPool          libraryClassPool;
@@ -801,17 +803,15 @@ implements ClassVisitor,
                                                    new ConstantInstruction(replacementInstructionOpcode,
                                                                            methodConstant));
 
-            if (DEBUG)
-            {
-                System.out.println(String.format("Replacing instruction at offset %d: %s.%s%s -> %s.%s%s",
-                                                 offset,
-                                                 anyMethodrefConstant.getClassName(clazz),
-                                                 anyMethodrefConstant.getName(clazz),
-                                                 anyMethodrefConstant.getType(clazz),
-                                                 className,
-                                                 methodName,
-                                                 methodDesc));
-            }
+            logger.debug("Replacing instruction at offset %d: %s.%s%s -> %s.%s%s",
+                         offset,
+                         anyMethodrefConstant.getClassName(clazz),
+                         anyMethodrefConstant.getName(clazz),
+                         anyMethodrefConstant.getType(clazz),
+                         className,
+                         methodName,
+                         methodDesc
+            );
         }
     }
 

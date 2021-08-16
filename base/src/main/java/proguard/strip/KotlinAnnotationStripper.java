@@ -7,6 +7,8 @@
 
 package proguard.strip;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
@@ -34,14 +36,11 @@ import static proguard.util.ProcessingFlags.*;
  */
 public class KotlinAnnotationStripper
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(KotlinAnnotationStripper.class);
 
     public void execute(Configuration configuration, ClassPool programClassPool, ClassPool libraryClassPool)
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Removing @kotlin.Metadata annotation where not kept...");
-        }
+        logger.info("Removing @kotlin.Metadata annotation where not kept...");
 
         ClassCounter               originalCounter          = new ClassCounter();
         MemberCounter              keptMemberCounter        = new MemberCounter();
@@ -76,11 +75,8 @@ public class KotlinAnnotationStripper
         programClassPool.classesAccept(kotlinAnnotationStripperVisitor);
         libraryClassPool.classesAccept(kotlinAnnotationStripperVisitor);
 
-        if (configuration.verbose)
-        {
-            System.out.println("  Original number of classes with @kotlin.Metadata:            " + originalCounter.getCount());
-            System.out.println("  Final number of classes with @kotlin.Metadata:               " + (originalCounter.getCount() - kotlinAnnotationStripper.getCount()));
-        }
+        logger.info("  Original number of classes with @kotlin.Metadata:            {}", originalCounter.getCount());
+        logger.info("  Final number of classes with @kotlin.Metadata:               {}", (originalCounter.getCount() - kotlinAnnotationStripper.getCount()));
     }
 
 
@@ -129,9 +125,7 @@ public class KotlinAnnotationStripper
         @Override
         public void visitAnnotation(Clazz clazz, Annotation annotation)
         {
-            if (DEBUG) {
-                System.out.println("Removing Kotlin metadata annotation from " + clazz.getName());
-            }
+            logger.debug("Removing Kotlin metadata annotation from {}", clazz.getName());
             attributesEditor.deleteAnnotation(annotation);
             clazz.accept(kotlinMetadataRemover);
             count++;

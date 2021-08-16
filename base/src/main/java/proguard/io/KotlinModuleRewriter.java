@@ -23,6 +23,8 @@ package proguard.io;
 import kotlinx.metadata.KmAnnotation;
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmMetadataVersion;
 import kotlinx.metadata.jvm.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 
@@ -33,6 +35,7 @@ import java.util.*;
 public class KotlinModuleRewriter
 extends DataEntryCopier
 {
+    private static final Logger logger = LogManager.getLogger(KotlinModuleRewriter.class);
 
     private final ClassPool programClassPool;
 
@@ -156,7 +159,7 @@ extends DataEntryCopier
 
         public void visitAnnotation(KmAnnotation annotation)
         {
-            System.err.println("Cannot handle annotations yet");
+            logger.error("Cannot handle annotations yet");
         }
 
 

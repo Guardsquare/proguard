@@ -21,6 +21,9 @@
 package proguard.configuration;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +44,8 @@ import java.util.Set;
  */
 public class ConfigurationLogger implements Runnable
 {
+    private static final Logger logger = LogManager.getLogger(ConfigurationLogger.class);
+
     // Logging constants.
     private static final boolean LOG_ONCE         = false;
     private static final String  ANDROID_UTIL_LOG = "android.util.Log";
@@ -1129,12 +1134,12 @@ public class ConfigurationLogger implements Runnable
             }
             catch (Exception e)
             {
-                System.err.println(message);
+                logger.error(message);
             }
         }
         else
         {
-            System.err.println(message);
+            logger.error(message);
         }
     }
 

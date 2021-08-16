@@ -20,9 +20,12 @@
  */
 package proguard.shrink;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.util.WarningLogger;
 import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
 import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
@@ -40,6 +43,7 @@ import java.io.*;
  */
 public class Shrinker
 {
+    private static final Logger logger = LogManager.getLogger(Shrinker.class);
     private final Configuration configuration;
 
 
@@ -95,7 +99,6 @@ public class Shrinker
         // Should we explain ourselves?
         if (configuration.whyAreYouKeeping != null)
         {
-            out.println();
 
             // Create a visitor for explaining classes and class members.
             ShortestUsagePrinter shortestUsagePrinter =
@@ -163,7 +166,7 @@ public class Shrinker
 
             if (configuration.enableKotlinAsserter)
             {
-                WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.err, true));
+                WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
                 new KotlinMetadataAsserter()
                     .execute(programClassPool,
                              libraryClassPool,
@@ -175,25 +178,22 @@ public class Shrinker
         int newProgramClassPoolSize = newProgramClassPool.size();
 
         // Collect some statistics.
-        if (configuration.verbose)
+       ClassCounter originalClassCounter = new ClassCounter();
+       programClassPool.classesAccept(
+           new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
+                                         originalClassCounter));
+
+       ClassCounter newClassCounter = new ClassCounter();
+       newProgramClassPool.classesAccept(
+           new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
+           newClassCounter));
+
+        logger.info("Removing unused program classes and class elements...");
+        logger.info("  Original number of program classes:            {}", originalClassCounter.getCount());
+        logger.info("  Final number of program classes:               {}", newClassCounter.getCount());
+        if (newClassCounter.getCount() != newProgramClassPoolSize)
         {
-           ClassCounter originalClassCounter = new ClassCounter();
-           programClassPool.classesAccept(
-               new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
-                                             originalClassCounter));
-
-           ClassCounter newClassCounter = new ClassCounter();
-           newProgramClassPool.classesAccept(
-               new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
-               newClassCounter));
-
-            out.println("Removing unused program classes and class elements...");
-            out.println("  Original number of program classes:            " + originalClassCounter.getCount());
-            out.println("  Final number of program classes:               " + newClassCounter.getCount());
-            if (newClassCounter.getCount() != newProgramClassPoolSize)
-            {
-                out.println("  Final number of program and injected classes:  " + newProgramClassPoolSize);
-            }
+            logger.info("  Final number of program and injected classes:  {}", newProgramClassPoolSize);
         }
 
         // Check if we have at least some output classes.
@@ -202,7 +202,7 @@ public class Shrinker
         {
             if (configuration.ignoreWarnings)
             {
-                System.err.println("Warning: the output jar is empty. Did you specify the proper '-keep' options?");
+                logger.warn("Warning: the output jar is empty. Did you specify the proper '-keep' options?");
             }
             else
             {
