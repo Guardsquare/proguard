@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.backport.Backporter;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
@@ -54,6 +56,7 @@ import java.io.*;
  */
 public class ProGuard
 {
+    private static final Logger logger = LogManager.getLogger(ProGuard.class);
     public static final String VERSION = "ProGuard, version " + getVersion();
 
 
@@ -88,7 +91,7 @@ public class ProGuard
     {
         Logging.configureVerbosity(configuration.verbose);
 
-        System.out.println(VERSION);
+        logger.always().log(VERSION);
 
         GPL.check();
 
@@ -280,12 +283,9 @@ public class ProGuard
      */
     private void printConfiguration() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Printing configuration to [" +
-                               PrintWriterUtil.fileName(configuration.printConfiguration) +
-                               "]...");
-        }
+        logger.info("Printing configuration to [{}]...",
+                    PrintWriterUtil.fileName(configuration.printConfiguration)
+        );
 
         PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printConfiguration);
         try
@@ -304,10 +304,7 @@ public class ProGuard
      */
     private void readInput() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Reading input...");
-        }
+        logger.info("Reading input...");
 
         // Fill the program class pool and the library class pool.
         new InputReader(configuration).execute(programClassPool,
@@ -322,10 +319,7 @@ public class ProGuard
      */
     private void initialize() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Initializing...");
-        }
+        logger.info("Initializing...");
 
         new Initializer(configuration).execute(programClassPool,
                                                libraryClassPool,
@@ -339,10 +333,7 @@ public class ProGuard
      */
     private void mark()
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Marking classes and class members to be kept...");
-        }
+        logger.info("Marking classes and class members to be kept...");
 
         new Marker(configuration).mark(programClassPool,
                                        libraryClassPool);
@@ -407,22 +398,16 @@ public class ProGuard
      */
     private void keepKotlinMetadata()
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Adapting Kotlin metadata...");
-        }
+        logger.info("Adapting Kotlin metadata...");
 
-        WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.out, true));
+        WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
 
         ClassCounter counter = new ClassCounter();
         programClassPool.classesAccept(
             new ReferencedKotlinMetadataVisitor(
             new KotlinMetadataWriter(warningPrinter, counter)));
 
-        if (configuration.verbose)
-        {
-            System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
-        }
+        logger.info("  Number of Kotlin classes adapted:              {}", counter.getCount());
     }
 
 
@@ -431,10 +416,7 @@ public class ProGuard
      */
     private void target() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Setting target versions...");
-        }
+        logger.info("Setting target versions...");
 
         new Targeter(configuration).execute(programClassPool);
     }
@@ -446,10 +428,7 @@ public class ProGuard
      */
     private void printSeeds() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Printing kept classes, fields, and methods...");
-        }
+        logger.info("Printing kept classes, fields, and methods...");
 
         PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printSeeds);
         try
@@ -470,21 +449,18 @@ public class ProGuard
      */
     private void shrink() throws IOException
     {
-        if (configuration.verbose)
+        logger.info("Shrinking...");
+
+        // We'll print out some explanation, if requested.
+        if (configuration.whyAreYouKeeping != null)
         {
-            System.out.println("Shrinking...");
+            logger.info("Explaining why classes and class members are being kept...");
+        }
 
-            // We'll print out some explanation, if requested.
-            if (configuration.whyAreYouKeeping != null)
-            {
-                System.out.println("Explaining why classes and class members are being kept...");
-            }
-
-            // We'll print out the usage, if requested.
-            if (configuration.printUsage != null)
-            {
-                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(configuration.printUsage) + "]...");
-            }
+        // We'll print out the usage, if requested.
+        if (configuration.printUsage != null)
+        {
+            logger.info("Printing usage to [{}]...", PrintWriterUtil.fileName(configuration.printUsage));
         }
 
         // Perform the actual shrinking.
@@ -500,10 +476,7 @@ public class ProGuard
      */
     private void inlineSubroutines()
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Inlining subroutines...");
-        }
+        logger.info("Inlining subroutines...");
 
         // Perform the actual inlining.
         new SubroutineInliner(configuration).execute(programClassPool);
@@ -522,10 +495,7 @@ public class ProGuard
              new ListParser(new NameParser()).parse(configuration.optimizations)
                  .matches(Optimizer.LIBRARY_GSON)))
         {
-            if (configuration.verbose)
-            {
-                System.out.println("Optimizing usages of Gson library...");
-            }
+            logger.info("Optimizing usages of Gson library...");
 
             // Perform the Gson optimization.
             new GsonOptimizer().execute(programClassPool,
@@ -542,10 +512,7 @@ public class ProGuard
     private boolean optimize(int currentPass,
                              int maxPasses) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Optimizing (pass " + currentPass + "/" + maxPasses + ")...");
-        }
+        logger.info("Optimizing (pass {}/{})...", currentPass, maxPasses);
 
         // Perform the actual optimization.
         return new Optimizer(configuration).execute(programClassPool,
@@ -559,10 +526,7 @@ public class ProGuard
      */
     private void obfuscate() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Obfuscating...");
-        }
+        logger.info("Obfuscating...");
 
         // Perform the actual obfuscation.
         new Obfuscator(configuration).execute(programClassPool,
@@ -609,10 +573,7 @@ public class ProGuard
      */
     private void preverify()
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Preverifying...");
-        }
+        logger.info("Preverifying...");
 
         // Perform the actual preverification.
         new Preverifier(configuration).execute(programClassPool);
@@ -633,10 +594,7 @@ public class ProGuard
      */
     private void writeOutput() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Writing output...");
-        }
+        logger.info("Writing output...");
 
         // Write out the program class pool.
         new OutputWriter(configuration).execute(programClassPool,
@@ -651,10 +609,7 @@ public class ProGuard
      */
     private void dump() throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(configuration.dump) + "]...");
-        }
+        logger.info("Printing classes to [{}]...", PrintWriterUtil.fileName(configuration.dump));
 
         PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.dump);
         try
@@ -694,8 +649,8 @@ public class ProGuard
     {
         if (args.length == 0)
         {
-            System.out.println(VERSION);
-            System.out.println("Usage: java proguard.ProGuard [options ...]");
+            logger.warn(VERSION);
+            logger.warn("Usage: java proguard.ProGuard [options ...]");
             System.exit(1);
         }
 
@@ -721,16 +676,7 @@ public class ProGuard
         }
         catch (Exception ex)
         {
-            if (configuration.verbose)
-            {
-                // Print a verbose stack trace.
-                ex.printStackTrace();
-            }
-            else
-            {
-                // Print just the stack trace message.
-                System.err.println("Error: "+ex.getMessage());
-            }
+            logger.error("Unexpected error", ex);
 
             System.exit(1);
         }

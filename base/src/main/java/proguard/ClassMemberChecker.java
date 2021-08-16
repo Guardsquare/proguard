@@ -20,9 +20,12 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
+import proguard.optimize.info.ReadWriteFieldMarker;
 
 import java.util.List;
 
@@ -34,6 +37,7 @@ import java.util.List;
 public class ClassMemberChecker
 implements   MemberVisitor
 {
+    private static final Logger logger = LogManager.getLogger(ClassMemberChecker.class);
     private final ClassPool      programClassPool;
     private final WarningPrinter notePrinter;
 
@@ -144,14 +148,14 @@ implements   MemberVisitor
 
     public void visitProgramField(ProgramClass programClass, ProgramField programField)
     {
-        System.out.println("      Maybe you meant the field '" +
-                           ClassUtil.externalFullFieldDescription(0, programField.getName(programClass), programField.getDescriptor(programClass)) + "'?");
+        logger.info("      Maybe you meant the field '{}'?",
+                                   ClassUtil.externalFullFieldDescription(0, programField.getName(programClass), programField.getDescriptor(programClass)));
     }
 
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        System.out.println("      Maybe you meant the method '" +
-                           ClassUtil.externalFullMethodDescription(programClass.getName(), 0, programMethod.getName(programClass), programMethod.getDescriptor(programClass)) + "'?");
+        logger.info("      Maybe you meant the method '{}'?",
+                                   ClassUtil.externalFullMethodDescription(programClass.getName(), 0, programMethod.getName(programClass), programMethod.getDescriptor(programClass)));
     }
 }

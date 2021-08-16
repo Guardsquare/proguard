@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.io.*;
 import proguard.resources.file.ResourceFilePool;
@@ -38,6 +40,8 @@ import java.util.*;
  */
 public class DataEntryWriterFactory
 {
+    private static final Logger logger = LogManager.getLogger(DataEntryWriterFactory.class);
+
     private static final String CLASS_FILE_PATTERN = "**.class";
     private static final String CLASS_FILE_PREFIX  = "classes/";
 
@@ -214,30 +218,28 @@ public class DataEntryWriterFactory
         List jmodFilter = classPathEntry.getJmodFilter();
         List zipFilter  = classPathEntry.getZipFilter();
 
-        if (verbose) {
-            System.out.println("Preparing " +
-                               (privateKeyEntries == null ? "" : "signed ") +
-                               "output " +
-                               (isApk  ? "apk"  :
-                                isAab  ? "aab"  :
-                                isJar  ? "jar"  :
-                                isAar  ? "aar"  :
-                                isWar  ? "war"  :
-                                isEar  ? "ear"  :
-                                isJmod ? "jmod" :
-                                isZip  ? "zip"  :
-                                         "directory") +
-                               " [" + classPathEntry.getName() + "]" +
-                               (filter     != null ||
-                                apkFilter  != null ||
-                                aabFilter  != null ||
-                                jarFilter  != null ||
-                                aarFilter  != null ||
-                                warFilter  != null ||
-                                earFilter  != null ||
-                                jmodFilter != null ||
-                                zipFilter  != null ? " (filtered)" : ""));
-        }
+        logger.info("Preparing {}output {} [{}]{}",
+                   privateKeyEntries == null ? "" : "signed ",
+                   (isApk  ? "apk"  :
+                    isAab  ? "aab"  :
+                    isJar  ? "jar"  :
+                    isAar  ? "aar"  :
+                    isWar  ? "war"  :
+                    isEar  ? "ear"  :
+                    isJmod ? "jmod" :
+                    isZip  ? "zip"  :
+                             "directory"),
+                   classPathEntry.getName(),
+                   (filter     != null ||
+                    apkFilter  != null ||
+                    aabFilter  != null ||
+                    jarFilter  != null ||
+                    aarFilter  != null ||
+                    warFilter  != null ||
+                    earFilter  != null ||
+                    jmodFilter != null ||
+                    zipFilter  != null ? " (filtered)" : "")
+        );
 
         // Create the writer for the main file or directory.
         DataEntryWriter writer =

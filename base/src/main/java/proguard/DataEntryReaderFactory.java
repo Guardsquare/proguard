@@ -20,11 +20,11 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassConstants;
 import proguard.io.*;
 import proguard.util.*;
-
-import java.io.PrintStream;
 import java.util.*;
 
 /**
@@ -36,6 +36,8 @@ import java.util.*;
  */
 public class DataEntryReaderFactory
 {
+    private static final Logger logger = LogManager.getLogger(DataEntryReaderFactory.class);
+
     private static final String VERSIONS_PATTERN = "META-INF/versions";
     private static final String VERSIONS_EXCLUDE = "!META-INF/versions/**";
 
@@ -93,29 +95,28 @@ public class DataEntryReaderFactory
         List jmodFilter = classPathEntry.getJmodFilter();
         List zipFilter  = classPathEntry.getZipFilter();
 
-        if (verbose)
-        {
-            System.out.println(messagePrefix +
-                           (isApk  ? "apk"  :
-                            isAab  ? "aab"  :
-                            isJar  ? "jar"  :
-                            isAar  ? "aar"  :
-                            isWar  ? "war"  :
-                            isEar  ? "ear"  :
-                            isJmod ? "jmod" :
-                            isZip  ? "zip"  :
-                                    "directory") +
-                           " [" + classPathEntry.getName() + "]" +
-                           (filter     != null ||
-                            apkFilter  != null ||
-                            aabFilter  != null ||
-                            jarFilter  != null ||
-                            aarFilter  != null ||
-                            warFilter  != null ||
-                            earFilter  != null ||
-                            jmodFilter != null ||
-                            zipFilter  != null ? " (filtered)" : ""));
-        }
+        logger.info("{}{} [{}]{}",
+                    messagePrefix,
+                    (isApk  ? "apk"  :
+                     isAab  ? "aab"  :
+                     isJar  ? "jar"  :
+                     isAar  ? "aar"  :
+                     isWar  ? "war"  :
+                     isEar  ? "ear"  :
+                     isJmod ? "jmod" :
+                     isZip  ? "zip"  :
+                              "directory"),
+                    classPathEntry.getName(),
+                    (filter     != null ||
+                     apkFilter  != null ||
+                     aabFilter  != null ||
+                     jarFilter  != null ||
+                     aarFilter  != null ||
+                     warFilter  != null ||
+                     earFilter  != null ||
+                     jmodFilter != null ||
+                     zipFilter  != null ? " (filtered)" : "")
+        );
 
         // Add a renaming filter, if specified.
         if (filter != null)

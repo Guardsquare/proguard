@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassPool;
 import proguard.classfile.io.visitor.ProcessingFlagDataEntryFilter;
 import proguard.classfile.kotlin.KotlinConstants;
@@ -46,6 +48,7 @@ import java.util.*;
  */
 public class OutputWriter
 {
+    private static final Logger logger = LogManager.getLogger(OutputWriter.class);
     private final Configuration configuration;
 
 
@@ -70,8 +73,8 @@ public class OutputWriter
     {
         if (configuration.addConfigurationDebugging)
         {
-            System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
-            System.err.println("It should only be used for debugging purposes.");
+            logger.error("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
+            logger.error("It should only be used for debugging purposes.");
         }
 
         ClassPath programJars = configuration.programJars;
@@ -207,9 +210,9 @@ public class OutputWriter
                 (keyAliases        == null ? missing : specified).append("a key alias, ");
                 (keyPasswords      == null ? missing : specified).append("a key password, ");
 
-                System.out.println("Note: you've specified "+specified.toString());
-                System.out.println("      but not "+missing.substring(0, missing.length()-2)+".");
-                System.out.println("      You should specify the missing parameters to sign the output jars.");
+                logger.info("Note: you've specified {}", specified.toString());
+                logger.info("      but not {}.", missing.substring(0, missing.length()-2));
+                logger.info("      You should specify the missing parameters to sign the output jars.");
             }
 
             return null;

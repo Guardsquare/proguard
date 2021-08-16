@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.visitor.*;
@@ -46,6 +48,7 @@ import java.util.*;
  */
 public class Initializer
 {
+    private static final Logger logger = LogManager.getLogger(Initializer.class);
     private final Configuration configuration;
     private final boolean       checkConfiguration;
 
@@ -75,15 +78,10 @@ public class Initializer
                         ResourceFilePool resourceFilePool)
     throws IOException
     {
-        // We're using the system's default character encoding for writing to
-        // the standard output and error output.
-        PrintWriter out = new PrintWriter(System.out, true);
-        PrintWriter err = new PrintWriter(System.err, true);
-
         int originalLibraryClassPoolSize = libraryClassPool.size();
 
         // Perform basic checks on the configuration.
-        WarningPrinter fullyQualifiedClassNameNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter fullyQualifiedClassNameNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (checkConfiguration)
         {
@@ -103,7 +101,7 @@ public class Initializer
             new ListParser(new NameParser()).parse(configuration.keepAttributes) :
             new EmptyStringMatcher();
 
-        WarningPrinter getAnnotationNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter getAnnotationNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (!keepAttributesMatcher.matches(Attribute.RUNTIME_VISIBLE_ANNOTATIONS))
         {
@@ -112,7 +110,7 @@ public class Initializer
                 new GetAnnotationChecker(getAnnotationNotePrinter)));
         }
 
-        WarningPrinter getSignatureNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter getSignatureNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (!keepAttributesMatcher.matches(Attribute.SIGNATURE))
         {
@@ -121,7 +119,7 @@ public class Initializer
                 new GetSignatureChecker(getSignatureNotePrinter)));
         }
 
-        WarningPrinter getEnclosingClassNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter getEnclosingClassNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (!keepAttributesMatcher.matches(Attribute.INNER_CLASSES))
         {
@@ -130,7 +128,7 @@ public class Initializer
                 new GetEnclosingClassChecker(getEnclosingClassNotePrinter)));
         }
 
-        WarningPrinter getEnclosingMethodNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter getEnclosingMethodNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (!keepAttributesMatcher.matches(Attribute.ENCLOSING_METHOD))
         {
@@ -146,8 +144,8 @@ public class Initializer
         ClassPool reducedLibraryClassPool = configuration.useUniqueClassMemberNames ?
             null : new ClassPool();
 
-        WarningPrinter classReferenceWarningPrinter = new WarningPrinter(err, configuration.warn);
-        WarningPrinter dependencyWarningPrinter     = new WarningPrinter(err, configuration.warn);
+        WarningPrinter classReferenceWarningPrinter = new WarningLogger(logger, configuration.warn);
+        WarningPrinter dependencyWarningPrinter     = new WarningLogger(logger, configuration.warn);
 
         // Initialize the superclass hierarchies for program classes.
         programClassPool.classesAccept(
@@ -164,7 +162,7 @@ public class Initializer
                                                null,
                                                dependencyWarningPrinter));
 
-        WarningPrinter kotlinInitializationWarningPrinter = new WarningPrinter(err, configuration.warn);
+        WarningPrinter kotlinInitializationWarningPrinter = new WarningLogger(logger, configuration.warn);
 
         // Initialize the Kotlin Metadata for Kotlin classes.
         if (configuration.keepKotlinMetadata)
@@ -183,8 +181,8 @@ public class Initializer
         // Initialize the class references of program class members and
         // attributes. Note that all superclass hierarchies have to be
         // initialized for this purpose.
-        WarningPrinter programMemberReferenceWarningPrinter = new WarningPrinter(err, configuration.warn);
-        WarningPrinter libraryMemberReferenceWarningPrinter = new WarningPrinter(err, configuration.warn);
+        WarningPrinter programMemberReferenceWarningPrinter = new WarningLogger(logger, configuration.warn);
+        WarningPrinter libraryMemberReferenceWarningPrinter = new WarningLogger(logger, configuration.warn);
 
         programClassPool.classesAccept(
             new ClassReferenceInitializer(programClassPool,
@@ -219,8 +217,8 @@ public class Initializer
             new EnumFieldReferenceInitializer())));
 
         // Initialize the Class.forName references.
-        WarningPrinter dynamicClassReferenceNotePrinter = new WarningPrinter(out, configuration.note);
-        WarningPrinter classForNameNotePrinter          = new WarningPrinter(out, configuration.note);
+        WarningPrinter dynamicClassReferenceNotePrinter = new WarningLogger(logger, configuration.note);
+        WarningPrinter classForNameNotePrinter          = new WarningLogger(logger, configuration.note);
 
         programClassPool.classesAccept(
             new AllMethodVisitor(
@@ -234,7 +232,7 @@ public class Initializer
                                                  createClassNoteExceptionMatcher(configuration.keep, true))))));
 
         // Initialize the Class.get[Declared]{Field,Method} references.
-        WarningPrinter getMemberNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter getMemberNotePrinter = new WarningLogger(logger, configuration.note);
 
         programClassPool.classesAccept(
             new AllMethodVisitor(
@@ -335,7 +333,7 @@ public class Initializer
         libraryClassPool.classesAccept(new StringSharer());
 
         // Check for any unmatched class members.
-        WarningPrinter classMemberNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter classMemberNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (checkConfiguration)
         {
@@ -351,7 +349,7 @@ public class Initializer
         }
 
         // Check for unkept descriptor classes of kept class members.
-        WarningPrinter descriptorKeepNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter descriptorKeepNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (checkConfiguration)
         {
@@ -361,7 +359,7 @@ public class Initializer
         }
 
         // Check for keep options that only match library classes.
-        WarningPrinter libraryKeepNotePrinter = new WarningPrinter(out, configuration.note);
+        WarningPrinter libraryKeepNotePrinter = new WarningLogger(logger, configuration.note);
 
         if (checkConfiguration)
         {
@@ -378,165 +376,162 @@ public class Initializer
         int fullyQualifiedNoteCount = fullyQualifiedClassNameNotePrinter.getWarningCount();
         if (fullyQualifiedNoteCount > 0)
         {
-            out.println("Note: there were " + fullyQualifiedNoteCount +
-                        " references to unknown classes.");
-            out.println("      You should check your configuration for typos.");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#unknownclass)");
+            logger.info("Note: there were {} references to unknown classes.", fullyQualifiedNoteCount);
+            logger.info("      You should check your configuration for typos.");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#unknownclass)");
         }
 
         int classMemberNoteCount = classMemberNotePrinter.getWarningCount();
         if (classMemberNoteCount > 0)
         {
-            out.println("Note: there were " + classMemberNoteCount +
-                        " references to unknown class members.");
-            out.println("      You should check your configuration for typos.");
+            logger.info("Note: there were {} references to unknown class members.", classMemberNoteCount);
+            logger.info("      You should check your configuration for typos.");
         }
 
         int getAnnotationNoteCount = getAnnotationNotePrinter.getWarningCount();
         if (getAnnotationNoteCount > 0)
         {
-            out.println("Note: there were " + getAnnotationNoteCount +
-                        " classes trying to access annotations using reflection.");
-            out.println("      You should consider keeping the annotation attributes");
-            out.println("      (using '-keepattributes *Annotation*').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
+            logger.info("Note: there were {} classes trying to access annotations using reflection.",
+                               getAnnotationNoteCount);
+            logger.info("      You should consider keeping the annotation attributes");
+            logger.info("      (using '-keepattributes *Annotation*').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int getSignatureNoteCount = getSignatureNotePrinter.getWarningCount();
         if (getSignatureNoteCount > 0)
         {
-            out.println("Note: there were " + getSignatureNoteCount +
-                        " classes trying to access generic signatures using reflection.");
-            out.println("      You should consider keeping the signature attributes");
-            out.println("      (using '-keepattributes Signature').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
+            logger.info("Note: there were {} classes trying to access generic signatures using reflection.",
+                         getSignatureNoteCount);
+            logger.info("      You should consider keeping the signature attributes");
+            logger.info("      (using '-keepattributes Signature').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int getEnclosingClassNoteCount = getEnclosingClassNotePrinter.getWarningCount();
         if (getEnclosingClassNoteCount > 0)
         {
-            out.println("Note: there were " + getEnclosingClassNoteCount +
-                        " classes trying to access enclosing classes using reflection.");
-            out.println("      You should consider keeping the inner classes attributes");
-            out.println("      (using '-keepattributes InnerClasses').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
+            logger.info("Note: there were {} classes trying to access enclosing classes using reflection.",
+                         getEnclosingClassNoteCount);
+            logger.info("      You should consider keeping the inner classes attributes");
+            logger.info("      (using '-keepattributes InnerClasses').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int getEnclosingMethodNoteCount = getEnclosingMethodNotePrinter.getWarningCount();
         if (getEnclosingMethodNoteCount > 0)
         {
-            out.println("Note: there were " + getEnclosingMethodNoteCount +
-                        " classes trying to access enclosing methods using reflection.");
-            out.println("      You should consider keeping the enclosing method attributes");
-            out.println("      (using '-keepattributes InnerClasses,EnclosingMethod').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
+            logger.info("Note: there were {} classes trying to access enclosing methods using reflection.",
+                         getEnclosingMethodNoteCount);
+            logger.info("      You should consider keeping the enclosing method attributes");
+            logger.info("      (using '-keepattributes InnerClasses,EnclosingMethod').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#attributes)");
         }
 
         int descriptorNoteCount = descriptorKeepNotePrinter.getWarningCount();
         if (descriptorNoteCount > 0)
         {
-            out.println("Note: there were " + descriptorNoteCount +
-                        " unkept descriptor classes in kept class members.");
-            out.println("      You should consider explicitly keeping the mentioned classes");
-            out.println("      (using '-keep').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#descriptorclass)");
+            logger.info("Note: there were {} unkept descriptor classes in kept class members.",
+                        descriptorNoteCount);
+            logger.info("      You should consider explicitly keeping the mentioned classes");
+            logger.info("      (using '-keep').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#descriptorclass)");
         }
 
         int libraryNoteCount = libraryKeepNotePrinter.getWarningCount();
         if (libraryNoteCount > 0)
         {
-            out.println("Note: there were " + libraryNoteCount +
-                               " library classes explicitly being kept.");
-            out.println("      You don't need to keep library classes; they are already left unchanged.");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#libraryclass)");
+            logger.info("Note: there were {} library classes explicitly being kept.", libraryNoteCount);
+            logger.info("      You don't need to keep library classes; they are already left unchanged.");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#libraryclass)");
         }
 
         int dynamicClassReferenceNoteCount = dynamicClassReferenceNotePrinter.getWarningCount();
         if (dynamicClassReferenceNoteCount > 0)
         {
-            out.println("Note: there were " + dynamicClassReferenceNoteCount +
-                        " unresolved dynamic references to classes or interfaces.");
-            out.println("      You should check if you need to specify additional program jars.");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclass)");
+            logger.info("Note: there were {} unresolved dynamic references to classes or interfaces.",
+                        dynamicClassReferenceNoteCount);
+            logger.info("      You should check if you need to specify additional program jars.");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclass)");
         }
 
         int classForNameNoteCount = classForNameNotePrinter.getWarningCount();
         if (classForNameNoteCount > 0)
         {
-            out.println("Note: there were " + classForNameNoteCount +
-                        " class casts of dynamically created class instances.");
-            out.println("      You might consider explicitly keeping the mentioned classes and/or");
-            out.println("      their implementations (using '-keep').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclasscast)");
+            logger.info("Note: there were {} class casts of dynamically created class instances.",
+                        classForNameNoteCount);
+            logger.info("      You might consider explicitly keeping the mentioned classes and/or");
+            logger.info("      their implementations (using '-keep').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclasscast)");
         }
 
         int getmemberNoteCount = getMemberNotePrinter.getWarningCount();
         if (getmemberNoteCount > 0)
         {
-            out.println("Note: there were " + getmemberNoteCount +
-                        " accesses to class members by means of reflection.");
-            out.println("      You should consider explicitly keeping the mentioned class members");
-            out.println("      (using '-keep' or '-keepclassmembers').");
-            out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclassmember)");
+            logger.info("Note: there were {} accesses to class members by means of reflection.",
+                        getmemberNoteCount);
+            logger.info("      You should consider explicitly keeping the mentioned class members");
+            logger.info("      (using '-keep' or '-keepclassmembers').");
+            logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#dynamicalclassmember)");
         }
 
         // Print out a summary of the warnings, if necessary.
         int classReferenceWarningCount = classReferenceWarningPrinter.getWarningCount();
         if (classReferenceWarningCount > 0)
         {
-            err.println("Warning: there were " + classReferenceWarningCount +
-                        " unresolved references to classes or interfaces.");
-            err.println("         You may need to add missing library jars or update their versions.");
-            err.println("         If your code works fine without the missing classes, you can suppress");
-            err.println("         the warnings with '-dontwarn' options.");
+            logger.warn("Warning: there were {} unresolved references to classes or interfaces.",
+                         classReferenceWarningCount);
+            logger.warn("         You may need to add missing library jars or update their versions.");
+            logger.warn("         If your code works fine without the missing classes, you can suppress");
+            logger.warn("         the warnings with '-dontwarn' options.");
 
             if (configuration.skipNonPublicLibraryClasses)
             {
-                err.println("         You may also have to remove the option '-skipnonpubliclibraryclasses'.");
+                logger.warn("         You may also have to remove the option '-skipnonpubliclibraryclasses'.");
             }
 
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedclass)");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedclass)");
         }
 
         int dependencyWarningCount = dependencyWarningPrinter.getWarningCount();
         if (dependencyWarningCount > 0)
         {
-            err.println("Warning: there were " + dependencyWarningCount +
-                        " instances of library classes depending on program classes.");
-            err.println("         You must avoid such dependencies, since the program classes will");
-            err.println("         be processed, while the library classes will remain unchanged.");
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#dependency)");
+            logger.warn("Warning: there were {} instances of library classes depending on program classes.",
+                         dependencyWarningCount);
+            logger.warn("         You must avoid such dependencies, since the program classes will");
+            logger.warn("         be processed, while the library classes will remain unchanged.");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#dependency)");
         }
 
         int programMemberReferenceWarningCount = programMemberReferenceWarningPrinter.getWarningCount();
         if (programMemberReferenceWarningCount > 0)
         {
-            err.println("Warning: there were " + programMemberReferenceWarningCount +
-                        " unresolved references to program class members.");
-            err.println("         Your input classes appear to be inconsistent.");
-            err.println("         You may need to recompile the code.");
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedprogramclassmember)");
+            logger.warn("Warning: there were {} unresolved references to program class members.",
+                         programMemberReferenceWarningCount);
+            logger.warn("         Your input classes appear to be inconsistent.");
+            logger.warn("         You may need to recompile the code.");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedprogramclassmember)");
         }
 
         int libraryMemberReferenceWarningCount = libraryMemberReferenceWarningPrinter.getWarningCount();
         if (libraryMemberReferenceWarningCount > 0)
         {
-            err.println("Warning: there were " + libraryMemberReferenceWarningCount +
-                        " unresolved references to library class members.");
-            err.println("         You probably need to update the library versions.");
+            logger.warn("Warning: there were {} unresolved references to library class members.",
+                         libraryMemberReferenceWarningCount);
+            logger.warn("         You probably need to update the library versions.");
 
             if (!configuration.skipNonPublicLibraryClassMembers)
             {
-                err.println("         Alternatively, you may have to specify the option ");
-                err.println("         '-dontskipnonpubliclibraryclassmembers'.");
+                logger.warn("         Alternatively, you may have to specify the option ");
+                logger.warn("         '-dontskipnonpubliclibraryclassmembers'.");
             }
 
             if (configuration.skipNonPublicLibraryClasses)
             {
-                err.println("         You may also have to remove the option '-skipnonpubliclibraryclasses'.");
+                logger.warn("         You may also have to remove the option '-skipnonpubliclibraryclasses'.");
             }
 
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedlibraryclassmember)");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedlibraryclassmember)");
         }
 
         if (configuration.keepKotlinMetadata)
@@ -545,8 +540,8 @@ public class Initializer
 
             if (kotlinInitializationWarningCount > 0)
             {
-                err.println("Warning: there were " + kotlinInitializationWarningCount +
-                            " errors during Kotlin metadata initialisation.");
+                logger.warn("Warning: there were {} errors during Kotlin metadata initialisation.",
+                             kotlinInitializationWarningCount);
             }
         }
 
@@ -554,8 +549,8 @@ public class Initializer
 
         if (incompatibleOptimization)
         {
-            err.println("Warning: optimization is enabled while shrinking is disabled.");
-            err.println("         You need to remove the option -dontshrink or optimization might result in classes that fail verification at runtime.");
+            logger.warn("Warning: optimization is enabled while shrinking is disabled.");
+            logger.warn("         You need to remove the option -dontshrink or optimization might result in classes that fail verification at runtime.");
         }
 
         if ((classReferenceWarningCount         > 0 ||
@@ -573,16 +568,12 @@ public class Initializer
              configuration.warn.isEmpty() ||
              configuration.ignoreWarnings))
         {
-            out.println("Note: you're ignoring all warnings!");
+            logger.info("Note: you're ignoring all warnings!");
         }
 
-        // Discard unused library classes.
-        if (configuration.verbose)
-        {
-            out.println("Ignoring unused library classes...");
-            out.println("  Original number of library classes: " + originalLibraryClassPoolSize);
-            out.println("  Final number of library classes:    " + libraryClassPool.size());
-        }
+        logger.info("Ignoring unused library classes...");
+        logger.info("  Original number of library classes: {}", originalLibraryClassPoolSize);
+        logger.info("  Final number of library classes:    {}", libraryClassPool.size());
     }
 
 
