@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -39,11 +41,7 @@ public class GotoCommonCodeReplacer
 implements   AttributeVisitor,
              InstructionVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = true;
-    //*/
+    private static final Logger logger = LogManager.getLogger(GotoCommonCodeReplacer.class);
 
 
     private final InstructionVisitor  extraInstructionVisitor;
@@ -111,10 +109,14 @@ implements   AttributeVisitor,
             if (commonCount > 0 &&
                 !exceptionBoundary(codeAttribute, offset, targetOffset))
             {
-                if (DEBUG)
-                {
-                    System.out.println("GotoCommonCodeReplacer: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+" (["+(offset-commonCount)+"] - "+branchInstruction.toString(offset)+" -> "+targetOffset+")");
-                }
+                logger.debug("GotoCommonCodeReplacer: {}.{}{} ([{}] - {} -> {})",
+                             clazz.getName(),
+                             method.getName(clazz),
+                             method.getDescriptor(clazz),
+                             offset-commonCount,
+                             branchInstruction.toString(offset),
+                             targetOffset
+                );
 
                 // Delete the common instructions.
                 for (int delta = 0; delta <= commonCount; delta++)

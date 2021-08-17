@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -42,7 +44,7 @@ implements   ClassVisitor,
              AttributeVisitor,
              LineNumberInfoVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(LineNumberLinearizer.class);
 
     public  static final int SHIFT_ROUNDING       = 1000;
     private static final int SHIFT_ROUNDING_LIMIT = 50000;
@@ -104,10 +106,11 @@ implements   ClassVisitor,
 
     public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("LineNumberLinearizer ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]:");
-        }
+        logger.debug("LineNumberLinearizer [{}.{}{}]:",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
 
         enclosingLineNumbers.clear();
         previousLineNumberInfo = null;
@@ -123,10 +126,11 @@ implements   ClassVisitor,
     {
         String source = lineNumberInfo.getSource();
 
-        if (DEBUG)
-        {
-            System.out.print("    [" + lineNumberInfo.u2startPC + "] line " + lineNumberInfo.u2lineNumber + (source == null ? "" : " [" + source + "]"));
-        }
+        String debugMessage = String.format("    [%s] line %s%s",
+                                            lineNumberInfo.u2startPC,
+                                            lineNumberInfo.u2lineNumber,
+                                            source == null ? "" : " [" + source + "]"
+        );
 
         // Is it an inlined line number?
         if (source != null)
@@ -171,10 +175,7 @@ implements   ClassVisitor,
 
                     highestUsedLineNumber = endLineNumber + currentLineNumberShift;
 
-                    if (DEBUG)
-                    {
-                        System.out.print(" (enter with shift "+currentLineNumberShift+")");
-                    }
+                    debugMessage += String.format(" (enter with shift %s)", currentLineNumberShift);
 
                     // Apply the shift.
                     lineNumberInfo.u2lineNumber += currentLineNumberShift;
@@ -183,10 +184,9 @@ implements   ClassVisitor,
                 // TODO: There appear to be cases where the stack is empty at this point, so we've added a check.
                 else if (enclosingLineNumbers.isEmpty())
                 {
-                    if (DEBUG)
-                    {
-                        System.err.println("Problem linearizing line numbers for optimized code ("+clazz.getName()+"."+method.getName(clazz)+")");
-                    }
+                    debugMessage += String.format("Problem linearizing line numbers for optimized code %s.%s)", clazz.getName(), method.getName(clazz));
+                    logger.debug(debugMessage);
+                    debugMessage = "";
                 }
 
                 // Are we exiting an inlined block?
@@ -204,18 +204,12 @@ implements   ClassVisitor,
                     // Reset the shift to the shift of the block.
                     currentLineNumberShift = lineNumberBlock.lineNumberShift;
 
-                    if (DEBUG)
-                    {
-                        System.out.print(" (exit to shift "+currentLineNumberShift+")");
-                    }
+                    debugMessage += String.format(" (exit to shift %s)", currentLineNumberShift);
                 }
             }
             else
             {
-                if (DEBUG)
-                {
-                    System.out.print(" (apply shift "+currentLineNumberShift+")");
-                }
+                debugMessage += String.format(" (apply shift %s)", currentLineNumberShift);
 
                 // Apply the shift.
                 lineNumberInfo.u2lineNumber += currentLineNumberShift;
@@ -224,10 +218,8 @@ implements   ClassVisitor,
 
         previousLineNumberInfo = lineNumberInfo;
 
-        if (DEBUG)
-        {
-            System.out.println(" -> line " + lineNumberInfo.u2lineNumber);
-        }
+        debugMessage += String.format(" -> line %s", lineNumberInfo.u2lineNumber);
+        logger.debug(debugMessage);
     }
 
 

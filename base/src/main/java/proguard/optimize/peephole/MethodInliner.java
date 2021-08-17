@@ -20,6 +20,9 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -35,6 +38,8 @@ import proguard.optimize.info.*;
 import proguard.util.ProcessingFlagSetter;
 import proguard.util.ProcessingFlags;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Stack;
 
 /**
@@ -63,14 +68,7 @@ implements   AttributeVisitor,
     static final int METHOD_DUMMY_START_LINE_NUMBER = 0;
     static final int INLINED_METHOD_END_LINE_NUMBER = -1;
 
-    //*
-    private static final boolean DEBUG         = false;
-    private static final boolean DEBUG_DETAILS = false;
-    /*/
-    public  static       boolean DEBUG         = System.getProperty("mi")  != null;
-    public  static       boolean DEBUG_DETAILS = System.getProperty("mid") != null;
-    //*/
-
+    private static final Logger logger = LogManager.getLogger(MethodInliner.class);
 
     private final boolean            microEdition;
     private final boolean            android;
@@ -180,27 +178,34 @@ implements   AttributeVisitor,
         }
         catch (RuntimeException ex)
         {
-            System.err.println("Unexpected error while inlining method:");
-            System.err.println("  Target class   = ["+targetClass.getName()+"]");
-            System.err.println("  Target method  = ["+targetMethod.getName(targetClass)+targetMethod.getDescriptor(targetClass)+"]");
+            logger.error("Unexpected error while inlining method:");
+            logger.error("  Target class   = [{}]", targetClass.getName());
+            logger.error("  Target method  = [{}{}]", targetMethod.getName(targetClass), targetMethod.getDescriptor(targetClass));
             if (inlining)
             {
-                System.err.println("  Inlined class  = ["+clazz.getName()+"]");
-                System.err.println("  Inlined method = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
+                logger.error("  Inlined class  = [{}]", clazz.getName());
+                logger.error("  Inlined method = [{}{}]", method.getName(clazz), method.getDescriptor(clazz));
             }
-            System.err.println("  Exception      = ["+ex.getClass().getName()+"] ("+ex.getMessage()+")");
+            logger.error("  Exception      = [{}] ({})", ex.getClass().getName(), ex.getMessage(), ex);
 
-            ex.printStackTrace();
-            System.err.println("Not inlining this method");
+            logger.error("Not inlining this method");
 
-            if (DEBUG)
+            logger.debug("{}", () -> {
+                StringWriter sw = new StringWriter();
+                targetMethod.accept(targetClass, new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
+            if (inlining)
             {
-                targetMethod.accept(targetClass, new ClassPrinter());
-                if (inlining)
-                {
-                    method.accept(clazz, new ClassPrinter());
-                }
+                logger.debug("{}", () -> {
+                    StringWriter sw = new StringWriter();
+                    method.accept(clazz, new ClassPrinter(new PrintWriter(sw)));
+                    return sw.toString();
+                });
+            }
 
+            if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
+            {
                 throw ex;
             }
         }
@@ -251,12 +256,14 @@ implements   AttributeVisitor,
                      MAXIMUM_RESULTING_CODE_LENGTH_JME :
                      MAXIMUM_RESULTING_CODE_LENGTH_JSE))
         {
-            if (DEBUG)
-            {
-                System.out.println("MethodInliner: inlining ["+
-                                   clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] in ["+
-                                   targetClass.getName()+"."+targetMethod.getName(targetClass)+targetMethod.getDescriptor(targetClass)+"]");
-            }
+            logger.debug("MethodInliner: inlining [{}.{}{}] in [{}.{}{}]",
+                         clazz.getName(),
+                         method.getName(clazz),
+                         method.getDescriptor(clazz),
+                         targetClass.getName(),
+                         targetMethod.getName(targetClass),
+                         targetMethod.getDescriptor(targetClass)
+            );
 
             // Ignore the removal of the original method invocation,
             // the addition of the parameter setup, and
@@ -589,12 +596,14 @@ implements   AttributeVisitor,
     {
         int accessFlags = programMethod.getAccessFlags();
 
-        if (DEBUG_DETAILS)
-        {
-            System.out.println("MethodInliner: checking ["+
-                               programClass.getName()+"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"] in ["+
-                               targetClass.getName()+"."+targetMethod.getName(targetClass)+targetMethod.getDescriptor(targetClass)+"]");
-        }
+        logger.trace("MethodInliner: checking [{}.{}{}] in [{}.{}{}]",
+                     programClass.getName(),
+                     programMethod.getName(programClass),
+                     programMethod.getDescriptor(programClass),
+                     targetClass.getName(),
+                     targetMethod.getName(targetClass),
+                     targetMethod.getDescriptor(targetClass)
+        );
 
         if (// Don't inline methods that must be preserved.
             !KeepMarker.isKept(programMethod)                                                     &&
@@ -773,17 +782,17 @@ implements   AttributeVisitor,
         }
         catch (IllegalArgumentException e)
         {
-            if (DEBUG)
+            if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
             {
-                System.err.println("Invalid line number while inlining method:");
-                System.err.println("  Target class   = ["+targetClass.getName()+"]");
-                System.err.println("  Target method  = ["+targetMethod.getName(targetClass)+targetMethod.getDescriptor(targetClass)+"]");
+                logger.error("Invalid line number while inlining method:");
+                logger.error("  Target class   = [{}]", targetClass.getName());
+                logger.error("  Target method  = [{}{}]", targetMethod.getName(targetClass), targetMethod.getDescriptor(targetClass));
                 if (inlining)
                 {
-                    System.err.println("  Inlined class  = ["+clazz.getName()+"]");
-                    System.err.println("  Inlined method = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
+                    logger.error("  Inlined class  = [{}]", clazz.getName());
+                    logger.error("  Inlined method = [{}{}]", method.getName(clazz), method.getDescriptor(clazz));
                 }
-                System.err.println("  Exception      = ["+e.getClass().getName()+"] ("+e.getMessage()+")");
+                logger.error("  Exception      = [{}] ({})", e.getClass().getName(), e.getMessage());
             }
         }
     }
@@ -805,10 +814,7 @@ implements   AttributeVisitor,
      */
     private boolean DEBUG(String string)
     {
-        if (DEBUG_DETAILS)
-        {
-            System.out.println("  "+string);
-        }
+        logger.trace("  {}", string);
 
         return true;
     }

@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -37,11 +39,7 @@ public class UnreachableCodeRemover
 implements   AttributeVisitor,
              InstructionVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = true;
-    //*/
+    private static final Logger logger = LogManager.getLogger(UnreachableCodeRemover.class);
 
     private final InstructionVisitor  extraInstructionVisitor;
 
@@ -89,10 +87,10 @@ implements   AttributeVisitor,
         }
         catch (RuntimeException ex)
         {
-            System.err.println("Unexpected error while removing unreachable code:");
-            System.err.println("  Class       = ["+clazz.getName()+"]");
-            System.err.println("  Method      = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-            System.err.println("  Exception   = ["+ex.getClass().getName()+"] ("+ex.getMessage()+")");
+            logger.error("Unexpected error while removing unreachable code:");
+            logger.error("  Class       = [{}]", clazz.getName());
+            logger.error("  Method      = [{}{}]", method.getName(clazz), method.getDescriptor(clazz));
+            logger.error("  Exception   = [{}] ({})", ex.getClass().getName(), ex.getMessage());
 
             throw ex;
         }
@@ -101,10 +99,11 @@ implements   AttributeVisitor,
 
     public void visitCodeAttribute0(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("UnreachableCodeRemover: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-        }
+        logger.debug("UnreachableCodeRemover: {}.{}{}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
 
         reachableCodeMarker.visitCodeAttribute(clazz, method, codeAttribute);
 
@@ -120,10 +119,10 @@ implements   AttributeVisitor,
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction)
     {
-        if (DEBUG)
-        {
-            System.out.println("  "+(reachableCodeMarker.isReachable(offset) ? "+" : "-")+" "+instruction.toString(offset));
-        }
+        logger.debug("  {} {}",
+                     reachableCodeMarker.isReachable(offset) ? "+" : "-",
+                     instruction.toString(offset)
+        );
 
         // Is this instruction unreachable?
         if (!reachableCodeMarker.isReachable(offset))

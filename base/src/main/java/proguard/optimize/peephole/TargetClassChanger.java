@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -56,11 +58,7 @@ implements   ClassVisitor,
              AnnotationVisitor,
              ElementValueVisitor
 {
-    /*
-    private static final boolean DEBUG = false;
-    /*/
-    private        final boolean DEBUG = System.getProperty("tcc") != null;;
-    //*/
+    private static final Logger logger = LogManager.getLogger(TargetClassChanger.class);
 
 
     // Implementations for ClassVisitor.
@@ -242,11 +240,13 @@ implements   ClassVisitor,
         Clazz newReferencedClass = updateReferencedClass(referencedClass);
         if (referencedClass != newReferencedClass)
         {
-            if (DEBUG)
-            {
-                System.out.println("TargetClassChanger:");
-                System.out.println("  ["+clazz.getName()+"] changing reference from ["+refConstant.referencedClass.getName()+"."+refConstant.referencedMethod.getName(refConstant.referencedClass)+refConstant.referencedMethod.getDescriptor(refConstant.referencedClass)+"]");
-            }
+            logger.debug("TargetClassChanger:");
+            logger.debug("  [{}] changing reference from [{}.{}{}]",
+                         clazz.getName(),
+                         refConstant.referencedClass.getName(),
+                         refConstant.referencedMethod.getName(refConstant.referencedClass),
+                         refConstant.referencedMethod.getDescriptor(refConstant.referencedClass)
+            );
 
             // Change the referenced class.
             refConstant.referencedClass  = newReferencedClass;
@@ -257,10 +257,11 @@ implements   ClassVisitor,
                                                                           refConstant.getType(clazz),
                                                                           newReferencedClass);
 
-            if (DEBUG)
-            {
-                System.out.println("  ["+clazz.getName()+"]                    to   ["+refConstant.referencedClass+"."+refConstant.referencedMethod+"]");
-            }
+            logger.debug("  [{}]                    to   [{}.{}]",
+                         clazz.getName(),
+                         refConstant.referencedClass,
+                         refConstant.referencedMethod
+            );
         }
     }
 
@@ -272,11 +273,13 @@ implements   ClassVisitor,
         Clazz newReferencedClass = updateReferencedClass(referencedClass);
         if (referencedClass != newReferencedClass)
         {
-            if (DEBUG)
-            {
-                System.out.println("TargetClassChanger:");
-                System.out.println("  ["+clazz.getName()+"] changing reference from ["+refConstant.referencedClass.getName()+"."+refConstant.referencedField.getName(refConstant.referencedClass)+refConstant.referencedField.getDescriptor(refConstant.referencedClass)+"]");
-            }
+            logger.debug("TargetClassChanger:");
+            logger.debug("  [{}] changing reference from [{}.{}{}]",
+                         clazz.getName(),
+                         refConstant.referencedClass.getName(),
+                         refConstant.referencedField.getName(refConstant.referencedClass),
+                         refConstant.referencedField.getDescriptor(refConstant.referencedClass)
+            );
 
             // Change the referenced class.
             refConstant.referencedClass  = newReferencedClass;
@@ -287,10 +290,11 @@ implements   ClassVisitor,
                                                                         refConstant.getType(clazz),
                                                                         newReferencedClass);
 
-            if (DEBUG)
-            {
-                System.out.println("  ["+clazz.getName()+"]                    to   ["+refConstant.referencedClass+"."+refConstant.referencedField+"]");
-            }
+            logger.debug("  [{}]                    to   [{}.{}]",
+                         clazz.getName(),
+                         refConstant.referencedClass,
+                         refConstant.referencedField
+            );
         }
     }
 
@@ -351,28 +355,28 @@ implements   ClassVisitor,
         }
         catch (RuntimeException e)
         {
-            System.err.println("Unexpected error while adapting signatures for merged classes:");
-            System.err.println("  Class     = ["+clazz.getName()+"]");
-            System.err.println("  Signature = ["+signatureAttribute.getSignature(clazz)+"]");
+            logger.error("Unexpected error while adapting signatures for merged classes:");
+            logger.error("  Class     = [{}]", clazz.getName());
+            logger.error("  Signature = [{}]", signatureAttribute.getSignature(clazz));
             Clazz[] referencedClasses = signatureAttribute.referencedClasses;
             if (referencedClasses != null)
             {
                 for (int index = 0; index < referencedClasses.length; index++)
                 {
                     Clazz referencedClass = referencedClasses[index];
-                    System.err.println("  Referenced class #"+index+" = "+ referencedClass);
+                    logger.error("  Referenced class #{} = {}", index, referencedClass);
                     if (referencedClass != null)
                     {
                         ClassOptimizationInfo info = ClassOptimizationInfo.getClassOptimizationInfo(referencedClass);
-                        System.err.println("                         info        = "+info);
+                        logger.error("                         info        = {}", info);
                         if (info != null)
                         {
-                            System.err.println("                         target      = "+info.getTargetClass());
+                            logger.error("                         target      = {}", info.getTargetClass());
                         }
                     }
                 }
             }
-            System.err.println("  Exception = ["+e.getClass().getName()+"] ("+e.getMessage()+")");
+            logger.error("  Exception = [{}] ({})", e.getClass().getName(), e.getMessage());
             throw e;
         }
     }
