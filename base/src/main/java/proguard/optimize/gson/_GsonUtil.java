@@ -23,6 +23,8 @@ package proguard.optimize.gson;
 import com.google.gson.*;
 import com.google.gson.internal.bind.ReflectiveTypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.*;
 import java.util.Map;
@@ -40,6 +42,8 @@ import java.util.Map;
  */
 public final class _GsonUtil
 {
+    private static final Logger logger = LogManager.getLogger(_GsonUtil.class);
+
     /**
      * Returns the appropriate type adapter for handling the given value with
      * the given declared type.
@@ -134,10 +138,10 @@ public final class _GsonUtil
      */
     public static void dumpTypeTokenCache(String message, Map<TypeToken<?>, TypeAdapter<?>> typeTokenCache)
     {
-        System.out.println(message);
+        logger.info(message);
         for (Map.Entry<TypeToken<?>, TypeAdapter<?>> typeTokenCacheEntry : typeTokenCache.entrySet())
         {
-            System.out.println("    " + typeTokenCacheEntry.getKey() + " -> " + typeTokenCacheEntry.getValue());
+            logger.info("    {} -> {}", typeTokenCacheEntry.getKey(), typeTokenCacheEntry.getValue());
         }
     }
 }

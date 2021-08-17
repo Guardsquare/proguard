@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.ClassBuilder;
@@ -48,7 +50,7 @@ implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(GsonDeserializationOptimizer.class);
 
     private static final int IS_NULL_VARIABLE_INDEX = ClassUtil.internalMethodParameterSize(METHOD_TYPE_FROM_JSON_FIELD, false);
 
@@ -158,12 +160,7 @@ implements   ClassVisitor,
     private void addDefaultConstructor(ProgramClass programClass,
                                        ClassBuilder classBuilder)
     {
-        if (DEBUG)
-        {
-            System.out.println(
-                "GsonDeserializationOptimizer: adding default constructor to " +
-                programClass.getName());
-        }
+        logger.debug("GsonDeserializationOptimizer: adding default constructor to {}", programClass.getName());
 
         classBuilder.addMethod(
             AccessConstants.PUBLIC |
@@ -187,13 +184,10 @@ implements   ClassVisitor,
     {
         String methodNameFromJson = METHOD_NAME_FROM_JSON + classIndex;
 
-        if (DEBUG)
-        {
-            System.out.println(
-                "GsonDeserializationOptimizer: adding " +
-                methodNameFromJson +
-                " method to " + programClass.getName());
-        }
+        logger.debug("GsonDeserializationOptimizer: adding {} method to {}",
+                     methodNameFromJson,
+                     programClass.getName()
+        );
 
         classBuilder.addMethod(
             AccessConstants.PUBLIC | AccessConstants.SYNTHETIC,
@@ -266,13 +260,10 @@ implements   ClassVisitor,
     {
         String methodNameFromJsonField = METHOD_NAME_FROM_JSON_FIELD + classIndex;
 
-        if (DEBUG)
-        {
-            System.out.println(
-                "GsonDeserializationOptimizer: adding " +
-                methodNameFromJsonField +
-                " method to " + programClass.getName());
-        }
+        logger.debug("GsonDeserializationOptimizer: adding {} method to {}",
+                     methodNameFromJsonField,
+                     programClass.getName()
+        );
 
         classBuilder.addMethod(
             AccessConstants.PROTECTED | AccessConstants.SYNTHETIC,

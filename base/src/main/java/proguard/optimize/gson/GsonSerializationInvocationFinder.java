@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -42,11 +44,7 @@ import proguard.evaluation.value.*;
 public class GsonSerializationInvocationFinder
 implements   InstructionVisitor
 {
-    //*
-    public static final boolean DEBUG = false;
-    /*/
-    public static       boolean DEBUG = System.getProperty("gsif") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(GsonSerializationInvocationFinder.class);
 
 
     private final ClassPool                  programClassPool;
@@ -182,16 +180,12 @@ implements   InstructionVisitor
 
         if (matchingMatcher != null)
         {
-            if (DEBUG)
-            {
-                System.out.println("GsonSerializationInvocationFinder: Gson#toJson/toJsonTree: " +
-                                   clazz.getName() +
-                                   "." +
-                                   method.getName(clazz) +
-                                   method.getDescriptor(clazz) +
-                                   " " +
-                                   instruction.toString(offset));
-            }
+            logger.debug("GsonSerializationInvocationFinder: Gson#toJson/toJsonTree: {}.{}{} {}",
+                         clazz.getName(),
+                         method.getName(clazz),
+                         method.getDescriptor(clazz),
+                         instruction.toString(offset)
+            );
 
             // Figure out the type that is being serialized.
             lazyPartialEvaluator.visitCodeAttribute(clazz,
@@ -209,11 +203,7 @@ implements   InstructionVisitor
 
                 if (targetClass instanceof ProgramClass)
                 {
-                    if(DEBUG)
-                    {
-                        System.out.println("GsonSerializationInvocationFinder: serialized type: " +
-                                           targetClass.getName());
-                    }
+                    logger.debug("GsonSerializationInvocationFinder: serialized type: {}", targetClass.getName());
                     targetClass.accept(domainClassVisitor);
                 }
             }
@@ -243,11 +233,7 @@ implements   InstructionVisitor
                 {
                     for (String targetType : targetTypes)
                     {
-                        if(DEBUG)
-                        {
-                            System.out.println("GsonSerializationInvocationFinder: serialized type: " +
-                                               targetType);
-                        }
+                        logger.debug("GsonSerializationInvocationFinder: serialized type: {}", targetType);
                         programClassPool.classAccept(targetType, domainClassVisitor);
                     }
                 }

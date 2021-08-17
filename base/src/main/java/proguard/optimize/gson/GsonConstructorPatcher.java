@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -43,7 +45,7 @@ implements   MemberVisitor,
              AttributeVisitor,
              InstructionVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(GsonConstructorPatcher.class);
 
     private final CodeAttributeEditor codeAttributeEditor;
     private final TypedReferenceValueFactory valueFactory         =
@@ -94,13 +96,11 @@ implements   MemberVisitor,
         String descriptor = programMethod.getDescriptor(programClass);
         if (descriptor.contains(ClassConstants.TYPE_JAVA_UTIL_LIST))
         {
-            if(DEBUG)
-            {
-                System.out.println("GsonConstructorPatcher: patching " +
-                                   programClass.getName() + " " +
-                                   programMethod.getName(programClass) + " " +
-                                   descriptor);
-            }
+            logger.debug("GsonConstructorPatcher: patching {} {} {}",
+                         programClass.getName(),
+                         programMethod.getName(programClass),
+                         descriptor
+            );
             programMethod.attributesAccept(programClass, this);
         }
     }

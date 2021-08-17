@@ -20,6 +20,9 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
@@ -27,10 +30,7 @@ import proguard.classfile.editor.ClassEditor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.editor.PeepholeEditor;
-import proguard.classfile.util.BranchTargetFinder;
-import proguard.classfile.util.ClassReferenceInitializer;
-import proguard.classfile.util.ClassSubHierarchyInitializer;
-import proguard.classfile.util.WarningPrinter;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.ClassPathDataEntry;
 import proguard.io.ClassReader;
@@ -79,6 +79,7 @@ import static proguard.optimize.gson.OptimizedClassConstants.*;
  */
 public class GsonOptimizer
 {
+    private static final Logger logger = LogManager.getLogger(GsonOptimizer.class);
     //*
     public static final boolean DEBUG = false;
     /*/
@@ -134,10 +135,8 @@ public class GsonOptimizer
 
         // Setup Gson context that represents how Gson is used in program
         // class pool.
-        PrintWriter out =
-            new PrintWriter(System.out, true);
         WarningPrinter warningPrinter =
-            new WarningPrinter(out, configuration.warn);
+            new WarningLogger(logger, configuration.warn);
 
         GsonContext gsonContext = new GsonContext();
         gsonContext.setupFor(programClassPool, libraryClassPool, warningPrinter);
@@ -308,12 +307,9 @@ public class GsonOptimizer
                     new ClassReferenceInitializer(programClassPool, libraryClassPool)));
 
 
-            if (configuration.verbose)
-            {
-                System.out.println("  Number of optimized serializable classes:      " + gsonContext.gsonDomainClassPool.size() );
-            }
+            logger.info("  Number of optimized serializable classes:      {}", gsonContext.gsonDomainClassPool.size() );
 
-            if (DEBUG)
+            if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
             {
                 // Inject instrumentation code in Gson.toJson() and Gson.fromJson().
                 programClassPool.classAccept(NAME_GSON,
