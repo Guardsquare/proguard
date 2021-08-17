@@ -20,6 +20,9 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -47,11 +50,7 @@ implements   ClassVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("enum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(SimpleEnumDescriptorSimplifier.class);
 
     private static final boolean DEBUG_EXTRA = false;
 
@@ -65,10 +64,7 @@ implements   ClassVisitor,
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (DEBUG)
-        {
-            System.out.println("SimpleEnumDescriptorSimplifier: "+programClass.getName());
-        }
+        logger.debug("SimpleEnumDescriptorSimplifier: {}", programClass.getName());
 
         // Simplify the class members.
         programClass.fieldsAccept(this);
@@ -198,10 +194,13 @@ implements   ClassVisitor,
             String name    = programField.getName(programClass);
             String newName = name + TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
 
-            if (DEBUG)
-            {
-                System.out.println("SimpleEnumDescriptorSimplifier: ["+programClass.getName()+"."+name+" "+descriptor + "] -> ["+newName+" "+newDescriptor+"]");
-            }
+            logger.debug("SimpleEnumDescriptorSimplifier: [{}.{} {}] -> [{} {}]",
+                         programClass.getName(),
+                         name,
+                         descriptor,
+                         newName,
+                         newDescriptor
+            );
 
             ConstantPoolEditor constantPoolEditor =
                 new ConstantPoolEditor(programClass);
@@ -259,10 +258,13 @@ implements   ClassVisitor,
                 newName += TypeConstants.SPECIAL_MEMBER_SEPARATOR + Long.toHexString(Math.abs((descriptor).hashCode()));
             }
 
-            if (DEBUG)
-            {
-                System.out.println("SimpleEnumDescriptorSimplifier: ["+programClass.getName()+"."+name+descriptor+"] -> ["+newName+newDescriptor+"]");
-            }
+            logger.debug("SimpleEnumDescriptorSimplifier: [{}.{}{}] -> [{}{}]",
+                         programClass.getName(),
+                         name,
+                         descriptor,
+                         newName,
+                         newDescriptor
+            );
 
             ConstantPoolEditor constantPoolEditor =
                 new ConstantPoolEditor(programClass);
@@ -399,10 +401,7 @@ implements   ClassVisitor,
     {
         if (referencedClasses != null)
         {
-            if (DEBUG_EXTRA)
-            {
-                System.out.println("  Before: ["+descriptor+"]");
-            }
+            logger.trace("  Before: [{}]", descriptor);
 
             InternalTypeEnumeration typeEnumeration =
                 new InternalTypeEnumeration(descriptor);
@@ -588,10 +587,7 @@ implements   ClassVisitor,
 
             descriptor = newDescriptorBuffer.toString();
 
-            if (DEBUG_EXTRA)
-            {
-                System.out.println("  After:  ["+descriptor+"]");
-            }
+            logger.trace("  After:  [{}]", descriptor);
         }
 
         return descriptor;
@@ -607,14 +603,13 @@ implements   ClassVisitor,
     {
         if (referencedClasses != null)
         {
-            if (DEBUG_EXTRA)
+            if (logger.getLevel().isLessSpecificThan(Level.TRACE))
             {
-                System.out.print("  Referenced before:");
-                for (int index = 0; index < referencedClasses.length; index++)
-                {
-                    System.out.print(" ["+(referencedClasses[index] == null ? null : referencedClasses[index].getName())+"]");
+                StringBuilder traceMessage = new StringBuilder("  Referenced before:");
+                for (int index = 0; index < referencedClasses.length; index++) {
+                    traceMessage.append(String.format(" [%s]", referencedClasses[index] == null ? null : referencedClasses[index].getName()));
                 }
-                System.out.println();
+                logger.trace(traceMessage);
             }
 
             InternalTypeEnumeration typeEnumeration =
@@ -774,14 +769,13 @@ implements   ClassVisitor,
 
                 referencedClasses = newReferencedClasses;
 
-                if (DEBUG_EXTRA)
+                if (logger.getLevel().isLessSpecificThan(Level.TRACE))
                 {
-                    System.out.print("  Referenced after: ");
-                    for (int index = 0; index < referencedClasses.length; index++)
-                    {
-                        System.out.print(" ["+(referencedClasses[index] == null ? null : referencedClasses[index].getName())+"]");
+                    StringBuilder traceMessage = new StringBuilder("  Referenced after: ");
+                    for (int index = 0; index < referencedClasses.length; index++) {
+                        traceMessage.append(String.format(" [%s]", referencedClasses[index] == null ? null : referencedClasses[index].getName()));
                     }
-                    System.out.println();
+                    logger.trace(traceMessage);
                 }
             }
         }

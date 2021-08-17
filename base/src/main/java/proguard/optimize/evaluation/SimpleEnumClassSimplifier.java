@@ -20,6 +20,8 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -40,11 +42,7 @@ public class SimpleEnumClassSimplifier
 implements   ClassVisitor,
              AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("enum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(SimpleEnumClassSimplifier.class);
 
 
     private static final int ENUM_CLASS_NAME          = InstructionSequenceReplacer.A;
@@ -158,10 +156,7 @@ implements   ClassVisitor,
     @Override
     public void visitProgramClass(ProgramClass programClass)
     {
-        if (DEBUG)
-        {
-            System.out.println("SimpleEnumClassSimplifier: ["+programClass.getName()+"]");
-        }
+        logger.debug("SimpleEnumClassSimplifier: [{}]", programClass.getName());
 
         // Unmark the class as an enum.
         programClass.u2accessFlags &= ~AccessConstants.ENUM;

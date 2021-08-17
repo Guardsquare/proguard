@@ -20,6 +20,9 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import proguard.FullyQualifiedClassNameChecker;
 import proguard.classfile.*;
 import proguard.classfile.visitor.*;
 import proguard.optimize.OptimizationInfoClassFilter;
@@ -34,11 +37,7 @@ import proguard.optimize.info.SimpleEnumMarker;
 public class SimpleEnumClassChecker
 implements   ClassVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("enum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(SimpleEnumClassChecker.class);
 
 
     private final ClassVisitor  simpleEnumMarker      = new OptimizationInfoClassFilter(
@@ -62,10 +61,7 @@ implements   ClassVisitor
         if (programClass.findMethod(ClassConstants.METHOD_NAME_INIT,
                                     ClassConstants.METHOD_TYPE_INIT_ENUM) != null)
         {
-            if (DEBUG)
-            {
-                System.out.println("SimpleEnumClassChecker: ["+programClass.getName()+"] is a candidate simple enum, without extra fields");
-            }
+            logger.debug("SimpleEnumClassChecker: [{}] is a candidate simple enum, without extra fields", programClass.getName());
 
             // Mark it.
             simpleEnumMarker.visitProgramClass(programClass);

@@ -20,6 +20,8 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -39,11 +41,7 @@ implements   AttributeVisitor,
              LocalVariableInfoVisitor,
              LocalVariableTypeInfoVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = true;
-    //*/
+    private static final Logger logger = LogManager.getLogger(VariableOptimizer.class);
 
     private static final int MAX_VARIABLES_SIZE = 64;
 
@@ -153,13 +151,14 @@ implements   AttributeVisitor,
         // Have we been able to remap any variables?
         if (remapping)
         {
-            if (DEBUG)
+            logger.debug("VariableOptimizer: {}.{}{}",
+                         clazz.getName(),
+                         method.getName(clazz),
+                         method.getDescriptor(clazz)
+            );
+            for (int index= 0; index < variableSize; index++)
             {
-                System.out.println("VariableOptimizer: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-                for (int index= 0; index < variableSize; index++)
-                {
-                    System.out.println("  v"+index+" -> "+variableMap[index]);
-                }
+                logger.debug("  v{} -> {}", index, variableMap[index]);
             }
 
             // Remap the variables.

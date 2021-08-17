@@ -20,18 +20,22 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.info.SideEffectInstructionChecker;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 
 /**
@@ -47,11 +51,7 @@ implements   AttributeVisitor,
     private static final int  POS_ZERO_FLOAT_BITS  = Float.floatToIntBits(0.0f);
     private static final long POS_ZERO_DOUBLE_BITS = Double.doubleToLongBits(0.0);
 
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static boolean DEBUG = System.getProperty("es") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(EvaluationSimplifier.class);
 
     private final InstructionVisitor extraInstructionVisitor;
 
@@ -106,16 +106,19 @@ implements   AttributeVisitor,
         }
         catch (RuntimeException ex)
         {
-            System.err.println("Unexpected error while simplifying instructions after partial evaluation:");
-            System.err.println("  Class       = ["+clazz.getName()+"]");
-            System.err.println("  Method      = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-            System.err.println("  Exception   = ["+ex.getClass().getName()+"] ("+ex.getMessage()+")");
-            System.err.println("Not optimizing this method");
+            logger.error("Unexpected error while simplifying instructions after partial evaluation:");
+            logger.error("  Class       = [{}]", clazz.getName());
+            logger.error("  Method      = [{}{}]", method.getName(clazz), method.getDescriptor(clazz));
+            logger.error("  Exception   = [{}] ({})", ex.getClass().getName(), ex.getMessage());
+            logger.error("Not optimizing this method");
 
-            if (DEBUG)
+            logger.debug("{}", () -> {
+                StringWriter sw = new StringWriter();
+                method.accept(clazz, new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
+            if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
             {
-                method.accept(clazz, new ClassPrinter());
-
                 throw ex;
             }
         }
@@ -124,11 +127,7 @@ implements   AttributeVisitor,
 
     public void visitCodeAttribute0(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println();
-            System.out.println("EvaluationSimplifier ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-        }
+        logger.debug("EvaluationSimplifier [{}.{}{}]", clazz.getName(), method.getName(clazz), method.getDescriptor(clazz));
 
         // Evaluate the method.
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
@@ -1014,7 +1013,7 @@ implements   AttributeVisitor,
             (!partialEvaluator.isSubroutineReturning(offset) ||
              partialEvaluator.branchOrigins(offset).instructionOffsetCount() == 1))
         {
-            if (DEBUG) System.out.println("  Deleting store of subroutine return address "+instruction.toString(offset));
+            logger.debug("  Deleting store of subroutine return address {}", instruction.toString(offset));
 
             // A reference value can only be specific if it is null.
             codeAttributeEditor.deleteInstruction(offset);
@@ -1040,7 +1039,7 @@ implements   AttributeVisitor,
             int branchOffset = branchTargets.instructionOffset(0) - offset;
             if (branchOffset == instruction.length(offset))
             {
-                if (DEBUG) System.out.println("  Ignoring zero branch instruction at ["+offset+"]");
+                logger.debug("  Ignoring zero branch instruction at [{}]", offset);
             }
             else
             {
@@ -1473,7 +1472,7 @@ implements   AttributeVisitor,
                 new SimpleInstruction(Instruction.OP_ATHROW)
             };
 
-        if (DEBUG) System.out.println("  Replacing instruction by explicit exception "+exceptionClass);
+        logger.debug("  Replacing instruction by explicit exception {}", exceptionClass);
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstructions);
 
@@ -1502,7 +1501,7 @@ implements   AttributeVisitor,
         Instruction replacementInstruction =
             new BranchInstruction(Instruction.OP_GOTO, 0);
 
-        if (DEBUG) System.out.println("  Replacing unreachable instruction by infinite loop "+replacementInstruction.toString(offset));
+        logger.debug("  Replacing unreachable instruction by infinite loop {}", replacementInstruction.toString(offset));
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
 
@@ -1535,7 +1534,11 @@ implements   AttributeVisitor,
 
         insertPopInstructions(offset, popCount);
 
-        if (DEBUG) System.out.println("  Replacing instruction "+instruction.toString(offset)+" -> "+replacementInstruction.toString()+(popCount == 0 ? "" : " ("+popCount+" pops)"));
+        logger.debug("  Replacing instruction {} -> {}{}",
+                     instruction.toString(offset),
+                     replacementInstruction.toString(),
+                     popCount == 0 ? "" : " ("+popCount+" pops)"
+        );
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
 
@@ -1620,7 +1623,11 @@ implements   AttributeVisitor,
                                                     int               switchOffset,
                                                     SwitchInstruction replacementSwitchInstruction)
     {
-        if (DEBUG) System.out.println("  Replacing switch instruction at ["+switchOffset+"] -> ["+loadOffset+"] swap + pop, "+replacementSwitchInstruction.toString(switchOffset)+")");
+        logger.debug("  Replacing switch instruction at [{}] -> [{}] swap + pop, {})",
+                     switchOffset,
+                     loadOffset,
+                     replacementSwitchInstruction.toString(switchOffset)
+        );
 
         // Remove the array load instruction.
         codeAttributeEditor.replaceInstruction(loadOffset, new Instruction[]
