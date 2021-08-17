@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -42,11 +44,7 @@ implements   AttributeVisitor,
              InstructionVisitor,
              ClassVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("ecm") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(EscapingClassMarker.class);
 
 
     private final PartialEvaluator       partialEvaluator;
@@ -168,10 +166,13 @@ implements   AttributeVisitor,
                     Clazz referencedClass = referenceValue.getReferencedClass();
                     if (referencedClass != null)
                     {
-                        if (DEBUG)
-                        {
-                            System.out.println("EscapingClassMarker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]: "+instruction.toString(offset)+" pushes escaping ["+referencedClass.getName()+"]");
-                        }
+                        logger.debug("EscapingClassMarker: [{}.{}{}]: {} pushes escaping [{}]",
+                                     clazz.getName(),
+                                     method.getName(clazz),
+                                     method.getDescriptor(clazz),
+                                     instruction.toString(offset),
+                                     referencedClass.getName()
+                        );
 
                         // Mark it, along with its superclasses.
                         referencedClass.hierarchyAccept(true, true, true, false, this);

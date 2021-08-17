@@ -21,6 +21,9 @@
 
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -47,11 +50,7 @@ implements   AttributeVisitor,
              InstructionVisitor,
              ConstantVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("rec") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(ReferenceEscapeChecker.class);
 
 
     private boolean[] instanceEscaping  = new boolean[ClassEstimates.TYPICAL_CODE_LENGTH];
@@ -173,22 +172,23 @@ implements   AttributeVisitor,
         // Mark the parameters and instances that are escaping from the code.
         codeAttribute.instructionsAccept(clazz, method, partialEvaluator.tracedInstructionFilter(this));
 
-        if (DEBUG)
-        {
-            System.out.println();
-            System.out.println("ReferenceEscapeChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]");
+        logger.debug("ReferenceEscapeChecker: [{}.{}{}]",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
 
-            for (int index = 0; index < codeLength; index++)
-            {
-                if (partialEvaluator.isInstruction(index))
-                {
-                    System.out.println("  " +
-                                       (instanceEscaping[index] ? 'E' : '.') +
-                                       (instanceReturned[index] ? 'R' : '.') +
-                                       (instanceModified[index] ? 'M' : '.') +
-                                       (externalInstance[index] ? 'X' : '.') +
-                                       ' ' +
-                                       InstructionFactory.create(codeAttribute.code, index).toString(index));
+        if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
+        {
+            for (int index = 0; index < codeLength; index++) {
+                if (partialEvaluator.isInstruction(index)) {
+                    logger.debug("  {}{}{}{} {}",
+                                 instanceEscaping[index] ? 'E' : '.',
+                                 instanceReturned[index] ? 'R' : '.',
+                                 instanceModified[index] ? 'M' : '.',
+                                 externalInstance[index] ? 'X' : '.',
+                                 InstructionFactory.create(codeAttribute.code, index).toString(index)
+                    );
                 }
             }
         }

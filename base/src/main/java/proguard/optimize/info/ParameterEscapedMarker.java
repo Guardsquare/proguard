@@ -20,6 +20,9 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -48,12 +51,7 @@ implements   ClassPoolVisitor,
              InstructionVisitor,
              ConstantVisitor
 {
-    /*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("pem") != null;
-    //*/
-
+    private static final Logger logger = LogManager.getLogger(ParameterEscapedMarker.class);
 
     private final ClassVisitor                 parameterEscapedMarker =
         new AllMethodVisitor(
@@ -92,17 +90,14 @@ implements   ClassPoolVisitor,
         {
             newEscapes = false;
 
-            if (DEBUG)
-            {
-                System.out.println("ParameterEscapedMarker: new iteration");
-            }
+            logger.debug("ParameterEscapedMarker: new iteration");
 
             // Go over all classes and their methods once.
             classPool.classesAccept(parameterEscapedMarker);
         }
         while (newEscapes);
 
-        if (DEBUG)
+        if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
         {
             classPool.classesAccept(new AllMethodVisitor(this));
         }
@@ -113,19 +108,23 @@ implements   ClassPoolVisitor,
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        if (DEBUG)
+        logger.debug("ParameterEscapedMarker: [{}.{}{}]",
+                     programClass.getName(),
+                     programMethod.getName(programClass),
+                     programMethod.getDescriptor(programClass)
+        );
+
+        int parameterSize =
+            ClassUtil.internalMethodParameterSize(programMethod.getDescriptor(programClass),
+                                                  programMethod.getAccessFlags());
+
+        if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
         {
-            System.out.println("ParameterEscapedMarker: [" + programClass.getName() + "." + programMethod.getName(programClass) + programMethod.getDescriptor(programClass) + "]");
-
-            int parameterSize =
-                ClassUtil.internalMethodParameterSize(programMethod.getDescriptor(programClass),
-                                                      programMethod.getAccessFlags());
-
-            for (int index = 0; index < parameterSize; index++)
-            {
-                System.out.println("  " +
-                                   (hasParameterEscaped(programMethod, index) ? 'e' : '.') +
-                                   " P" + index);
+            for (int index = 0; index < parameterSize; index++) {
+                logger.debug("  {} P{}",
+                        hasParameterEscaped(programMethod, index) ? 'e' : '.',
+                        index
+                );
             }
         }
     }

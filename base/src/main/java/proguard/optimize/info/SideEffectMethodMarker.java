@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.Instruction;
@@ -39,8 +41,7 @@ public class SideEffectMethodMarker
 implements   MemberVisitor,
              InstructionVisitor
 {
-    private static final boolean DEBUG = System.getProperty("semm") != null;
-
+    private static final Logger logger = LogManager.getLogger(SideEffectMethodMarker.class);
 
     private final MemberVisitor extraMemberVisitor;
 
@@ -111,10 +112,11 @@ implements   MemberVisitor,
             // Trigger the repeater if the setter has changed the value.
             if (methodOptimizationInfo.hasSideEffects())
             {
-                if (DEBUG)
-                {
-                    System.out.println("SideEffectMethodMarker: marking for side-effects: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-                }
+                logger.debug("SideEffectMethodMarker: marking for side-effects: {}.{}{}",
+                             clazz.getName(),
+                             method.getName(clazz),
+                             method.getDescriptor(clazz)
+                );
 
                 if (extraMemberVisitor != null)
                 {

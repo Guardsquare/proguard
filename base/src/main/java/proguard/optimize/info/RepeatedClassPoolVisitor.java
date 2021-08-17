@@ -21,6 +21,8 @@
 
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassPool;
 import proguard.classfile.visitor.ClassPoolVisitor;
 
@@ -33,11 +35,7 @@ import proguard.classfile.visitor.ClassPoolVisitor;
 public class RepeatedClassPoolVisitor
 implements   ClassPoolVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("rcpv") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(RepeatedClassPoolVisitor.class);
 
 
     private final MutableBoolean   repeatTrigger;
@@ -67,10 +65,7 @@ implements   ClassPoolVisitor
         // setting the repeat trigger.
         do
         {
-            if (DEBUG)
-            {
-                System.out.println("RepeatedClassPoolVisitor: new iteration");
-            }
+            logger.debug("RepeatedClassPoolVisitor: new iteration");
 
             repeatTrigger.reset();
 
@@ -79,9 +74,6 @@ implements   ClassPoolVisitor
         }
         while (repeatTrigger.isSet());
 
-        if (DEBUG)
-        {
-            System.out.println("RepeatedClassPoolVisitor: done iterating");
-        }
+        logger.debug("RepeatedClassPoolVisitor: done iterating");
     }
 }

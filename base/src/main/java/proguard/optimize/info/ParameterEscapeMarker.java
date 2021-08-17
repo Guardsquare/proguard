@@ -20,6 +20,9 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -57,11 +60,7 @@ implements   MemberVisitor,
              ConstantVisitor,
              ParameterVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("pem") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(ParameterEscapeMarker.class);
 
 
     private final MemberVisitor          extraMemberVisitor;
@@ -193,30 +192,32 @@ implements   MemberVisitor,
             referenceEscapeChecker.visitCodeAttribute(clazz, method, codeAttribute);
         }
 
-        if (DEBUG)
+        // These results are not complete yet, since this class must still
+        // be called as an InstructionVisitor.
+        logger.debug("ParameterEscapeMarker: [{}.{}{}]",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
+
+        int parameterCount =
+            ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz),
+                                                   method.getAccessFlags());
+
+        if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
         {
-            // These results are not complete yet, since this class must still
-            // be called as an InstructionVisitor.
-            System.out.println("ParameterEscapeMarker: [" + clazz.getName() + "." + method.getName(clazz) + method.getDescriptor(clazz) + "]");
-
-            int parameterCount =
-                ClassUtil.internalMethodParameterCount(method.getDescriptor(clazz),
-                                                       method.getAccessFlags());
-
-            for (int index = 0; index < parameterCount; index++)
-            {
-                System.out.println("  " +
-//                                   (hasParameterEscaped(method, index) ? 'e' : '.') +
-                                   (isParameterEscaping(method, index) ? 'E' : '.') +
-                                   (isParameterReturned(method, index) ? 'R' : '.') +
-                                   (isParameterModified(method, index) ? 'M' : '.') +
-                                   " P" + index);
+            for (int index = 0; index < parameterCount; index++) {
+                logger.debug("  {}{}{} P{}",
+//                           (hasParameterEscaped(method, index) ? 'e' : '.'),
+                             isParameterEscaping(method, index) ? 'E' : '.',
+                             isParameterReturned(method, index) ? 'R' : '.',
+                             isParameterModified(method, index) ? 'M' : '.',
+                             index
+                );
             }
-
-            System.out.println("  " +
-                               (returnsExternalValues(method) ? 'X' : '.') +
-                               "   Return value");
         }
+
+        logger.debug("  {}   Return value", returnsExternalValues(method) ? 'X' : '.');
     }
 
 

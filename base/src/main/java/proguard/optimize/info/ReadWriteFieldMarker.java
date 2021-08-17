@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.constant.*;
@@ -38,11 +40,7 @@ implements   InstructionVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("rwfm") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(ReadWriteFieldMarker.class);
 
 
     private final MutableBoolean repeatTrigger;
@@ -176,10 +174,7 @@ implements   InstructionVisitor,
         if (!fieldOptimizationInfo.isRead() &&
             fieldOptimizationInfo instanceof ProgramFieldOptimizationInfo)
         {
-            if (DEBUG)
-            {
-                System.out.println("ReadWriteFieldMarker: marking as read: "+clazz.getName()+"."+field.getName(clazz));
-            }
+            logger.debug("ReadWriteFieldMarker: marking as read: {}.{}", clazz.getName(), field.getName(clazz));
 
             ((ProgramFieldOptimizationInfo)fieldOptimizationInfo).setRead();
 
@@ -202,10 +197,7 @@ implements   InstructionVisitor,
         if (!fieldOptimizationInfo.isWritten() &&
             fieldOptimizationInfo instanceof ProgramFieldOptimizationInfo)
         {
-            if (DEBUG)
-            {
-                System.out.println("ReadWriteFieldMarker: marking as written: "+clazz.getName()+"."+field.getName(clazz));
-            }
+            logger.debug("ReadWriteFieldMarker: marking as written: {}.{}", clazz.getName(), field.getName(clazz));
 
             ((ProgramFieldOptimizationInfo)fieldOptimizationInfo).setWritten();
 

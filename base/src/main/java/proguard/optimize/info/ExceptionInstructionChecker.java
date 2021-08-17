@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.*;
@@ -35,11 +37,7 @@ implements   InstructionVisitor
 //             ConstantVisitor,
 //             MemberVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    public  static       boolean DEBUG = System.getProperty("eic") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(ExceptionInstructionChecker.class);
 
 
     // A return value for the visitor methods.
@@ -70,10 +68,13 @@ implements   InstructionVisitor
                                       int           startOffset,
                                       int           endOffset)
     {
-        if (DEBUG)
-        {
-            System.out.println("ExceptionInstructionChecker.mayThrowExceptions ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]: "+startOffset+" -> "+endOffset);
-        }
+        logger.debug("ExceptionInstructionChecker.mayThrowExceptions [{}.{}{}]: {} -> {}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz),
+                     startOffset,
+                     endOffset
+        );
 
         return firstExceptionThrowingInstructionOffset(clazz,
                                                        method,
@@ -93,10 +94,13 @@ implements   InstructionVisitor
                                                        int           startOffset,
                                                        int           endOffset)
     {
-        if (DEBUG)
-        {
-            System.out.println("ExceptionInstructionChecker.firstExceptionThrowingInstructionOffset ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]: "+startOffset+" -> "+endOffset);
-        }
+        logger.debug("ExceptionInstructionChecker.firstExceptionThrowingInstructionOffset [{}.{}{}]: {} -> {}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz),
+                     startOffset,
+                     endOffset
+        );
 
         byte[] code = codeAttribute.code;
 
@@ -114,10 +118,7 @@ implements   InstructionVisitor
                                    offset,
                                    instruction))
             {
-                if (DEBUG)
-                {
-                    System.out.println("  "+instruction.toString(offset));
-                }
+                logger.debug("  {}", instruction.toString(offset));
 
                 return offset;
             }
@@ -140,10 +141,13 @@ implements   InstructionVisitor
                                                        int           startOffset,
                                                        int           endOffset)
     {
-        if (DEBUG)
-        {
-            System.out.println("ExceptionInstructionChecker.lastExceptionThrowingInstructionOffset ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]: "+startOffset+" -> "+endOffset);
-        }
+        logger.debug("ExceptionInstructionChecker.lastExceptionThrowingInstructionOffset [{}.{}{}]: {} -> {}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz),
+                     startOffset,
+                     endOffset
+        );
 
         byte[] code = codeAttribute.code;
 
@@ -163,10 +167,7 @@ implements   InstructionVisitor
                                    offset,
                                    instruction))
             {
-                if (DEBUG)
-                {
-                    System.out.println("  "+instruction.toString(offset));
-                }
+                logger.debug("  {}", instruction.toString(offset));
 
                 // Go to the next instruction.
                 offset += instruction.length(offset);

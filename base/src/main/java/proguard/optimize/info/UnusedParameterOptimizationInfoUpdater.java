@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -41,11 +43,7 @@ import java.util.*;
 public class UnusedParameterOptimizationInfoUpdater
 implements   AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("upoiu") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(UnusedParameterOptimizationInfoUpdater.class);
 
 
     private final MemberVisitor extraUnusedParameterMethodVisitor;
@@ -79,10 +77,11 @@ implements   AttributeVisitor
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("UnusedParameterOptimizationInfoUpdater: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-        }
+        logger.debug("UnusedParameterOptimizationInfoUpdater: {}.{}{}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
 
         // Get the original parameter size that was saved.
         int oldParameterSize = ParameterUsageMarker.getParameterSize(method);
@@ -103,10 +102,7 @@ implements   AttributeVisitor
                 // Is the variable required as a parameter?
                 if (!ParameterUsageMarker.isParameterUsed(method, variableIndex))
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("  Deleting parameter #"+parameterIndex+" (v"+variableIndex+")");
-                    }
+                    logger.debug("  Deleting parameter #{} (v{})", parameterIndex, variableIndex);
 
                     removedParameters.add(parameterIndex);
                 }

@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -48,11 +50,7 @@ implements   ClassVisitor,
              MemberVisitor,
              AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    public  static       boolean DEBUG = System.getProperty("wcm")  != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(WrapperClassMarker.class);
 
 
     private final Constant[] INITIALIZER_CONSTANTS = new Constant[]
@@ -212,10 +210,7 @@ implements   ClassVisitor,
 
     private static void setWrappedClass(Clazz clazz, Clazz wrappedClass)
     {
-        if (DEBUG)
-        {
-            System.out.println("WrapperClassMarker: ["+clazz.getName()+"] wraps ["+wrappedClass.getName()+"]");
-        }
+        logger.debug("WrapperClassMarker: [{}] wraps [{}]", clazz.getName(), wrappedClass.getName());
 
         ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(clazz).setWrappedClass(wrappedClass);
     }
