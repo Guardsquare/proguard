@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -38,11 +40,7 @@ public class DuplicateInitializerFixer
 implements   MemberVisitor,
              AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("dif") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(DuplicateInitializerFixer.class);
 
     private static final char[] TYPES = new char[]
     {
@@ -125,11 +123,13 @@ implements   MemberVisitor,
                     // Is the new initializer descriptor unique?
                     if (programClass.findMethod(name, newDescriptor) == null)
                     {
-                        if (DEBUG)
-                        {
-                            System.out.println("DuplicateInitializerFixer:");
-                            System.out.println("  ["+programClass.getName()+"."+name+descriptor+"] ("+ClassUtil.externalClassAccessFlags(programMethod.getAccessFlags())+") -> ["+newDescriptor+"]");
-                        }
+                        logger.debug("DuplicateInitializerFixer:");
+                        logger.debug("  [{}.{}{}] ({}) -> [{}]",
+                                programClass.getName(),
+                                name,
+                                descriptor,
+                                ClassUtil.externalClassAccessFlags(programMethod.getAccessFlags()),
+                                newDescriptor);
 
                         // Update the descriptor.
                         programMethod.u2descriptorIndex =

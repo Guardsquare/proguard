@@ -20,6 +20,9 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -46,7 +49,7 @@ implements   AttributeVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    private static final boolean DEBUG = System.getProperty("estf") != null;
+    private static final Logger logger = LogManager.getLogger(ExpectedStackTypeFinder.class);
 
 
     protected final PartialEvaluator partialEvaluator;
@@ -145,10 +148,11 @@ implements   AttributeVisitor,
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("ExpectedStackTypeFinder: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-        }
+        logger.debug("ExpectedStackTypeFinder: [{}.{}{}]",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
 
         // Initialized the results.
         expectedTypes =
@@ -180,30 +184,32 @@ implements   AttributeVisitor,
                 }
             }
 
-            if (DEBUG)
+            if (reRunFromStart)
             {
-                if (reRunFromStart)
-                {
-                    System.out.println("ExpectedStackTypeFinder: repeat ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-                }
+                logger.debug("ExpectedStackTypeFinder: repeat [{}.{}{}]",
+                             clazz.getName(),
+                             method.getName(clazz),
+                             method.getDescriptor(clazz)
+                );
             }
         }
         while (reRunFromStart);
 
-        if (DEBUG)
-        {
-            System.out.println("ExpectedStackTypeFinder: results");
+        logger.debug("ExpectedStackTypeFinder: results");
 
+        if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
+        {
             int offset = 0;
-            do
-            {
+            do {
                 Instruction instruction = InstructionFactory.create(codeAttribute.code,
-                                                                    offset);
+                        offset);
                 ReferenceValue expectedType = expectedTypes[offset];
 
-                System.out.println(expectedType != null ?
-                                       instruction.toString(offset)+" -> ["+expectedType+"]" :
-                                       instruction.toString(offset));
+                if (expectedType == null) {
+                    logger.debug(instruction.toString(offset));
+                } else {
+                    logger.debug("{} -> [{}]", instruction.toString(offset), expectedType);
+                }
 
                 offset += instruction.length(offset);
             }
@@ -606,10 +612,12 @@ implements   AttributeVisitor,
                 ReferenceValue oldExpectedType =
                     expectedTypes[producerOffset];
 
-                if (DEBUG)
-                {
-                    System.out.print("["+offset+"]: ["+producerOffset+"] old ["+oldExpectedType+"] & new ["+type+"]");
-                }
+                String debugMessage = String.format("[%s]: [%s] old [%s] & new [%s]",
+                                                    offset,
+                                                    producerOffset,
+                                                    oldExpectedType,
+                                                    type
+                );
 
                 ReferenceValue newExpectedType =
                     new TypedReferenceValue(type, referencedClass, false, false);
@@ -630,10 +638,7 @@ implements   AttributeVisitor,
                     {
                         reRunFromStart = true;
 
-                        if (DEBUG)
-                        {
-                            System.out.print(" (rerun for higher producer ["+producerOffset+"])");
-                        }
+                        debugMessage += String.format(" (rerun for higher producer [%s])", producerOffset);
                     }
                 }
                 else if (oldExpectedType.instanceOf(type, referencedClass) == Value.ALWAYS)
@@ -671,17 +676,12 @@ implements   AttributeVisitor,
                     {
                         reRunFromStart = true;
 
-                        if (DEBUG)
-                        {
-                            System.out.print(" (rerun for higher producer ["+producerOffset+"])");
-                        }
+                        debugMessage += String.format(" (rerun for higher producer [%s])", producerOffset);
                     }
                 }
 
-                if (DEBUG)
-                {
-                    System.out.println(" => ["+expectedTypes[producerOffset]+"]");
-                }
+                debugMessage += String.format(" => [%s]", expectedTypes[producerOffset]);
+                logger.debug(debugMessage);
             }
         }
     }

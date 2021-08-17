@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -41,7 +43,7 @@ implements   AttributeVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(DuplicateInitializerInvocationFixer.class);
 
     private final InstructionVisitor extraAddedInstructionVisitor;
 
@@ -113,10 +115,13 @@ implements   AttributeVisitor,
                 codeAttributeEditor.insertBeforeInstruction(offset,
                                                             extraInstruction);
 
-                if (DEBUG)
-                {
-                    System.out.println("  ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] Inserting "+extraInstruction.toString()+" before "+constantInstruction.toString(offset));
-                }
+                logger.debug("  [{}.{}{}] Inserting {} before {}",
+                             clazz.getName(),
+                             method.getName(clazz),
+                             method.getDescriptor(clazz),
+                             extraInstruction.toString(),
+                             constantInstruction.toString(offset)
+                );
 
                 if (extraAddedInstructionVisitor != null)
                 {
@@ -151,13 +156,15 @@ implements   AttributeVisitor,
         descriptorLengthDelta =
             programMethod.getDescriptor(programClass).length() - descriptor.length();
 
-        if (DEBUG)
+        if (descriptorLengthDelta > 0)
         {
-            if (descriptorLengthDelta > 0)
-            {
-                System.out.println("DuplicateInitializerInvocationFixer:");
-                System.out.println("  ["+programClass.getName()+"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"] ("+ClassUtil.externalClassAccessFlags(programMethod.getAccessFlags())+") referenced by:");
-            }
+            logger.debug("DuplicateInitializerInvocationFixer:");
+            logger.debug("  [{}.{}{}] ({}) referenced by:",
+                         programClass.getName(),
+                         programMethod.getName(programClass),
+                         programMethod.getDescriptor(programClass),
+                         ClassUtil.externalClassAccessFlags(programMethod.getAccessFlags())
+            );
         }
     }
 }

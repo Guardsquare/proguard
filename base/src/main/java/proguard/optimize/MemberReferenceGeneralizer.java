@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.constant.*;
@@ -46,7 +48,7 @@ implements   InstructionVisitor,
              ConstantVisitor,
              ClassVisitor
 {
-    private static final boolean DEBUG = System.getProperty("mrg") != null;
+    private static final Logger logger = LogManager.getLogger(MemberReferenceGeneralizer.class);
 
     private final boolean             fieldGeneralizationClass;
     private final boolean             methodGeneralizationClass;
@@ -211,12 +213,13 @@ implements   InstructionVisitor,
                 // hierarchy.
                 !generalizedClass.getName().equals(refConstant.getClassName(clazz)))
             {
-                if (DEBUG)
-                {
-                    System.out.println("ReferenceGeneralizer: [" + clazz.getName() + "] invocation [" +
-                                       refConstant.getClassName(clazz) + "." + memberName + memberType + "] -> [" +
-                                       generalizedClass.getName() + ". ...]");
-                }
+                logger.debug("ReferenceGeneralizer: [{}] invocation [{}.{}{}] -> [{}. ...]",
+                             clazz.getName(),
+                             refConstant.getClassName(clazz),
+                             memberName,
+                             memberType,
+                             generalizedClass.getName()
+                );
 
                 int refConstantIndex;
 

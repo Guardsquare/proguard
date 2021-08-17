@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -37,6 +39,7 @@ import proguard.classfile.util.ClassUtil;
 public class ChangedCodePrinter
 implements   AttributeVisitor
 {
+    private static final Logger logger = LogManager.getLogger(ChangedCodePrinter.class);
     private final AttributeVisitor attributeVisitor;
 
 
@@ -375,19 +378,20 @@ implements   AttributeVisitor
                                   CodeAttribute codeAttribute,
                                   byte[]        oldCode)
     {
-        System.out.println("Class "+ClassUtil.externalClassName(clazz.getName()));
-        System.out.println("Method "+ClassUtil.externalFullMethodDescription(clazz.getName(),
-                                                                             0,
-                                                                             method.getName(clazz),
-                                                                             method.getDescriptor(clazz)));
+        logger.info("Class {}", ClassUtil.externalClassName(clazz.getName()));
+        logger.info("Method {}", ClassUtil.externalFullMethodDescription(clazz.getName(),
+                                                                                 0,
+                                                                                 method.getName(clazz),
+                                                                                 method.getDescriptor(clazz)));
 
         for (int index = 0; index < codeAttribute.u4codeLength; index++)
         {
-            System.out.println(
-                (oldCode[index] == codeAttribute.code[index]? "  -- ":"  => ")+
-                index+": "+
-                Integer.toHexString(0x100|oldCode[index]           &0xff).substring(1)+" "+
-                Integer.toHexString(0x100|codeAttribute.code[index]&0xff).substring(1));
+            logger.info("{}{}: {} {}",
+                        oldCode[index] == codeAttribute.code[index]? "  -- ":"  => ",
+                        index,
+                        Integer.toHexString(0x100|oldCode[index]           &0xff).substring(1),
+                        Integer.toHexString(0x100|codeAttribute.code[index]&0xff).substring(1)
+            );
         }
     }
 }

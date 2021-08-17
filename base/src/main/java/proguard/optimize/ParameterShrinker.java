@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -40,12 +42,7 @@ import proguard.optimize.info.*;
 public class ParameterShrinker
 implements   AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("ps") != null;
-    //*/
-
+    private static final Logger logger = LogManager.getLogger(ParameterShrinker.class);
 
     private final MemberVisitor extraUnusedParameterMethodVisitor;
 
@@ -92,13 +89,10 @@ implements   AttributeVisitor
             // Get the total size of the local variable frame.
             int maxLocals = codeAttribute.u2maxLocals;
 
-            if (DEBUG)
-            {
-                System.out.println("ParameterShrinker: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-                System.out.println("  Old parameter size = " + oldParameterSize);
-                System.out.println("  New parameter size = " + newParameterSize);
-                System.out.println("  Max locals         = " + maxLocals);
-            }
+            logger.debug("ParameterShrinker: {}.{}{}", clazz.getName(), method.getName(clazz), method.getDescriptor(clazz));
+            logger.debug("  Old parameter size = {}", oldParameterSize);
+            logger.debug("  New parameter size = {}", newParameterSize);
+            logger.debug("  Max locals         = {}", maxLocals);
 
             // Create a variable map.
             int[] variableMap = new int[maxLocals];
@@ -116,10 +110,7 @@ implements   AttributeVisitor
                 }
                 else
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("  Deleting parameter #"+parameterIndex);
-                    }
+                    logger.debug("  Deleting parameter #{}", parameterIndex);
 
                     // Shift the variable to the unused parameter block,
                     // in case it is still used as a variable.

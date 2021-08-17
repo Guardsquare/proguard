@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.visitor.*;
 
@@ -36,7 +38,7 @@ import java.util.concurrent.*;
 public class InfluenceFixpointVisitor
 implements   ClassPoolVisitor
 {
-    private static final boolean DEBUG = System.getProperty("ifv") != null;
+    private static final Logger logger = LogManager.getFormatterLogger(InfluenceFixpointVisitor.class);
 
     // A copy of the code in ParallelAllClassVisitor.
     private static final int THREAD_COUNT;
@@ -86,11 +88,7 @@ implements   ClassPoolVisitor
         // This variable represents the ReverseDependencyStore to know which classes are impacted on change
         reverseDependencyStore = new ReverseDependencyCalculator(classPool).reverseDependencyStore();
 
-        long start = 0L;
-        if (DEBUG)
-        {
-            start = System.currentTimeMillis();
-        }
+        long start = System.currentTimeMillis();
 
         try
         {
@@ -112,12 +110,8 @@ implements   ClassPoolVisitor
             throw new RuntimeException("Parallel execution is taking too long", e);
         }
 
-        if (DEBUG)
-        {
-            long end = System.currentTimeMillis();
-            System.out.print("InfluenceFixpointVisitor........................");
-            System.out.printf(" took: %6d ms%n", (end - start));
-        }
+        long end = System.currentTimeMillis();
+        logger.debug("InfluenceFixpointVisitor........................ took: %6d ms", (end - start));
     }
 
 

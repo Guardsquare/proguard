@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.editor.*;
 import proguard.classfile.util.*;
@@ -42,7 +44,7 @@ import proguard.util.ProcessingFlags;
 public class MemberDescriptorSpecializer
 implements   MemberVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(MemberDescriptorSpecializer.class);
 
     private final boolean       specializeFieldTypes;
     private final boolean       specializeMethodParameterTypes;
@@ -132,10 +134,12 @@ implements   MemberVisitor
                     valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(fieldType)) &&
                     (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("MemberDescriptorSpecializer ["+programClass.getName()+"."+programField.getName(programClass)+" "+programField.getDescriptor(programClass)+"] -> "+valueType);
-                    }
+                    logger.debug("MemberDescriptorSpecializer [{}.{} {}] -> {}",
+                                 programClass.getName(),
+                                 programField.getName(programClass),
+                                 programField.getDescriptor(programClass),
+                                 valueType
+                    );
 
                     // Set the specialized referenced class.
                     programField.referencedClass = value.referenceValue().getReferencedClass();
@@ -199,10 +203,14 @@ implements   MemberVisitor
                             valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(parameterType)) &&
                             (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                         {
-                            if (DEBUG)
-                            {
-                                System.out.println("MemberDescriptorSpecializer ["+programClass.getName()+"."+programMethod.getName(programClass)+descriptor+"]: parameter #"+parameterIndex+": "+parameterType+" -> "+valueType);
-                            }
+                            logger.debug("MemberDescriptorSpecializer [{}.{}{}]: parameter #{}: {} -> {}",
+                                    programClass.getName(),
+                                    programMethod.getName(programClass),
+                                    descriptor,
+                                    parameterIndex,
+                                    parameterType,
+                                    valueType
+                            );
 
                             // Set the specialized type.
                             referencedClasses[classIndex] = valueClass;
@@ -253,10 +261,13 @@ implements   MemberVisitor
                         valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(returnType)) &&
                         (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                     {
-                        if (DEBUG)
-                        {
-                            System.out.println("MemberDescriptorSpecializer ["+programClass.getName()+"."+programMethod.getName(programClass)+descriptor+"]: return value: "+returnType+" ->  "+valueType);
-                        }
+                        logger.debug("MemberDescriptorSpecializer [{}.{}{}]: return value: {} ->  {}",
+                                     programClass.getName(),
+                                     programMethod.getName(programClass),
+                                     descriptor,
+                                     returnType,
+                                     valueType
+                        );
 
                         // Set the specialized type.
                         referencedClasses[classIndex] = value.referenceValue().getReferencedClass();
