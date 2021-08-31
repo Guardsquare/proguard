@@ -51,7 +51,7 @@ import java.util.*;
  */
 public class Optimizer
 {
-    private static final Logger logger = LogManager.getFormatterLogger(Optimizer.class);
+    private static final Logger logger = LogManager.getLogger(Optimizer.class);
 
     public  static final String LIBRARY_GSON                         = "library/gson";
     private static final String CLASS_MARKING_FINAL                  = "class/marking/final";
