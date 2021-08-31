@@ -678,7 +678,7 @@ the entire signatures remain compatible with the native libraries.
 ProGuard doesn't look at your native code, so it won't automatically preserve
 the classes or class members that are invoked by the native code. These are
 entry points, which you'll have to specify explicitly. [Callback
-methods](callback) are discussed below as a typical example.
+methods](#callback) are discussed below as a typical example.
 
 ### Processing callback methods {: #callback}
 
