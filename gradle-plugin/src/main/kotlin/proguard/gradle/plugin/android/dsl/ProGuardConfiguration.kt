@@ -46,7 +46,7 @@ class DefaultProGuardConfiguration private constructor(filename: String) : ProGu
                 ANDROID_RELEASE.filename -> ANDROID_RELEASE
                 ANDROID_RELEASE_OPTIMIZE.filename -> ANDROID_RELEASE_OPTIMIZE
                 else -> throw IllegalArgumentException("""
-                        The default ProGuard configuration '$filename' is not invalid.
+                        The default ProGuard configuration '$filename' is invalid.
 
                         Choose from:
                            $ANDROID_DEBUG, $ANDROID_RELEASE, $ANDROID_RELEASE_OPTIMIZE
