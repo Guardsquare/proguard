@@ -1,3 +1,10 @@
+## Version 7.1.2
+
+### Bug fixes
+
+- Fix enabling of optimization when `proguard-android-optimize.txt` is specified as the default in the Gradle plugin.
+
+
 ## Version 7.1.1
 
 ### Miscellaneous
