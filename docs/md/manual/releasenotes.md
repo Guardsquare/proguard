@@ -20,6 +20,14 @@ To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated
 - Fix potential `NullPointerException` when initializing Kotlin callable references. (`T5899`)
 - Prevent requiring `--enable-preview` on a JVM for Java 16 class files (write class file version `60.0` instead of `60.65535`).
 
+
+## Version 7.1.2
+
+### Bug fixes
+
+- Fix enabling of optimization when `proguard-android-optimize.txt` is specified as the default in the Gradle plugin.
+
+
 ## Version 7.1.1
 
 ### Miscellaneous

@@ -60,7 +60,7 @@ task repackage(type: Zip) {
 
     from  "${buildDir}/extracted"
     entryCompression ZipEntryCompression.STORED
-    archiveFileName= "demo-$archiveVersion-obfuscated.jar"
+    archiveFileName= "demo-${archiveVersion.get()}-obfuscated.jar"
     destinationDirectory = file("${buildDir}/libs")
 }
 

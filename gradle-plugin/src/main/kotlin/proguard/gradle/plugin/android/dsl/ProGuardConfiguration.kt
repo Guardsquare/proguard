@@ -44,7 +44,7 @@ class DefaultProGuardConfiguration private constructor(filename: String) : ProGu
             return when (filename) {
                 ANDROID_DEBUG.filename -> ANDROID_DEBUG
                 ANDROID_RELEASE.filename -> ANDROID_RELEASE
-                ANDROID_RELEASE_OPTIMIZE.filename -> ANDROID_RELEASE
+                ANDROID_RELEASE_OPTIMIZE.filename -> ANDROID_RELEASE_OPTIMIZE
                 else -> throw IllegalArgumentException("""
                         The default ProGuard configuration '$filename' is invalid.
 
