@@ -33,6 +33,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 
 /**
@@ -58,6 +59,8 @@ public class ProGuardGUI extends JFrame
     private static final Border BORDER = BorderFactory.createEtchedBorder(EtchedBorder.RAISED);
 
     static boolean systemOutRedirected;
+
+    private static final Preferences PREFS = Preferences.userRoot().node(ProGuardGUI.class.getName());
 
     private final JFileChooser configurationChooser = new JFileChooser("");
     private final JFileChooser fileChooser          = new JFileChooser("");
@@ -962,6 +965,8 @@ public class ProGuardGUI extends JFrame
         {
             public void actionPerformed(ActionEvent e)
             {
+                fileChooser.setCurrentDirectory(new File(PREFS.get("LAST_MAPPING_FILE", new File(".").getAbsolutePath())));
+
                 // Update the file chooser.
                 fileChooser.setDialogTitle(title);
                 fileChooser.setSelectedFile(new File(textField.getText()));
@@ -971,6 +976,8 @@ public class ProGuardGUI extends JFrame
                 {
                     // Update the text field.
                     textField.setText(fileChooser.getSelectedFile().getPath());
+                    // Save the last opened folder for the next usage of this panel (it's kept even on app restarts)
+                    PREFS.put("LAST_MAPPING_FILE", fileChooser.getSelectedFile().getAbsolutePath());
                 }
             }
         });
@@ -1179,6 +1186,10 @@ public class ProGuardGUI extends JFrame
         if (configuration.printMapping != null)
         {
             reTraceMappingTextField.setText(fileName(configuration.printMapping));
+        }
+        else
+        {
+            reTraceMappingTextField.setText(PREFS.get("LAST_MAPPING_FILE", ""));
         }
     }
 
@@ -1752,24 +1763,21 @@ public class ProGuardGUI extends JFrame
     {
         public void actionPerformed(ActionEvent e)
         {
-            // Make sure System.out has not been redirected yet.
-            if (!systemOutRedirected)
-            {
-                systemOutRedirected = true;
 
-                boolean verbose            = reTraceVerboseCheckBox.isSelected();
-                File    retraceMappingFile = new File(reTraceMappingTextField.getText());
-                String  stackTrace         = stackTraceTextArea.getText();
+            systemOutRedirected = true;
 
-                // Create the ReTrace runnable.
-                Runnable reTraceRunnable = new ReTraceRunnable(reTraceTextArea,
-                                                               verbose,
-                                                               retraceMappingFile,
-                                                               stackTrace);
+            boolean verbose            = reTraceVerboseCheckBox.isSelected();
+            File    retraceMappingFile = new File(reTraceMappingTextField.getText());
+            String  stackTrace         = stackTraceTextArea.getText();
 
-                // Run it in this thread, because it won't take long anyway.
-                reTraceRunnable.run();
-            }
+            // Create the ReTrace runnable.
+            Runnable reTraceRunnable = new ReTraceRunnable(reTraceTextArea,
+                                                           verbose,
+                                                           retraceMappingFile,
+                                                           stackTrace);
+
+            // Run it in this thread, because it won't take long anyway.
+            reTraceRunnable.run();
         }
     }
 
