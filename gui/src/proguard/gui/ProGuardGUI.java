@@ -1918,8 +1918,28 @@ public class ProGuardGUI extends JFrame
 
                         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
                         Dimension guiSize    = gui.getSize();
-                        gui.setLocation((screenSize.width - guiSize.width)   / 2,
-                                        (screenSize.height - guiSize.height) / 2);
+                        gui.setSize(
+                                new Dimension(
+                                        PREFS.getInt("width", gui.getWidth()),
+                                        PREFS.getInt("height", gui.getHeight())
+                                )
+                        );
+
+                        gui.setLocation(new Point(
+                                PREFS.getInt("x", (screenSize.width - guiSize.width) / 2),
+                                PREFS.getInt("y", (screenSize.height - guiSize.height) / 2)
+                        ));
+
+                        gui.addWindowListener(new WindowAdapter() {
+                            public void windowClosing(WindowEvent e) {
+                                PREFS.putInt("width", gui.getWidth());
+                                PREFS.putInt("height", gui.getHeight());
+
+                                PREFS.putInt("x", gui.getLocation().x);
+                                PREFS.putInt("y", gui.getLocation().y);
+                            }
+                        });
+
                         gui.show();
 
                         // Start the splash animation, unless specified otherwise.
