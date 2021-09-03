@@ -51,7 +51,7 @@ class DefaultConfigurationTest : FreeSpec({
         "When the project is evaluated" - {
             val buildResult = createGradleRunner(project.rootDir, testKitDir, "-si").buildAndFail()
             "Then an exception is thrown" {
-                buildResult.output shouldContain "The default ProGuard configuration 'non-existing' is not invalid"
+                buildResult.output shouldContain "The default ProGuard configuration 'non-existing' is invalid"
             }
         }
     }
