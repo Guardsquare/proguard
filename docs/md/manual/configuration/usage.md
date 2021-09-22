@@ -924,7 +924,7 @@ irrelevant in actual configuration files.
     just like file name filters. This notation doesn't look very
     Java-like, so it should be used with moderation.
     For convenience and for backward compatibility, the class name `*`
-    refers to any class, irrespective of its package.
+    refers to any class, irrespective of its package, when used on its own (e.g. `-keep class *`).
 
 - The `extends` and `implements` specifications are typically used to
   restrict classes with wildcards. They are currently equivalent,
