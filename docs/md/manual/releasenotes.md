@@ -2,6 +2,7 @@
 
 ### Bug fixes
 
+- Prevent possible R8 compilation error when using enum default values in an interface definition.
 - Fix enabling of optimization when `proguard-android-optimize.txt` is specified as the default in the Gradle plugin.
 
 
