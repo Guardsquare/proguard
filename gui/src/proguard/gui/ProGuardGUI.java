@@ -1763,21 +1763,23 @@ public class ProGuardGUI extends JFrame
     {
         public void actionPerformed(ActionEvent e)
         {
+            // Make sure System.out has not been redirected yet.
+            if (!systemOutRedirected)
+            {
+                systemOutRedirected = true;
+                boolean verbose            = reTraceVerboseCheckBox.isSelected();
+                File    retraceMappingFile = new File(reTraceMappingTextField.getText());
+                String  stackTrace         = stackTraceTextArea.getText();
+                // Create the ReTrace runnable.
+                Runnable reTraceRunnable = new ReTraceRunnable(reTraceTextArea,
+                                                               verbose,
+                                                               retraceMappingFile,
+                                                               stackTrace);
 
-            systemOutRedirected = true;
-
-            boolean verbose            = reTraceVerboseCheckBox.isSelected();
-            File    retraceMappingFile = new File(reTraceMappingTextField.getText());
-            String  stackTrace         = stackTraceTextArea.getText();
-
-            // Create the ReTrace runnable.
-            Runnable reTraceRunnable = new ReTraceRunnable(reTraceTextArea,
-                                                           verbose,
-                                                           retraceMappingFile,
-                                                           stackTrace);
-
-            // Run it in this thread, because it won't take long anyway.
-            reTraceRunnable.run();
+                // Run it in this thread, because it won't take long anyway.
+                reTraceRunnable.run();
+                systemOutRedirected = false;
+            }
         }
     }
 
