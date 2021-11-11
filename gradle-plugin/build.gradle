@@ -1,57 +1,127 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
-    id 'com.jfrog.bintray'
-    id 'java'
-    id 'groovy'
+    id 'com.github.johnrengelman.shadow'
+    id 'java-gradle-plugin'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
     id 'maven-publish'
+    id 'org.jlleitschuh.gradle.ktlint' version '9.2.1'
 }
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
-sourceCompatibility = "${target}"
-targetCompatibility = "${target}"
+def agpVersion = '4.1.0'
 
-sourceSets.main {
-    java {
-        srcDirs = ['src']
-    }
-
-    groovy {
-        srcDirs = ['src']
-    }
-
-    resources {
-        srcDirs = ['src']
-        include '**/*.properties'
-        include '**/*.gif'
-        include '**/*.png'
-        include '**/*.pro'
+gradlePlugin {
+    plugins {
+        proguardPlugin {
+            id = 'com.guardsquare.proguard'
+            implementationClass = 'proguard.gradle.plugin.ProGuardPlugin'
+        }
     }
 }
 
-jar {
-    metaInf.from 'src/META-INF'
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
 }
 
-repositories {
-    google()
-    jcenter()
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+configurations {
+    fatJar.extendsFrom(compile)
 }
 
 dependencies {
-    compile project(':base')
-    compile 'com.guardsquare:proguard-core'
-    compile('com.android.tools.build:gradle:3.0.0')
-    compile gradleApi()
-    compile localGroovy()
+    api project(':base')
+    // TODO update to 4.2 or 7.0 API
+    compileOnly ("com.android.tools.build:gradle:$agpVersion") {
+        exclude module: 'proguard-gradle'
+        exclude module: 'proguard-base'
+    }
+
+    testCompileOnly ("com.android.tools.build:gradle:$agpVersion") {
+        exclude module: 'proguard-gradle'
+        exclude module: 'proguard-base'
+    }
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:4.4.3'   // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.4.3' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:4.4.3'        // for kotest property test
+
+    testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "commons-io:commons-io:2.8.0"
+
+    fatJar project(":base")
 }
 
-publishing {
-    publications {
-        getByName('gradle-plugin') {
-            artifactId = 'proguard-gradle'
+test {
+    useJUnitPlatform()
+}
+
+def localRepo = file("$buildDir/local-repo")
+
+task fatJar(type: ShadowJar) {
+    destinationDirectory.set(localRepo)
+    archiveFileName.set("proguard-gradle-${version}.jar")
+    from sourceSets.main.output
+    configurations = [project.configurations.fatJar]
+    manifest {
+        attributes(
+                'Main-Class': 'proguard.ProGuard',
+                'Implementation-Version': archiveVersion.get())
+    }
+}
+
+tasks.withType(Test).configureEach {
+    dependsOn fatJar
+    systemProperty "local.repo", localRepo.toURI()
+    systemProperty "proguard.version", version
+    systemProperty "agp.version", agpVersion
+}
+
+sourceSets.test {
+    resources {
+        srcDirs += "$buildDir/fixtures"
+    }
+}
+
+// Copies selected directories from examples into the test resources to compile during an integration test.
+tasks.register('copyExamples', Copy) {
+    from("$rootProject.rootDir/examples") {
+        include 'spring-boot/**'
+        include 'gradle-kotlin-dsl/**'
+    }
+    into "$buildDir/fixtures"
+}
+
+tasks.withType(Test).configureEach {
+    dependsOn copyExamples
+}
+
+afterEvaluate {
+    /*  This project gets two publications:
+        - "pluginMaven" is the default from `java-gradle-plugin`
+          and must not be automatically published.
+        - "<project.name>" is created by ProGuard custom logic
+          and should have its artifact ID adjusted.
+        - we also disable publishing of plugin markers.
+     */
+    tasks.withType(AbstractPublishToMaven).matching { task ->
+        task.publication.name == 'pluginMaven' ||
+            task.name =~ /^publish(.*)PluginMarkerMavenPublicationTo(GithubRepository|MavenLocal|SonatypeRepository)$/
+    } each {task ->
+        task.enabled = false
+    }
+
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = 'Gradle plugin for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
+            }
         }
     }
 }

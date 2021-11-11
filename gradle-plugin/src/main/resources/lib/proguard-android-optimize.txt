@@ -1,0 +1,7 @@
+# ProGuard configuration for optimized release versions of Android apps.
+#
+# Copyright (c) 2018-2021 Guardsquare NV
+
+-include proguard-android-common.txt
+
+-optimizationpasses 5

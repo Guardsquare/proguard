@@ -2,13 +2,12 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     id 'com.github.johnrengelman.shadow'
-    id 'com.jfrog.bintray'
     id 'java'
     id 'maven-publish'
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 sourceCompatibility = "${target}"
@@ -28,15 +27,14 @@ sourceSets.main {
 }
 
 dependencies {
-    compile project(':base')
-    compile 'com.guardsquare:proguard-core'
+    implementation project(':base')
 }
 
 task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('retrace.jar')
     from sourceSets.main.output
-    configurations = [project.configurations.runtime]
+    configurations = [project.configurations.runtimeClasspath]
     manifest {
         attributes(
                 'Manifest-Version': '1.0',
@@ -45,3 +43,13 @@ task fatJar(type: ShadowJar) {
 }
 
 assemble.dependsOn fatJar
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = "ReTrace is a companion tool for ProGuard and DexGuard that 'de-obfuscates' stack traces."
+            }
+        }
+    }
+}

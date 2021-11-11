@@ -1,11 +1,13 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
-    id 'com.jfrog.bintray'
+    id 'com.github.johnrengelman.shadow'
     id 'java'
     id 'maven-publish'
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 sourceCompatibility = "${target}"
@@ -14,6 +16,7 @@ targetCompatibility = "${target}"
 sourceSets.main {
     java {
         srcDirs = ['src']
+        include '**/*.java'
     }
     resources {
         srcDirs = ['src']
@@ -25,7 +28,30 @@ sourceSets.main {
 }
 
 dependencies {
-    compile project(':base')
-    compile 'com.guardsquare:proguard-core'
-    compile 'org.apache.ant:ant:1.9.7'
+    implementation project(':base')
+    implementation 'org.apache.ant:ant:1.9.7'
+}
+
+task fatJar(type: ShadowJar) {
+    destinationDirectory.set(file("$rootDir/lib"))
+    archiveFileName.set('proguard-ant.jar')
+    from sourceSets.main.output
+    configurations = [project.configurations.runtimeClasspath]
+    manifest {
+        attributes(
+                'Manifest-Version': '1.0',
+                'Implementation-Version': archiveVersion.get())
+    }
+}
+
+assemble.dependsOn fatJar
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = 'Ant plugin for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
+            }
+        }
+    }
 }

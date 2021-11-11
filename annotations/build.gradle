@@ -1,5 +1,4 @@
 plugins {
-    id 'com.jfrog.bintray'
     id 'java'
     id 'maven-publish'
 }
@@ -17,5 +16,15 @@ sourceSets.main {
         include '**/*.gif'
         include '**/*.png'
         include '**/*.pro'
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = 'Java annotations to configure ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
+            }
+        }
     }
 }

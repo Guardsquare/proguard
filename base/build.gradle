@@ -1,49 +1,97 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
-    id 'com.github.johnrengelman.shadow'
-    id 'com.jfrog.bintray'
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
+    id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
+    id 'com.adarshr.test-logger' version '3.0.0'
+    id 'de.jansauer.printcoverage' version '2.0.0'
+    id 'jacoco'
+    id "org.jlleitschuh.gradle.ktlint" version '10.1.0'
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
-sourceCompatibility = "${target}"
-targetCompatibility = "${target}"
+java {
+    sourceCompatibility = JavaVersion.toVersion("${target}")
+    targetCompatibility = JavaVersion.toVersion("${target}")
+}
 
-sourceSets.main {
-    java {
-        srcDirs = ['src']
-    }
-    resources {
-        srcDirs = ['src']
-        include '**/*.properties'
-        include '**/*.gif'
-        include '**/*.png'
-        include '**/*.pro'
-    }
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+  kotlinOptions {
+    jvmTarget = "${target}"
+  }
 }
 
 dependencies {
-    compile 'com.guardsquare:proguard-core:7.0.0'
-    compile "com.google.code.gson:gson:${gsonVersion}"
+    api "com.guardsquare:proguard-core:${proguardCoreVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.4.32"
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.4.32"
+    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.3.0'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:4.5.0' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.5.0' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:4.5.0' // for kotest property test
+    testImplementation "io.mockk:mockk:1.12.0" // for mocking
+
+    // For assembling ProGuard assembler snippets
+    testImplementation ('com.github.Guardsquare:proguard-assembler:master-SNAPSHOT') {
+        exclude group: 'com.guardsquare', module: 'proguard-core'
+    }
 }
 
 jar.manifest.attributes('Implementation-Version': version)
 
-task fatJar(type: ShadowJar) {
-    destinationDirectory.set(file("$rootDir/lib"))
-    archiveFileName.set('proguard.jar')
-    from sourceSets.main.output
-    configurations = [project.configurations.runtime]
-    manifest {
-        attributes(
-                'Main-Class': 'proguard.ProGuard',
-                'Implementation-Version': archiveVersion.get())
+// Early access automatic downloads are not yet supported:
+// https://github.com/gradle/gradle/issues/14814
+// But it will work if e.g. Java 17-ea is pre-installed
+def javaVersionsForTest = 9..16
+
+test {
+    useJUnitPlatform()
+}
+
+task testAllJavaVersions() { testAllTask ->
+    dependsOn(test) // the usual test runs on Java 8
+
+    javaVersionsForTest.each {version ->
+        task("testJava$version", type: Test) {
+            useJUnitPlatform()
+            ignoreFailures = true
+
+            testAllTask.dependsOn(it)
+
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(version)
+            }
+        }
     }
 }
 
-assemble.dependsOn fatJar
+jacocoTestReport {
+    // Define which classes need to be monitored
+    def sources = files(project.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom(sources)
+    additionalSourceDirs.setFrom(sources)
+    sourceDirectories.setFrom(sources)
+    def classes = files(project.sourceSets.main.output.classesDirs)
+    classDirectories.setFrom(classes)
+    executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/*.exec')
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/reports/coverage")
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications.getByName(project.name) {
+            pom {
+                description = 'ProGuard is a free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
+            }
+        }
+    }
+}

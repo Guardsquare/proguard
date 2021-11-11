@@ -73,6 +73,13 @@ public class ReTrace
     // For example: "Something: com.example.FooException: something"
     private static final String REGULAR_EXPRESSION_THROW            = "(?:.*?[:\"]\\s+)?%c(?::.*)?";
 
+    // For example: java.lang.NullPointerException: Cannot invoke "com.example.Foo.bar.foo(int)" because the return value of "com.example.Foo.bar.foo2()" is null
+    private static final String REGULAR_EXPRESSION_RETURN_VALUE_NULL1 = ".*?\\bjava\\.lang\\.NullPointerException: Cannot invoke \\\".*\\\" because the return value of \\\"%c\\.%m\\(%a\\)\\\" is null";
+    private static final String REGULAR_EXPRESSION_RETURN_VALUE_NULL2 = ".*?\\bjava\\.lang\\.NullPointerException: Cannot invoke \\\"%c\\.%m\\(%a\\)\\\" because the return value of \\\".*\\\" is null";
+
+    //For example: Cannot invoke "java.net.ServerSocket.close()" because "com.example.Foo.bar" is null
+    private static final String REGULAR_EXPRESSION_BECAUSE_IS_NULL = ".*?\\bbecause \\\"%c\\.%f\\\" is null";
+
     // The overall regular expression for a line in the stack trace.
     public static final String REGULAR_EXPRESSION  = "(?:" + REGULAR_EXPRESSION_AT               + ")|" +
                                                      "(?:" + REGULAR_EXPRESSION_CAST1            + ")|" +
@@ -80,10 +87,19 @@ public class ReTrace
                                                      "(?:" + REGULAR_EXPRESSION_NULL_FIELD_READ  + ")|" +
                                                      "(?:" + REGULAR_EXPRESSION_NULL_FIELD_WRITE + ")|" +
                                                      "(?:" + REGULAR_EXPRESSION_NULL_METHOD      + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_RETURN_VALUE_NULL1 + ")|" +
+                                                     "(?:" + REGULAR_EXPRESSION_BECAUSE_IS_NULL + ")|" +
                                                      "(?:" + REGULAR_EXPRESSION_THROW            + ")";
+
+    // DIRTY FIX:
+    // We need to call another regex because Java 16 stacktrace may have multiple methods in the same line.
+    // For Example: java.lang.NullPointerException: Cannot invoke "dev.lone.itemsadder.Core.f.a.b.b.b.c.a(org.bukkit.Location, boolean)" because the return value of "dev.lone.itemsadder.Core.f.a.b.b.b.c.a()" is null
+    //TODO: Make this stuff less hacky.
+    public static final String REGULAR_EXPRESSION2  = "(?:" + REGULAR_EXPRESSION_RETURN_VALUE_NULL2 + ")";
 
     // The settings.
     private final String  regularExpression;
+    private final String  regularExpression2;
     private final boolean allClassNames;
     private final boolean verbose;
     private final File    mappingFile;
@@ -96,7 +112,7 @@ public class ReTrace
      */
     public ReTrace(File mappingFile)
     {
-        this(REGULAR_EXPRESSION, false, false, mappingFile);
+        this(REGULAR_EXPRESSION, REGULAR_EXPRESSION2, false, false, mappingFile);
     }
 
 
@@ -113,11 +129,13 @@ public class ReTrace
      *                          ProGuard.
      */
     public ReTrace(String  regularExpression,
+                   String  regularExpression2,
                    boolean allClassNames,
                    boolean verbose,
                    File    mappingFile)
     {
         this.regularExpression = regularExpression;
+        this.regularExpression2 = regularExpression2;
         this.allClassNames     = allClassNames;
         this.verbose           = verbose;
         this.mappingFile       = mappingFile;
@@ -133,7 +151,8 @@ public class ReTrace
                         PrintWriter      stackTraceWriter) throws IOException
     {
         // Create a pattern for stack frames.
-        FramePattern pattern = new FramePattern(regularExpression, verbose);
+        FramePattern pattern1 = new FramePattern(regularExpression, verbose);
+        FramePattern pattern2 = new FramePattern(regularExpression2, verbose);
 
         // Create a remapper.
         FrameRemapper mapper = new FrameRemapper();
@@ -153,61 +172,76 @@ public class ReTrace
             }
 
             // Try to match it against the regular expression.
-            FrameInfo obfuscatedFrame = pattern.parse(obfuscatedLine);
-            if (obfuscatedFrame != null)
-            {
-                // Transform the obfuscated frame back to one or more
-                // original frames.
-                Iterator<FrameInfo> retracedFrames =
-                    mapper.transform(obfuscatedFrame).iterator();
+            FrameInfo obfuscatedFrame1 = pattern1.parse(obfuscatedLine);
+            FrameInfo obfuscatedFrame2 = pattern2.parse(obfuscatedLine);
 
-                String previousLine = null;
+            String deobf = handle(obfuscatedFrame1, mapper, pattern1, obfuscatedLine);
+            // DIRTY FIX:
+            // I have to execute it two times because recent Java stacktraces may have multiple fields/methods in the same line.
+            // For example: java.lang.NullPointerException: Cannot invoke "com.example.Foo.bar.foo(int)" because the return value of "com.example.Foo.bar.foo2()" is null
+            deobf = handle(obfuscatedFrame2, mapper, pattern2, deobf);
 
-                while (retracedFrames.hasNext())
-                {
-                    // Retrieve the next retraced frame.
-                    FrameInfo retracedFrame = retracedFrames.next();
-
-                    // Format the retraced line.
-                    String retracedLine =
-                        pattern.format(obfuscatedLine, retracedFrame);
-
-                    // Clear the common first part of ambiguous alternative
-                    // retraced lines, to present a cleaner list of
-                    // alternatives.
-                    String trimmedLine =
-                        previousLine != null &&
-                        obfuscatedFrame.getLineNumber() == 0 ?
-                            trim(retracedLine, previousLine) :
-                            retracedLine;
-
-                    // Print out the retraced line.
-                    if (trimmedLine != null)
-                    {
-                        if (allClassNames)
-                        {
-                            trimmedLine = deobfuscateTokens(trimmedLine, mapper);
-                        }
-
-                        stackTraceWriter.println(trimmedLine);
-                    }
-
-                    previousLine = retracedLine;
-                }
-            }
-            else
-            {
-                if (allClassNames)
-                {
-                    obfuscatedLine = deobfuscateTokens(obfuscatedLine, mapper);
-                }
-
-                // Print out the original line.
-                stackTraceWriter.println(obfuscatedLine);
-            }
+            stackTraceWriter.println(deobf);
         }
 
         stackTraceWriter.flush();
+    }
+
+    private String handle(FrameInfo obfuscatedFrame, FrameRemapper mapper, FramePattern pattern, String obfuscatedLine)
+    {
+        StringBuilder result = new StringBuilder();
+        if (obfuscatedFrame != null)
+        {
+            // Transform the obfuscated frame back to one or more
+            // original frames.
+            Iterator<FrameInfo> retracedFrames =
+                    mapper.transform(obfuscatedFrame).iterator();
+
+            String previousLine = null;
+
+            while (retracedFrames.hasNext())
+            {
+                // Retrieve the next retraced frame.
+                FrameInfo retracedFrame = retracedFrames.next();
+
+                // Format the retraced line.
+                String retracedLine =
+                        pattern.format(obfuscatedLine, retracedFrame);
+
+                // Clear the common first part of ambiguous alternative
+                // retraced lines, to present a cleaner list of
+                // alternatives.
+                String trimmedLine =
+                        previousLine != null &&
+                                obfuscatedFrame.getLineNumber() == 0 ?
+                                trim(retracedLine, previousLine) :
+                                retracedLine;
+
+                // Print out the retraced line.
+                if (trimmedLine != null)
+                {
+                    if (allClassNames)
+                    {
+                        trimmedLine = deobfuscateTokens(trimmedLine, mapper);
+                    }
+
+                    result.append(trimmedLine);
+                }
+
+                previousLine = retracedLine;
+            }
+        }
+        else
+        {
+            if (allClassNames)
+            {
+                obfuscatedLine = deobfuscateTokens(obfuscatedLine, mapper);
+            }
+
+            // Print out the original line.
+            result.append(obfuscatedLine);
+        }
+        return result.toString();
     }
 
 
@@ -309,7 +343,8 @@ public class ReTrace
             System.exit(-1);
         }
 
-        String  regularExpresssion = REGULAR_EXPRESSION;
+        String  regularExpression = REGULAR_EXPRESSION;
+        String  regularExpression2 = REGULAR_EXPRESSION2;
         boolean verbose            = false;
         boolean allClassNames             = false;
 
@@ -319,7 +354,7 @@ public class ReTrace
             String arg = args[argumentIndex];
             if (arg.equals(REGEX_OPTION))
             {
-                regularExpresssion = args[++argumentIndex];
+                regularExpression = args[++argumentIndex];
             }
             else if (arg.equals(ALL_CLASS_NAMES_OPTION))
             {
@@ -367,7 +402,7 @@ public class ReTrace
             try
             {
                 // Execute ReTrace with the collected settings.
-                new ReTrace(regularExpresssion, allClassNames, verbose, mappingFile)
+                new ReTrace(regularExpression, regularExpression2, allClassNames, verbose, mappingFile)
                     .retrace(reader, writer);
             }
             finally

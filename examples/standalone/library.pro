@@ -28,8 +28,9 @@
 -printmapping out.map
 -keepparameternames
 -renamesourcefileattribute SourceFile
--keepattributes Exceptions,InnerClasses,Signature,Deprecated,
-                SourceFile,LineNumberTable,EnclosingMethod
+-keepattributes Signature,Exceptions,
+                InnerClasses,PermittedSubclasses,EnclosingMethod,
+                Deprecated,SourceFile,LineNumberTable
 
 # Preserve all annotations.
 
@@ -78,7 +79,7 @@
     java.lang.Object readResolve();
 }
 
-# Your library may contain more items that need to be preserved; 
+# Your library may contain more items that need to be preserved;
 # typically classes that are dynamically created using Class.forName:
 
 # -keep public class com.example.MyClass

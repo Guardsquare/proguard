@@ -1,0 +1,23 @@
+
+:root {
+  --md-admonition-icon--android: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAABAxJREFUWEetlz+oHFUUxn/fZqOIQbCJghaClagBbVJYzD6Fnc7KYGdjTDWvkGBhYWFn/0ZQCLaKFraZF3jspBBSKGIpSASLqIiFyiNmN++zuPfOzO7e3X0BP5iZ++ecc8+/e+4dsQUHs3Ik8XlVNG9uowOo2/IK8ANwqyoa76I/Neq2fKuelW8sjc2mj9ez6cMDmsfqtvxqnXs3tG2ybktVReO6nd4AfjS6DDwkwBgMgi+Qnq+K5kLdTkdVcXiyTeYqNirQLT6bfmnpUiA0INsIbA35pZ+wX6omh39vEJnFKDfYW17+inQJuAl8k9ZTsD2sLx0jfQZ+1vBX3ZZP52RuQlaBuPh3tp8A2C+aoiqaV2wDyFEHY4B3q6J5GzQTnIB/ycnchGwI6llZIq7btiQBR9hC2gs6eMCsu4iPsa9aGCOJa1Vx+E5O9iqyHkB8CCBpAcwNrxr2gHsSc9AcmCPmyGPgKmIuWEiaGy5n5WaQVwAugo/B8/gcSxyDF0AcIz33gOO+77kQdVs+t0H2dhy0061b8/+GDtryRezrku4CF6ui+aNuyzvBA4DB0lKy2GETyLHgqasMKS/OAa9XRXOrbssjmxeAD/YnzaesYCy4gXSekFlHwAXgSdD9ZdJePCwrlKD+fQZYHMymH9neA+4LfQKsKwA8QZA+As4P5kJ+aElw14obZFDzhbHC/jRIlngm7FifQWTPh3FPr1hcIQz0LKHkKYxDL8nOOMIKIQEjK9FnaWGUogihwoSeAssyrQ144Al3T9R1ZYkNRi9hLJRkrgU2uVgrfRzdnQkBkmPRipym80IGK3Vgt8YJm5Mwwt1rfW6AsWNsJIVgD2BbSXtJdncAGinMB8reRsWMiUGN016LZ8Koy5chHLdc5/vBN7aXGLTypFweUm1wwRi6pB1kQYpdz+VBOYrXgTWZQe9+NEnuD9F1jIDfCCqfAL/3U9GU4FMrCDAhUA4eklEal9W1g2zDbQyS7q8U0w4jw2vAHfBtwok3dKNwd/53To59sBX3t8Byagdjz+0XzfuII/CfhiuZ9fNa1bPSyLbZmITL6McGAdirJs2MHRhnR4OUlX3urg4EQx2LZ4Y5pE825qvIK2CC80PFGZiVOk7dqOoSs4cx3IVNN6L3AGEtupAjx/RbCC2EFsQkHSy1AAnxfVU0N7OyV5DNgSHqtvwWeBniDRE/Wk0OjwHqWfkz+CmkM8FbeqSaNHfj3KiaNDv/ETZdyYbolAzlXWfrtoyu70xPPu/mTrM4nEaBYbid/ocS+hM7poMf9L9wtwKxgKTXUnqlsyCeGYnsQbBbgXDrhf44OakmwUpL47A1u1j8u86+HadRoAofjWx9XRXNP2lCUGGfDU2u7U+ae3kRm/Ef38/ZmrIoJ+YAAAAASUVORK5CYII=');
+}
+.md-typeset .admonition.android,
+.md-typeset details.android {
+  border-color: rgb(43, 155, 70);
+}
+.md-typeset .android > .admonition-title,
+.md-typeset .android > summary {
+  background-color: rgba(43, 155, 70, 0.1);
+  border-color: rgb(43, 155, 70);
+}
+.md-typeset .android > .admonition-title::before,
+.md-typeset .android > summary::before {
+  background-color: rgb(43, 155, 70);
+  -webkit-mask-image: var(--md-admonition-icon--android);
+          mask-image: var(--md-admonition-icon--android);
+  -webkit-mask-size: 100%;
+          mask-size: 100%;
+}
+
+

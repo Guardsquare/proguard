@@ -1,75 +1,105 @@
 plugins {
-    id 'com.jfrog.bintray'
     id 'distribution'
-    id 'maven-publish'
+    id 'io.github.gradle-nexus.publish-plugin'
     id 'signing'
 }
 
 allprojects {
     group = 'com.guardsquare'
-    version = '7.0.0'
+    version = proguardVersion
+    repositories {
+        mavenLocal()
+    }
 }
 
-wrapper {
-    gradleVersion = '6.4'
-    distributionType = Wrapper.DistributionType.ALL
+task buildDocumentation(type: Exec) {
+    inputs.dir 'docs/md'
+    inputs.file 'docs/mkdocs.yml'
+    outputs.dir 'docs/html'
+    executable 'sh'
+    args '-c', "docker run --volume $rootDir/docs:/docs --rm squidfunk/mkdocs-material:5.2.2 build"
 }
 
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = findProperty('PROGUARD_STAGING_USERNAME')
+            password = findProperty('PROGUARD_STAGING_PASSWORD')
+        }
+    }
+}
+
+// Add Maven repositories
 allprojects { Project project ->
-    pluginManager.withPlugin('maven-publish') {
-        configure(project) {
-            publishing {
-                publications {
-                    create(project.name, MavenPublication) {
-                        pom {
-                            name = "[$group] $artifactId"
-                            developers {
-                                developer {
-                                    id = 'lafortune'
-                                    name = 'Eric Lafortune'
-                                    url = 'https://www.guardsquare.com/proguard'
-                                    organization = 'Guardsquare'
-                                    organizationUrl = 'https://www.guardsquare.com/'
-                                    roles = ['Project Administrator', 'Developer']
-                                }
+    afterEvaluate {
+        if (pluginManager.hasPlugin('maven-publish')) {
+            configure(project) {
+                publishing {
+                    repositories {
+                        maven {
+                            name = 'Github'
+                            url = uri('https://maven.pkg.github.com/guardsquare/proguard')
+                            credentials {
+                                username = project.findProperty('PROGUARD_GITHUB_USERNAME')
+                                password = project.findProperty('PROGUARD_GITHUB_TOKEN')
                             }
                         }
                     }
                 }
-                repositories {
-                    maven {
-                        name = 'Github'
-                        url = uri('https://maven.pkg.github.com/guardsquare/proguard')
-                        credentials {
-                            username = project.findProperty('PROGUARD_GITHUB_USERNAME')
-                            password = project.findProperty('PROGUARD_GITHUB_TOKEN')
-                        }
-                    }
-                    maven {
-                        name = 'Sonatype'
-                        url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-                        credentials(PasswordCredentials) {
-                            username = findProperty('PROGUARD_STAGING_USERNAME')
-                            password = findProperty('PROGUARD_STAGING_PASSWORD')
-                        }
-                    }
-                }
-            }
-            // We use in-memory ascii-armored keys
-            // See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
-            signing {
-                String key = findProperty('PROGUARD_SIGNING_KEY')
-                String password = findProperty('PROGUARD_SIGNING_PASSWORD')
-                useInMemoryPgpKeys(key, password)
-                sign publishing.publications.getByName(project.name)
             }
         }
     }
 }
 
+// Add publication
 allprojects { Project project ->
     afterEvaluate {
-        if (pluginManager.hasPlugin('java') && pluginManager.hasPlugin('maven-publish')) {
+        if (pluginManager.hasPlugin('maven-publish')) {
+            configure(project) {
+                publishing {
+                    publications {
+                        create(project.name, MavenPublication) {
+                            pom {
+                                artifactId = "proguard-$project.name"
+                                name = "$group:$artifactId"
+                                url = 'https://www.guardsquare.com/proguard'
+                                licenses {
+                                    license {
+                                        name = 'GNU General Public License, Version 2'
+                                        url = 'https://www.gnu.org/licenses/gpl-2.0.txt'
+                                        distribution = 'repo'
+                                    }
+                                }
+                                issueManagement {
+                                    system = 'Github Tracker'
+                                    url = 'https://github.com/Guardsquare/proguard/issues'
+                                }
+                                scm {
+                                    url = 'https://github.com/Guardsquare/proguard.git'
+                                    connection = 'scm:git:https://github.com/Guardsquare/proguard.git'
+                                }
+                                developers {
+                                    developer {
+                                        id = 'lafortune'
+                                        name = 'Eric Lafortune'
+                                        organization = 'Guardsquare'
+                                        organizationUrl = 'https://www.guardsquare.com/'
+                                        roles = ['Project Administrator', 'Developer']
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Configure default publication (all Java projects)
+allprojects { Project project ->
+    afterEvaluate {
+        if  (pluginManager.hasPlugin('maven-publish') && pluginManager.hasPlugin('java')) {
             configure(project) {
                 javadoc {
                     options.addStringOption('Xdoclint:none', '-quiet')
@@ -82,10 +112,6 @@ allprojects { Project project ->
                     publications {
                         getByName(project.name) {
                             from components.java
-                            // Do not change artifact ID if already overriden at project level.
-                            if (artifactId == project.name) {
-                                artifactId = "proguard-$project.name"
-                            }
                         }
                     }
                 }
@@ -94,59 +120,20 @@ allprojects { Project project ->
     }
 }
 
+// Configure signing
 allprojects { Project project ->
     afterEvaluate {
-        if (pluginManager.hasPlugin('com.jfrog.bintray') && pluginManager.hasPlugin('maven-publish')) {
+        if (pluginManager.hasPlugin('maven-publish')) {
             configure(project) {
-                bintray {
-                    Publication rootPub = rootProject.publishing.publications.parent
-                    Publication pub = project.publishing.publications.getByName(project.name)
-                    user = findProperty('PROGUARD_BINTRAY_USER')
-                    key = findProperty('PROGUARD_BINTRAY_KEY')
-                    publications = [project.name]
-                    dryRun = false
-                    override = true
-                    pkg {
-                        repo = 'proguard'
-                        name = "$project.group:$pub.artifactId"
-                        desc = pub.artifactId
-                        licenses = ['GPL-2.0']
-                        websiteUrl = rootPub.pom.url.get()
-                        issueTrackerUrl = rootPub.pom.issueManagement.url.get()
-                        vcsUrl = rootPub.pom.scm.url.get()
-                        version {
-                            name = project.version
-                            gpg.sign = true
-                            released = new Date()
-                        }
+                if (project.hasProperty('PROGUARD_SIGNING_KEY')) {
+                    // We use in-memory ascii-armored keys
+                    // See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
+                    signing {
+                        String key = project.findProperty('PROGUARD_SIGNING_KEY')
+                        String password = project.findProperty('PROGUARD_SIGNING_PASSWORD')
+                        useInMemoryPgpKeys(key, password)
+                        sign publishing.publications.getByName(project.name)
                     }
-                }
-            }
-        }
-    }
-}
-
-publishing {
-    publications {
-        parent {
-            artifactId = "proguard-parent"
-            pom {
-                description = 'ProGuard is a free Java class file shrinker, optimizer, obfuscator, and preverifier.'
-                url = 'https://www.guardsquare.com/proguard'
-                licenses {
-                    license {
-                        name = 'GNU General Public License, Version 2'
-                        url = 'https://www.gnu.org/licenses/gpl-2.0.txt'
-                        distribution = 'repo'
-                    }
-                }
-                issueManagement {
-                    system = 'Github Tracker'
-                    url = 'https://github.com/Guardsquare/proguard/issues'
-                }
-                scm {
-                    url = 'https://github.com/Guardsquare/proguard.git'
-                    connection = 'scm:git:https://github.com/Guardsquare/proguard.git'
                 }
             }
         }
@@ -158,9 +145,10 @@ distributions {
         distributionBaseName.set('proguard')
         contents {
             into('lib') {
-                from tasks.getByPath(':base:fatJar').outputs
+                from tasks.getByPath(':proguard-app:fatJar').outputs
                 from tasks.getByPath(':gui:fatJar').outputs
                 from tasks.getByPath(':retrace:fatJar').outputs
+                from tasks.getByPath(':ant:fatJar').outputs
             }
             into('docs') {
                 from('docs/md') {
@@ -171,6 +159,8 @@ distributions {
             from(rootDir) {
                 include 'bin/'
                 include 'examples/'
+                exclude 'examples/*/build'
+                exclude 'examples/*/.gradle'
                 include 'LICENSE'
                 include 'LICENSE_exception.md'
             }
@@ -185,4 +175,6 @@ distTar {
 
 clean {
     delete file("$rootDir/lib")
+// TODO docker runs as root, so cannot clean the HTML yet
+//    delete buildDocumentation.outputs
 }

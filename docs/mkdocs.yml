@@ -4,7 +4,7 @@
 site_name:        ProGuard
 site_description: Optimizer and obfuscator for Java bytecode
 site_author:      Guardsquare NV
-copyright:        Copyright &copy; 2002-2020 Guardsquare NV
+copyright:        Copyright &copy; 2002-2021 Guardsquare NV
 
 ###################################################################
 # Options
@@ -23,6 +23,7 @@ site_dir: html
 
 extra_css:
   - css/extra.css
+  - css/admonition.css
 
 use_directory_urls: false
 #strict: true # broken links are errors
@@ -50,44 +51,53 @@ extra:
 # Extensions
 ###################################################################
 markdown_extensions:
-- attr_list
-- admonition
-- codehilite
-- footnotes
-- def_list
+  - attr_list
+  - admonition
+  - footnotes
+  - def_list
+  - toc:
+      permalink: True
+  - codehilite:
+      guess_lang: False
+  - pymdownx.magiclink
+  - pymdownx.tabbed
+  - pymdownx.superfences:
+      css_class: codehilite
+  - pymdownx.striphtml:
+      strip_comments: true
+plugins:
+  - search
 
 ###################################################################
 # Page tree
 ###################################################################
 nav:
-- Main:                index.md
-- Results:             results.md
-- FAQ:                 FAQ.md
-- ProGuard Manual:
-    - Introduction:    manual/index.md
-    - Usage:           manual/usage.md
-    - Kotlin:          manual/kotlin.md
-    - Attributes:      manual/attributes.md
-    - Optimizations:   manual/optimizations.md
-    - Limitations:     manual/limitations.md
-    - Examples:        manual/examples.md
-    - Troubleshooting: manual/troubleshooting.md
-    - Reference Card:  manual/refcard.md
-    - GUI:             manual/gui.md
-    - Ant Task:        manual/ant.md
-    - Gradle Task:     manual/gradle.md
-    - Gradle Plugin:   manual/gradleplugin.md
-    - JME WTK:         manual/wtk.md
-- ReTrace Manual:
-    - Introduction:    manual/retrace/index.md
-    - Usage:           manual/retrace/usage.md
-    - Mapping File:    manual/retrace/mapping.md
-    - Examples:        manual/retrace/examples.md
+- Home:            manual/home.md
+- Quickstart:      manual/quickstart.md  
+- Building:        manual/building.md
+- Setup:
+    - Standalone:          manual/setup/standalone.md
+    - Android Gradle:      manual/setup/gradleplugin.md
+    - Java/Kotlin Gradle:  manual/setup/gradle.md
+    - Ant Task:            manual/setup/ant.md
+    - Upgrading:           manual/setup/upgrading.md
+- Configuration:
+    - Usage:           manual/configuration/usage.md
+    - Attributes:      manual/configuration/attributes.md
+    - Optimizations:   manual/configuration/optimizations.md
+    - Examples:        manual/configuration/examples.md
+- Languages:
+    - Java:            manual/languages/java.md
+    - Kotlin:          manual/languages/kotlin.md
+- Tools:
+    - ReTrace:         manual/tools/retrace.md
+- Troubleshooting:
+    - Overview:        manual/troubleshooting/troubleshooting.md
+    - Limitations:     manual/troubleshooting/limitations.md
+- Reference Card:  manual/refcard.md
+- Version History: manual/releasenotes.md
+- Feedback:        manual/feedback.md
 - License:
-    - Overview:        license.md
-    - GPL:             GPL.md
-    - GPL Exception:   GPL_exception.md
-- Downloads:           downloads.md
-- Building:            building.md
-- Release notes:       releasenotes.md
-- Feedback:            feedback.md
+    - Overview:        manual/license/license.md
+    - GPL:             manual/license/gpl.md
+    - GPL Exception:   manual/license/gplexception.md
