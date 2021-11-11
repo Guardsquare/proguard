@@ -8,19 +8,17 @@ Building ProGuard is easy - you'll need:
 
 * a Java 8 JDK installed
 * a clone of the [ProGuard](https://github.com/Guardsquare/proguard.git) repository
-* a clone of the [ProGuardCORE](https://github.com/Guardsquare/proguard-core) repository, since ProGuard 
-  is built on the ProGuardCORE library 
 
 You can then execute a composite build with the following Gradle command:
 
 === "Linux/macOS"
     ```bash
-    ./gradlew --include-build=/path/to/proguard-core assemble
+    ./gradlew assemble
     ```
 
 === "Windows"
     ```bash
-    gradlew --include-build=\path\to\proguard-core assemble
+    gradlew assemble
     ```
 
 
