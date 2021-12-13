@@ -96,7 +96,7 @@ implements   KotlinMetadataVisitor
             new KotlinFunctionFilter(
                 fun -> !fun.flags.isDeclaration &&
                        fun.name.equals(METHOD_NAME_TOSTRING) &&
-                       fun.jvmSignature.getDesc().equals(METHOD_TYPE_TOSTRING),
+                       fun.jvmSignature.descriptor.toString().equals(METHOD_TYPE_TOSTRING),
                 new KotlinFunctionToMethodVisitor(
                 new AllAttributeVisitor(
                 new MyObfuscatedToStringFixer(nameMap, new ConstantPoolEditor((ProgramClass)clazz))))));

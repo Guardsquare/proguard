@@ -23,6 +23,14 @@ To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated
 
 - Fix potential `NullPointerException` when initializing Kotlin callable references. (`T5899`)
 - Prevent requiring `--enable-preview` on a JVM for Java 16 class files (write class file version `60.0` instead of `60.65535`).
+- Fix potential `StringIndexOutOfBoundsException` during signing. (`T7004`)
+- Fix potential `StackOverflowError` when processing Java 16 records with type annotations. (`PGD-182`)
+- Fix potential `StringOutOfBoundsException` when processing Kotlin callable references. (`T5927`)
+- Fix potential `NullPointerException` when processing Kotlin callable references. (`T6138`)
+- Fix potential `Stack size becomes negative` exception when processing large methods. (`T5721`)
+- Fix potential `ClassFormatError` due to adding multiple annotation attributes when processing Kotlin code.
+- Fix potential `NullPointerException` due to missing classes.
+- Prevent making package-private final methods that are shadowed protected. (`T7056`)
 
 
 ## Version 7.1.2
