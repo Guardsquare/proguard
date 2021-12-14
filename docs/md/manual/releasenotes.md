@@ -30,7 +30,7 @@ To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated
 - Fix potential `Stack size becomes negative` exception when processing large methods. (`T5721`)
 - Fix potential `ClassFormatError` due to adding multiple annotation attributes when processing Kotlin code.
 - Fix potential `NullPointerException` due to missing classes.
-- Prevent making package-private final methods that are shadowed protected. (`T7056`)
+- Prevent possible `LinkageError` when making package-private final methods that are shadowed protected. (`T7056`)
 
 
 ## Version 7.1.2
