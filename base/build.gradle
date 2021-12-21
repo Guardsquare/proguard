@@ -27,8 +27,8 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
 dependencies {
     api "com.guardsquare:proguard-core:${proguardCoreVersion}"
     implementation "com.google.code.gson:gson:${gsonVersion}"
-    implementation 'org.apache.logging.log4j:log4j-api:2.16.0'
-    implementation 'org.apache.logging.log4j:log4j-core:2.16.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.17.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.17.0'
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.20"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.5.20"
