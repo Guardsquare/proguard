@@ -218,7 +218,12 @@ ProGuard in detail.
 
 ## 💻 Building ProGuard
 
-Building ProGuard is easy - you'll just need a Java 8 JDK installed.
+Building ProGuard is easy - you'll just need a Java 8 JDK installed. 
+To build from source, clone a copy of the ProGuard repository and run the following command:
+
+```bash
+./gradlew assemble
+```
 
 The artifacts will be generated in the `lib` directory. You can then execute ProGuard using the
 scripts in `bin`, for example:
