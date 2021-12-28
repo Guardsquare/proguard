@@ -68,5 +68,6 @@ public class KotlinLambdaMerger {
         if (kotlinFunction0Interface == null) {
             kotlinFunction0Interface = libraryClassPool.getClass(KOTLIN_FUNCTION0_INTERFACE);
         }
+        return kotlinFunction0Interface;
     }
 }
