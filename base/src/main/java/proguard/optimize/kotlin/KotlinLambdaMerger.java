@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
+import proguard.classfile.visitor.ClassMethodFilter;
 import proguard.classfile.visitor.ClassPoolFiller;
 import proguard.classfile.visitor.ImplementedClassFilter;
 import proguard.resources.file.ResourceFilePool;
@@ -42,13 +43,17 @@ public class KotlinLambdaMerger {
         }
 
         if (kotlinLambdaClass != null && kotlinFunction0Interface != null) {
-            // find all lambda classes of arity 0
+            // find all lambda classes of arity 0 and with an empty closure
+            // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
+            //  (i.e. no arguments) if the closure is empty
             programClassPool.classesAccept(new ImplementedClassFilter(kotlinFunction0Interface, false,
                                            new ImplementedClassFilter(kotlinLambdaClass, false,
-                                           new ClassPoolFiller(lambdaClassPool), null), null)
+                                           new ClassMethodFilter("<init>", "()V",
+                                           new ClassPoolFiller(lambdaClassPool), null), null), null)
             );
-            // filter for lambda's without constructor arguments -> put them in a classpool
-            // TODO: filter on classes that have a constructor WITHOUT arguments!
+
+
+
         }
         return programClassPool;
     }
