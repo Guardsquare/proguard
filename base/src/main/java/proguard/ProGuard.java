@@ -39,6 +39,7 @@ import proguard.obfuscate.ResourceFileNameAdapter;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
+import proguard.optimize.kotlin.KotlinLambdaMerger;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.pass.PassRunner;
 import proguard.preverify.*;
@@ -174,6 +175,11 @@ public class ProGuard
             {
                 shrink(false);
             }
+
+            // if (configuration.mergeKotlinLambdaClasses)
+            //{
+                mergeKotlinLambdaClasses();
+            //}
 
             // Create a matcher for filtering optimizations.
             StringMatcher filter = configuration.optimizations != null ?
@@ -413,6 +419,16 @@ public class ProGuard
         {
             passRunner.run(new KotlinMetadataAsserter(configuration), appView);
         }
+    }
+
+    /**
+     * Reduce the size needed to represent Kotlin lambda's.
+     * The classes that are generated for lambda's with a same structure and from the same package are merged into a group.
+     */
+    private void mergeKotlinLambdaClasses() throws IOException {
+        programClassPool = new KotlinLambdaMerger(configuration).execute(programClassPool,
+                                                                         libraryClassPool,
+                                                                         resourceFilePool);
     }
 
 
