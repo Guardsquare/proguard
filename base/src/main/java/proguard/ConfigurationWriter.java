@@ -33,7 +33,7 @@ import java.util.*;
  *
  * @author Eric Lafortune
  */
-public class ConfigurationWriter
+public class ConfigurationWriter implements AutoCloseable
 {
     private static final String[] KEEP_OPTIONS = new String[]
     {
@@ -71,9 +71,10 @@ public class ConfigurationWriter
     /**
      * Closes this ConfigurationWriter.
      */
+    @Override
     public void close() throws IOException
     {
-        writer.close();
+        PrintWriterUtil.closePrintWriter(baseDir, writer);
     }
 
 
@@ -823,10 +824,8 @@ public class ConfigurationWriter
      */
     public static void main(String[] args)
     {
-        try
+        try (ConfigurationWriter writer = new ConfigurationWriter(new File(args[0])))
         {
-            ConfigurationWriter writer = new ConfigurationWriter(new File(args[0]));
-
             writer.write(new Configuration());
         }
         catch (Exception ex)

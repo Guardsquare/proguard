@@ -18,20 +18,19 @@ import io.kotest.core.spec.style.FreeSpec
 class ConfigurationParserTest : FreeSpec({
     fun parseConfiguration(rules: String): Configuration {
         val configuration = Configuration()
-        val parser = ConfigurationParser(rules, "", null, System.getProperties())
-        parser.parse(configuration)
+        ConfigurationParser(rules, "", null, System.getProperties()).use {
+            it.parse(configuration)
+        }
         return configuration
     }
 
     fun parseConfiguration(reader: WordReader): Configuration {
         val configuration = Configuration()
-        val parser = ConfigurationParser(reader, System.getProperties())
-        parser.parse(configuration)
+        ConfigurationParser(reader, System.getProperties()).use {
+            it.parse(configuration)
+        }
         return configuration
     }
-
-    fun parseRulesAsArguments(rules: String) =
-        rules.split(' ', '\n').toTypedArray()
 
     "Keep rule tests" - {
         "Keep rule with <fields> wildcard should be valid" {

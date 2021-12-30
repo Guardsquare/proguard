@@ -32,14 +32,12 @@ import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
-import proguard.io.ExtraDataEntryNameMap;
 import proguard.mark.Marker;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.preverify.*;
-import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.Shrinker;
 import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.*;
@@ -55,20 +53,11 @@ public class ProGuard
 {
     public static final String VERSION = "ProGuard, version " + getVersion();
 
-
-    private final Configuration    configuration;
-
-    private       ClassPool        programClassPool = new ClassPool();
-    private final ClassPool        libraryClassPool = new ClassPool();
-    private final ResourceFilePool resourceFilePool = new ResourceFilePool();
-
-    // Stores information about the original state of the program class pool
-    // used for configuration debugging.
-    private InitialStateInfo initialStateInfo;
-
-    // All injected data entries.
-    private final ExtraDataEntryNameMap extraDataEntryNameMap = new ExtraDataEntryNameMap();
-
+    /**
+     * A data object containing pass inputs in a centralized location. Passes can access and update the information
+     * at any point in the pipeline.
+     */
+    private final AppView appView;
 
     /**
      * Creates a new ProGuard object to process jars as specified by the given
@@ -76,33 +65,32 @@ public class ProGuard
      */
     public ProGuard(Configuration configuration)
     {
-        this.configuration = configuration;
+        this.appView = new AppView(configuration);
     }
-
 
     /**
      * Performs all subsequent ProGuard operations.
      */
-    public void execute() throws IOException
+    public void execute() throws Exception
     {
         System.out.println(VERSION);
 
-        GPL.check();
+        Configuration configuration = appView.configuration;
 
         try
         {
+            checkGpl();
+
             if (configuration.printConfiguration != null)
             {
                 printConfiguration();
             }
 
-            new ConfigurationChecker(configuration).check();
+            checkConfiguration();
 
-            if (configuration.programJars != null     &&
-                configuration.programJars.hasOutput() &&
-                new UpToDateChecker(configuration).check())
+            if (configuration.programJars.hasOutput())
             {
-                return;
+                checkUpToDate();
             }
 
             if (configuration.targetClassVersion != 0)
@@ -137,7 +125,7 @@ public class ProGuard
             {
                 // Remember the initial state of the program classpool and resource filepool
                 // before shrinking / obfuscation / optimization.
-                initialStateInfo = new InitialStateInfo(programClassPool);
+                appView.initialStateInfo = new InitialStateInfo(appView.programClassPool);
             }
 
             if (configuration.keepKotlinMetadata)
@@ -260,6 +248,7 @@ public class ProGuard
                 dump();
             }
         }
+        catch (UpToDateChecker.UpToDateException ignore) {}
         catch (IncompleteClassHierarchyException e)
         {
             throw new RuntimeException(
@@ -273,27 +262,50 @@ public class ProGuard
 
 
     /**
+     * Checks the GPL.
+     */
+    private void checkGpl()
+    {
+        GPL.check();
+    }
+
+
+    /**
      * Prints out the configuration that ProGuard is using.
      */
     private void printConfiguration() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Printing configuration to [" +
-                               PrintWriterUtil.fileName(configuration.printConfiguration) +
+                               PrintWriterUtil.fileName(appView.configuration.printConfiguration) +
                                "]...");
         }
 
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printConfiguration);
-        try
+        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.printConfiguration);
+
+        try (ConfigurationWriter configurationWriter = new ConfigurationWriter(pw))
         {
-            new ConfigurationWriter(pw).write(configuration);
-        }
-        finally
-        {
-            PrintWriterUtil.closePrintWriter(configuration.printConfiguration, pw);
+            configurationWriter.write(appView.configuration);
         }
     }
+
+    /**
+     * Checks the configuration for conflicts and inconsistencies.
+     */
+    private void checkConfiguration() throws IOException
+    {
+        new ConfigurationChecker(appView.configuration).check();
+    }
+
+    /**
+     * Checks whether the output is up-to-date.
+     */
+    private void checkUpToDate()
+    {
+        new UpToDateChecker(appView.configuration).check();
+    }
+
 
 
     /**
@@ -301,15 +313,13 @@ public class ProGuard
      */
     private void readInput() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Reading input...");
         }
 
         // Fill the program class pool and the library class pool.
-        new InputReader(configuration).execute(programClassPool,
-                                               libraryClassPool,
-                                               resourceFilePool);
+        new InputReader(appView.configuration).execute(appView);
     }
 
 
@@ -319,14 +329,14 @@ public class ProGuard
      */
     private void initialize() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Initializing...");
         }
 
-        new Initializer(configuration).execute(programClassPool,
-                                               libraryClassPool,
-                                               resourceFilePool);
+        new Initializer(appView.configuration).execute(appView.programClassPool,
+                                                       appView.libraryClassPool,
+                                                       appView.resourceFilePool);
     }
 
 
@@ -336,13 +346,13 @@ public class ProGuard
      */
     private void mark()
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Marking classes and class members to be kept...");
         }
 
-        new Marker(configuration).mark(programClassPool,
-                                       libraryClassPool);
+        new Marker(appView.configuration).mark(appView.programClassPool,
+                                               appView.libraryClassPool);
     }
 
 
@@ -351,9 +361,9 @@ public class ProGuard
      */
     private void stripKotlinMetadataAnnotations()
     {
-        new KotlinAnnotationStripper().execute(configuration,
-                                               programClassPool,
-                                               libraryClassPool);
+        new KotlinAnnotationStripper().execute(appView.configuration,
+                                               appView.programClassPool,
+                                               appView.libraryClassPool);
     }
 
 
@@ -362,7 +372,7 @@ public class ProGuard
      */
     private void introducePrimitiveArrayConstants()
     {
-        programClassPool.classesAccept(new ArrayInitializationReplacer());
+        appView.programClassPool.classesAccept(new ArrayInitializationReplacer());
     }
 
 
@@ -372,7 +382,7 @@ public class ProGuard
      */
     private void expandPrimitiveArrayConstants()
     {
-        programClassPool.classesAccept(new PrimitiveArrayConstantReplacer());
+        appView.programClassPool.classesAccept(new PrimitiveArrayConstantReplacer());
     }
 
 
@@ -381,9 +391,9 @@ public class ProGuard
      */
     private void backport()
     {
-        new Backporter(configuration).execute(programClassPool,
-                                              libraryClassPool,
-                                              extraDataEntryNameMap);
+        new Backporter(appView.configuration).execute(appView.programClassPool,
+                                                      appView.libraryClassPool,
+                                                      appView.extraDataEntryNameMap);
     }
 
 
@@ -393,9 +403,9 @@ public class ProGuard
      */
     private void addConfigurationLogging() throws IOException
     {
-        new ConfigurationLoggingAdder().execute(programClassPool,
-                                                libraryClassPool,
-                                                extraDataEntryNameMap);
+        new ConfigurationLoggingAdder().execute(appView.programClassPool,
+                                                appView.libraryClassPool,
+                                                appView.extraDataEntryNameMap);
     }
 
 
@@ -404,7 +414,7 @@ public class ProGuard
      */
     private void keepKotlinMetadata()
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Adapting Kotlin metadata...");
         }
@@ -412,11 +422,11 @@ public class ProGuard
         WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.out, true));
 
         ClassCounter counter = new ClassCounter();
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new ReferencedKotlinMetadataVisitor(
             new KotlinMetadataWriter(warningPrinter, counter)));
 
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
         }
@@ -428,12 +438,12 @@ public class ProGuard
      */
     private void target() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Setting target versions...");
         }
 
-        new Targeter(configuration).execute(programClassPool);
+        new Targeter(appView.configuration).execute(appView.programClassPool);
     }
 
 
@@ -443,21 +453,21 @@ public class ProGuard
      */
     private void printSeeds() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Printing kept classes, fields, and methods...");
         }
 
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printSeeds);
+        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.printSeeds);
         try
         {
-            new SeedPrinter(pw).write(configuration,
-                                      programClassPool,
-                                      libraryClassPool);
+            new SeedPrinter(pw).write(appView.configuration,
+                                      appView.programClassPool,
+                                      appView.libraryClassPool);
         }
         finally
         {
-            PrintWriterUtil.closePrintWriter(configuration.printSeeds, pw);
+            PrintWriterUtil.closePrintWriter(appView.configuration.printSeeds, pw);
         }
     }
 
@@ -467,28 +477,27 @@ public class ProGuard
      */
     private void shrink() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Shrinking...");
 
             // We'll print out some explanation, if requested.
-            if (configuration.whyAreYouKeeping != null)
+            if (appView.configuration.whyAreYouKeeping != null)
             {
                 System.out.println("Explaining why classes and class members are being kept...");
             }
 
             // We'll print out the usage, if requested.
-            if (configuration.printUsage != null)
+            if (appView.configuration.printUsage != null)
             {
-                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(configuration.printUsage) + "]...");
+                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(appView.configuration.printUsage) + "]...");
             }
         }
 
         // Perform the actual shrinking.
-        programClassPool =
-            new Shrinker(configuration).execute(programClassPool,
-                                                libraryClassPool,
-                                                resourceFilePool);
+        new Shrinker(appView.configuration).execute(appView.programClassPool,
+                                                    appView.libraryClassPool,
+                                                    appView.resourceFilePool);
     }
 
 
@@ -497,13 +506,13 @@ public class ProGuard
      */
     private void inlineSubroutines()
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Inlining subroutines...");
         }
 
         // Perform the actual inlining.
-        new SubroutineInliner(configuration).execute(programClassPool);
+        new SubroutineInliner(appView.configuration).execute(appView.programClassPool);
     }
 
 
@@ -514,21 +523,21 @@ public class ProGuard
     {
         // Do we have Gson code?
         // Is Gson optimization enabled?
-        if (programClassPool.getClass("com/google/gson/Gson") != null &&
-            (configuration.optimizations == null ||
-             new ListParser(new NameParser()).parse(configuration.optimizations)
+        if (appView.programClassPool.getClass("com/google/gson/Gson") != null &&
+            (appView.configuration.optimizations == null ||
+             new ListParser(new NameParser()).parse(appView.configuration.optimizations)
                  .matches(Optimizer.LIBRARY_GSON)))
         {
-            if (configuration.verbose)
+            if (appView.configuration.verbose)
             {
                 System.out.println("Optimizing usages of Gson library...");
             }
 
             // Perform the Gson optimization.
-            new GsonOptimizer().execute(programClassPool,
-                                        libraryClassPool,
-                                        extraDataEntryNameMap,
-                                        configuration);
+            new GsonOptimizer().execute(appView.programClassPool,
+                                        appView.libraryClassPool,
+                                        appView.extraDataEntryNameMap,
+                                        appView.configuration);
         }
     }
 
@@ -539,15 +548,15 @@ public class ProGuard
     private boolean optimize(int currentPass,
                              int maxPasses) throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Optimizing (pass " + currentPass + "/" + maxPasses + ")...");
         }
 
         // Perform the actual optimization.
-        return new Optimizer(configuration).execute(programClassPool,
-                                                    libraryClassPool,
-                                                    extraDataEntryNameMap);
+        return new Optimizer(appView.configuration).execute(appView.programClassPool,
+                             appView.libraryClassPool,
+                             appView.extraDataEntryNameMap);
     }
 
 
@@ -556,15 +565,15 @@ public class ProGuard
      */
     private void obfuscate() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Obfuscating...");
         }
 
         // Perform the actual obfuscation.
-        new Obfuscator(configuration).execute(programClassPool,
-                                              libraryClassPool,
-                                              resourceFilePool);
+        new Obfuscator(appView.configuration).execute(appView.programClassPool,
+                                                      appView.libraryClassPool,
+                                                      appView.resourceFilePool);
     }
 
 
@@ -574,7 +583,7 @@ public class ProGuard
      */
     private void linearizeLineNumbers()
     {
-        programClassPool.classesAccept(new LineNumberLinearizer());
+        appView.programClassPool.classesAccept(new LineNumberLinearizer());
     }
 
 
@@ -583,7 +592,7 @@ public class ProGuard
      */
     private void trimLineNumbers()
     {
-        programClassPool.classesAccept(new AllAttributeVisitor(true,
+        appView.programClassPool.classesAccept(new AllAttributeVisitor(true,
                                        new LineNumberTableAttributeTrimmer()));
     }
 
@@ -593,7 +602,7 @@ public class ProGuard
      */
     private void clearPreverification()
     {
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_6,
             new AllMethodVisitor(
             new AllAttributeVisitor(
@@ -606,13 +615,13 @@ public class ProGuard
      */
     private void preverify()
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Preverifying...");
         }
 
         // Perform the actual preverification.
-        new Preverifier(configuration).execute(programClassPool);
+        new Preverifier(appView.configuration).execute(appView.programClassPool);
     }
 
 
@@ -621,7 +630,7 @@ public class ProGuard
      */
     private void sortClassElements()
     {
-        programClassPool.classesAccept(new ClassElementSorter());
+        appView.programClassPool.classesAccept(new ClassElementSorter());
     }
 
 
@@ -630,16 +639,16 @@ public class ProGuard
      */
     private void writeOutput() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Writing output...");
         }
 
         // Write out the program class pool.
-        new OutputWriter(configuration).execute(programClassPool,
-                                                initialStateInfo,
-                                                resourceFilePool,
-                                                extraDataEntryNameMap);
+        new OutputWriter(appView.configuration).execute(appView.programClassPool,
+                                                        appView.initialStateInfo,
+                                                        appView.resourceFilePool,
+                                                        appView.extraDataEntryNameMap);
     }
 
 
@@ -648,19 +657,19 @@ public class ProGuard
      */
     private void dump() throws IOException
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
-            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(configuration.dump) + "]...");
+            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(appView.configuration.dump) + "]...");
         }
 
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.dump);
+        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.dump);
         try
         {
-            programClassPool.classesAccept(new ClassPrinter(pw));
+            appView.programClassPool.classesAccept(new ClassPrinter(pw));
         }
         finally
         {
-            PrintWriterUtil.closePrintWriter(configuration.dump, pw);
+            PrintWriterUtil.closePrintWriter(appView.configuration.dump, pw);
         }
     }
 
@@ -702,15 +711,9 @@ public class ProGuard
         try
         {
             // Parse the options specified in the command line arguments.
-            ConfigurationParser parser = new ConfigurationParser(args,
-                                                                 System.getProperties());
-            try
+            try (ConfigurationParser parser = new ConfigurationParser(args, System.getProperties()))
             {
                 parser.parse(configuration);
-            }
-            finally
-            {
-                parser.close();
             }
 
             // Execute ProGuard with these options.

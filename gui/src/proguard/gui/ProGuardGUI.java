@@ -693,14 +693,12 @@ public class ProGuardGUI extends JFrame
         try
         {
             // Parse the boilerplate configuration file.
-            ConfigurationParser parser = new ConfigurationParser(
+            try (ConfigurationParser parser = new ConfigurationParser(
                 this.getClass().getResource(BOILERPLATE_CONFIGURATION),
-                System.getProperties());
-
-            Configuration configuration = new Configuration();
-
-            try
+                System.getProperties()))
             {
+                Configuration configuration = new Configuration();
+
                 parser.parse(configuration);
 
                 // We're interested in the keep options.
@@ -714,10 +712,6 @@ public class ProGuardGUI extends JFrame
                 // We're interested in the side effects options.
                 boilerplateNoSideEffectMethods = new ClassSpecification[configuration.assumeNoSideEffects.size()];
                 configuration.assumeNoSideEffects.toArray(boilerplateNoSideEffectMethods);
-            }
-            finally
-            {
-                parser.close();
             }
         }
         catch (Exception ex)
@@ -1470,13 +1464,11 @@ public class ProGuardGUI extends JFrame
         try
         {
             // Parse the configuration file.
-            ConfigurationParser parser = new ConfigurationParser(file,
-                                                                 System.getProperties());
-
-            Configuration configuration = new Configuration();
-
-            try
+            try (ConfigurationParser parser = new ConfigurationParser(file,
+                                                                      System.getProperties()))
             {
+                Configuration configuration = new Configuration();
+
                 parser.parse(configuration);
 
                 // Let the GUI reflect the configuration.
@@ -1488,10 +1480,6 @@ public class ProGuardGUI extends JFrame
                                               msg("cantParseConfigurationFile", file.getPath()),
                                               msg("warning"),
                                               JOptionPane.ERROR_MESSAGE);
-            }
-            finally
-            {
-                parser.close();
             }
         }
         catch (IOException ex)
@@ -1512,13 +1500,11 @@ public class ProGuardGUI extends JFrame
         try
         {
             // Parse the configuration file.
-            ConfigurationParser parser = new ConfigurationParser(url,
-                                                                 System.getProperties());
-
-            Configuration configuration = new Configuration();
-
-            try
+            try (ConfigurationParser parser = new ConfigurationParser(url,
+                                                                      System.getProperties()))
             {
+                Configuration configuration = new Configuration();
+
                 parser.parse(configuration);
 
                 // Let the GUI reflect the configuration.
@@ -1530,10 +1516,6 @@ public class ProGuardGUI extends JFrame
                                               msg("cantParseConfigurationFile", url),
                                               msg("warning"),
                                               JOptionPane.ERROR_MESSAGE);
-            }
-            finally
-            {
-                parser.close();
             }
         }
         catch (IOException ex)
@@ -1554,15 +1536,10 @@ public class ProGuardGUI extends JFrame
         try
         {
             // Save the configuration file.
-            ConfigurationWriter writer = new ConfigurationWriter(file);
-
-            try
+            Configuration configuration = getProGuardConfiguration();
+            try (ConfigurationWriter writer = new ConfigurationWriter(file))
             {
-                writer.write(getProGuardConfiguration());
-            }
-            finally
-            {
-                writer.close();
+                writer.write(configuration);
             }
         }
         catch (Exception ex)
@@ -1680,16 +1657,11 @@ public class ProGuardGUI extends JFrame
                     // TODO: write out relative path names and path names with system properties.
 
                     // Write the configuration.
-                    ConfigurationWriter configurationWriter =
-                        new ConfigurationWriter(printWriter);
-
-                    try
+                    Configuration configuration = getProGuardConfiguration();
+                    try (ConfigurationWriter configurationWriter =
+                                 new ConfigurationWriter(printWriter))
                     {
-                        configurationWriter.write(getProGuardConfiguration());
-                    }
-                    finally
-                    {
-                        configurationWriter.close();
+                        configurationWriter.write(configuration);
                     }
                 }
                 catch (IOException ignore)

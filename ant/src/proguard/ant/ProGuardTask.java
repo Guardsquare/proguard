@@ -49,21 +49,15 @@ public class ProGuardTask extends ConfigurationTask
             URL configUrl =
                 ConfigurationElement.class.getResource(configurationFile.toString());
 
-            ConfigurationParser parser = configUrl != null ?
-                new ConfigurationParser(configUrl, properties) :
-                new ConfigurationParser(configurationFile, properties);
-
-            try
+            try (ConfigurationParser parser = configUrl != null ?
+                    new ConfigurationParser(configUrl, properties) :
+                    new ConfigurationParser(configurationFile, properties))
             {
                 parser.parse(configuration);
             }
             catch (ParseException e)
             {
                 throw new BuildException(e.getMessage(), e);
-            }
-            finally
-            {
-                parser.close();
             }
         }
         catch (IOException e)
@@ -338,7 +332,7 @@ public class ProGuardTask extends ConfigurationTask
             ProGuard proGuard = new ProGuard(configuration);
             proGuard.execute();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             throw new BuildException(e.getMessage(), e);
         }

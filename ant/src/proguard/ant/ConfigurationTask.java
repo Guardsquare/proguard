@@ -347,22 +347,16 @@ public class ConfigurationTask extends Task
             Properties properties = new Properties();
             properties.putAll(project.getProperties());
 
-            ConfigurationParser parser = new ConfigurationParser(arg,
-                                                                 "embedded configuration",
-                                                                 project.getBaseDir(),
-                                                                 properties);
-
-            try
+            try (ConfigurationParser parser = new ConfigurationParser(arg,
+                                                                      "embedded configuration",
+                                                                      project.getBaseDir(),
+                                                                      properties))
             {
                 parser.parse(configuration);
             }
             catch (ParseException ex)
             {
                 throw new BuildException(ex.getMessage());
-            }
-            finally
-            {
-                parser.close();
             }
         }
         catch (IOException ex)

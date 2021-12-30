@@ -20,11 +20,11 @@
  */
 package proguard;
 
-import proguard.classfile.*;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.*;
+import proguard.pass.Pass;
 import proguard.resources.file.*;
 import proguard.resources.file.io.ResourceFileDataEntryReader;
 import proguard.resources.file.visitor.*;
@@ -34,24 +34,17 @@ import proguard.util.*;
 import java.io.*;
 
 /**
- * This class reads the input class files.
+ * This pass reads the input class files.
  *
  * @author Eric Lafortune
  */
-public class InputReader
+public class InputReader implements Pass
 {
-    // Option to favor library classes over program classes, in case of
-    // duplicates.
-    // https://sourceforge.net/p/proguard/discussion/182455/thread/76430d9e
-    private static final boolean FAVOR_LIBRARY_CLASSES = System.getProperty("favor.library.classes") != null;
-
-
-    private final Configuration configuration;
+    private Configuration configuration;
 
     // Field that acts as a parameter to the visitors that attach
     // feature names to classes and resource files.
     private String featureName;
-
 
     /**
      * Creates a new InputReader to read input class files as specified by the
@@ -64,13 +57,14 @@ public class InputReader
 
 
     /**
-     * Fills the given program class pool, library class pool, and resource file
+     * Fills the program class pool, library class pool, and resource file
      * pool by reading files based on the current configuration.
      */
-    public void execute(ClassPool        programClassPool,
-                        ClassPool        libraryClassPool,
-                        ResourceFilePool resourceFilePool) throws IOException
+    @Override
+    public void execute(AppView appView) throws IOException
     {
+        this.configuration = appView.configuration;
+
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);
@@ -83,9 +77,9 @@ public class InputReader
         DuplicateResourceFilePrinter duplicateResourceFilePrinter = new DuplicateResourceFilePrinter(notePrinter);
 
         ClassVisitor classPoolFiller =
-            new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
+            new ClassPresenceFilter(appView.programClassPool, duplicateClassPrinter,
             new MultiClassVisitor(
-                new ClassPoolFiller(programClassPool),
+                new ClassPoolFiller(appView.programClassPool),
                 // Attach the current resource name, if any, to any program classes that it visits.
                 new ProgramClassFilter(clazz -> clazz.setFeatureName(featureName))));
 
@@ -113,9 +107,9 @@ public class InputReader
         // Create a visitor and a reader to fill the resource file pool with
         // plain resource file instances (while checking for duplicates).
         ResourceFileVisitor resourceFilePoolFiller =
-            new ResourceFilePresenceFilter(resourceFilePool, duplicateResourceFilePrinter,
+            new ResourceFilePresenceFilter(appView.resourceFilePool, duplicateResourceFilePrinter,
             new MultiResourceFileVisitor(
-                new ResourceFilePoolFiller(resourceFilePool),
+                new ResourceFilePoolFiller(appView.resourceFilePool),
                 new MyResourceFileFeatureNameSetter()));
 
         DataEntryReader resourceReader =
@@ -138,7 +132,7 @@ public class InputReader
                                   resourceReader));
 
         // Check if we have at least some input classes.
-        if (programClassPool.size() == 0)
+        if (appView.programClassPool.size() == 0)
         {
             throw new IOException("The input doesn't contain any classes. Did you specify the proper '-injars' options?");
         }
@@ -162,9 +156,9 @@ public class InputReader
                                       configuration.skipNonPublicLibraryClassMembers,
                                       true,
                                       warningPrinter,
-                      new ClassPresenceFilter(programClassPool, duplicateClassPrinter,
-                      new ClassPresenceFilter(libraryClassPool, duplicateClassPrinter,
-                      new ClassPoolFiller(libraryClassPool))))));
+                      new ClassPresenceFilter(appView.programClassPool, duplicateClassPrinter,
+                      new ClassPresenceFilter(appView.libraryClassPool, duplicateClassPrinter,
+                      new ClassPoolFiller(appView.libraryClassPool))))));
         }
 
         // Print out a summary of the notes, if necessary.
@@ -263,7 +257,7 @@ public class InputReader
         }
         catch (IOException ex)
         {
-            throw (IOException)new IOException("Can't read [" + classPathEntry + "] (" + ex.getMessage() + ")").initCause(ex);
+            throw new IOException("Can't read [" + classPathEntry + "] (" + ex.getMessage() + ")", ex);
         }
     }
 

@@ -99,19 +99,14 @@ public class ConfigurationElement extends FileSet
             {
                 File configurationFile = new File(baseDir, fileNames[index]);
 
-                ConfigurationParser parser =
-                    new ConfigurationParser(configurationFile, properties);
-                try
+                try (ConfigurationParser parser =
+                     new ConfigurationParser(configurationFile, properties))
                 {
                     parser.parse(configuration);
                 }
                 catch (ParseException ex)
                 {
                     throw new BuildException(ex.getMessage());
-                }
-                finally
-                {
-                    parser.close();
                 }
             }
         }

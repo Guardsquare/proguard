@@ -15,13 +15,17 @@ import java.io.StringWriter
 
 fun String.asConfiguration(): Configuration {
     val configuration = Configuration()
-    val parser = ConfigurationParser(this, "test configuration", null, System.getProperties())
-    parser.parse(configuration)
+    ConfigurationParser(this, "test configuration", null, System.getProperties()).use {
+        it.parse(configuration)
+    }
     return configuration
 }
 
 fun Configuration.asString(): String {
     val out = StringWriter()
-    ConfigurationWriter(PrintWriter(out)).write(this)
+    val configuration = Configuration()
+    ConfigurationWriter(PrintWriter(out)).use {
+        it.write(configuration)
+    }
     return out.toString().trim()
 }

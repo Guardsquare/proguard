@@ -1411,8 +1411,7 @@ public abstract class ProGuardTask extends DefaultTask
     // Gradle task execution.
 
     @TaskAction
-    public void proguard()
-    throws ParseException, IOException
+    public void proguard() throws Exception
     {
         // Let the logging manager capture the standard output and errors from
         // ProGuard.
@@ -1430,7 +1429,7 @@ public abstract class ProGuardTask extends DefaultTask
      * Returns the configuration collected so far, resolving files and
      * reading included configurations.
      */
-    private Configuration getConfiguration() throws IOException, ParseException
+    private Configuration getConfiguration() throws Exception
     {
         // Weave the input jars and the output jars into a single class path,
         // with lazy resolution of the files.
