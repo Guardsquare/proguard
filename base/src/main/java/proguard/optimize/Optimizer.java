@@ -37,17 +37,18 @@ import proguard.optimize.evaluation.*;
 import proguard.optimize.evaluation.InstructionUsageMarker;
 import proguard.optimize.info.*;
 import proguard.optimize.peephole.*;
+import proguard.pass.Pass;
 import proguard.util.*;
 
 import java.io.*;
 import java.util.*;
 
 /**
- * This class optimizes class pools according to a given configuration.
+ * This pass optimizes class pools according to a given configuration.
  *
  * @author Eric Lafortune
  */
-public class Optimizer
+public class Optimizer implements Pass
 {
     public  static final boolean DETAILS = System.getProperty("optd") != null;
 
@@ -133,60 +134,65 @@ public class Optimizer
     };
 
 
-    private final Configuration configuration;
-
-    private final boolean libraryGson;
-    private final boolean classMarkingFinal;
-    private final boolean classUnboxingEnum;
-    private final boolean classMergingVertical;
-    private final boolean classMergingHorizontal;
-    private final boolean classMergingWrapper;
-    private final boolean fieldRemovalWriteonly;
-    private final boolean fieldMarkingPrivate;
-    private final boolean fieldGeneralizationClass;
-    private final boolean fieldSpecializationType;
-    private final boolean fieldPropagationValue;
-    private final boolean methodMarkingPrivate;
-    private final boolean methodMarkingStatic;
-    private final boolean methodMarkingFinal;
-    private final boolean methodMarkingSynchronized;
-    private final boolean methodRemovalParameter;
-    private final boolean methodGeneralizationClass;
-    private final boolean methodSpecializationParametertype;
-    private final boolean methodSpecializationReturntype;
-    private final boolean methodPropagationParameter;
-    private final boolean methodPropagationReturnvalue;
-    private final boolean methodInliningShort;
-    private final boolean methodInliningUnique;
-    private final boolean methodInliningTailrecursion;
-    private final boolean codeMerging;
-    private final boolean codeSimplificationVariable;
-    private final boolean codeSimplificationArithmetic;
-    private final boolean codeSimplificationCast;
-    private final boolean codeSimplificationField;
-    private final boolean codeSimplificationBranch;
-    private final boolean codeSimplificationObject;
-    private final boolean codeSimplificationString;
-    private final boolean codeSimplificationMath;
-    private final boolean codeSimplificationPeephole;
-    private       boolean codeSimplificationAdvanced;
-    private       boolean codeRemovalAdvanced;
-    private       boolean codeRemovalSimple;
-    private final boolean codeRemovalVariable;
-    private       boolean codeRemovalException;
-    private final boolean codeAllocationVariable;
+    private boolean libraryGson;
+    private boolean classMarkingFinal;
+    private boolean classUnboxingEnum;
+    private boolean classMergingVertical;
+    private boolean classMergingHorizontal;
+    private boolean classMergingWrapper;
+    private boolean fieldRemovalWriteonly;
+    private boolean fieldMarkingPrivate;
+    private boolean fieldGeneralizationClass;
+    private boolean fieldSpecializationType;
+    private boolean fieldPropagationValue;
+    private boolean methodMarkingPrivate;
+    private boolean methodMarkingStatic;
+    private boolean methodMarkingFinal;
+    private boolean methodMarkingSynchronized;
+    private boolean methodRemovalParameter;
+    private boolean methodGeneralizationClass;
+    private boolean methodSpecializationParametertype;
+    private boolean methodSpecializationReturntype;
+    private boolean methodPropagationParameter;
+    private boolean methodPropagationReturnvalue;
+    private boolean methodInliningShort;
+    private boolean methodInliningUnique;
+    private boolean methodInliningTailrecursion;
+    private boolean codeMerging;
+    private boolean codeSimplificationVariable;
+    private boolean codeSimplificationArithmetic;
+    private boolean codeSimplificationCast;
+    private boolean codeSimplificationField;
+    private boolean codeSimplificationBranch;
+    private boolean codeSimplificationObject;
+    private boolean codeSimplificationString;
+    private boolean codeSimplificationMath;
+    private boolean codeSimplificationPeephole;
+    private boolean codeSimplificationAdvanced;
+    private boolean codeRemovalAdvanced;
+    private boolean codeRemovalSimple;
+    private boolean codeRemovalVariable;
+    private boolean codeRemovalException;
+    private boolean codeAllocationVariable;
 
 
-    /**
-     * Creates a new Optimizer.
-     */
-    public Optimizer(Configuration configuration)
+    // The optimizer uses this field to communicate to its following
+    // invocations that no further optimizations are possible.
+    private boolean moreOptimizationsPossible = true;
+    private int     passIndex = 0;
+
+
+    @Override
+    public void execute(AppView appView) throws IOException
     {
-        this.configuration = configuration;
+        if (!moreOptimizationsPossible)
+        {
+            return;
+        }
 
         // Create a matcher for filtering optimizations.
-        StringMatcher filter = configuration.optimizations != null ?
-            new ListParser(new NameParser()).parse(configuration.optimizations) :
+        StringMatcher filter = appView.configuration.optimizations != null ?
+            new ListParser(new NameParser()).parse(appView.configuration.optimizations) :
             new ConstantMatcher(true);
 
         libraryGson                       = filter.matches(LIBRARY_GSON);
@@ -262,15 +268,27 @@ public class Optimizer
             codeSimplificationMath       ||
             fieldGeneralizationClass     ||
             methodGeneralizationClass;
+
+        optimize(appView.configuration,
+                 appView.programClassPool,
+                 appView.libraryClassPool,
+                 appView.extraDataEntryNameMap);
+
+        passIndex++;
+
+        // Set fields to null so that the Shrinker can be silently run afterwards.
+        appView.configuration.printUsage       = null;
+        appView.configuration.whyAreYouKeeping = null;
     }
 
 
     /**
      * Performs optimization of the given program class pool.
      */
-    public boolean execute(final ClassPool             programClassPool,
-                           final ClassPool             libraryClassPool,
-                           final ExtraDataEntryNameMap extraDataEntryNameMap)
+    private void optimize(Configuration         configuration,
+                          ClassPool             programClassPool,
+                          ClassPool             libraryClassPool,
+                          ExtraDataEntryNameMap extraDataEntryNameMap)
     throws IOException
     {
         // Check if we have at least some keep commands.
@@ -1353,7 +1371,8 @@ public class Optimizer
                             new InstructionSequenceConstants(programClassPool,
                                                              libraryClassPool);
 
-                        List<InstructionVisitor> peepholeOptimizations = createPeepholeOptimizations(sequences,
+                        List<InstructionVisitor> peepholeOptimizations = createPeepholeOptimizations(configuration,
+                                                                                 sequences,
                                                                                  branchTargetFinder,
                                                                                  codeAttributeEditor,
                                                                                  codeSimplificationVariableCounter,
@@ -1549,7 +1568,8 @@ public class Optimizer
             System.out.println("  Number of optimized local variable frames:     " + codeAllocationVariableCount            + disabled(codeAllocationVariable));
         }
 
-        return classMarkingFinalCount                 > 0 ||
+        moreOptimizationsPossible =
+               classMarkingFinalCount                 > 0 ||
                classUnboxingEnumCount                 > 0 ||
                classMergingVerticalCount              > 0 ||
                classMergingHorizontalCount            > 0 ||
@@ -1590,7 +1610,8 @@ public class Optimizer
     }
 
 
-    private List<InstructionVisitor> createPeepholeOptimizations(InstructionSequenceConstants sequences,
+    private List<InstructionVisitor> createPeepholeOptimizations(Configuration configuration,
+                                             InstructionSequenceConstants sequences,
                                              BranchTargetFinder           branchTargetFinder,
                                              CodeAttributeEditor          codeAttributeEditor,
                                              InstructionCounter           codeSimplificationVariableCounter,

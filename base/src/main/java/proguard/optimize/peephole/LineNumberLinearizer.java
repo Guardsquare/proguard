@@ -20,15 +20,17 @@
  */
 package proguard.optimize.peephole;
 
+import proguard.AppView;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.visitor.*;
+import proguard.pass.Pass;
 
 import java.util.*;
 
 /**
- * This ClassVisitor disambiguates line numbers, in the classes that it
+ * This pass disambiguates line numbers, in the classes that it
  * visits. It shifts line numbers that originate from different classes
  * (e.g. due to method inlining or class merging) to blocks that don't
  * overlap with the main line numbers and with each other. The line numbers
@@ -37,7 +39,8 @@ import java.util.*;
  * @author Eric Lafortune
  */
 public class LineNumberLinearizer
-implements   ClassVisitor,
+implements   Pass,
+             ClassVisitor,
              MemberVisitor,
              AttributeVisitor,
              LineNumberInfoVisitor
@@ -53,6 +56,16 @@ implements   ClassVisitor,
     private int            highestUsedLineNumber;
     private int            currentLineNumberShift;
 
+
+    /**
+     * Disambiguates the line numbers of all program classes, after
+     * optimizations like method inlining and class merging.
+     */
+    @Override
+    public void execute(AppView appView)
+    {
+        appView.programClassPool.classesAccept(this);
+    }
 
     // Implementations for ClassVisitor.
 

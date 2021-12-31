@@ -177,27 +177,7 @@ public class ProGuard
 
             if (configuration.optimize)
             {
-                for (int optimizationPass = 0;
-                     optimizationPass < configuration.optimizationPasses;
-                     optimizationPass++)
-                {
-                    if (!optimize(optimizationPass+1, configuration.optimizationPasses))
-                    {
-                        // Stop optimizing if the code doesn't improve any further.
-                        break;
-                    }
-
-                    // Shrink again, if we may.
-                    if (configuration.shrink)
-                    {
-                        // Don't print any usage this time around.
-                        configuration.printUsage       = null;
-                        configuration.whyAreYouKeeping = null;
-
-                        shrink();
-                    }
-                }
-
+                optimize();
                 linearizeLineNumbers();
             }
 
@@ -494,18 +474,36 @@ public class ProGuard
     /**
      * Performs the optimization step.
      */
-    private boolean optimize(int currentPass,
-                             int maxPasses) throws IOException
+    private void optimize() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Optimizing (pass " + currentPass + "/" + maxPasses + ")...");
-        }
+        Optimizer optimizer = new Optimizer();
 
-        // Perform the actual optimization.
-        return new Optimizer(appView.configuration).execute(appView.programClassPool,
-                             appView.libraryClassPool,
-                             appView.extraDataEntryNameMap);
+        for (int optimizationPass = 0; optimizationPass < appView.configuration.optimizationPasses; optimizationPass++)
+        {
+            if (appView.configuration.verbose)
+            {
+                System.out.println("Optimizing (pass " + (optimizationPass + 1) + "/" + appView.configuration.optimizationPasses + ")...");
+            }
+
+            // Perform the actual optimization.
+            optimizer.execute(appView);
+
+            // Shrink again, if we may.
+            if (appView.configuration.shrink)
+            {
+                shrink();
+            }
+        }
+    }
+
+
+    /**
+     * Disambiguates the line numbers of all program classes, after
+     * optimizations like method inlining and class merging.
+     */
+    private void linearizeLineNumbers()
+    {
+        new LineNumberLinearizer().execute(appView);
     }
 
 
@@ -561,16 +559,6 @@ public class ProGuard
         }
 
         new Targeter(appView.configuration).execute(appView.programClassPool);
-    }
-
-
-    /**
-     * Disambiguates the line numbers of all program classes, after
-     * optimizations like method inlining and class merging.
-     */
-    private void linearizeLineNumbers()
-    {
-        appView.programClassPool.classesAccept(new LineNumberLinearizer());
     }
 
 
