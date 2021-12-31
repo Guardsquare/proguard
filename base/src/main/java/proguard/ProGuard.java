@@ -25,6 +25,7 @@ import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.io.kotlin.KotlinMetadataWriter;
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.pass.PrimitiveArrayConstantIntroducer;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
@@ -163,7 +164,13 @@ public class ProGuard
                 shrink();
             }
 
-            if (configuration.optimize)
+            // Create a matcher for filtering optimizations.
+            StringMatcher filter = configuration.optimizations != null ?
+                new ListParser(new NameParser()).parse(configuration.optimizations) :
+                new ConstantMatcher(true);
+
+            if (configuration.optimize &&
+                filter.matches(Optimizer.LIBRARY_GSON))
             {
                 optimizeGson();
             }
@@ -374,7 +381,16 @@ public class ProGuard
      */
     private void introducePrimitiveArrayConstants()
     {
-        appView.programClassPool.classesAccept(new ArrayInitializationReplacer());
+        new PrimitiveArrayConstantIntroducer().execute(appView);
+    }
+
+
+    /**
+     * Backports java language features to the specified target version.
+     */
+    private void backport() throws Exception
+    {
+        new Backporter().execute(appView);
     }
 
 
@@ -389,63 +405,12 @@ public class ProGuard
 
 
     /**
-     * Backports java language features to the specified target version.
-     */
-    private void backport()
-    {
-        new Backporter(appView.configuration).execute(appView.programClassPool,
-                                                      appView.libraryClassPool,
-                                                      appView.extraDataEntryNameMap);
-    }
-
-
-    /**
      * Adds configuration logging code, providing suggestions on improving
      * the ProGuard configuration.
      */
     private void addConfigurationLogging() throws IOException
     {
-        new ConfigurationLoggingAdder().execute(appView.programClassPool,
-                                                appView.libraryClassPool,
-                                                appView.extraDataEntryNameMap);
-    }
-
-
-    /**
-     * Adapts Kotlin Metadata annotations.
-     */
-    private void keepKotlinMetadata()
-    {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Adapting Kotlin metadata...");
-        }
-
-        WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.out, true));
-
-        ClassCounter counter = new ClassCounter();
-        appView.programClassPool.classesAccept(
-            new ReferencedKotlinMetadataVisitor(
-            new KotlinMetadataWriter(warningPrinter, counter)));
-
-        if (appView.configuration.verbose)
-        {
-            System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
-        }
-    }
-
-
-    /**
-     * Sets that target versions of the program classes.
-     */
-    private void target() throws IOException
-    {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Setting target versions...");
-        }
-
-        new Targeter(appView.configuration).execute(appView.programClassPool);
+        new ConfigurationLoggingAdder().execute(appView);
     }
 
 
@@ -460,17 +425,22 @@ public class ProGuard
             System.out.println("Printing kept classes, fields, and methods...");
         }
 
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.printSeeds);
-        try
+        new SeedPrinter().execute(appView);
+    }
+
+
+    /**
+     * Performs the subroutine inlining step.
+     */
+    private void inlineSubroutines()
+    {
+        if (appView.configuration.verbose)
         {
-            new SeedPrinter(pw).write(appView.configuration,
-                                      appView.programClassPool,
-                                      appView.libraryClassPool);
+            System.out.println("Inlining subroutines...");
         }
-        finally
-        {
-            PrintWriterUtil.closePrintWriter(appView.configuration.printSeeds, pw);
-        }
+
+        // Perform the actual inlining.
+        new SubroutineInliner().execute(appView);
     }
 
 
@@ -497,24 +467,7 @@ public class ProGuard
         }
 
         // Perform the actual shrinking.
-        new Shrinker(appView.configuration).execute(appView.programClassPool,
-                                                    appView.libraryClassPool,
-                                                    appView.resourceFilePool);
-    }
-
-
-    /**
-     * Performs the subroutine inlining step.
-     */
-    private void inlineSubroutines()
-    {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Inlining subroutines...");
-        }
-
-        // Perform the actual inlining.
-        new SubroutineInliner(appView.configuration).execute(appView.programClassPool);
+        new Shrinker().execute(appView);
     }
 
 
@@ -525,10 +478,7 @@ public class ProGuard
     {
         // Do we have Gson code?
         // Is Gson optimization enabled?
-        if (appView.programClassPool.getClass("com/google/gson/Gson") != null &&
-            (appView.configuration.optimizations == null ||
-             new ListParser(new NameParser()).parse(appView.configuration.optimizations)
-                 .matches(Optimizer.LIBRARY_GSON)))
+        if (appView.programClassPool.getClass("com/google/gson/Gson") != null)
         {
             if (appView.configuration.verbose)
             {
@@ -536,10 +486,7 @@ public class ProGuard
             }
 
             // Perform the Gson optimization.
-            new GsonOptimizer().execute(appView.programClassPool,
-                                        appView.libraryClassPool,
-                                        appView.extraDataEntryNameMap,
-                                        appView.configuration);
+            new GsonOptimizer().execute(appView);
         }
     }
 
@@ -576,6 +523,44 @@ public class ProGuard
         new Obfuscator(appView.configuration).execute(appView.programClassPool,
                                                       appView.libraryClassPool,
                                                       appView.resourceFilePool);
+    }
+
+
+    /**
+     * Adapts Kotlin Metadata annotations.
+     */
+    private void keepKotlinMetadata()
+    {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Adapting Kotlin metadata...");
+        }
+
+        WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.out, true));
+
+        ClassCounter counter = new ClassCounter();
+        appView.programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                        new KotlinMetadataWriter(warningPrinter, counter)));
+
+        if (appView.configuration.verbose)
+        {
+            System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
+        }
+    }
+
+
+    /**
+     * Sets that target versions of the program classes.
+     */
+    private void target() throws IOException
+    {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Setting target versions...");
+        }
+
+        new Targeter(appView.configuration).execute(appView.programClassPool);
     }
 
 

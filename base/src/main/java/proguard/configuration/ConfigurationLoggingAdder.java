@@ -21,6 +21,7 @@
 package proguard.configuration;
 
 
+import proguard.AppView;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
@@ -38,6 +39,7 @@ import proguard.classfile.visitor.MultiClassVisitor;
 import proguard.io.ClassPathDataEntry;
 import proguard.io.ClassReader;
 import proguard.io.ExtraDataEntryNameMap;
+import proguard.pass.Pass;
 import proguard.util.ProcessingFlagSetter;
 import proguard.util.ProcessingFlags;
 
@@ -46,29 +48,28 @@ import java.io.IOException;
 import static proguard.configuration.ConfigurationLoggingInstructionSequenceConstants.*;
 
 /**
- * This class can add configuration debug logging code to all code that
+ * This pass can add configuration debug logging code to all code that
  * relies on reflection. The added code prints suggestions on which keep
  * rules to add to ensure the reflection code will continue working after
  * obfuscation and shrinking.
  *
  * @author Johan Leys
  */
-public class ConfigurationLoggingAdder
+public class ConfigurationLoggingAdder implements Pass
 {
     /**
      * Instruments the given program class pool.
      */
-    public void execute(ClassPool programClassPool,
-                        ClassPool libraryClassPool,
-                        ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
+    @Override
+    public void execute(AppView appView) throws IOException
     {
         // Load the logging utility classes in the program class pool.
         // TODO: The initialization could be incomplete if the loaded classes depend on one another.
         ClassReader classReader =
             new ClassReader(false, false, false, false, null,
             new MultiClassVisitor(
-                new ClassPoolFiller(programClassPool),
-                new ClassReferenceInitializer(programClassPool, libraryClassPool),
+                new ClassPoolFiller(appView.programClassPool),
+                new ClassReferenceInitializer(appView.programClassPool, appView.libraryClassPool),
                 new ClassSubHierarchyInitializer(),
                 new ProcessingFlagSetter(ProcessingFlags.INJECTED
             )));
@@ -78,12 +79,12 @@ public class ConfigurationLoggingAdder
         classReader.read(new ClassPathDataEntry(ConfigurationLogger.class));
 
         // Initialize the ConfigurationLogger class with the actual packageName.
-        initializeConfigurationLogger(programClassPool);
+        initializeConfigurationLogger(appView.programClassPool);
 
         // Set up the instruction sequences and their replacements.
         ConfigurationLoggingInstructionSequenceConstants constants =
-             new ConfigurationLoggingInstructionSequenceConstants(programClassPool,
-                                                                  libraryClassPool);
+             new ConfigurationLoggingInstructionSequenceConstants(appView.programClassPool,
+                                                                  appView.libraryClassPool);
 
         BranchTargetFinder  branchTargetFinder  = new BranchTargetFinder();
         CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
@@ -91,7 +92,7 @@ public class ConfigurationLoggingAdder
         // Replace the instruction sequences in all classes.
         // Do not add configuration debugging to any ProGuard runtime classes,
         // to avoid false positives.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
             new AllMethodVisitor(
             new AllAttributeVisitor(
@@ -100,7 +101,7 @@ public class ConfigurationLoggingAdder
                                                                  constants.RESOURCE,
                                                                  branchTargetFinder,
                                                                  codeAttributeEditor,
-                                                                 new ExtraClassAdder(extraDataEntryNameMap)))))));
+                                                                 new ExtraClassAdder(appView.extraDataEntryNameMap)))))));
     }
 
 

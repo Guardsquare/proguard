@@ -20,38 +20,28 @@
  */
 package proguard.preverify;
 
-import proguard.Configuration;
+import proguard.AppView;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.visitor.*;
+import proguard.pass.Pass;
 
 /**
- * This class can inline subroutines in methods. This is generally useful (i.e.
+ * This pass can inline subroutines in methods. This is generally useful (i.e.
  * required) for preverifying code.
  *
  * @author Eric Lafortune
  */
-public class SubroutineInliner
+public class SubroutineInliner implements Pass
 {
-    private final Configuration configuration;
-
-
-    /**
-     * Creates a new SubroutineInliner.
-     */
-    public SubroutineInliner(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-
     /**
      * Performs subroutine inlining of the given program class pool.
      */
-    public void execute(ClassPool programClassPool)
+    @Override
+    public void execute(AppView appView)
     {
         // Clean up any old processing info.
-        programClassPool.classesAccept(new ClassCleaner());
+        appView.programClassPool.classesAccept(new ClassCleaner());
 
         // Inline all subroutines.
         ClassVisitor inliner =
@@ -61,14 +51,14 @@ public class SubroutineInliner
 
         // In Java Standard Edition, only class files from Java 6 or higher
         // should be preverified.
-        if (!configuration.microEdition &&
-            !configuration.android)
+        if (!appView.configuration.microEdition &&
+            !appView.configuration.android)
         {
             inliner =
                 new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_6,
                                        inliner);
         }
 
-        programClassPool.classesAccept(inliner);
+        appView.programClassPool.classesAccept(inliner);
     }
 }

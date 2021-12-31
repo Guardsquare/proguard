@@ -20,72 +20,68 @@
  */
 package proguard;
 
-import proguard.classfile.ClassPool;
 import proguard.classfile.visitor.*;
 import proguard.optimize.*;
+import proguard.pass.Pass;
+import proguard.util.PrintWriterUtil;
 
 import java.io.*;
 
 /**
- * This class prints out the seeds specified by keep options.
+ * This pass prints out the seeds specified by keep options.
  *
  * @author Eric Lafortune
  */
-public class SeedPrinter
+public class SeedPrinter implements Pass
 {
-    private final PrintWriter printWriter;
-
-
-    /**
-     * Creates a new ConfigurationWriter that prints to the given writer.
-     */
-    public SeedPrinter(PrintWriter printWriter) throws IOException
-    {
-        this.printWriter = printWriter;
-    }
-
-
     /**
      * Prints out the seeds for the classes in the given program class pool.
-     * @param configuration the configuration containing the keep options.
+     *
      * @throws IOException if an IO error occurs while writing the configuration.
      */
-    public void write(Configuration configuration,
-                      ClassPool     programClassPool,
-                      ClassPool     libraryClassPool) throws IOException
+    @Override
+    public void execute(AppView appView) throws IOException
     {
-        // Check if we have at least some keep commands.
-        if (configuration.keep == null)
+        PrintWriter printWriter = PrintWriterUtil.createPrintWriterOut(appView.configuration.printSeeds);
+
+        try
         {
-            throw new IOException("You have to specify '-keep' options if you want to write out kept elements with '-printseeds'.");
+            // Check if we have at least some keep commands.
+            if (appView.configuration.keep == null) {
+                throw new IOException("You have to specify '-keep' options if you want to write out kept elements with '-printseeds'.");
+            }
+
+            // Clean up any old processing info.
+            appView.programClassPool.classesAccept(new ClassCleaner());
+            appView.libraryClassPool.classesAccept(new ClassCleaner());
+
+            // Create a visitor for printing out the seeds. We're  printing out
+            // the program elements that are preserved against shrinking,
+            // optimization, or obfuscation.
+            KeepMarker keepMarker = new KeepMarker();
+            ClassPoolVisitor classPoolvisitor =
+                    new KeepClassSpecificationVisitorFactory(true, true, true)
+                        .createClassPoolVisitor(appView.configuration.keep,
+                                                keepMarker,
+                                                keepMarker,
+                                                keepMarker,
+                                                null);
+
+            // Mark the seeds.
+            appView.programClassPool.accept(classPoolvisitor);
+            appView.libraryClassPool.accept(classPoolvisitor);
+
+            // Print out the seeds.
+            SimpleClassPrinter printer = new SimpleClassPrinter(false, printWriter);
+            appView.programClassPool.classesAcceptAlphabetically(
+                new MultiClassVisitor(
+                    new KeptClassFilter(printer),
+                    new AllMemberVisitor(new KeptMemberFilter(printer))
+                ));
         }
-
-        // Clean up any old processing info.
-        programClassPool.classesAccept(new ClassCleaner());
-        libraryClassPool.classesAccept(new ClassCleaner());
-
-        // Create a visitor for printing out the seeds. We're  printing out
-        // the program elements that are preserved against shrinking,
-        // optimization, or obfuscation.
-        KeepMarker keepMarker = new KeepMarker();
-        ClassPoolVisitor classPoolvisitor =
-            new KeepClassSpecificationVisitorFactory(true, true, true)
-                .createClassPoolVisitor(configuration.keep,
-                                        keepMarker,
-                                        keepMarker,
-                                        keepMarker,
-                                        null);
-
-        // Mark the seeds.
-        programClassPool.accept(classPoolvisitor);
-        libraryClassPool.accept(classPoolvisitor);
-
-        // Print out the seeds.
-        SimpleClassPrinter printer = new SimpleClassPrinter(false, printWriter);
-        programClassPool.classesAcceptAlphabetically(
-            new MultiClassVisitor(
-                new KeptClassFilter(printer),
-                new AllMemberVisitor(new KeptMemberFilter(printer))
-            ));
+        finally
+        {
+            PrintWriterUtil.closePrintWriter(appView.configuration.printSeeds, printWriter);
+        }
     }
 }
