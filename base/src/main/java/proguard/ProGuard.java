@@ -21,8 +21,6 @@
 package proguard;
 
 import proguard.backport.Backporter;
-import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.io.kotlin.KotlinMetadataWriter;
@@ -324,6 +322,15 @@ public class ProGuard
 
 
     /**
+     * Clears any JSE preverification information from the program classes.
+     */
+    private void clearPreverification()
+    {
+        new PreverificationClearer().execute(appView);
+    }
+
+
+    /**
      * Initializes the cross-references between all classes, performs some
      * basic checks, and shrinks the library class pool.
      */
@@ -334,9 +341,7 @@ public class ProGuard
             System.out.println("Initializing...");
         }
 
-        new Initializer(appView.configuration).execute(appView.programClassPool,
-                                                       appView.libraryClassPool,
-                                                       appView.resourceFilePool);
+        new Initializer().execute(appView);
     }
 
 
@@ -351,8 +356,7 @@ public class ProGuard
             System.out.println("Marking classes and class members to be kept...");
         }
 
-        new Marker(appView.configuration).mark(appView.programClassPool,
-                                               appView.libraryClassPool);
+        new Marker().execute(appView);
     }
 
 
@@ -361,9 +365,7 @@ public class ProGuard
      */
     private void stripKotlinMetadataAnnotations()
     {
-        new KotlinAnnotationStripper().execute(appView.configuration,
-                                               appView.programClassPool,
-                                               appView.libraryClassPool);
+        new KotlinAnnotationStripper().execute(appView);
     }
 
 
@@ -594,19 +596,6 @@ public class ProGuard
     {
         appView.programClassPool.classesAccept(new AllAttributeVisitor(true,
                                        new LineNumberTableAttributeTrimmer()));
-    }
-
-
-    /**
-     * Clears any JSE preverification information from the program classes.
-     */
-    private void clearPreverification()
-    {
-        appView.programClassPool.classesAccept(
-            new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_6,
-            new AllMethodVisitor(
-            new AllAttributeVisitor(
-            new NamedAttributeDeleter(Attribute.STACK_MAP_TABLE)))));
     }
 
 

@@ -7,8 +7,7 @@
 
 package proguard.strip;
 
-import proguard.Configuration;
-import proguard.classfile.ClassPool;
+import proguard.AppView;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.Annotation;
@@ -21,24 +20,26 @@ import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.kotlin.visitor.KotlinMetadataRemover;
 import proguard.classfile.kotlin.visitor.filter.KotlinClassFilter;
 import proguard.classfile.visitor.*;
+import proguard.pass.Pass;
 import proguard.util.ProcessingFlagSetter;
 import proguard.util.ProcessingFlags;
 
 import static proguard.util.ProcessingFlags.*;
 
 /**
- * This class aggressively strips the kotlin.Metadata annotation from classes. We only keep 
+ * This pass aggressively strips the kotlin.Metadata annotation from classes. We only keep
  * the metadata for classes/members if the class isn't processed in any way.
  *
  * @author James Hamilton
  */
-public class KotlinAnnotationStripper
+public class KotlinAnnotationStripper implements Pass
 {
     private static final boolean DEBUG = false;
 
-    public void execute(Configuration configuration, ClassPool programClassPool, ClassPool libraryClassPool)
+    @Override
+    public void execute(AppView appView)
     {
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("Removing @kotlin.Metadata annotation where not kept...");
         }
@@ -73,10 +74,10 @@ public class KotlinAnnotationStripper
                 // (e.g. if originally the member was kept but class wasn't).
                 new KotlinClassFilter(new ProcessingFlagSetter(ProcessingFlags.DONT_OPTIMIZE)));
 
-        programClassPool.classesAccept(kotlinAnnotationStripperVisitor);
-        libraryClassPool.classesAccept(kotlinAnnotationStripperVisitor);
+        appView.programClassPool.classesAccept(kotlinAnnotationStripperVisitor);
+        appView.libraryClassPool.classesAccept(kotlinAnnotationStripperVisitor);
 
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("  Original number of classes with @kotlin.Metadata:            " + originalCounter.getCount());
             System.out.println("  Final number of classes with @kotlin.Metadata:               " + (originalCounter.getCount() - kotlinAnnotationStripper.getCount()));
