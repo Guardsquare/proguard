@@ -32,14 +32,14 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
     private ProgramClass lambdaGroup = new ProgramClass();
     private ClassBuilder classBuilder;
     private LambdaGroupInvokeCodeBuilder invokeCodeBuilder;
-    private ClassPool programClassPool;
-    private ClassPool libraryClassPool;
+    private final ClassPool programClassPool;
+    private final ClassPool libraryClassPool;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaClassMerger.class);
 
-    public KotlinLambdaClassMerger(ClassPool        programClassPool,
-                                   ClassPool        libraryClassPool,
-                                   ClassVisitor lambdaGroupVisitor,
+    public KotlinLambdaClassMerger(final ClassPool             programClassPool,
+                                   final ClassPool             libraryClassPool,
+                                   final ClassVisitor          lambdaGroupVisitor,
                                    final ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool = programClassPool;
