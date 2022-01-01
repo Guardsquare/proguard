@@ -154,19 +154,9 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
 
     @Override
     public void visitProgramClass(ProgramClass lambdaClass) {
-        // the bridge method has descriptor "()Ljava/lang/Object;"
-        // but for now: only consider lambda's with "void invoke()"
-        logger.info("Visiting lambda {}", lambdaClass.getName());
-        Method returnVoidInvoke = lambdaClass.findMethod("invoke", "()V");
-        /*if (returnVoidInvoke == null)
-        {
-            logger.info("{} does not contain an invoke()V method.", lambdaClass.getName());
-            return;
-        }*/
-
         logger.info("Adding lambda {} to lambda group {}", lambdaClass.getName(), lambdaGroup.getName());
 
-        ProgramMethod copiedMethod = copyLambdaInvokeToLambdaGroup(lambdaClass, returnVoidInvoke);
+        ProgramMethod copiedMethod = copyLambdaInvokeToLambdaGroup(lambdaClass);
         boolean copiedMethodHasReturnValue = !copiedMethod.getDescriptor(this.lambdaGroup).endsWith(")V");
 
         // create a new case in the switch that calls the copied invoke method
@@ -193,7 +183,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId);
     }
 
-    private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass, Method returnVoidInvoke)
+    private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass)
     {
         logger.info("Copying invoke method of {} to lambda group {}", lambdaClass.getName(), this.lambdaGroup.getName());
 
