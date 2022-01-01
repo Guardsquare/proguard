@@ -61,7 +61,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
         this.classBuilder = new ClassBuilder(VersionConstants.CLASS_VERSION_1_8,
                                              AccessConstants.PUBLIC,
                                              lambdaGroupName,
-                                             ClassConstants.NAME_KOTLIN_LAMBDA);
+                                             KotlinLambdaMerger.NAME_KOTLIN_LAMBDA);
         this.lambdaGroup = classBuilder.getProgramClass();
         this.classBuilder = new ClassBuilder(this.lambdaGroup,
                                              this.programClassPool,
@@ -73,7 +73,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
                                 this.libraryClassPool));
 
         // let the lambda group implement Function0
-        classBuilder.addInterface(ClassConstants.NAME_KOTLIN_FUNCTION0);
+        classBuilder.addInterface(KotlinLambdaMerger.NAME_KOTLIN_FUNCTION0);
 
         // add a classId field to the lambda group
         ProgramField classIdField = classBuilder.addAndReturnField(AccessConstants.PRIVATE, "classId", "I");
@@ -92,7 +92,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
                                         .putfield(lambdaGroup, classIdField) // store the id in a field
                                         .aload_0() // load this class
                                         .iconst_0() // push 0 on stack
-                                        .invokespecial(ClassConstants.NAME_KOTLIN_LAMBDA,
+                                        .invokespecial(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA,
                                                        ClassConstants.METHOD_NAME_INIT,
                                                        "(I)V")
                                         .return_();
@@ -136,7 +136,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
                         .dup()
                         .iconst_0()
                         .invokespecial(this.lambdaGroup, initMethod)
-                        .invokeinterface(ClassConstants.NAME_KOTLIN_FUNCTION0, "invoke", "()Ljava/lang/Object;")
+                        .invokeinterface(KotlinLambdaMerger.NAME_KOTLIN_FUNCTION0, "invoke", "()Ljava/lang/Object;")
                         .return_());
     }
 
