@@ -428,7 +428,8 @@ public class ProGuard
     private void mergeKotlinLambdaClasses() throws IOException {
         programClassPool = new KotlinLambdaMerger(configuration).execute(programClassPool,
                                                                          libraryClassPool,
-                                                                         resourceFilePool);
+                                                                         resourceFilePool,
+                                                                         extraDataEntryNameMap);
     }
 
 
