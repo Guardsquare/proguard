@@ -29,7 +29,6 @@ import java.util.List;
 public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
 
     private final ClassVisitor lambdaGroupVisitor;
-    private ProgramMethod invokeMethod = new ProgramMethod();
     private ProgramClass lambdaGroup = new ProgramClass();
     private ClassBuilder classBuilder;
     private LambdaGroupInvokeCodeBuilder invokeCodeBuilder;
@@ -105,7 +104,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
         lambdaClassPool.classesAccept(this);
 
         // add an invoke method
-        this.invokeMethod = classBuilder.addAndReturnMethod(AccessConstants.PUBLIC,
+        ProgramMethod invokeMethod = classBuilder.addAndReturnMethod(AccessConstants.PUBLIC,
                                                             "invoke",
                                                             "()Ljava/lang/Object;",
                                                             50,
