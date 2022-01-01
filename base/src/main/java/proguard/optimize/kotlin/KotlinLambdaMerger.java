@@ -66,8 +66,6 @@ public class KotlinLambdaMerger {
                              final ResourceFilePool resourceFilePool,
                              final ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
-        // A class pool where the applicable lambda's will be stored
-        ClassPool lambdaClassPool = new ClassPool();
 
         // get the Lambda class and the Function0 interface
         Clazz kotlinLambdaClass = getKotlinLambdaClass(programClassPool, libraryClassPool);
@@ -80,17 +78,47 @@ public class KotlinLambdaMerger {
         }
 
         if (kotlinLambdaClass != null && kotlinFunction0Interface != null) {
+            // A class pool where the applicable lambda's will be stored
+            ClassPool lambdaClassPool = new ClassPool();
+            ClassPool newProgramClassPool = new ClassPool();
+            ClassPoolFiller newProgramClassPoolFiller = new ClassPoolFiller(newProgramClassPool);
             // find all lambda classes of arity 0 and with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
             programClassPool.classesAccept(new ImplementedClassFilter(kotlinFunction0Interface, false,
                                            new ImplementedClassFilter(kotlinLambdaClass, false,
-                                           new ClassMethodFilter("<init>", "()V",
-                                           new ClassPoolFiller(lambdaClassPool), null), null), null)
+                                           new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
+                                           new ClassPoolFiller(lambdaClassPool),
+                                           newProgramClassPoolFiller),
+                                           newProgramClassPoolFiller),
+                                           newProgramClassPoolFiller)
             );
 
+            // group the lambda's per package
+            PackageGrouper packageGrouper = new PackageGrouper();
+            lambdaClassPool.classesAccept(packageGrouper);
+            ClassPool lambdaGroupClassPool = new ClassPool();
 
+            // merge the lambda's per package
+            packageGrouper.packagesAccept(new KotlinLambdaClassMerger(
+                                          programClassPool,
+                                          libraryClassPool,
+                                          new MultiClassVisitor(
+                                          new ClassPoolFiller(lambdaGroupClassPool),
+                                          newProgramClassPoolFiller),
+                                          extraDataEntryNameMap));
 
+            // initialise the super classes of the newly created lambda groups
+            ClassSubHierarchyInitializer hierarchyInitializer = new ClassSubHierarchyInitializer();
+            newProgramClassPool.accept(hierarchyInitializer);
+
+            logger.info("{} lambda class(es) found.", lambdaClassPool.size());
+            logger.info("{} lambda group(s) created.", lambdaGroupClassPool.size());
+            logger.info("#lambda groups/#lambda classes ratio = {}/{} = {}%", lambdaGroupClassPool.size(), lambdaClassPool.size(), 100 * lambdaGroupClassPool.size() / lambdaClassPool.size());
+            logger.info("Size of original program class pool: {}", programClassPool.size());
+            logger.info("Size of new program class pool: {}", newProgramClassPool.size());
+
+            return newProgramClassPool;
         }
         return programClassPool;
     }
