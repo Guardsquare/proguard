@@ -61,9 +61,10 @@ public class KotlinLambdaMerger {
         this.configuration = configuration;
     }
 
-    public ClassPool execute(ClassPool        programClassPool,
-                             ClassPool        libraryClassPool,
-                             ResourceFilePool resourceFilePool) throws IOException
+    public ClassPool execute(final ClassPool        programClassPool,
+                             final ClassPool        libraryClassPool,
+                             final ResourceFilePool resourceFilePool,
+                             final ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
         // A class pool where the applicable lambda's will be stored
         ClassPool lambdaClassPool = new ClassPool();
