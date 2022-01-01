@@ -73,10 +73,10 @@ public class KotlinLambdaMerger {
         Clazz kotlinLambdaClass = getKotlinLambdaClass(programClassPool, libraryClassPool);
         Clazz kotlinFunction0Interface = getKotlinFunction0Interface(programClassPool, libraryClassPool);
         if (kotlinLambdaClass == null) {
-            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", KOTLIN_LAMBDA_CLASS);
+            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", NAME_KOTLIN_LAMBDA);
         }
         if (kotlinFunction0Interface == null) {
-            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", KOTLIN_FUNCTION0_INTERFACE);
+            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", NAME_KOTLIN_FUNCTION0);
         }
 
         if (kotlinLambdaClass != null && kotlinFunction0Interface != null) {
@@ -97,18 +97,18 @@ public class KotlinLambdaMerger {
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
     {
-        Clazz kotlinLambdaClass = programClassPool.getClass(KOTLIN_LAMBDA_CLASS);
+        Clazz kotlinLambdaClass = programClassPool.getClass(NAME_KOTLIN_LAMBDA);
         if (kotlinLambdaClass == null) {
-            kotlinLambdaClass = libraryClassPool.getClass(KOTLIN_LAMBDA_CLASS);
+            kotlinLambdaClass = libraryClassPool.getClass(NAME_KOTLIN_LAMBDA);
         }
         return kotlinLambdaClass;
     }
 
     private Clazz getKotlinFunction0Interface(ClassPool programClassPool, ClassPool libraryClassPool)
     {
-        Clazz kotlinFunction0Interface = programClassPool.getClass(KOTLIN_FUNCTION0_INTERFACE);
+        Clazz kotlinFunction0Interface = programClassPool.getClass(NAME_KOTLIN_FUNCTION0);
         if (kotlinFunction0Interface == null) {
-            kotlinFunction0Interface = libraryClassPool.getClass(KOTLIN_FUNCTION0_INTERFACE);
+            kotlinFunction0Interface = libraryClassPool.getClass(NAME_KOTLIN_FUNCTION0);
         }
         return kotlinFunction0Interface;
     }
