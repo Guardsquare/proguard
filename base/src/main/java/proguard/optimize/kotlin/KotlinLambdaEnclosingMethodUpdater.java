@@ -210,8 +210,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
          */
 
         // note offset of this instruction, so it can be replaced later
-        logger.info("ConstantInstruction {}", constantInstruction);
-        logger.info("Lambda constant index: {}", this.lambdaConstantIndex);
+        //logger.info("ConstantInstruction {}", constantInstruction);
+        //logger.info("Lambda constant index: {}", this.lambdaConstantIndex);
         if (constantReferencesClass(enclosingClass.getConstant(constantInstruction.constantIndex), this.currentLambdaClass))
         {
             this.offsetsWhereLambdaIsReferenced.add(offset);
@@ -255,7 +255,7 @@ class ClassConstantFinder implements ConstantVisitor
     @Override
     public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
     {
-        logger.info("Visiting class constant {}, referencing class {}", classConstant, classConstant.referencedClass);
+        //logger.info("Visiting class constant {}, referencing class {}", classConstant, classConstant.referencedClass);
         if (classConstant.referencedClass == this.classToBeFound || Objects.equals(classConstant.referencedClass.getName(), this.classToBeFound.getName()))
         {
             this.classFound = true;
