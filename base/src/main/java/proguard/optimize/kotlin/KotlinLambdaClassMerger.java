@@ -207,7 +207,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
     {
         // Assuming that all specific invoke methods have been inlined into the bridge invoke methods
         // we can take the bridge invoke method (which returns an Object)
-        ProgramMethod bridgeInvokeMethod = lambdaClass.findMethod("invoke", "()Ljava/lang/Object;");
+        ProgramMethod bridgeInvokeMethod = (ProgramMethod)lambdaClass.findMethod("invoke", "()Ljava/lang/Object;");
         /*
         for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++) {
             ProgramMethod method = lambdaClass.methods[methodIndex];
