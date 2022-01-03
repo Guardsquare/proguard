@@ -126,7 +126,7 @@ class KotlinLambdaMergerTest : FreeSpec({
                 programClassPool.size() shouldBeGreaterThanOrEqual newProgramClassPool.size()
             }
 
-            "Then the program classes should only refer to classes that are longer in the class pool" {
+            "Then the program classes should only refer to classes that are in the class pool" {
                 val visitor = mockk<ConstantVisitor>()
                 val slot = slot<ClassConstant>()
                 every {
