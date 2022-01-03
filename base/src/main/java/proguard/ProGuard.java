@@ -21,18 +21,15 @@
 package proguard;
 
 import proguard.backport.Backporter;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.io.kotlin.KotlinMetadataWriter;
-import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.classfile.pass.PrimitiveArrayConstantIntroducer;
 import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
 import proguard.mark.Marker;
 import proguard.obfuscate.Obfuscator;
+import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
 import proguard.optimize.peephole.LineNumberLinearizer;
@@ -188,7 +185,7 @@ public class ProGuard
 
             if (configuration.keepKotlinMetadata)
             {
-                keepKotlinMetadata();
+                adaptKotlinMetadata();
             }
 
             if (configuration.optimize ||
@@ -375,16 +372,6 @@ public class ProGuard
 
 
     /**
-     * Expands primitive array constants back to traditional primitive array
-     * initialization code.
-     */
-    private void expandPrimitiveArrayConstants()
-    {
-        appView.programClassPool.classesAccept(new PrimitiveArrayConstantReplacer());
-    }
-
-
-    /**
      * Adds configuration logging code, providing suggestions on improving
      * the ProGuard configuration.
      */
@@ -525,24 +512,19 @@ public class ProGuard
     /**
      * Adapts Kotlin Metadata annotations.
      */
-    private void keepKotlinMetadata()
+    private void adaptKotlinMetadata()
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Adapting Kotlin metadata...");
-        }
+        new KotlinMetadataAdapter().execute(appView);
+    }
 
-        WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.out, true));
 
-        ClassCounter counter = new ClassCounter();
-        appView.programClassPool.classesAccept(
-                new ReferencedKotlinMetadataVisitor(
-                        new KotlinMetadataWriter(warningPrinter, counter)));
-
-        if (appView.configuration.verbose)
-        {
-            System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
-        }
+    /**
+     * Expands primitive array constants back to traditional primitive array
+     * initialization code.
+     */
+    private void expandPrimitiveArrayConstants()
+    {
+        appView.programClassPool.classesAccept(new PrimitiveArrayConstantReplacer());
     }
 
 
@@ -556,17 +538,7 @@ public class ProGuard
             System.out.println("Setting target versions...");
         }
 
-        new Targeter(appView.configuration).execute(appView.programClassPool);
-    }
-
-
-    /**
-     * Trims the line number table attributes of all program classes.
-     */
-    private void trimLineNumbers()
-    {
-        appView.programClassPool.classesAccept(new AllAttributeVisitor(true,
-                                       new LineNumberTableAttributeTrimmer()));
+        new Targeter().execute(appView);
     }
 
 
@@ -581,7 +553,16 @@ public class ProGuard
         }
 
         // Perform the actual preverification.
-        new Preverifier(appView.configuration).execute(appView.programClassPool);
+        new Preverifier().execute(appView);
+    }
+
+
+    /**
+     * Trims the line number table attributes of all program classes.
+     */
+    private void trimLineNumbers()
+    {
+        new LineNumberTrimmer().execute(appView);
     }
 
 
@@ -605,32 +586,21 @@ public class ProGuard
         }
 
         // Write out the program class pool.
-        new OutputWriter(appView.configuration).execute(appView.programClassPool,
-                                                        appView.initialStateInfo,
-                                                        appView.resourceFilePool,
-                                                        appView.extraDataEntryNameMap);
+        new OutputWriter().execute(appView);
     }
 
 
     /**
      * Prints out the contents of the program classes.
      */
-    private void dump() throws IOException
+    private void dump() throws Exception
     {
         if (appView.configuration.verbose)
         {
             System.out.println("Printing classes to [" + PrintWriterUtil.fileName(appView.configuration.dump) + "]...");
         }
 
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.dump);
-        try
-        {
-            appView.programClassPool.classesAccept(new ClassPrinter(pw));
-        }
-        finally
-        {
-            PrintWriterUtil.closePrintWriter(appView.configuration.dump, pw);
-        }
+        new Dumper().execute(appView);
     }
 
 

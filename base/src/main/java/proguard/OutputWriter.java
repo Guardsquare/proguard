@@ -27,6 +27,7 @@ import proguard.classfile.util.ClassUtil;
 import proguard.configuration.ConfigurationLogger;
 import proguard.configuration.InitialStateInfo;
 import proguard.io.*;
+import proguard.pass.Pass;
 import proguard.resources.file.ResourceFilePool;
 import proguard.resources.file.util.ResourceFilePoolNameFunction;
 import proguard.resources.kotlinmodule.io.KotlinModuleDataEntryWriter;
@@ -34,56 +35,42 @@ import proguard.util.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
 /**
- * This class writes the output class files and resource files, packaged in
+ * This pass writes the output class files and resource files, packaged in
  * jar files, etc, if required.
  *
  * @author Eric Lafortune
  */
-public class OutputWriter
+public class OutputWriter implements Pass
 {
-    private final Configuration configuration;
-
-
-    /**
-     * Creates a new OutputWriter to write output class files as specified by
-     * the given configuration.
-     */
-    public OutputWriter(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-
     /**
      * Writes the given class pool to class files, based on the current
      * configuration.
      */
-    public void execute(ClassPool             programClassPool,
-                        InitialStateInfo      initialStateInfo,
-                        ResourceFilePool      resourceFilePool,
-                        ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
+    @Override
+    public void execute(AppView appView) throws IOException
     {
-        if (configuration.addConfigurationDebugging)
+        if (appView.configuration.addConfigurationDebugging)
         {
             System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
             System.err.println("It should only be used for debugging purposes.");
         }
 
-        ClassPath programJars = configuration.programJars;
+        ClassPath programJars = appView.configuration.programJars;
 
         // Construct a filter for files that shouldn't be compressed.
         StringMatcher uncompressedFilter =
-            configuration.dontCompress == null ? null :
-                new ListParser(new FileNameParser()).parse(configuration.dontCompress);
+            appView.configuration.dontCompress == null ? null :
+                new ListParser(new FileNameParser()).parse(appView.configuration.dontCompress);
 
         // Get the private key from the key store.
         KeyStore.PrivateKeyEntry[] privateKeyEntries =
-            retrievePrivateKeys(configuration);
+            retrievePrivateKeys(appView.configuration);
 
         // Convert the current time into DOS date and time.
         Date currentDate = new Date();
@@ -97,24 +84,24 @@ public class OutputWriter
 
         // Create a main data entry writer factory for all nested archives.
         DataEntryWriterFactory dataEntryWriterFactory =
-            new DataEntryWriterFactory(programClassPool,
-                                       resourceFilePool,
+            new DataEntryWriterFactory(appView.programClassPool,
+                                       appView.resourceFilePool,
                                        modificationTime,
                                        uncompressedFilter,
-                                       configuration.zipAlign,
-                                       configuration.android, //resourceInfo.pageAlignNativeLibs,
-                                       configuration.obfuscate,
+                                       appView.configuration.zipAlign,
+                                       appView.configuration.android, //resourceInfo.pageAlignNativeLibs,
+                                       appView.configuration.obfuscate,
                                        privateKeyEntries,
-                                       configuration.verbose);
+                                       appView.configuration.verbose);
 
         DataEntryWriter extraDataEntryWriter = null;
-        if (configuration.extraJar != null)
+        if (appView.configuration.extraJar != null)
         {
             // Extra data entries can optionally be written to a separate jar file.
             // This prevents duplicates if there are multiple -outjars that are later
             // combined together, after ProGuard processing.
             ClassPath extraClassPath = new ClassPath();
-            extraClassPath.add(new ClassPathEntry(configuration.extraJar, true));
+            extraClassPath.add(new ClassPathEntry(appView.configuration.extraJar, true));
             extraDataEntryWriter =
                     new UniqueDataEntryWriter(
                     dataEntryWriterFactory.createDataEntryWriter(extraClassPath, 0, 1, null));
@@ -143,16 +130,17 @@ public class OutputWriter
                 {
                     // Write the processed input entries to the output entries.
                     writeOutput(dataEntryWriterFactory,
-                                programClassPool,
-                                initialStateInfo,
-                                resourceFilePool,
+                                appView.configuration,
+                                appView.programClassPool,
+                                appView.initialStateInfo,
+                                appView.resourceFilePool,
                                 extraDataEntryWriter != null ?
                                         // The extraDataEntryWriter must be remain open
                                         // until all outputs have been written.
                                         new NonClosingDataEntryWriter(extraDataEntryWriter) :
                                         // no extraDataEntryWriter supplied
                                         null,
-                                extraDataEntryNameMap,
+                                appView.extraDataEntryNameMap,
                                 programJars,
                                 firstInputIndex,
                                 lastInputIndex + 1,
@@ -190,28 +178,6 @@ public class OutputWriter
             keyAliases        == null ||
             keyPasswords      == null)
         {
-            // Print a note if any of the signing parameters have been
-            // specified.
-            if ((keyStoreFiles     != null ||
-                 keyStorePasswords != null ||
-                 keyAliases        != null ||
-                 keyPasswords      != null) &&
-                (configuration.note == null ||
-                 !configuration.note.isEmpty()))
-            {
-                StringBuffer missing   = new StringBuffer();
-                StringBuffer specified = new StringBuffer();
-
-                (keyStoreFiles     == null ? missing : specified).append("a key store file, ");
-                (keyStorePasswords == null ? missing : specified).append("a key store password, ");
-                (keyAliases        == null ? missing : specified).append("a key alias, ");
-                (keyPasswords      == null ? missing : specified).append("a key password, ");
-
-                System.out.println("Note: you've specified "+specified.toString());
-                System.out.println("      but not "+missing.substring(0, missing.length()-2)+".");
-                System.out.println("      You should specify the missing parameters to sign the output jars.");
-            }
-
             return null;
         }
 
@@ -224,7 +190,7 @@ public class OutputWriter
            KeyStore.PrivateKeyEntry[] privateKeys =
                new KeyStore.PrivateKeyEntry[keyCount];
 
-           Map certificates = new HashMap(keyCount);
+           Map<X509Certificate, Integer> certificates = new HashMap<>(keyCount);
 
            for (int index = 0; index < keyCount; index++)
            {
@@ -243,10 +209,10 @@ public class OutputWriter
                // Check if the certificate accidentally is a duplicate,
                // to avoid basic configuration errors.
                X509Certificate certificate    = (X509Certificate)privateKeyEntry.getCertificate();
-               Integer         duplicateIndex = (Integer)certificates.put(certificate, Integer.valueOf(index));
+               Integer         duplicateIndex = certificates.put(certificate, index);
                if (duplicateIndex != null)
                {
-                   throw new IllegalArgumentException("Duplicate specified signing certificates #"+(duplicateIndex.intValue()+1)+" and #"+(index+1)+" out of "+keyCount+" ["+certificate.getSubjectDN().getName()+"]");
+                   throw new IllegalArgumentException("Duplicate specified signing certificates #" + (duplicateIndex + 1) + " and #" + (index + 1) + " out of " + keyCount + " [" + certificate.getSubjectDN().getName() + "]");
                }
 
                // Add the private key to the list.
@@ -257,7 +223,7 @@ public class OutputWriter
        }
        catch (Exception e)
        {
-           throw (IOException)new IOException("Can't sign jar ("+e.getMessage()+")", e);
+           throw new IOException("Can't sign jar ("+e.getMessage()+")", e);
         }
     }
 
@@ -295,6 +261,7 @@ public class OutputWriter
      * Transfers the specified input jars to the specified output jars.
      */
     private void writeOutput(DataEntryWriterFactory dataEntryWriterFactory,
+                             Configuration          configuration,
                              ClassPool              programClassPool,
                              InitialStateInfo       initialStateInfo,
                              ResourceFilePool       resourceFilePool,
@@ -366,7 +333,8 @@ public class OutputWriter
                 if (configuration.obfuscate)
                 {
                     adaptingContentWriter =
-                        adaptResourceFiles(programClassPool,
+                        adaptResourceFiles(configuration,
+                                           programClassPool,
                                            resourceWriter);
                 }
 
@@ -379,13 +347,15 @@ public class OutputWriter
 
             // Write any kept directories.
             DataEntryReader reader =
-                writeDirectories(programClassPool,
+                writeDirectories(configuration,
+                                 programClassPool,
                                  resourceCopier,
                                  resourceRewriter);
 
             // Write extra configuration files.
             reader =
-                writeExtraConfigurationFiles(programClassPool,
+                writeExtraConfigurationFiles(configuration,
+                                             programClassPool,
                                              initialStateInfo,
                                              extraDataEntryNameMap,
                                              reader,
@@ -415,7 +385,8 @@ public class OutputWriter
         }
         catch (IOException ex)
         {
-            throw (IOException)new IOException("Can't write [" + classPath.get(fromOutputIndex).getName() + "] (" + ex.getMessage() + ")").initCause(ex);
+            String message = "Can't write [" + classPath.get(fromOutputIndex).getName() + "] (" + ex.getMessage() + ")";
+            throw new IOException(message, ex);
         }
     }
 
@@ -423,7 +394,8 @@ public class OutputWriter
      * Returns a resource writer that writes all extra configuration files to the given extra writer,
      * and delegates all other resources to the given resource writer.
      */
-    private DataEntryReader writeExtraConfigurationFiles(ClassPool             programClassPool,
+    private DataEntryReader writeExtraConfigurationFiles(Configuration         configuration,
+                                                         ClassPool             programClassPool,
                                                          InitialStateInfo      initialStateInfo,
                                                          ExtraDataEntryNameMap extraDataEntryNameMap,
                                                          DataEntryReader       resourceCopier,
@@ -463,12 +435,13 @@ public class OutputWriter
      * native libraries, text files) with shrunk, optimized, and obfuscated
      * contents to the given writer.
      */
-    private DataEntryReader adaptResourceFiles(ClassPool       programClassPool,
+    private DataEntryReader adaptResourceFiles(Configuration   configuration,
+                                               ClassPool       programClassPool,
                                                DataEntryWriter writer)
     {
         // Pick a suitable encoding.
         Charset charset = configuration.android ?
-            Charset.forName("UTF-8") :
+            StandardCharsets.UTF_8 :
             Charset.defaultCharset();
 
         // Filter between the various general resource files.
@@ -483,7 +456,8 @@ public class OutputWriter
      * Writes possibly renamed directories that should be preserved to the
      * given resource copier, and non-directories to the given file copier.
      */
-    private DirectoryFilter writeDirectories(ClassPool       programClassPool,
+    private DirectoryFilter writeDirectories(Configuration   configuration,
+                                             ClassPool       programClassPool,
                                              DataEntryReader directoryCopier,
                                              DataEntryReader fileCopier)
     {
@@ -511,17 +485,17 @@ public class OutputWriter
      * Creates a map of old package prefixes to new package prefixes, based on
      * the given class pool.
      */
-    private static Map createPackagePrefixMap(ClassPool classPool)
+    private static Map<String, String> createPackagePrefixMap(ClassPool classPool)
     {
-        Map packagePrefixMap = new HashMap();
+        Map<String, String> packagePrefixMap = new HashMap<>();
 
-        Iterator iterator = classPool.classNames();
+        Iterator<String> iterator = classPool.classNames();
         while (iterator.hasNext())
         {
-            String className     = (String)iterator.next();
+            String className     = iterator.next();
             String packagePrefix = ClassUtil.internalPackagePrefix(className);
 
-            String mappedNewPackagePrefix = (String)packagePrefixMap.get(packagePrefix);
+            String mappedNewPackagePrefix = packagePrefixMap.get(packagePrefix);
             if (mappedNewPackagePrefix == null ||
                 !mappedNewPackagePrefix.equals(packagePrefix))
             {

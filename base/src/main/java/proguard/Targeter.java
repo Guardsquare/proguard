@@ -20,42 +20,30 @@
  */
 package proguard;
 
-import proguard.classfile.ClassPool;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.ClassVersionSetter;
+import proguard.pass.Pass;
 
 import java.io.IOException;
 import java.util.*;
 
 /**
- * This class sets the target version on program classes.
+ * This pass sets the target version on program classes.
  *
  * @author Eric Lafortune
  */
-public class Targeter
+public class Targeter implements Pass
 {
-    private final Configuration configuration;
-
-
-    /**
-     * Creates a new Targeter to set the target version on program classes
-     * according to the given configuration.
-     */
-    public Targeter(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-
     /**
      * Sets the target version on classes in the given program class pool.
      */
-    public void execute(ClassPool programClassPool) throws IOException
+    @Override
+    public void execute(AppView appView) throws IOException
     {
-        Set newerClassVersions = configuration.warn != null ? null : new HashSet();
+        Set newerClassVersions = appView.configuration.warn != null ? null : new HashSet();
 
-        programClassPool.classesAccept(new ClassVersionSetter(configuration.targetClassVersion,
-                                                              newerClassVersions));
+        appView.programClassPool.classesAccept(new ClassVersionSetter(appView.configuration.targetClassVersion,
+                                                                      newerClassVersions));
 
         if (newerClassVersions != null &&
             newerClassVersions.size() > 0)
@@ -66,7 +54,7 @@ public class Targeter
             while (iterator.hasNext())
             {
                 Integer classVersion = (Integer)iterator.next();
-                System.err.print(ClassUtil.externalClassVersion(classVersion.intValue()));
+                System.err.print(ClassUtil.externalClassVersion(classVersion));
 
                 if (iterator.hasNext())
                 {
@@ -75,9 +63,9 @@ public class Targeter
             }
 
             System.err.println(")");
-            System.err.println("         than the target version ("+ClassUtil.externalClassVersion(configuration.targetClassVersion)+").");
+            System.err.println("         than the target version ("+ClassUtil.externalClassVersion(appView.configuration.targetClassVersion)+").");
 
-            if (!configuration.ignoreWarnings)
+            if (!appView.configuration.ignoreWarnings)
             {
                 System.err.println("         If you are sure this is not a problem,");
                 System.err.println("         you could try your luck using the '-ignorewarnings' option.");

@@ -20,49 +20,39 @@
  */
 package proguard.preverify;
 
-import proguard.Configuration;
+import proguard.AppView;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.visitor.*;
+import proguard.pass.Pass;
 
 /**
- * This class can preverify methods in program class pools, according to a given
+ * This pass can preverify methods in program class pools, according to a given
  * configuration.
  *
  * @author Eric Lafortune
  */
-public class Preverifier
+public class Preverifier implements Pass
 {
-    private final Configuration configuration;
-
-
-    /**
-     * Creates a new Preverifier.
-     */
-    public Preverifier(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-
     /**
      * Performs preverification of the given program class pool.
      */
-    public void execute(ClassPool programClassPool)
+    @Override
+    public void execute(AppView appView)
     {
         // Clean up any old processing info.
-        programClassPool.classesAccept(new ClassCleaner());
+        appView.programClassPool.classesAccept(new ClassCleaner());
 
         // Preverify all methods.
         // Classes for JME must be preverified.
         // Classes for JSE 6 may optionally be preverified.
         // Classes for JSE 7 or higher must be preverified.
-        programClassPool.classesAccept(
-            new ClassVersionFilter(configuration.microEdition ?
+        appView.programClassPool.classesAccept(
+            new ClassVersionFilter(appView.configuration.microEdition ?
                                        VersionConstants.CLASS_VERSION_1_0 :
                                        VersionConstants.CLASS_VERSION_1_6,
             new AllMethodVisitor(
             new AllAttributeVisitor(
-            new CodePreverifier(configuration.microEdition)))));
+            new CodePreverifier(appView.configuration.microEdition)))));
     }
 }
