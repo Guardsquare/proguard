@@ -12,6 +12,7 @@ import proguard.classfile.constant.Constant;
 import proguard.classfile.constant.visitor.ConstantTagFilter;
 import proguard.classfile.instruction.visitor.AllInstructionVisitor;
 import proguard.classfile.instruction.visitor.InstructionConstantVisitor;
+import proguard.classfile.*;
 import proguard.classfile.util.ClassSubHierarchyInitializer;
 import proguard.classfile.util.ClassSuperHierarchyInitializer;
 import proguard.classfile.visitor.*;
@@ -21,9 +22,11 @@ import proguard.optimize.TimedClassPoolVisitor;
 import proguard.optimize.info.OptimizationCodeAttributeFilter;
 import proguard.optimize.info.ParameterUsageMarker;
 import proguard.optimize.peephole.MethodInliner;
+import proguard.optimize.*;
 import proguard.resources.file.ResourceFilePool;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class KotlinLambdaMerger {
 
@@ -97,6 +100,11 @@ public class KotlinLambdaMerger {
             // group the lambda's per package
             PackageGrouper packageGrouper = new PackageGrouper();
             lambdaClassPool.classesAccept(packageGrouper);
+
+            // let the method inliner inline the specific invoke methods into the bridge methods
+            inlineLambdaInvokeMethods(programClassPool, libraryClassPool, lambdaClassPool);
+            //lambdaClassPool.classesAccept(new ClassPrinter());
+
             ClassPool lambdaGroupClassPool = new ClassPool();
 
             // merge the lambda's per package
@@ -107,6 +115,8 @@ public class KotlinLambdaMerger {
                                           new ClassPoolFiller(lambdaGroupClassPool),
                                           newProgramClassPoolFiller),
                                           extraDataEntryNameMap));
+
+            inlineLambdaGroupInvokeMethods(newProgramClassPool, libraryClassPool, lambdaGroupClassPool);
 
             // initialise the super classes of the newly created lambda groups
             ClassSubHierarchyInitializer hierarchyInitializer = new ClassSubHierarchyInitializer();
@@ -139,5 +149,31 @@ public class KotlinLambdaMerger {
             kotlinFunction0Interface = libraryClassPool.getClass(NAME_KOTLIN_FUNCTION0);
         }
         return kotlinFunction0Interface;
+    }
+
+    private void inlineLambdaInvokeMethods(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaClassPool)
+    {
+        // Make the non-bridge invoke methods private, so they can be inlined.
+        lambdaClassPool.classesAccept(new AllMethodVisitor(
+                new MemberVisitor() {
+                    @Override
+                    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
+                        if ((programMethod.u2accessFlags & AccessConstants.BRIDGE) == 0)
+                        {
+                            if (Objects.equals(programMethod.getName(programClass), "invoke"))
+                            {
+                                programMethod.u2accessFlags &= ~AccessConstants.PUBLIC;
+                                programMethod.u2accessFlags |= AccessConstants.PRIVATE;
+                            }
+                        }
+                    }
+                }
+        ));
+        lambdaClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
+    }
+
+    private void inlineLambdaGroupInvokeMethods(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
+    {
+        lambdaGroupClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
     }
 }
