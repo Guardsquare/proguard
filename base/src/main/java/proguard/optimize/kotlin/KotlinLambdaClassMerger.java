@@ -188,8 +188,9 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
 
         // Note: the lambda class is expected to containt two invoke methods:
         //      - a bridge method that implements invoke()Ljava/lang/Object; for the Function0 interface
-        //      - a specific method that contains the implementation of the lambda, of which the
-        // Assumption: the specific invoke method is found before the
+        //      - a specific method that contains the implementation of the lambda
+        // Assumption: the specific invoke method has been inlined into the bridge invoke method, such that
+        // copying the bridge method to the lambda group is sufficient to retrieve the full implementation
         ProgramMethod invokeMethod = getInvokeMethod(lambdaClass);
         String newMethodName = lambdaClass.getName().substring(lambdaClass.getName().lastIndexOf("/") + 1) + "$invoke";
         invokeMethod.accept(lambdaClass, new MethodCopier(this.lambdaGroup, newMethodName));
