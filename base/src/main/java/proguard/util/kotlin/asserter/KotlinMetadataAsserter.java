@@ -21,10 +21,12 @@
 
 package proguard.util.kotlin.asserter;
 
+import proguard.AppView;
 import proguard.classfile.*;
 import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.classfile.kotlin.visitor.*;
 import proguard.classfile.util.WarningPrinter;
+import proguard.pass.Pass;
 import proguard.resources.file.*;
 import proguard.resources.file.visitor.*;
 import proguard.resources.kotlinmodule.KotlinModule;
@@ -32,12 +34,13 @@ import proguard.resources.kotlinmodule.visitor.KotlinModuleVisitor;
 import proguard.util.*;
 import proguard.util.kotlin.asserter.constraint.*;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
- * This class performs a series of checks to see whether the kotlin metadata is intact.
+ * This pass performs a series of checks to see whether the kotlin metadata is intact.
  */
-public class KotlinMetadataAsserter
+public class KotlinMetadataAsserter implements Pass
 {
     // This is the list of constraints that will be checked using this asserter.
     private static final List<KotlinAsserterConstraint> DEFAULT_CONSTRAINTS = Arrays.asList(
@@ -55,17 +58,21 @@ public class KotlinMetadataAsserter
         new KotlinModuleIntegrity()
     );
 
-    public void execute(ClassPool programClassPool, ClassPool libraryClassPool, ResourceFilePool resourceFilePool, WarningPrinter warningPrinter)
+    @Override
+    public void execute(AppView appView)
     {
+        PrintWriter    err            = new PrintWriter(System.err, true);
+        WarningPrinter warningPrinter = new WarningPrinter(err, appView.configuration.warn);
+
         Reporter reporter = new DefaultReporter(warningPrinter);
         MyKotlinMetadataAsserter kotlinMetadataAsserter = new MyKotlinMetadataAsserter(reporter, DEFAULT_CONSTRAINTS);
 
         reporter.setErrorMessage("Warning: Kotlin metadata errors encountered in %s. Not processing the metadata for this class.");
-        programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
-        libraryClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
+        appView.programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
+        appView.libraryClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
 
         reporter.setErrorMessage("Warning: Kotlin module errors encountered in module %s. Not processing the metadata for this module.");
-        resourceFilePool.resourceFilesAccept(
+        appView.resourceFilePool.resourceFilesAccept(
             new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE, kotlinMetadataAsserter));
     }
 

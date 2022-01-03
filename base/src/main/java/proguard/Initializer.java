@@ -304,11 +304,7 @@ public class Initializer implements Pass
 
             if (appView.configuration.enableKotlinAsserter)
             {
-                new KotlinMetadataAsserter()
-                    .execute(appView.programClassPool,
-                             appView.libraryClassPool,
-                             appView.resourceFilePool,
-                             kotlinInitializationWarningPrinter);
+                new KotlinMetadataAsserter().execute(appView);
             }
         }
 

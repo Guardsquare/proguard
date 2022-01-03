@@ -34,7 +34,7 @@ import proguard.classfile.visitor.*;
 import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
 import proguard.obfuscate.kotlin.*;
 import proguard.obfuscate.util.InstructionSequenceObfuscator;
-import proguard.resources.file.ResourceFilePool;
+import proguard.pass.Pass;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
 import proguard.util.*;
 import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
@@ -43,36 +43,23 @@ import java.io.*;
 import java.util.*;
 
 /**
- * This class can perform obfuscation of class pools according to a given
+ * This pass can perform obfuscation of class pools according to a given
  * specification.
  *
  * @author Eric Lafortune
  */
-public class Obfuscator
+public class Obfuscator implements Pass
 {
-    private final Configuration configuration;
-
-
-    /**
-     * Creates a new Obfuscator.
-     */
-    public Obfuscator(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-
     /**
      * Performs obfuscation of the given program class pool.
      */
-    public void execute(ClassPool        programClassPool,
-                        ClassPool        libraryClassPool,
-                        ResourceFilePool resourceFilePool) throws IOException
+    @Override
+    public void execute(AppView appView) throws IOException
     {
         // Check if we have at least some keep commands.
-        if (configuration.keep         == null &&
-            configuration.applyMapping == null &&
-            configuration.printMapping == null)
+        if (appView.configuration.keep         == null &&
+            appView.configuration.applyMapping == null &&
+            appView.configuration.printMapping == null)
         {
             throw new IOException("You have to specify '-keep' options for the obfuscation step.");
         }
@@ -83,33 +70,33 @@ public class Obfuscator
         PrintWriter err = new PrintWriter(System.err, true);
 
         // Clean up any old processing info.
-        programClassPool.classesAccept(new ClassCleaner());
-        libraryClassPool.classesAccept(new ClassCleaner());
+        appView.programClassPool.classesAccept(new ClassCleaner());
+        appView.libraryClassPool.classesAccept(new ClassCleaner());
 
         // Link all non-private, non-static methods in all class hierarchies.
         ClassVisitor memberInfoLinker =
             new BottomClassFilter(new MethodLinker());
 
-        programClassPool.classesAccept(memberInfoLinker);
-        libraryClassPool.classesAccept(memberInfoLinker);
+        appView.programClassPool.classesAccept(memberInfoLinker);
+        appView.libraryClassPool.classesAccept(memberInfoLinker);
 
         // If the class member names have to correspond globally,
         // additionally link all class members in all program classes.
-        if (configuration.useUniqueClassMemberNames)
+        if (appView.configuration.useUniqueClassMemberNames)
         {
-            programClassPool.classesAccept(new AllMemberVisitor(
-                                           new MethodLinker()));
+            appView.programClassPool.classesAccept(new AllMemberVisitor(
+                                                   new MethodLinker()));
         }
 
         // Create a visitor for marking the seeds.
         NameMarker nameMarker = new NameMarker();
 
         // All library classes and library class members keep their names.
-        libraryClassPool.classesAccept(nameMarker);
-        libraryClassPool.classesAccept(new AllMemberVisitor(nameMarker));
+        appView.libraryClassPool.classesAccept(nameMarker);
+        appView.libraryClassPool.classesAccept(new AllMemberVisitor(nameMarker));
 
         // Mark classes that have the DONT_OBFUSCATE flag set.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new MultiClassVisitor(
                 new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
                 nameMarker),
@@ -122,7 +109,7 @@ public class Obfuscator
         // interfaces with LambdaMetafactory.altMetafactory).
         // The functional method names have to match the names in the
         // dynamic method invocations with LambdaMetafactory.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_7,
             new AllAttributeVisitor(
             new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS,
@@ -140,7 +127,7 @@ public class Obfuscator
         // interfaces that are returned by dynamic method invocations.
         // The functional method names have to match the names in the
         // dynamic method invocations with LambdaMetafactory.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_7,
             new AllConstantVisitor(
             new DynamicReturnedClassVisitor(
@@ -150,9 +137,9 @@ public class Obfuscator
             new MemberAccessFilter(AccessConstants.ABSTRACT, 0,
             nameMarker))))))));
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 // Keep Kotlin default implementations class where the user had already kept the interface.
                 new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
                 new ReferencedKotlinMetadataVisitor(new KotlinInterfaceToDefaultImplsClassVisitor(nameMarker))));
@@ -164,40 +151,40 @@ public class Obfuscator
             new AttributeUsageMarker());
 
         AttributeVisitor optionalAttributeUsageMarker =
-            configuration.keepAttributes == null ? null :
-                new AttributeNameFilter(configuration.keepAttributes,
+            appView.configuration.keepAttributes == null ? null :
+                new AttributeNameFilter(appView.configuration.keepAttributes,
                                         attributeUsageMarker);
 
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new AllAttributeVisitor(true,
             new RequiredAttributeFilter(attributeUsageMarker,
                                         optionalAttributeUsageMarker)));
 
         // Keep parameter names and types if specified.
-        if (configuration.keepParameterNames)
+        if (appView.configuration.keepParameterNames)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new AllMethodVisitor(
                 new NewMemberNameFilter(
                 new AllAttributeVisitor(true,
                 new ParameterNameMarker(attributeUsageMarker)))));
 
-            if (configuration.keepKotlinMetadata)
+            if (appView.configuration.keepKotlinMetadata)
             {
-                programClassPool.classesAccept(
+                appView.programClassPool.classesAccept(
                     new ReferencedKotlinMetadataVisitor(
                     new KotlinValueParameterUsageMarker()));
             }
         }
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new KotlinValueParameterNameShrinker()));
 
             // Keep SourceDebugExtension annotations on Kotlin synthetic classes but obfuscate them.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new KotlinSyntheticClassKindFilter(
                     KotlinSyntheticClassKindFilter::isLambda,
@@ -211,35 +198,35 @@ public class Obfuscator
         // Remove the attributes that can be discarded. Note that the attributes
         // may only be discarded after the seeds have been marked, since the
         // configuration may rely on annotations.
-        programClassPool.classesAccept(new AttributeShrinker());
+        appView.programClassPool.classesAccept(new AttributeShrinker());
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new KotlinAnnotationFlagFixer()));
         }
 
         // Apply the mapping, if one has been specified. The mapping can
         // override the names of library classes and of library class members.
-        if (configuration.applyMapping != null)
+        if (appView.configuration.applyMapping != null)
         {
-            if (configuration.verbose)
+            if (appView.configuration.verbose)
             {
                 out.println("Applying mapping from [" +
-                            PrintWriterUtil.fileName(configuration.applyMapping) +
+                            PrintWriterUtil.fileName(appView.configuration.applyMapping) +
                             "]...");
             }
 
-            WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+            WarningPrinter warningPrinter = new WarningPrinter(err, appView.configuration.warn);
 
-            MappingReader reader = new MappingReader(configuration.applyMapping);
+            MappingReader reader = new MappingReader(appView.configuration.applyMapping);
 
             MappingProcessor keeper =
                 new MultiMappingProcessor(new MappingProcessor[]
                 {
-                    new MappingKeeper(programClassPool, warningPrinter),
-                    new MappingKeeper(libraryClassPool, null),
+                    new MappingKeeper(appView.programClassPool, warningPrinter),
+                    new MappingKeeper(appView.libraryClassPool, null),
                 });
 
             reader.pump(keeper);
@@ -252,7 +239,7 @@ public class Obfuscator
                             " kept classes and class members that were remapped anyway.");
                 err.println("         You should adapt your configuration or edit the mapping file.");
 
-                if (!configuration.ignoreWarnings)
+                if (!appView.configuration.ignoreWarnings)
                 {
                     err.println("         If you are sure this remapping won't hurt,");
                     err.println("         you could try your luck using the '-ignorewarnings' option.");
@@ -260,7 +247,7 @@ public class Obfuscator
 
                 err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict1)");
 
-                if (!configuration.ignoreWarnings)
+                if (!appView.configuration.ignoreWarnings)
                 {
                     throw new IOException("Please correct the above warnings first.");
                 }
@@ -268,67 +255,67 @@ public class Obfuscator
         }
 
         // Come up with new names for all classes.
-        DictionaryNameFactory classNameFactory = configuration.classObfuscationDictionary != null ?
-            new DictionaryNameFactory(configuration.classObfuscationDictionary, null) :
+        DictionaryNameFactory classNameFactory = appView.configuration.classObfuscationDictionary != null ?
+            new DictionaryNameFactory(appView.configuration.classObfuscationDictionary, null) :
             null;
 
-        DictionaryNameFactory packageNameFactory = configuration.packageObfuscationDictionary != null ?
-            new DictionaryNameFactory(configuration.packageObfuscationDictionary, null) :
+        DictionaryNameFactory packageNameFactory = appView.configuration.packageObfuscationDictionary != null ?
+            new DictionaryNameFactory(appView.configuration.packageObfuscationDictionary, null) :
             null;
 
-        programClassPool.classesAccept(
-            new ClassObfuscator(programClassPool,
-                                libraryClassPool,
+        appView.programClassPool.classesAccept(
+            new ClassObfuscator(appView.programClassPool,
+                                appView.libraryClassPool,
                                 classNameFactory,
                                 packageNameFactory,
-                                configuration.useMixedCaseClassNames,
-                                configuration.keepPackageNames,
-                                configuration.flattenPackageHierarchy,
-                                configuration.repackageClasses,
-                                configuration.allowAccessModification,
-                                configuration.keepKotlinMetadata));
+                                appView.configuration.useMixedCaseClassNames,
+                                appView.configuration.keepPackageNames,
+                                appView.configuration.flattenPackageHierarchy,
+                                appView.configuration.repackageClasses,
+                                appView.configuration.allowAccessModification,
+                                appView.configuration.keepKotlinMetadata));
 
         // Come up with new names for all class members.
         NameFactory nameFactory = new SimpleNameFactory();
-        if (configuration.obfuscationDictionary != null)
+        if (appView.configuration.obfuscationDictionary != null)
         {
             nameFactory =
-                new DictionaryNameFactory(configuration.obfuscationDictionary,
+                new DictionaryNameFactory(appView.configuration.obfuscationDictionary,
                                           nameFactory);
         }
 
-        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+        WarningPrinter warningPrinter = new WarningPrinter(err, appView.configuration.warn);
 
         // Maintain a map of names to avoid [descriptor - new name - old name].
         Map descriptorMap = new HashMap();
 
         // Do the class member names have to be globally unique?
-        if (configuration.useUniqueClassMemberNames)
+        if (appView.configuration.useUniqueClassMemberNames)
         {
             // Collect all member names in all classes.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new AllMemberVisitor(
-                new MemberNameCollector(configuration.overloadAggressively,
+                new MemberNameCollector(appView.configuration.overloadAggressively,
                                         descriptorMap)));
 
             // Assign new names to all members in all classes.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new AllMemberVisitor(
-                new MemberObfuscator(configuration.overloadAggressively,
+                new MemberObfuscator(appView.configuration.overloadAggressively,
                                      nameFactory,
                                      descriptorMap)));
         }
         else
         {
             // Come up with new names for all non-private class members.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new MultiClassVisitor(
                     // Collect all private member names in this class and down
                     // the hierarchy.
                     new ClassHierarchyTraveler(true, false, false, true,
                     new AllMemberVisitor(
                     new MemberAccessFilter(AccessConstants.PRIVATE, 0,
-                    new MemberNameCollector(configuration.overloadAggressively,
+                    new MemberNameCollector(appView.configuration.overloadAggressively,
                                             descriptorMap)))),
 
                     // Collect all non-private member names anywhere in the
@@ -336,13 +323,13 @@ public class Obfuscator
                     new ClassHierarchyTraveler(true, true, true, true,
                     new AllMemberVisitor(
                     new MemberAccessFilter(0, AccessConstants.PRIVATE,
-                    new MemberNameCollector(configuration.overloadAggressively,
+                    new MemberNameCollector(appView.configuration.overloadAggressively,
                                             descriptorMap)))),
 
                     // Assign new names to all non-private members in this class.
                     new AllMemberVisitor(
                     new MemberAccessFilter(0, AccessConstants.PRIVATE,
-                    new MemberObfuscator(configuration.overloadAggressively,
+                    new MemberObfuscator(appView.configuration.overloadAggressively,
                                          nameFactory,
                                          descriptorMap))),
 
@@ -351,18 +338,18 @@ public class Obfuscator
                 ));
 
             // Come up with new names for all private class members.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new MultiClassVisitor(
                     // Collect all member names in this class.
                     new AllMemberVisitor(
-                    new MemberNameCollector(configuration.overloadAggressively,
+                    new MemberNameCollector(appView.configuration.overloadAggressively,
                                             descriptorMap)),
 
                     // Collect all non-private member names higher up the hierarchy.
                     new ClassHierarchyTraveler(false, true, true, false,
                     new AllMemberVisitor(
                     new MemberAccessFilter(0, AccessConstants.PRIVATE,
-                    new MemberNameCollector(configuration.overloadAggressively,
+                    new MemberNameCollector(appView.configuration.overloadAggressively,
                                             descriptorMap)))),
 
                     // Collect all member names from interfaces of abstract
@@ -375,7 +362,7 @@ public class Obfuscator
                     new ClassAccessFilter(AccessConstants.ABSTRACT, 0,
                     new ClassHierarchyTraveler(false, false, true, false,
                     new AllMemberVisitor(
-                    new MemberNameCollector(configuration.overloadAggressively,
+                    new MemberNameCollector(appView.configuration.overloadAggressively,
                                             descriptorMap))))),
 
                     // Collect all default method names from interfaces of
@@ -387,13 +374,13 @@ public class Obfuscator
                     new ClassHierarchyTraveler(false, false, true, false,
                     new AllMethodVisitor(
                     new MemberAccessFilter(0, AccessConstants.ABSTRACT | AccessConstants.STATIC,
-                    new MemberNameCollector(configuration.overloadAggressively,
+                    new MemberNameCollector(appView.configuration.overloadAggressively,
                                             descriptorMap))))),
 
                     // Assign new names to all private members in this class.
                     new AllMemberVisitor(
                     new MemberAccessFilter(AccessConstants.PRIVATE, 0,
-                    new MemberObfuscator(configuration.overloadAggressively,
+                    new MemberObfuscator(appView.configuration.overloadAggressively,
                                          nameFactory,
                                          descriptorMap))),
 
@@ -411,27 +398,27 @@ public class Obfuscator
         // [descriptor - new name - old name].
         Map specialDescriptorMap = new HashMap();
 
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new AllMemberVisitor(
             new MemberSpecialNameFilter(
-            new MemberNameCollector(configuration.overloadAggressively,
+            new MemberNameCollector(appView.configuration.overloadAggressively,
                                     specialDescriptorMap))));
 
-        libraryClassPool.classesAccept(
+        appView.libraryClassPool.classesAccept(
             new AllMemberVisitor(
             new MemberSpecialNameFilter(
-            new MemberNameCollector(configuration.overloadAggressively,
+            new MemberNameCollector(appView.configuration.overloadAggressively,
                                     specialDescriptorMap))));
 
         // Replace conflicting non-private member names with special names.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new MultiClassVisitor(
                 // Collect all private member names in this class and down
                 // the hierarchy.
                 new ClassHierarchyTraveler(true, false, false, true,
                 new AllMemberVisitor(
                 new MemberAccessFilter(AccessConstants.PRIVATE, 0,
-                new MemberNameCollector(configuration.overloadAggressively,
+                new MemberNameCollector(appView.configuration.overloadAggressively,
                                         descriptorMap)))),
 
                 // Collect all non-private member names in this class and
@@ -439,7 +426,7 @@ public class Obfuscator
                 new ClassHierarchyTraveler(true, true, true, false,
                 new AllMemberVisitor(
                 new MemberAccessFilter(0, AccessConstants.PRIVATE,
-                new MemberNameCollector(configuration.overloadAggressively,
+                new MemberNameCollector(appView.configuration.overloadAggressively,
                                         descriptorMap)))),
 
                 // Assign new names to all conflicting non-private members
@@ -447,10 +434,10 @@ public class Obfuscator
                 new ClassHierarchyTraveler(true, true, true, false,
                 new AllMemberVisitor(
                 new MemberAccessFilter(0, AccessConstants.PRIVATE,
-                new MemberNameConflictFixer(configuration.overloadAggressively,
+                new MemberNameConflictFixer(appView.configuration.overloadAggressively,
                                             descriptorMap,
                                             warningPrinter,
-                new MemberObfuscator(configuration.overloadAggressively,
+                new MemberObfuscator(appView.configuration.overloadAggressively,
                                      specialNameFactory,
                                      specialDescriptorMap))))),
 
@@ -460,28 +447,28 @@ public class Obfuscator
 
         // Replace conflicting private member names with special names.
         // This is only possible if those names were kept or mapped.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new MultiClassVisitor(
                 // Collect all member names in this class.
                 new AllMemberVisitor(
-                new MemberNameCollector(configuration.overloadAggressively,
+                new MemberNameCollector(appView.configuration.overloadAggressively,
                                         descriptorMap)),
 
                 // Collect all non-private member names higher up the hierarchy.
                 new ClassHierarchyTraveler(false, true, true, false,
                 new AllMemberVisitor(
                 new MemberAccessFilter(0, AccessConstants.PRIVATE,
-                new MemberNameCollector(configuration.overloadAggressively,
+                new MemberNameCollector(appView.configuration.overloadAggressively,
                                         descriptorMap)))),
 
                 // Assign new names to all conflicting private members in this
                 // class.
                 new AllMemberVisitor(
                 new MemberAccessFilter(AccessConstants.PRIVATE, 0,
-                new MemberNameConflictFixer(configuration.overloadAggressively,
+                new MemberNameConflictFixer(appView.configuration.overloadAggressively,
                                             descriptorMap,
                                             warningPrinter,
-                new MemberObfuscator(configuration.overloadAggressively,
+                new MemberObfuscator(appView.configuration.overloadAggressively,
                                      specialNameFactory,
                                      specialDescriptorMap)))),
 
@@ -497,7 +484,7 @@ public class Obfuscator
                                " conflicting class member name mappings.");
             err.println("         Your configuration may be inconsistent.");
 
-            if (!configuration.ignoreWarnings)
+            if (!appView.configuration.ignoreWarnings)
             {
                 err.println("         If you are sure the conflicts are harmless,");
                 err.println("         you could try your luck using the '-ignorewarnings' option.");
@@ -505,19 +492,19 @@ public class Obfuscator
 
             err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict2)");
 
-            if (!configuration.ignoreWarnings)
+            if (!appView.configuration.ignoreWarnings)
             {
                 throw new IOException("Please correct the above warnings first.");
             }
         }
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new MultiClassVisitor(
                 // Obfuscate the Intrinsics.check* method calls.
                 new InstructionSequenceObfuscator(
-                    new KotlinIntrinsicsReplacementSequences(programClassPool, libraryClassPool)),
+                    new KotlinIntrinsicsReplacementSequences(appView.programClassPool, appView.libraryClassPool)),
 
                 new ReferencedKotlinMetadataVisitor(
                 new MultiKotlinMetadataVisitor(
@@ -542,7 +529,7 @@ public class Obfuscator
                     // because they contain the original function name in the string.
                     new KotlinFunctionToDefaultMethodVisitor(
                     new InstructionSequenceObfuscator(
-                        new KotlinUnsupportedExceptionReplacementSequences(programClassPool, libraryClassPool)))
+                        new KotlinUnsupportedExceptionReplacementSequences(appView.programClassPool, appView.libraryClassPool)))
                 ),
 
                 // Obfuscate toString methods in data classes.
@@ -551,40 +538,40 @@ public class Obfuscator
                     new KotlinDataClassObfuscator())
             ))));
 
-            resourceFilePool.resourceFilesAccept(
+            appView.resourceFilePool.resourceFilesAccept(
                 new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_OBFUSCATE,
                                                      new KotlinModuleNameObfuscator(nameFactory)));
         }
 
         // Print out the mapping, if requested.
-        if (configuration.printMapping != null)
+        if (appView.configuration.printMapping != null)
         {
-            if (configuration.verbose)
+            if (appView.configuration.verbose)
             {
                 out.println("Printing mapping to [" +
-                            PrintWriterUtil.fileName(configuration.printMapping) +
+                            PrintWriterUtil.fileName(appView.configuration.printMapping) +
                             "]...");
             }
 
             PrintWriter mappingWriter =
-                PrintWriterUtil.createPrintWriter(configuration.printMapping, out);
+                PrintWriterUtil.createPrintWriter(appView.configuration.printMapping, out);
 
             try
             {
                 // Print out items that will be renamed.
-                programClassPool.classesAcceptAlphabetically(
+                appView.programClassPool.classesAcceptAlphabetically(
                     new MappingPrinter(mappingWriter));
             }
             finally
             {
-                PrintWriterUtil.closePrintWriter(configuration.printMapping,
+                PrintWriterUtil.closePrintWriter(appView.configuration.printMapping,
                                                  mappingWriter);
             }
         }
 
-        if (configuration.addConfigurationDebugging)
+        if (appView.configuration.addConfigurationDebugging)
         {
-            programClassPool.classesAccept(new RenamedFlagSetter());
+            appView.programClassPool.classesAccept(new RenamedFlagSetter());
         }
 
         // Collect some statistics about the number of obfuscated
@@ -604,35 +591,35 @@ public class Obfuscator
                 obfuscatedFieldCounter))
             );
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
             // Ensure multi-file parts and facades are in the same package.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new KotlinMultiFileFacadeFixer()));
         }
 
         // Actually apply the new names.
-        programClassPool.classesAccept(classRenamer);
-        libraryClassPool.classesAccept(classRenamer);
+        appView.programClassPool.classesAccept(classRenamer);
+        appView.libraryClassPool.classesAccept(classRenamer);
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
             // Apply new names to Kotlin properties.
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new AllKotlinPropertiesVisitor(
                 new KotlinPropertyRenamer())));
         }
 
         // Update all references to these new names.
-        programClassPool.classesAccept(new ClassReferenceFixer(false));
-        libraryClassPool.classesAccept(new ClassReferenceFixer(false));
-        programClassPool.classesAccept(new MemberReferenceFixer(configuration.android));
+        appView.programClassPool.classesAccept(new ClassReferenceFixer(false));
+        appView.libraryClassPool.classesAccept(new ClassReferenceFixer(false));
+        appView.programClassPool.classesAccept(new MemberReferenceFixer(appView.configuration.android));
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
                 new MultiKotlinMetadataVisitor(
                 new AllTypeVisitor(
@@ -640,21 +627,21 @@ public class Obfuscator
                     new KotlinAliasReferenceFixer()),
 
                 // Fix all the CallableReference interface methods to match the new names.
-                new KotlinCallableReferenceFixer(programClassPool, libraryClassPool))));
+                new KotlinCallableReferenceFixer(appView.programClassPool, appView.libraryClassPool))));
         }
 
         // Make package visible elements public or protected, if obfuscated
         // classes are being repackaged aggressively.
-        if (configuration.repackageClasses != null &&
-            configuration.allowAccessModification)
+        if (appView.configuration.repackageClasses != null &&
+            appView.configuration.allowAccessModification)
         {
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new AccessFixer());
 
             // Fix the access flags of the inner classes information.
             // Don't change the access flags of inner classes that
             // have not been renamed (Guice). [DGD-63]
-            programClassPool.classesAccept(
+            appView.programClassPool.classesAccept(
                 new OriginalClassNameFilter(null,
                 new AllAttributeVisitor(
                 new AllInnerClassesInfoVisitor(
@@ -662,46 +649,46 @@ public class Obfuscator
         }
 
         // Fix the bridge method flags.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new AllMethodVisitor(
             new BridgeMethodFixer()));
 
         // Rename the source file attributes, if requested.
-        if (configuration.newSourceFileAttribute != null)
+        if (appView.configuration.newSourceFileAttribute != null)
         {
-            programClassPool.classesAccept(new SourceFileRenamer(configuration.newSourceFileAttribute));
+            appView.programClassPool.classesAccept(new SourceFileRenamer(appView.configuration.newSourceFileAttribute));
         }
 
         // Remove unused constants.
-        programClassPool.classesAccept(
+        appView.programClassPool.classesAccept(
             new ConstantPoolShrinker());
 
         // Adapt resource file names that correspond to class names, if necessary.
-        if (configuration.adaptResourceFileNames != null)
+        if (appView.configuration.adaptResourceFileNames != null)
         {
-            resourceFilePool.resourceFilesAccept(
-                new ListParser(new FileNameParser()).parse(configuration.adaptResourceFileNames),
-                new ResourceFileNameObfuscator(new ClassNameAdapterFunction(programClassPool), true));
+            appView.resourceFilePool.resourceFilesAccept(
+                new ListParser(new FileNameParser()).parse(appView.configuration.adaptResourceFileNames),
+                new ResourceFileNameObfuscator(new ClassNameAdapterFunction(appView.programClassPool), true));
         }
 
-        if (configuration.verbose)
+        if (appView.configuration.verbose)
         {
             System.out.println("  Number of obfuscated classes:                  " + obfuscatedClassCounter.getCount());
             System.out.println("  Number of obfuscated fields:                   " + obfuscatedFieldCounter.getCount());
             System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
         }
 
-        if (configuration.keepKotlinMetadata)
+        if (appView.configuration.keepKotlinMetadata)
         {
             // Fix the Kotlin modules so the filename matches and the class names match.
-            resourceFilePool.resourceFilesAccept(
+            appView.resourceFilePool.resourceFilesAccept(
                 new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE,
                 new KotlinModuleFixer()));
         }
 
-        if (configuration.keepKotlinMetadata && configuration.enableKotlinAsserter)
+        if (appView.configuration.keepKotlinMetadata && appView.configuration.enableKotlinAsserter)
         {
-            new KotlinMetadataAsserter().execute(programClassPool, libraryClassPool, resourceFilePool, warningPrinter);
+            new KotlinMetadataAsserter().execute(appView);
         }
     }
 }

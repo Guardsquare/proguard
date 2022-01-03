@@ -150,12 +150,7 @@ public class Shrinker implements Pass
 
             if (appView.configuration.enableKotlinAsserter)
             {
-                WarningPrinter warningPrinter = new WarningPrinter(new PrintWriter(System.err, true));
-                new KotlinMetadataAsserter()
-                    .execute(appView.programClassPool,
-                             appView.libraryClassPool,
-                             appView.resourceFilePool,
-                             warningPrinter);
+                new KotlinMetadataAsserter().execute(appView);
             }
         }
 

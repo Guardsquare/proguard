@@ -518,9 +518,7 @@ public class ProGuard
         }
 
         // Perform the actual obfuscation.
-        new Obfuscator(appView.configuration).execute(appView.programClassPool,
-                                                      appView.libraryClassPool,
-                                                      appView.resourceFilePool);
+        new Obfuscator().execute(appView);
     }
 
 
