@@ -1,6 +1,5 @@
 package proguard.optimize.kotlin;
 
-import jdk.internal.reflect.ConstantPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
@@ -24,7 +23,9 @@ import proguard.classfile.visitor.MemberVisitor;
 import proguard.io.ExtraDataEntryNameMap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
 
@@ -35,6 +36,8 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
+    private final Map<String, ProgramClass> lambdasToLambdaGroups = new HashMap<>();
+    private final Map<String, Integer> lambdasToIds = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(KotlinLambdaClassMerger.class);
 
     public KotlinLambdaClassMerger(final ClassPool             programClassPool,
@@ -46,6 +49,16 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
         this.libraryClassPool = libraryClassPool;
         this.lambdaGroupVisitor = lambdaGroupVisitor;
         this.extraDataEntryNameMap = extraDataEntryNameMap;
+    }
+
+    public Map<String, ProgramClass> getLambdaToLambdaGroupMapping()
+    {
+        return lambdasToLambdaGroups;
+    }
+
+    public Map<String, Integer> getLambdaToIdMapping()
+    {
+        return lambdasToIds;
     }
 
     @Override
@@ -180,13 +193,15 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor, ClassVisitor {
         // replace instantiation of lambda class with instantiation of lambda group
         //  with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId);
+        this.lambdasToLambdaGroups.put(lambdaClass.getName(), this.lambdaGroup);
+        this.lambdasToIds.put(lambdaClass.getName(), lambdaClassId);
     }
 
     private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass)
     {
         logger.info("Copying invoke method of {} to lambda group {}", lambdaClass.getName(), this.lambdaGroup.getName());
 
-        // Note: the lambda class is expected to containt two invoke methods:
+        // Note: the lambda class is expected to contain two invoke methods:
         //      - a bridge method that implements invoke()Ljava/lang/Object; for the Function0 interface
         //      - a specific method that contains the implementation of the lambda
         // Assumption: the specific invoke method has been inlined into the bridge invoke method, such that
