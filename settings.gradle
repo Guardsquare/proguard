@@ -20,5 +20,6 @@ include 'gui'
 include 'gradle-plugin'
 include 'ant'
 include 'annotations'
+includeBuild "../proguard-core"
 
 project(':gradle-plugin').name = 'gradle'
