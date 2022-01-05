@@ -97,25 +97,6 @@ class KotlinLambdaMergerTest : FreeSpec({
                                    ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                    ClassPoolFiller(lambdaClassPool), null), null), null))
 
-    "Given a Kotlin Lambda Package Grouper" {
-        val grouper = PackageGrouper()
-        "When the grouper is applied to lambda's of different packages" {
-            programClassPool.classesAccept(grouper)
-            "Then the grouper has found 2 packages" {
-                grouper.size() shouldBe 2
-            }
-            "Then the grouper has found the packages app/package1 and app/package2" {
-                grouper.containsPackage("app/package1") shouldBe true
-                grouper.containsPackage("app/package2") shouldBe true
-            }
-            "Then the grouper does not contain other packages" {
-                grouper.packageNames().forEach {
-                    it shouldBeIn arrayListOf("app/package2", "app/package1")
-                }
-            }
-        }
-    }
-
     "Given a Kotlin Lambda Merger and entry name mapper" - {
         val merger = KotlinLambdaMerger(Configuration())
         val nameMapper = ExtraDataEntryNameMap()
