@@ -235,11 +235,26 @@ public class ClassSpecificationVisitorFactory
             }
         }
 
-        // If specified, visit a single named class, otherwise visit all classes.
-        return className != null ?
-            new NamedClassVisitor(combinedClassVisitor, className) :
-            new AllClassVisitor(combinedClassVisitor);
-    }
+        return
+                // If specified, visit a single named class.
+                className != null ?
+                    new NamedClassVisitor(combinedClassVisitor, className) :
+
+                // If an extendsAnnotationType is specified, start visiting from matching extendsAnnotationType classes.
+                extendsAnnotationType != null ?
+                    new FilteredClassVisitor(extendsAnnotationTypeMatcher, combinedClassVisitor) :
+
+                // If an extendsClassName is specified, start visiting from matching extendsClassName classes.
+                extendsClassName != null ?
+                    new FilteredClassVisitor(extendsClassNameMatcher, combinedClassVisitor) :
+
+                // If there is a className filter, start visiting from matching className classes.
+                classSpecification.className != null ?
+                    new FilteredClassVisitor(classNameMatcher, combinedClassVisitor) :
+
+                // Otherwise, visit all classes.
+                    new AllClassVisitor(combinedClassVisitor);
+}
 
 
     /**
