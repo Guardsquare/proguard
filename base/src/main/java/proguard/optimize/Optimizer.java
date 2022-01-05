@@ -46,6 +46,9 @@ import java.util.*;
 /**
  * This pass optimizes class pools according to a given configuration.
  *
+ * This pass is stateful. It tracks when no more optimizations are
+ * possible, and then all further runs of this pass will have no effect.
+ *
  * @author Eric Lafortune
  */
 public class Optimizer implements Pass

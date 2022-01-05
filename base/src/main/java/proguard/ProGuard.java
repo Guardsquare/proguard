@@ -28,6 +28,7 @@ import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
 import proguard.mark.Marker;
+import proguard.obfuscate.ObfuscationPreparation;
 import proguard.obfuscate.Obfuscator;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
@@ -503,6 +504,8 @@ public class ProGuard
         {
             System.out.println("Obfuscating...");
         }
+
+        new ObfuscationPreparation().execute(appView);
 
         // Perform the actual obfuscation.
         new Obfuscator().execute(appView);

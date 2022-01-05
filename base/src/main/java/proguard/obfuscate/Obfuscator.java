@@ -56,22 +56,10 @@ public class Obfuscator implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        // Check if we have at least some keep commands.
-        if (appView.configuration.keep         == null &&
-            appView.configuration.applyMapping == null &&
-            appView.configuration.printMapping == null)
-        {
-            throw new IOException("You have to specify '-keep' options for the obfuscation step.");
-        }
-
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);
         PrintWriter err = new PrintWriter(System.err, true);
-
-        // Clean up any old processing info.
-        appView.programClassPool.classesAccept(new ClassCleaner());
-        appView.libraryClassPool.classesAccept(new ClassCleaner());
 
         // Link all non-private, non-static methods in all class hierarchies.
         ClassVisitor memberInfoLinker =
@@ -211,13 +199,6 @@ public class Obfuscator implements Pass
         // override the names of library classes and of library class members.
         if (appView.configuration.applyMapping != null)
         {
-            if (appView.configuration.verbose)
-            {
-                out.println("Applying mapping from [" +
-                            PrintWriterUtil.fileName(appView.configuration.applyMapping) +
-                            "]...");
-            }
-
             WarningPrinter warningPrinter = new WarningPrinter(err, appView.configuration.warn);
 
             MappingReader reader = new MappingReader(appView.configuration.applyMapping);
