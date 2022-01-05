@@ -16,10 +16,7 @@ import proguard.classfile.instruction.*;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassSuperHierarchyInitializer;
 import proguard.classfile.util.ClassUtil;
-import proguard.classfile.visitor.ClassPoolVisitor;
-import proguard.classfile.visitor.ClassPrinter;
-import proguard.classfile.visitor.ClassVisitor;
-import proguard.classfile.visitor.MemberVisitor;
+import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 
 import java.util.ArrayList;
