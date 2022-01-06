@@ -58,6 +58,10 @@ public class KotlinLambdaMerger {
                              final ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
     {
 
+        // Remove old processing info
+        programClassPool.classesAccept(new ClassCleaner());
+        libraryClassPool.classesAccept(new ClassCleaner());
+
         // get the Lambda class and the Function0 interface
         Clazz kotlinLambdaClass = getKotlinLambdaClass(programClassPool, libraryClassPool);
         Clazz kotlinFunction0Interface = getKotlinFunction0Interface(programClassPool, libraryClassPool);
