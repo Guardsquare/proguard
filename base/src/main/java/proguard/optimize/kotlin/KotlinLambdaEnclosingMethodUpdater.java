@@ -161,7 +161,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                 .new_(lambdaGroup)
                 .dup()
                 .iconst(this.classId)
-                .invokespecial(lambdaGroup, lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, "(I)V"))
+                .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(I)V")
                 .instructions();
 
         codeAttributeEditor.reset(codeAttribute.u4codeLength);
