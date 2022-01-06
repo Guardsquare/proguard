@@ -105,7 +105,6 @@ public class KotlinLambdaMerger {
             lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
 
             // let the method inliner inline the specific invoke methods into the bridge methods
-            inlineLambdaInvokeMethods(programClassPool, libraryClassPool, lambdaClassPool);
             //lambdaClassPool.classesAccept(new ClassPrinter());
 
             ClassPool lambdaGroupClassPool = new ClassPool();
@@ -118,8 +117,6 @@ public class KotlinLambdaMerger {
                                           new ClassPoolFiller(lambdaGroupClassPool),
                                           newProgramClassPoolFiller),
                                           extraDataEntryNameMap));
-
-            inlineLambdaGroupInvokeMethods(newProgramClassPool, libraryClassPool, lambdaGroupClassPool);
 
             // initialise the super classes of the newly created lambda groups
             ClassSubHierarchyInitializer hierarchyInitializer = new ClassSubHierarchyInitializer();
@@ -152,32 +149,6 @@ public class KotlinLambdaMerger {
             kotlinFunction0Interface = libraryClassPool.getClass(NAME_KOTLIN_FUNCTION0);
         }
         return kotlinFunction0Interface;
-    }
-
-    private void inlineLambdaInvokeMethods(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaClassPool)
-    {
-        // Make the non-bridge invoke methods private, so they can be inlined.
-        lambdaClassPool.classesAccept(new AllMethodVisitor(
-                new MemberVisitor() {
-                    @Override
-                    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
-                        if ((programMethod.u2accessFlags & AccessConstants.BRIDGE) == 0)
-                        {
-                            if (Objects.equals(programMethod.getName(programClass), "invoke"))
-                            {
-                                programMethod.u2accessFlags &= ~AccessConstants.PUBLIC;
-                                programMethod.u2accessFlags |= AccessConstants.PRIVATE;
-                            }
-                        }
-                    }
-                }
-        ));
-        lambdaClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
-    }
-
-    private void inlineLambdaGroupInvokeMethods(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
-    {
-        lambdaGroupClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
     }
 
     /**
