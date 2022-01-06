@@ -101,6 +101,9 @@ public class KotlinLambdaMerger {
             PackageGrouper packageGrouper = new PackageGrouper();
             lambdaClassPool.classesAccept(packageGrouper);
 
+            // add optimisation info to the lambda's, so that it can be filled out later
+            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
+
             // let the method inliner inline the specific invoke methods into the bridge methods
             inlineLambdaInvokeMethods(programClassPool, libraryClassPool, lambdaClassPool);
             //lambdaClassPool.classesAccept(new ClassPrinter());
