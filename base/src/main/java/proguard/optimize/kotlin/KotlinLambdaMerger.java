@@ -99,6 +99,7 @@ public class KotlinLambdaMerger {
 
             // merge the lambda's per package
             packageGrouper.packagesAccept(new KotlinLambdaClassMerger(
+                                          this.configuration,
                                           programClassPool,
                                           libraryClassPool,
                                           new MultiClassVisitor(
