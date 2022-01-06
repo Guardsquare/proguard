@@ -92,9 +92,6 @@ public class KotlinLambdaMerger {
             // add optimisation info to the lambda's, so that it can be filled out later
             lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
 
-            // let the method inliner inline the specific invoke methods into the bridge methods
-            //lambdaClassPool.classesAccept(new ClassPrinter());
-
             ClassPool lambdaGroupClassPool = new ClassPool();
 
             // merge the lambda's per package
