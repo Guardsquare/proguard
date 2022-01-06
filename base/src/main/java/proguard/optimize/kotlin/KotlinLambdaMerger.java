@@ -81,11 +81,9 @@ public class KotlinLambdaMerger {
             // find all lambda classes of arity 0 and with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
-            programClassPool.classesAccept(new ImplementedClassFilter(kotlinFunction0Interface, false,
-                                           new ImplementedClassFilter(kotlinLambdaClass, false,
+            programClassPool.classesAccept(new ImplementedClassFilter(kotlinLambdaClass, false,
                                            new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                            new ClassPoolFiller(lambdaClassPool),
-                                           newProgramClassPoolFiller),
                                            newProgramClassPoolFiller),
                                            newProgramClassPoolFiller)
             );
