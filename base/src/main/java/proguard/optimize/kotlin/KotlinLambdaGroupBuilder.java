@@ -9,6 +9,8 @@ import proguard.classfile.attribute.visitor.AllInnerClassesInfoVisitor;
 import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
 import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
 import proguard.classfile.editor.ClassBuilder;
+import proguard.classfile.editor.InterfaceAdder;
+import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
 import proguard.optimize.MethodInlinerWrapper;
@@ -34,6 +36,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
     private final Map<Integer, KotlinLambdaGroupInvokeMethodBuilder> invokeMethodBuilders;
+    private final InterfaceAdder interfaceAdder;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaGroupBuilder.class);
 
     /**
@@ -49,6 +52,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         this.programClassPool = programClassPool;
         this.libraryClassPool = libraryClassPool;
         this.invokeMethodBuilders = new HashMap<>();
+        this.interfaceAdder = new InterfaceAdder(this.classBuilder.getProgramClass());
         initialiseLambdaGroup();
     }
 
@@ -101,6 +105,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         {
             return;
         }
+
+        // Add interfaces of lambda class to the lambda group
+        // TODO: ensure that only Function interfaces are added
+        lambdaClass.interfaceConstantsAccept(this.interfaceAdder);
 
         // TODO: check whether lambda class has inner lambda's
         //  if so, visit inner lambda's first
