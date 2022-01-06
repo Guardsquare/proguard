@@ -15,6 +15,7 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
     public static final String METHOD_ARGUMENT_TYPE_INVOKE = "Ljava/lang/Object;";
     public static final String METHOD_RETURN_TYPE_INVOKE = "Ljava/lang/Object;";
     public static final String METHOD_NAME_INVOKE = "invoke";
+    public static final String METHOD_TYPE_INVOKE_FUNCTIONN = "([Ljava/lang/Object;)Ljava/lang/Object;";
     private final int arity;
     private int caseIndexCounter = 0;
     private final ClassBuilder classBuilder;
@@ -146,6 +147,11 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
 
     private static String getMethodDescriptorForArity(int arity)
     {
+        // arity -1 is used for implementations of FunctionN
+        if (arity == -1)
+        {
+            return METHOD_TYPE_INVOKE_FUNCTIONN;
+        }
         StringBuilder descriptor = new StringBuilder("(");
         for (int argumentIndex = 0; argumentIndex < arity; argumentIndex++)
         {
