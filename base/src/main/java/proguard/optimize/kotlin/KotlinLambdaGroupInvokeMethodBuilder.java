@@ -65,9 +65,8 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
         InstructionSequenceBuilder builder = new InstructionSequenceBuilder(this.classBuilder.getProgramClass(),
                                                                             this.programClassPool,
                                                                             this.libraryClassPool);
-        builder.aload_0() // load this lambda group
-               .invokevirtual(this.classBuilder.getProgramClass(), methodToBeCalled); // invoke the lambda implementation
-        if (!methodDoesNotHaveReturnValue(methodToBeCalled)) {
+        builder.invokevirtual(this.classBuilder.getProgramClass(), methodToBeCalled); // invoke the lambda implementation
+        if (methodDoesNotHaveReturnValue(methodToBeCalled)) {
             // ensure there is a return value
             builder.getstatic(ClassConstants.NAME_KOTLIN_UNIT, ClassConstants.FIELD_NAME_KOTLIN_UNIT_INSTANCE, ClassConstants.TYPE_KOTLIN_UNIT);
         }
@@ -84,6 +83,12 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
 
     private CompactCodeAttributeComposer addLoadArgumentsInstructions(CompactCodeAttributeComposer composer)
     {
+        // load the lambda group, so later on the correct implementation methods can be called on this lambda group
+        composer.aload_0();
+        if (this.arity == -1)
+        {
+            return composer.aload_1();
+        }
         for (int argumentIndex = 1; argumentIndex <= this.arity; argumentIndex++)
         {
             composer.aload(argumentIndex);
