@@ -129,6 +129,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         inlineLambdaInvokeMethods(lambdaClass);
         ProgramMethod copiedMethod = copyLambdaInvokeToLambdaGroup(lambdaClass);
         int arity = ClassUtil.internalMethodParameterCount(copiedMethod.getDescriptor(lambdaGroup));
+        if (arity == 1 && lambdaClass.extendsOrImplements(KotlinLambdaMerger.NAME_KOTLIN_FUNCTIONN)
+                && Objects.equals(copiedMethod.getDescriptor(lambdaGroup), KotlinLambdaGroupInvokeMethodBuilder.METHOD_TYPE_INVOKE_FUNCTIONN))
+        {
+            arity = -1;
+        }
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
 
         // inline the helper invoke methods into the general invoke method
