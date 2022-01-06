@@ -232,7 +232,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
 
     private boolean constantReferencesClass(RefConstant refConstant, Clazz clazz)
     {
-        return refConstant.referencedClass == clazz || Objects.equals(refConstant.referencedClass.getName(), clazz.getName());
+        return refConstant.referencedClass != null && (refConstant.referencedClass == clazz || Objects.equals(refConstant.referencedClass.getName(), clazz.getName()));
     }
 }
 
