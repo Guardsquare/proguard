@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
+import proguard.classfile.util.ClassInitializer;
 import proguard.classfile.util.ClassSubHierarchyInitializer;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
@@ -108,9 +109,8 @@ public class KotlinLambdaMerger {
                                           newProgramClassPoolFiller),
                                           extraDataEntryNameMap));
 
-            // initialise the super classes of the newly created lambda groups
-            ClassSubHierarchyInitializer hierarchyInitializer = new ClassSubHierarchyInitializer();
-            newProgramClassPool.accept(hierarchyInitializer);
+            // initialise the references from and to the newly created lambda groups and their enclosing classes
+            newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, libraryClassPool));
 
             logger.info("{} lambda class(es) found.", lambdaClassPool.size());
             logger.info("{} lambda group(s) created.", lambdaGroupClassPool.size());
