@@ -1,8 +1,8 @@
-## Version 7.2-beta5
+## Version 7.2-beta6
 
 ### Improved
 
-- Upgrade log4j2 dependency to 2.17.0 in response to CVE-2021-44228, CVE-2021-45046 and CVE-2021-45105.
+- Upgrade log4j2 dependency to 2.17.1 in response to CVE-2021-44228, CVE-2021-45046, CVE-2021-45105 and CVE-2021-44832
 
 ### Java Support
 
