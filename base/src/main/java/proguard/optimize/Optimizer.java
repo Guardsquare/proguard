@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -1228,11 +1228,10 @@ public class Optimizer
                 new AllAttributeVisitor(
                 new DebugAttributeVisitor("Inlining single methods",
                 new OptimizationCodeAttributeFilter(
-                new MethodInliner(configuration.microEdition,
-                                  configuration.android,
-                                  configuration.allowAccessModification,
-                                  true,
-                                  methodInliningUniqueCounter)))))));
+                new SingleInvocationMethodInliner(configuration.microEdition,
+                                                  configuration.android,
+                                                  configuration.allowAccessModification,
+                                                  methodInliningUniqueCounter)))))));
         }
 
         if (methodInliningShort)
@@ -1244,11 +1243,10 @@ public class Optimizer
                 new AllAttributeVisitor(
                 new DebugAttributeVisitor("Inlining short methods",
                 new OptimizationCodeAttributeFilter(
-                new MethodInliner(configuration.microEdition,
-                                  configuration.android,
-                                  configuration.allowAccessModification,
-                                  false,
-                                  methodInliningShortCounter)))))));
+                new ShortMethodInliner(configuration.microEdition,
+                                       configuration.android,
+                                       configuration.allowAccessModification,
+                                       methodInliningShortCounter)))))));
         }
 
         if (methodInliningTailrecursion)

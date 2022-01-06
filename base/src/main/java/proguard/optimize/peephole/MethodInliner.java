@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -43,8 +43,12 @@ import java.io.StringWriter;
 import java.util.Stack;
 
 /**
- * This AttributeVisitor inlines short methods or methods that are only invoked
- * once, in the code attributes that it visits.
+ * This AttributeVisitor is an abstract class representing a visitor considering to inline each method that it
+ * visits in its usage sites. The behavior of whether or not a class is considered for inlining is controlled
+ * by overriding the shouldInline method.
+ *
+ * There are some additional technical constraints imposed on whether the method is actually inlined
+ * (see visitProgramMethod).
  *
  * @see SuperInvocationMarker
  * @see BackwardBranchMarker
@@ -52,29 +56,30 @@ import java.util.Stack;
  * @see SideEffectClassMarker
  * @author Eric Lafortune
  */
-public class MethodInliner
-implements   AttributeVisitor,
-             InstructionVisitor,
-             ConstantVisitor,
-             MemberVisitor,
-             ExceptionInfoVisitor,
-             LineNumberInfoVisitor
+abstract public class MethodInliner
+implements            AttributeVisitor,
+                      InstructionVisitor,
+                      ConstantVisitor,
+                      MemberVisitor,
+                      ExceptionInfoVisitor,
+                      LineNumberInfoVisitor
 {
-    private static final int MAXIMUM_INLINED_CODE_LENGTH_JVM    = Integer.parseInt(System.getProperty("maximum.inlined.code.length",      "8"));
-    private static final int MAXIMUM_INLINED_CODE_LENGTH_android= Integer.parseInt(System.getProperty("maximum.inlined.code.length",     "32"));
-    private static final int MAXIMUM_RESULTING_CODE_LENGTH_JSE  = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
-    private static final int MAXIMUM_RESULTING_CODE_LENGTH_JME  = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "2000"));
+    protected static final int MAXIMUM_INLINED_CODE_LENGTH_JVM     = Integer.parseInt(System.getProperty("maximum.inlined.code.length",      "8"));
+    protected static final int MAXIMUM_INLINED_CODE_LENGTH_android = Integer.parseInt(System.getProperty("maximum.inlined.code.length",     "32"));
+    protected static final int MAXIMUM_RESULTING_CODE_LENGTH_JSE   = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
+    protected static final int MAXIMUM_RESULTING_CODE_LENGTH_JME   = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "2000"));
+    protected static final int MAXIMUM_RESULTING_CODE_LENGTH_JVM   = 65535;
 
     static final int METHOD_DUMMY_START_LINE_NUMBER = 0;
     static final int INLINED_METHOD_END_LINE_NUMBER = -1;
 
     private static final Logger logger = LogManager.getLogger(MethodInliner.class);
 
-    private final boolean            microEdition;
-    private final boolean            android;
-    private final boolean            allowAccessModification;
-    private final boolean            inlineSingleInvocations;
-    private final InstructionVisitor extraInlinedInvocationVisitor;
+    protected final boolean            microEdition;
+    protected final boolean            android;
+    protected final int                maxResultingCodeLength;
+    protected final boolean            allowAccessModification;
+    protected final InstructionVisitor extraInlinedInvocationVisitor;
 
     private final CodeAttributeComposer codeAttributeComposer  = new CodeAttributeComposer();
     private final MemberVisitor         accessMethodMarker     = new OptimizationInfoMemberFilter(
@@ -116,19 +121,15 @@ implements   AttributeVisitor,
      * @param allowAccessModification indicates whether the access modifiers of
      *                                classes and class members can be changed
      *                                in order to inline methods.
-     * @param inlineSingleInvocations indicates whether the single invocations
-     *                                should be inlined, or, alternatively,
-     *                                short methods.
      */
     public MethodInliner(boolean microEdition,
                          boolean android,
-                         boolean allowAccessModification,
-                         boolean inlineSingleInvocations)
+                         boolean allowAccessModification)
     {
         this(microEdition,
              android,
+             defaultMaxResultingCodeLength(microEdition),
              allowAccessModification,
-             inlineSingleInvocations,
              null);
     }
 
@@ -142,25 +143,52 @@ implements   AttributeVisitor,
      * @param allowAccessModification indicates whether the access modifiers of
      *                                classes and class members can be changed
      *                                in order to inline methods.
-     * @param inlineSingleInvocations indicates whether the single invocations
-     *                                should be inlined, or, alternatively,
-     *                                short methods.
      * @param extraInlinedInvocationVisitor an optional extra visitor for all
      *                                      inlined invocation instructions.
      */
     public MethodInliner(boolean            microEdition,
                          boolean            android,
                          boolean            allowAccessModification,
-                         boolean            inlineSingleInvocations,
                          InstructionVisitor extraInlinedInvocationVisitor)
     {
-        this.microEdition                  = microEdition;
-        this.android                       = android;
-        this.allowAccessModification       = allowAccessModification;
-        this.inlineSingleInvocations       = inlineSingleInvocations;
-        this.extraInlinedInvocationVisitor = extraInlinedInvocationVisitor;
+        this(microEdition,
+            android,
+            defaultMaxResultingCodeLength(microEdition),
+            allowAccessModification,
+            extraInlinedInvocationVisitor);
     }
 
+
+    /**
+     * Creates a new MethodInliner.
+     * @param microEdition            indicates whether the resulting code is
+     *                                targeted at Java Micro Edition.
+     * @param android                 indicates whether the resulting code is
+     *                                targeted at the Dalvik VM.
+     * @param maxResultingCodeLength  configures the inliner with a max resulting
+     *                                code length.
+     * @param allowAccessModification indicates whether the access modifiers of
+     *                                classes and class members can be changed
+     *                                in order to inline methods.
+     * @param extraInlinedInvocationVisitor an optional extra visitor for all
+     *                                      inlined invocation instructions.
+     */
+    public MethodInliner(boolean            microEdition,
+                         boolean            android,
+                         int                maxResultingCodeLength,
+                         boolean            allowAccessModification,
+                         InstructionVisitor extraInlinedInvocationVisitor)
+    {
+        if (maxResultingCodeLength > MAXIMUM_RESULTING_CODE_LENGTH_JVM)
+        {
+            throw new IllegalArgumentException("Maximum resulting code length cannot exceed " + MAXIMUM_RESULTING_CODE_LENGTH_JVM);
+        }
+        this.microEdition                  = microEdition;
+        this.android                       = android;
+        this.maxResultingCodeLength        = maxResultingCodeLength;
+        this.allowAccessModification       = allowAccessModification;
+        this.extraInlinedInvocationVisitor = extraInlinedInvocationVisitor;
+    }
 
     // Implementations for AttributeVisitor.
 
@@ -249,12 +277,11 @@ implements   AttributeVisitor,
             constantAdder = null;
         }
 
-        // Only inline the method if it is invoked once or if it is short.
+        // Only inline the method if
+        // 1. The shouldInline method returns true AND
+        // 2. The resulting estimated code attribute length is below the specified limit
         else if (shouldInline(clazz, method, codeAttribute) &&
-                 estimatedResultingCodeLength + codeAttribute.u4codeLength <
-                 (microEdition ?
-                     MAXIMUM_RESULTING_CODE_LENGTH_JME :
-                     MAXIMUM_RESULTING_CODE_LENGTH_JSE))
+                 estimatedResultingCodeLength + codeAttribute.u4codeLength < maxResultingCodeLength)
         {
             logger.debug("MethodInliner: inlining [{}.{}{}] in [{}.{}{}]",
                          clazz.getName(),
@@ -809,6 +836,11 @@ implements   AttributeVisitor,
 
     // Small helper methods.
 
+    private static int defaultMaxResultingCodeLength(boolean microEdition)
+    {
+        return microEdition ? MAXIMUM_RESULTING_CODE_LENGTH_JME : MAXIMUM_RESULTING_CODE_LENGTH_JSE;
+    }
+
     /**
      * Returns true, while printing out the given debug message.
      */
@@ -835,8 +867,7 @@ implements   AttributeVisitor,
 
 
     /**
-     * Indicates whether this method should be inlined. By default, this method uses
-     * the `inlineSingleInvocations` constructor parameter. Subclasses can overwrite
+     * Indicates whether this method should be inlined. Subclasses can overwrite
      * this method to change which methods are inlined.
      *
      * Note that the method will still always first be tested on whether they can technically
@@ -845,13 +876,5 @@ implements   AttributeVisitor,
      *
      * @param method the method that is eligible for inlining
      */
-    protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute)
-    {
-        return inlineSingleInvocations ?
-            MethodInvocationMarker.getInvocationCount(method) == 1 :
-            codeAttribute.u4codeLength <=
-            (android ?
-                 MAXIMUM_INLINED_CODE_LENGTH_android:
-                 MAXIMUM_INLINED_CODE_LENGTH_JVM);
-    }
+    abstract protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute);
 }
