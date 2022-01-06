@@ -44,6 +44,7 @@ extends      ClassOptimizationInfo
     private volatile boolean mayBeMerged                   = true;
     private volatile Clazz   wrappedClass;
     private volatile Clazz   targetClass;
+    private volatile Clazz   lambdaGroup;
 
 
     public boolean isKept()
@@ -247,6 +248,18 @@ extends      ClassOptimizationInfo
     public Clazz getTargetClass()
     {
         return targetClass;
+    }
+
+
+    public void setLambdaGroup(Clazz lambdaGroup)
+    {
+        this.lambdaGroup = lambdaGroup;
+    }
+
+
+    public Clazz getLambdaGroup()
+    {
+        return lambdaGroup;
     }
 
 
