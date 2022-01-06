@@ -176,4 +176,16 @@ public class KotlinLambdaMerger {
     {
         lambdaGroupClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
     }
+
+    /**
+     * Checks whether the given lambda class should still be merged.
+     * Returns true if the lambda class has not yet been merged and is allowed to be merged.
+     * @param lambdaClass the lambda class for which should be checked whether it should be merged
+     */
+    public static boolean shouldMerge(ProgramClass lambdaClass)
+    {
+        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
+        return (lambdaClass.getProcessingFlags() & ProcessingFlags.DONT_OPTIMIZE) == 0
+                && optimizationInfo.getLambdaGroup() == null;
+    }
 }
