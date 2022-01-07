@@ -28,8 +28,10 @@ import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
 import proguard.mark.Marker;
+import proguard.obfuscate.NameObfuscationReferenceFixer;
 import proguard.obfuscate.ObfuscationPreparation;
 import proguard.obfuscate.Obfuscator;
+import proguard.obfuscate.ResourceFileNameAdapter;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
@@ -38,6 +40,7 @@ import proguard.preverify.*;
 import proguard.shrink.Shrinker;
 import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.*;
+import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.io.*;
 
@@ -327,6 +330,12 @@ public class ProGuard
         }
 
         new Initializer().execute(appView);
+
+        if (appView.configuration.keepKotlinMetadata &&
+            appView.configuration.enableKotlinAsserter)
+        {
+            new KotlinMetadataAsserter().execute(appView);
+        }
     }
 
 
@@ -436,6 +445,12 @@ public class ProGuard
 
         // Perform the actual shrinking.
         new Shrinker().execute(appView);
+
+        if (appView.configuration.keepKotlinMetadata &&
+            appView.configuration.enableKotlinAsserter)
+        {
+            new KotlinMetadataAsserter().execute(appView);
+        }
     }
 
 
@@ -509,6 +524,21 @@ public class ProGuard
 
         // Perform the actual obfuscation.
         new Obfuscator().execute(appView);
+
+        // Adapt resource file names that correspond to class names, if necessary.
+        if (appView.configuration.adaptResourceFileNames != null)
+        {
+            new ResourceFileNameAdapter().execute(appView);
+        }
+
+        // Fix the Kotlin modules so the filename matches and the class names match.
+        new NameObfuscationReferenceFixer().execute(appView);
+
+        if (appView.configuration.keepKotlinMetadata &&
+            appView.configuration.enableKotlinAsserter)
+        {
+            new KotlinMetadataAsserter().execute(appView);
+        }
     }
 
 

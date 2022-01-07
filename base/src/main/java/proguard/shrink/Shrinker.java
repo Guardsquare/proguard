@@ -25,8 +25,6 @@ import proguard.classfile.*;
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
-import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
-import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
 import proguard.pass.Pass;
 import proguard.util.*;
@@ -147,11 +145,6 @@ public class Shrinker implements Pass
             appView.resourceFilePool.resourceFilesAccept(
                 new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE,
                                                      new KotlinModuleShrinker(simpleUsageMarker)));
-
-            if (appView.configuration.enableKotlinAsserter)
-            {
-                new KotlinMetadataAsserter().execute(appView);
-            }
         }
 
         int newProgramClassPoolSize = newProgramClassPool.size();

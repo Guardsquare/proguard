@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -34,7 +34,6 @@ import proguard.pass.Pass;
 import proguard.resources.file.visitor.ResourceJavaReferenceClassInitializer;
 import proguard.resources.kotlinmodule.util.KotlinModuleReferenceInitializer;
 import proguard.util.*;
-import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.io.*;
 import java.util.*;
@@ -301,11 +300,6 @@ public class Initializer implements Pass
         if (appView.configuration.keepKotlinMetadata)
         {
             appView.resourceFilePool.resourceFilesAccept(new KotlinModuleReferenceInitializer(appView.programClassPool, appView.libraryClassPool));
-
-            if (appView.configuration.enableKotlinAsserter)
-            {
-                new KotlinMetadataAsserter().execute(appView);
-            }
         }
 
         // Share strings between the classes, to reduce heap memory usage.

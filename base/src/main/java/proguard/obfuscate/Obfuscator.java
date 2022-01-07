@@ -37,7 +37,6 @@ import proguard.obfuscate.util.InstructionSequenceObfuscator;
 import proguard.pass.Pass;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
 import proguard.util.*;
-import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.io.*;
 import java.util.*;
@@ -644,32 +643,11 @@ public class Obfuscator implements Pass
         appView.programClassPool.classesAccept(
             new ConstantPoolShrinker());
 
-        // Adapt resource file names that correspond to class names, if necessary.
-        if (appView.configuration.adaptResourceFileNames != null)
-        {
-            appView.resourceFilePool.resourceFilesAccept(
-                new ListParser(new FileNameParser()).parse(appView.configuration.adaptResourceFileNames),
-                new ResourceFileNameObfuscator(new ClassNameAdapterFunction(appView.programClassPool), true));
-        }
-
         if (appView.configuration.verbose)
         {
             System.out.println("  Number of obfuscated classes:                  " + obfuscatedClassCounter.getCount());
             System.out.println("  Number of obfuscated fields:                   " + obfuscatedFieldCounter.getCount());
             System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
-        }
-
-        if (appView.configuration.keepKotlinMetadata)
-        {
-            // Fix the Kotlin modules so the filename matches and the class names match.
-            appView.resourceFilePool.resourceFilesAccept(
-                new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE,
-                new KotlinModuleFixer()));
-        }
-
-        if (appView.configuration.keepKotlinMetadata && appView.configuration.enableKotlinAsserter)
-        {
-            new KotlinMetadataAsserter().execute(appView);
         }
     }
 }
