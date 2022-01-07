@@ -22,10 +22,8 @@
 package proguard.optimize.kotlin
 
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
-import io.kotest.matchers.shouldBe
 import io.mockk.*
 import proguard.Configuration
 import proguard.classfile.ClassConstants
