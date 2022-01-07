@@ -14,6 +14,7 @@ import proguard.classfile.util.MethodLinker;
 import proguard.classfile.visitor.*;
 import proguard.optimize.info.*;
 import proguard.optimize.peephole.MethodInliner;
+import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.util.*;
 
 public class MethodInlinerWrapper implements ClassPoolVisitor {
@@ -309,12 +310,10 @@ public class MethodInlinerWrapper implements ClassPoolVisitor {
                          new AllAttributeVisitor(
                          new DebugAttributeVisitor("Inlining single methods",
                          new OptimizationCodeAttributeFilter(
-                         new MethodInliner(configuration.microEdition,
-                                           configuration.android,
-                                           configuration.allowAccessModification,
-                                           true,
-                                           false,
-                                           methodInliningUniqueCounter)))))));
+                         new SameClassMethodInliner(configuration.microEdition,
+                                                    configuration.android,
+                                                    configuration.allowAccessModification,
+                                                    methodInliningUniqueCounter)))))));
         System.out.println("Lambda methods inlined: " + methodInliningUniqueCounter.getCount());
     }
 }
