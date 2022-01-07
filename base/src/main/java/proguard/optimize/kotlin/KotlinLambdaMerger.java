@@ -48,6 +48,7 @@ public class KotlinLambdaMerger {
 
     private static final Logger logger = LogManager.getLogger(KotlinLambdaMerger.class);
     private final Configuration configuration;
+    public static MethodInlinerWrapper methodInlinerWrapper;
 
     public KotlinLambdaMerger(Configuration configuration)
     {
@@ -82,31 +83,47 @@ public class KotlinLambdaMerger {
             // find all lambda classes of arity 0 and with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
-            programClassPool.classesAccept(new ImplementedClassFilter(kotlinLambdaClass, false,
+            programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
+            programClassPool.classesAccept(new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_OPTIMIZE,
+                                           new ImplementedClassFilter(kotlinLambdaClass, false,
                                            new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                            new ClassPoolFiller(lambdaClassPool),
                                            newProgramClassPoolFiller),
-                                           newProgramClassPoolFiller)
+                                           newProgramClassPoolFiller))
             );
 
             // group the lambda's per package
             PackageGrouper packageGrouper = new PackageGrouper();
             lambdaClassPool.classesAccept(packageGrouper);
 
+            methodInlinerWrapper = new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool);
+
             // add optimisation info to the lambda's, so that it can be filled out later
-            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
+            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter(true));
+            lambdaClassPool.classesAccept(new AllMemberVisitor(
+                                          new ProgramMemberOptimizationInfoSetter(true)));
 
             ClassPool lambdaGroupClassPool = new ClassPool();
 
             // merge the lambda's per package
-            packageGrouper.packagesAccept(new KotlinLambdaClassMerger(
+            KotlinLambdaClassMerger merger = new KotlinLambdaClassMerger(
                                           this.configuration,
                                           programClassPool,
                                           libraryClassPool,
                                           new MultiClassVisitor(
                                           new ClassPoolFiller(lambdaGroupClassPool),
                                           newProgramClassPoolFiller),
-                                          extraDataEntryNameMap));
+                                          extraDataEntryNameMap);
+            //packageGrouper.packageAccept("androidx/compose/foundation/layout", merger); // ColumnKt
+            packageGrouper.packagesAccept(merger);
+
+            // inline the helper invoke methods into the general invoke method
+            inlineMethodsInsideLambdaGroups(newProgramClassPool, libraryClassPool, lambdaGroupClassPool);
+
+            lambdaGroupClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
+
+            lambdaGroupClassPool.classesAccept(new AllMemberVisitor(
+                                               new ProgramMemberOptimizationInfoSetter(true)));
 
             // initialise the references from and to the newly created lambda groups and their enclosing classes
             newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, libraryClassPool));
@@ -120,6 +137,12 @@ public class KotlinLambdaMerger {
             return newProgramClassPool;
         }
         return programClassPool;
+    }
+
+    private void inlineMethodsInsideLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
+    {
+        // TODO: use a simpler, more reliable, specific method inliner instead of the current wrapper around the MethodInliner
+        lambdaGroupClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
     }
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
