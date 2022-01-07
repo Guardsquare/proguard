@@ -140,9 +140,6 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         }
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
 
-        // inline the helper invoke methods into the general invoke method
-        inlineMethodsInsideClass(lambdaClass);
-
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId);
 
