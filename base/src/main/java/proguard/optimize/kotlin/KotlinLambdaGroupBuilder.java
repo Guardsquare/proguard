@@ -122,9 +122,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     new AllInnerClassesInfoVisitor(
                                     new InnerClassInfoClassConstantVisitor(
                                     new ClassConstantToClassVisitor(
+                                    new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                     new ClassNameFilter(lambdaClass.getName(),
                                                         (ClassVisitor)null,
-                                                        (ClassVisitor)this)), // don't revisit the current lambda
+                                                        (ClassVisitor)this),
+                                    null)), // don't revisit the current lambda
                                     null)));
 
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
