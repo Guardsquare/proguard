@@ -179,19 +179,19 @@ public class MethodInlinerWrapper implements ClassPoolVisitor {
 
 
         // Mark methods based on their headers.
-        programClassPool.classesAccept(
+        /*programClassPool.classesAccept(
                 new AllMethodVisitor(
                         new OptimizationInfoMemberFilter(
                                 new MultiMemberVisitor(
                                         new SideEffectMethodMarker(),
                                         new ParameterEscapeMarker()
-                                ))));
+                                ))));*/
 
-        programClassPool.accept(new InfluenceFixpointVisitor(
-                new SideEffectVisitorMarkerFactory()));
+        /*programClassPool.accept(new InfluenceFixpointVisitor(
+                new SideEffectVisitorMarkerFactory()));*/
 
         // Mark all used parameters, including the 'this' parameters.
-        ParallelAllClassVisitor.ClassVisitorFactory markingUsedParametersClassVisitor =
+        /*ParallelAllClassVisitor.ClassVisitorFactory markingUsedParametersClassVisitor =
                 new ParallelAllClassVisitor.ClassVisitorFactory()
                 {
                     public ClassVisitor createClassVisitor()
@@ -202,12 +202,12 @@ public class MethodInlinerWrapper implements ClassPoolVisitor {
                                                 new ParameterUsageMarker(!methodMarkingStatic,
                                                         !methodRemovalParameter)));
                     }
-                };
+                };*/
 
-        programClassPool.accept(
+        /*programClassPool.accept(
                 new TimedClassPoolVisitor("Marking used parameters",
                         new ParallelAllClassVisitor(
-                                markingUsedParametersClassVisitor)));
+                                markingUsedParametersClassVisitor)));*/
 
         // Mark all parameters of referenced methods in methods whose code must
         // be kept. This prevents shrinking of method descriptors which may not
@@ -313,6 +313,7 @@ public class MethodInlinerWrapper implements ClassPoolVisitor {
                                            configuration.android,
                                            configuration.allowAccessModification,
                                            true,
+                                           false,
                                            methodInliningUniqueCounter)))))));
         System.out.println("Lambda methods inlined: " + methodInliningUniqueCounter.getCount());
     }
