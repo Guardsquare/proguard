@@ -11,6 +11,7 @@ import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
+import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.resources.file.ResourceFilePool;
 import proguard.util.ProcessingFlags;
 
@@ -148,6 +149,8 @@ public class KotlinLambdaMerger {
     {
         ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
         return (lambdaClass.getProcessingFlags() & ProcessingFlags.DONT_OPTIMIZE) == 0
-                && optimizationInfo.getLambdaGroup() == null;
+                && optimizationInfo.getLambdaGroup() == null
+                && optimizationInfo.mayBeMerged()
+                && lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA);
     }
 }
