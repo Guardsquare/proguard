@@ -18,6 +18,7 @@ New Kotlin versions are released every 6 months.
 To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated class files and their corresponding metadata ProGuard now supports Kotlin reading Kotlin classes from version 1.0 to 1.6 and writing Kotlin metadata with version 1.5 (readable by Kotlin reflection library / compiler 1.4 - 1.6).
 
 - Add support for processing Kotlin 1.5 and 1.6 metadata. (`PGD-179`, `DGD-3467`, `PGC-31`, `T4777`)
+- Add support for matching Kotlin inline class type parameters when using `includedescriptorclasses` keep rule modifier (requires `-keepkotlinmetadata`). (`T13653`)
 
 ### Bug fixes
 
