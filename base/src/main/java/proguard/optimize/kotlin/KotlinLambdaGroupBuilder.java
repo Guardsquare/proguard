@@ -110,9 +110,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
             return;
         }
 
-        // Add interfaces of lambda class to the lambda group
-        // TODO: ensure that only Function interfaces are added
-        lambdaClass.interfaceConstantsAccept(this.interfaceAdder);
+        // update optimisation info of lambda to show lambda has been merged or is going to be merged
+        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
+        optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());
 
         // TODO: check whether lambda class has inner lambda's
         //  if so, visit inner lambda's first
@@ -128,6 +128,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                         (ClassVisitor)this),
                                     null)), // don't revisit the current lambda
                                     null)));
+
+        // Add interfaces of lambda class to the lambda group
+        // TODO: ensure that only Function interfaces are added
+        lambdaClass.interfaceConstantsAccept(this.interfaceAdder);
 
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         logger.info("Adding lambda {} to lambda group {}", lambdaClass.getName(), lambdaGroup.getName());
@@ -146,8 +150,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId);
 
         // update optimisation info of lambda to show lambda has been merged
-        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
-        optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());
+        /*ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
+        optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());*/
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
