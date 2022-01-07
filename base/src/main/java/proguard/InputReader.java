@@ -65,6 +65,11 @@ public class InputReader implements Pass
     {
         this.configuration = appView.configuration;
 
+        if (configuration.verbose)
+        {
+            System.out.println("Reading input...");
+        }
+
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);

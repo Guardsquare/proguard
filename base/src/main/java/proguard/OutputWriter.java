@@ -55,6 +55,11 @@ public class OutputWriter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Writing output...");
+        }
+
         if (appView.configuration.addConfigurationDebugging)
         {
             System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");

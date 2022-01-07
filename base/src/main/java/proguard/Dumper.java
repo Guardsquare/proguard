@@ -23,6 +23,11 @@ public class Dumper implements Pass
     @Override
     public void execute(AppView appView) throws Exception
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(appView.configuration.dump) + "]...");
+        }
+
         PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.dump);
         try
         {

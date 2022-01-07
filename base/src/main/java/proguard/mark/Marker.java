@@ -52,6 +52,11 @@ public class Marker implements Pass
     @Override
     public void execute(AppView appView)
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Marking classes and class members to be kept...");
+        }
+
         // Create a combined ClassPool visitor for marking classes.
         MultiClassPoolVisitor classPoolVisitor =
             new MultiClassPoolVisitor(

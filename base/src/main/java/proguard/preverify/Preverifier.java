@@ -40,6 +40,11 @@ public class Preverifier implements Pass
     @Override
     public void execute(AppView appView)
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Preverifying...");
+        }
+
         // Clean up any old processing info.
         appView.programClassPool.classesAccept(new ClassCleaner());
 

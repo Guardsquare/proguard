@@ -40,6 +40,11 @@ public class SubroutineInliner implements Pass
     @Override
     public void execute(AppView appView)
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Inlining subroutines...");
+        }
+
         // Clean up any old processing info.
         appView.programClassPool.classesAccept(new ClassCleaner());
 

@@ -261,13 +261,6 @@ public class ProGuard
      */
     private void printConfiguration() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Printing configuration to [" +
-                               PrintWriterUtil.fileName(appView.configuration.printConfiguration) +
-                               "]...");
-        }
-
         PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.printConfiguration);
 
         try (ConfigurationWriter configurationWriter = new ConfigurationWriter(pw))
@@ -276,6 +269,7 @@ public class ProGuard
         }
     }
 
+
     /**
      * Checks the configuration for conflicts and inconsistencies.
      */
@@ -283,6 +277,7 @@ public class ProGuard
     {
         new ConfigurationChecker(appView.configuration).check();
     }
+
 
     /**
      * Checks whether the output is up-to-date.
@@ -293,17 +288,11 @@ public class ProGuard
     }
 
 
-
     /**
      * Reads the input class files.
      */
     private void readInput() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Reading input...");
-        }
-
         // Fill the program class pool and the library class pool.
         new InputReader(appView.configuration).execute(appView);
     }
@@ -324,11 +313,6 @@ public class ProGuard
      */
     private void initialize() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Initializing...");
-        }
-
         new Initializer().execute(appView);
 
         if (appView.configuration.keepKotlinMetadata &&
@@ -345,11 +329,6 @@ public class ProGuard
      */
     private void mark()
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Marking classes and class members to be kept...");
-        }
-
         new Marker().execute(appView);
     }
 
@@ -397,11 +376,6 @@ public class ProGuard
      */
     private void printSeeds() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Printing kept classes, fields, and methods...");
-        }
-
         new SeedPrinter().execute(appView);
     }
 
@@ -411,11 +385,6 @@ public class ProGuard
      */
     private void inlineSubroutines()
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Inlining subroutines...");
-        }
-
         // Perform the actual inlining.
         new SubroutineInliner().execute(appView);
     }
@@ -426,23 +395,6 @@ public class ProGuard
      */
     private void shrink() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Shrinking...");
-
-            // We'll print out some explanation, if requested.
-            if (appView.configuration.whyAreYouKeeping != null)
-            {
-                System.out.println("Explaining why classes and class members are being kept...");
-            }
-
-            // We'll print out the usage, if requested.
-            if (appView.configuration.printUsage != null)
-            {
-                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(appView.configuration.printUsage) + "]...");
-            }
-        }
-
         // Perform the actual shrinking.
         new Shrinker().execute(appView);
 
@@ -459,18 +411,8 @@ public class ProGuard
      */
     private void optimizeGson() throws IOException
     {
-        // Do we have Gson code?
-        // Is Gson optimization enabled?
-        if (appView.programClassPool.getClass("com/google/gson/Gson") != null)
-        {
-            if (appView.configuration.verbose)
-            {
-                System.out.println("Optimizing usages of Gson library...");
-            }
-
-            // Perform the Gson optimization.
-            new GsonOptimizer().execute(appView);
-        }
+        // Perform the Gson optimization.
+        new GsonOptimizer().execute(appView);
     }
 
 
@@ -483,11 +425,6 @@ public class ProGuard
 
         for (int optimizationPass = 0; optimizationPass < appView.configuration.optimizationPasses; optimizationPass++)
         {
-            if (appView.configuration.verbose)
-            {
-                System.out.println("Optimizing (pass " + (optimizationPass + 1) + "/" + appView.configuration.optimizationPasses + ")...");
-            }
-
             // Perform the actual optimization.
             optimizer.execute(appView);
 
@@ -515,11 +452,6 @@ public class ProGuard
      */
     private void obfuscate() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Obfuscating...");
-        }
-
         new ObfuscationPreparation().execute(appView);
 
         // Perform the actual obfuscation.
@@ -566,11 +498,6 @@ public class ProGuard
      */
     private void target() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Setting target versions...");
-        }
-
         new Targeter().execute(appView);
     }
 
@@ -580,11 +507,6 @@ public class ProGuard
      */
     private void preverify()
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Preverifying...");
-        }
-
         // Perform the actual preverification.
         new Preverifier().execute(appView);
     }
@@ -613,11 +535,6 @@ public class ProGuard
      */
     private void writeOutput() throws IOException
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Writing output...");
-        }
-
         // Write out the program class pool.
         new OutputWriter().execute(appView);
     }
@@ -628,11 +545,6 @@ public class ProGuard
      */
     private void dump() throws Exception
     {
-        if (appView.configuration.verbose)
-        {
-            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(appView.configuration.dump) + "]...");
-        }
-
         new Dumper().execute(appView);
     }
 

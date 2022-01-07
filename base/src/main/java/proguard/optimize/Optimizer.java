@@ -272,6 +272,11 @@ public class Optimizer implements Pass
             fieldGeneralizationClass     ||
             methodGeneralizationClass;
 
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Optimizing (pass " + (passIndex + 1) + "/" + appView.configuration.optimizationPasses + ")...");
+        }
+
         optimize(appView.configuration,
                  appView.programClassPool,
                  appView.libraryClassPool,

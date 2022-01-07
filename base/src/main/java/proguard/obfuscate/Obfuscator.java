@@ -55,6 +55,11 @@ public class Obfuscator implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Obfuscating...");
+        }
+
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);

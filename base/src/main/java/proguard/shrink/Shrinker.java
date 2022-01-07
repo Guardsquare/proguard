@@ -44,6 +44,23 @@ public class Shrinker implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Shrinking...");
+
+            // We'll print out some explanation, if requested.
+            if (appView.configuration.whyAreYouKeeping != null)
+            {
+                System.out.println("Explaining why classes and class members are being kept...");
+            }
+
+            // We'll print out the usage, if requested.
+            if (appView.configuration.printUsage != null)
+            {
+                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(appView.configuration.printUsage) + "]...");
+            }
+        }
+
         // Check if we have at least some keep commands.
         if (appView.configuration.keep == null)
         {

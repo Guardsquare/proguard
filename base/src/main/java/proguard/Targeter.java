@@ -40,6 +40,11 @@ public class Targeter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Setting target versions...");
+        }
+
         Set newerClassVersions = appView.configuration.warn != null ? null : new HashSet();
 
         appView.programClassPool.classesAccept(new ClassVersionSetter(appView.configuration.targetClassVersion,

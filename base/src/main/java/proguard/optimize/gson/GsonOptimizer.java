@@ -110,6 +110,17 @@ public class GsonOptimizer implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        // Do we have Gson code?
+        if (appView.programClassPool.getClass("com/google/gson/Gson") == null)
+        {
+            return;
+        }
+
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Optimizing usages of Gson library...");
+        }
+
         // Set all fields of Gson to public.
         appView.programClassPool.classesAccept(
             new ClassNameFilter(StringUtil.join(",",

@@ -52,6 +52,11 @@ public class Initializer implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Initializing...");
+        }
+
         boolean checkConfiguration = appView.configuration.shrink   ||
                                      appView.configuration.optimize ||
                                      appView.configuration.obfuscate;

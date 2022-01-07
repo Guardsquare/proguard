@@ -42,12 +42,18 @@ public class SeedPrinter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
+        if (appView.configuration.verbose)
+        {
+            System.out.println("Printing kept classes, fields, and methods...");
+        }
+
         PrintWriter printWriter = PrintWriterUtil.createPrintWriterOut(appView.configuration.printSeeds);
 
         try
         {
             // Check if we have at least some keep commands.
-            if (appView.configuration.keep == null) {
+            if (appView.configuration.keep == null)
+            {
                 throw new IOException("You have to specify '-keep' options if you want to write out kept elements with '-printseeds'.");
             }
 
