@@ -157,7 +157,7 @@ public class Obfuscator
             programClassPool.classesAccept(
                 // Keep Kotlin default implementations class where the user had already kept the interface.
                 new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
-                new ReferencedKotlinMetadataVisitor(new KotlinInterfaceToDefaultImplsClassVisitor(nameMarker))));
+                new ReferencedKotlinMetadataVisitor(new KotlinClassToDefaultImplsClassVisitor(nameMarker))));
         }
 
         // Mark attributes that have to be kept.
