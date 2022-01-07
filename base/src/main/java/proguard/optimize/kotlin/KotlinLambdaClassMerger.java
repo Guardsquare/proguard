@@ -19,6 +19,7 @@ import proguard.classfile.util.ClassSuperHierarchyInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
+import proguard.optimize.info.ProgramClassOptimizationInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +67,10 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
         lambdaClassPool.classesAccept(lambdaGroupBuilder);
 
         ProgramClass lambdaGroup = lambdaGroupBuilder.build();
+
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(lambdaGroup);
+        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaGroup);
+        optimizationInfo.setLambdaGroup(lambdaGroup);
 
         // let the lambda group visitor visit the newly created lambda group
         this.lambdaGroupVisitor.visitProgramClass(lambdaGroup);
