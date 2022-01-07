@@ -158,7 +158,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     {
         // TODO: use a simpler, more reliable, specific method inliner instead of the current wrapper around the MethodInliner
         ClassPool lambdaClassPool = new ClassPool(lambdaClass);
-        lambdaClassPool.accept(new MethodInlinerWrapper(this.configuration, this.programClassPool, this.libraryClassPool));
+        lambdaClassPool.accept(KotlinLambdaMerger.methodInlinerWrapper);
     }
 
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
