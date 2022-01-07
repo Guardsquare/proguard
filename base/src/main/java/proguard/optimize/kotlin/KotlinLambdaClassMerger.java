@@ -61,7 +61,8 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
         KotlinLambdaGroupBuilder lambdaGroupBuilder = new KotlinLambdaGroupBuilder(lambdaGroupName,
                                                                                    this.configuration,
                                                                                    this.programClassPool,
-                                                                                   this.libraryClassPool);
+                                                                                   this.libraryClassPool,
+                                                                                   this.extraDataEntryNameMap);
 
         // visit each lambda of this package to add their implementations to the lambda group
         lambdaClassPool.classesAccept(lambdaGroupBuilder);
@@ -76,7 +77,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
         this.lambdaGroupVisitor.visitProgramClass(lambdaGroup);
 
         // ensure that this newly created class is part of the resulting output
-        extraDataEntryNameMap.addExtraClass(lambdaGroup.getName());
+        //extraDataEntryNameMap.addExtraClass(lambdaGroup.getName());
     }
 
     private static String getPackagePrefixOfClasses(ClassPool classPool)

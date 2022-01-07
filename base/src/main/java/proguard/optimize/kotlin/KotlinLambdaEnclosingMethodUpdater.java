@@ -20,6 +20,7 @@ import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.Shrinker;
 
@@ -32,6 +33,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     private ClassPool libraryClassPool;
     private final ProgramClass lambdaGroup;
     private final int classId;
+    private final ExtraDataEntryNameMap extraDataEntryNameMap;
     private boolean visitEnclosingMethodAttribute = false;
     private boolean visitEnclosingMethod = false;
     private boolean visitEnclosingCode = false;
@@ -43,11 +45,13 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     public KotlinLambdaEnclosingMethodUpdater(ClassPool        programClassPool,
                                               ClassPool        libraryClassPool,
                                               ProgramClass lambdaGroup,
-                                              int classId) {
+                                              int classId,
+                                              ExtraDataEntryNameMap extraDataEntryNameMap) {
         this.programClassPool = programClassPool;
         this.libraryClassPool = libraryClassPool;
         this.lambdaGroup = lambdaGroup;
         this.classId = classId;
+        this.extraDataEntryNameMap = extraDataEntryNameMap;
     }
 
     @Override
@@ -75,7 +79,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
 
         // remove all references to lambda class from the constant pool of its enclosing class
         enclosingClass.accept(new ConstantPoolShrinker());
-
+        // ensure that the newly created lambda group is part of the resulting output as a dependency of this enclosing class
+        this.extraDataEntryNameMap.addExtraClassToClass(enclosingClass, this.lambdaGroup);
     }
 
     @Override

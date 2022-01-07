@@ -13,6 +13,7 @@ import proguard.classfile.editor.InterfaceAdder;
 import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
+import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 
@@ -37,6 +38,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private final ClassPool libraryClassPool;
     private final Map<Integer, KotlinLambdaGroupInvokeMethodBuilder> invokeMethodBuilders;
     private final InterfaceAdder interfaceAdder;
+    private final ExtraDataEntryNameMap extraDataEntryNameMap;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaGroupBuilder.class);
 
     /**
@@ -45,7 +47,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param programClassPool a program class pool containing classes that can be referenced by the new lambda group
      * @param libraryClassPool a library class pool containing classes that can be referenced by the new lambda group
      */
-    public KotlinLambdaGroupBuilder(String lambdaGroupName, Configuration configuration, ClassPool programClassPool, ClassPool libraryClassPool)
+    public KotlinLambdaGroupBuilder(String lambdaGroupName, Configuration configuration, ClassPool programClassPool, ClassPool libraryClassPool,
+                                    final ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.classBuilder = getNewLambdaGroupClassBuilder(lambdaGroupName, programClassPool, libraryClassPool);
         this.configuration = configuration;
@@ -53,6 +56,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         this.libraryClassPool = libraryClassPool;
         this.invokeMethodBuilders = new HashMap<>();
         this.interfaceAdder = new InterfaceAdder(this.classBuilder.getProgramClass());
+        this.extraDataEntryNameMap = extraDataEntryNameMap;
         initialiseLambdaGroup();
     }
 
@@ -235,11 +239,12 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId)
     {
         logger.info("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
-        lambdaClass.attributesAccept(new KotlinLambdaEnclosingMethodUpdater(
-                                     this.programClassPool,
-                                     this.libraryClassPool,
-                                     this.classBuilder.getProgramClass(),
-                                     lambdaClassId));
+        lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD,
+                                    new KotlinLambdaEnclosingMethodUpdater(this.programClassPool,
+                                                                           this.libraryClassPool,
+                                                                           this.classBuilder.getProgramClass(),
+                                                                           lambdaClassId,
+                                                                           this.extraDataEntryNameMap));
     }
 
     private void addInitConstructors()
