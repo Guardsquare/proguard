@@ -16,6 +16,7 @@ import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
+import proguard.util.ProcessingFlags;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -272,6 +273,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         //
         addInitConstructors();
         addInvokeMethods();
-        return this.classBuilder.getProgramClass();
+        ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
+        lambdaGroup.setProcessingFlags(lambdaGroup.getProcessingFlags() | ProcessingFlags.INJECTED);
+        return lambdaGroup;
     }
 }
