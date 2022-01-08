@@ -30,6 +30,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
 
     public static final String NAME_LAMBDA_GROUP = "LambdaGroup";
     private final ClassVisitor lambdaGroupVisitor;
+    private final ClassVisitor notMergedLambdaVisitor;
     private final Configuration configuration;
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
@@ -40,18 +41,29 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
                                    final ClassPool             programClassPool,
                                    final ClassPool             libraryClassPool,
                                    final ClassVisitor          lambdaGroupVisitor,
+                                   final ClassVisitor          notMergedLambdaVisitor,
                                    final ExtraDataEntryNameMap extraDataEntryNameMap)
     {
-        this.configuration         = configuration;
-        this.programClassPool      = programClassPool;
-        this.libraryClassPool      = libraryClassPool;
-        this.lambdaGroupVisitor    = lambdaGroupVisitor;
-        this.extraDataEntryNameMap = extraDataEntryNameMap;
+        this.configuration          = configuration;
+        this.programClassPool       = programClassPool;
+        this.libraryClassPool       = libraryClassPool;
+        this.lambdaGroupVisitor     = lambdaGroupVisitor;
+        this.notMergedLambdaVisitor = notMergedLambdaVisitor;
+        this.extraDataEntryNameMap  = extraDataEntryNameMap;
     }
 
     @Override
     public void visitClassPool(ClassPool lambdaClassPool)
     {
+        // don't merge lambda's if there is only one or zero
+        if (lambdaClassPool.size() < 2)
+        {
+            if (notMergedLambdaVisitor != null) {
+                lambdaClassPool.classesAccept(notMergedLambdaVisitor);
+            }
+            return;
+        }
+
         // choose a name for the lambda group
         // ensure that the lambda group is in the same package as the classes of the class pool
         String lambdaGroupName = getPackagePrefixOfClasses(lambdaClassPool) + NAME_LAMBDA_GROUP;
@@ -62,7 +74,8 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
                                                                                    this.configuration,
                                                                                    this.programClassPool,
                                                                                    this.libraryClassPool,
-                                                                                   this.extraDataEntryNameMap);
+                                                                                   this.extraDataEntryNameMap,
+                                                                                   this.notMergedLambdaVisitor);
 
         // visit each lambda of this package to add their implementations to the lambda group
         lambdaClassPool.classesAccept(lambdaGroupBuilder);

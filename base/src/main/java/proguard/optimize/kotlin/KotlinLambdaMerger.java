@@ -104,6 +104,7 @@ public class KotlinLambdaMerger {
                                           new ProgramMemberOptimizationInfoSetter()));
 
             ClassPool lambdaGroupClassPool = new ClassPool();
+            ClassPool notMergedLambdaClassPool = new ClassPool();
 
             // merge the lambda's per package
             KotlinLambdaClassMerger merger = new KotlinLambdaClassMerger(this.configuration,
@@ -111,6 +112,9 @@ public class KotlinLambdaMerger {
                                                                          libraryClassPool,
                                                                          new MultiClassVisitor(
                                                                          new ClassPoolFiller(lambdaGroupClassPool),
+                                                                         newProgramClassPoolFiller),
+                                                                         new MultiClassVisitor(
+                                                                         new ClassPoolFiller(notMergedLambdaClassPool),
                                                                          newProgramClassPoolFiller),
                                                                          extraDataEntryNameMap);
             packageGrouper.packagesAccept(merger);
@@ -124,9 +128,13 @@ public class KotlinLambdaMerger {
             // remove the unused helper methods from the lambda groups
             shrinkLambdaGroups(newProgramClassPool, libraryClassPool, resourceFilePool, lambdaGroupClassPool);
 
-            logger.info("{} lambda class(es) found that can be merged.", lambdaClassPool.size());
+            logger.info("Considered {} lambda classes for merging", lambdaClassPool.size());
+            logger.info("of which {} lambda classes were not merged.", notMergedLambdaClassPool.size());
             logger.info("{} lambda group(s) created.", lambdaGroupClassPool.size());
-            logger.info("#lambda groups/#lambda classes ratio = {}/{} = {}%", lambdaGroupClassPool.size(), lambdaClassPool.size(), 100 * lambdaGroupClassPool.size() / lambdaClassPool.size());
+            logger.info("#lambda groups/#merged lambda classes ratio = {}/{} = {}%",
+                        lambdaGroupClassPool.size(),
+                        lambdaClassPool.size() - notMergedLambdaClassPool.size(),
+                        100 * lambdaGroupClassPool.size() / (lambdaClassPool.size() - notMergedLambdaClassPool.size()));
             logger.info("Size of original program class pool: {}", programClassPool.size());
             logger.info("Size of new program class pool: {}", newProgramClassPool.size());
 

@@ -41,6 +41,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private final Configuration configuration;
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
+    private final ClassVisitor notMergedLambdaVisitor;
     private final Map<Integer, KotlinLambdaGroupInvokeMethodBuilder> invokeMethodBuilders;
     private final InterfaceAdder interfaceAdder;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
@@ -52,16 +53,21 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param programClassPool a program class pool containing classes that can be referenced by the new lambda group
      * @param libraryClassPool a library class pool containing classes that can be referenced by the new lambda group
      */
-    public KotlinLambdaGroupBuilder(String lambdaGroupName, Configuration configuration, ClassPool programClassPool, ClassPool libraryClassPool,
-                                    final ExtraDataEntryNameMap extraDataEntryNameMap)
+    public KotlinLambdaGroupBuilder(final String lambdaGroupName,
+                                    final Configuration configuration,
+                                    final ClassPool programClassPool,
+                                    final ClassPool libraryClassPool,
+                                    final ExtraDataEntryNameMap extraDataEntryNameMap,
+                                    final ClassVisitor notMergedLambdaVisitor)
     {
-        this.classBuilder = getNewLambdaGroupClassBuilder(lambdaGroupName, programClassPool, libraryClassPool);
-        this.configuration = configuration;
-        this.programClassPool = programClassPool;
-        this.libraryClassPool = libraryClassPool;
-        this.invokeMethodBuilders = new HashMap<>();
-        this.interfaceAdder = new InterfaceAdder(this.classBuilder.getProgramClass());
-        this.extraDataEntryNameMap = extraDataEntryNameMap;
+        this.classBuilder           = getNewLambdaGroupClassBuilder(lambdaGroupName, programClassPool, libraryClassPool);
+        this.configuration          = configuration;
+        this.programClassPool       = programClassPool;
+        this.libraryClassPool       = libraryClassPool;
+        this.invokeMethodBuilders   = new HashMap<>();
+        this.interfaceAdder         = new InterfaceAdder(this.classBuilder.getProgramClass());
+        this.extraDataEntryNameMap  = extraDataEntryNameMap;
+        this.notMergedLambdaVisitor = notMergedLambdaVisitor;
         initialiseLambdaGroup();
     }
 
@@ -115,23 +121,35 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
             return;
         }
 
+        try
+        {
+            mergeLambdaClass(lambdaClass);
+        }
+        catch(Exception exception)
+        {
+            logger.error("Lambda class {} could not be merged: {}", lambdaClass, exception);
+            if (this.notMergedLambdaVisitor != null) {
+                lambdaClass.accept(this.notMergedLambdaVisitor);
+            }
+        }
+    }
+
+    private void mergeLambdaClass(ProgramClass lambdaClass)
+    {
         // update optimisation info of lambda to show lambda has been merged or is going to be merged
         ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
         optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());
 
-        // TODO: check whether lambda class has inner lambda's
-        //  if so, visit inner lambda's first
-        // TODO: ensure that visited inner classes are lambda's
-        // TODO: ensure that visited inner classes are lambda's of the expected type (arity, closure size, free variable types)
+        // merge any inner lambda's before merging the current lambda
         lambdaClass.attributeAccept(Attribute.INNER_CLASSES,
                                     new AllInnerClassesInfoVisitor(
                                     new InnerClassInfoClassConstantVisitor(
                                     new ClassConstantToClassVisitor(
                                     new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
-                                    new ClassNameFilter(lambdaClass.getName(),
-                                                        (ClassVisitor)null,
-                                                        (ClassVisitor)this),
-                                    null)), // don't revisit the current lambda
+                                                          new ClassNameFilter(lambdaClass.getName(),
+                                                          (ClassVisitor)null,
+                                                          (ClassVisitor)this),
+                                                          null)), // don't revisit the current lambda
                                     null)));
 
         // Add interfaces of lambda class to the lambda group
