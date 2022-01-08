@@ -157,7 +157,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.interfaceConstantsAccept(this.interfaceAdder);
 
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
-        logger.info("Adding lambda {} to lambda group {}", lambdaClass.getName(), lambdaGroup.getName());
+        logger.debug("Adding lambda {} to lambda group {}", lambdaClass.getName(), lambdaGroup.getName());
 
         inlineLambdaInvokeMethods(lambdaClass);
         ProgramMethod copiedMethod = copyLambdaInvokeToLambdaGroup(lambdaClass);
@@ -271,7 +271,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      */
     private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId)
     {
-        logger.info("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
+        logger.debug("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
         lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD,
                                     new KotlinLambdaEnclosingMethodUpdater(this.programClassPool,
                                                                            this.libraryClassPool,
