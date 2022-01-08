@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AllInnerClassesInfoVisitor;
 import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
 import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
@@ -16,6 +17,9 @@ import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
+import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
+import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
+import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.util.ProcessingFlags;
 
 import java.util.HashMap;
@@ -157,9 +161,16 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
     {
-        // TODO: use a simpler, more reliable, specific method inliner instead of the current wrapper around the MethodInliner
-        ClassPool lambdaClassPool = new ClassPool(lambdaClass);
-        lambdaClassPool.accept(KotlinLambdaMerger.methodInlinerWrapper);
+        lambdaClass.accept(new ProgramClassOptimizationInfoSetter());
+
+        lambdaClass.accept(new AllMemberVisitor(
+                           new ProgramMemberOptimizationInfoSetter()));
+
+        lambdaClass.accept(new AllMethodVisitor(
+                           new AllAttributeVisitor(
+                           new SameClassMethodInliner(configuration.microEdition,
+                                                      configuration.android,
+                                                      configuration.allowAccessModification))));
     }
 
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
