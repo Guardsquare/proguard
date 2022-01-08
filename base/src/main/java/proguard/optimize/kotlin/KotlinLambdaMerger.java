@@ -74,20 +74,17 @@ public class KotlinLambdaMerger {
 
         // get the Lambda class and the Function0 interface
         Clazz kotlinLambdaClass = getKotlinLambdaClass(programClassPool, libraryClassPool);
-        Clazz kotlinFunction0Interface = getKotlinFunction0Interface(programClassPool, libraryClassPool);
         if (kotlinLambdaClass == null) {
             logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", NAME_KOTLIN_LAMBDA);
         }
-        if (kotlinFunction0Interface == null) {
-            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", NAME_KOTLIN_FUNCTION0);
-        }
-
-        if (kotlinLambdaClass != null && kotlinFunction0Interface != null) {
+        else
+        {
             // A class pool where the applicable lambda's will be stored
             ClassPool lambdaClassPool = new ClassPool();
             ClassPool newProgramClassPool = new ClassPool();
             ClassPoolFiller newProgramClassPoolFiller = new ClassPoolFiller(newProgramClassPool);
-            // find all lambda classes of arity 0 and with an empty closure
+
+            // find all lambda classes with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
             programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
