@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassInitializer;
-import proguard.classfile.util.ClassSubHierarchyInitializer;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.MethodInlinerWrapper;
@@ -13,10 +12,13 @@ import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.resources.file.ResourceFilePool;
+import proguard.shrink.ClassShrinker;
+import proguard.shrink.ClassUsageMarker;
+import proguard.shrink.SimpleUsageMarker;
+import proguard.shrink.UsageMarker;
 import proguard.util.ProcessingFlags;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public class KotlinLambdaMerger {
 
@@ -117,18 +119,16 @@ public class KotlinLambdaMerger {
             //packageGrouper.packageAccept("androidx/compose/foundation/layout", merger); // ColumnKt
             packageGrouper.packagesAccept(merger);
 
-            // inline the helper invoke methods into the general invoke method
-            inlineMethodsInsideLambdaGroups(newProgramClassPool, libraryClassPool, lambdaGroupClassPool);
-
-            lambdaGroupClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
-
-            lambdaGroupClassPool.classesAccept(new AllMemberVisitor(
-                                               new ProgramMemberOptimizationInfoSetter(true)));
-
             // initialise the references from and to the newly created lambda groups and their enclosing classes
             newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, libraryClassPool));
 
-            logger.info("{} lambda class(es) found.", lambdaClassPool.size());
+            // inline the helper invoke methods into the general invoke method
+            inlineMethodsInsideLambdaGroups(newProgramClassPool, libraryClassPool, lambdaGroupClassPool);
+
+            // remove the unused helper methods from the lambda groups
+            shrinkLambdaGroups(newProgramClassPool, libraryClassPool, resourceFilePool, lambdaGroupClassPool);
+
+            logger.info("{} lambda class(es) found that can be merged.", lambdaClassPool.size());
             logger.info("{} lambda group(s) created.", lambdaGroupClassPool.size());
             logger.info("#lambda groups/#lambda classes ratio = {}/{} = {}%", lambdaGroupClassPool.size(), lambdaClassPool.size(), 100 * lambdaGroupClassPool.size() / lambdaClassPool.size());
             logger.info("Size of original program class pool: {}", programClassPool.size());
@@ -143,6 +143,20 @@ public class KotlinLambdaMerger {
     {
         // TODO: use a simpler, more reliable, specific method inliner instead of the current wrapper around the MethodInliner
         lambdaGroupClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
+    private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ResourceFilePool resourceFilePool, ClassPool lambdaGroupClassPool)
+    {
+        SimpleUsageMarker simpleUsageMarker = new SimpleUsageMarker();
+        ClassUsageMarker classUsageMarker = new ClassUsageMarker(simpleUsageMarker);
+
+        // make sure that the used methods of the lambda groups are marked as used
+        // note: if -dontshrink is
+        new UsageMarker(configuration).mark(programClassPool,
+                                            libraryClassPool,
+                                            resourceFilePool,
+                                            simpleUsageMarker,
+                                            classUsageMarker);
+        // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
+        lambdaGroupClassPool.classesAccept(new ClassShrinker(simpleUsageMarker));
     }
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
