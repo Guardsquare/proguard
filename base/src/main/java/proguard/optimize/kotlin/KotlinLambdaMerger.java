@@ -161,12 +161,22 @@ public class KotlinLambdaMerger {
         ClassUsageMarker classUsageMarker = new ClassUsageMarker(simpleUsageMarker);
 
         // make sure that the used methods of the lambda groups are marked as used
+        // by marking all classes and methods
         // note: if -dontshrink is
-        new UsageMarker(configuration).mark(programClassPool,
+        /*new UsageMarker(configuration).mark(programClassPool,
                                             libraryClassPool,
                                             resourceFilePool,
                                             simpleUsageMarker,
-                                            classUsageMarker);
+                                            classUsageMarker);*/
+        libraryClassPool.classesAccept(classUsageMarker);
+        // but don't mark the lambda groups if they are not used
+        programClassPool.classesAccept(new ClassNameFilter(
+                                       "**/" + KotlinLambdaClassMerger.NAME_LAMBDA_GROUP,
+                                       (ClassVisitor) null,
+                                       new MultiClassVisitor(
+                                       classUsageMarker,
+                                       new AllMemberVisitor(
+                                       classUsageMarker))));
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
         // and make sure that the line numbers are updated
         lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
