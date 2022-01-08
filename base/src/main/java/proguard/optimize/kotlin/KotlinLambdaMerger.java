@@ -213,9 +213,10 @@ public class KotlinLambdaMerger {
     public static boolean shouldMerge(ProgramClass lambdaClass)
     {
         ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
-        return (lambdaClass.getProcessingFlags() & ProcessingFlags.DONT_OPTIMIZE) == 0
+        return (lambdaClass.getProcessingFlags() & (ProcessingFlags.DONT_OPTIMIZE | ProcessingFlags.DONT_SHRINK)) == 0
+                && lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA)
+                && optimizationInfo != null // if optimisation info is null, then the lambda was not enqueued to be merged
                 && optimizationInfo.getLambdaGroup() == null
-                && optimizationInfo.mayBeMerged()
-                && lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA);
+                && optimizationInfo.mayBeMerged();
     }
 }
