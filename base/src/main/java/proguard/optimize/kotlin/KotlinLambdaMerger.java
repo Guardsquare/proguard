@@ -16,6 +16,7 @@ import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
+import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.ClassShrinker;
@@ -167,7 +168,10 @@ public class KotlinLambdaMerger {
                                             simpleUsageMarker,
                                             classUsageMarker);
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
-        lambdaGroupClassPool.classesAccept(new ClassShrinker(simpleUsageMarker));
+        // and make sure that the line numbers are updated
+        lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
+                                           new ClassShrinker(simpleUsageMarker),
+                                           new LineNumberLinearizer()));
     }
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
