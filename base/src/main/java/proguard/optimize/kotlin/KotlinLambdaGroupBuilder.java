@@ -171,10 +171,6 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId);
-
-        // update optimisation info of lambda to show lambda has been merged
-        /*ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
-        optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());*/
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
