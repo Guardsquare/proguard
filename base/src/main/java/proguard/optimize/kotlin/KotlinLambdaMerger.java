@@ -3,7 +3,12 @@ package proguard.optimize.kotlin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
-import proguard.classfile.*;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.ClassInitializer;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
@@ -11,6 +16,7 @@ import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
+import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.ClassShrinker;
 import proguard.shrink.ClassUsageMarker;
@@ -50,7 +56,6 @@ public class KotlinLambdaMerger {
 
     private static final Logger logger = LogManager.getLogger(KotlinLambdaMerger.class);
     private final Configuration configuration;
-    public static MethodInlinerWrapper methodInlinerWrapper;
 
     public KotlinLambdaMerger(Configuration configuration)
     {
@@ -98,8 +103,6 @@ public class KotlinLambdaMerger {
             PackageGrouper packageGrouper = new PackageGrouper();
             lambdaClassPool.classesAccept(packageGrouper);
 
-            methodInlinerWrapper = new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool);
-
             // add optimisation info to the lambda's, so that it can be filled out later
             lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter(true));
             lambdaClassPool.classesAccept(new AllMemberVisitor(
@@ -141,8 +144,21 @@ public class KotlinLambdaMerger {
 
     private void inlineMethodsInsideLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
     {
-        // TODO: use a simpler, more reliable, specific method inliner instead of the current wrapper around the MethodInliner
-        lambdaGroupClassPool.accept(new MethodInlinerWrapper(this.configuration, programClassPool, libraryClassPool));
+        InstructionCounter methodInliningCounter = new InstructionCounter();
+
+        lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
+                                           new ProgramClassOptimizationInfoSetter(),
+                                           new AllMemberVisitor(
+                                           new ProgramMemberOptimizationInfoSetter()),
+                                           new AllMethodVisitor(
+                                           new AllAttributeVisitor(
+                                           new SameClassMethodInliner(configuration.microEdition,
+                                                                      configuration.android,
+                                                                      configuration.allowAccessModification,
+                                                                      methodInliningCounter)))));
+        logger.debug("{} methods inlined inside lambda groups.", methodInliningCounter.getCount());
+    }
+
     private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ResourceFilePool resourceFilePool, ClassPool lambdaGroupClassPool)
     {
         SimpleUsageMarker simpleUsageMarker = new SimpleUsageMarker();
