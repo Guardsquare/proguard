@@ -19,10 +19,7 @@ import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.resources.file.ResourceFilePool;
-import proguard.shrink.ClassShrinker;
-import proguard.shrink.ClassUsageMarker;
-import proguard.shrink.SimpleUsageMarker;
-import proguard.shrink.UsageMarker;
+import proguard.shrink.*;
 import proguard.util.ProcessingFlags;
 
 import java.io.IOException;
@@ -169,7 +166,8 @@ public class KotlinLambdaMerger {
                                             simpleUsageMarker,
                                             classUsageMarker);*/
         libraryClassPool.classesAccept(classUsageMarker);
-        // but don't mark the lambda groups if they are not used
+        // but don't mark the lambda groups and their members in case they are not used,
+        // e.g. inlined helper invoke methods
         programClassPool.classesAccept(new ClassNameFilter(
                                        "**/" + KotlinLambdaClassMerger.NAME_LAMBDA_GROUP,
                                        (ClassVisitor) null,
@@ -177,6 +175,11 @@ public class KotlinLambdaMerger {
                                        classUsageMarker,
                                        new AllMemberVisitor(
                                        classUsageMarker))));
+
+        // ensure that the interfaces of the lambda group are not removed
+        lambdaGroupClassPool.classesAccept(new InterfaceUsageMarker(
+                                           classUsageMarker));
+
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
         // and make sure that the line numbers are updated
         lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
