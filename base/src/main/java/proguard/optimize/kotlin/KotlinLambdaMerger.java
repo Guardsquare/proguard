@@ -101,9 +101,9 @@ public class KotlinLambdaMerger {
             lambdaClassPool.classesAccept(packageGrouper);
 
             // add optimisation info to the lambda's, so that it can be filled out later
-            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter(true));
+            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
             lambdaClassPool.classesAccept(new AllMemberVisitor(
-                                          new ProgramMemberOptimizationInfoSetter(true)));
+                                          new ProgramMemberOptimizationInfoSetter()));
 
             ClassPool lambdaGroupClassPool = new ClassPool();
 
