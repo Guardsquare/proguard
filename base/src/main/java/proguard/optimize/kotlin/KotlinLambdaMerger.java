@@ -108,15 +108,13 @@ public class KotlinLambdaMerger {
             ClassPool lambdaGroupClassPool = new ClassPool();
 
             // merge the lambda's per package
-            KotlinLambdaClassMerger merger = new KotlinLambdaClassMerger(
-                                          this.configuration,
-                                          programClassPool,
-                                          libraryClassPool,
-                                          new MultiClassVisitor(
-                                          new ClassPoolFiller(lambdaGroupClassPool),
-                                          newProgramClassPoolFiller),
-                                          extraDataEntryNameMap);
-            //packageGrouper.packageAccept("androidx/compose/foundation/layout", merger); // ColumnKt
+            KotlinLambdaClassMerger merger = new KotlinLambdaClassMerger(this.configuration,
+                                                                         programClassPool,
+                                                                         libraryClassPool,
+                                                                         new MultiClassVisitor(
+                                                                         new ClassPoolFiller(lambdaGroupClassPool),
+                                                                         newProgramClassPoolFiller),
+                                                                         extraDataEntryNameMap);
             packageGrouper.packagesAccept(merger);
 
             // initialise the references from and to the newly created lambda groups and their enclosing classes
