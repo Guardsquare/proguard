@@ -5,10 +5,7 @@ import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.attribute.visitor.AllInnerClassesInfoVisitor;
-import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
-import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
+import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.editor.ClassBuilder;
 import proguard.classfile.editor.InterfaceAdder;
 import proguard.classfile.util.ClassUtil;
@@ -140,7 +137,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
         // merge any inner lambda's before merging the current lambda
         lambdaClass.attributeAccept(Attribute.INNER_CLASSES,
-                                    new AllInnerClassesInfoVisitor(
+                                    new ModifiedAllInnerClassesInfoVisitor(
                                     new InnerClassInfoClassConstantVisitor(
                                     new ClassConstantToClassVisitor(
                                     new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
