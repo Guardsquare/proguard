@@ -73,7 +73,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     {
         // The initial builder is used to set up the initial lambda group class
         ClassBuilder initialBuilder = new ClassBuilder(VersionConstants.CLASS_VERSION_1_8,
-                                                       AccessConstants.PUBLIC,
+                                                       AccessConstants.FINAL | AccessConstants.SUPER,
                                                        lambdaGroupName,
                                                        KotlinLambdaMerger.NAME_KOTLIN_LAMBDA);
         ProgramClass lambdaGroup = initialBuilder.getProgramClass();
