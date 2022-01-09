@@ -208,7 +208,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass)
     {
-        logger.info("Copying invoke method of {} to lambda group {}", lambdaClass.getName(), this.classBuilder.getProgramClass().getName());
+        logger.trace("Copying invoke method of {} to lambda group {}", lambdaClass.getName(), this.classBuilder.getProgramClass().getName());
 
         // Note: the lambda class is expected to contain two invoke methods:
         //      - a bridge method that implements invoke()Ljava/lang/Object; for the Function0 interface
