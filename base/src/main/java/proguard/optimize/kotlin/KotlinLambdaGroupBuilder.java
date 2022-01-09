@@ -168,7 +168,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
 
         // replace instantiation of lambda class with instantiation of lambda group with correct id
-        updateLambdaInstantiationSite(lambdaClass, lambdaClassId);
+        updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity);
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
@@ -263,7 +263,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param lambdaClass the lambda class of which the enclosing method must be updated
      * @param lambdaClassId the id that is used for the given lambda class to identify its implementation in the lambda group
      */
-    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId)
+    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity)
     {
         logger.debug("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
         lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD,
@@ -271,6 +271,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                                            this.libraryClassPool,
                                                                            this.classBuilder.getProgramClass(),
                                                                            lambdaClassId,
+                                                                           arity,
                                                                            this.extraDataEntryNameMap));
     }
 

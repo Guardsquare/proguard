@@ -29,6 +29,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     private final ClassPool libraryClassPool;
     private final ProgramClass lambdaGroup;
     private final int classId;
+    private final int arity;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
     private boolean visitEnclosingMethodAttribute = false;
     private boolean visitEnclosingMethod = false;
@@ -41,11 +42,13 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                               ClassPool        libraryClassPool,
                                               ProgramClass lambdaGroup,
                                               int classId,
+                                              int arity,
                                               ExtraDataEntryNameMap extraDataEntryNameMap) {
         this.programClassPool = programClassPool;
         this.libraryClassPool = libraryClassPool;
         this.lambdaGroup = lambdaGroup;
         this.classId = classId;
+        this.arity = arity;
         this.extraDataEntryNameMap = extraDataEntryNameMap;
     }
 
@@ -154,7 +157,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                 builder.new_(lambdaGroup)
                                        .dup()
                                        .iconst(classId)
-                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(I)V").__()
+                                       .iconst(arity)
+                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(II)V").__()
                         },
                         {
                                 // Lambda is explicitly instantiated
@@ -165,7 +169,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                 builder.new_(lambdaGroup)
                                        .dup()
                                        .iconst(classId)
-                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(I)V").__()
+                                       .iconst(arity)
+                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(II)V").__()
                         }
                 };
     }

@@ -31,8 +31,9 @@ public class KotlinLambdaGroupInitBuilder {
         {
             descriptor.append(METHOD_ARGUMENT_TYPE_INIT);
         }
-        descriptor.append(KotlinLambdaGroupBuilder.FIELD_TYPE_ID);
-        descriptor.append(")")
+        descriptor.append(KotlinLambdaGroupBuilder.FIELD_TYPE_ID)
+                  .append("I") // arity argument - TODO: use constant instead of string value
+                  .append(")")
                   .append(RETURN_TYPE_INIT);
         return descriptor.toString();
     }
@@ -64,7 +65,7 @@ public class KotlinLambdaGroupInitBuilder {
                                                .findField(KotlinLambdaGroupBuilder.FIELD_NAME_ID,
                                                           KotlinLambdaGroupBuilder.FIELD_TYPE_ID))
                     .aload_0() // load this class
-                    .iconst_0() // push 0 on stack
+                    .iload(this.closureSize + 2) // load arity argument
                     .invokespecial(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA,
                                    ClassConstants.METHOD_NAME_INIT,
                                    TYPE_KOTLIN_LAMBDA_INIT)
