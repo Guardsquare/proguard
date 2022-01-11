@@ -36,6 +36,7 @@ import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
 import proguard.optimize.peephole.LineNumberLinearizer;
+import proguard.pass.PassRunner;
 import proguard.preverify.*;
 import proguard.shrink.Shrinker;
 import proguard.strip.KotlinAnnotationStripper;
@@ -57,7 +58,8 @@ public class ProGuard
      * A data object containing pass inputs in a centralized location. Passes can access and update the information
      * at any point in the pipeline.
      */
-    private final AppView appView;
+    private final AppView    appView;
+    private final PassRunner passRunner;
 
     /**
      * Creates a new ProGuard object to process jars as specified by the given
@@ -65,7 +67,8 @@ public class ProGuard
      */
     public ProGuard(Configuration configuration)
     {
-        this.appView = new AppView(configuration);
+        this.appView    = new AppView(configuration);
+        this.passRunner = new PassRunner();
     }
 
     /**
@@ -291,19 +294,19 @@ public class ProGuard
     /**
      * Reads the input class files.
      */
-    private void readInput() throws IOException
+    private void readInput() throws Exception
     {
         // Fill the program class pool and the library class pool.
-        new InputReader(appView.configuration).execute(appView);
+        passRunner.run(new InputReader(appView.configuration), appView);
     }
 
 
     /**
      * Clears any JSE preverification information from the program classes.
      */
-    private void clearPreverification()
+    private void clearPreverification() throws Exception
     {
-        new PreverificationClearer().execute(appView);
+        passRunner.run(new PreverificationClearer(), appView);
     }
 
 
@@ -311,14 +314,14 @@ public class ProGuard
      * Initializes the cross-references between all classes, performs some
      * basic checks, and shrinks the library class pool.
      */
-    private void initialize() throws IOException
+    private void initialize() throws Exception
     {
-        new Initializer().execute(appView);
+        passRunner.run(new Initializer(), appView);
 
         if (appView.configuration.keepKotlinMetadata &&
             appView.configuration.enableKotlinAsserter)
         {
-            new KotlinMetadataAsserter().execute(appView);
+            passRunner.run(new KotlinMetadataAsserter(), appView);
         }
     }
 
@@ -327,27 +330,27 @@ public class ProGuard
      * Marks the classes, class members and attributes to be kept or encrypted,
      * by setting the appropriate access flags.
      */
-    private void mark()
+    private void mark() throws Exception
     {
-        new Marker().execute(appView);
+        passRunner.run(new Marker(), appView);
     }
 
 
     /**
      * Strips the Kotlin metadata annotation where possible.
      */
-    private void stripKotlinMetadataAnnotations()
+    private void stripKotlinMetadataAnnotations() throws Exception
     {
-        new KotlinAnnotationStripper().execute(appView);
+        passRunner.run(new KotlinAnnotationStripper(), appView);
     }
 
 
     /**
      * Replaces primitive array initialization code by primitive array constants.
      */
-    private void introducePrimitiveArrayConstants()
+    private void introducePrimitiveArrayConstants() throws Exception
     {
-        new PrimitiveArrayConstantIntroducer().execute(appView);
+        passRunner.run(new PrimitiveArrayConstantIntroducer(), appView);
     }
 
 
@@ -356,7 +359,7 @@ public class ProGuard
      */
     private void backport() throws Exception
     {
-        new Backporter().execute(appView);
+        passRunner.run(new Backporter(), appView);
     }
 
 
@@ -364,9 +367,9 @@ public class ProGuard
      * Adds configuration logging code, providing suggestions on improving
      * the ProGuard configuration.
      */
-    private void addConfigurationLogging() throws IOException
+    private void addConfigurationLogging() throws Exception
     {
-        new ConfigurationLoggingAdder().execute(appView);
+        passRunner.run(new ConfigurationLoggingAdder(), appView);
     }
 
 
@@ -374,34 +377,34 @@ public class ProGuard
      * Prints out classes and class members that are used as seeds in the
      * shrinking and obfuscation steps.
      */
-    private void printSeeds() throws IOException
+    private void printSeeds() throws Exception
     {
-        new SeedPrinter().execute(appView);
+        passRunner.run(new SeedPrinter(), appView);
     }
 
 
     /**
      * Performs the subroutine inlining step.
      */
-    private void inlineSubroutines()
+    private void inlineSubroutines() throws Exception
     {
         // Perform the actual inlining.
-        new SubroutineInliner().execute(appView);
+        passRunner.run(new SubroutineInliner(), appView);
     }
 
 
     /**
      * Performs the shrinking step.
      */
-    private void shrink() throws IOException
+    private void shrink() throws Exception
     {
         // Perform the actual shrinking.
-        new Shrinker().execute(appView);
+        passRunner.run(new Shrinker(), appView);
 
         if (appView.configuration.keepKotlinMetadata &&
             appView.configuration.enableKotlinAsserter)
         {
-            new KotlinMetadataAsserter().execute(appView);
+            passRunner.run(new KotlinMetadataAsserter(), appView);
         }
     }
 
@@ -409,24 +412,24 @@ public class ProGuard
     /**
      * Optimizes usages of the Gson library.
      */
-    private void optimizeGson() throws IOException
+    private void optimizeGson() throws Exception
     {
         // Perform the Gson optimization.
-        new GsonOptimizer().execute(appView);
+        passRunner.run(new GsonOptimizer(), appView);
     }
 
 
     /**
      * Performs the optimization step.
      */
-    private void optimize() throws IOException
+    private void optimize() throws Exception
     {
         Optimizer optimizer = new Optimizer();
 
         for (int optimizationPass = 0; optimizationPass < appView.configuration.optimizationPasses; optimizationPass++)
         {
             // Perform the actual optimization.
-            optimizer.execute(appView);
+            passRunner.run(optimizer, appView);
 
             // Shrink again, if we may.
             if (appView.configuration.shrink)
@@ -441,35 +444,35 @@ public class ProGuard
      * Disambiguates the line numbers of all program classes, after
      * optimizations like method inlining and class merging.
      */
-    private void linearizeLineNumbers()
+    private void linearizeLineNumbers() throws Exception
     {
-        new LineNumberLinearizer().execute(appView);
+        passRunner.run(new LineNumberLinearizer(), appView);
     }
 
 
     /**
      * Performs the obfuscation step.
      */
-    private void obfuscate() throws IOException
+    private void obfuscate() throws Exception
     {
-        new ObfuscationPreparation().execute(appView);
+        passRunner.run(new ObfuscationPreparation(), appView);
 
         // Perform the actual obfuscation.
-        new Obfuscator().execute(appView);
+        passRunner.run(new Obfuscator(), appView);
 
         // Adapt resource file names that correspond to class names, if necessary.
         if (appView.configuration.adaptResourceFileNames != null)
         {
-            new ResourceFileNameAdapter().execute(appView);
+            passRunner.run(new ResourceFileNameAdapter(), appView);
         }
 
         // Fix the Kotlin modules so the filename matches and the class names match.
-        new NameObfuscationReferenceFixer().execute(appView);
+        passRunner.run(new NameObfuscationReferenceFixer(), appView);
 
         if (appView.configuration.keepKotlinMetadata &&
             appView.configuration.enableKotlinAsserter)
         {
-            new KotlinMetadataAsserter().execute(appView);
+            passRunner.run(new KotlinMetadataAsserter(), appView);
         }
     }
 
@@ -477,9 +480,9 @@ public class ProGuard
     /**
      * Adapts Kotlin Metadata annotations.
      */
-    private void adaptKotlinMetadata()
+    private void adaptKotlinMetadata() throws Exception
     {
-        new KotlinMetadataAdapter().execute(appView);
+        passRunner.run(new KotlinMetadataAdapter(), appView);
     }
 
 
@@ -496,28 +499,28 @@ public class ProGuard
     /**
      * Sets that target versions of the program classes.
      */
-    private void target() throws IOException
+    private void target() throws Exception
     {
-        new Targeter().execute(appView);
+        passRunner.run(new Targeter(), appView);
     }
 
 
     /**
      * Performs the preverification step.
      */
-    private void preverify()
+    private void preverify() throws Exception
     {
         // Perform the actual preverification.
-        new Preverifier().execute(appView);
+        passRunner.run(new Preverifier(), appView);
     }
 
 
     /**
      * Trims the line number table attributes of all program classes.
      */
-    private void trimLineNumbers()
+    private void trimLineNumbers() throws Exception
     {
-        new LineNumberTrimmer().execute(appView);
+        passRunner.run(new LineNumberTrimmer(), appView);
     }
 
 
@@ -533,10 +536,10 @@ public class ProGuard
     /**
      * Writes the output class files.
      */
-    private void writeOutput() throws IOException
+    private void writeOutput() throws Exception
     {
         // Write out the program class pool.
-        new OutputWriter().execute(appView);
+        passRunner.run(new OutputWriter(), appView);
     }
 
 
@@ -545,7 +548,7 @@ public class ProGuard
      */
     private void dump() throws Exception
     {
-        new Dumper().execute(appView);
+        passRunner.run(new Dumper(), appView);
     }
 
 
