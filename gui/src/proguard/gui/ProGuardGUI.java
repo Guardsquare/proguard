@@ -1108,7 +1108,7 @@ public class ProGuardGUI extends JFrame
         optimizeCheckBox                        .setSelected(configuration.optimize);
         allowAccessModificationCheckBox         .setSelected(configuration.allowAccessModification);
         mergeInterfacesAggressivelyCheckBox     .setSelected(configuration.mergeInterfacesAggressively);
-        optimizationPassesSpinner.getModel()    .setValue(new Integer(configuration.optimizationPasses));
+        optimizationPassesSpinner.getModel()    .setValue(configuration.optimizationPasses);
 
         obfuscateCheckBox                       .setSelected(configuration.obfuscate);
         printMappingCheckBox                    .setSelected(configuration.printMapping                  != null);
