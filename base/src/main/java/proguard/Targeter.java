@@ -34,20 +34,28 @@ import java.util.*;
  */
 public class Targeter implements Pass
 {
+    private final Configuration configuration;
+
+    public Targeter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Sets the target version on classes in the given program class pool.
      */
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Setting target versions...");
         }
 
-        Set newerClassVersions = appView.configuration.warn != null ? null : new HashSet();
+        Set newerClassVersions = configuration.warn != null ? null : new HashSet();
 
-        appView.programClassPool.classesAccept(new ClassVersionSetter(appView.configuration.targetClassVersion,
+        appView.programClassPool.classesAccept(new ClassVersionSetter(configuration.targetClassVersion,
                                                                       newerClassVersions));
 
         if (newerClassVersions != null &&
@@ -68,9 +76,9 @@ public class Targeter implements Pass
             }
 
             System.err.println(")");
-            System.err.println("         than the target version ("+ClassUtil.externalClassVersion(appView.configuration.targetClassVersion)+").");
+            System.err.println("         than the target version ("+ClassUtil.externalClassVersion(configuration.targetClassVersion)+").");
 
-            if (!appView.configuration.ignoreWarnings)
+            if (!configuration.ignoreWarnings)
             {
                 System.err.println("         If you are sure this is not a problem,");
                 System.err.println("         you could try your luck using the '-ignorewarnings' option.");

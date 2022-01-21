@@ -48,6 +48,14 @@ import java.util.*;
  */
 public class OutputWriter implements Pass
 {
+    private final Configuration configuration;
+
+    public OutputWriter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Writes the given class pool to class files, based on the current
      * configuration.
@@ -55,27 +63,27 @@ public class OutputWriter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Writing output...");
         }
 
-        if (appView.configuration.addConfigurationDebugging)
+        if (configuration.addConfigurationDebugging)
         {
             System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
             System.err.println("It should only be used for debugging purposes.");
         }
 
-        ClassPath programJars = appView.configuration.programJars;
+        ClassPath programJars = configuration.programJars;
 
         // Construct a filter for files that shouldn't be compressed.
         StringMatcher uncompressedFilter =
-            appView.configuration.dontCompress == null ? null :
-                new ListParser(new FileNameParser()).parse(appView.configuration.dontCompress);
+            configuration.dontCompress == null ? null :
+                new ListParser(new FileNameParser()).parse(configuration.dontCompress);
 
         // Get the private key from the key store.
         KeyStore.PrivateKeyEntry[] privateKeyEntries =
-            retrievePrivateKeys(appView.configuration);
+            retrievePrivateKeys(configuration);
 
         // Convert the current time into DOS date and time.
         Date currentDate = new Date();
@@ -93,20 +101,20 @@ public class OutputWriter implements Pass
                                        appView.resourceFilePool,
                                        modificationTime,
                                        uncompressedFilter,
-                                       appView.configuration.zipAlign,
-                                       appView.configuration.android, //resourceInfo.pageAlignNativeLibs,
-                                       appView.configuration.obfuscate,
+                                       configuration.zipAlign,
+                                       configuration.android, //resourceInfo.pageAlignNativeLibs,
+                                       configuration.obfuscate,
                                        privateKeyEntries,
-                                       appView.configuration.verbose);
+                                       configuration.verbose);
 
         DataEntryWriter extraDataEntryWriter = null;
-        if (appView.configuration.extraJar != null)
+        if (configuration.extraJar != null)
         {
             // Extra data entries can optionally be written to a separate jar file.
             // This prevents duplicates if there are multiple -outjars that are later
             // combined together, after ProGuard processing.
             ClassPath extraClassPath = new ClassPath();
-            extraClassPath.add(new ClassPathEntry(appView.configuration.extraJar, true));
+            extraClassPath.add(new ClassPathEntry(configuration.extraJar, true));
             extraDataEntryWriter =
                     new UniqueDataEntryWriter(
                     dataEntryWriterFactory.createDataEntryWriter(extraClassPath, 0, 1, null));
@@ -135,7 +143,7 @@ public class OutputWriter implements Pass
                 {
                     // Write the processed input entries to the output entries.
                     writeOutput(dataEntryWriterFactory,
-                                appView.configuration,
+                                configuration,
                                 appView.programClassPool,
                                 appView.initialStateInfo,
                                 appView.resourceFilePool,

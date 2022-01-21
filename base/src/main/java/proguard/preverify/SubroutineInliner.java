@@ -21,6 +21,7 @@
 package proguard.preverify;
 
 import proguard.AppView;
+import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.visitor.*;
@@ -34,13 +35,21 @@ import proguard.pass.Pass;
  */
 public class SubroutineInliner implements Pass
 {
+    private final Configuration configuration;
+
+    public SubroutineInliner(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Performs subroutine inlining of the given program class pool.
      */
     @Override
     public void execute(AppView appView)
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Inlining subroutines...");
         }
@@ -56,8 +65,8 @@ public class SubroutineInliner implements Pass
 
         // In Java Standard Edition, only class files from Java 6 or higher
         // should be preverified.
-        if (!appView.configuration.microEdition &&
-            !appView.configuration.android)
+        if (!configuration.microEdition &&
+            !configuration.android)
         {
             inliner =
                 new ClassVersionFilter(VersionConstants.CLASS_VERSION_1_6,

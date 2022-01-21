@@ -44,6 +44,14 @@ import static proguard.util.ProcessingFlags.DONT_OBFUSCATE;
  */
 public class Marker implements Pass
 {
+    private final Configuration configuration;
+
+    public Marker(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Marks classes and class members in the given class pools with
      * appropriate access flags, corresponding to the class specifications
@@ -52,7 +60,7 @@ public class Marker implements Pass
     @Override
     public void execute(AppView appView)
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Marking classes and class members to be kept...");
         }
@@ -60,16 +68,16 @@ public class Marker implements Pass
         // Create a combined ClassPool visitor for marking classes.
         MultiClassPoolVisitor classPoolVisitor =
             new MultiClassPoolVisitor(
-                createShrinkingMarker(appView.configuration),
-                createOptimizationMarker(appView.configuration),
-                createObfuscationMarker(appView.configuration)
+                createShrinkingMarker(configuration),
+                createOptimizationMarker(configuration),
+                createObfuscationMarker(configuration)
             );
 
         // Mark the seeds.
         appView.programClassPool.accept(classPoolVisitor);
         appView.libraryClassPool.accept(classPoolVisitor);
 
-        if (appView.configuration.keepKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Keep the Kotlin metadata annotation.
             ClassVisitor classVisitor =
@@ -82,7 +90,7 @@ public class Marker implements Pass
             appView.libraryClassPool.classesAccept(classVisitor);
         }
 
-        if (appView.configuration.keepKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             disableOptimizationForKotlinFeatures(appView.programClassPool, appView.libraryClassPool);
         }

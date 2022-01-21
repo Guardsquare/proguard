@@ -22,6 +22,7 @@
 package proguard.util.kotlin.asserter;
 
 import proguard.AppView;
+import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.classfile.kotlin.visitor.*;
@@ -58,11 +59,19 @@ public class KotlinMetadataAsserter implements Pass
         new KotlinModuleIntegrity()
     );
 
+    private final Configuration configuration;
+
+    public KotlinMetadataAsserter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView)
     {
         PrintWriter    err            = new PrintWriter(System.err, true);
-        WarningPrinter warningPrinter = new WarningPrinter(err, appView.configuration.warn);
+        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
 
         Reporter reporter = new DefaultReporter(warningPrinter);
         MyKotlinMetadataAsserter kotlinMetadataAsserter = new MyKotlinMetadataAsserter(reporter, DEFAULT_CONSTRAINTS);

@@ -18,10 +18,18 @@ import java.io.PrintWriter;
 public class KotlinMetadataAdapter
 implements Pass
 {
+    private final Configuration configuration;
+
+    public KotlinMetadataAdapter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView)
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Adapting Kotlin metadata...");
         }
@@ -33,7 +41,7 @@ implements Pass
             new ReferencedKotlinMetadataVisitor(
                 new KotlinMetadataWriter(warningPrinter, counter)));
 
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("  Number of Kotlin classes adapted:              " + counter.getCount());
         }

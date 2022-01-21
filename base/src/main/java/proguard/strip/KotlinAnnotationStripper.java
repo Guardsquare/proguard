@@ -8,6 +8,7 @@
 package proguard.strip;
 
 import proguard.AppView;
+import proguard.Configuration;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.annotation.Annotation;
@@ -36,10 +37,18 @@ public class KotlinAnnotationStripper implements Pass
 {
     private static final boolean DEBUG = false;
 
+    private final Configuration configuration;
+
+    public KotlinAnnotationStripper(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView)
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Removing @kotlin.Metadata annotation where not kept...");
         }
@@ -77,7 +86,7 @@ public class KotlinAnnotationStripper implements Pass
         appView.programClassPool.classesAccept(kotlinAnnotationStripperVisitor);
         appView.libraryClassPool.classesAccept(kotlinAnnotationStripperVisitor);
 
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("  Original number of classes with @kotlin.Metadata:            " + originalCounter.getCount());
             System.out.println("  Final number of classes with @kotlin.Metadata:               " + (originalCounter.getCount() - kotlinAnnotationStripper.getCount()));

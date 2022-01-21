@@ -184,6 +184,13 @@ public class Optimizer implements Pass
     private boolean moreOptimizationsPossible = true;
     private int     passIndex = 0;
 
+    private final Configuration configuration;
+
+    public Optimizer(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
 
     @Override
     public void execute(AppView appView) throws IOException
@@ -194,8 +201,8 @@ public class Optimizer implements Pass
         }
 
         // Create a matcher for filtering optimizations.
-        StringMatcher filter = appView.configuration.optimizations != null ?
-            new ListParser(new NameParser()).parse(appView.configuration.optimizations) :
+        StringMatcher filter = configuration.optimizations != null ?
+            new ListParser(new NameParser()).parse(configuration.optimizations) :
             new ConstantMatcher(true);
 
         libraryGson                       = filter.matches(LIBRARY_GSON);
@@ -272,21 +279,17 @@ public class Optimizer implements Pass
             fieldGeneralizationClass     ||
             methodGeneralizationClass;
 
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
-            System.out.println("Optimizing (pass " + (passIndex + 1) + "/" + appView.configuration.optimizationPasses + ")...");
+            System.out.println("Optimizing (pass " + (passIndex + 1) + "/" + configuration.optimizationPasses + ")...");
         }
 
-        optimize(appView.configuration,
+        optimize(configuration,
                  appView.programClassPool,
                  appView.libraryClassPool,
                  appView.extraDataEntryNameMap);
 
         passIndex++;
-
-        // Set fields to null so that the Shrinker can be silently run afterwards.
-        appView.configuration.printUsage       = null;
-        appView.configuration.whyAreYouKeeping = null;
     }
 
 

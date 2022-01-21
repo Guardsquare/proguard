@@ -40,7 +40,7 @@ import java.io.*;
  */
 public class InputReader implements Pass
 {
-    private Configuration configuration;
+    private final Configuration configuration;
 
     // Field that acts as a parameter to the visitors that attach
     // feature names to classes and resource files.
@@ -63,8 +63,6 @@ public class InputReader implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        this.configuration = appView.configuration;
-
         if (configuration.verbose)
         {
             System.out.println("Reading input...");

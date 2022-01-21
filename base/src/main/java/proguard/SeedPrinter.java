@@ -34,6 +34,14 @@ import java.io.*;
  */
 public class SeedPrinter implements Pass
 {
+    private final Configuration configuration;
+
+    public SeedPrinter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Prints out the seeds for the classes in the given program class pool.
      *
@@ -42,17 +50,17 @@ public class SeedPrinter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Printing kept classes, fields, and methods...");
         }
 
-        PrintWriter printWriter = PrintWriterUtil.createPrintWriterOut(appView.configuration.printSeeds);
+        PrintWriter printWriter = PrintWriterUtil.createPrintWriterOut(configuration.printSeeds);
 
         try
         {
             // Check if we have at least some keep commands.
-            if (appView.configuration.keep == null)
+            if (configuration.keep == null)
             {
                 throw new IOException("You have to specify '-keep' options if you want to write out kept elements with '-printseeds'.");
             }
@@ -67,7 +75,7 @@ public class SeedPrinter implements Pass
             KeepMarker keepMarker = new KeepMarker();
             ClassPoolVisitor classPoolvisitor =
                     new KeepClassSpecificationVisitorFactory(true, true, true)
-                        .createClassPoolVisitor(appView.configuration.keep,
+                        .createClassPoolVisitor(configuration.keep,
                                                 keepMarker,
                                                 keepMarker,
                                                 keepMarker,
@@ -87,7 +95,7 @@ public class SeedPrinter implements Pass
         }
         finally
         {
-            PrintWriterUtil.closePrintWriter(appView.configuration.printSeeds, printWriter);
+            PrintWriterUtil.closePrintWriter(configuration.printSeeds, printWriter);
         }
     }
 }

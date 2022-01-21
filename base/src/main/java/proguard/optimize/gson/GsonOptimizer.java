@@ -35,7 +35,6 @@ import proguard.classfile.util.WarningPrinter;
 import proguard.classfile.visitor.*;
 import proguard.io.ClassPathDataEntry;
 import proguard.io.ClassReader;
-import proguard.io.ExtraDataEntryNameMap;
 import proguard.pass.Pass;
 import proguard.util.ProcessingFlagSetter;
 import proguard.util.ProcessingFlags;
@@ -101,6 +100,13 @@ public class GsonOptimizer implements Pass
             NAME_OPTIMIZED_TYPE_ADAPTER_FACTORY
         };
 
+    private final Configuration configuration;
+
+    public GsonOptimizer(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
 
     /**
      * Performs the Gson optimizations.
@@ -116,7 +122,7 @@ public class GsonOptimizer implements Pass
             return;
         }
 
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Optimizing usages of Gson library...");
         }
@@ -140,7 +146,7 @@ public class GsonOptimizer implements Pass
         PrintWriter out =
             new PrintWriter(System.out, true);
         WarningPrinter warningPrinter =
-            new WarningPrinter(out, appView.configuration.warn);
+            new WarningPrinter(out, configuration.warn);
 
         GsonContext gsonContext = new GsonContext();
         gsonContext.setupFor(appView.programClassPool, appView.libraryClassPool, warningPrinter);
@@ -247,7 +253,7 @@ public class GsonOptimizer implements Pass
 
             // Inject type adapters for all serialized and deserialized classes that are not abstract and hence can
             // be instantiated directly.
-            Map<String, String> typeAdapterRegistry = new HashMap<String, String>();
+            Map<String, String> typeAdapterRegistry = new HashMap<>();
             OptimizedTypeAdapterAdder optimizedTypeAdapterAdder =
                 new OptimizedTypeAdapterAdder(appView.programClassPool,
                                               appView.libraryClassPool,
@@ -311,7 +317,7 @@ public class GsonOptimizer implements Pass
                     new ClassReferenceInitializer(appView.programClassPool, appView.libraryClassPool)));
 
 
-            if (appView.configuration.verbose)
+            if (configuration.verbose)
             {
                 System.out.println("  Number of optimized serializable classes:      " + gsonContext.gsonDomainClassPool.size() );
             }

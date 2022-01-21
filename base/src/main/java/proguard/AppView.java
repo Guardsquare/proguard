@@ -14,9 +14,6 @@ import proguard.resources.file.ResourceFilePool;
 
 public class AppView
 {
-    // Configuration.
-    public final Configuration         configuration;
-
     // App model.
     public final ClassPool             programClassPool;
     public final ClassPool             libraryClassPool;
@@ -30,18 +27,16 @@ public class AppView
     public       InitialStateInfo      initialStateInfo;
 
 
-    public AppView(Configuration configuration)
+    public AppView()
     {
-        this(new ClassPool(), new ClassPool(), new ResourceFilePool(), new ExtraDataEntryNameMap(), configuration);
+        this(new ClassPool(), new ClassPool(), new ResourceFilePool(), new ExtraDataEntryNameMap());
     }
 
     public AppView(ClassPool             programClassPool,
                    ClassPool             libraryClassPool,
                    ResourceFilePool      resourceFilePool,
-                   ExtraDataEntryNameMap extraDataEntryNameMap,
-                   Configuration         configuration)
+                   ExtraDataEntryNameMap extraDataEntryNameMap)
     {
-        this.configuration         = configuration;
         this.programClassPool      = programClassPool;
         this.resourceFilePool      = resourceFilePool;
         this.libraryClassPool      = libraryClassPool;

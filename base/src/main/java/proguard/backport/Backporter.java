@@ -42,12 +42,20 @@ import java.io.PrintWriter;
  */
 public class Backporter implements Pass
 {
+    private final Configuration configuration;
+
+    public Backporter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView) throws IOException
     {
-        int targetClassVersion = appView.configuration.targetClassVersion;
+        int targetClassVersion = configuration.targetClassVersion;
 
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Backporting class files...");
         }
@@ -223,7 +231,7 @@ public class Backporter implements Pass
             if (streamSupportClasses.getCount() > 0)
             {
                 WarningPrinter streamSupportWarningPrinter =
-                    new WarningPrinter(err, appView.configuration.warn);
+                    new WarningPrinter(err, configuration.warn);
 
                 ClassPool modifiedClasses = new ClassPool();
                 ClassVisitor modifiedClassCollector =
@@ -269,7 +277,7 @@ public class Backporter implements Pass
             if (threetenClasses.getCount() > 0)
             {
                 WarningPrinter threetenWarningPrinter =
-                    new WarningPrinter(err, appView.configuration.warn);
+                    new WarningPrinter(err, configuration.warn);
 
                 ClassPool modifiedClasses = new ClassPool();
                 ClassVisitor modifiedClassCollector =
@@ -307,7 +315,7 @@ public class Backporter implements Pass
             appView.programClassPool.classesAccept(new ClassVersionSetter(targetClassVersion));
         }
 
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("  Number of converted string concatenations:     " + replacedStringConcatCounter.getCount());
             System.out.println("  Number of converted lambda expressions:        " + lambdaExpressionCounter.getCount());

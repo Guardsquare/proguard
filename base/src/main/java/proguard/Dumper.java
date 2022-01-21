@@ -20,22 +20,30 @@ import java.io.PrintWriter;
  */
 public class Dumper implements Pass
 {
+    private final Configuration configuration;
+
+    public Dumper(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView) throws Exception
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
-            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(appView.configuration.dump) + "]...");
+            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(configuration.dump) + "]...");
         }
 
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.dump);
+        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.dump);
         try
         {
             appView.programClassPool.classesAccept(new ClassPrinter(pw));
         }
         finally
         {
-            PrintWriterUtil.closePrintWriter(appView.configuration.dump, pw);
+            PrintWriterUtil.closePrintWriter(configuration.dump, pw);
         }
     }
 }

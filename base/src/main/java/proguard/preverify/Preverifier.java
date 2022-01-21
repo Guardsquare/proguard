@@ -21,6 +21,7 @@
 package proguard.preverify;
 
 import proguard.AppView;
+import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.visitor.*;
@@ -34,13 +35,21 @@ import proguard.pass.Pass;
  */
 public class Preverifier implements Pass
 {
+    private final Configuration configuration;
+
+    public Preverifier(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     /**
      * Performs preverification of the given program class pool.
      */
     @Override
     public void execute(AppView appView)
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Preverifying...");
         }
@@ -53,11 +62,11 @@ public class Preverifier implements Pass
         // Classes for JSE 6 may optionally be preverified.
         // Classes for JSE 7 or higher must be preverified.
         appView.programClassPool.classesAccept(
-            new ClassVersionFilter(appView.configuration.microEdition ?
-                                       VersionConstants.CLASS_VERSION_1_0 :
-                                       VersionConstants.CLASS_VERSION_1_6,
+            new ClassVersionFilter(configuration.microEdition ?
+                                   VersionConstants.CLASS_VERSION_1_0 :
+                                   VersionConstants.CLASS_VERSION_1_6,
             new AllMethodVisitor(
             new AllAttributeVisitor(
-            new CodePreverifier(appView.configuration.microEdition)))));
+            new CodePreverifier(configuration.microEdition)))));
     }
 }

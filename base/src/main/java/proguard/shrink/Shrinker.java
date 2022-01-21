@@ -38,31 +38,41 @@ import java.io.*;
  */
 public class Shrinker implements Pass
 {
+    private final Configuration configuration;
+    private final boolean       afterOptimizer;
+
+    public Shrinker(Configuration configuration, boolean afterOptimizer)
+    {
+        this.configuration  = configuration;
+        this.afterOptimizer = afterOptimizer;
+    }
+
+
     /**
      * Performs shrinking of the given program class pool.
      */
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
             System.out.println("Shrinking...");
 
             // We'll print out some explanation, if requested.
-            if (appView.configuration.whyAreYouKeeping != null)
+            if (configuration.whyAreYouKeeping != null && !afterOptimizer)
             {
                 System.out.println("Explaining why classes and class members are being kept...");
             }
 
             // We'll print out the usage, if requested.
-            if (appView.configuration.printUsage != null)
+            if (configuration.printUsage != null && !afterOptimizer)
             {
-                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(appView.configuration.printUsage) + "]...");
+                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(configuration.printUsage) + "]...");
             }
         }
 
         // Check if we have at least some keep commands.
-        if (appView.configuration.keep == null)
+        if (configuration.keep == null)
         {
             throw new IOException("You have to specify '-keep' options for the shrinking step.");
         }
@@ -76,38 +86,38 @@ public class Shrinker implements Pass
         appView.libraryClassPool.classesAccept(new ClassCleaner());
 
         // Create a visitor for marking the seeds.
-        SimpleUsageMarker simpleUsageMarker = appView.configuration.whyAreYouKeeping == null ?
+        SimpleUsageMarker simpleUsageMarker = configuration.whyAreYouKeeping == null || afterOptimizer ?
             new SimpleUsageMarker() :
             new ShortestUsageMarker();
 
          // Create a usage marker for resources and code, tracing the reasons
          // if specified.
-         ClassUsageMarker classUsageMarker = appView.configuration.whyAreYouKeeping == null ?
+         ClassUsageMarker classUsageMarker = configuration.whyAreYouKeeping == null || afterOptimizer ?
              new ClassUsageMarker(simpleUsageMarker) :
              new ShortestClassUsageMarker((ShortestUsageMarker) simpleUsageMarker,
                                           "is kept by a directive in the configuration.\n\n");
 
         // Mark all used code and resources and resource files.
-        new UsageMarker(appView.configuration).mark(appView.programClassPool,
+        new UsageMarker(configuration).mark(appView.programClassPool,
                                                     appView.libraryClassPool,
                                                     appView.resourceFilePool,
                                                     simpleUsageMarker,
                                                     classUsageMarker);
 
         // Should we explain ourselves?
-        if (appView.configuration.whyAreYouKeeping != null)
+        if (configuration.whyAreYouKeeping != null && !afterOptimizer)
         {
             out.println();
 
             // Create a visitor for explaining classes and class members.
             ShortestUsagePrinter shortestUsagePrinter =
                 new ShortestUsagePrinter((ShortestUsageMarker)classUsageMarker.getUsageMarker(),
-                                         appView.configuration.verbose,
+                                         configuration.verbose,
                                          out);
 
             ClassPoolVisitor whyClassPoolvisitor =
                 new ClassSpecificationVisitorFactory()
-                    .createClassPoolVisitor(appView.configuration.whyAreYouKeeping,
+                    .createClassPoolVisitor(configuration.whyAreYouKeeping,
                                             shortestUsagePrinter,
                                             shortestUsagePrinter);
 
@@ -116,10 +126,10 @@ public class Shrinker implements Pass
             appView.libraryClassPool.accept(whyClassPoolvisitor);
         }
 
-        if (appView.configuration.printUsage != null)
+        if (configuration.printUsage != null && !afterOptimizer)
         {
             PrintWriter usageWriter =
-                PrintWriterUtil.createPrintWriterOut(appView.configuration.printUsage);
+                PrintWriterUtil.createPrintWriterOut(configuration.printUsage);
 
             try
             {
@@ -129,7 +139,7 @@ public class Shrinker implements Pass
             }
             finally
             {
-                PrintWriterUtil.closePrintWriter(appView.configuration.printUsage,
+                PrintWriterUtil.closePrintWriter(configuration.printUsage,
                                                  usageWriter);
             }
         }
@@ -147,7 +157,7 @@ public class Shrinker implements Pass
             new UsedClassFilter(simpleUsageMarker,
             new ClassShrinker(simpleUsageMarker)));
 
-        if (appView.configuration.keepKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Clean up Kotlin metadata for unused classes/members.
             newProgramClassPool.classesAccept(
@@ -167,7 +177,7 @@ public class Shrinker implements Pass
         int newProgramClassPoolSize = newProgramClassPool.size();
 
         // Collect some statistics.
-        if (appView.configuration.verbose)
+        if (configuration.verbose)
         {
            ClassCounter originalClassCounter = new ClassCounter();
             appView.programClassPool.classesAccept(
@@ -190,9 +200,9 @@ public class Shrinker implements Pass
 
         // Check if we have at least some output classes.
         if (newProgramClassPoolSize == 0 &&
-            (appView.configuration.warn == null || !appView.configuration.warn.isEmpty()))
+            (configuration.warn == null || !configuration.warn.isEmpty()))
         {
-            if (appView.configuration.ignoreWarnings)
+            if (configuration.ignoreWarnings)
             {
                 System.err.println("Warning: the output jar is empty. Did you specify the proper '-keep' options?");
             }

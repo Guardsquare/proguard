@@ -8,6 +8,7 @@
 package proguard.obfuscate;
 
 import proguard.AppView;
+import proguard.Configuration;
 import proguard.pass.Pass;
 import proguard.util.FileNameParser;
 import proguard.util.ListParser;
@@ -20,11 +21,19 @@ import proguard.util.ListParser;
 public class ResourceFileNameAdapter
 implements   Pass
 {
+    private final Configuration configuration;
+
+    public ResourceFileNameAdapter(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView)
     {
         appView.resourceFilePool.resourceFilesAccept(
-            new ListParser(new FileNameParser()).parse(appView.configuration.adaptResourceFileNames),
+            new ListParser(new FileNameParser()).parse(configuration.adaptResourceFileNames),
             new ResourceFileNameObfuscator(new ClassNameAdapterFunction(appView.programClassPool), true));
     }
 }

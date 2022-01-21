@@ -8,6 +8,7 @@
 package proguard.obfuscate;
 
 import proguard.AppView;
+import proguard.Configuration;
 import proguard.obfuscate.kotlin.KotlinModuleFixer;
 import proguard.pass.Pass;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
@@ -23,10 +24,18 @@ import proguard.util.ProcessingFlags;
 public class NameObfuscationReferenceFixer
 implements   Pass
 {
+    private final Configuration configuration;
+
+    public NameObfuscationReferenceFixer(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+
     @Override
     public void execute(AppView appView)
     {
-        if (appView.configuration.keepKotlinMetadata)
+        if (configuration.keepKotlinMetadata)
         {
             // Fix the Kotlin modules so the filename matches and the class names match.
             appView.resourceFilePool.resourceFilesAccept(

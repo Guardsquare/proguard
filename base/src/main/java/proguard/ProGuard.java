@@ -58,8 +58,9 @@ public class ProGuard
      * A data object containing pass inputs in a centralized location. Passes can access and update the information
      * at any point in the pipeline.
      */
-    private final AppView    appView;
-    private final PassRunner passRunner;
+    private final AppView       appView;
+    private final PassRunner    passRunner;
+    private final Configuration configuration;
 
     /**
      * Creates a new ProGuard object to process jars as specified by the given
@@ -67,8 +68,9 @@ public class ProGuard
      */
     public ProGuard(Configuration configuration)
     {
-        this.appView    = new AppView(configuration);
-        this.passRunner = new PassRunner();
+        this.appView       = new AppView();
+        this.passRunner    = new PassRunner();
+        this.configuration = configuration;
     }
 
     /**
@@ -77,8 +79,6 @@ public class ProGuard
     public void execute() throws Exception
     {
         System.out.println(VERSION);
-
-        Configuration configuration = appView.configuration;
 
         try
         {
@@ -165,7 +165,7 @@ public class ProGuard
 
             if (configuration.shrink)
             {
-                shrink();
+                shrink(false);
             }
 
             // Create a matcher for filtering optimizations.
@@ -264,11 +264,11 @@ public class ProGuard
      */
     private void printConfiguration() throws IOException
     {
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(appView.configuration.printConfiguration);
+        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printConfiguration);
 
         try (ConfigurationWriter configurationWriter = new ConfigurationWriter(pw))
         {
-            configurationWriter.write(appView.configuration);
+            configurationWriter.write(configuration);
         }
     }
 
@@ -278,7 +278,7 @@ public class ProGuard
      */
     private void checkConfiguration() throws IOException
     {
-        new ConfigurationChecker(appView.configuration).check();
+        new ConfigurationChecker(configuration).check();
     }
 
 
@@ -287,7 +287,7 @@ public class ProGuard
      */
     private void checkUpToDate()
     {
-        new UpToDateChecker(appView.configuration).check();
+        new UpToDateChecker(configuration).check();
     }
 
 
@@ -297,7 +297,7 @@ public class ProGuard
     private void readInput() throws Exception
     {
         // Fill the program class pool and the library class pool.
-        passRunner.run(new InputReader(appView.configuration), appView);
+        passRunner.run(new InputReader(configuration), appView);
     }
 
 
@@ -316,12 +316,12 @@ public class ProGuard
      */
     private void initialize() throws Exception
     {
-        passRunner.run(new Initializer(), appView);
+        passRunner.run(new Initializer(configuration), appView);
 
-        if (appView.configuration.keepKotlinMetadata &&
-            appView.configuration.enableKotlinAsserter)
+        if (configuration.keepKotlinMetadata &&
+            configuration.enableKotlinAsserter)
         {
-            passRunner.run(new KotlinMetadataAsserter(), appView);
+            passRunner.run(new KotlinMetadataAsserter(configuration), appView);
         }
     }
 
@@ -332,7 +332,7 @@ public class ProGuard
      */
     private void mark() throws Exception
     {
-        passRunner.run(new Marker(), appView);
+        passRunner.run(new Marker(configuration), appView);
     }
 
 
@@ -341,7 +341,7 @@ public class ProGuard
      */
     private void stripKotlinMetadataAnnotations() throws Exception
     {
-        passRunner.run(new KotlinAnnotationStripper(), appView);
+        passRunner.run(new KotlinAnnotationStripper(configuration), appView);
     }
 
 
@@ -359,7 +359,7 @@ public class ProGuard
      */
     private void backport() throws Exception
     {
-        passRunner.run(new Backporter(), appView);
+        passRunner.run(new Backporter(configuration), appView);
     }
 
 
@@ -379,7 +379,7 @@ public class ProGuard
      */
     private void printSeeds() throws Exception
     {
-        passRunner.run(new SeedPrinter(), appView);
+        passRunner.run(new SeedPrinter(configuration), appView);
     }
 
 
@@ -389,22 +389,22 @@ public class ProGuard
     private void inlineSubroutines() throws Exception
     {
         // Perform the actual inlining.
-        passRunner.run(new SubroutineInliner(), appView);
+        passRunner.run(new SubroutineInliner(configuration), appView);
     }
 
 
     /**
      * Performs the shrinking step.
      */
-    private void shrink() throws Exception
+    private void shrink(boolean afterOptimizer) throws Exception
     {
         // Perform the actual shrinking.
-        passRunner.run(new Shrinker(), appView);
+        passRunner.run(new Shrinker(configuration, afterOptimizer), appView);
 
-        if (appView.configuration.keepKotlinMetadata &&
-            appView.configuration.enableKotlinAsserter)
+        if (configuration.keepKotlinMetadata &&
+            configuration.enableKotlinAsserter)
         {
-            passRunner.run(new KotlinMetadataAsserter(), appView);
+            passRunner.run(new KotlinMetadataAsserter(configuration), appView);
         }
     }
 
@@ -415,7 +415,7 @@ public class ProGuard
     private void optimizeGson() throws Exception
     {
         // Perform the Gson optimization.
-        passRunner.run(new GsonOptimizer(), appView);
+        passRunner.run(new GsonOptimizer(configuration), appView);
     }
 
 
@@ -424,17 +424,17 @@ public class ProGuard
      */
     private void optimize() throws Exception
     {
-        Optimizer optimizer = new Optimizer();
+        Optimizer optimizer = new Optimizer(configuration);
 
-        for (int optimizationPass = 0; optimizationPass < appView.configuration.optimizationPasses; optimizationPass++)
+        for (int optimizationPass = 0; optimizationPass < configuration.optimizationPasses; optimizationPass++)
         {
             // Perform the actual optimization.
             passRunner.run(optimizer, appView);
 
             // Shrink again, if we may.
-            if (appView.configuration.shrink)
+            if (configuration.shrink)
             {
-                shrink();
+                shrink(true);
             }
         }
     }
@@ -455,24 +455,24 @@ public class ProGuard
      */
     private void obfuscate() throws Exception
     {
-        passRunner.run(new ObfuscationPreparation(), appView);
+        passRunner.run(new ObfuscationPreparation(configuration), appView);
 
         // Perform the actual obfuscation.
-        passRunner.run(new Obfuscator(), appView);
+        passRunner.run(new Obfuscator(configuration), appView);
 
         // Adapt resource file names that correspond to class names, if necessary.
-        if (appView.configuration.adaptResourceFileNames != null)
+        if (configuration.adaptResourceFileNames != null)
         {
-            passRunner.run(new ResourceFileNameAdapter(), appView);
+            passRunner.run(new ResourceFileNameAdapter(configuration), appView);
         }
 
         // Fix the Kotlin modules so the filename matches and the class names match.
-        passRunner.run(new NameObfuscationReferenceFixer(), appView);
+        passRunner.run(new NameObfuscationReferenceFixer(configuration), appView);
 
-        if (appView.configuration.keepKotlinMetadata &&
-            appView.configuration.enableKotlinAsserter)
+        if (configuration.keepKotlinMetadata &&
+            configuration.enableKotlinAsserter)
         {
-            passRunner.run(new KotlinMetadataAsserter(), appView);
+            passRunner.run(new KotlinMetadataAsserter(configuration), appView);
         }
     }
 
@@ -482,7 +482,7 @@ public class ProGuard
      */
     private void adaptKotlinMetadata() throws Exception
     {
-        passRunner.run(new KotlinMetadataAdapter(), appView);
+        passRunner.run(new KotlinMetadataAdapter(configuration), appView);
     }
 
 
@@ -501,7 +501,7 @@ public class ProGuard
      */
     private void target() throws Exception
     {
-        passRunner.run(new Targeter(), appView);
+        passRunner.run(new Targeter(configuration), appView);
     }
 
 
@@ -511,7 +511,7 @@ public class ProGuard
     private void preverify() throws Exception
     {
         // Perform the actual preverification.
-        passRunner.run(new Preverifier(), appView);
+        passRunner.run(new Preverifier(configuration), appView);
     }
 
 
@@ -539,7 +539,7 @@ public class ProGuard
     private void writeOutput() throws Exception
     {
         // Write out the program class pool.
-        passRunner.run(new OutputWriter(), appView);
+        passRunner.run(new OutputWriter(configuration), appView);
     }
 
 
@@ -548,7 +548,7 @@ public class ProGuard
      */
     private void dump() throws Exception
     {
-        passRunner.run(new Dumper(), appView);
+        passRunner.run(new Dumper(configuration), appView);
     }
 
 
