@@ -1,8 +1,5 @@
-## Version 7.2-beta6
+## Version 7.2
 
-### Improved
-
-- Upgrade log4j2 dependency to 2.17.1 in response to CVE-2021-44228, CVE-2021-45046, CVE-2021-45105 and CVE-2021-44832
 
 ### Java Support
 
@@ -19,6 +16,11 @@ To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated
 
 - Add support for processing Kotlin 1.5 and 1.6 metadata. (`PGD-179`, `DGD-3467`, `PGC-31`, `T4777`)
 - Add support for matching Kotlin inline class type parameters when using `includedescriptorclasses` keep rule modifier (requires `-keepkotlinmetadata`). (`T13653`)
+
+### Improved
+
+- Upgrade log4j2 dependency to 2.17.1 in response to CVE-2021-44228, CVE-2021-45046, CVE-2021-45105 and CVE-2021-44832
+- Improve build speed when using `-keepkotlinmetadata`. (`T5205`)
 
 ### Bug fixes
 
