@@ -20,6 +20,8 @@
  */
 package proguard.preverify;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
@@ -35,6 +37,8 @@ import proguard.pass.Pass;
  */
 public class SubroutineInliner implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(SubroutineInliner.class);
+
     private final Configuration configuration;
 
     public SubroutineInliner(Configuration configuration)
@@ -49,10 +53,7 @@ public class SubroutineInliner implements Pass
     @Override
     public void execute(AppView appView)
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Inlining subroutines...");
-        }
+        logger.info("Inlining subroutines...");
 
         // Clean up any old processing info.
         appView.programClassPool.classesAccept(new ClassCleaner());

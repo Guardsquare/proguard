@@ -20,6 +20,8 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -50,11 +52,7 @@ implements   ClassVisitor,
              InstructionVisitor,
              ParameterVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("enum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(SimpleEnumUseChecker.class);
 
     private final PartialEvaluator       partialEvaluator;
     private final MemberVisitor          methodCodeChecker           = new AllAttributeVisitor(this);
@@ -219,14 +217,14 @@ implements   ClassVisitor,
                 // more general array.
                 if (!isPoppingSimpleEnumType(offset, 2))
                 {
-                    if (DEBUG)
+                    if (isPoppingSimpleEnumType(offset))
                     {
-                        if (isPoppingSimpleEnumType(offset))
-                        {
-                            System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] stores enum ["+
-                                               partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] in more general array ["+
-                                               partialEvaluator.getStackBefore(offset).getTop(2).referenceValue().getType()+"]");
-                        }
+                        logger.debug("SimpleEnumUseChecker: [{}.{}{}] stores enum [{}] in more general array [{}]",
+                                     clazz.getName(),
+                                     method.getName(clazz),
+                                     method.getDescriptor(clazz),
+                                     partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType(),
+                                     partialEvaluator.getStackBefore(offset).getTop(2).referenceValue().getType());
                     }
 
                     markPoppedComplexEnumType(offset);
@@ -239,13 +237,13 @@ implements   ClassVisitor,
                 // more general type.
                 if (!isReturningSimpleEnumType(clazz, method))
                 {
-                    if (DEBUG)
+                    if (isPoppingSimpleEnumType(offset))
                     {
-                        if (isPoppingSimpleEnumType(offset))
-                        {
-                            System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] returns enum [" +
-                                               partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] as more general type");
-                        }
+                        logger.debug("SimpleEnumUseChecker: [{}.{}{}] returns enum [{}] as more general type",
+                                     clazz.getName(),
+                                     method.getName(clazz),
+                                     method.getDescriptor(clazz),
+                                     partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType());
                     }
 
                     markPoppedComplexEnumType(offset);
@@ -256,13 +254,14 @@ implements   ClassVisitor,
             case Instruction.OP_MONITOREXIT:
             {
                 // Make sure the popped type is not a simple enum type.
-                if (DEBUG)
+                if (isPoppingSimpleEnumType(offset))
                 {
-                    if (isPoppingSimpleEnumType(offset))
-                    {
-                        System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] uses enum ["+
-                                           partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] as monitor");
-                    }
+                    logger.debug("SimpleEnumUseChecker: [{}.{}{}] uses enum [{}] as monitor",
+                                 clazz.getName(),
+                                 method.getName(clazz),
+                                 method.getDescriptor(clazz),
+                                 partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()
+                    );
                 }
 
                 markPoppedComplexEnumType(offset);
@@ -305,10 +304,13 @@ implements   ClassVisitor,
                     !isSupportedMethod(invokedMethodName,
                                        invokedMethodType))
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] calls ["+partialEvaluator.getStackBefore(offset).getTop(stackEntryIndex).referenceValue().getType()+"."+invokedMethodName+"]");
-                    }
+                    logger.debug("SimpleEnumUseChecker: [{}.{}{}] calls [{}.{}]",
+                                 clazz.getName(),
+                                 method.getName(clazz),
+                                 method.getDescriptor(clazz),
+                                 partialEvaluator.getStackBefore(offset).getTop(stackEntryIndex).referenceValue().getType(),
+                                 invokedMethodName
+                    );
 
                     markPoppedComplexEnumType(offset, stackEntryIndex);
                 }
@@ -343,14 +345,15 @@ implements   ClassVisitor,
                                            clazz,
                                            constantInstruction.constantIndex))
                 {
-                    if (DEBUG)
+                    if (isPoppingSimpleEnumType(offset))
                     {
-                        if (isPoppingSimpleEnumType(offset))
-                        {
-                            System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] is casting or checking ["+
-                                               partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] as ["+
-                                               clazz.getClassName(constantInstruction.constantIndex)+"]");
-                        }
+                        logger.debug("SimpleEnumUseChecker: [{}.{}{}] is casting or checking [{}] as [{}]",
+                                     clazz.getName(),
+                                     method.getName(clazz),
+                                     method.getDescriptor(clazz),
+                                     partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType(),
+                                     clazz.getClassName(constantInstruction.constantIndex)
+                        );
                     }
 
                     // Make sure the popped type is not a simple enum type.
@@ -364,14 +367,15 @@ implements   ClassVisitor,
                         !isMethodSkippedForCheckcast(method.getName(clazz),
                                                      method.getDescriptor(clazz)))
                     {
-                        if (DEBUG)
+                        if (isSimpleEnum(((ClassConstant)((ProgramClass)clazz).getConstant(constantInstruction.constantIndex)).referencedClass))
                         {
-                            if (isSimpleEnum(((ClassConstant)((ProgramClass)clazz).getConstant(constantInstruction.constantIndex)).referencedClass))
-                            {
-                                System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] is casting or checking ["+
-                                                   partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] as ["+
-                                                   clazz.getClassName(constantInstruction.constantIndex)+"]");
-                            }
+                            logger.debug("SimpleEnumUseChecker: [{}.{}{}] is casting or checking [{}] as [{}]",
+                                         clazz.getName(),
+                                         method.getName(clazz),
+                                         method.getDescriptor(clazz),
+                                         partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType(),
+                                         clazz.getClassName(constantInstruction.constantIndex)
+                            );
                         }
 
                         markConstantComplexEnumType(clazz, constantInstruction.constantIndex);
@@ -393,17 +397,24 @@ implements   ClassVisitor,
                 // Check if the instruction is comparing different types.
                 if (!isPoppingIdenticalTypes(offset, 0, 1))
                 {
-                    if (DEBUG)
+                    if (isPoppingSimpleEnumType(offset, 0))
                     {
-                        if (isPoppingSimpleEnumType(offset, 0))
-                        {
-                            System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] compares ["+partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()+"] to plain type");
-                        }
+                        logger.debug("SimpleEnumUseChecker: [{}.{}{}] compares [{}] to plain type",
+                                     clazz.getName(),
+                                     method.getName(clazz),
+                                     method.getDescriptor(clazz),
+                                     partialEvaluator.getStackBefore(offset).getTop(0).referenceValue().getType()
+                        );
+                    }
 
-                        if (isPoppingSimpleEnumType(offset, 1))
-                        {
-                            System.out.println("SimpleEnumUseChecker: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"] compares ["+partialEvaluator.getStackBefore(offset).getTop(1).referenceValue().getType()+"] to plain type");
-                        }
+                    if (isPoppingSimpleEnumType(offset, 1))
+                    {
+                        logger.debug("SimpleEnumUseChecker: [{}.{}{}] compares [{}] to plain type",
+                                     clazz.getName(),
+                                     method.getName(clazz),
+                                     method.getDescriptor(clazz),
+                                     partialEvaluator.getStackBefore(offset).getTop(1).referenceValue().getType()
+                        );
                     }
 
                     // Make sure the first popped type is not a simple enum type.
@@ -434,10 +445,11 @@ implements   ClassVisitor,
             isUnsupportedMethod(programMethod.getName(programClass),
                                 programMethod.getDescriptor(programClass)))
         {
-            if (DEBUG)
-            {
-                System.out.println("SimpleEnumUseChecker: invocation of ["+programClass.getName()+"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"]");
-            }
+            logger.debug("SimpleEnumUseChecker: invocation of [{}.{}{}]",
+                         programClass.getName(),
+                         programMethod.getName(programClass),
+                         programMethod.getDescriptor(programClass)
+            );
 
             complexEnumMarker.visitProgramClass(programClass);
         }
@@ -457,17 +469,15 @@ implements   ClassVisitor,
                                        parameterType :
                                        ClassUtil.internalClassNameFromClassType(parameterType)))
         {
-            if (DEBUG)
+            ReferenceValue poppedValue =
+                partialEvaluator.getStackBefore(invocationOffset).getTop(stackEntryIndex).referenceValue();
+            if (isSimpleEnumType(poppedValue))
             {
-                ReferenceValue poppedValue =
-                    partialEvaluator.getStackBefore(invocationOffset).getTop(stackEntryIndex).referenceValue();
-                if (isSimpleEnumType(poppedValue))
-                {
-                    System.out.println("SimpleEnumUseChecker: ["+poppedValue.getType()+"] "+
-                                       (member instanceof Field ?
-                                            ("is stored as more general type ["+parameterType+"] in field ["+clazz.getName()+"."+member.getName(clazz)+"]") :
-                                            ("is passed as more general argument #"+parameterIndex+" ["+parameterType+"] to ["+clazz.getName()+"."+member.getName(clazz)+"]")));
-                }
+                logger.debug("SimpleEnumUseChecker: [{}] {}",
+                             poppedValue.getType(),
+                             member instanceof Field ?
+                                ("is stored as more general type ["+parameterType+"] in field ["+clazz.getName()+"."+member.getName(clazz)+"]") :
+                                ("is passed as more general argument #"+parameterIndex+" ["+parameterType+"] to ["+clazz.getName()+"."+member.getName(clazz)+"]"));
             }
 
             // Make sure the popped type is not a simple enum type.
@@ -549,14 +559,11 @@ implements   ClassVisitor,
                                 int producerOffset =
                                     producerOffsets.instructionOffset(producerIndex);
 
-                                if (DEBUG)
+                                ReferenceValue producedValue =
+                                    partialEvaluator.getStackAfter(producerOffset).getTop(0).referenceValue();
+                                if (isSimpleEnumType(producedValue))
                                 {
-                                    ReferenceValue producedValue =
-                                        partialEvaluator.getStackAfter(producerOffset).getTop(0).referenceValue();
-                                    if (isSimpleEnumType(producedValue))
-                                    {
-                                        System.out.println("SimpleEnumUseChecker: ["+producedValue.getType()+"] mixed with general type on stack");
-                                    }
+                                    logger.debug("SimpleEnumUseChecker: [{}] mixed with general type on stack", producedValue.getType());
                                 }
 
                                 // Make sure the produced stack entry isn't a
@@ -611,14 +618,11 @@ implements   ClassVisitor,
                                 int producerOffset =
                                     producerOffsets.instructionOffset(producerIndex);
 
-                                if (DEBUG)
+                                ReferenceValue producedValue =
+                                    partialEvaluator.getVariablesAfter(producerOffset).getValue(variableIndex).referenceValue();
+                                if (isSimpleEnumType(producedValue))
                                 {
-                                    ReferenceValue producedValue =
-                                        partialEvaluator.getVariablesAfter(producerOffset).getValue(variableIndex).referenceValue();
-                                    if (isSimpleEnumType(producedValue))
-                                    {
-                                        System.out.println("SimpleEnumUseChecker: ["+producedValue.getType()+"] mixed with general type in variables");
-                                    }
+                                    logger.debug("SimpleEnumUseChecker: [{}] mixed with general type in variables", producedValue.getType());
                                 }
 
                                 // Make sure the stored variable entry isn't a

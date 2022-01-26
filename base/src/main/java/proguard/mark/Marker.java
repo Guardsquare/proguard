@@ -20,6 +20,8 @@
  */
 package proguard.mark;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
@@ -44,6 +46,8 @@ import static proguard.util.ProcessingFlags.DONT_OBFUSCATE;
  */
 public class Marker implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(Marker.class);
+
     private final Configuration configuration;
 
     public Marker(Configuration configuration)
@@ -60,10 +64,7 @@ public class Marker implements Pass
     @Override
     public void execute(AppView appView)
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Marking classes and class members to be kept...");
-        }
+        logger.info("Marking classes and class members to be kept...");
 
         // Create a combined ClassPool visitor for marking classes.
         MultiClassPoolVisitor classPoolVisitor =

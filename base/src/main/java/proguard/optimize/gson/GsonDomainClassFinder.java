@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.Annotation;
 import proguard.classfile.attribute.annotation.visitor.*;
@@ -40,6 +42,7 @@ import java.util.*;
 public class GsonDomainClassFinder
 implements   ClassVisitor
 {
+    private static final Logger logger = LogManager.getLogger(GsonDomainClassFinder.class);
     //*
     public static final boolean DEBUG = false;
     /*/
@@ -214,11 +217,9 @@ implements   ClassVisitor
 
             if ((programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0)
             {
-                if (DEBUG)
-                {
-                    System.out.println("GsonDomainClassFinder: adding domain class " +
-                                       programClass.getName());
-                }
+                logger.debug("GsonDomainClassFinder: adding domain class {}",
+                             programClass.getName()
+                );
 
                 // Add type occurring in toJson() invocation to domain class pool.
                 gsonDomainClassPool.addClass(programClass);

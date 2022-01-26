@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.JavaTypeConstants;
@@ -51,6 +53,7 @@ import static proguard.optimize.gson.OptimizedClassConstants.NAME_OPTIMIZED_TYPE
  */
 public class OptimizedTypeAdapterAdder implements ClassVisitor
 {
+    private static final Logger logger = LogManager.getLogger(OptimizedTypeAdapterAdder.class);
     //*
     public static final boolean DEBUG = false;
     /*/
@@ -129,11 +132,7 @@ public class OptimizedTypeAdapterAdder implements ClassVisitor
 
         if (programClassPool.getClass(typeAdapterClassName) == null)
         {
-            if (DEBUG)
-            {
-                System.out.println("OptimizedTypeAdapterAdder: injecting " +
-                                   typeAdapterClassName);
-            }
+            logger.debug("OptimizedTypeAdapterAdder: injecting {}", typeAdapterClassName);
 
             ClassReader templateClassReader =
                 new ClassReader(false, false, false, false, null,

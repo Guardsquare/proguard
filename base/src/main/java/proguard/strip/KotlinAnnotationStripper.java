@@ -8,6 +8,8 @@
 package proguard.strip;
 
 import proguard.AppView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
@@ -35,7 +37,7 @@ import static proguard.util.ProcessingFlags.*;
  */
 public class KotlinAnnotationStripper implements Pass
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(KotlinAnnotationStripper.class);
 
     private final Configuration configuration;
 
@@ -48,10 +50,7 @@ public class KotlinAnnotationStripper implements Pass
     @Override
     public void execute(AppView appView)
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Removing @kotlin.Metadata annotation where not kept...");
-        }
+        logger.info("Removing @kotlin.Metadata annotation where not kept...");
 
         ClassCounter               originalCounter          = new ClassCounter();
         MemberCounter              keptMemberCounter        = new MemberCounter();
@@ -86,11 +85,8 @@ public class KotlinAnnotationStripper implements Pass
         appView.programClassPool.classesAccept(kotlinAnnotationStripperVisitor);
         appView.libraryClassPool.classesAccept(kotlinAnnotationStripperVisitor);
 
-        if (configuration.verbose)
-        {
-            System.out.println("  Original number of classes with @kotlin.Metadata:            " + originalCounter.getCount());
-            System.out.println("  Final number of classes with @kotlin.Metadata:               " + (originalCounter.getCount() - kotlinAnnotationStripper.getCount()));
-        }
+        logger.info("  Original number of classes with @kotlin.Metadata:            {}", originalCounter.getCount());
+        logger.info("  Final number of classes with @kotlin.Metadata:               {}", (originalCounter.getCount() - kotlinAnnotationStripper.getCount()));
     }
 
 
@@ -139,9 +135,7 @@ public class KotlinAnnotationStripper implements Pass
         @Override
         public void visitAnnotation(Clazz clazz, Annotation annotation)
         {
-            if (DEBUG) {
-                System.out.println("Removing Kotlin metadata annotation from " + clazz.getName());
-            }
+            logger.debug("Removing Kotlin metadata annotation from {}", clazz.getName());
             attributesEditor.deleteAnnotation(annotation);
             clazz.accept(kotlinMetadataRemover);
             count++;

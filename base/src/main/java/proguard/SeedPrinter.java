@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.visitor.*;
 import proguard.optimize.*;
 import proguard.pass.Pass;
@@ -34,6 +36,8 @@ import java.io.*;
  */
 public class SeedPrinter implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(SeedPrinter.class);
+
     private final Configuration configuration;
 
     public SeedPrinter(Configuration configuration)
@@ -50,10 +54,7 @@ public class SeedPrinter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Printing kept classes, fields, and methods...");
-        }
+        logger.info("Printing kept classes, fields, and methods...");
 
         PrintWriter printWriter = PrintWriterUtil.createPrintWriterOut(configuration.printSeeds);
 

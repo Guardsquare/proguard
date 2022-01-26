@@ -20,6 +20,8 @@
  */
 package proguard.obfuscate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
@@ -49,6 +51,7 @@ import java.util.*;
  */
 public class Obfuscator implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(Obfuscator.class);
     private final Configuration configuration;
 
     public Obfuscator(Configuration configuration)
@@ -63,15 +66,11 @@ public class Obfuscator implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Obfuscating...");
-        }
+        logger.info("Obfuscating...");
 
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);
-        PrintWriter err = new PrintWriter(System.err, true);
 
         // Link all non-private, non-static methods in all class hierarchies.
         ClassVisitor memberInfoLinker =
@@ -142,7 +141,7 @@ public class Obfuscator implements Pass
             appView.programClassPool.classesAccept(
                 // Keep Kotlin default implementations class where the user had already kept the interface.
                 new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
-                new ReferencedKotlinMetadataVisitor(new KotlinInterfaceToDefaultImplsClassVisitor(nameMarker))));
+                new ReferencedKotlinMetadataVisitor(new KotlinClassToDefaultImplsClassVisitor(nameMarker))));
         }
 
         // Mark attributes that have to be kept.
@@ -211,7 +210,9 @@ public class Obfuscator implements Pass
         // override the names of library classes and of library class members.
         if (configuration.applyMapping != null)
         {
-            WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+            logger.info("Applying mapping from [{}]...", PrintWriterUtil.fileName(configuration.applyMapping));
+
+            WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
 
             MappingReader reader = new MappingReader(configuration.applyMapping);
 
@@ -228,17 +229,17 @@ public class Obfuscator implements Pass
             int warningCount = warningPrinter.getWarningCount();
             if (warningCount > 0)
             {
-                err.println("Warning: there were " + warningCount +
-                            " kept classes and class members that were remapped anyway.");
-                err.println("         You should adapt your configuration or edit the mapping file.");
+                logger.warn("Warning: there were {} kept classes and class members that were remapped anyway.",
+                             warningCount);
+                logger.warn("         You should adapt your configuration or edit the mapping file.");
 
                 if (!configuration.ignoreWarnings)
                 {
-                    err.println("         If you are sure this remapping won't hurt,");
-                    err.println("         you could try your luck using the '-ignorewarnings' option.");
+                    logger.warn("         If you are sure this remapping won't hurt,");
+                    logger.warn("         you could try your luck using the '-ignorewarnings' option.");
                 }
 
-                err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict1)");
+                logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict1)");
 
                 if (!configuration.ignoreWarnings)
                 {
@@ -277,7 +278,7 @@ public class Obfuscator implements Pass
                                           nameFactory);
         }
 
-        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+        WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
 
         // Maintain a map of names to avoid [descriptor - new name - old name].
         Map descriptorMap = new HashMap();
@@ -473,17 +474,16 @@ public class Obfuscator implements Pass
         int warningCount = warningPrinter.getWarningCount();
         if (warningCount > 0)
         {
-            err.println("Warning: there were " + warningCount +
-                               " conflicting class member name mappings.");
-            err.println("         Your configuration may be inconsistent.");
+            logger.warn("Warning: there were {} conflicting class member name mappings.", warningCount);
+            logger.warn("         Your configuration may be inconsistent.");
 
             if (!configuration.ignoreWarnings)
             {
-                err.println("         If you are sure the conflicts are harmless,");
-                err.println("         you could try your luck using the '-ignorewarnings' option.");
+                logger.warn("         If you are sure the conflicts are harmless,");
+                logger.warn("         you could try your luck using the '-ignorewarnings' option.");
             }
 
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict2)");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#mappingconflict2)");
 
             if (!configuration.ignoreWarnings)
             {
@@ -513,7 +513,7 @@ public class Obfuscator implements Pass
                 // Ensure object classes have the INSTANCE field.
                 new KotlinObjectFixer(),
 
-                new AllFunctionsVisitor(
+                new AllFunctionVisitor(
                     // Ensure that all default interface implementations of methods have the same names.
                     new KotlinDefaultImplsMethodNameEqualizer(),
                     // Ensure all $default methods match their counterpart but with a $default suffix.
@@ -539,12 +539,7 @@ public class Obfuscator implements Pass
         // Print out the mapping, if requested.
         if (configuration.printMapping != null)
         {
-            if (configuration.verbose)
-            {
-                out.println("Printing mapping to [" +
-                            PrintWriterUtil.fileName(configuration.printMapping) +
-                            "]...");
-            }
+            logger.info("Printing mapping to [{}]...", PrintWriterUtil.fileName(configuration.printMapping));
 
             PrintWriter mappingWriter =
                 PrintWriterUtil.createPrintWriter(configuration.printMapping, out);
@@ -601,7 +596,7 @@ public class Obfuscator implements Pass
             // Apply new names to Kotlin properties.
             appView.programClassPool.classesAccept(
                 new ReferencedKotlinMetadataVisitor(
-                new AllKotlinPropertiesVisitor(
+                new AllPropertyVisitor(
                 new KotlinPropertyRenamer())));
         }
 
@@ -656,11 +651,8 @@ public class Obfuscator implements Pass
         appView.programClassPool.classesAccept(
             new ConstantPoolShrinker());
 
-        if (configuration.verbose)
-        {
-            System.out.println("  Number of obfuscated classes:                  " + obfuscatedClassCounter.getCount());
-            System.out.println("  Number of obfuscated fields:                   " + obfuscatedFieldCounter.getCount());
-            System.out.println("  Number of obfuscated methods:                  " + obfuscatedMethodCounter.getCount());
-        }
+        logger.info("  Number of obfuscated classes:                  {}", obfuscatedClassCounter.getCount());
+        logger.info("  Number of obfuscated fields:                   {}", obfuscatedFieldCounter.getCount());
+        logger.info("  Number of obfuscated methods:                  {}", obfuscatedMethodCounter.getCount());
     }
 }

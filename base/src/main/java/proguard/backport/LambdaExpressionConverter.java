@@ -20,6 +20,8 @@
  */
 package proguard.backport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -47,11 +49,7 @@ implements ClassVisitor,
            AttributeVisitor,
            InstructionVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    public  static       boolean DEBUG = System.getProperty("lec") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(LambdaExpressionConverter.class);
 
 
     private static final String LAMBDA_SINGLETON_FIELD_NAME = "INSTANCE";
@@ -96,10 +94,7 @@ implements ClassVisitor,
 
         if (!lambdaExpressionMap.isEmpty())
         {
-            if (DEBUG)
-            {
-                System.out.println("LambdaExpressionConverter: converting lambda expressions in ["+programClass.getName()+"]");
-            }
+            logger.debug("LambdaExpressionConverter: converting lambda expressions in [{}]", programClass.getName());
 
             for (LambdaExpression lambdaExpression : lambdaExpressionMap.values())
             {
@@ -187,10 +182,7 @@ implements ClassVisitor,
 
                 if (lambdaExpression.isStateless())
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("LambdaExpressionConverter:   "+constantInstruction.toString(offset)+" -> getting static "+lambdaClassName+"."+LAMBDA_SINGLETON_FIELD_NAME);
-                    }
+                    logger.debug("LambdaExpressionConverter:   {} -> getting static {}.{}", constantInstruction.toString(offset), lambdaClassName, LAMBDA_SINGLETON_FIELD_NAME);
 
                     builder.getstatic(lambdaClassName,
                                       LAMBDA_SINGLETON_FIELD_NAME,
@@ -198,10 +190,7 @@ implements ClassVisitor,
                 }
                 else
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("LambdaExpressionConverter:   "+constantInstruction.toString(offset)+" -> new instance of "+lambdaClassName);
-                    }
+                    logger.debug("LambdaExpressionConverter:   {} -> new instance of {}", constantInstruction.toString(offset), lambdaClassName);
 
                     int maxLocals = codeAttribute.u2maxLocals;
 
@@ -323,10 +312,7 @@ implements ClassVisitor,
     {
         String lambdaClassName = lambdaExpression.getLambdaClassName();
 
-        if (DEBUG)
-        {
-            System.out.println("LambdaExpressionConverter:   creating lambda class ["+lambdaClassName+"]");
-        }
+        logger.debug("LambdaExpressionConverter:   creating lambda class [{}]", lambdaClassName);
 
         // Start creating the lambda class.
         ClassBuilder classBuilder =
@@ -439,10 +425,11 @@ implements ClassVisitor,
         int accessFlags =
             lambdaExpression.referencedInvokedMethod.getAccessFlags();
 
-        if (DEBUG)
-        {
-           System.out.println("LambdaExpressionConverter:     creating accessor method ["+className+"."+accessorMethodName+accessorMethodDescriptor+"]");
-        }
+        logger.debug("LambdaExpressionConverter:     creating accessor method [{}.{}{}]",
+                     className,
+                     accessorMethodName,
+                     accessorMethodDescriptor
+        );
 
         // Method reference to a constructor.
         if (lambdaExpression.invokedReferenceKind == MethodHandleConstant.REF_NEW_INVOKE_SPECIAL)
@@ -579,10 +566,11 @@ implements ClassVisitor,
                     .areturn());
         }
 
-        if (DEBUG)
-        {
-           System.out.println("LambdaExpressionConverter:     creating interface method ["+lambdaClass.getName()+"."+lambdaExpression.interfaceMethod+lambdaExpression.interfaceMethodDescriptor+"]");
-        }
+        logger.debug("LambdaExpressionConverter:     creating interface method [{}.{}{}]",
+                     lambdaClass.getName(),
+                     lambdaExpression.interfaceMethod,
+                     lambdaExpression.interfaceMethodDescriptor
+        );
 
         // Add the interface method.
         classBuilder.addMethod(
@@ -637,10 +625,11 @@ implements ClassVisitor,
         // Add the constructor.
         String ctorDescriptor = lambdaExpression.getConstructorDescriptor();
 
-        if (DEBUG)
-        {
-           System.out.println("LambdaExpressionConverter:     creating constructor ["+lambdaClass+"."+ClassConstants.METHOD_NAME_INIT+ctorDescriptor+"]");
-        }
+        logger.debug("LambdaExpressionConverter:     creating constructor [{}.{}{}]",
+                     lambdaClass,
+                     ClassConstants.METHOD_NAME_INIT,
+                     ctorDescriptor
+        );
 
         classBuilder.addMethod(
             AccessConstants.PUBLIC,
@@ -684,10 +673,11 @@ implements ClassVisitor,
             String type      = typeEnumeration.nextType();
             String fieldName = "arg$" + argIndex++;
 
-            if (DEBUG)
-            {
-                System.out.println("LambdaExpressionConverter:     creating field ["+lambdaClass+"."+fieldName+" "+type+"]");
-            }
+            logger.debug("LambdaExpressionConverter:     creating field [{}.{} {}]",
+                         lambdaClass,
+                         fieldName,
+                         type
+            );
 
             classBuilder.addField(AccessConstants.PRIVATE |
                                  AccessConstants.FINAL,
@@ -695,10 +685,11 @@ implements ClassVisitor,
                                  type);
         }
 
-        if (DEBUG)
-        {
-           System.out.println("LambdaExpressionConverter:     creating interface method [" + lambdaClassName + "." + lambdaExpression.interfaceMethod + lambdaExpression.interfaceMethodDescriptor + "]");
-        }
+        logger.debug("LambdaExpressionConverter:     creating interface method [{}.{}{}]",
+                     lambdaClassName,
+                     lambdaExpression.interfaceMethod,
+                     lambdaExpression.interfaceMethodDescriptor
+        );
 
         // Add the interface method implementation.
         classBuilder.addMethod(
@@ -869,10 +860,11 @@ implements ClassVisitor,
             Method method = lambdaClass.findMethod(methodName, bridgeMethodDescriptor);
             if (method == null)
             {
-                if (DEBUG)
-                {
-                    System.out.println("LambdaExpressionConverter:     adding bridge method ["+lambdaClass.getName()+"."+methodName+bridgeMethodDescriptor+"]");
-                }
+                logger.debug("LambdaExpressionConverter:     adding bridge method [{}.{}{}]",
+                             lambdaClass.getName(),
+                             methodName,
+                             bridgeMethodDescriptor
+                );
 
                 classBuilder.addMethod(
                     AccessConstants.PUBLIC |

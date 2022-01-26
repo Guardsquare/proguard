@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.annotation.*;
@@ -43,11 +45,7 @@ public class MethodDescriptorShrinker
 implements   MemberVisitor,
              AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("mds") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(MethodDescriptorShrinker.class);
 
 
     private final MemberVisitor extraMemberVisitor;
@@ -77,10 +75,11 @@ implements   MemberVisitor,
 
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        if (DEBUG)
-        {
-            System.out.println("MethodDescriptorShrinker: ["+programClass.getName()+"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"]");
-        }
+        logger.debug("MethodDescriptorShrinker: [{}.{}{}]",
+                     programClass.getName(),
+                     programMethod.getName(programClass),
+                     programMethod.getDescriptor(programClass)
+        );
 
         // Update the descriptor if it has any unused parameters.
         String descriptor    = programMethod.getDescriptor(programClass);
@@ -122,10 +121,7 @@ implements   MemberVisitor,
             programMethod.u2descriptorIndex =
                 constantPoolEditor.addUtf8Constant(newDescriptor);
 
-            if (DEBUG)
-            {
-                System.out.println("    -> ["+newName+newDescriptor+"]");
-            }
+            logger.debug("    -> [{}{}]", newName, newDescriptor);
 
             // Visit the method, if required.
             if (extraMemberVisitor != null)
@@ -143,10 +139,7 @@ implements   MemberVisitor,
 
     public void visitSignatureAttribute(Clazz clazz, Method method, SignatureAttribute signatureAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("  ["+signatureAttribute.getSignature(clazz)+"]");
-        }
+        logger.debug("  [{}]", signatureAttribute.getSignature(clazz));
 
         // Compute the new signature.
         String signature = signatureAttribute.getSignature(clazz);
@@ -175,10 +168,7 @@ implements   MemberVisitor,
                                         syntheticParametersSize,
                                         signatureAttribute.referencedClasses);
 
-            if (DEBUG)
-            {
-                System.out.println("    -> ["+newSignature+"]");
-            }
+            logger.debug("    -> [{}]", newSignature);
         }
     }
 
@@ -284,10 +274,7 @@ implements   MemberVisitor,
             {
                 newDescriptorBuffer.append(type);
             }
-            else if (DEBUG)
-            {
-                System.out.println("  Deleting parameter #"+parameterIndex+" ["+type+"]");
-            }
+            else logger.debug("  Deleting parameter #{} [{}]", parameterIndex, type);
 
             parameterIndex += ClassUtil.internalTypeSize(type);
         }

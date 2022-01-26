@@ -1,3 +1,41 @@
+## Version 7.2
+
+
+### Java Support
+
+New Java versions are released every 6 months. 
+To allow ProGuard to continue to optimize, obfuscate and shrink Java class files ProGuard now supports all Java versions including Java 17.
+
+- Add support for Java 17. (`PGD-132`)
+
+
+### Kotlin Support
+
+New Kotlin versions are released every 6 months.
+To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated class files and their corresponding metadata ProGuard now supports Kotlin reading Kotlin classes from version 1.0 to 1.6 and writing Kotlin metadata with version 1.5 (readable by Kotlin reflection library / compiler 1.4 - 1.6).
+
+- Add support for processing Kotlin 1.5 and 1.6 metadata. (`PGD-179`, `DGD-3467`, `PGC-31`, `T4777`)
+- Add support for matching Kotlin inline class type parameters when using `includedescriptorclasses` keep rule modifier (requires `-keepkotlinmetadata`). (`T13653`)
+
+### Improved
+
+- Upgrade log4j2 dependency to 2.17.1 in response to CVE-2021-44228, CVE-2021-45046, CVE-2021-45105 and CVE-2021-44832
+- Improve build speed when using `-keepkotlinmetadata`. (`T5205`)
+
+### Bug fixes
+
+- Fix potential `NullPointerException` when initializing Kotlin callable references. (`T5899`)
+- Prevent requiring `--enable-preview` on a JVM for Java 16 class files (write class file version `60.0` instead of `60.65535`).
+- Fix potential `StringIndexOutOfBoundsException` during signing. (`T7004`)
+- Fix potential `StackOverflowError` when processing Java 16 records with type annotations. (`PGD-182`)
+- Fix potential `StringOutOfBoundsException` when processing Kotlin callable references. (`T5927`)
+- Fix potential `NullPointerException` when processing Kotlin callable references. (`T6138`)
+- Fix potential `Stack size becomes negative` exception when processing large methods. (`T5721`)
+- Fix potential `ClassFormatError` due to adding multiple annotation attributes when processing Kotlin code.
+- Fix potential `NullPointerException` due to missing classes.
+- Prevent possible `LinkageError` when making package-private final methods that are shadowed protected. (`T7056`)
+
+
 ## Version 7.1.2
 
 ### Bug fixes

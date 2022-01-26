@@ -151,20 +151,14 @@ extends      ClassSpecificationVisitorFactory
             fieldVisitor = fieldVisitor == null ?
                 new MemberDescriptorReferencedClassVisitor(classVisitor) :
                 new MultiMemberVisitor(
-                new MemberVisitor[]
-                {
-                    fieldVisitor,
-                    new MemberDescriptorReferencedClassVisitor(classVisitor)
-                });
+                        fieldVisitor,
+                        new MemberDescriptorReferencedClassVisitor(classVisitor));
 
             methodVisitor = methodVisitor == null ?
-                new MemberDescriptorReferencedClassVisitor(classVisitor) :
+                new MemberDescriptorReferencedClassVisitor(true, classVisitor) :
                 new MultiMemberVisitor(
-                new MemberVisitor[]
-                {
-                    methodVisitor,
-                    new MemberDescriptorReferencedClassVisitor(classVisitor)
-                });
+                        methodVisitor,
+                        new MemberDescriptorReferencedClassVisitor(true, classVisitor));
         }
 
         // Don't visit the classes if not specified.

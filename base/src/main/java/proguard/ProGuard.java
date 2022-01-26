@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.backport.Backporter;
 import proguard.classfile.editor.*;
 import proguard.classfile.pass.PrimitiveArrayConstantIntroducer;
@@ -27,6 +29,8 @@ import proguard.classfile.util.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
+import proguard.io.ExtraDataEntryNameMap;
+import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
 import proguard.obfuscate.ObfuscationPreparation;
@@ -52,6 +56,7 @@ import java.io.*;
  */
 public class ProGuard
 {
+    private static final Logger logger = LogManager.getLogger(ProGuard.class);
     public static final String VERSION = "ProGuard, version " + getVersion();
 
     /**
@@ -78,7 +83,9 @@ public class ProGuard
      */
     public void execute() throws Exception
     {
-        System.out.println(VERSION);
+        Logging.configureVerbosity(configuration.verbose);
+
+        logger.always().log(VERSION);
 
         try
         {
@@ -578,8 +585,8 @@ public class ProGuard
     {
         if (args.length == 0)
         {
-            System.out.println(VERSION);
-            System.out.println("Usage: java proguard.ProGuard [options ...]");
+            logger.warn(VERSION);
+            logger.warn("Usage: java proguard.ProGuard [options ...]");
             System.exit(1);
         }
 
@@ -599,16 +606,7 @@ public class ProGuard
         }
         catch (Exception ex)
         {
-            if (configuration.verbose)
-            {
-                // Print a verbose stack trace.
-                ex.printStackTrace();
-            }
-            else
-            {
-                // Print just the stack trace message.
-                System.err.println("Error: "+ex.getMessage());
-            }
+            logger.error("Unexpected error", ex);
 
             System.exit(1);
         }

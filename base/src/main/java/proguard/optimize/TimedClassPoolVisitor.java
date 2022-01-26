@@ -20,8 +20,11 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassPool;
 import proguard.classfile.visitor.*;
+import proguard.optimize.info.ParameterEscapedMarker;
 
 /**
  * A simple class pool visitor that will output timing information.
@@ -29,8 +32,7 @@ import proguard.classfile.visitor.*;
 public class TimedClassPoolVisitor
 implements   ClassPoolVisitor
 {
-
-    private static final boolean DETAILS = System.getProperty("tcpv") != null;
+    private static final Logger logger = LogManager.getFormatterLogger(TimedClassPoolVisitor.class);
 
     private final String           message;
     private final ClassPoolVisitor classPoolVisitor;
@@ -51,22 +53,12 @@ implements   ClassPoolVisitor
 
     public void visitClassPool(ClassPool classPool)
     {
-        long start = 0;
-
-        if (DETAILS)
-        {
-            System.out.print(message);
-            System.out.print(getPadding(message.length(), 48));
-            start = System.currentTimeMillis();
-        }
+        long start = System.currentTimeMillis();
 
         classPool.accept(classPoolVisitor);
 
-        if (DETAILS)
-        {
-            long end = System.currentTimeMillis();
-            System.out.printf(" took: %6d ms%n", (end - start));
-        }
+        long end = System.currentTimeMillis();
+        logger.trace("%s %s took: %6d ms", message, getPadding(message.length(), 48), (end - start));
     }
 
 

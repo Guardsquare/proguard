@@ -20,6 +20,9 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import proguard.classfile.ClassPool;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.ClassVersionSetter;
 import proguard.pass.Pass;
@@ -34,6 +37,7 @@ import java.util.*;
  */
 public class Targeter implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(Targeter.class);
     private final Configuration configuration;
 
     public Targeter(Configuration configuration)
@@ -48,10 +52,7 @@ public class Targeter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Setting target versions...");
-        }
+        logger.info("Setting target versions...");
 
         Set newerClassVersions = configuration.warn != null ? null : new HashSet();
 
@@ -61,27 +62,27 @@ public class Targeter implements Pass
         if (newerClassVersions != null &&
             newerClassVersions.size() > 0)
         {
-            System.err.print("Warning: some classes have more recent versions (");
+            logger.error("Warning: some classes have more recent versions (");
 
             Iterator iterator = newerClassVersions.iterator();
             while (iterator.hasNext())
             {
                 Integer classVersion = (Integer)iterator.next();
-                System.err.print(ClassUtil.externalClassVersion(classVersion));
+                logger.error(ClassUtil.externalClassVersion(classVersion.intValue()));
 
                 if (iterator.hasNext())
                 {
-                    System.err.print(",");
+                    logger.error(",");
                 }
             }
 
-            System.err.println(")");
-            System.err.println("         than the target version ("+ClassUtil.externalClassVersion(configuration.targetClassVersion)+").");
+            logger.error(")");
+            logger.error("         than the target version ({}).", ClassUtil.externalClassVersion(configuration.targetClassVersion));
 
             if (!configuration.ignoreWarnings)
             {
-                System.err.println("         If you are sure this is not a problem,");
-                System.err.println("         you could try your luck using the '-ignorewarnings' option.");
+                logger.error("         If you are sure this is not a problem,");
+                logger.error("         you could try your luck using the '-ignorewarnings' option.");
                 throw new IOException("Please correct the above warnings first.");
             }
         }

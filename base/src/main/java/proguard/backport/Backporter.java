@@ -20,6 +20,8 @@
  */
 package proguard.backport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
@@ -33,7 +35,6 @@ import proguard.classfile.visitor.*;
 import proguard.pass.Pass;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * This pass backports classes to the specified targetClassVersion.
@@ -42,6 +43,7 @@ import java.io.PrintWriter;
  */
 public class Backporter implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(Backporter.class);
     private final Configuration configuration;
 
     public Backporter(Configuration configuration)
@@ -55,12 +57,7 @@ public class Backporter implements Pass
     {
         int targetClassVersion = configuration.targetClassVersion;
 
-        if (configuration.verbose)
-        {
-            System.out.println("Backporting class files...");
-        }
-
-        PrintWriter err = new PrintWriter(System.err, true);
+        logger.info("Backporting class files...");
 
         // Clean up any previous processing info.
         appView.programClassPool.classesAccept(new ClassCleaner());
@@ -231,7 +228,7 @@ public class Backporter implements Pass
             if (streamSupportClasses.getCount() > 0)
             {
                 WarningPrinter streamSupportWarningPrinter =
-                    new WarningPrinter(err, configuration.warn);
+                    new WarningLogger(logger, configuration.warn);
 
                 ClassPool modifiedClasses = new ClassPool();
                 ClassVisitor modifiedClassCollector =
@@ -254,10 +251,11 @@ public class Backporter implements Pass
                 int conversionWarningCount = streamSupportWarningPrinter.getWarningCount();
                 if (conversionWarningCount > 0)
                 {
-                    err.println("Warning: there were " + conversionWarningCount +
-                                " Java 8 stream API method calls that could not be backported.");
-                    err.println("      You should check if a your project setup is correct (compileSdkVersion, streamsupport dependency).");
-                    err.println("      For more information, consult the section 'Integration->Gradle Plugin->Java 8 stream API support' in our manual");                }
+                    logger.warn("Warning: there were {} Java 8 stream API method calls that could not be backported.",
+                                 conversionWarningCount);
+                    logger.warn("      You should check if a your project setup is correct (compileSdkVersion, streamsupport dependency).");
+                    logger.warn("      For more information, consult the section \'Integration->Gradle Plugin->Java 8 stream API support\' in our manual");
+                }
             }
         }
 
@@ -277,7 +275,7 @@ public class Backporter implements Pass
             if (threetenClasses.getCount() > 0)
             {
                 WarningPrinter threetenWarningPrinter =
-                    new WarningPrinter(err, configuration.warn);
+                    new WarningLogger(logger, configuration.warn);
 
                 ClassPool modifiedClasses = new ClassPool();
                 ClassVisitor modifiedClassCollector =
@@ -300,10 +298,11 @@ public class Backporter implements Pass
                 int conversionWarningCount = threetenWarningPrinter.getWarningCount();
                 if (conversionWarningCount > 0)
                 {
-                    err.println("Warning: there were " + conversionWarningCount +
-                                " Java 8 time API method calls that could not be backported.");
-                    err.println("      You should check if a your project setup is correct (compileSdkVersion, threetenbp dependency).");
-                    err.println("      For more information, consult the section 'Integration->Gradle Plugin->Java 8 time API support' in our manual");                }
+                    logger.warn("Warning: there were {} Java 8 time API method calls that could not be backported.",
+                                 conversionWarningCount);
+                    logger.warn("      You should check if a your project setup is correct (compileSdkVersion, threetenbp dependency).");
+                    logger.warn("      For more information, consult the section \'Integration->Gradle Plugin->Java 8 time API support\' in our manual");
+                }
             }
         }
 
@@ -315,15 +314,12 @@ public class Backporter implements Pass
             appView.programClassPool.classesAccept(new ClassVersionSetter(targetClassVersion));
         }
 
-        if (configuration.verbose)
-        {
-            System.out.println("  Number of converted string concatenations:     " + replacedStringConcatCounter.getCount());
-            System.out.println("  Number of converted lambda expressions:        " + lambdaExpressionCounter.getCount());
-            System.out.println("  Number of converted static interface methods:  " + staticInterfaceMethodCounter.getCount());
-            System.out.println("  Number of converted default interface methods: " + defaultInterfaceMethodCounter.getCount());
-            System.out.println("  Number of replaced Java 7+ method calls:       " + replacedMethodCallCounter.getCount());
-            System.out.println("  Number of replaced Java 8 stream method calls: " + replacedStreamsMethodCallCounter.getCount());
-            System.out.println("  Number of replaced Java 8 time method calls:   " + replacedTimeMethodCallCounter.getCount());
-        }
+        logger.info("  Number of converted string concatenations:     {}", replacedStringConcatCounter.getCount());
+        logger.info("  Number of converted lambda expressions:        {}", lambdaExpressionCounter.getCount());
+        logger.info("  Number of converted static interface methods:  {}", staticInterfaceMethodCounter.getCount());
+        logger.info("  Number of converted default interface methods: {}", defaultInterfaceMethodCounter.getCount());
+        logger.info("  Number of replaced Java 7+ method calls:       {}", replacedMethodCallCounter.getCount());
+        logger.info("  Number of replaced Java 8 stream method calls: {}", replacedStreamsMethodCallCounter.getCount());
+        logger.info("  Number of replaced Java 8 time method calls:   {}", replacedTimeMethodCallCounter.getCount());
     }
 }

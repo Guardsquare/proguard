@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassPool;
 import proguard.classfile.io.visitor.ProcessingFlagDataEntryFilter;
 import proguard.classfile.kotlin.KotlinConstants;
@@ -48,6 +50,7 @@ import java.util.*;
  */
 public class OutputWriter implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(OutputWriter.class);
     private final Configuration configuration;
 
     public OutputWriter(Configuration configuration)
@@ -63,15 +66,12 @@ public class OutputWriter implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Writing output...");
-        }
+        logger.info("Writing output...");
 
         if (configuration.addConfigurationDebugging)
         {
-            System.err.println("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
-            System.err.println("It should only be used for debugging purposes.");
+            logger.error("Warning: -addconfigurationdebugging is enabled; the resulting build will contain obfuscation information.");
+            logger.error("It should only be used for debugging purposes.");
         }
 
         ClassPath programJars = configuration.programJars;

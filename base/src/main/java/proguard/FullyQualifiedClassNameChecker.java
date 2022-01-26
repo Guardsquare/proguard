@@ -20,6 +20,8 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
@@ -35,6 +37,7 @@ import java.util.*;
 public class FullyQualifiedClassNameChecker
 implements   ClassVisitor
 {
+    private static final Logger logger = LogManager.getLogger(FullyQualifiedClassNameChecker.class);
     private static final String INVALID_CLASS_EXTENSION = ClassUtil.internalClassName(ClassConstants.CLASS_FILE_EXTENSION);
 
 
@@ -194,7 +197,6 @@ implements   ClassVisitor
 
     public void visitAnyClass(Clazz clazz)
     {
-        System.out.println("      Maybe you meant the fully qualified name '" +
-                           ClassUtil.externalClassName(clazz.getName()) + "'?");
+        logger.info("      Maybe you meant the fully qualified name '{}'?", ClassUtil.externalClassName(clazz.getName()));
     }
 }

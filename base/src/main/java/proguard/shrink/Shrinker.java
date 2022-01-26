@@ -20,9 +20,12 @@
  */
 package proguard.shrink;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.util.WarningLogger;
 import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
 import proguard.classfile.visitor.*;
@@ -38,6 +41,7 @@ import java.io.*;
  */
 public class Shrinker implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(Shrinker.class);
     private final Configuration configuration;
     private final boolean       afterOptimizer;
 
@@ -54,21 +58,18 @@ public class Shrinker implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (configuration.verbose)
+        logger.info("Shrinking...");
+
+        // We'll print out some explanation, if requested.
+        if (configuration.whyAreYouKeeping != null && !afterOptimizer)
         {
-            System.out.println("Shrinking...");
+            logger.info("Explaining why classes and class members are being kept...");
+        }
 
-            // We'll print out some explanation, if requested.
-            if (configuration.whyAreYouKeeping != null && !afterOptimizer)
-            {
-                System.out.println("Explaining why classes and class members are being kept...");
-            }
-
-            // We'll print out the usage, if requested.
-            if (configuration.printUsage != null && !afterOptimizer)
-            {
-                System.out.println("Printing usage to [" + PrintWriterUtil.fileName(configuration.printUsage) + "]...");
-            }
+        // We'll print out the usage, if requested.
+        if (configuration.printUsage != null && !afterOptimizer)
+        {
+            logger.info("Printing usage to [" + PrintWriterUtil.fileName(configuration.printUsage) + "]...");
         }
 
         // Check if we have at least some keep commands.
@@ -107,7 +108,6 @@ public class Shrinker implements Pass
         // Should we explain ourselves?
         if (configuration.whyAreYouKeeping != null && !afterOptimizer)
         {
-            out.println();
 
             // Create a visitor for explaining classes and class members.
             ShortestUsagePrinter shortestUsagePrinter =
@@ -177,25 +177,22 @@ public class Shrinker implements Pass
         int newProgramClassPoolSize = newProgramClassPool.size();
 
         // Collect some statistics.
-        if (configuration.verbose)
+       ClassCounter originalClassCounter = new ClassCounter();
+        appView.programClassPool.classesAccept(
+           new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
+                                         originalClassCounter));
+
+       ClassCounter newClassCounter = new ClassCounter();
+       newProgramClassPool.classesAccept(
+           new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
+           newClassCounter));
+
+        logger.info("Removing unused program classes and class elements...");
+        logger.info("  Original number of program classes:            {}", originalClassCounter.getCount());
+        logger.info("  Final number of program classes:               {}", newClassCounter.getCount());
+        if (newClassCounter.getCount() != newProgramClassPoolSize)
         {
-           ClassCounter originalClassCounter = new ClassCounter();
-            appView.programClassPool.classesAccept(
-               new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
-                                             originalClassCounter));
-
-           ClassCounter newClassCounter = new ClassCounter();
-           newProgramClassPool.classesAccept(
-               new ClassProcessingFlagFilter(0, ProcessingFlags.INJECTED,
-               newClassCounter));
-
-            out.println("Removing unused program classes and class elements...");
-            out.println("  Original number of program classes:            " + originalClassCounter.getCount());
-            out.println("  Final number of program classes:               " + newClassCounter.getCount());
-            if (newClassCounter.getCount() != newProgramClassPoolSize)
-            {
-                out.println("  Final number of program and injected classes:  " + newProgramClassPoolSize);
-            }
+            logger.info("  Final number of program and injected classes:  {}", newProgramClassPoolSize);
         }
 
         // Check if we have at least some output classes.
@@ -204,7 +201,7 @@ public class Shrinker implements Pass
         {
             if (configuration.ignoreWarnings)
             {
-                System.err.println("Warning: the output jar is empty. Did you specify the proper '-keep' options?");
+                logger.warn("Warning: the output jar is empty. Did you specify the proper '-keep' options?");
             }
             else
             {

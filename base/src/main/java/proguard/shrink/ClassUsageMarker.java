@@ -1572,6 +1572,7 @@ implements   ClassVisitor,
 
                 markAsUsed(kotlinClassKindMetadata.superTypes);
                 markAsUsed(kotlinClassKindMetadata.typeParameters);
+                markAsUsed(kotlinClassKindMetadata.underlyingPropertyType);
 
                 if (kotlinClassKindMetadata.flags.isAnnotationClass)
                 {
@@ -1590,9 +1591,10 @@ implements   ClassVisitor,
                     clazz.fieldAccept(KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME, null, ClassUsageMarker.this);
                 }
 
-                kotlinClassKindMetadata.superTypesAccept(        clazz, this);
-                kotlinClassKindMetadata.typeParametersAccept(    clazz, this);
-                kotlinClassKindMetadata.versionRequirementAccept(clazz, this);
+                kotlinClassKindMetadata.superTypesAccept(                       clazz, this);
+                kotlinClassKindMetadata.typeParametersAccept(                   clazz, this);
+                kotlinClassKindMetadata.versionRequirementAccept(               clazz, this);
+                kotlinClassKindMetadata.inlineClassUnderlyingPropertyTypeAccept(clazz, this);
             }
         }
 
@@ -1947,8 +1949,7 @@ implements   ClassVisitor,
         // Implementations for KotlinAnnotationVisitor.
 
         @Override
-        public void visitAnyAnnotation(Clazz                    clazz,
-                                       KotlinMetadataAnnotation annotation)
+        public void visitAnyAnnotation(Clazz clazz, KotlinAnnotatable annotatable, KotlinAnnotation  annotation)
         {
             if (!isUsed(annotation))
             {

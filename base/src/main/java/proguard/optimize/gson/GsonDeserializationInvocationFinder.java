@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -42,11 +44,7 @@ import proguard.evaluation.value.*;
 public class GsonDeserializationInvocationFinder
 implements   InstructionVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    public  static       boolean DEBUG = System.getProperty("gdif") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(GsonDeserializationInvocationFinder.class);
 
     private final ClassPool                   programClassPool;
     private final ClassPool                   libraryClassPool;
@@ -162,16 +160,12 @@ implements   InstructionVisitor
 
         if (matchingMatcher != null)
         {
-            if (DEBUG)
-            {
-                System.out.println("GsonDeserializationInvocationFinder: Gson#fromJson: " +
-                                   clazz.getName() +
-                                   "." +
-                                   method.getName(clazz) +
-                                   method.getDescriptor(clazz) +
-                                   " " +
-                                   instruction.toString(offset));
-            }
+            logger.debug("GsonDeserializationInvocationFinder: Gson#fromJson: {}.{}{} {}",
+                         clazz.getName(),
+                         method.getName(clazz),
+                         method.getDescriptor(clazz),
+                         instruction.toString(offset)
+            );
 
             // Figure out the type that is being deserialized.
             lazyPartialEvaluator.visitCodeAttribute(clazz,
@@ -204,11 +198,7 @@ implements   InstructionVisitor
             {
                 for (String targetType : targetTypes)
                 {
-                    if(DEBUG)
-                    {
-                        System.out.println("GsonDeserializationInvocationFinder: deserialized type: " +
-                                           targetType);
-                    }
+                    logger.debug("GsonDeserializationInvocationFinder: deserialized type: {}", targetType);
                     programClassPool.classAccept(targetType, domainClassVisitor);
                 }
             }

@@ -20,6 +20,8 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.constant.*;
 import proguard.classfile.util.ClassUtil;
@@ -40,11 +42,7 @@ import proguard.optimize.info.ParameterEscapeMarker;
 public class ParameterTracingInvocationUnit
 extends      ReferenceTracingInvocationUnit
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("ptiu") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(ParameterTracingInvocationUnit.class);
 
 
     private Value[] parameters = new Value[256];
@@ -129,10 +127,13 @@ extends      ReferenceTracingInvocationUnit
                 }
             }
 
-            if (DEBUG)
-            {
-                System.out.println("ParameterTracingInvocationUnit.getMethodReturnValue: calling ["+refConstant.getClassName(clazz)+"."+refConstant.getName(clazz)+refConstant.getType(clazz)+"] returns ["+traceValue+" "+returnValue+"]");
-            }
+            logger.debug("ParameterTracingInvocationUnit.getMethodReturnValue: calling [{}.{}{}  ] returns [{} {}]",
+                         refConstant.getClassName(clazz),
+                         refConstant.getName(clazz),
+                         refConstant.getType(clazz),
+                         traceValue,
+                         returnValue
+            );
 
             // Did we find more detailed information on the return value?
             // We should, unless the return value is always null.

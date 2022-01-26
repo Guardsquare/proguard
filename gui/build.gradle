@@ -41,6 +41,7 @@ task fatJar(type: ShadowJar) {
         attributes(
                 'Manifest-Version': '1.0',
                 'Main-Class': 'proguard.gui.ProGuardGUI',
+                'Multi-Release': true,
                 'Implementation-Version': archiveVersion.get())
     }
 }

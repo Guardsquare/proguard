@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -46,7 +46,7 @@ implements   KotlinMetadataVisitor
     public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
     {
         // If there is a default implementations class, name it as this one but with a $DefaultImpls suffix.
-        if (kotlinClassKindMetadata.flags.isInterface && kotlinClassKindMetadata.referencedDefaultImplsClass != null)
+        if (kotlinClassKindMetadata.referencedDefaultImplsClass != null)
         {
             String className = newClassName(kotlinClassKindMetadata.referencedClass);
 
@@ -55,7 +55,7 @@ implements   KotlinMetadataVisitor
                                                  className + DEFAULT_IMPLEMENTATIONS_SUFFIX;
 
             kotlinClassKindMetadata.accept(clazz,
-                new KotlinInterfaceToDefaultImplsClassVisitor(
+                new KotlinClassToDefaultImplsClassVisitor(
                 new ProgramClassFilter(_clazz -> setNewClassName(_clazz, defaultImplsClassName))));
         }
     }

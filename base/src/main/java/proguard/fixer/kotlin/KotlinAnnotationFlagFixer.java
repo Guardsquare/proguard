@@ -64,10 +64,11 @@ implements   KotlinMetadataVisitor,
     {
         visitKotlinDeclarationContainerMetadata(clazz, kotlinClassKindMetadata);
 
-        kotlinClassKindMetadata.superTypesAccept(        clazz, this);
-        kotlinClassKindMetadata.typeParametersAccept(    clazz, this);
-        kotlinClassKindMetadata.versionRequirementAccept(clazz, this);
-        kotlinClassKindMetadata.constructorsAccept(      clazz, this);
+        kotlinClassKindMetadata.superTypesAccept(                       clazz, this);
+        kotlinClassKindMetadata.typeParametersAccept(                   clazz, this);
+        kotlinClassKindMetadata.versionRequirementAccept(               clazz, this);
+        kotlinClassKindMetadata.constructorsAccept(                     clazz, this);
+        kotlinClassKindMetadata.inlineClassUnderlyingPropertyTypeAccept(clazz, this);
 
         kotlinClassKindMetadata.referencedClass.attributesAccept(annotationCounter.reset());
         kotlinClassKindMetadata.flags.common.hasAnnotations = annotationCounter.getCount() > 0;

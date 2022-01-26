@@ -20,6 +20,8 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -42,11 +44,7 @@ implements   AttributeVisitor,
              ConstantVisitor,
              ExceptionInfoVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = true;
-    //*/
+    private static final Logger logger = LogManager.getLogger(TailRecursionSimplifier.class);
 
 
     private final InstructionVisitor extraTailRecursionVisitor;
@@ -182,10 +180,12 @@ implements   AttributeVisitor,
                                 if (stackSizeComputer.isReachable(nextOffset) &&
                                     stackSizeComputer.getStackSizeAfter(nextOffset) == 0)
                                 {
-                                    if (DEBUG)
-                                    {
-                                        System.out.println("TailRecursionSimplifier: ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"], inlining "+constantInstruction.toString(offset));
-                                    }
+                                    logger.debug("TailRecursionSimplifier: [{}.{}{}], inlining {}",
+                                                 clazz.getName(),
+                                                 method.getName(clazz),
+                                                 method.getDescriptor(clazz),
+                                                 constantInstruction.toString(offset)
+                                    );
 
                                     // Append a label.
                                     codeAttributeComposer.appendLabel(offset);

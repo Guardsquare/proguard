@@ -20,6 +20,8 @@
  */
 package proguard.optimize.info;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -42,11 +44,7 @@ implements   MemberVisitor,
              AttributeVisitor,
              InstructionVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("pum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(ParameterUsageMarker.class);
 
 
     private final boolean          markThisParameter;
@@ -161,15 +159,18 @@ implements   MemberVisitor,
                 }
             }
 
-            if (DEBUG)
-            {
-                System.out.print("ParameterUsageMarker: ["+programClass.getName() +"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"]: ");
-                for (int variableIndex = 0; variableIndex < parameterSize; variableIndex++)
-                {
-                    System.out.print(isParameterUsed(programMethod, variableIndex) ? '+' : '-');
+            logger.debug("{}",
+                () -> {
+                    StringBuilder debugMessage = new StringBuilder(String.format("ParameterUsageMarker: [%s.%s%s]: ",
+                            programClass.getName(),
+                            programMethod.getName(programClass),
+                            programMethod.getDescriptor(programClass)));
+                    for (int variableIndex = 0; variableIndex < parameterSize; variableIndex++) {
+                        debugMessage.append(isParameterUsed(programMethod, variableIndex) ? '+' : '-');
+                    }
+                    return debugMessage.toString();
                 }
-                System.out.println();
-            }
+            );
         }
 
         // Set the parameter size.

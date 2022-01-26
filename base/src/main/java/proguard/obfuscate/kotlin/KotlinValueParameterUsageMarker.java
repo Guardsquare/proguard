@@ -58,7 +58,7 @@ implements KotlinMetadataVisitor,
     {
         kotlinDeclarationContainerMetadata.functionsAccept(clazz, this);
         kotlinDeclarationContainerMetadata.accept(clazz,
-                                                  new AllKotlinPropertiesVisitor(this));
+                                                  new AllPropertyVisitor(this));
     }
 
     @Override

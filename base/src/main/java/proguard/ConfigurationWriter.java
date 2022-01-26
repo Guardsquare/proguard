@@ -20,8 +20,11 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
+import proguard.optimize.Optimizer;
 import proguard.util.*;
 
 import java.io.*;
@@ -35,6 +38,8 @@ import java.util.*;
  */
 public class ConfigurationWriter implements AutoCloseable
 {
+    private static final Logger logger = LogManager.getLogger(ConfigurationWriter.class);
+
     private static final String[] KEEP_OPTIONS = new String[]
     {
         ConfigurationConstants.KEEP_OPTION,
@@ -85,12 +90,7 @@ public class ConfigurationWriter implements AutoCloseable
      */
     public void write(Configuration configuration) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Printing configuration to [" +
-                PrintWriterUtil.fileName(configuration.printConfiguration) +
-                "]...");
-        }
+        logger.info("Printing configuration to [{}]...", PrintWriterUtil.fileName(configuration.printConfiguration));
 
         // Write the program class path (input and output entries).
         writeJarOptions(ConfigurationConstants.INJARS_OPTION,

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2021 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -30,10 +30,11 @@ import proguard.util.kotlin.asserter.AssertUtil;
  */
 public class KmAnnotationIntegrity
 extends      AbstractKotlinMetadataConstraint
-    implements KotlinTypeVisitor,
-               KotlinTypeAliasVisitor,
-               KotlinTypeParameterVisitor,
-               KotlinAnnotationVisitor
+implements   KotlinTypeVisitor,
+             KotlinTypeAliasVisitor,
+             KotlinTypeParameterVisitor,
+             KotlinAnnotationVisitor,
+             KotlinAnnotationArgumentVisitor
 {
 
     private AssertUtil util;
@@ -77,12 +78,52 @@ extends      AbstractKotlinMetadataConstraint
         kotlinTypeParameterMetadata.annotationsAccept(clazz, this);
     }
 
+    // Implementations for KotlinAnnotationVisitor.
     @Override
-    public void visitAnyAnnotation(Clazz clazz, KotlinMetadataAnnotation antn)
+    public void visitAnyAnnotation(Clazz                clazz,
+                                   KotlinAnnotatable    annotatable,
+                                   KotlinAnnotation     antn)
     {
+
+        // TODO: there's an annotation added by the compiler, ParameterName, but it's not in the
+        //       class pool - should this be a dummy class, are there more?
+        //       util.reportIfClassDangling("annotation class", antn.referencedAnnotationClass);
+
         util.reportIfNullReference("annotation class", antn.referencedAnnotationClass);
-        antn.referencedArgumentMethods
-            .values()
-            .forEach(annotation -> util.reportIfNullReference("annotation method", annotation));
+        antn.argumentsAccept(clazz, annotatable, this);
+    }
+
+    // Implementations for KotlinAnnotationArgumentVisitor.
+    @Override
+    public void visitAnyArgument(Clazz                    clazz,
+                                 KotlinAnnotatable        annotatable,
+                                 KotlinAnnotation         annotation,
+                                 KotlinAnnotationArgument argument,
+                                 KotlinAnnotationArgument.Value value)
+    {
+        util.reportIfNullReference("annotation method", argument.referencedAnnotationMethod);
+        util.reportIfNullReference("annotation class", argument.referencedAnnotationMethodClass);
+    }
+
+    @Override
+    public void visitClassArgument(Clazz                               clazz,
+                                   KotlinAnnotatable                   annotatable,
+                                   KotlinAnnotation                    annotation,
+                                   KotlinAnnotationArgument            argument,
+                                   KotlinAnnotationArgument.ClassValue value)
+    {
+        visitAnyArgument(clazz, annotatable, annotation, argument, value);
+        util.reportIfNullReference("annotation argument class referenced", value.referencedClass);
+    }
+
+    @Override
+    public void visitEnumArgument(Clazz                    clazz,
+                                  KotlinAnnotatable        annotatable,
+                                  KotlinAnnotation         annotation,
+                                  KotlinAnnotationArgument argument,
+                                  KotlinAnnotationArgument.EnumValue value)
+    {
+        visitAnyArgument(clazz, annotatable, annotation, argument, value);
+        util.reportIfNullReference("annotation argument enum referenced", value.referencedClass);
     }
 }

@@ -8,9 +8,11 @@
 package testutils
 
 import io.kotest.core.config.AbstractProjectConfig
-import io.kotest.core.extensions.DiscoveryExtension
 import io.kotest.core.extensions.Extension
-import io.kotest.core.spec.Spec
+import io.kotest.core.filter.SpecFilter
+import io.kotest.core.filter.SpecFilterResult
+import io.kotest.core.filter.SpecFilterResult.Exclude
+import io.kotest.core.filter.SpecFilterResult.Include
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
@@ -21,13 +23,11 @@ object TestConfig : AbstractProjectConfig() {
     }
 }
 
-class RequiresJavaVersionAnnotationFilter : DiscoveryExtension {
-    override fun afterScan(classes: List<KClass<out Spec>>): List<KClass<out Spec>> =
-        classes.filter {
-            with(it.findAnnotation<RequiresJavaVersion>()) {
-                (this == null || (currentJavaVersion >= this.from && currentJavaVersion <= this.to))
-            }
-        }
+class RequiresJavaVersionAnnotationFilter : SpecFilter {
+    override fun filter(kclass: KClass<*>): SpecFilterResult = if (with(kclass.findAnnotation<RequiresJavaVersion>()) {
+        (this == null || (currentJavaVersion >= this.from && currentJavaVersion <= this.to))
+    }
+    ) Include else Exclude("Required Java version is not in range.")
 }
 
 @Target(AnnotationTarget.CLASS)

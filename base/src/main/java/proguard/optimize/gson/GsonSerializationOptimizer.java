@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor;
 import proguard.classfile.attribute.annotation.visitor.ElementValueVisitor;
@@ -54,7 +56,7 @@ implements   MemberVisitor,
              AttributeVisitor,
              AnnotationVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(GsonSerializationOptimizer.class);
 
     private static final int VALUE_VARIABLE_INDEX = ClassUtil.internalMethodParameterSize(METHOD_TYPE_TO_JSON_BODY, false);
 
@@ -137,13 +139,10 @@ implements   MemberVisitor,
         String  methodNameToJson     = METHOD_NAME_TO_JSON             + classIndex;
         String  methodNameToJsonBody = METHOD_NAME_TO_JSON_BODY        + classIndex;
 
-        if (DEBUG)
-        {
-            System.out.println(
-                "GsonSerializationOptimizer: adding " +
-                methodNameToJson +
-                " method to " + programClass.getName());
-        }
+        logger.debug("GsonSerializationOptimizer: adding {} method to {}",
+                     methodNameToJson,
+                     programClass.getName()
+        );
 
         classBuilder.addMethod(
             AccessConstants.PUBLIC | AccessConstants.SYNTHETIC,
@@ -192,13 +191,10 @@ implements   MemberVisitor,
         String  methodName = METHOD_NAME_TO_JSON_BODY + classIndex;
 
         // Add toJsonBody$ method.
-        if (DEBUG)
-        {
-            System.out.println(
-                "GsonSerializationOptimizer: adding " +
-                methodName +
-                " method to " + programClass.getName());
-        }
+        logger.debug("GsonSerializationOptimizer: adding {} method to {}",
+                     methodName,
+                     programClass.getName()
+        );
 
         classBuilder.addMethod(
             AccessConstants.PROTECTED | AccessConstants.SYNTHETIC,

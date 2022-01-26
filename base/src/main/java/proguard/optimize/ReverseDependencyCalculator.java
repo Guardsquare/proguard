@@ -20,6 +20,9 @@
  */
 package proguard.optimize;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import proguard.ProGuard;
 import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.instruction.visitor.*;
@@ -36,7 +39,7 @@ import proguard.util.MultiValueMap;
  */
 public class ReverseDependencyCalculator
 {
-    private static final boolean DETAILS = System.getProperty("rdc") != null;
+    private static final Logger logger = LogManager.getFormatterLogger(ReverseDependencyCalculator.class);
 
     private final ClassPool classPool;
 
@@ -53,18 +56,11 @@ public class ReverseDependencyCalculator
      */
     public ReverseDependencyStore reverseDependencyStore()
     {
-        long start = 0;
-        if (DETAILS)
-        {
-            System.out.print("Calculating Reverse Dependencies................");
-            start = System.currentTimeMillis();
-        }
+        long start = System.currentTimeMillis();
         ReverseDependencyStore out = new ReverseDependencyStore(isCalledBy(), methodsByProgramMethodOptimizationInfo());
-        if (DETAILS)
-        {
-            long end = System.currentTimeMillis();
-            System.out.printf(" took: %6d ms%n", (end - start));
-        }
+
+        long end = System.currentTimeMillis();
+        logger.trace("Calculating Reverse Dependencies................ took: %6d ms", (end - start));
 
         return out;
     }

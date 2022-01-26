@@ -113,9 +113,6 @@ public class   KotlinValueParameterNameShrinker
         private int parameterNumber = 0;
 
         @Override
-        public void onNewFunctionStart() { }
-
-        @Override
         public void visitAnyValueParameter(Clazz clazz, KotlinValueParameterMetadata kotlinValueParameterMetadata)
         {
             if (!KotlinValueParameterUsageMarker.isUsed(kotlinValueParameterMetadata))

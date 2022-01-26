@@ -20,6 +20,8 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.visitor.*;
 import proguard.evaluation.value.*;
@@ -37,11 +39,7 @@ public class SimpleEnumArrayPropagator
 implements   ClassVisitor,
              MemberVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("enum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(SimpleEnumArrayPropagator.class);
 
 
     private final MemberVisitor fieldArrayFinder      = new MemberDescriptorFilter("[I", this);
@@ -91,10 +89,12 @@ implements   ClassVisitor,
                                                    null,
                                                    array.referenceValue().arrayLength(valueFactory));
 
-        if (DEBUG)
-        {
-            System.out.println("SimpleEnumArrayPropagator: ["+programClass.getName()+"."+programMethod.getName(programClass)+programMethod.getDescriptor(programClass)+"]: propagating ["+propagatedArray+"] as return value");
-        }
+        logger.debug("SimpleEnumArrayPropagator: [{}.{}{}]: propagating [{}] as return value",
+                     programClass.getName(),
+                     programMethod.getName(programClass),
+                     programMethod.getDescriptor(programClass),
+                     propagatedArray
+        );
 
         setMethodReturnValue(programMethod, propagatedArray);
     }

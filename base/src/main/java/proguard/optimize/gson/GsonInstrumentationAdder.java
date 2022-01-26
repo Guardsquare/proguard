@@ -20,6 +20,8 @@
  */
 package proguard.optimize.gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.editor.*;
@@ -39,7 +41,7 @@ import static proguard.classfile.instruction.Instruction.OP_RETURN;
 public class GsonInstrumentationAdder
 implements   InstructionVisitor
 {
-    private static final boolean DEBUG = false;
+    private static final Logger logger = LogManager.getLogger(GsonInstrumentationAdder.class);
 
     private final ClassPool           programClassPool;
     private final ClassPool           libraryClassPool;
@@ -80,11 +82,7 @@ implements   InstructionVisitor
         {
             String fullyQualifiedMethodName = clazz.getName() + "#" +
                                               method.getName(clazz) + method.getDescriptor(clazz);
-            if (DEBUG)
-            {
-                System.out.println("GsonInstrumentationAdder: instrumenting " +
-                                   fullyQualifiedMethodName);
-            }
+            logger.debug("GsonInstrumentationAdder: instrumenting {}", fullyQualifiedMethodName);
 
             InstructionSequenceBuilder ____ = new InstructionSequenceBuilder((ProgramClass)clazz,
                                                                              programClassPool,

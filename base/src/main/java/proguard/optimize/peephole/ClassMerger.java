@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.visitor.*;
@@ -31,6 +33,8 @@ import proguard.optimize.KeepMarker;
 import proguard.optimize.info.*;
 import proguard.util.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 import static proguard.classfile.attribute.Attribute.NEST_HOST;
@@ -51,6 +55,7 @@ public class ClassMerger
 implements   ClassVisitor,
              ConstantVisitor
 {
+    private static final Logger logger = LogManager.getLogger(ClassMerger.class);
     //*
     private static final boolean DEBUG   = false;
     private static final boolean DETAILS = false;
@@ -141,17 +146,21 @@ implements   ClassVisitor,
         }
         catch (RuntimeException ex)
         {
-            System.err.println("Unexpected error while merging classes:");
-            System.err.println("  Class        = ["+programClass.getName()+"]");
-            System.err.println("  Target class = ["+targetClass.getName()+"]");
-            System.err.println("  Exception    = ["+ex.getClass().getName()+"] ("+ex.getMessage()+")");
+            logger.error("Unexpected error while merging classes:");
+            logger.error("  Class        = [{}]", programClass.getName());
+            logger.error("  Target class = [{}]", targetClass.getName());
+            logger.error("  Exception    = [{}] ({})", ex.getClass().getName(), ex.getMessage());
 
-            if (DEBUG)
-            {
-                programClass.accept(new ClassPrinter());
-                targetClass.accept(new ClassPrinter());
-            }
-
+            logger.debug("{}", () -> {
+                StringWriter sw = new StringWriter();
+                programClass.accept(new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
+            logger.debug("{}", () -> {
+                StringWriter sw = new StringWriter();
+                targetClass.accept(new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
             throw ex;
         }
     }
@@ -164,25 +173,27 @@ implements   ClassVisitor,
             // contents from the source class to the target class. We'll
             // then let all other classes point to it. The shrinking step
             // will finally remove the source class.
-            if (DEBUG)
-            {
-                System.out.println("ClassMerger ["+programClass.getName()+"] -> ["+targetClass.getName()+"]");
-                System.out.println("  Source instantiated? [ " + InstantiationClassMarker.isInstantiated(programClass) + "]");
-                System.out.println("  Target instantiated? [ " + InstantiationClassMarker.isInstantiated(targetClass) + "]");
-                System.out.println("  Source interface? ["+((programClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
-                System.out.println("  Target interface? ["+((targetClass.getAccessFlags() & AccessConstants.INTERFACE)!=0)+"]");
-                System.out.println("  Source subclasses ("+programClass.subClassCount+")");
-                System.out.println("  Target subclasses ("+targetClass.subClassCount+")");
-                System.out.println("  Source superclass ["+programClass.getSuperClass().getName()+"]");
-                System.out.println("  Target superclass ["+targetClass.getSuperClass().getName()+"]");
+            logger.debug("ClassMerger [{}] -> [{}]", programClass.getName(), targetClass.getName());
+            logger.debug("  Source instantiated? [ {}]", InstantiationClassMarker.isInstantiated(programClass));
+            logger.debug("  Target instantiated? [ {}]", InstantiationClassMarker.isInstantiated(targetClass));
+            logger.debug("  Source interface? [{}]", ((programClass.getAccessFlags() & AccessConstants.INTERFACE)!=0));
+            logger.debug("  Target interface? [{}]", ((targetClass.getAccessFlags() & AccessConstants.INTERFACE)!=0));
+            logger.debug("  Source subclasses ({})", programClass.subClassCount);
+            logger.debug("  Target subclasses ({})", targetClass.subClassCount);
+            logger.debug("  Source superclass [{}]", programClass.getSuperClass().getName());
+            logger.debug("  Target superclass [{}]", targetClass.getSuperClass().getName());
 
-                if (DETAILS)
-                {
-                    System.out.println("=== Before ===");
-                    programClass.accept(new ClassPrinter());
-                    targetClass.accept(new ClassPrinter());
-                }
-            }
+            logger.trace("=== Before ===");
+            logger.trace("{}", () -> {
+                StringWriter sw = new StringWriter();
+                programClass.accept(new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
+            logger.trace("{}", () -> {
+                StringWriter sw = new StringWriter();
+                targetClass.accept(new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
 
             // Combine the access flags.
             int targetAccessFlags = targetClass.getAccessFlags();
@@ -260,10 +271,7 @@ implements   ClassVisitor,
                 new AttributeAdder(targetClass, true)));
 
             // Update the optimization information of the target class.
-            if (DEBUG)
-            {
-                System.out.println("merging optimization info for " + targetClass.getName() + " and " + programClass.getName());
-            }
+            logger.debug("merging optimization info for {} and {}", targetClass.getName(), programClass.getName());
 
             ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(targetClass)
                 .merge(ClassOptimizationInfo.getClassOptimizationInfo(programClass));
@@ -271,14 +279,19 @@ implements   ClassVisitor,
             // Remember to replace the inlined class by the target class.
             setTargetClass(programClass, targetClass);
 
-            if (DETAILS)
-            {
-                System.out.println("=== After ====");
-                System.out.println("Target instantiated? " + InstantiationClassMarker.isInstantiated(targetClass));
-                targetClass.accept(new ClassPrinter());
-                System.out.println("  Interfaces:");
-                targetClass.interfaceConstantsAccept(new ClassPrinter());
-            }
+            logger.trace("=== After ====");
+            logger.trace("Target instantiated? {}", InstantiationClassMarker.isInstantiated(targetClass));
+            logger.trace("{}", () -> {
+                StringWriter sw = new StringWriter();
+                targetClass.accept(new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
+            logger.trace("  Interfaces:");
+            logger.trace("{}", () -> {
+                StringWriter sw = new StringWriter();
+                targetClass.interfaceConstantsAccept(new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
 
             // Visit the merged class, if required.
             if (extraClassVisitor != null)
@@ -455,7 +468,7 @@ implements   ClassVisitor,
 
 private boolean print(ProgramClass programClass, String message)
     {
-        System.out.println("Merge ["+targetClass.getName()+"] <- ["+programClass.getName()+"] "+message);
+        logger.debug("Merge [{}] <- [{}] {}", targetClass.getName(), programClass.getName(), message);
 
         return true;
     }

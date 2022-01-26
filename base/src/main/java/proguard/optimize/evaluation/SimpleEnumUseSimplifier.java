@@ -20,6 +20,8 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -48,11 +50,7 @@ implements   AttributeVisitor,
              ConstantVisitor,
              ParameterVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("enum") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(SimpleEnumUseSimplifier.class);
 
 
     private final InstructionVisitor extraInstructionVisitor;
@@ -101,10 +99,11 @@ implements   AttributeVisitor,
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("SimpleEnumUseSimplifier: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-        }
+        logger.debug("SimpleEnumUseSimplifier: {}.{}{}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz)
+        );
 
         // Skip the non-static methods of simple enum classes.
         if (SimpleEnumMarker.isSimpleEnum(clazz) &&
@@ -613,7 +612,10 @@ implements   AttributeVisitor,
                                      Instruction   instruction,
                                      Instruction[] replacementInstructions)
     {
-        if (DEBUG) System.out.println("  Replacing instruction "+instruction.toString(offset)+" -> "+replacementInstructions.length+" instructions");
+        logger.debug("  Replacing instruction {} -> {} instructions",
+                     instruction.toString(offset),
+                     replacementInstructions.length
+        );
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstructions);
 
@@ -643,7 +645,11 @@ implements   AttributeVisitor,
 
         insertPopInstructions(offset, popCount);
 
-        if (DEBUG) System.out.println("  Replacing instruction "+instruction.toString(offset)+" -> "+replacementInstruction.toString()+(popCount == 0 ? "" : " ("+popCount+" pops)"));
+        logger.debug("  Replacing instruction {} -> {}{}",
+                     instruction.toString(offset),
+                     replacementInstruction.toString(),
+                     popCount == 0 ? "" : " ("+popCount+" pops)"
+        );
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
 
@@ -670,9 +676,9 @@ implements   AttributeVisitor,
         //
         //insertPopInstructions(offset, popCount);
         //
-        //if (DEBUG) System.out.println("  Deleting instruction "+instruction.toString(offset)+(popCount == 0 ? "" : " ("+popCount+" pops)"));
+        //logger.debug("  Deleting instruction {}{}", instruction.toString(offset), popCount == 0 ? "" : " ("+popCount+" pops)");
 
-        if (DEBUG) System.out.println("  Deleting instruction "+instruction.toString(offset));
+        logger.debug("  Deleting instruction {}", instruction.toString(offset));
 
         codeAttributeEditor.deleteInstruction(offset);
 

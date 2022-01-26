@@ -20,6 +20,9 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import proguard.classfile.*;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
@@ -40,6 +43,14 @@ import java.io.*;
  */
 public class InputReader implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(InputReader.class);
+
+    // Option to favor library classes over program classes, in case of
+    // duplicates.
+    // https://sourceforge.net/p/proguard/discussion/182455/thread/76430d9e
+    private static final boolean FAVOR_LIBRARY_CLASSES = System.getProperty("favor.library.classes") != null;
+
+
     private final Configuration configuration;
 
     // Field that acts as a parameter to the visitors that attach
@@ -63,18 +74,15 @@ public class InputReader implements Pass
     @Override
     public void execute(AppView appView) throws IOException
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Reading input...");
-        }
+        logger.info("Reading input...");
 
         // We're using the system's default character encoding for writing to
         // the standard output and error output.
         PrintWriter out = new PrintWriter(System.out, true);
         PrintWriter err = new PrintWriter(System.err, true);
 
-        WarningPrinter notePrinter    = new WarningPrinter(out, configuration.note);
-        WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
+        WarningPrinter notePrinter    = new WarningLogger(logger, configuration.note);
+        WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
 
         DuplicateClassPrinter        duplicateClassPrinter        = new DuplicateClassPrinter(notePrinter);
         DuplicateResourceFilePrinter duplicateResourceFilePrinter = new DuplicateResourceFilePrinter(notePrinter);
@@ -168,25 +176,23 @@ public class InputReader implements Pass
         int noteCount = notePrinter.getWarningCount();
         if (noteCount > 0)
         {
-            err.println("Note: there were " + noteCount +
-                        " duplicate class definitions.");
-            err.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#duplicateclass)");
+            logger.warn("Note: there were {} duplicate class definitions.", noteCount);
+            logger.warn("      (https://www.guardsquare.com/proguard/manual/troubleshooting#duplicateclass)");
         }
 
         // Print out a summary of the warnings, if necessary.
         int warningCount = warningPrinter.getWarningCount();
         if (warningCount > 0)
         {
-            err.println("Warning: there were " + warningCount +
-                        " classes in incorrectly named files.");
-            err.println("         You should make sure all file names correspond to their class names.");
-            err.println("         The directory hierarchies must correspond to the package hierarchies.");
-            err.println("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unexpectedclass)");
+            logger.warn("Warning: there were {} classes in incorrectly named files.", warningCount);
+            logger.warn("         You should make sure all file names correspond to their class names.");
+            logger.warn("         The directory hierarchies must correspond to the package hierarchies.");
+            logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unexpectedclass)");
 
             if (!configuration.ignoreWarnings)
             {
-                err.println("         If you don't mind the mentioned classes not being written out,");
-                err.println("         you could try your luck using the '-ignorewarnings' option.");
+                logger.warn("         If you don't mind the mentioned classes not being written out,");
+                logger.warn("         you could try your luck using the '-ignorewarnings' option.");
                 throw new IOException("Please correct the above warnings first.");
             }
         }

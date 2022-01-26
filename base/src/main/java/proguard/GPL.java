@@ -20,6 +20,9 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.util.*;
 
@@ -30,6 +33,8 @@ import java.util.*;
  */
 public class GPL
 {
+    private static final Logger logger = LogManager.getLogger(GPL.class);
+
     /**
      * Prints out a note about the GPL if ProGuard is linked against unknown
      * code.
@@ -48,10 +53,10 @@ public class GPL
         {
             String uniquePackageNames = uniquePackageNames(unknownPackageNames);
 
-            System.out.println("ProGuard is released under the GNU General Public License. You therefore");
-            System.out.println("must ensure that programs that link to it ("+uniquePackageNames+"...)");
-            System.out.println("carry the GNU General Public License as well. Alternatively, you can");
-            System.out.println("apply for an exception with the author of ProGuard.");
+            logger.info("ProGuard is released under the GNU General Public License. You therefore");
+            logger.info("must ensure that programs that link to it ({}...)", uniquePackageNames);
+            logger.info("carry the GNU General Public License as well. Alternatively, you can");
+            logger.info("apply for an exception with the author of ProGuard.");
         }
     }
 

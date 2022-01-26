@@ -33,9 +33,9 @@ import proguard.classfile.kotlin.KotlinClassKindMetadata
 import proguard.classfile.kotlin.KotlinConstructorMetadata
 import proguard.classfile.kotlin.KotlinFunctionMetadata
 import proguard.classfile.kotlin.KotlinPropertyMetadata
-import proguard.classfile.kotlin.visitor.AllConstructorsVisitor
-import proguard.classfile.kotlin.visitor.AllFunctionsVisitor
-import proguard.classfile.kotlin.visitor.AllKotlinPropertiesVisitor
+import proguard.classfile.kotlin.visitor.AllConstructorVisitor
+import proguard.classfile.kotlin.visitor.AllFunctionVisitor
+import proguard.classfile.kotlin.visitor.AllPropertyVisitor
 import proguard.classfile.kotlin.visitor.AllValueParameterVisitor
 import proguard.classfile.kotlin.visitor.KotlinValueParameterVisitor
 import testutils.ClassPoolBuilder
@@ -75,7 +75,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllConstructorsVisitor(
+                    AllConstructorVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -111,7 +111,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllConstructorsVisitor(
+                    AllConstructorVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -150,7 +150,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllConstructorsVisitor(
+                    AllConstructorVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -188,7 +188,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllFunctionsVisitor(
+                    AllFunctionVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -224,7 +224,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllFunctionsVisitor(
+                    AllFunctionVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -263,7 +263,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllFunctionsVisitor(
+                    AllFunctionVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -301,7 +301,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllKotlinPropertiesVisitor(
+                    AllPropertyVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )
@@ -329,7 +329,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(KotlinValueParameterNameShrinker())
 
                 clazz.kotlinMetadataAccept(
-                    AllKotlinPropertiesVisitor(
+                    AllPropertyVisitor(
                         AllValueParameterVisitor(
                             valueParameterVisitor
                         )

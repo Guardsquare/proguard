@@ -7,6 +7,8 @@
 
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.visitor.*;
 import proguard.pass.Pass;
 import proguard.util.PrintWriterUtil;
@@ -20,6 +22,8 @@ import java.io.PrintWriter;
  */
 public class Dumper implements Pass
 {
+    private static final Logger logger = LogManager.getLogger(Dumper.class);
+
     private final Configuration configuration;
 
     public Dumper(Configuration configuration)
@@ -31,10 +35,7 @@ public class Dumper implements Pass
     @Override
     public void execute(AppView appView) throws Exception
     {
-        if (configuration.verbose)
-        {
-            System.out.println("Printing classes to [" + PrintWriterUtil.fileName(configuration.dump) + "]...");
-        }
+        logger.info("Printing classes to [{}]...", PrintWriterUtil.fileName(configuration.dump));
 
         PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.dump);
         try

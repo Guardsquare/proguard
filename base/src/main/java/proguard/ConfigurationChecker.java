@@ -20,6 +20,9 @@
  */
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import proguard.classfile.util.WarningLogger;
 import proguard.classfile.util.WarningPrinter;
 
 import java.io.*;
@@ -31,6 +34,8 @@ import java.io.*;
  */
 public class ConfigurationChecker
 {
+    private static final Logger logger = LogManager.getLogger(ConfigurationChecker.class);
+
     private final Configuration configuration;
 
 
@@ -48,10 +53,6 @@ public class ConfigurationChecker
      */
     public void check() throws IOException
     {
-        // We're using the system's default character encoding for writing to
-        // the standard output.
-        PrintWriter out = new PrintWriter(System.out, true);
-
         ClassPath programJars = configuration.programJars;
         ClassPath libraryJars = configuration.libraryJars;
 
@@ -115,10 +116,10 @@ public class ConfigurationChecker
                             !entry.isJmod()  &&
                             !entry.isZip())
                         {
-                            out.println("Note: you're writing the processed class files to a directory [" + entry.getName() +"].");
-                            out.println("      This will likely cause problems with obfuscated mixed-case class names.");
-                            out.println("      You should consider writing the output to a jar file, or otherwise");
-                            out.println("      specify '-dontusemixedcaseclassnames'.");
+                            logger.info("Note: you're writing the processed class files to a directory [{}].", entry.getName());
+                            logger.info("      This will likely cause problems with obfuscated mixed-case class names.");
+                            logger.info("      You should consider writing the output to a jar file, or otherwise");
+                            logger.info("      specify '-dontusemixedcaseclassnames'.");
 
                             break;
                         }
@@ -131,17 +132,17 @@ public class ConfigurationChecker
                 (configuration.adaptResourceFileContents.isEmpty() ||
                  configuration.adaptResourceFileContents.get(0).equals(ConfigurationConstants.ANY_FILE_KEYWORD)))
             {
-                out.println("Note: you're specifying '-adaptresourcefilecontents' for all resource files.");
-                out.println("      This will most likely cause problems with binary files.");
+                logger.info("Note: you're specifying '-adaptresourcefilecontents' for all resource files.");
+                logger.info("      This will most likely cause problems with binary files.");
             }
 
             // Check if all -keepclassmembers options indeed have class members.
-            WarningPrinter keepClassMemberNotePrinter = new WarningPrinter(out, configuration.note);
+            WarningPrinter keepClassMemberNotePrinter = new WarningLogger(logger, configuration.note);
 
             new KeepClassMemberChecker(keepClassMemberNotePrinter).checkClassSpecifications(configuration.keep);
 
             // Check if -assumenosideffects options don't specify all methods.
-            WarningPrinter assumeNoSideEffectsNotePrinter = new WarningPrinter(out, configuration.note);
+            WarningPrinter assumeNoSideEffectsNotePrinter = new WarningLogger(logger, configuration.note);
 
             new AssumeNoSideEffectsChecker(assumeNoSideEffectsNotePrinter).checkClassSpecifications(configuration.assumeNoSideEffects);
 
@@ -149,21 +150,19 @@ public class ConfigurationChecker
             int keepClassMemberNoteCount = keepClassMemberNotePrinter.getWarningCount();
             if (keepClassMemberNoteCount > 0)
             {
-                out.println("Note: there were " + keepClassMemberNoteCount +
-                            " '-keepclassmembers' options that didn't specify class");
-                out.println("      members. You should specify at least some class members or consider");
-                out.println("      if you just need '-keep'.");
-                out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#classmembers)");
+                logger.info("Note: there were {} '-keepclassmembers' options that didn't specify class", keepClassMemberNoteCount);
+                logger.info("      members. You should specify at least some class members or consider");
+                logger.info("      if you just need '-keep'.");
+                logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#classmembers)");
             }
 
             int assumeNoSideEffectsNoteCount = assumeNoSideEffectsNotePrinter.getWarningCount();
             if (assumeNoSideEffectsNoteCount > 0)
             {
-                out.println("Note: there were " + assumeNoSideEffectsNoteCount +
-                                   " '-assumenosideeffects' options that try to match all");
-                out.println("      methods with wildcards. This will likely cause problems with methods like");
-                out.println("      'wait()' and 'notify()'. You should specify the methods more precisely.");
-                out.println("      (https://www.guardsquare.com/proguard/manual/troubleshooting#nosideeffects)");
+                logger.info("Note: there were {} '-assumenosideeffects' options that try to match all", assumeNoSideEffectsNoteCount);
+                logger.info("      methods with wildcards. This will likely cause problems with methods like");
+                logger.info("      'wait()' and 'notify()'. You should specify the methods more precisely.");
+                logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#nosideeffects)");
             }
         }
     }

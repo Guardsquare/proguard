@@ -21,6 +21,8 @@
 
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -52,11 +54,7 @@ implements   AttributeVisitor,
              ConstantVisitor,
              ClassVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("wc") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(WrapperClassUseSimplifier.class);
 
 
     private final InstructionVisitor extraInstructionVisitor;
@@ -96,10 +94,10 @@ implements   AttributeVisitor,
 
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG)
-        {
-            System.out.println("WrapperClassUseSimplifier: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-        }
+        logger.debug("WrapperClassUseSimplifier: {}.{}{}",
+                     clazz.getName(),
+                     method.getName(clazz),
+                     method.getDescriptor(clazz));
 
         int codeLength = codeAttribute.u4codeLength;
 

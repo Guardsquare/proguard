@@ -20,6 +20,8 @@
  */
 package proguard.optimize.peephole;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -41,11 +43,7 @@ import proguard.optimize.info.*;
 public class VariableShrinker
 implements   AttributeVisitor
 {
-    //*
-    private static final boolean DEBUG = false;
-    /*/
-    private static       boolean DEBUG = System.getProperty("vs") != null;
-    //*/
+    private static final Logger logger = LogManager.getLogger(VariableShrinker.class);
 
 
     private final MemberVisitor extraVariableMemberVisitor;
@@ -91,12 +89,9 @@ implements   AttributeVisitor
             // Get the total size of the local variable frame.
             int maxLocals = codeAttribute.u2maxLocals;
 
-            if (DEBUG)
-            {
-                System.out.println("VariableShrinker: "+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz));
-                System.out.println("  Parameter size = " + parameterSize);
-                System.out.println("  Max locals     = " + maxLocals);
-            }
+            logger.debug("VariableShrinker: {}.{}{}", clazz.getName(), method.getName(clazz), method.getDescriptor(clazz));
+            logger.debug("  Parameter size = {}", parameterSize);
+            logger.debug("  Max locals     = {}", maxLocals);
 
             // Figure out the local variables that are used by the code.
             variableUsageMarker.visitCodeAttribute(clazz, method, codeAttribute);
@@ -109,10 +104,7 @@ implements   AttributeVisitor
                 // Is the variable not required?
                 if (!variableUsageMarker.isVariableUsed(variableIndex))
                 {
-                    if (DEBUG)
-                    {
-                        System.out.println("  Deleting local variable #"+variableIndex);
-                    }
+                    logger.debug("  Deleting local variable #{}", variableIndex);
 
                     // Delete the unused variable.
                     variableEditor.deleteVariable(variableIndex);

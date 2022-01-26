@@ -20,6 +20,9 @@
  */
 package proguard.optimize.evaluation;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -33,6 +36,9 @@ import proguard.evaluation.*;
 import proguard.evaluation.value.*;
 import proguard.optimize.info.ParameterUsageMarker;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * This AttributeVisitor shrinks the code attributes that it visits, based
  * on partial evaluation.
@@ -43,13 +49,7 @@ public class EvaluationShrinker
 implements   AttributeVisitor,
              ExceptionInfoVisitor
 {
-    //*
-    private static final boolean DEBUG          = false;
-    private static final boolean DEBUG_RESULTS  = false;
-    /*/
-    private static boolean DEBUG          = System.getProperty("es") != null;
-    private static boolean DEBUG_RESULTS  = DEBUG;
-    //*/
+    private static final Logger logger = LogManager.getLogger(EvaluationShrinker.class);
 
     // Useful short sequences of simple instructions (LSB first).
     private static final int UNSUPPORTED         = -1;
@@ -188,18 +188,21 @@ implements   AttributeVisitor,
         }
         catch (RuntimeException ex)
         {
-            System.err.println("Unexpected error while shrinking instructions after partial evaluation:");
-            System.err.println("  Class       = ["+clazz.getName()+"]");
-            System.err.println("  Method      = ["+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-            System.err.println("  Exception   = ["+ex.getClass().getName()+"] ("+ex.getMessage()+")");
+            logger.error("Unexpected error while shrinking instructions after partial evaluation:");
+            logger.error("  Class       = [{}]", clazz.getName());
+            logger.error("  Method      = [{}{}]", method.getName(clazz), method.getDescriptor(clazz));
+            logger.error("  Exception   = [{}] ({})", ex.getClass().getName(), ex.getMessage());
 
             ex.printStackTrace();
-            System.err.println("Not optimizing this method");
+            logger.error("Not optimizing this method");
 
-            if (DEBUG)
+            logger.debug("{}", () -> {
+                StringWriter sw = new StringWriter();
+                method.accept(clazz, new ClassPrinter(new PrintWriter(sw)));
+                return sw.toString();
+            });
+            if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
             {
-                method.accept(clazz, new ClassPrinter());
-
                 throw ex;
             }
         }
@@ -208,10 +211,7 @@ implements   AttributeVisitor,
 
     public void visitCodeAttribute0(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
-        if (DEBUG_RESULTS)
-        {
-            System.out.println("EvaluationShrinker ["+clazz.getName()+"."+method.getName(clazz)+method.getDescriptor(clazz)+"]");
-        }
+        logger.debug("EvaluationShrinker [{}.{}]", clazz.getName(), method.getName(clazz)+method.getDescriptor(clazz));
 
         // Analyze the method.
         if (runInstructionUsageMarker)
@@ -221,112 +221,89 @@ implements   AttributeVisitor,
 
         int codeLength = codeAttribute.u4codeLength;
 
-        if (DEBUG) System.out.println();
-
-
         // Reset the code changes.
         codeAttributeEditor.reset(codeLength);
 
         // Replace virtual invocations by static invocations, where necessary.
-        if (DEBUG) System.out.println("Static invocation fixing:");
+        logger.debug("Static invocation fixing:");
 
         codeAttribute.instructionsAccept(clazz, method,
             instructionUsageMarker.necessaryInstructionFilter(true,
             staticInvocationFixer));
 
-        if (DEBUG) System.out.println();
-
-
         // Replace traced but unnecessary backward branches by infinite loops.
         // The virtual machine's verification step is not smart enough to see
         // the code isn't reachable, and may complain otherwise.
         // Any clearly unreachable code will still be removed elsewhere.
-        if (DEBUG) System.out.println("Backward branch fixing:");
+        logger.debug("Backward branch fixing:");
 
         codeAttribute.instructionsAccept(clazz, method,
             instructionUsageMarker.tracedInstructionFilter(true,
             instructionUsageMarker.necessaryInstructionFilter(false,
             backwardBranchFixer)));
 
-        if (DEBUG) System.out.println();
-
-
         // Insert infinite loops after jumps to subroutines that don't return.
         // The virtual machine's verification step is not smart enough to see
         // the code isn't reachable, and may complain otherwise.
-        if (DEBUG) System.out.println("Non-returning subroutine fixing:");
+        logger.debug("Non-returning subroutine fixing:");
 
         codeAttribute.instructionsAccept(clazz, method,
             instructionUsageMarker.necessaryInstructionFilter(true,
             nonReturningSubroutineFixer));
 
-        if (DEBUG) System.out.println();
-
-
         // Locally fix instructions, in order to keep the stack consistent.
-        if (DEBUG) System.out.println("Stack consistency fixing:");
+        logger.debug("Stack consistency fixing:");
 
         codeAttribute.instructionsAccept(clazz, method,
             instructionUsageMarker.tracedInstructionFilter(true,
             stackConsistencyFixer));
 
-        if (DEBUG) System.out.println();
-
-
         // Delete all instructions that are not used.
-        if (DEBUG) System.out.println("Deleting unused instructions");
+        logger.debug("Deleting unused instructions");
 
         codeAttribute.instructionsAccept(clazz, method,
             instructionUsageMarker.necessaryInstructionFilter(false,
             instructionDeleter));
 
-        if (DEBUG) System.out.println();
+        logger.debug("Simplification results:");
 
-
-        if (DEBUG_RESULTS)
+        if (logger.getLevel().isLessSpecificThan(Level.DEBUG))
         {
-            System.out.println("Simplification results:");
-
             int offset = 0;
-            do
-            {
+            do {
                 Instruction instruction = InstructionFactory.create(codeAttribute.code,
-                                                                    offset);
-                System.out.println((instructionUsageMarker.isInstructionNecessary(offset)             ? " + " :
-                                    instructionUsageMarker.isExtraPushPopInstructionNecessary(offset) ? " ~ " :
-                                                                                                        " - ") +
-                                   instruction.toString(offset));
+                        offset);
+                logger.debug("{}{}",
+                        (instructionUsageMarker.isInstructionNecessary(offset) ? " + " :
+                                instructionUsageMarker.isExtraPushPopInstructionNecessary(offset) ? " ~ " :
+                                        " - "),
+                        instruction.toString(offset)
+                );
 
-                if (instructionUsageMarker.isTraced(offset))
-                {
+                if (instructionUsageMarker.isTraced(offset)) {
                     InstructionOffsetValue branchTargets = instructionUsageMarker.branchTargets(offset);
-                    if (branchTargets != null)
-                    {
-                        System.out.println("     has overall been branching to "+branchTargets);
+                    if (branchTargets != null) {
+                        logger.debug("     has overall been branching to {}", branchTargets);
                     }
 
                     boolean deleted = codeAttributeEditor.deleted[offset];
-                    if (instructionUsageMarker.isInstructionNecessary(offset) && deleted)
-                    {
-                        System.out.println("     is deleted");
+                    if (instructionUsageMarker.isInstructionNecessary(offset) && deleted) {
+                        logger.debug("     is deleted");
                     }
 
                     Instruction preInsertion = codeAttributeEditor.preInsertions[offset];
-                    if (preInsertion != null)
-                    {
-                        System.out.println("     is preceded by: "+preInsertion);
+                    if (preInsertion != null) {
+                        logger.debug("     is preceded by: {}", preInsertion);
                     }
 
                     Instruction replacement = codeAttributeEditor.replacements[offset];
-                    if (replacement != null)
-                    {
-                        System.out.println("     is replaced by: "+replacement);
+                    if (replacement != null) {
+                        logger.debug("     is replaced by: {}", replacement);
                     }
 
                     Instruction postInsertion = codeAttributeEditor.postInsertions[offset];
-                    if (postInsertion != null)
-                    {
-                        System.out.println("     is followed by: "+postInsertion);
+                    if (postInsertion != null) {
+                        logger.debug("     is followed by: {}", postInsertion);
                     }
                 }
 
@@ -423,7 +400,7 @@ implements   AttributeVisitor,
             {
                 replaceByInfiniteLoop(clazz, offset);
 
-                if (DEBUG) System.out.println("  Setting infinite loop instead of "+instruction.toString(offset));
+                logger.debug("  Setting infinite loop instead of {}", instruction.toString(offset));
             }
         }
 
@@ -499,7 +476,9 @@ implements   AttributeVisitor,
                 {
                     replaceByInfiniteLoop(clazz, nextOffset);
 
-                    if (DEBUG) System.out.println("  Adding infinite loop at ["+nextOffset+"] after "+branchInstruction.toString(offset));
+                    logger.debug("  Adding infinite loop at [{}] after {}",
+                                 nextOffset,
+                                 branchInstruction.toString(offset));
                 }
             }
         }
@@ -573,7 +552,7 @@ implements   AttributeVisitor,
                     // Pop some unnecessary stack entries.
                     if (requiredPopMask > 0)
                     {
-                        if (DEBUG) System.out.println("  Popping 0x"+Integer.toHexString(requiredPopMask)+" before marked consumer "+instruction.toString(offset));
+                        logger.debug("  Popping 0x{} before marked consumer {}", Integer.toHexString(requiredPopMask), instruction.toString(offset));
 
                         insertInstructions(offset, false, true, instruction, simpleInstructions(complexPop(requiredPopMask)));
                     }
@@ -588,7 +567,7 @@ implements   AttributeVisitor,
                             throw new IllegalArgumentException("Unsupported stack size increment ["+requiredPushMask+"] at ["+offset+"]");
                         }
 
-                        if (DEBUG) System.out.println("  Pushing "+value.computationalType()+" before marked consumer "+instruction.toString(offset));
+                        logger.debug("  Pushing {} before marked consumer {}", value.computationalType(), instruction.toString(offset));
 
                         insertPushInstructions(offset, false, true, value.computationalType());
                     }
@@ -619,7 +598,7 @@ implements   AttributeVisitor,
                     // Pop the unnecessary stack entries.
                     if (requiredPopCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Popping "+requiredPopCount+" entries after marked producer "+instruction.toString(offset));
+                        logger.debug("  Popping {} entries after marked producer {}", requiredPopCount, instruction.toString(offset));
 
                         insertPopInstructions(offset, false, false, requiredPopCount);
                     }
@@ -653,7 +632,7 @@ implements   AttributeVisitor,
                     // Pop the unnecessary stack entries.
                     if (expectedPopCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Popping "+expectedPopCount+" entries instead of unmarked consumer "+instruction.toString(offset));
+                        logger.debug("  Popping {} entries instead of unmarked consumer {}", expectedPopCount, instruction.toString(offset));
 
                         insertPopInstructions(offset, true, false, expectedPopCount);
                     }
@@ -684,7 +663,7 @@ implements   AttributeVisitor,
                     // Push some necessary stack entries.
                     if (expectedPushCount > 0)
                     {
-                        if (DEBUG) System.out.println("  Pushing type "+tracedStack.getTop(0).computationalType()+" entry instead of unmarked producer "+instruction.toString(offset));
+                        logger.debug("  Pushing type {} entry instead of unmarked producer {}", tracedStack.getTop(0).computationalType(), instruction.toString(offset));
 
                         insertPushInstructions(offset, true, false, tracedStack.getTop(0).computationalType());
                     }
@@ -728,7 +707,7 @@ implements   AttributeVisitor,
                     codeAttributeEditor.replaceInstruction(offset,
                                                            replacementInstruction);
 
-                    if (DEBUG) System.out.println("  Replacing branch instruction "+branchInstruction.toString(offset)+" by "+replacementInstruction.toString());
+                    logger.debug("  Replacing branch instruction {} by {}", branchInstruction.toString(offset), replacementInstruction.toString());
                 }
             }
             else
@@ -751,7 +730,7 @@ implements   AttributeVisitor,
                     codeAttributeEditor.replaceInstruction(offset,
                                                            replacementInstruction);
 
-                    if (DEBUG) System.out.println("  Replacing switch instruction "+switchInstruction.toString(offset)+" by "+replacementInstruction.toString());
+                    logger.debug("  Replacing switch instruction {} by {}", switchInstruction.toString(offset), replacementInstruction.toString());
                 }
             }
             else
@@ -1398,7 +1377,7 @@ implements   AttributeVisitor,
         Instruction replacementInstruction =
             new SimpleInstruction(pushOpcode(computationalType));
 
-        if (DEBUG) System.out.println(": "+replacementInstruction.toString(offset));
+        logger.debug(": {}", replacementInstruction.toString(offset));
 
         // Replace or insert the push instruction.
         insertInstruction(offset, replace, before, replacementInstruction);
@@ -1588,7 +1567,9 @@ implements   AttributeVisitor,
              new ConstantInstruction(Instruction.OP_INVOKESTATIC,
                                      constantInstruction.constantIndex);
 
-        if (DEBUG) System.out.println("  Replacing by static invocation "+constantInstruction.toString(offset)+" -> "+replacementInstruction.toString());
+        logger.debug("  Replacing by static invocation {} -> {}",
+                constantInstruction.toString(offset),
+                replacementInstruction.toString());
 
         codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
     }
@@ -1600,7 +1581,7 @@ implements   AttributeVisitor,
     private void replaceByInfiniteLoop(Clazz clazz,
                                        int   offset)
     {
-        if (DEBUG) System.out.println("  Inserting infinite loop at ["+offset+"]");
+        logger.debug("  Inserting infinite loop at [{}]", offset);
 
         // We can edit an instruction without marking it.
         //markInstruction(offset);
@@ -1643,14 +1624,14 @@ implements   AttributeVisitor,
                     extraDeletedInstructionVisitor.visitSimpleInstruction(null, null, null, offset, null);
                 }
 
-                if (DEBUG) System.out.println("  Deleting marked instruction " + oldInstruction.toString(offset));
+                logger.debug("  Deleting marked instruction {}", oldInstruction.toString(offset));
             }
             else if (newOpcode == oldInstruction.opcode)
             {
                 // Leave the instruction unchanged.
                 codeAttributeEditor.undeleteInstruction(offset);
 
-                if (DEBUG) System.out.println("  Marking unchanged instruction " + oldInstruction.toString(offset));
+                logger.debug("  Marking unchanged instruction {}", oldInstruction.toString(offset));
             }
             else
             {
@@ -1659,12 +1640,15 @@ implements   AttributeVisitor,
                 codeAttributeEditor.replaceInstruction(offset,
                                                        replacementInstruction);
 
-                if (DEBUG) System.out.println("  Replacing instruction " + oldInstruction.toString(offset) + " by " + replacementInstruction.toString());
+                logger.debug("  Replacing instruction {} by {}",
+                             oldInstruction.toString(offset),
+                             replacementInstruction.toString()
+                );
             }
         }
         else
         {
-            if (DEBUG) System.out.println("  Replacing instruction " + oldInstruction.toString(offset) + " by");
+            logger.debug("  Replacing instruction {} by", oldInstruction.toString(offset));
 
             // Replace the instruction.
             Instruction[] replacementInstructions = simpleInstructions(newOpcodes);
@@ -1696,7 +1680,7 @@ implements   AttributeVisitor,
             Instruction replacementInstruction = new SimpleInstruction((byte)opcodes);
             instructions[count++] = replacementInstruction;
 
-            if (DEBUG) System.out.println("    "+replacementInstruction.toString());
+            logger.debug("    {}", replacementInstruction.toString());
             opcodes >>>= 8;
         }
 
