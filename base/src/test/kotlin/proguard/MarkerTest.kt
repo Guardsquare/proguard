@@ -8,7 +8,9 @@
 package proguard
 
 import io.kotest.core.spec.style.FreeSpec
+import proguard.io.ExtraDataEntryNameMap
 import proguard.mark.Marker
+import proguard.resources.file.ResourceFilePool
 import proguard.util.ProcessingFlags.DONT_OBFUSCATE
 import proguard.util.ProcessingFlags.DONT_OPTIMIZE
 import proguard.util.ProcessingFlags.DONT_SHRINK
@@ -53,8 +55,8 @@ class MarkerTest : FreeSpec({
 
             "The inline class should be marked" {
                 val marker = Marker(config)
-
-                marker.mark(programClassPool, libraryClassPool)
+                val appView = AppView(programClassPool, libraryClassPool, ResourceFilePool(), ExtraDataEntryNameMap())
+                marker.execute(appView)
 
                 with(programClassPool.getClass("Password").processingFlags) {
                     this shouldHaveFlag DONT_OBFUSCATE
@@ -73,8 +75,8 @@ class MarkerTest : FreeSpec({
 
             "The inline class should not be marked" {
                 val marker = Marker(config)
-
-                marker.mark(programClassPool, libraryClassPool)
+                val appView = AppView(programClassPool, libraryClassPool, ResourceFilePool(), ExtraDataEntryNameMap())
+                marker.execute(appView)
 
                 with(programClassPool.getClass("Password").processingFlags) {
                     this shouldNotHaveFlag DONT_OBFUSCATE
