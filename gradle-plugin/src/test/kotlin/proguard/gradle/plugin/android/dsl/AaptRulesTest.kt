@@ -57,7 +57,7 @@ class AaptRulesTest : FreeSpec({
             }
 
             "The rules file should be passed to ProGuard" {
-                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+                result.output shouldContain "Loading configuration file ${aaptRules.canonicalPath}"
             }
 
             "The the AAPT rules should be generated" {
@@ -83,7 +83,7 @@ class AaptRulesTest : FreeSpec({
                     }
                 }
 
-                aaptOptions.additionalParameters = ["--proguard", "${rootDir.absolutePath}/test.pro"]
+                aaptOptions.additionalParameters = ["--proguard", "${rootDir.canonicalPath}/test.pro"]
             }
 
             proguard {
@@ -104,7 +104,7 @@ class AaptRulesTest : FreeSpec({
             }
 
             "The rules file should be passed to ProGuard" {
-                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+                result.output shouldContain "Loading configuration file ${aaptRules.canonicalPath}"
             }
 
             "The AAPT rules file should be re-used" {
@@ -163,7 +163,7 @@ class AaptRulesTest : FreeSpec({
             }
 
             "The rules file should be passed to ProGuard" {
-                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+                result.output shouldContain "Loading configuration file ${aaptRules.canonicalPath}"
             }
 
             "The the AAPT rules should be generated" {
@@ -186,7 +186,7 @@ class AaptRulesTest : FreeSpec({
             }
 
             "The rules file should be passed to ProGuard" {
-                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+                result.output shouldContain "Loading configuration file ${aaptRules.canonicalPath}"
             }
 
             "The the AAPT rules should be generated" {
@@ -250,7 +250,7 @@ class AaptRulesTest : FreeSpec({
             }
 
             "The rules file should be passed to ProGuard" {
-                result.output shouldContain "Loading configuration file ${aaptRules.absolutePath}"
+                result.output shouldContain "Loading configuration file ${aaptRules.canonicalPath}"
             }
 
             "The the AAPT rules should be generated" {
