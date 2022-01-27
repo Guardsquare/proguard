@@ -3,7 +3,7 @@
 
 ### Java Support
 
-New Java versions are released every 6 months. 
+New Java versions are released every 6 months.
 To allow ProGuard to continue to optimize, obfuscate and shrink Java class files ProGuard now supports all Java versions including Java 17.
 
 - Add support for Java 17. (`PGD-132`)

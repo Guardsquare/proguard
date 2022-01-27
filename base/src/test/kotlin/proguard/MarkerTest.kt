@@ -29,7 +29,7 @@ class MarkerTest : FreeSpec({
                 """
                 @JvmInline
                 value class Password(val s: String)
-                
+
                 // The underlying JVM method descriptor will reference the
                 // underlying property of `Password`, rather than `Password` itself.
 
