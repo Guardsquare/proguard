@@ -85,7 +85,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:x.y.z'    // The Android Gradle plugin.
-        classpath 'com.guardsquare:proguard-gradle:7.1.0'  // The ProGuard Gradle plugin.
+        classpath 'com.guardsquare:proguard-gradle:7.2.0'  // The ProGuard Gradle plugin.
     }
 }
 ```
@@ -158,7 +158,7 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.1.0')
+                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.2.0')
             }
         }
     }
@@ -246,7 +246,7 @@ guide](CONTRIBUTING.md) if you would like to contribute.
 
 ## 📝 License
 
-Copyright (c) 2002-2020 [Guardsquare NV](https://www.guardsquare.com/).
+Copyright (c) 2002-2022 [Guardsquare NV](https://www.guardsquare.com/).
 ProGuard is released under the [GNU General Public License, version
 2](LICENSE), with [exceptions granted to a number of
 projects](docs/md/license.md).
