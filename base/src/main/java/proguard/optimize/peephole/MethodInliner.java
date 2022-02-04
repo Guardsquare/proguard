@@ -44,7 +44,7 @@ import java.util.Stack;
 
 /**
  * This AttributeVisitor is an abstract class representing a visitor considering to inline each method that it
- * visits in its usage sites. The behavior of whether or not a class is considered for inlining is controlled
+ * visits in its usage sites. The behavior of whether a class is considered for inlining is controlled
  * by overriding the shouldInline method.
  *
  * There are some additional technical constraints imposed on whether the method is actually inlined
@@ -79,6 +79,7 @@ implements            AttributeVisitor,
     protected final boolean            android;
     protected final int                maxResultingCodeLength;
     protected final boolean            allowAccessModification;
+    protected final boolean            usesOptimizationInfo;
     protected final InstructionVisitor extraInlinedInvocationVisitor;
 
     private final CodeAttributeComposer codeAttributeComposer  = new CodeAttributeComposer();
@@ -114,11 +115,12 @@ implements            AttributeVisitor,
 
     /**
      * Creates a new MethodInliner.
-     * @param microEdition            indicates whether the resulting code is
+     *
+     * @param microEdition            Indicates whether the resulting code is
      *                                targeted at Java Micro Edition.
-     * @param android                 indicates whether the resulting code is
+     * @param android                 Indicates whether the resulting code is
      *                                targeted at the Dalvik VM.
-     * @param allowAccessModification indicates whether the access modifiers of
+     * @param allowAccessModification Indicates whether the access modifiers of
      *                                classes and class members can be changed
      *                                in order to inline methods.
      */
@@ -128,7 +130,6 @@ implements            AttributeVisitor,
     {
         this(microEdition,
              android,
-             defaultMaxResultingCodeLength(microEdition),
              allowAccessModification,
              null);
     }
@@ -136,14 +137,15 @@ implements            AttributeVisitor,
 
     /**
      * Creates a new MethodInliner.
-     * @param microEdition            indicates whether the resulting code is
-     *                                targeted at Java Micro Edition.
-     * @param android                 indicates whether the resulting code is
-     *                                targeted at the androidVM.
-     * @param allowAccessModification indicates whether the access modifiers of
-     *                                classes and class members can be changed
-     *                                in order to inline methods.
-     * @param extraInlinedInvocationVisitor an optional extra visitor for all
+     *
+     * @param microEdition                  Indicates whether the resulting code is
+     *                                      targeted at Java Micro Edition.
+     * @param android                       Indicates whether the resulting code is
+     *                                      targeted at the Dalvik VM.
+     * @param allowAccessModification       Indicates whether the access modifiers of
+     *                                      classes and class members can be changed
+     *                                      in order to inline methods.
+     * @param extraInlinedInvocationVisitor An optional extra visitor for all
      *                                      inlined invocation instructions.
      */
     public MethodInliner(boolean            microEdition,
@@ -152,31 +154,36 @@ implements            AttributeVisitor,
                          InstructionVisitor extraInlinedInvocationVisitor)
     {
         this(microEdition,
-            android,
-            defaultMaxResultingCodeLength(microEdition),
-            allowAccessModification,
-            extraInlinedInvocationVisitor);
+             android,
+             defaultMaxResultingCodeLength(microEdition),
+             allowAccessModification,
+             true,
+             extraInlinedInvocationVisitor);
     }
 
 
     /**
      * Creates a new MethodInliner.
-     * @param microEdition            indicates whether the resulting code is
-     *                                targeted at Java Micro Edition.
-     * @param android                 indicates whether the resulting code is
-     *                                targeted at the Dalvik VM.
-     * @param maxResultingCodeLength  configures the inliner with a max resulting
-     *                                code length.
-     * @param allowAccessModification indicates whether the access modifiers of
-     *                                classes and class members can be changed
-     *                                in order to inline methods.
-     * @param extraInlinedInvocationVisitor an optional extra visitor for all
+     *
+     * @param microEdition                  Indicates whether the resulting code is
+     *                                      targeted at Java Micro Edition.
+     * @param android                       Indicates whether the resulting code is
+     *                                      targeted at the Dalvik VM.
+     * @param maxResultingCodeLength        Configures the inliner with a max resulting
+     *                                      code length.
+     * @param allowAccessModification       Indicates whether the access modifiers of
+     *                                      classes and class members can be changed
+     *                                      in order to inline methods.
+     * @param usesOptimizationInfo          Indicates whether this inliner needs to perform checks
+     *                                      that require optimization info.
+     * @param extraInlinedInvocationVisitor An optional extra visitor for all
      *                                      inlined invocation instructions.
      */
     public MethodInliner(boolean            microEdition,
                          boolean            android,
                          int                maxResultingCodeLength,
                          boolean            allowAccessModification,
+                         boolean            usesOptimizationInfo,
                          InstructionVisitor extraInlinedInvocationVisitor)
     {
         if (maxResultingCodeLength > MAXIMUM_RESULTING_CODE_LENGTH_JVM)
@@ -187,6 +194,7 @@ implements            AttributeVisitor,
         this.android                       = android;
         this.maxResultingCodeLength        = maxResultingCodeLength;
         this.allowAccessModification       = allowAccessModification;
+        this.usesOptimizationInfo          = usesOptimizationInfo;
         this.extraInlinedInvocationVisitor = extraInlinedInvocationVisitor;
     }
 
@@ -269,7 +277,10 @@ implements            AttributeVisitor,
 
                 // Update the super/private/package/protected accessing flags.
 
-                method.accept(clazz, accessMethodMarker);
+                if (usesOptimizationInfo)
+                {
+                    method.accept(clazz, accessMethodMarker);
+                }
             }
 
             targetClass   = null;
@@ -572,7 +583,7 @@ implements            AttributeVisitor,
                 coveredByCatchAllHandler = false;
                 exceptionInfoCount       = 0;
                 codeAttribute.exceptionsAccept(clazz, method, offset, this);
-                coveredByCatchAllHandler = exceptionInfoCount > 0 ? coveredByCatchAllHandler : true;
+                coveredByCatchAllHandler = exceptionInfoCount <= 0 || coveredByCatchAllHandler;
 
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
 
@@ -632,10 +643,7 @@ implements            AttributeVisitor,
                      targetMethod.getDescriptor(targetClass)
         );
 
-        if (// Don't inline methods that must be preserved.
-            !KeepMarker.isKept(programMethod)                                                     &&
-
-            DEBUG("Access?")                                                                      &&
+        if (DEBUG("Access?")                                                                      &&
 
             // Only inline the method if it is private, static, or final.
             // This currently precludes default interface methods, because
@@ -679,6 +687,12 @@ implements            AttributeVisitor,
             targetClass.u4version >= programClass.u4version                                       &&
 
             DEBUG("Super?")                                                                       &&
+
+            // The below checks require optimization info to be set.
+            (!usesOptimizationInfo || (
+
+            // Don't inline methods that must be preserved.
+            !KeepMarker.isKept(programMethod)                                                     &&
 
             // Only inline the method if it doesn't invoke a super method or a
             // dynamic method, or if it is in the same class.
@@ -754,9 +768,7 @@ implements            AttributeVisitor,
 
             // Only inline the method if its related static initializers don't
             // have any side effects.
-            !SideEffectClassChecker.mayHaveSideEffects(targetClass,
-                                                       programClass,
-                                                       programMethod))
+            !SideEffectClassChecker.mayHaveSideEffects(targetClass, programClass, programMethod))))
         {
             boolean oldInlining = inlining;
 
@@ -766,16 +778,19 @@ implements            AttributeVisitor,
             // Inline the method body.
             programMethod.attributesAccept(programClass, this);
 
-            // Update the optimization information of the target method.
-            if (!KeepMarker.isKept(targetMethod))
+            if (usesOptimizationInfo)
             {
-                ProgramMethodOptimizationInfo.getProgramMethodOptimizationInfo(targetMethod)
-                    .merge(MethodOptimizationInfo.getMethodOptimizationInfo(programMethod));
-            }
+                // Update the optimization information of the target method.
+                if (!KeepMarker.isKept(targetMethod))
+                {
+                    ProgramMethodOptimizationInfo.getProgramMethodOptimizationInfo(targetMethod)
+                        .merge(MethodOptimizationInfo.getMethodOptimizationInfo(programMethod));
+                }
 
-            // Increment the invocation count of referenced methods again,
-            // since they are now invoked from the inlined code too.
-            programMethod.attributesAccept(programClass, methodInvocationMarker);
+                // Increment the invocation count of referenced methods again,
+                // since they are now invoked from the inlined code too.
+                programMethod.attributesAccept(programClass, methodInvocationMarker);
+            }
 
             inlining = oldInlining;
             inliningMethods.pop();
@@ -870,11 +885,11 @@ implements            AttributeVisitor,
      * Indicates whether this method should be inlined. Subclasses can overwrite
      * this method to change which methods are inlined.
      *
-     * Note that the method will still always first be tested on whether they can technically
-     * be inlined (see `visitProrgamMethod`) and only then will this method be called to decide
+     * Note that the method will always still first be tested on whether they can technically
+     * be inlined (see `visitProgramMethod`) and only then will this method be called to decide
      * whether to actually inline or not.
      *
-     * @param method the method that is eligible for inlining
+     * @param method The method that is eligible for inlining.
      */
     abstract protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute);
 }

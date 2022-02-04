@@ -32,7 +32,7 @@ import proguard.util.ArrayUtil;
  * @author Eric Lafortune
  */
 public class ProgramMethodOptimizationInfo
-    extends      MethodOptimizationInfo
+extends      MethodOptimizationInfo
 {
     private static final Value[] EMPTY_PARAMETERS      = new Value[0];
     private static final int[]   EMPTY_PARAMETER_SIZES = new int[0];
