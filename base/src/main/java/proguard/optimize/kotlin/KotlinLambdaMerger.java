@@ -12,7 +12,6 @@ import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.ClassInitializer;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
-import proguard.optimize.MethodInlinerWrapper;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;

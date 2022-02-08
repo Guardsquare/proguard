@@ -153,11 +153,48 @@ implements            AttributeVisitor,
                          boolean            allowAccessModification,
                          InstructionVisitor extraInlinedInvocationVisitor)
     {
+        this(microEdition,
+             android,
+             defaultMaxResultingCodeLength(microEdition),
+             allowAccessModification,
+             true,
+             extraInlinedInvocationVisitor);
+    }
+
+
+    /**
+     * Creates a new MethodInliner.
+     *
+     * @param microEdition                  Indicates whether the resulting code is
+     *                                      targeted at Java Micro Edition.
+     * @param android                       Indicates whether the resulting code is
+     *                                      targeted at the Dalvik VM.
+     * @param maxResultingCodeLength        Configures the inliner with a max resulting
+     *                                      code length.
+     * @param allowAccessModification       Indicates whether the access modifiers of
+     *                                      classes and class members can be changed
+     *                                      in order to inline methods.
+     * @param usesOptimizationInfo          Indicates whether this inliner needs to perform checks
+     *                                      that require optimization info.
+     * @param extraInlinedInvocationVisitor An optional extra visitor for all
+     *                                      inlined invocation instructions.
+     */
+    public MethodInliner(boolean            microEdition,
+                         boolean            android,
+                         int                maxResultingCodeLength,
+                         boolean            allowAccessModification,
+                         boolean            usesOptimizationInfo,
+                         InstructionVisitor extraInlinedInvocationVisitor)
+    {
+        if (maxResultingCodeLength > MAXIMUM_RESULTING_CODE_LENGTH_JVM)
+        {
+            throw new IllegalArgumentException("Maximum resulting code length cannot exceed " + MAXIMUM_RESULTING_CODE_LENGTH_JVM);
+        }
         this.microEdition                  = microEdition;
         this.android                       = android;
         this.maxResultingCodeLength        = maxResultingCodeLength;
         this.allowAccessModification       = allowAccessModification;
-        this.inlineSingleInvocations       = inlineSingleInvocations;
+        this.usesOptimizationInfo          = usesOptimizationInfo;
         this.extraInlinedInvocationVisitor = extraInlinedInvocationVisitor;
     }
 
@@ -731,9 +768,7 @@ implements            AttributeVisitor,
 
             // Only inline the method if its related static initializers don't
             // have any side effects.
-            !SideEffectClassChecker.mayHaveSideEffects(targetClass,
-                                                       programClass,
-                                                       programMethod))
+            !SideEffectClassChecker.mayHaveSideEffects(targetClass, programClass, programMethod))))
         {
             boolean oldInlining = inlining;
 
