@@ -1,5 +1,9 @@
 ## Version 7.2.1
 
+### Improved
+
+- Add [`consumerRuleFilter`](setup/gradleplugin.md#consumerrulefilter) to the ProGuard Gradle plugin. (`T4134`)
+
 ### Bug fixes
 
 - Prevent the generation of Windows reserved names. (`T3937`)

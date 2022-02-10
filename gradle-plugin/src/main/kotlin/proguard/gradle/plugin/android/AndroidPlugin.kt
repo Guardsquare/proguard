@@ -44,6 +44,7 @@ import proguard.gradle.plugin.android.dsl.ProGuardConfiguration
 import proguard.gradle.plugin.android.dsl.UserProGuardConfiguration
 import proguard.gradle.plugin.android.dsl.VariantConfiguration
 import proguard.gradle.plugin.android.tasks.CollectConsumerRulesTask
+import proguard.gradle.plugin.android.tasks.ConsumerRuleFilterEntry
 import proguard.gradle.plugin.android.tasks.PrepareProguardConfigDirectoryTask
 import proguard.gradle.plugin.android.transforms.AndroidConsumerRulesTransform
 import proguard.gradle.plugin.android.transforms.ArchiveConsumerRulesTransform
@@ -127,6 +128,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
                     project,
                     variant,
                     createConsumerRulesConfiguration(project, variant),
+                    matchingConfiguration.consumerRuleFilter,
                     File("${project.buildDir}/intermediates/proguard/configs")))
         }
         return matchingConfiguration
@@ -136,13 +138,26 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         project: Project,
         variant: BaseVariant,
         inputConfiguration: Configuration,
+        consumerRuleFilter: MutableList<String>,
         outputDir: File
-    ): TaskProvider<CollectConsumerRulesTask> =
-        project.tasks.register(COLLECT_CONSUMER_RULES_TASK_NAME + variant.name.capitalize(), CollectConsumerRulesTask::class.java) {
+    ): TaskProvider<CollectConsumerRulesTask> {
+
+        fun parseConsumerRuleFilter(consumerRuleFilter: List<String>) =
+            consumerRuleFilter.map { filter ->
+                val splits = filter.split(':')
+                if (splits.size != 2) {
+                    throw GradleException("Invalid consumer rule filter entry: ${filter}\nExpected an entry of the form: <group>:<module>")
+                }
+                ConsumerRuleFilterEntry(splits[0], splits[1])
+            }
+
+        return project.tasks.register(COLLECT_CONSUMER_RULES_TASK_NAME + variant.name.capitalize(), CollectConsumerRulesTask::class.java) {
             it.consumerRulesConfiguration = inputConfiguration
+            it.consumerRuleFilter = parseConsumerRuleFilter(consumerRuleFilter)
             it.outputFile = File(File(outputDir, variant.dirName), CONSUMER_RULES_PRO)
             it.dependsOn(inputConfiguration.buildDependencies)
         }
+    }
 
     private fun createConsumerRulesConfiguration(project: Project, variant: BaseVariant): Configuration =
         project.configurations.create("${variant.name}ProGuardConsumerRulesArtifacts") {
