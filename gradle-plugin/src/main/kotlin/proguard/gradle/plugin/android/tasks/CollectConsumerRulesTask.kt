@@ -9,6 +9,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
@@ -21,6 +22,13 @@ open class CollectConsumerRulesTask : DefaultTask() {
 
     @get:Input
     var consumerRuleFilter: List<ConsumerRuleFilterEntry> = emptyList()
+
+    @Internal
+    val consumerRuleIgnoreFilter: List<ConsumerRuleFilterEntry> = listOf(
+        // T13715: androidx.window contains an invalid -keep rule, the corrected rule
+        //         has been copied to the `proguard-android-common.txt` default configuration.
+        ConsumerRuleFilterEntry("androidx.window", "window")
+    )
 
     @TaskAction
     fun extractConsumerRules() {
@@ -35,9 +43,10 @@ open class CollectConsumerRulesTask : DefaultTask() {
 
         for (artifact in resolvedArtifacts) {
             val entry = ConsumerRuleFilterEntry(artifact.moduleVersion.id.group, artifact.moduleVersion.id.name)
-            if (entry in consumerRuleFilter) {
+            val inConsumerRuleFilter = entry in consumerRuleFilter
+            if (inConsumerRuleFilter || entry in consumerRuleIgnoreFilter) {
                 logger.debug("Skipping consumer rules of '${artifact.file}'...")
-                matchedConsumerRuleFilterEntries += entry
+                if (inConsumerRuleFilter) matchedConsumerRuleFilterEntries += entry
                 continue
             }
             project.fileTree(artifact.file).forEach { file ->

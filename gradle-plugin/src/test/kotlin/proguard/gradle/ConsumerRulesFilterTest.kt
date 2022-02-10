@@ -47,9 +47,7 @@ class ConsumerRulesFilterTest : FreeSpec({
                         consumerRuleFilter 'filter1', 'filter2'
                     }
                 }
-            }""".trimIndent()
-                )
-            )
+            }""".trimIndent()))
         }.create())
 
         "When the project is evaluated" - {
