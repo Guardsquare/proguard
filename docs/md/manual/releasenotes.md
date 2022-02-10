@@ -2,7 +2,7 @@
 
 ### Bug fixes
 
--
+- Prevent the generation of Windows reserved names. (`T3937`)
 
 ## Version 7.2
 
