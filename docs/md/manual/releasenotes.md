@@ -8,6 +8,7 @@
 
 - Prevent the generation of Windows reserved names. (`T3937`)
 - Prevent "Expecting type and name" parse error when using the `androidx.window` library in an Android project. (`T13715`)
+- Fix shrinking of annotations during GSON optimization.
 
 ## Version 7.2
 

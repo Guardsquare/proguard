@@ -144,12 +144,19 @@ implements AttributeVisitor
         // Delete marked annotations.
         AnnotationsAttributeEditor annotationsAttributeEditor = new AnnotationsAttributeEditor(attribute);
         Annotation[]               annotations                = attribute.annotations;
-        for (int index = 0; index < attribute.u2annotationsCount; index++)
+        int                        index                      = 0;
+        while (index < attribute.u2annotationsCount)
         {
             Annotation annotation = annotations[index];
             if (annotation.getProcessingInfo() == mark)
             {
+                // We do not increase the index here, as we are deleting this element and the next element
+                // to look at will be at the same index.
                 annotationsAttributeEditor.deleteAnnotation(index);
+            }
+            else
+            {
+                index++;
             }
         }
 
@@ -175,14 +182,20 @@ implements AttributeVisitor
         boolean allEmpty = true;
         for (int parameterIndex = 0; parameterIndex < attribute.u1parametersCount; parameterIndex++)
         {
-            int          annotationsCount = attribute.u2parameterAnnotationsCount[parameterIndex];
-            Annotation[] annotations      = attribute.parameterAnnotations[parameterIndex];
-            for (int annotationIndex = 0; annotationIndex < annotationsCount; annotationIndex++)
+            Annotation[] annotations = attribute.parameterAnnotations[parameterIndex];
+            int          index       = 0;
+            while (index < attribute.u2parameterAnnotationsCount[parameterIndex])
             {
-                Annotation annotation = annotations[annotationIndex];
+                Annotation annotation = annotations[index];
                 if (annotation.getProcessingInfo() == mark)
                 {
-                    annotationsAttributeEditor.deleteAnnotation(parameterIndex, annotationIndex);
+                    // We do not increase the index here, as we are deleting this element and the next element
+                    // to look at will be at the same index.
+                    annotationsAttributeEditor.deleteAnnotation(parameterIndex, index);
+                }
+                else
+                {
+                    index++;
                 }
             }
             if (attribute.u2parameterAnnotationsCount[parameterIndex] != 0)
