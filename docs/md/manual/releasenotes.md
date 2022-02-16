@@ -19,6 +19,7 @@ New Java versions are released every 6 months.
 To allow ProGuard to continue to optimize, obfuscate and shrink Java class files ProGuard now supports all Java versions including Java 17.
 
 - Add support for Java 17. (`PGD-132`)
+- Deprecate `-target` for classes compiled with Java > 11. (`T13968`)
 
 
 ### Kotlin Support

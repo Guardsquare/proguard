@@ -131,6 +131,8 @@ public class ProGuard
                 mark();
             }
 
+            checkConfigurationAfterInitialization();
+
             if (configuration.addConfigurationDebugging)
             {
                 // Remember the initial state of the program classpool and resource filepool
@@ -351,6 +353,13 @@ public class ProGuard
         passRunner.run(new KotlinAnnotationStripper(configuration), appView);
     }
 
+    /**
+     * Checks the configuration after it has been initialized.
+     */
+    private void checkConfigurationAfterInitialization() throws Exception
+    {
+        passRunner.run(new AfterInitConfigurationChecker(configuration), appView);
+    }
 
     /**
      * Replaces primitive array initialization code by primitive array constants.
