@@ -25,11 +25,14 @@ class MarkedAnnotationDeleterTest : FreeSpec({
         val (programClassPool, _) = ClassPoolBuilder.fromSource(
             JavaSource("Ann1.java", "public @interface Ann1 {}"),
             JavaSource("Ann2.java", "public @interface Ann2 {}"),
-            JavaSource("A.java", """class A {
+            JavaSource(
+                "A.java",
+                """class A {
                 @Ann1
                 @Ann2
                 public int a;
-            }""")
+            }"""
+            )
         )
 
         val classA = programClassPool.getClass("A")
@@ -40,20 +43,30 @@ class MarkedAnnotationDeleterTest : FreeSpec({
             classA.fieldsAccept(
                 AllAttributeVisitor(
                     AllAnnotationVisitor(
-                        ProcessingInfoSetter(mark))))
+                        ProcessingInfoSetter(mark)
+                    )
+                )
+            )
 
             classA.fieldsAccept(
                 AllAttributeVisitor(
-                    MarkedAnnotationDeleter(mark)))
+                    MarkedAnnotationDeleter(mark)
+                )
+            )
 
             "Then no annotations should remain" {
                 var count = 0
 
-                classA.fieldsAccept(AllAttributeVisitor(AllAnnotationVisitor(object : AnnotationVisitor {
-                    override fun visitAnnotation(clazz: Clazz?, annotation: Annotation?) {
-                        count += 1
-                    }
-                })))
+                classA.fieldsAccept(
+                    AllAttributeVisitor(
+                        AllAnnotationVisitor(object : AnnotationVisitor {
+                            override fun visitAnnotation(clazz: Clazz?, annotation: Annotation?) {
+                                count += 1
+                            }
+                        }
+                        )
+                    )
+                )
 
                 count shouldBe 0
             }
@@ -67,14 +80,17 @@ class MarkedAnnotationDeleterTest : FreeSpec({
             JavaSource("AnnB1.java", "public @interface AnnB1 {}"),
             JavaSource("AnnB2.java", "public @interface AnnB2 {}"),
             JavaSource("AnnB3.java", "public @interface AnnB3 {}"),
-            JavaSource("A.java", """class A {
+            JavaSource(
+                "A.java",
+                """class A {
                 @AnnB1
                 @AnnA1
                 @AnnB2
                 @AnnA2
                 @AnnB3
                 public int a;
-            }""")
+            }"""
+            )
         )
 
         val classA = programClassPool.getClass("A")
@@ -85,21 +101,33 @@ class MarkedAnnotationDeleterTest : FreeSpec({
             classA.fieldsAccept(
                 AllAttributeVisitor(
                     AllAnnotationVisitor(
-                        AnnotationTypeFilter("LAnnA*;",
-                            ProcessingInfoSetter(mark)))))
+                        AnnotationTypeFilter(
+                            "LAnnA*;",
+                            ProcessingInfoSetter(mark)
+                        )
+                    )
+                )
+            )
 
             classA.fieldsAccept(
                 AllAttributeVisitor(
-                    MarkedAnnotationDeleter(mark)))
+                    MarkedAnnotationDeleter(mark)
+                )
+            )
 
             "Then only the B annotations should remain" {
                 val list = mutableListOf<String>()
 
-                classA.fieldsAccept(AllAttributeVisitor(AllAnnotationVisitor(object : AnnotationVisitor {
-                    override fun visitAnnotation(clazz: Clazz, annotation: Annotation) {
-                        list.add(annotation.getType(clazz))
-                    }
-                })))
+                classA.fieldsAccept(
+                    AllAttributeVisitor(
+                        AllAnnotationVisitor(object : AnnotationVisitor {
+                            override fun visitAnnotation(clazz: Clazz, annotation: Annotation) {
+                                list.add(annotation.getType(clazz))
+                            }
+                        }
+                        )
+                    )
+                )
 
                 list shouldContainExactly listOf("LAnnB1;", "LAnnB2;", "LAnnB3;")
             }
@@ -110,9 +138,12 @@ class MarkedAnnotationDeleterTest : FreeSpec({
         val (programClassPool, _) = ClassPoolBuilder.fromSource(
             JavaSource("Ann1.java", "public @interface Ann1 {}"),
             JavaSource("Ann2.java", "public @interface Ann2 {}"),
-            JavaSource("A.java", """class A {
+            JavaSource(
+                "A.java",
+                """class A {
                 public void a(@Ann1 @Ann2 int x) {}
-            }""")
+            }"""
+            )
         )
 
         val classA = programClassPool.getClass("A")
@@ -123,20 +154,30 @@ class MarkedAnnotationDeleterTest : FreeSpec({
             classA.methodsAccept(
                 AllAttributeVisitor(
                     AllAnnotationVisitor(
-                        ProcessingInfoSetter(mark))))
+                        ProcessingInfoSetter(mark)
+                    )
+                )
+            )
 
             classA.methodsAccept(
                 AllAttributeVisitor(
-                    MarkedAnnotationDeleter(mark)))
+                    MarkedAnnotationDeleter(mark)
+                )
+            )
 
             "Then no annotations should remain" {
                 var count = 0
 
-                classA.methodsAccept(AllAttributeVisitor(AllAnnotationVisitor(object : AnnotationVisitor {
-                    override fun visitAnnotation(clazz: Clazz?, annotation: Annotation?) {
-                        count += 1
-                    }
-                })))
+                classA.methodsAccept(
+                    AllAttributeVisitor(
+                        AllAnnotationVisitor(object : AnnotationVisitor {
+                            override fun visitAnnotation(clazz: Clazz?, annotation: Annotation?) {
+                                count += 1
+                            }
+                        }
+                        )
+                    )
+                )
 
                 count shouldBe 0
             }
@@ -150,9 +191,12 @@ class MarkedAnnotationDeleterTest : FreeSpec({
             JavaSource("AnnB1.java", "public @interface AnnB1 {}"),
             JavaSource("AnnB2.java", "public @interface AnnB2 {}"),
             JavaSource("AnnB3.java", "public @interface AnnB3 {}"),
-            JavaSource("A.java", """class A {
+            JavaSource(
+                "A.java",
+                """class A {
                 public void a(@AnnB1 @AnnA1 @AnnB2 @AnnA2 @AnnB3 int x) {}
-            }""")
+            }"""
+            )
         )
 
         val classA = programClassPool.getClass("A")
@@ -163,21 +207,33 @@ class MarkedAnnotationDeleterTest : FreeSpec({
             classA.methodsAccept(
                 AllAttributeVisitor(
                     AllAnnotationVisitor(
-                        AnnotationTypeFilter("LAnnA*;",
-                            ProcessingInfoSetter(mark)))))
+                        AnnotationTypeFilter(
+                            "LAnnA*;",
+                            ProcessingInfoSetter(mark)
+                        )
+                    )
+                )
+            )
 
             classA.methodsAccept(
                 AllAttributeVisitor(
-                    MarkedAnnotationDeleter(mark)))
+                    MarkedAnnotationDeleter(mark)
+                )
+            )
 
             "Then only the B annotations should remain" {
                 val list = mutableListOf<String>()
 
-                classA.methodsAccept(AllAttributeVisitor(AllAnnotationVisitor(object : AnnotationVisitor {
-                    override fun visitAnnotation(clazz: Clazz, annotation: Annotation) {
-                        list.add(annotation.getType(clazz))
-                    }
-                })))
+                classA.methodsAccept(
+                    AllAttributeVisitor(
+                        AllAnnotationVisitor(object : AnnotationVisitor {
+                            override fun visitAnnotation(clazz: Clazz, annotation: Annotation) {
+                                list.add(annotation.getType(clazz))
+                            }
+                        }
+                        )
+                    )
+                )
 
                 list shouldContainExactly listOf("LAnnB1;", "LAnnB2;", "LAnnB3;")
             }
