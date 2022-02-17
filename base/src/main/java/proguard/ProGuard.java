@@ -425,11 +425,8 @@ public class ProGuard
      * Reduce the size needed to represent Kotlin lambda's.
      * The classes that are generated for lambda's with a same structure and from the same package are merged into a group.
      */
-    private void mergeKotlinLambdaClasses() throws IOException {
-        programClassPool = new KotlinLambdaMerger(configuration).execute(programClassPool,
-                                                                         libraryClassPool,
-                                                                         resourceFilePool,
-                                                                         extraDataEntryNameMap);
+    private void mergeKotlinLambdaClasses() throws Exception {
+        passRunner.run(new KotlinLambdaMerger(configuration), appView);
     }
 
 

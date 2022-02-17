@@ -2,6 +2,7 @@ package proguard.optimize.kotlin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.ClassConstants;
 import proguard.classfile.ClassPool;
@@ -17,13 +18,14 @@ import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.optimize.peephole.SameClassMethodInliner;
+import proguard.pass.Pass;
 import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.*;
 import proguard.util.ProcessingFlags;
 
 import java.io.IOException;
 
-public class KotlinLambdaMerger {
+public class KotlinLambdaMerger implements Pass {
 
     public static final String NAME_KOTLIN_LAMBDA     = "kotlin/jvm/internal/Lambda";
     public static final String NAME_KOTLIN_FUNCTION0  = "kotlin/jvm/functions/Function0";
@@ -59,18 +61,15 @@ public class KotlinLambdaMerger {
         this.configuration = configuration;
     }
 
-    public ClassPool execute(final ClassPool        programClassPool,
-                             final ClassPool        libraryClassPool,
-                             final ResourceFilePool resourceFilePool,
-                             final ExtraDataEntryNameMap extraDataEntryNameMap) throws IOException
+    @Override
+    public void execute(AppView appView) throws Exception
     {
-
         // Remove old processing info
-        programClassPool.classesAccept(new ClassCleaner());
-        libraryClassPool.classesAccept(new ClassCleaner());
+        appView.programClassPool.classesAccept(new ClassCleaner());
+        appView.libraryClassPool.classesAccept(new ClassCleaner());
 
         // get the Lambda class and the Function0 interface
-        Clazz kotlinLambdaClass = getKotlinLambdaClass(programClassPool, libraryClassPool);
+        Clazz kotlinLambdaClass = getKotlinLambdaClass(appView.programClassPool, appView.libraryClassPool);
         if (kotlinLambdaClass == null) {
             logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", NAME_KOTLIN_LAMBDA);
         }
@@ -84,13 +83,13 @@ public class KotlinLambdaMerger {
             // find all lambda classes with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
-            programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
-            programClassPool.classesAccept(new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_OPTIMIZE,
-                                           new ImplementedClassFilter(kotlinLambdaClass, false,
-                                           new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
-                                           new ClassPoolFiller(lambdaClassPool),
-                                           newProgramClassPoolFiller),
-                                           newProgramClassPoolFiller))
+            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
+            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_OPTIMIZE,
+                                                   new ImplementedClassFilter(kotlinLambdaClass, false,
+                                                   new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
+                                                   new ClassPoolFiller(lambdaClassPool),
+                                                   newProgramClassPoolFiller),
+                                                   newProgramClassPoolFiller))
             );
 
             // group the lambda's per package
@@ -107,25 +106,25 @@ public class KotlinLambdaMerger {
 
             // merge the lambda's per package
             KotlinLambdaClassMerger merger = new KotlinLambdaClassMerger(this.configuration,
-                                                                         programClassPool,
-                                                                         libraryClassPool,
+                                                                         appView.programClassPool,
+                                                                         appView.libraryClassPool,
                                                                          new MultiClassVisitor(
                                                                          new ClassPoolFiller(lambdaGroupClassPool),
                                                                          newProgramClassPoolFiller),
                                                                          new MultiClassVisitor(
                                                                          new ClassPoolFiller(notMergedLambdaClassPool),
                                                                          newProgramClassPoolFiller),
-                                                                         extraDataEntryNameMap);
+                                                                         appView.extraDataEntryNameMap);
             packageGrouper.packagesAccept(merger);
 
             // initialise the references from and to the newly created lambda groups and their enclosing classes
-            newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, libraryClassPool));
+            newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, appView.libraryClassPool));
 
             // inline the helper invoke methods into the general invoke method
-            inlineMethodsInsideLambdaGroups(newProgramClassPool, libraryClassPool, lambdaGroupClassPool);
+            inlineMethodsInsideLambdaGroups(newProgramClassPool, appView.libraryClassPool, lambdaGroupClassPool);
 
             // remove the unused helper methods from the lambda groups
-            shrinkLambdaGroups(newProgramClassPool, libraryClassPool, resourceFilePool, lambdaGroupClassPool);
+            shrinkLambdaGroups(newProgramClassPool, appView.libraryClassPool, appView.resourceFilePool, lambdaGroupClassPool);
 
             logger.info("Considered {} lambda classes for merging", lambdaClassPool.size());
             logger.info("of which {} lambda classes were not merged.", notMergedLambdaClassPool.size());
@@ -134,12 +133,12 @@ public class KotlinLambdaMerger {
                         lambdaGroupClassPool.size(),
                         lambdaClassPool.size() - notMergedLambdaClassPool.size(),
                         100 * lambdaGroupClassPool.size() / (lambdaClassPool.size() - notMergedLambdaClassPool.size()));
-            logger.info("Size of original program class pool: {}", programClassPool.size());
+            logger.info("Size of original program class pool: {}", appView.programClassPool.size());
             logger.info("Size of new program class pool: {}", newProgramClassPool.size());
 
-            return newProgramClassPool;
+            appView.programClassPool.clear();
+            newProgramClassPool.classesAccept(new ClassPoolFiller(appView.programClassPool));
         }
-        return programClassPool;
     }
 
     private void inlineMethodsInsideLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
