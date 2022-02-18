@@ -88,5 +88,19 @@ extends      AbstractKotlinMetadataConstraint
                                         kotlinPropertyMetadata.referencedSyntheticMethodClass,
                                         kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations);
         }
+
+        if (kotlinPropertyMetadata.syntheticMethodForDelegate != null)
+        {
+            util.reportIfNullReference("synthetic delegate method class",
+                                       kotlinPropertyMetadata.referencedSyntheticMethodForDelegateClass);
+            util.reportIfClassDangling("synthetic delegate method class",
+                                       kotlinPropertyMetadata.referencedSyntheticMethodForDelegateClass);
+            util.reportIfNullReference("synthetic delegate method",
+                                       kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod);
+            util.reportIfMethodDangling("synthetic delegate method",
+                                        kotlinPropertyMetadata.referencedSyntheticMethodForDelegateClass,
+                                        kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod);
+
+        }
     }
 }
