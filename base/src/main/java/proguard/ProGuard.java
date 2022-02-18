@@ -498,7 +498,7 @@ public class ProGuard
      */
     private void adaptKotlinMetadata() throws Exception
     {
-        passRunner.run(new KotlinMetadataAdapter(configuration), appView);
+        passRunner.run(new KotlinMetadataAdapter(), appView);
     }
 
 
