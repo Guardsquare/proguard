@@ -20,6 +20,7 @@
  */
 package proguard.util.kotlin.asserter.constraint;
 
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
@@ -31,15 +32,24 @@ implements KotlinAsserterConstraint,
            KotlinMetadataVisitor
 {
     protected Reporter  reporter;
+    protected ClassPool programClassPool;
+    protected ClassPool libraryClassPool;
 
 
     @Override
     public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {}
 
     @Override
-    public void check(Reporter reporter, Clazz clazz, KotlinMetadata metadata)
+    public void check(Reporter       reporter,
+                      ClassPool      programClassPool,
+                      ClassPool      libraryClassPool,
+                      Clazz          clazz,
+                      KotlinMetadata metadata)
     {
-        this.reporter = reporter;
+        this.reporter         = reporter;
+        this.programClassPool = programClassPool;
+        this.libraryClassPool = libraryClassPool;
+
 
         try
         {

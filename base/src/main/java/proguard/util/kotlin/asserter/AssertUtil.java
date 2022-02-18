@@ -25,15 +25,24 @@ import proguard.classfile.visitor.*;
 
 import java.util.*;
 
+import static proguard.classfile.kotlin.KotlinConstants.dummyClassPool;
+
 public class AssertUtil
 {
-    private       String      parentElement;
-    private final Reporter    reporter;
+    private       String    parentElement;
+    private final Reporter  reporter;
+    private final ClassPool programClassPool;
+    private final ClassPool libraryClassPool;
 
-    public AssertUtil(String parentElement, Reporter reporter)
+    public AssertUtil(String    parentElement,
+                      Reporter  reporter,
+                      ClassPool programClassPool,
+                      ClassPool libraryClassPool)
     {
-        this.parentElement  = parentElement;
-        this.reporter       = reporter;
+        this.parentElement    = parentElement;
+        this.reporter         = reporter;
+        this.programClassPool = programClassPool;
+        this.libraryClassPool = libraryClassPool;
     }
 
     public void setParentElement(String parentElement)
@@ -54,6 +63,20 @@ public class AssertUtil
         if (checkedElement == null)
         {
             reporter.report(parentElement + " has no reference for its " + checkedElementName + ".");
+        }
+    }
+
+    public void reportIfClassDangling(String checkedElementName,
+                                      Clazz  clazz)
+    {
+        if (clazz != null)
+        {
+            if (!programClassPool.contains(clazz) &&
+                !libraryClassPool.contains(clazz) &&
+                !dummyClassPool  .contains(clazz))
+            {
+                reporter.report(parentElement + " has dangling class reference for its " + checkedElementName + ".");
+            }
         }
     }
 

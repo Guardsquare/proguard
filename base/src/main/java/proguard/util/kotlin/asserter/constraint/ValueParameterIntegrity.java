@@ -49,7 +49,7 @@ extends      AbstractKotlinMetadataConstraint
                                              KotlinConstructorMetadata kotlinConstructorMetadata,
                                              KotlinValueParameterMetadata kotlinValueParameterMetadata)
     {
-        new AssertUtil("Constructor value parameter", reporter)
+        new AssertUtil("Constructor value parameter", reporter, programClassPool, libraryClassPool)
             .reportIfNullReference("type", kotlinValueParameterMetadata.type);
     }
 
@@ -59,7 +59,7 @@ extends      AbstractKotlinMetadataConstraint
                                           KotlinFunctionMetadata kotlinFunctionMetadata,
                                           KotlinValueParameterMetadata kotlinValueParameterMetadata)
     {
-        new AssertUtil("Function value parameter", reporter)
+        new AssertUtil("Function value parameter", reporter, programClassPool, libraryClassPool)
             .reportIfNullReference("type", kotlinValueParameterMetadata.type);
     }
 
@@ -69,7 +69,7 @@ extends      AbstractKotlinMetadataConstraint
                                           KotlinPropertyMetadata kotlinPropertyMetadata,
                                           KotlinValueParameterMetadata kotlinValueParameterMetadata)
     {
-        new AssertUtil("Property value parameter", reporter)
+        new AssertUtil("Property value parameter", reporter, programClassPool, libraryClassPool)
             .reportIfNullReference("type", kotlinValueParameterMetadata.type);
     }
 }

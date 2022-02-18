@@ -47,12 +47,13 @@ extends      AbstractKotlinMetadataConstraint
                                  KotlinMetadata kotlinMetadata,
                                  KotlinFunctionMetadata kotlinFunctionMetadata)
     {
-        AssertUtil util = new AssertUtil("Function " + kotlinFunctionMetadata.name, reporter);
+        AssertUtil util = new AssertUtil("Function " + kotlinFunctionMetadata.name, reporter, programClassPool, libraryClassPool);
 
         util.reportIfNull("jvmSignature", kotlinFunctionMetadata.jvmSignature);
 
         util.reportIfNullReference("referencedMethod", kotlinFunctionMetadata.referencedMethod);
         util.reportIfNullReference("referencedMethodClass", kotlinFunctionMetadata.referencedMethodClass);
+        util.reportIfClassDangling("referencedMethodClass", kotlinFunctionMetadata.referencedMethodClass);
 
         util.reportIfMethodDangling("referenced method",
                                     kotlinFunctionMetadata.referencedMethodClass,
@@ -92,10 +93,16 @@ extends      AbstractKotlinMetadataConstraint
             KotlinClassKindMetadata kotlinClassKindMetadata = (KotlinClassKindMetadata)kotlinMetadata;
             if (kotlinClassKindMetadata.flags.isInterface)
             {
-                util.reportIfNullReference("default implementation method", kotlinFunctionMetadata.referencedDefaultImplementationMethod);
-                util.reportIfNullReference("default implementation method class", kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
+                util.reportIfNullReference("default implementation method",
+                                           kotlinFunctionMetadata.referencedDefaultImplementationMethod);
+                util.reportIfMethodDangling("default implementation method",
+                                            kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
+                                            kotlinFunctionMetadata.referencedDefaultImplementationMethod);
+                util.reportIfNullReference("default implementation method class",
+                                           kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
+                util.reportIfClassDangling("default implementation method class",
+                                           kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
             }
         }
-
     }
 }

@@ -74,7 +74,7 @@ public class KotlinMetadataAsserter implements Pass
         WarningPrinter warningPrinter = new WarningPrinter(err, configuration.warn);
 
         Reporter reporter = new DefaultReporter(warningPrinter);
-        MyKotlinMetadataAsserter kotlinMetadataAsserter = new MyKotlinMetadataAsserter(reporter, DEFAULT_CONSTRAINTS);
+        MyKotlinMetadataAsserter kotlinMetadataAsserter = new MyKotlinMetadataAsserter(reporter, DEFAULT_CONSTRAINTS, appView.programClassPool, appView.libraryClassPool);
 
         reporter.setErrorMessage("Warning: Kotlin metadata errors encountered in %s. Not processing the metadata for this class.");
         appView.programClassPool.classesAccept(new ReferencedKotlinMetadataVisitor(kotlinMetadataAsserter));
@@ -95,19 +95,27 @@ public class KotlinMetadataAsserter implements Pass
     {
         private final List<? extends KotlinAsserterConstraint> constraints;
         private final Reporter                                 reporter;
+        private final ClassPool                                programClassPool;
+        private final ClassPool                                libraryClassPool;
 
-        MyKotlinMetadataAsserter(Reporter reporter, List<KotlinAsserterConstraint> constraints)
+        MyKotlinMetadataAsserter(Reporter                       reporter,
+                                 List<KotlinAsserterConstraint> constraints,
+                                 ClassPool                      programClassPool,
+                                 ClassPool                      libraryClassPool)
         {
-            this.constraints = constraints;
-            this.reporter    = reporter;
+            this.constraints      = constraints;
+            this.reporter         = reporter;
+            this.programClassPool = programClassPool;
+            this.libraryClassPool = libraryClassPool;
         }
+
 
         @Override
         public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata)
         {
             reporter.resetCounter(clazz.getName());
 
-            constraints.forEach(constraint -> constraint.check(reporter, clazz, kotlinMetadata));
+            constraints.forEach(constraint -> constraint.check(reporter, programClassPool, libraryClassPool, clazz, kotlinMetadata));
 
             if (reporter.getCount() > 0)
             {

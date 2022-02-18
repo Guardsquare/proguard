@@ -46,7 +46,7 @@ extends      AbstractKotlinMetadataConstraint
                                  KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
                                  KotlinPropertyMetadata kotlinPropertyMetadata)
     {
-        AssertUtil util = new AssertUtil("Property " + kotlinPropertyMetadata.name, reporter);
+        AssertUtil util = new AssertUtil("Property " + kotlinPropertyMetadata.name, reporter, programClassPool, libraryClassPool);
 
         util.reportIfNull("backingFieldSignature, getterSignature or setterSignature",
                           kotlinPropertyMetadata.backingFieldSignature,
@@ -56,6 +56,8 @@ extends      AbstractKotlinMetadataConstraint
         if (kotlinPropertyMetadata.backingFieldSignature  != null)
         {
             util.reportIfNullReference("backing field class",
+                                       kotlinPropertyMetadata.referencedBackingFieldClass);
+            util.reportIfClassDangling("backing field class",
                                        kotlinPropertyMetadata.referencedBackingFieldClass);
             util.reportIfNullReference("backing field",
                                        kotlinPropertyMetadata.referencedBackingField);
@@ -77,6 +79,8 @@ extends      AbstractKotlinMetadataConstraint
         if (kotlinPropertyMetadata.syntheticMethodForAnnotations != null)
         {
             util.reportIfNullReference("synthetic annotations method class",
+                                       kotlinPropertyMetadata.referencedSyntheticMethodClass);
+            util.reportIfClassDangling("synthetic annotations method class",
                                        kotlinPropertyMetadata.referencedSyntheticMethodClass);
             util.reportIfNullReference("synthetic annotations method",
                                        kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations);

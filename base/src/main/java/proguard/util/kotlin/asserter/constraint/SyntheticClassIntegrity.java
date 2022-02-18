@@ -39,7 +39,7 @@ extends      AbstractKotlinMetadataConstraint
     public void visitKotlinSyntheticClassMetadata(Clazz clazz,
                                                   KotlinSyntheticClassKindMetadata kotlinSyntheticClassKindMetadata)
     {
-        AssertUtil util = new AssertUtil("Synthetic class", reporter);
+        AssertUtil util = new AssertUtil("Synthetic class", reporter, programClassPool, libraryClassPool);
 
         switch (kotlinSyntheticClassKindMetadata.flavor)
         {

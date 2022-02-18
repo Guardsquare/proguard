@@ -20,6 +20,7 @@
  */
 package proguard.util.kotlin.asserter.constraint;
 
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.resources.kotlinmodule.KotlinModule;
@@ -33,7 +34,11 @@ import proguard.util.kotlin.asserter.Reporter;
  */
 public interface KotlinAsserterConstraint
 {
-    void check(Reporter reporter, Clazz clazz, KotlinMetadata kotlinMetadata);
+    void check(Reporter       reporter,
+               ClassPool programClassPool,
+               ClassPool      libraryClassPool,
+               Clazz          clazz,
+               KotlinMetadata kotlinMetadata);
 
     void check(Reporter reporter, KotlinModule kotlinModule);
 }

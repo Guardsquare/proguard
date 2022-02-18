@@ -54,7 +54,7 @@ implements   KotlinTypeVisitor,
     @Override
     public void visitAnyType(Clazz clazz, KotlinTypeMetadata type)
     {
-        util = new AssertUtil("Type", reporter);
+        util = new AssertUtil("Type", reporter, programClassPool, libraryClassPool);
         type.annotationsAccept(clazz, this);
 
     }
@@ -65,7 +65,7 @@ implements   KotlinTypeVisitor,
                                KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
                                KotlinTypeAliasMetadata kotlinTypeAliasMetadata)
     {
-        util = new AssertUtil("Type alias", reporter);
+        util = new AssertUtil("Type alias", reporter, programClassPool, libraryClassPool);
         kotlinTypeAliasMetadata.annotationsAccept(clazz, this);
     }
 
@@ -74,7 +74,7 @@ implements   KotlinTypeVisitor,
     public void visitAnyTypeParameter(Clazz clazz,
                                       KotlinTypeParameterMetadata kotlinTypeParameterMetadata)
     {
-        util = new AssertUtil("Type parameter", reporter);
+        util = new AssertUtil("Type parameter", reporter, programClassPool, libraryClassPool);
         kotlinTypeParameterMetadata.annotationsAccept(clazz, this);
     }
 
