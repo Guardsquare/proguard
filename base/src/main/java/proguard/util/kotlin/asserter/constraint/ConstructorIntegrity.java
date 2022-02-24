@@ -43,7 +43,7 @@ extends      AbstractKotlinMetadataConstraint
     {
         if (!kotlinClassKindMetadata.flags.isAnnotationClass)
         {
-            AssertUtil util = new AssertUtil("Constructor", reporter);
+            AssertUtil util = new AssertUtil("Constructor", reporter, programClassPool, libraryClassPool);
             util.reportIfNullReference("constructor referencedMethod", kotlinConstructorMetadata.referencedMethod);
             util.reportIfMethodDangling("constructor referencedMethod",
                                         clazz, kotlinConstructorMetadata.referencedMethod);

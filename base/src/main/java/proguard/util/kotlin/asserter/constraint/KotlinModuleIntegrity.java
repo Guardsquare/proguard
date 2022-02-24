@@ -21,6 +21,7 @@
 
 package proguard.util.kotlin.asserter.constraint;
 
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.util.ClassUtil;
@@ -40,7 +41,8 @@ implements   KotlinAsserterConstraint,
     private Reporter reporter;
 
     @Override
-    public void check(Reporter reporter, Clazz clazz, KotlinMetadata kotlinMetadata) {}
+    public void check(Reporter reporter, ClassPool programClassPool, ClassPool libraryClassPool, Clazz clazz, KotlinMetadata kotlinMetadata) {}
+
 
     @Override
     public void check(Reporter reporter, KotlinModule kotlinModule)
@@ -53,7 +55,7 @@ implements   KotlinAsserterConstraint,
     @Override
     public void visitKotlinModule(KotlinModule kotlinModule)
     {
-        AssertUtil util = new AssertUtil("Kotlin module", reporter);
+        AssertUtil util = new AssertUtil("Kotlin module", reporter, new ClassPool(), new ClassPool());
 
         util.reportIfNull("Module name", kotlinModule.name);
 

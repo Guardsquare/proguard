@@ -41,9 +41,10 @@ extends AbstractKotlinMetadataConstraint
     public void visitKotlinClassMetadata(Clazz clazz,
                                          KotlinClassKindMetadata kotlinClassKindMetadata)
     {
-        AssertUtil util = new AssertUtil("Class " + kotlinClassKindMetadata.className, reporter);
+        AssertUtil util = new AssertUtil("Class " + kotlinClassKindMetadata.className, reporter, programClassPool, libraryClassPool);
 
         util.reportIfNullReference("referenced class", kotlinClassKindMetadata.referencedClass);
+        util.reportIfClassDangling("referenced class", kotlinClassKindMetadata.referencedClass);
 
         if (kotlinClassKindMetadata.referencedModule != null)
         {
@@ -54,6 +55,7 @@ extends AbstractKotlinMetadataConstraint
         if (kotlinClassKindMetadata.companionObjectName != null)
         {
             util.reportIfNullReference("companion", kotlinClassKindMetadata.referencedCompanionClass);
+            util.reportIfClassDangling("companion", kotlinClassKindMetadata.referencedCompanionClass);
             util.reportIfNullReference("companion field", kotlinClassKindMetadata.referencedCompanionField);
 
             String referencedCompanionClassName = kotlinClassKindMetadata.referencedCompanionClass.getName();
@@ -85,10 +87,16 @@ extends AbstractKotlinMetadataConstraint
             .forEach(enumEntry -> util.reportIfFieldDangling("enum entries", clazz, enumEntry));
 
         kotlinClassKindMetadata.referencedNestedClasses
-            .forEach(nestedClass -> util.reportIfNullReference("nested classes", nestedClass));
+            .forEach(nestedClass -> {
+                util.reportIfNullReference("nested classes", nestedClass);
+                util.reportIfClassDangling("nested classes", nestedClass);
+            });
 
         kotlinClassKindMetadata.referencedSealedSubClasses
-            .forEach(sealedSubClass -> util.reportIfNullReference("sealed subclasses", sealedSubClass));
+            .forEach(sealedSubClass -> {
+                util.reportIfNullReference("sealed subclasses", sealedSubClass);
+                util.reportIfClassDangling("sealed subclasses", sealedSubClass);
+            });
 
         if (kotlinClassKindMetadata.flags.isObject &&
             kotlinClassKindMetadata.referencedClass != null &&

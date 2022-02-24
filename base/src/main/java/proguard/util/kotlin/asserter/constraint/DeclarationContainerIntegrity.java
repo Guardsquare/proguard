@@ -37,10 +37,14 @@ extends      AbstractKotlinMetadataConstraint
     public void visitKotlinDeclarationContainerMetadata(Clazz clazz,
                                                         KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata)
     {
-        if (kotlinDeclarationContainerMetadata.ownerClassName != null)
-        {
-            new AssertUtil("Declaration container " + kotlinDeclarationContainerMetadata.ownerClassName, reporter)
+        AssertUtil assertUtil = new AssertUtil("Declaration container " +
+                                               kotlinDeclarationContainerMetadata.ownerClassName,
+                                               reporter,
+                                               programClassPool,
+                                               libraryClassPool);
+        assertUtil
                 .reportIfNullReference("referenced owner class", kotlinDeclarationContainerMetadata.ownerReferencedClass);
-        }
+        assertUtil
+                .reportIfClassDangling("referenced owner class", kotlinDeclarationContainerMetadata.ownerReferencedClass);
     }
 }

@@ -16,11 +16,3 @@ which are easily avoided or resolved:
   volatile field. Again, it may remove such loops. Should this assumption be
   false, you'll have to switch off optimization using the `-dontoptimize`
   option.
-
-- When obfuscating, ProGuard writes out class files named "`a.class`",
-  "`b.class`", etc. If a package contains a large number of classes, ProGuard
-  may also write out **"`aux.class`"**. Inconveniently, Windows refuses to
-  create files with this reserved name (among a few other names). It's
-  generally better to write the output to a jar, in order to avoid such
-  problems. Alternatively, you can use the Uniform Naming Convention (UNC) for
-  your Windows paths, which doesn't suffer from the constraint.

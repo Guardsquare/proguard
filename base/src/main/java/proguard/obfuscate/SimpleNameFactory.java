@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,6 +20,8 @@
  */
 package proguard.obfuscate;
 
+import java.util.Arrays;
+
 /**
  * This <code>NameFactory</code> generates unique short names, using mixed-case
  * characters or lower-case characters only.
@@ -29,6 +31,13 @@ package proguard.obfuscate;
 public class SimpleNameFactory implements NameFactory
 {
     private static final int CHARACTER_COUNT = 26;
+
+    /**
+     +     * Array of windows reserved names.
+     +     * This array does not include COM{digit} or LPT{digit} as {@link SimpleNameFactory} does not generate digits.
+     +     * This array must be sorted in ascending order as we're using {@link Arrays#binarySearch(Object[], Object)} on it.
+     +     */
+    private static final String[] reservedNames    = new String[] {"AUX", "CON", "NUL", "PRN"};
 
     private final boolean generateMixedCaseNames;
     private int     index = 0;
@@ -97,6 +106,10 @@ public class SimpleNameFactory implements NameFactory
             new String(new char[] { newChar }) :
             (name(baseIndex-1) + newChar);
 
+        if (Arrays.binarySearch(reservedNames, newName.toUpperCase()) >= 0)
+        {
+            newName += newChar;
+        }
         return newName;
     }
 

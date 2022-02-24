@@ -180,6 +180,14 @@ implements   KotlinMetadataVisitor,
             kotlinPropertyMetadata.flags.common.hasAnnotations             = false;
         }
 
+        if (kotlinPropertyMetadata.syntheticMethodForDelegate != null &&
+            !usageMarker.isUsed(kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod))
+        {
+            kotlinPropertyMetadata.syntheticMethodForDelegate                 = null;
+            kotlinPropertyMetadata.referencedSyntheticMethodForDelegateClass  = null;
+            kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod = null;
+        }
+
         // Fix inconsistencies that were introduced as
         // a result of shrinking
         if (kotlinPropertyMetadata.referencedBackingField != null &&

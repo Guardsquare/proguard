@@ -1,5 +1,8 @@
 ## Java 8 language support
 
+!!! Warning
+    ProGuard does not support backporting class files compiled with Java >11.
+
 ProGuard can backport Java 8 language features to Dalvik and to older versions
 of Java, so you can use them in applications and libraries that work on all
 versions of Android.

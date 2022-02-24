@@ -1,3 +1,22 @@
+## Version 7.2.1
+
+
+### Java Support
+
+- Update maximum supported Java class version to 62.65535 (Java 18 ea). (T13973)
+- Deprecate `-target` for classes compiled with Java > 11. (`T13968`)
+
+
+### Improved
+
+- Add [`consumerRuleFilter`](setup/gradleplugin.md#consumerrulefilter) to the ProGuard Gradle plugin. (`T4134`)
+
+### Bug fixes
+
+- Prevent the generation of Windows reserved names. (`T3937`)
+- Prevent "Expecting type and name" parse error when using the `androidx.window` library in an Android project. (`T13715`)
+- Fix shrinking of annotations during GSON optimization.
+
 ## Version 7.2
 
 

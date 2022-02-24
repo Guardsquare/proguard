@@ -45,11 +45,12 @@ extends    AbstractKotlinMetadataConstraint
     public void visitAnyType(Clazz clazz,
                              KotlinTypeMetadata type)
     {
-        AssertUtil util = new AssertUtil("Type", reporter);
+        AssertUtil util = new AssertUtil("Type", reporter, programClassPool, libraryClassPool);
 
         if (type.className != null)
         {
             util.reportIfNullReference("class \"" + type.className + "\"", type.referencedClass);
+            util.reportIfClassDangling("class \"" + type.className + "\"", type.referencedClass);
 
             if (type.aliasName != null)
             {

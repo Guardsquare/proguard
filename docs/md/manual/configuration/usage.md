@@ -95,7 +95,8 @@ This page lists all available options for ProGuard, grouped logically.
   mydirectory/**`" matches all of its subdirectories.
 
 `-target`{: #target} *version*
-: Specifies the version number to be set in the processed class files. The
+: **Deprecated: this option is only applicable for Java class file versions <= 11.**
+  Specifies the version number to be set in the processed class files. The
   version number can be one of `1.0`,..., `1.9`, or the more recent short
   numbers `5`,..., `12`. By default, the version numbers of the class files
   are left unchanged. For example, you may want to [upgrade class files to
