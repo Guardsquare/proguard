@@ -13,6 +13,7 @@ import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.ClassInitializer;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
+import proguard.obfuscate.MappingPrinter;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
@@ -21,9 +22,12 @@ import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.pass.Pass;
 import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.*;
+import proguard.util.PrintWriterUtil;
 import proguard.util.ProcessingFlags;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class KotlinLambdaMerger implements Pass {
 
@@ -116,6 +120,28 @@ public class KotlinLambdaMerger implements Pass {
                                                                          newProgramClassPoolFiller),
                                                                          appView.extraDataEntryNameMap);
             packageGrouper.packagesAccept(merger);
+
+            // Print out the mapping, if requested.
+            PrintWriter out = new PrintWriter(System.out, true);
+            if (configuration.printLambdaGroupMapping != null)
+            {
+                logger.info("Printing lambda group mapping to [{}]...", PrintWriterUtil.fileName(configuration.printLambdaGroupMapping));
+
+                PrintWriter mappingWriter =
+                         PrintWriterUtil.createPrintWriter(configuration.printLambdaGroupMapping, out);
+
+                try
+                {
+                    // Print out lambda's that have been merged and their lambda groups.
+                    lambdaClassPool.classesAcceptAlphabetically(
+                            new LambdaGroupMappingPrinter(mappingWriter));
+                }
+                finally
+                {
+                    PrintWriterUtil.closePrintWriter(configuration.printMapping,
+                            mappingWriter);
+                }
+            }
 
             // initialise the references from and to the newly created lambda groups and their enclosing classes
             newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, appView.libraryClassPool));
