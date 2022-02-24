@@ -190,6 +190,7 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.ASSUME_VALUES_OPTION                             .startsWith(nextWord)) configuration.assumeValues                          = parseAssumeClassSpecificationArguments(configuration.assumeValues);
             else if (ConfigurationConstants.ALLOW_ACCESS_MODIFICATION_OPTION                 .startsWith(nextWord)) configuration.allowAccessModification               = parseNoArgument(true);
             else if (ConfigurationConstants.MERGE_INTERFACES_AGGRESSIVELY_OPTION             .startsWith(nextWord)) configuration.mergeInterfacesAggressively           = parseNoArgument(true);
+            else if (ConfigurationConstants.PRINT_LAMBDAGROUP_MAPPING_OPTION                 .startsWith(nextWord)) configuration.printLambdaGroupMapping               = parseOptionalFile();
             else if (ConfigurationConstants.MERGE_KOTLIN_LAMBDA_CLASSES_OPTION               .startsWith(nextWord)) configuration.mergeKotlinLambdaClasses              = parseNoArgument(true);
 
             else if (ConfigurationConstants.DONT_OBFUSCATE_OPTION                            .startsWith(nextWord)) configuration.obfuscate                             = parseNoArgument(false);
