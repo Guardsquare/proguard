@@ -200,6 +200,11 @@ public class Configuration
      */
     public boolean                      mergeInterfacesAggressively      = false;
 
+    /**
+     * Specifies whether Kotlin lambda classes can be merged into lambda groups.
+     */
+    public boolean                      mergeKotlinLambdaClasses;
+
     ///////////////////////////////////////////////////////////////////////////
     // Obfuscation options.
     ///////////////////////////////////////////////////////////////////////////
