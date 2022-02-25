@@ -28,6 +28,7 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.github.zafarkhaja.semver.Version
 import java.io.File
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -36,7 +37,6 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.util.VersionNumber
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
@@ -223,7 +223,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
     }
 
     private fun warnOldProguardVersion(project: Project) {
-        if (agpVersion.major >= 7) return
+        if (agpVersion.majorVersion >= 7) return
 
         val message =
 """An older version of ProGuard has been detected on the classpath which can clash with ProGuard Gradle Plugin.
@@ -282,16 +282,7 @@ fun Iterable<VariantConfiguration>.findVariantConfiguration(variantName: String)
 fun Iterable<VariantConfiguration>.hasVariantConfiguration(variantName: String) =
         this.findVariantConfiguration(variantName) != null
 
-val agpVersion: VersionNumber
-    get() { // TODO update to use AGP7 version API
-        return try {
-            val clazz = Class.forName("com.android.builder.model.Version")
-            val version = clazz.fields.first { it.name == "ANDROID_GRADLE_PLUGIN_VERSION" }.get(null) as String
-            return VersionNumber.parse(version)
-        } catch (e: ClassNotFoundException) {
-            VersionNumber.UNKNOWN
-        }
-    }
+val agpVersion: Version = Version.valueOf(com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION)
 
 /**
  * Extension property that wraps the aapt additional parameters, to take into account
@@ -300,7 +291,7 @@ val agpVersion: VersionNumber
 @Suppress("UNCHECKED_CAST")
 val BaseExtension.aaptAdditionalParameters: MutableCollection<String>
     get() {
-        val aaptOptionsGetter = if (agpVersion.major >= 7) "getAndroidResources" else "getAaptOptions"
+        val aaptOptionsGetter = if (agpVersion.majorVersion >= 7) "getAndroidResources" else "getAaptOptions"
         val aaptOptions = this.javaClass.methods.first { it.name == aaptOptionsGetter }.invoke(this)
         val additionalParameters = aaptOptions.javaClass.methods.first { it.name == "getAdditionalParameters" }.invoke(aaptOptions)
         return if (additionalParameters != null) {
