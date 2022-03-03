@@ -1,5 +1,13 @@
 ## Version 7.2.1
 
+### Improved
+
+- Remove `throwUninitializedProperty` parameter strings when using `-keepkotlinmetadata`. (`T4696`)
+
+### Bug fixes
+
+## Version 7.2.1
+
 
 ### Java Support
 
