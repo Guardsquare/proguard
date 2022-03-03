@@ -3,23 +3,10 @@
  *             of Java bytecode.
  *
  * Copyright (c) 2002-2020 Guardsquare NV
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 package proguard.obfuscate.kotlin;
 
+import proguard.KotlinMetadataAdapter;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
@@ -32,33 +19,46 @@ import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitor.*;
 import proguard.classfile.kotlin.visitor.filter.KotlinFunctionFilter;
 import proguard.obfuscate.ClassObfuscator;
+import proguard.strip.KotlinAnnotationStripper;
+import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static proguard.classfile.ClassConstants.METHOD_NAME_TOSTRING;
-import static proguard.classfile.ClassConstants.METHOD_TYPE_TOSTRING;
+import static proguard.classfile.ClassConstants.*;
 import static proguard.classfile.util.ClassUtil.internalSimpleClassName;
 import static proguard.obfuscate.ClassObfuscator.hasOriginalClassName;
 import static proguard.obfuscate.ClassObfuscator.newClassName;
 
 /**
- * Data classes in Kotlin hold data and the compiler uses this fact to automatically
- * generate functions that a programmer would normally implement manually.
+ * Some types of Kotlin classes (i.e. data, value, inline) simply hold data.
+ * The compiler uses this fact to automatically generate functions that a programmer would normally implement manually.
  *
- * One of these functions is the default toString() of the form "User(name=John, age=42)".
+ * One of these functions is the default toString() and its potential implementation counterpart toString-impl().
+ * The output of these functions is of the form "User(name=John, age=42)".
  *
- * This exposes unobfuscated names so we must update these strings with the obfuscated
- * versions.
+ * This exposes unobfuscated classNames (in the example above "User") so we must update these className strings
+ * with their obfuscated versions.
  *
  * This class relies on the {@link KotlinPropertyNameObfuscator} storing the obfuscated
  * name in the processingInfo field. And that the {@link ClassObfuscator} gives us the
  * new class name (internally this also relies on the new class name being in the
  * processingInfo field).
+ *
+ * One limitation of this class is that it requires that the Kotlin metadata is still attached to the
+ * classes that are processed. If the Kotlin metadata is stripped {@link KotlinAnnotationStripper} or
+ * removed by the {@link KotlinMetadataAsserter} the `toString` method's output cannot be updated with the
+ * obfuscated class name.
  */
-public class KotlinDataClassObfuscator
+public class KotlinSyntheticToStringObfuscator
 implements   KotlinMetadataVisitor
 {
+
+    // TODO When a new release for ProGuard-Core (> 8.0.7) is available, these hardcoded strings should
+    //  be replaced with the constants in {@link ClassConstants}.
+    private final String METHOD_NAME_TOSTRING_IMPL = "toString-impl";
+    private final String METHOD_TYPE_TOSTRING_IMPL = "(Ljava/lang/String;)Ljava/lang/String;";
+
     private static final Comparator<String> REVERSE_LENGTH_STRING_ORDER =
         Comparator
             .comparingInt(String::length)
@@ -86,7 +86,7 @@ implements   KotlinMetadataVisitor
         if (!hasOriginalClassName(clazz))
         {
             nameMap.put(internalSimpleClassName(kotlinClassKindMetadata.className) + "(",
-                        internalSimpleClassName(newClassName(clazz)) + "(");
+                    internalSimpleClassName(newClassName(clazz)) + "(");
         }
 
         // We visit all the ldc instructions in the automatically declared toString function
@@ -94,12 +94,15 @@ implements   KotlinMetadataVisitor
 
         kotlinClassKindMetadata.functionsAccept(clazz,
             new KotlinFunctionFilter(
-                fun -> !fun.flags.isDeclaration &&
-                       fun.name.equals(METHOD_NAME_TOSTRING) &&
-                       fun.jvmSignature.descriptor.toString().equals(METHOD_TYPE_TOSTRING),
+                fun ->
+                    !fun.flags.isDeclaration &&
+                    (fun.name.equals(METHOD_NAME_TOSTRING) ||
+                     fun.name.equals(METHOD_NAME_TOSTRING_IMPL)) &&
+                    (fun.jvmSignature.descriptor.toString().equals(METHOD_TYPE_TOSTRING) ||
+                     fun.jvmSignature.descriptor.toString().equals(METHOD_TYPE_TOSTRING_IMPL)),
                 new KotlinFunctionToMethodVisitor(
-                new AllAttributeVisitor(
-                new MyObfuscatedToStringFixer(nameMap, new ConstantPoolEditor((ProgramClass)clazz))))));
+                    new AllAttributeVisitor(
+                        new MyObfuscatedToStringFixer(nameMap, new ConstantPoolEditor((ProgramClass)clazz))))));
     }
 
 
@@ -145,7 +148,7 @@ implements   KotlinMetadataVisitor
                                              ConstantInstruction constantInstruction)
         {
             if (constantInstruction.opcode == Instruction.OP_LDC ||
-                constantInstruction.opcode == Instruction.OP_LDC_W)
+                    constantInstruction.opcode == Instruction.OP_LDC_W)
             {
                 replacement = null;
                 clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
@@ -196,7 +199,7 @@ implements   KotlinMetadataVisitor
 
     // Collect the original name/new name map - assumes the old name is in the processingInfo.
     private static final class PropertyNameCollector
-    implements KotlinPropertyVisitor
+    implements                 KotlinPropertyVisitor
     {
         private final Map<String, String> nameMap;
 
