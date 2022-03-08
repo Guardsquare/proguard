@@ -6,6 +6,8 @@
 
 ### Bug fixes
 
+- Fix possible `NullPointerException` in the `ConigurationLogger` when printing rules about constructors.
+
 ## Version 7.2.1
 
 

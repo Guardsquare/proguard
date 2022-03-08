@@ -368,7 +368,7 @@ public class ConfigurationLogger implements Runnable
                                                        constructorParameters,
                                                        false);
 
-        if (constructorInfo != null && !isKept(constructorInfo) && constructorParameters.length > 0) {
+        if (constructorInfo != null && !isKept(constructorInfo) && (constructorParameters == null || constructorParameters.length > 0)) {
             String signature = signatureString(INIT, constructorParameters, true);
             if (shouldLog(reflectedClass, sMissingMethods, signature))
             {
