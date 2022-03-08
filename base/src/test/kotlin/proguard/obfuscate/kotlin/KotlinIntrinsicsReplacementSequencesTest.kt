@@ -16,12 +16,12 @@ import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.constant.StringConstant
 import proguard.classfile.constant.visitor.ConstantVisitor
 import proguard.classfile.editor.InstructionSequenceBuilder
+import proguard.classfile.editor.InstructionSequenceReplacer.X
 import proguard.classfile.instruction.Instruction
 import proguard.classfile.instruction.visitor.AllInstructionVisitor
 import proguard.classfile.instruction.visitor.InstructionVisitor
 import proguard.classfile.kotlin.KotlinConstants.KOTLIN_INTRINSICS_CLASS
 import proguard.classfile.util.InstructionSequenceMatcher
-import proguard.classfile.util.InstructionSequenceMatcher.*
 import proguard.classfile.visitor.MultiClassVisitor
 import proguard.obfuscate.util.InstructionSequenceObfuscator
 import testutils.ClassPoolBuilder
@@ -31,19 +31,22 @@ class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
 
     "Given a class with a lateinit variable" - {
         val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-                KotlinSource(
-                    "Test.kt",
-                    """
-                    lateinit var lateVar : String
-                    """
-                )
+            KotlinSource(
+                "Test.kt",
+                """
+                lateinit var lateVar : String
+                """
+            )
         )
 
         val builder = InstructionSequenceBuilder(programClassPool, libraryClassPool)
         val intrinsicsSequence = builder.ldc_(X)
-                                        .invokestatic(KOTLIN_INTRINSICS_CLASS,
-                                                "throwUninitializedPropertyAccessException",
-                                                "(Ljava/lang/String;)V").instructions()
+            .invokestatic(
+                KOTLIN_INTRINSICS_CLASS,
+                "throwUninitializedPropertyAccessException",
+                "(Ljava/lang/String;)V"
+            )
+            .instructions()
         val constants = builder.constants()
         val intrinsicsSequenceMatcher = InstructionSequenceMatcher(constants, intrinsicsSequence)
 
@@ -53,14 +56,16 @@ class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
             programClassPool.classesAccept(
                 AllAttributeVisitor(
                     true,
-                        AllInstructionVisitor(
-                            object : InstructionVisitor {
-                                override fun visitAnyInstruction(clazz: Clazz, method: Method, codeAttribute: CodeAttribute, offset: Int, instruction: Instruction) {
-                                    instruction.accept(clazz, method, codeAttribute, offset, intrinsicsSequenceMatcher)
-                                    if (intrinsicsSequenceMatcher.isMatching) hasMatched = true
-                                }
+                    AllInstructionVisitor(
+                        object : InstructionVisitor {
+                            override fun visitAnyInstruction(clazz: Clazz, method: Method, codeAttribute: CodeAttribute, offset: Int, instruction: Instruction) {
+                                instruction.accept(clazz, method, codeAttribute, offset, intrinsicsSequenceMatcher)
+                                if (intrinsicsSequenceMatcher.isMatching) hasMatched = true
                             }
-                        )))
+                        }
+                    )
+                )
+            )
             hasMatched shouldBe true
         }
 
@@ -70,14 +75,16 @@ class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
             programClassPool.classesAccept(
                 MultiClassVisitor(
                     InstructionSequenceObfuscator(KotlinIntrinsicsReplacementSequences(programClassPool, libraryClassPool)),
-                    AllAttributeVisitor(true,
+                    AllAttributeVisitor(
+                        true,
                         AllInstructionVisitor(
                             object : InstructionVisitor {
                                 override fun visitAnyInstruction(clazz: Clazz, method: Method, codeAttribute: CodeAttribute, offset: Int, instruction: Instruction) {
                                     instruction.accept(clazz, method, codeAttribute, offset, intrinsicsSequenceMatcher)
                                     if (intrinsicsSequenceMatcher.isMatching) {
                                         var constantIndex = intrinsicsSequenceMatcher.matchedConstantIndex(X)
-                                        clazz.constantPoolEntryAccept(constantIndex,
+                                        clazz.constantPoolEntryAccept(
+                                            constantIndex,
                                             object : ConstantVisitor {
                                                 override fun visitStringConstant(clazz: Clazz, stringConstant: StringConstant) {
                                                     matchedConstant = stringConstant.getString(clazz)
@@ -88,7 +95,8 @@ class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
                                 }
                             }
                         )
-                    ))
+                    )
+                )
             )
 
             matchedConstant shouldBe ""
