@@ -167,10 +167,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
 
         Method initMethod = copyLambdaInitToLambdaGroup(lambdaClass);
+        String constructorDescriptor = initMethod.getDescriptor(lambdaGroup);
         initMethod.accept(lambdaGroup, this.initUpdater);
 
         // replace instantiation of lambda class with instantiation of lambda group with correct id
-        updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, closureSize);
+        updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, constructorDescriptor);
         optimizationInfo.setLambdaGroupClassId(lambdaClassId);
     }
 
@@ -266,7 +267,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param lambdaClass the lambda class of which the enclosing method must be updated
      * @param lambdaClassId the id that is used for the given lambda class to identify its implementation in the lambda group
      */
-    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity, int closureSize)
+    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity, String constructorDescriptor)
     {
         logger.debug("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
         lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD,
@@ -275,7 +276,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                                            this.classBuilder.getProgramClass(),
                                                                            lambdaClassId,
                                                                            arity,
-                                                                           closureSize,
+                                                                           constructorDescriptor,
                                                                            this.extraDataEntryNameMap));
     }
 

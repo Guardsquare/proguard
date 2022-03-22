@@ -30,7 +30,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     private final ProgramClass lambdaGroup;
     private final int classId;
     private final int arity;
-    private final int closureSize;
+    private final String constructorDescriptor;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
     private boolean visitEnclosingMethodAttribute = false;
     private boolean visitEnclosingMethod = false;
@@ -44,7 +44,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                               ProgramClass lambdaGroup,
                                               int classId,
                                               int arity,
-                                              int closureSize,
+                                              String constructorDescriptor,
                                               ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool      = programClassPool;
@@ -52,7 +52,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
         this.lambdaGroup           = lambdaGroup;
         this.classId               = classId;
         this.arity                 = arity;
-        this.closureSize           = closureSize;
+        this.constructorDescriptor = constructorDescriptor;
         this.extraDataEntryNameMap = extraDataEntryNameMap;
     }
 
@@ -196,10 +196,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                 builder.invokespecial(currentLambdaClass, initMethod).__(),
                                 builder.iconst(classId)
                                        .iconst(arity)
-                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT,
-                                               //createInitDescriptor(this.closureSize, KotlinLambdaGroupBuilder.FIELD_TYPE_FREE_VARIABLE, KotlinLambdaGroupBuilder.FIELD_TYPE_ID)
-                                               KotlinLambdaGroupInitBuilder.getInitDescriptorForClosureSize(this.closureSize)
-                                       )
+                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT,constructorDescriptor)
                                         .__()
                         }
                 };
