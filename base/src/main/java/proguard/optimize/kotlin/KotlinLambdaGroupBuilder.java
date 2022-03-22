@@ -40,6 +40,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private final Map<Integer, KotlinLambdaGroupInvokeMethodBuilder> invokeMethodBuilders;
     private final InterfaceAdder interfaceAdder;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
+    private final KotlinLambdaGroupInitUpdater initUpdater;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaGroupBuilder.class);
 
     /**
@@ -63,6 +64,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         this.interfaceAdder         = new InterfaceAdder(this.classBuilder.getProgramClass());
         this.extraDataEntryNameMap  = extraDataEntryNameMap;
         this.notMergedLambdaVisitor = notMergedLambdaVisitor;
+        this.initUpdater            = new KotlinLambdaGroupInitUpdater(programClassPool, libraryClassPool);
         initialiseLambdaGroup();
     }
 
@@ -163,6 +165,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
             arity = -1;
         }
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
+
+        Method initMethod = copyLambdaInitToLambdaGroup(lambdaClass);
+        initMethod.accept(lambdaGroup, this.initUpdater);
 
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, closureSize);
@@ -294,7 +299,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         // create <init>(int id)
         // create invoke(...) method, based on invokeArity
         //
-        addInitConstructors();
+        //addInitConstructors();
         addInvokeMethods();
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         lambdaGroup.setProcessingFlags(lambdaGroup.getProcessingFlags() | ProcessingFlags.INJECTED);
