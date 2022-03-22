@@ -90,9 +90,9 @@ public class KotlinLambdaMerger implements Pass {
             appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
             appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_OPTIMIZE,
                                                    new ImplementedClassFilter(kotlinLambdaClass, false,
-                                                   new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
+                                                   //new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                                    new ClassPoolFiller(lambdaClassPool),
-                                                   newProgramClassPoolFiller),
+                                                   //newProgramClassPoolFiller),
                                                    newProgramClassPoolFiller))
             );
 

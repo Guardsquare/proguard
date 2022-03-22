@@ -142,11 +142,12 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     new ModifiedAllInnerClassesInfoVisitor(
                                     new InnerClassInfoClassConstantVisitor(
                                     new ClassConstantToClassVisitor(
-                                    new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
+                                    //new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                                           new ClassNameFilter(lambdaClass.getName(),
                                                           (ClassVisitor)null,
-                                                          (ClassVisitor)this),
-                                                          null)), // don't revisit the current lambda
+                                                          (ClassVisitor)this)//,
+                                    //                      null)
+                                    ), // don't revisit the current lambda
                                     null)));
 
         // Add interfaces of lambda class to the lambda group
