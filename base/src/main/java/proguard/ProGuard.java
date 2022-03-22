@@ -178,10 +178,10 @@ public class ProGuard
                 shrink(false);
             }
 
-            // if (configuration.mergeKotlinLambdaClasses)
-            //{
+            if (configuration.mergeKotlinLambdaClasses)
+            {
                 mergeKotlinLambdaClasses();
-            //}
+            }
 
             // Create a matcher for filtering optimizations.
             StringMatcher filter = configuration.optimizations != null ?
