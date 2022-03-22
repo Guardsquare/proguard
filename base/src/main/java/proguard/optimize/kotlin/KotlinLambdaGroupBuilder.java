@@ -210,6 +210,20 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         inlineMethodsInsideClass(lambdaClass);
     }
 
+    private ProgramMethod copyLambdaInitToLambdaGroup(ProgramClass lambdaClass)
+    {
+        logger.trace("Copying <init> method of {} to lambda group {}", lambdaClass.getName(), this.classBuilder.getProgramClass().getName());
+        ProgramMethod initMethod = (ProgramMethod)lambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null);
+        if (initMethod == null)
+        {
+            throw new NullPointerException("No <init> method was found in lambda class " + lambdaClass);
+        }
+        String oldInitDescriptor = initMethod.getDescriptor(lambdaClass);
+        String newInitDescriptor = oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
+        initMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), ClassConstants.METHOD_NAME_INIT, newInitDescriptor, AccessConstants.PUBLIC));
+        return (ProgramMethod)this.classBuilder.getProgramClass().findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+    }
+
     private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass)
     {
         logger.trace("Copying invoke method of {} to lambda group {}", lambdaClass.getName(), this.classBuilder.getProgramClass().getName());
@@ -225,8 +239,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
             throw new NullPointerException("No invoke method was found in lambda class " + lambdaClass);
         }
         String newMethodName = createDerivedInvokeMethodName(lambdaClass);
-        invokeMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), newMethodName));
-        return (ProgramMethod)this.classBuilder.getProgramClass().findMethod(newMethodName, invokeMethod.getDescriptor(lambdaClass));
+        invokeMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), newMethodName, AccessConstants.PRIVATE));
+        ProgramMethod newInitMethod = (ProgramMethod)this.classBuilder.getProgramClass().findMethod(newMethodName, invokeMethod.getDescriptor(lambdaClass));
+        return newInitMethod;
         // TODO: ensure that fields that are referenced by the copied method exist in the lambda group, are initialised,
         //  and cast to the correct type inside the copied method
     }
