@@ -30,6 +30,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     private final ProgramClass lambdaGroup;
     private final int classId;
     private final int arity;
+    private final int closureSize;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
     private boolean visitEnclosingMethodAttribute = false;
     private boolean visitEnclosingMethod = false;
@@ -43,12 +44,15 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                               ProgramClass lambdaGroup,
                                               int classId,
                                               int arity,
-                                              ExtraDataEntryNameMap extraDataEntryNameMap) {
-        this.programClassPool = programClassPool;
-        this.libraryClassPool = libraryClassPool;
-        this.lambdaGroup = lambdaGroup;
-        this.classId = classId;
-        this.arity = arity;
+                                              int closureSize,
+                                              ExtraDataEntryNameMap extraDataEntryNameMap)
+    {
+        this.programClassPool      = programClassPool;
+        this.libraryClassPool      = libraryClassPool;
+        this.lambdaGroup           = lambdaGroup;
+        this.classId               = classId;
+        this.arity                 = arity;
+        this.closureSize           = closureSize;
         this.extraDataEntryNameMap = extraDataEntryNameMap;
     }
 
@@ -56,7 +60,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
     @Override
-    public void visitEnclosingMethodAttribute(Clazz lambdaClass, EnclosingMethodAttribute enclosingMethodAttribute) {
+    public void visitEnclosingMethodAttribute(Clazz lambdaClass, EnclosingMethodAttribute enclosingMethodAttribute)
+    {
         // the given method must be the method where the lambda is defined
         Clazz enclosingClass = enclosingMethodAttribute.referencedClass;
         if (visitEnclosingMethodAttribute || enclosingClass == lambdaClass) {
@@ -81,7 +86,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     }
 
     @Override
-    public void visitProgramMethod(ProgramClass enclosingClass, ProgramMethod enclosingMethod) {
+    public void visitProgramMethod(ProgramClass enclosingClass, ProgramMethod enclosingMethod)
+    {
         // the given class must be the class that defines the lambda
         // the given method must be the method where the lambda is defined
         if (!visitEnclosingMethodAttribute || visitEnclosingMethod) {
@@ -145,32 +151,56 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
 
     private Instruction[][][] createReplacementPatternsForLambda(InstructionSequenceBuilder builder)
     {
-        Method initMethod = currentLambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, "()V");
+        // TODO: ensure that the correct <init> method is selected
+        // TODO: decide what to do if multiple <init> methods exist
+        Method initMethod = currentLambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null);
         return new Instruction[][][]
                 {
+                        // Empty closure lambda's
                         {
                                 // Lambda is 'instantiated' by referring to its static INSTANCE field
                                 builder.getstatic(currentLambdaClass.getName(),
-                                                  KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME,
-                                                  "L" + currentLambdaClass.getName() + ";").__(),
+                                        KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME,
+                                        "L" + currentLambdaClass.getName() + ";").__(),
 
                                 builder.new_(lambdaGroup)
-                                       .dup()
-                                       .iconst(classId)
-                                       .iconst(arity)
-                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(II)V").__()
+                                        .dup()
+                                        .iconst(classId)
+                                        .iconst(arity)
+                                        .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(II)V").__()
                         },
                         {
                                 // Lambda is explicitly instantiated
                                 builder.new_(currentLambdaClass)
-                                       .dup()
-                                       .invokespecial(currentLambdaClass, initMethod).__(),
+                                        .dup()
+                                        .invokespecial(currentLambdaClass, initMethod).__(),
 
                                 builder.new_(lambdaGroup)
-                                       .dup()
-                                       .iconst(classId)
+                                        .dup()
+                                        .iconst(classId)
+                                        .iconst(arity)
+                                        .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(II)V").__()
+                        },
+                        // Non-empty closure lambda's
+                        {
+                                // Lambda is explicitly instantiated with free variables as arguments (part 1)
+                                builder.new_(currentLambdaClass)
+                                        //.dup()
+                                        .__(),
+
+                                builder.new_(lambdaGroup)
+                                        //.dup()
+                                        .__()
+                        },
+                        {
+                                builder.invokespecial(currentLambdaClass, initMethod).__(),
+                                builder.iconst(classId)
                                        .iconst(arity)
-                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, "(II)V").__()
+                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT,
+                                               //createInitDescriptor(this.closureSize, KotlinLambdaGroupBuilder.FIELD_TYPE_FREE_VARIABLE, KotlinLambdaGroupBuilder.FIELD_TYPE_ID)
+                                               KotlinLambdaGroupInitBuilder.getInitDescriptorForClosureSize(this.closureSize)
+                                       )
+                                        .__()
                         }
                 };
     }
