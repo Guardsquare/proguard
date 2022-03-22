@@ -166,6 +166,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity);
+        optimizationInfo.setLambdaGroupClassId(lambdaClassId);
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)

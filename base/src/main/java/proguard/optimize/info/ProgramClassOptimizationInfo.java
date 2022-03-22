@@ -45,6 +45,7 @@ extends      ClassOptimizationInfo
     private volatile Clazz   wrappedClass;
     private volatile Clazz   targetClass;
     private volatile Clazz   lambdaGroup;
+    private volatile int     lambdaGroupClassId;
 
 
     public boolean isKept()
@@ -260,6 +261,17 @@ extends      ClassOptimizationInfo
     public Clazz getLambdaGroup()
     {
         return lambdaGroup;
+    }
+
+    public void setLambdaGroupClassId(int classId)
+    {
+        this.lambdaGroupClassId = classId;
+    }
+
+
+    public int getLambdaGroupClassId()
+    {
+        return lambdaGroupClassId;
     }
 
 

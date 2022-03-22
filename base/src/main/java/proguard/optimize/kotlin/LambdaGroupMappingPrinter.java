@@ -36,7 +36,10 @@ public class LambdaGroupMappingPrinter implements ClassVisitor {
             // Print out the class to lambda group mapping.
             pw.println(ClassUtil.externalClassName(name) +
                     " -> " +
-                    ClassUtil.externalClassName(lambdaGroupName));
+                    ClassUtil.externalClassName(lambdaGroupName) +
+                    " (case " +
+                    optimizationInfo.getLambdaGroupClassId() +
+                    ")");
         }
     }
 }
