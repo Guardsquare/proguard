@@ -1,3 +1,9 @@
+## Version 7.2.2
+
+### Bug fixes
+
+- Fix "Can't save configuration file" error in ProGuardGUI. (`PGD-220`)
+
 ## Version 7.2.1
 
 ### Improved
