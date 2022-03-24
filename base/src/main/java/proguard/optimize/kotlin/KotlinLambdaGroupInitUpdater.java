@@ -53,8 +53,10 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
         BranchTargetFinder branchTargetFinder = new BranchTargetFinder();
 
         // The arity argument is the last of all.
-        // Note that the arguments start counting from 1, as the class itself is at index 0.
-        int arityIndex = ClassUtil.internalMethodParameterCount(programMethod.getDescriptor(programClass));
+        // Note that the arguments start counting from 1, as the class itself is at byte 0.
+        // long and double arguments take 2 bytes.
+        // The classId and arity arguments are the 2 last, which take 1 byte each, as they are of type int.
+        int arityIndex = KotlinLambdaGroupInitUpdater.countParameterBytes(programMethod.getDescriptor(programClass)) - 1;
 
         InstructionSequencesReplacer replacer = createInstructionSequenceReplacer(branchTargetFinder, codeAttributeEditor, arityIndex, programClass);
 
@@ -63,6 +65,51 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
                              new PeepholeEditor(branchTargetFinder,
                                                 codeAttributeEditor,
                                                 replacer));
+    }
+
+    private static int countParameterBytes(String descriptor)
+    {
+        int counter = 1;
+        int index   = 1;
+
+        char oldC = 0;
+        char c = descriptor.charAt(index++);
+        while (true)
+        {
+            switch (c)
+            {
+                case TypeConstants.ARRAY:
+                {
+                    // Just ignore all array characters.
+                    break;
+                }
+                case TypeConstants.CLASS_START:
+                {
+                    counter++;
+
+                    // Skip the class name.
+                    index = descriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
+                    break;
+                }
+                case TypeConstants.LONG:
+                case TypeConstants.DOUBLE:
+                    if (oldC != TypeConstants.ARRAY)
+                    {
+                        counter++;
+                    }
+                default:
+                {
+                    counter++;
+                    break;
+                }
+                case TypeConstants.METHOD_ARGUMENTS_CLOSE:
+                {
+                    return counter;
+                }
+            }
+            oldC = c;
+            c = descriptor.charAt(index++);
+        }
     }
 
     private InstructionSequencesReplacer createInstructionSequenceReplacer(BranchTargetFinder branchTargetFinder,
