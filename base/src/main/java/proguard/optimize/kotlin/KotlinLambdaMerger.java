@@ -4,10 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.Configuration;
-import proguard.classfile.ClassConstants;
-import proguard.classfile.ClassPool;
-import proguard.classfile.Clazz;
-import proguard.classfile.ProgramClass;
+import proguard.classfile.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.ClassInitializer;
@@ -250,5 +247,19 @@ public class KotlinLambdaMerger implements Pass {
                 && optimizationInfo != null // if optimisation info is null, then the lambda was not enqueued to be merged
                 && optimizationInfo.getLambdaGroup() == null
                 && optimizationInfo.mayBeMerged();
+    }
+
+    public static boolean lambdaClassHasExactlyOneInitConstructor(ProgramClass lambdaClass)
+    {
+        int count = 0;
+        for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++)
+        {
+            Method method = lambdaClass.methods[methodIndex];
+            if (method.getName(lambdaClass).equals(ClassConstants.METHOD_NAME_INIT))
+            {
+                count++;
+            }
+        }
+        return count == 1;
     }
 }

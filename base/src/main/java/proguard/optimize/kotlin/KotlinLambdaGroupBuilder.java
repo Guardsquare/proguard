@@ -133,6 +133,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void mergeLambdaClass(ProgramClass lambdaClass)
     {
+        if (!KotlinLambdaMerger.lambdaClassHasExactlyOneInitConstructor(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged because it has more than 1 <init> constructor.");
+        }
         // update optimisation info of lambda to show lambda has been merged or is going to be merged
         ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
         optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());
