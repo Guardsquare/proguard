@@ -196,8 +196,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                                 builder.invokespecial(currentLambdaClass, initMethod).__(),
                                 builder.iconst(classId)
                                        .iconst(arity)
-                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT,constructorDescriptor)
-                                        .__()
+                                       .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, constructorDescriptor)
+                                       .__()
                         }
                 };
     }
