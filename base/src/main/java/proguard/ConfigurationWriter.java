@@ -90,7 +90,10 @@ public class ConfigurationWriter implements AutoCloseable
      */
     public void write(Configuration configuration) throws IOException
     {
-        logger.info("Printing configuration to [{}]...", PrintWriterUtil.fileName(configuration.printConfiguration));
+        if (configuration.printConfiguration != null)
+        {
+            logger.info("Printing configuration to [{}]...", PrintWriterUtil.fileName(configuration.printConfiguration));
+        }
 
         // Write the program class path (input and output entries).
         writeJarOptions(ConfigurationConstants.INJARS_OPTION,
