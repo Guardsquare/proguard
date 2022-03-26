@@ -240,10 +240,6 @@ public class ClassSpecificationVisitorFactory
                 className != null ?
                     new NamedClassVisitor(combinedClassVisitor, className) :
 
-                // If an extendsAnnotationType is specified, start visiting from matching extendsAnnotationType classes.
-                extendsAnnotationType != null ?
-                    new FilteredClassVisitor(extendsAnnotationTypeMatcher, combinedClassVisitor) :
-
                 // If an extendsClassName is specified, start visiting from matching extendsClassName classes.
                 extendsClassName != null ?
                     new FilteredClassVisitor(extendsClassNameMatcher, combinedClassVisitor) :

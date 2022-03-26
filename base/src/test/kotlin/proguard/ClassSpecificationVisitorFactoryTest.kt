@@ -87,4 +87,23 @@ class ClassSpecificationVisitorFactoryTest : FreeSpec({
             }
         }
     }
+
+    "Given a class specification extending an annotation class" - {
+        val (programClassPool, _) = ClassPoolBuilder.fromSource(
+            JavaSource("Annotation.java", "@interface Annotation { }"),
+            JavaSource("FooBar.java", "class FooBar extends Bar { }"),
+            JavaSource("Bar.java", "@Annotation class Bar { }")
+        )
+        val spec = "-keep class * extends @Annotation *".asConfiguration().keep.first()
+        val classVisitor = spyk<ClassVisitor>()
+        val visitor = KeepClassSpecificationVisitorFactory(true, false, false).createClassPoolVisitor(
+            spec, classVisitor, null, null, null
+        )
+        "Then the visitor should visit the matched class" {
+            programClassPool.accept(visitor)
+            verify(exactly = 1) {
+                classVisitor.visitAnyClass(programClassPool.getClass("FooBar"))
+            }
+        }
+    }
 })

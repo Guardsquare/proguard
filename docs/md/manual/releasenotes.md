@@ -3,6 +3,7 @@
 ### Bug fixes
 
 - Fix "Can't save configuration file" error in ProGuardGUI. (`PGD-220`)
+- Fix rule configurations that extend annotation classes. (`PGD-229`)
 
 ## Version 7.2.1
 
