@@ -13,11 +13,6 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion("${target}")
-    targetCompatibility = JavaVersion.toVersion("${target}")
-}
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
   kotlinOptions {
     jvmTarget = "${target}"
