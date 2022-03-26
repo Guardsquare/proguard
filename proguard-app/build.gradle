@@ -10,9 +10,6 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = "${target}"
-targetCompatibility = "${target}"
-
 dependencies {
    implementation project(':base')
 }
