@@ -5,12 +5,14 @@ import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.EnclosingMethodAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.ClassInitializer;
+import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
-import proguard.io.ExtraDataEntryNameMap;
-import proguard.obfuscate.MappingPrinter;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
@@ -21,9 +23,6 @@ import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.*;
 import proguard.util.PrintWriterUtil;
 import proguard.util.ProcessingFlags;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 public class KotlinLambdaMerger implements Pass {
@@ -98,9 +97,9 @@ public class KotlinLambdaMerger implements Pass {
             lambdaClassPool.classesAccept(packageGrouper);
 
             // add optimisation info to the lambda's, so that it can be filled out later
-            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
-            lambdaClassPool.classesAccept(new AllMemberVisitor(
-                                          new ProgramMemberOptimizationInfoSetter()));
+            appView.programClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
+            appView.programClassPool.classesAccept(new AllMemberVisitor(
+                                                   new ProgramMemberOptimizationInfoSetter()));
 
             ClassPool lambdaGroupClassPool = new ClassPool();
             ClassPool notMergedLambdaClassPool = new ClassPool();
