@@ -6,24 +6,22 @@ import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.attribute.visitor.InnerClassesInfoVisitor;
+import proguard.classfile.constant.AnyMethodrefConstant;
 import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.Constant;
-import proguard.classfile.constant.RefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
-import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.BranchTargetFinder;
-import proguard.classfile.visitor.MemberVisitor;
-import proguard.configuration.ConfigurationLoggingAdder;
-import proguard.configuration.ConfigurationLoggingInstructionSequencesReplacer;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
+import proguard.optimize.peephole.RetargetedInnerClassAttributeRemover;
 
 import java.util.*;
 
-public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, MemberVisitor {
+public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, AttributeVisitor, MemberVisitor {
 
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
@@ -37,7 +35,9 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     private boolean visitEnclosingCode = false;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaEnclosingMethodUpdater.class);
     private Clazz currentLambdaClass;
+    private Clazz currentEnclosingClass;
     private SortedSet<Integer> offsetsWhereLambdaIsReferenced;
+    private static final RetargetedInnerClassAttributeRemover retargetedInnerClassAttributeRemover = new RetargetedInnerClassAttributeRemover();
 
     public KotlinLambdaEnclosingMethodUpdater(ClassPool        programClassPool,
                                               ClassPool        libraryClassPool,
@@ -70,8 +70,37 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
 
         visitEnclosingMethodAttribute = true;
         currentLambdaClass = lambdaClass;
+        currentEnclosingClass = enclosingClass;
+        /*
         enclosingMethodAttribute.referencedMethodAccept(this);
-        currentLambdaClass = null;
+        if (enclosingMethodAttribute.referencedMethod == null)
+        {
+            logger.warn("No enclosing method was found for {}, so lambda merging will break the code that uses this class.", lambdaClass);
+            logger.info("Assuming that {} is used in the <clinit> constructor of {}", lambdaClass, enclosingClass);
+            Method clinitMethod = enclosingClass.findMethod(ClassConstants.METHOD_NAME_CLINIT, null);
+            if (clinitMethod == null)
+            {
+                logger.warn("No <clinit> method found for {}, so the usage of {} will not be updated ...", enclosingClass, lambdaClass);
+            }
+            else
+            {
+                clinitMethod.accept(enclosingClass, this);
+            }
+        }
+        else {
+            Method inlinedMethod = enclosingClass.findMethod(enclosingMethodAttribute.referencedMethod.getName(enclosingClass) + "$$forInline", null);
+            if (inlinedMethod != null)
+            {
+                logger.info("The enclosing method of lambda class {} has an inlined version, which will also be updated.", lambdaClass);
+                inlinedMethod.accept(enclosingClass, this);
+            }
+        }
+        */
+
+        // Visit all methods of the enclosing class, assuming that those are the only methods that can contain
+        // references to this lambda class.
+        enclosingClass.methodsAccept(this);
+
         visitEnclosingMethodAttribute = false;
 
         // remove lambda class as inner class of its enclosing class
@@ -81,8 +110,19 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
         // remove all references to lambda class from the constant pool of its enclosing class
         enclosingClass.accept(new ConstantPoolShrinker());
 
+        // Also update any references would occur in other classes of the same package.
+        //ClassCounter classCounter = new ClassCounter();
+        this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
+                                            new ClassNameFilter(enclosingClass.getName(), (ClassVisitor)null,
+                                            //new MultiClassVisitor(
+                                            this))); //, classCounter))));
+
+        //logger.info("{} classes visited to update references to {}", classCounter.getCount(), lambdaClass);
+
         // ensure that the newly created lambda group is part of the resulting output as a dependency of this enclosing class
-        this.extraDataEntryNameMap.addExtraClassToClass(enclosingClass, this.lambdaGroup);
+        extraDataEntryNameMap.addExtraClassToClass(enclosingClass, this.lambdaGroup);
+        currentLambdaClass = null;
+        currentEnclosingClass = null;
     }
 
     @Override
@@ -153,7 +193,9 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
     {
         // TODO: ensure that the correct <init> method is selected
         // TODO: decide what to do if multiple <init> methods exist
-        Method initMethod = currentLambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null);
+        Method initMethod   = currentLambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null);
+        Method specificInvokeMethod = KotlinLambdaGroupBuilder.getInvokeMethod((ProgramClass)currentLambdaClass, false);
+        Method bridgeInvokeMethod = KotlinLambdaGroupBuilder.getInvokeMethod((ProgramClass)currentLambdaClass, true);
         return new Instruction[][][]
                 {
                         // Empty closure lambda's
@@ -194,13 +236,142 @@ public class KotlinLambdaEnclosingMethodUpdater implements AttributeVisitor, Mem
                         },
                         {
                                 builder.invokespecial(currentLambdaClass, initMethod).__(),
+
                                 builder.iconst(classId)
                                        .iconst(arity)
                                        .invokespecial(lambdaGroup.getName(), ClassConstants.METHOD_NAME_INIT, constructorDescriptor)
                                        .__()
+                        },
+                        // Direct invocation of named lambda's
+                        {
+                                builder.invokevirtual(currentLambdaClass, specificInvokeMethod)
+                                       .__(),
+
+                                builder.invokevirtual(lambdaGroup.getName(), KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE, specificInvokeMethod.getDescriptor(currentLambdaClass))
+                                       .__()
+                        },
+                        {
+                                builder.invokevirtual(currentLambdaClass, bridgeInvokeMethod)
+                                       .__(),
+
+                                builder.invokevirtual(lambdaGroup.getName(), KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE, bridgeInvokeMethod.getDescriptor(currentLambdaClass))
+                                       .__()
                         }
                 };
     }
+
+    @Override
+    public void visitAnyClass(Clazz clazz) {}
+
+    @Override
+    public void visitProgramClass(ProgramClass programClass) {
+        ClassReferenceFinder classReferenceFinder = new ClassReferenceFinder(this.currentLambdaClass);
+        programClass.constantPoolEntriesAccept(classReferenceFinder);
+        if (classReferenceFinder.classReferenceFound())
+        {
+            if (currentEnclosingClass == null)
+            {
+                logger.warn("Lambda class {} is referenced by {}, while no enclosing class was linked to this lambda class.", currentLambdaClass, programClass);
+            }
+            else if (currentEnclosingClass.equals(programClass))
+            {
+                logger.warn("Lambda class {} is referenced by {}, which is not the enclosing class.", currentLambdaClass, programClass);
+            }
+            // This programClass references the lambda class, so any referencing instructions
+            // must be updated.
+            programClass.methodsAccept(this);
+
+            // remove any old links between lambda's and their inner classes
+            programClass.accept(KotlinLambdaEnclosingMethodUpdater.retargetedInnerClassAttributeRemover);
+
+            // Remove any constants referring to the old lambda class.
+            programClass.accept(new ConstantPoolShrinker());
+            this.extraDataEntryNameMap.addExtraClassToClass(programClass, currentLambdaClass);
+        }
+    }
+}
+
+class ClassReferenceFinder implements ConstantVisitor
+{
+    private final Clazz referencedClass;
+    private boolean classIsReferenced = false;
+
+    public ClassReferenceFinder(Clazz referencedClass)
+    {
+        this.referencedClass = referencedClass;
+    }
+
+    public void visitAnyConstant(Clazz clazz, Constant constant) {}
+
+    public void visitClassConstant(Clazz clazz, ClassConstant classConstant)
+    {
+        if (classConstant.referencedClass != null && classConstant.referencedClass.equals(referencedClass))
+        {
+            this.classIsReferenced = true;
+        }
+    }
+
+    public boolean classReferenceFound()
+    {
+        return this.classIsReferenced;
+    }
+}
+
+class MethodReferenceFinder implements ConstantVisitor
+{
+    private final Method referencedMethod;
+    private final Clazz referencedClass;
+    private boolean methodIsReferenced = false;
+
+    public MethodReferenceFinder(Method referencedMethod, Clazz referencedClass)
+    {
+        this.referencedMethod = referencedMethod;
+        this.referencedClass  = referencedClass;
+    }
+
+    public void visitAnyConstant(Clazz clazz, Constant constant) {}
+
+    public void visitAnyMethodrefConstant(Clazz clazz, AnyMethodrefConstant anyMethodrefConstant)
+    {
+        if ((anyMethodrefConstant.referencedMethod != null && anyMethodrefConstant.referencedMethod.equals(referencedMethod)))
+            /*||
+                (anyMethodrefConstant.referencedClass != null && anyMethodrefConstant.referencedClass.equals(this.referencedClass) &&
+                        anyMethodrefConstant.getName(clazz).equals(this.referencedMethod.getName(this.referencedClass)) &&
+                        anyMethodrefConstant.referencedMethod.getDescriptor(anyMethodrefConstant.referencedClass).equals(this.referencedMethod.getDescriptor(this.referencedClass))))
+
+             */
+        {
+            this.methodIsReferenced = true;
+        }
+    }
+
+    public boolean methodReferenceFound()
+    {
+        return this.methodIsReferenced;
+    }
+}
+
+class EnclosingClassRemover implements AttributeVisitor
+{
+    private final Clazz classToBeRemoved;
+
+    public EnclosingClassRemover(Clazz clazz)
+    {
+        this.classToBeRemoved = clazz;
+    }
+
+    @Override
+    public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+    @Override
+    public void visitEnclosingMethodAttribute(Clazz clazz, EnclosingMethodAttribute enclosingMethodAttribute)
+    {
+        if (this.classToBeRemoved.equals(enclosingMethodAttribute.referencedClass))
+        {
+
+        }
+    }
+
 }
 
 class InnerClassRemover implements AttributeVisitor, InnerClassesInfoVisitor
