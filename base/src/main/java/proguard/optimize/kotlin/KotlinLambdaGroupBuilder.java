@@ -76,6 +76,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                        lambdaGroupName,
                                                        KotlinLambdaMerger.NAME_KOTLIN_LAMBDA);
         ProgramClass lambdaGroup = initialBuilder.getProgramClass();
+        lambdaGroup.accept(new ProgramClassOptimizationInfoSetter());
+
         // The new builder receives the class pools, such that references can be added when necessary
         return new ClassBuilder(lambdaGroup, programClassPool, libraryClassPool);
     }
