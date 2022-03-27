@@ -5,12 +5,14 @@ import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.EnclosingMethodAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.util.ClassInitializer;
+import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
-import proguard.io.ExtraDataEntryNameMap;
-import proguard.obfuscate.MappingPrinter;
 import proguard.optimize.info.ProgramClassOptimizationInfo;
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
@@ -21,9 +23,6 @@ import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.*;
 import proguard.util.PrintWriterUtil;
 import proguard.util.ProcessingFlags;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 public class KotlinLambdaMerger implements Pass {
@@ -98,9 +97,9 @@ public class KotlinLambdaMerger implements Pass {
             lambdaClassPool.classesAccept(packageGrouper);
 
             // add optimisation info to the lambda's, so that it can be filled out later
-            lambdaClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
-            lambdaClassPool.classesAccept(new AllMemberVisitor(
-                                          new ProgramMemberOptimizationInfoSetter()));
+            appView.programClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
+            appView.programClassPool.classesAccept(new AllMemberVisitor(
+                                                   new ProgramMemberOptimizationInfoSetter()));
 
             ClassPool lambdaGroupClassPool = new ClassPool();
             ClassPool notMergedLambdaClassPool = new ClassPool();
@@ -249,6 +248,47 @@ public class KotlinLambdaMerger implements Pass {
                 && optimizationInfo.mayBeMerged();
     }
 
+    public static void ensureCanMerge(ProgramClass lambdaClass) throws IllegalArgumentException
+    {
+        if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged, because it has more than 1 <init> constructor.");
+        }
+        else if (!lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged, because it contains unexpected methods.");
+        }
+        else if (!lambdaClassIsNotDirectlyInvoked(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged, because it is directly invoked with its specific invoke method.");
+        }
+    }
+
+    public static boolean canMerge(ProgramClass lambdaClass)
+    {
+        return lambdaClassHasExactlyOneInitConstructor(lambdaClass) && lambdaClassHasNoUnexpectedMethods(lambdaClass);
+    }
+
+    public static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
+    {
+        for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++)
+        {
+            Method method = lambdaClass.methods[methodIndex];
+            String methodName = method.getName(lambdaClass);
+            switch (methodName)
+            {
+                case ClassConstants.METHOD_NAME_INIT:
+                case ClassConstants.METHOD_NAME_CLINIT:
+                case KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE:
+                    break;
+                default:
+                    logger.warn("Lambda class {} contains an unexpected method: {}", lambdaClass, ClassUtil.externalFullMethodDescription(lambdaClass.getName(), method.getAccessFlags(), methodName, method.getDescriptor(lambdaClass)));
+                    return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean lambdaClassHasExactlyOneInitConstructor(ProgramClass lambdaClass)
     {
         int count = 0;
@@ -260,6 +300,27 @@ public class KotlinLambdaMerger implements Pass {
                 count++;
             }
         }
+        if (count != 1)
+        {
+            logger.warn("Lambda class {} has {} <init> constructors.", lambdaClass, count);
+        }
         return count == 1;
+    }
+
+    public static boolean lambdaClassIsNotDirectlyInvoked(ProgramClass lambdaClass)
+    {
+        Method invokeMethod = KotlinLambdaGroupBuilder.getInvokeMethod(lambdaClass, false);
+        if (invokeMethod == null)
+        {
+            return true;
+        }
+        MethodReferenceFinder methodReferenceFinder = new MethodReferenceFinder(invokeMethod, lambdaClass);
+        lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD, new AttributeVisitor() {
+            @Override
+            public void visitEnclosingMethodAttribute(Clazz clazz, EnclosingMethodAttribute enclosingMethodAttribute) {
+                enclosingMethodAttribute.referencedClass.constantPoolEntriesAccept(methodReferenceFinder);
+            }
+        });
+        return !methodReferenceFinder.methodReferenceFound();
     }
 }
