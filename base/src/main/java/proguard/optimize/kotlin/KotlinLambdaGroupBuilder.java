@@ -157,14 +157,23 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     ), // don't revisit the current lambda
                                     null)));
 
+        canonicalizeLambdaClassFields(lambdaClass);
+
         // Add interfaces of lambda class to the lambda group
         // TODO: ensure that only Function interfaces are added
         lambdaClass.interfaceConstantsAccept(this.interfaceAdder);
 
-        ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         logger.debug("Adding lambda {} to lambda group {}", lambdaClass.getName(), lambdaGroup.getName());
 
+        // First copy the <init> constructors to the lambda group
+        Method initMethod = copyOrMergeLambdaInitIntoLambdaGroup(lambdaClass);
+
+        String constructorDescriptor = initMethod.getDescriptor(lambdaGroup);
+
+        // Then inline the specific invoke methods into the bridge invoke methods, within the lambda class
         inlineLambdaInvokeMethods(lambdaClass);
+
+        // and copy the bridge invoke methods to the lambda group
         ProgramMethod copiedMethod = copyLambdaInvokeToLambdaGroup(lambdaClass);
         int arity = ClassUtil.internalMethodParameterCount(copiedMethod.getDescriptor(lambdaGroup));
         if (arity == 1 && lambdaClass.extendsOrImplements(KotlinLambdaMerger.NAME_KOTLIN_FUNCTIONN)
@@ -174,13 +183,30 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         }
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
 
-        Method initMethod = copyLambdaInitToLambdaGroup(lambdaClass);
-        String constructorDescriptor = initMethod.getDescriptor(lambdaGroup);
-        initMethod.accept(lambdaGroup, this.initUpdater);
 
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, constructorDescriptor);
         optimizationInfo.setLambdaGroupClassId(lambdaClassId);
+    }
+
+    private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)
+    {
+        FieldRenamer fieldRenamer = new FieldRenamer(true);
+        // Note: the order of the fields is not necessarily the order in which they are assigned
+        // For now, let's assume the order matches the order in which they are assigned.
+        lambdaClass.fieldsAccept(
+                new MemberVisitor() {
+                    @Override
+                    public void visitProgramField(ProgramClass programClass, ProgramField programField) {
+                        // Assumption: the only name clash of fields of different classes is
+                        // for fields with the name "INSTANCE". We don't need these fields anyway, so we don't rename them.
+                        // TODO: handle name clashes correctly
+                        if (!programField.getName(programClass).equals("INSTANCE"))
+                        {
+                            fieldRenamer.visitProgramField(programClass, programField);
+                        }
+                    }
+                });
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
@@ -218,18 +244,36 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         inlineMethodsInsideClass(lambdaClass);
     }
 
-    private ProgramMethod copyLambdaInitToLambdaGroup(ProgramClass lambdaClass)
+    private ProgramMethod copyOrMergeLambdaInitIntoLambdaGroup(ProgramClass lambdaClass)
     {
+        ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         logger.trace("Copying <init> method of {} to lambda group {}", lambdaClass.getName(), this.classBuilder.getProgramClass().getName());
-        ProgramMethod initMethod = (ProgramMethod)lambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null);
+        ProgramMethod initMethod = (ProgramMethod)lambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null); //, 0, AccessConstants.PRIVATE);
         if (initMethod == null)
         {
             throw new NullPointerException("No <init> method was found in lambda class " + lambdaClass);
         }
+        logger.trace("<init> method of lambda class {}: {}", lambdaClass, ClassUtil.externalFullMethodDescription(lambdaClass.getName(), initMethod.getAccessFlags(), initMethod.getName(lambdaClass), initMethod.getDescriptor(lambdaClass)));
+
         String oldInitDescriptor = initMethod.getDescriptor(lambdaClass);
         String newInitDescriptor = oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
-        initMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), ClassConstants.METHOD_NAME_INIT, newInitDescriptor, AccessConstants.PUBLIC));
-        return (ProgramMethod)this.classBuilder.getProgramClass().findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+
+        // Check whether an init method with this descriptor exists already
+        ProgramMethod existingInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+
+        if (existingInitMethod != null)
+        {
+            //logger.info("Multiple lambda classes (of which {}) with the same <init> descriptor ({}) are merged in the same lambda group ({}).", lambdaClass, oldInitDescriptor, this.classBuilder.getProgramClass());
+            //new ClassEditor(lambdaGroup).removeMethod(existingInitMethod);
+            return existingInitMethod;
+        }
+
+        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, newInitDescriptor, AccessConstants.PUBLIC));//, true));
+        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+
+        // Add the necessary instructions to entirely new <init> methods
+        newInitMethod.accept(lambdaGroup, this.initUpdater);
+        return newInitMethod;
     }
 
     private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass)
