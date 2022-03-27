@@ -284,8 +284,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         //      - a bridge method that implements invoke()Ljava/lang/Object; for the Function0 interface
         //      - a specific method that contains the implementation of the lambda
         // Assumption: the specific invoke method has been inlined into the bridge invoke method, such that
-        // copying the bridge method to the lambda group is sufficient to retrieve the full implementation
-        ProgramMethod invokeMethod = getInvokeMethod(lambdaClass);
+        // copying the bridge method to th  e lambda group is sufficient to retrieve the full implementation
+        ProgramMethod invokeMethod = getBridgeInvokeMethod(lambdaClass);
         if (invokeMethod == null)
         {
             throw new NullPointerException("No invoke method was found in lambda class " + lambdaClass);
@@ -310,23 +310,29 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * invoke method is returned. If no invoke method was found, then null is returned.
      * @param lambdaClass the lambda class of which a (bridge) invoke method is to be returned
      */
-    private static ProgramMethod getInvokeMethod(ProgramClass lambdaClass)
+    private static ProgramMethod getBridgeInvokeMethod(ProgramClass lambdaClass)
     {
         // Assuming that all specific invoke methods have been inlined into the bridge invoke methods
         // we can take the bridge invoke method (which overrides the invoke method of the FunctionX interface)
-        ProgramMethod nonBridgeInvokeMethod = null;
+        return getInvokeMethod(lambdaClass, true);
+    }
+
+    public static ProgramMethod getInvokeMethod(ProgramClass lambdaClass, boolean isBridgeMethod)
+    {
+        ProgramMethod invokeMethod = null;
         for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++) {
             ProgramMethod method = lambdaClass.methods[methodIndex];
             if (method.getName(lambdaClass).equals(KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE))
             {
-                if ((method.u2accessFlags & AccessConstants.BRIDGE) != 0) {
-                    // we have found the bridge invoke method
+                if ((isBridgeMethod && (method.u2accessFlags & AccessConstants.BRIDGE) != 0) ||
+                        (!isBridgeMethod && (method.u2accessFlags & AccessConstants.BRIDGE) == 0)) {
+                    // we have found the bridge/non-bridge invoke method
                     return method;
                 }
-                nonBridgeInvokeMethod = method;
+                invokeMethod = method;
             }
         }
-        return nonBridgeInvokeMethod;
+        return invokeMethod;
     }
 
     /**
