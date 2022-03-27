@@ -141,7 +141,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
         // update optimisation info of lambda to show lambda has been merged or is going to be merged
         ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
-        optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());
+        optimizationInfo.setLambdaGroup(lambdaGroup);
+        optimizationInfo.setTargetClass(lambdaGroup);
 
         // merge any inner lambda's before merging the current lambda
         lambdaClass.attributeAccept(Attribute.INNER_CLASSES,
