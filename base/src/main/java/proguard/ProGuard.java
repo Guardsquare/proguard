@@ -29,7 +29,6 @@ import proguard.classfile.util.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
-import proguard.io.ExtraDataEntryNameMap;
 import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
@@ -39,6 +38,7 @@ import proguard.obfuscate.ResourceFileNameAdapter;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
+import proguard.optimize.kotlin.KotlinLambdaMerger;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.pass.PassRunner;
 import proguard.preverify.*;
@@ -177,6 +177,11 @@ public class ProGuard
                 shrink(false);
             }
 
+            if (configuration.mergeKotlinLambdaClasses && !configuration.lambdaMergingAfterOptimizing)
+            {
+                mergeKotlinLambdaClasses();
+            }
+
             // Create a matcher for filtering optimizations.
             StringMatcher filter = configuration.optimizations != null ?
                 new ListParser(new NameParser()).parse(configuration.optimizations) :
@@ -192,6 +197,11 @@ public class ProGuard
             {
                 optimize();
                 linearizeLineNumbers();
+            }
+
+            if (configuration.mergeKotlinLambdaClasses && configuration.lambdaMergingAfterOptimizing)
+            {
+                mergeKotlinLambdaClasses();
             }
 
             if (configuration.obfuscate)
@@ -422,6 +432,14 @@ public class ProGuard
         {
             passRunner.run(new KotlinMetadataAsserter(configuration), appView);
         }
+    }
+
+    /**
+     * Reduce the size needed to represent Kotlin lambda's.
+     * The classes that are generated for lambda's with a same structure and from the same package are merged into a group.
+     */
+    private void mergeKotlinLambdaClasses() throws Exception {
+        passRunner.run(new KotlinLambdaMerger(configuration), appView);
     }
 
 
