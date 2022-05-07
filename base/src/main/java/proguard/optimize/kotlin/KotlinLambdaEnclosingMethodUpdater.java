@@ -195,7 +195,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
                                 // Lambda is 'instantiated' by referring to its static INSTANCE field
                                 builder.getstatic(currentLambdaClass.getName(),
                                         KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME,
-                                        "L" + currentLambdaClass.getName() + ";").__(),
+                                        ClassUtil.internalTypeFromClassName(currentLambdaClass.getName())).__(),
 
                                 builder.new_(lambdaGroup)
                                         .dup()
@@ -263,11 +263,15 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
         {
             if (currentEnclosingClass == null)
             {
-                logger.warn("Lambda class {} is referenced by {}, while no enclosing class was linked to this lambda class.", currentLambdaClass, programClass);
+                logger.warn("Lambda class {} is referenced by {}, while no enclosing class was linked to this lambda class.",
+                            ClassUtil.externalClassName(currentLambdaClass.getName()),
+                            ClassUtil.externalClassName(programClass.getName()));
             }
             else if (currentEnclosingClass.equals(programClass))
             {
-                logger.warn("Lambda class {} is referenced by {}, which is not the enclosing class.", currentLambdaClass, programClass);
+                logger.warn("Lambda class {} is referenced by {}, which is not the enclosing class or the lambda class itself.",
+                            ClassUtil.externalClassName(currentLambdaClass.getName()),
+                            ClassUtil.externalClassName(programClass.getName()));
             }
             // This programClass references the lambda class, so any referencing instructions
             // must be updated.

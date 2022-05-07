@@ -29,7 +29,12 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
     @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        logger.trace("Updating method " + programMethod.getName(programClass) + programMethod.getDescriptor(programClass) + " in class " + programClass);
+        logger.trace("Updating method {} in class {}",
+                     ClassUtil.externalFullMethodDescription(programClass.getName(),
+                                                             programMethod.getAccessFlags(),
+                                                             programMethod.getName(programClass),
+                                                             programMethod.getDescriptor(programClass)),
+                                                             ClassUtil.externalClassName(programClass.getName()));
         programMethod.attributesAccept(programClass, this);
     }
 

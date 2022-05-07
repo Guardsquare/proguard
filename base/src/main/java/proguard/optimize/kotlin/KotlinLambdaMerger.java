@@ -334,7 +334,7 @@ public class KotlinLambdaMerger implements Pass {
                 case KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE:
                     break;
                 default:
-                    logger.warn("Lambda class {} contains an unexpected method: {}", lambdaClass, ClassUtil.externalFullMethodDescription(lambdaClass.getName(), method.getAccessFlags(), methodName, method.getDescriptor(lambdaClass)));
+                    logger.warn("Lambda class {} contains an unexpected method: {}", ClassUtil.externalClassName(lambdaClass.getName()), ClassUtil.externalFullMethodDescription(lambdaClass.getName(), method.getAccessFlags(), methodName, method.getDescriptor(lambdaClass)));
                     return false;
             }
         }
@@ -354,7 +354,7 @@ public class KotlinLambdaMerger implements Pass {
         }
         if (count != 1)
         {
-            logger.warn("Lambda class {} has {} <init> constructors.", lambdaClass, count);
+            logger.warn("Lambda class {} has {} <init> constructors.", ClassUtil.externalClassName(lambdaClass.getName()), count);
         }
         return count == 1;
     }
