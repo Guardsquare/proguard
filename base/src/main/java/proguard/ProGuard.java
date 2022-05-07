@@ -178,7 +178,7 @@ public class ProGuard
                 shrink(false);
             }
 
-            if (configuration.mergeKotlinLambdaClasses)
+            if (configuration.mergeKotlinLambdaClasses && !configuration.lambdaMergingAfterOptimizing)
             {
                 mergeKotlinLambdaClasses();
             }
@@ -198,6 +198,11 @@ public class ProGuard
             {
                 optimize();
                 linearizeLineNumbers();
+            }
+
+            if (configuration.mergeKotlinLambdaClasses && configuration.lambdaMergingAfterOptimizing)
+            {
+                mergeKotlinLambdaClasses();
             }
 
             if (configuration.obfuscate)

@@ -123,6 +123,7 @@ public class ConfigurationWriter implements AutoCloseable
         writeOption(ConfigurationConstants.MERGE_INTERFACES_AGGRESSIVELY_OPTION, configuration.mergeInterfacesAggressively);
         writeOption(ConfigurationConstants.PRINT_LAMBDAGROUP_MAPPING_OPTION,     configuration.printLambdaGroupMapping);
         writeOption(ConfigurationConstants.MERGE_KOTLIN_LAMBDA_CLASSES_OPTION,   configuration.mergeKotlinLambdaClasses);
+        writeOption(ConfigurationConstants.LAMBDA_MERGING_AFTER_OPTIMIZE_OPTION, configuration.lambdaMergingAfterOptimizing);
 
         writeOption(ConfigurationConstants.DONT_OBFUSCATE_OPTION,                            !configuration.obfuscate);
         writeOption(ConfigurationConstants.PRINT_MAPPING_OPTION,                             configuration.printMapping);
