@@ -193,6 +193,7 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.PRINT_LAMBDAGROUP_MAPPING_OPTION                 .startsWith(nextWord)) configuration.printLambdaGroupMapping               = parseOptionalFile();
             else if (ConfigurationConstants.MERGE_KOTLIN_LAMBDA_CLASSES_OPTION               .startsWith(nextWord)) configuration.mergeKotlinLambdaClasses              = parseNoArgument(true);
             else if (ConfigurationConstants.LAMBDA_MERGING_AFTER_OPTIMIZE_OPTION             .startsWith(nextWord)) configuration.lambdaMergingAfterOptimizing          = parseNoArgument(true);
+            else if (ConfigurationConstants.LAMBDA_MERGING_ALLOW_UNEXPECTED_METHODS          .startsWith(nextWord)) configuration.mergeLambdaClassesWithUnexpectedMethods = parseNoArgument(true);
 
             else if (ConfigurationConstants.DONT_OBFUSCATE_OPTION                            .startsWith(nextWord)) configuration.obfuscate                             = parseNoArgument(false);
             else if (ConfigurationConstants.PRINT_MAPPING_OPTION                             .startsWith(nextWord)) configuration.printMapping                          = parseOptionalFile();

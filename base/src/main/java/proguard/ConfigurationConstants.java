@@ -69,6 +69,7 @@ public class ConfigurationConstants
     public static final String PRINT_LAMBDAGROUP_MAPPING_OPTION        = "-printlambdagroupmapping";
     public static final String MERGE_KOTLIN_LAMBDA_CLASSES_OPTION      = "-mergekotlinlambdaclasses";
     public static final String LAMBDA_MERGING_AFTER_OPTIMIZE_OPTION    = "-lambdamergingafteroptimizing";
+    public static final String LAMBDA_MERGING_ALLOW_UNEXPECTED_METHODS = "-mergelambdaclasseswithunexpectedmethods";
 
     public static final String DONT_OBFUSCATE_OPTION                  = "-dontobfuscate";
     public static final String PRINT_MAPPING_OPTION                   = "-printmapping";
