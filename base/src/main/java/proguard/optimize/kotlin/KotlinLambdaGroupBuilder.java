@@ -157,6 +157,19 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     ), // don't revisit the current lambda
                                     null)));
 
+        // possibly, some inner lambda classes were not mentioned in the inner classes attribute of this lambda,
+        // so we have to find them by looking for their occurrence in this lambda class
+        // Normally, this should be redundant if all inner lambda classes are correctly mentioned as inner classes.
+        lambdaClass.constantPoolEntriesAccept(new ClassConstantToClassVisitor(
+                                              new ClassNameFilter(lambdaClass.getName(),
+                                              (ClassVisitor)null,
+                                              new ImplementedClassFilter(
+                                              programClassPool.getClass(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA),
+                                              false,
+                                              new MultiClassVisitor(this,
+                                              new SimpleClassPrinter(true)),
+                                              null))));
+
         canonicalizeLambdaClassFields(lambdaClass);
 
         // Add interfaces of lambda class to the lambda group
