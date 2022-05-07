@@ -267,7 +267,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
                             ClassUtil.externalClassName(currentLambdaClass.getName()),
                             ClassUtil.externalClassName(programClass.getName()));
             }
-            else if (currentEnclosingClass.equals(programClass))
+            else if (!currentEnclosingClass.equals(programClass) && !currentLambdaClass.equals(programClass))
             {
                 logger.warn("Lambda class {} is referenced by {}, which is not the enclosing class or the lambda class itself.",
                             ClassUtil.externalClassName(currentLambdaClass.getName()),
