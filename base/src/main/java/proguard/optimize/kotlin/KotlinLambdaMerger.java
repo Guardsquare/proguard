@@ -208,9 +208,12 @@ public class KotlinLambdaMerger implements Pass {
         lambdaGroupClassPool.classesAccept(new InterfaceUsageMarker(
                                            classUsageMarker));
 
+        // mark the lambda groups themselves as used
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
         // and make sure that the line numbers are updated
-        lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
+        //ClassPool newLambdaGroupClassPool = new ClassPool();
+        lambdaGroupClassPool.classesAccept(new UsedClassFilter(simpleUsageMarker,
+                                           new MultiClassVisitor(
                                            new ClassShrinker(simpleUsageMarker),
                                            new LineNumberLinearizer()));
     }
