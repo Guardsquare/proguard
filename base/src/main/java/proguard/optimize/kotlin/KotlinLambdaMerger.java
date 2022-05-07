@@ -248,19 +248,31 @@ public class KotlinLambdaMerger implements Pass {
                 && optimizationInfo.mayBeMerged();
     }
 
-    public static void ensureCanMerge(ProgramClass lambdaClass) throws IllegalArgumentException
+    public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods) throws IllegalArgumentException
     {
+        String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
         if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged, because it has more than 1 <init> constructor.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it has more than 1 <init> constructor.");
         }
-        else if (!lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        else if (!lambdaClassHasNoAccessibleStaticMethods(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged, because it contains unexpected methods.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains a static method that could be used outside the class itself.");
         }
         else if (!lambdaClassIsNotDirectlyInvoked(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + lambdaClass + " cannot be merged, because it is directly invoked with its specific invoke method.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it is directly invoked with its specific invoke method.");
+        }
+        else if (!lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        {
+            if (!mergeLambdaClassesWithUnexpectedMethods)
+            {
+                throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods.");
+            }
+            else if (!lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(lambdaClass))
+            {
+                throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods that contain too much code all together.");
+            }
         }
     }
 
