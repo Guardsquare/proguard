@@ -284,6 +284,43 @@ public class KotlinLambdaMerger implements Pass {
         return lambdaClassHasExactlyOneInitConstructor(lambdaClass) && lambdaClassHasNoUnexpectedMethods(lambdaClass);
     }
 
+    public static boolean lambdaClassHasNoAccessibleStaticMethods(ProgramClass lambdaClass)
+    {
+        for (int index = 0; index < lambdaClass.u2methodsCount; index++)
+        {
+            ProgramMethod method = lambdaClass.methods[index];
+            if (!method.getName(lambdaClass).equals(ClassConstants.METHOD_NAME_CLINIT)
+                && (method.getAccessFlags() & AccessConstants.STATIC) != 0
+                && ((method.getAccessFlags() & AccessConstants.PRIVATE) == 0))
+            {
+                logger.warn("Lambda class {} contains a static method that cannot be merged: {}", ClassUtil.externalClassName(lambdaClass.getName()), ClassUtil.externalFullMethodDescription(lambdaClass.getName(), method.getAccessFlags(), method.getName(lambdaClass), method.getDescriptor(lambdaClass)));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(ProgramClass lambdaClass)
+    {
+        String methodNameRegularExpression = "!" + ClassConstants.METHOD_NAME_INIT;
+        methodNameRegularExpression += ",!" + ClassConstants.METHOD_NAME_CLINIT;
+        // TODO: create a dedicated CodeSizeCounter visitor
+        final int[] totalCodeSize = {0};
+        lambdaClass.methodsAccept(new MemberNameFilter(methodNameRegularExpression,
+                                  new AllAttributeVisitor(new AttributeVisitor() {
+                                      @Override
+                                      public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+                                      @Override
+                                      public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
+                                          totalCodeSize[0] += codeAttribute.u4codeLength;
+                                      }
+                                  })));
+        // TODO: replace 7000 by constant or
+        //  Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
+        return totalCodeSize[0] <= 7000;
+    }
+
     public static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
     {
         for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++)
