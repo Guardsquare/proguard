@@ -41,6 +41,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
 
     public KotlinLambdaEnclosingMethodUpdater(ClassPool        programClassPool,
                                               ClassPool        libraryClassPool,
+                                              ProgramClass lambdaClass,
                                               ProgramClass lambdaGroup,
                                               int classId,
                                               int arity,
@@ -49,6 +50,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
     {
         this.programClassPool      = programClassPool;
         this.libraryClassPool      = libraryClassPool;
+        this.currentLambdaClass    = lambdaClass;
         this.lambdaGroup           = lambdaGroup;
         this.classId               = classId;
         this.arity                 = arity;
@@ -110,19 +112,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
         // remove all references to lambda class from the constant pool of its enclosing class
         enclosingClass.accept(new ConstantPoolShrinker());
 
-        // Also update any references would occur in other classes of the same package.
-        //ClassCounter classCounter = new ClassCounter();
-        this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
-                                            new ClassNameFilter(enclosingClass.getName(), (ClassVisitor)null,
-                                            //new MultiClassVisitor(
-                                            this))); //, classCounter))));
-
-        //logger.info("{} classes visited to update references to {}", classCounter.getCount(), lambdaClass);
-
         // ensure that the newly created lambda group is part of the resulting output as a dependency of this enclosing class
         extraDataEntryNameMap.addExtraClassToClass(enclosingClass, this.lambdaGroup);
-        currentLambdaClass = null;
-        currentEnclosingClass = null;
     }
 
     @Override
@@ -130,7 +121,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
     {
         // the given class must be the class that defines the lambda
         // the given method must be the method where the lambda is defined
-        if (!visitEnclosingMethodAttribute || visitEnclosingMethod) {
+
+        if (visitEnclosingMethod) {
             return;
         }
         visitEnclosingMethod = true;
@@ -159,7 +151,7 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
         // the given code attribute must contain the original definition of the lambda:
         //  - load LambdaClass.INSTANCE
         //  - or instantiate LambdaClass()
-        if (!visitEnclosingMethodAttribute || !visitEnclosingMethod || visitEnclosingCode)
+        if (!visitEnclosingMethod || visitEnclosingCode)
         {
             return;
         }

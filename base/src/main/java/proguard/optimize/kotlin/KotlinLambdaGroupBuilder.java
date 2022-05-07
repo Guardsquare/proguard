@@ -342,15 +342,23 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      */
     private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity, String constructorDescriptor)
     {
-        logger.debug("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
-        lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD,
+        logger.info("Updating instantiation of {} in enclosing method(s) to use id {}.",
+                    ClassUtil.externalClassName(lambdaClass.getName()), lambdaClassId);
+        KotlinLambdaEnclosingMethodUpdater enclosingMethodUpdater =
                                     new KotlinLambdaEnclosingMethodUpdater(this.programClassPool,
                                                                            this.libraryClassPool,
+                                                                           lambdaClass,
                                                                            this.classBuilder.getProgramClass(),
                                                                            lambdaClassId,
                                                                            arity,
                                                                            constructorDescriptor,
-                                                                           this.extraDataEntryNameMap));
+                                                                           this.extraDataEntryNameMap);
+        lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD, enclosingMethodUpdater);
+
+        // Also update any references that would occur in other classes of the same package.
+        this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
+                                            new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
+                                            enclosingMethodUpdater)));
     }
 
     private void addInitConstructors()
