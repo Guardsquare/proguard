@@ -105,6 +105,9 @@ allprojects { Project project ->
                     options.addStringOption('Xdoclint:none', '-quiet')
                 }
                 java {
+                    toolchain {
+                        languageVersion.set(JavaLanguageVersion.of(8))
+                    }
                     withJavadocJar()
                     withSourcesJar()
                 }

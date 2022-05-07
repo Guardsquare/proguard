@@ -130,6 +130,15 @@ implements         ReplacementSequences
                     .invokestatic(KOTLIN_INTRINSICS_CLASS, "checkFieldIsNotNull", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V").__()
             },
             {
+                    ____
+                            .ldc_(CONSTANT_INDEX_1)
+                            .invokestatic(KOTLIN_INTRINSICS_CLASS, "throwUninitializedProperty", "(Ljava/lang/String;)V").__(),
+
+                    ____
+                            .ldc(REPLACEMENT_STRING)
+                            .invokestatic(KOTLIN_INTRINSICS_CLASS, "throwUninitializedProperty", "(Ljava/lang/String;)V").__()
+            },
+            {
                 ____
                     .ldc_(CONSTANT_INDEX_1)
                     .invokestatic(KOTLIN_INTRINSICS_CLASS, "throwUninitializedPropertyAccessException", "(Ljava/lang/String;)V").__(),

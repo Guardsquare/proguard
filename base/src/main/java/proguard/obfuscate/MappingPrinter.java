@@ -20,6 +20,10 @@
  */
 package proguard.obfuscate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
@@ -49,6 +53,8 @@ implements   ClassVisitor,
     // A field serving as a return value for the visitor methods.
     private boolean printed;
 
+    private static final Logger logger = LogManager.getLogger(MappingPrinter.class);
+
 
     /**
      * Creates a new MappingPrinter that prints to the given writer.
@@ -77,6 +83,9 @@ implements   ClassVisitor,
                    " -> " +
                    ClassUtil.externalClassName(newName) +
                    ":");
+
+        SourceFileNamePrinter sourceFileNamePrinter = new SourceFileNamePrinter(pw);
+        programClass.attributesAccept(sourceFileNamePrinter);
 
         // Print out the class members.
         programClass.fieldsAccept(this);
@@ -365,5 +374,38 @@ implements   ClassVisitor,
                    ClassUtil.externalMethodArguments(enclosingMethodDescriptor)  + JavaTypeConstants.METHOD_ARGUMENTS_CLOSE + ":" +
                    enclosingLineNumber                                           + " -> " +
                    obfuscatedMethodName);
+    }
+
+    private static class SourceFileNamePrinter implements AttributeVisitor
+    {
+        private final PrintWriter pw;
+
+        public SourceFileNamePrinter(PrintWriter pw)
+        {
+            this.pw = pw;
+        }
+
+        @Override
+        public void visitSourceFileAttribute(Clazz clazz, SourceFileAttribute sourceFileAttribute)
+        {
+            String sourceFileName = clazz.getString(sourceFileAttribute.u2sourceFileIndex);
+            JSONObject json = new JSONObject();
+            try
+            {
+                json.put("id", "sourceFile");
+                json.put("fileName", sourceFileName);
+                pw.println("# " + json);
+            }
+            catch (JSONException e)
+            {
+                logger.info("Failed to convert source file name {} into JSON.", sourceFileName);
+            }
+        }
+
+        @Override
+        public void visitAnyAttribute(Clazz clazz, Attribute attribute)
+        {
+
+        }
     }
 }

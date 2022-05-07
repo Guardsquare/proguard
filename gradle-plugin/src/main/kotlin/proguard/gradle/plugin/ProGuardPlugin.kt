@@ -42,7 +42,7 @@ class ProGuardPlugin : Plugin<Project> {
                                 |     }""".trimMargin()
         when {
             androidExtension != null -> {
-                if (agpVersion.major < 4) {
+                if (agpVersion.majorVersion < 4) {
                     throw GradleException(
                             """The ProGuard plugin only supports Android plugin 4 and higher.
                               |For Android plugin version 3 and lower, you can use ProGuard through the Android plugin integration.

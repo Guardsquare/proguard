@@ -500,36 +500,37 @@ public class Obfuscator implements Pass
                     new KotlinIntrinsicsReplacementSequences(appView.programClassPool, appView.libraryClassPool)),
 
                 new ReferencedKotlinMetadataVisitor(
-                new MultiKotlinMetadataVisitor(
-                // Come up with new names for Kotlin Properties.
-                new KotlinPropertyNameObfuscator(nameFactory),
-                // Obfuscate alias names.
-                new KotlinAliasNameObfuscator(nameFactory),
+                    new MultiKotlinMetadataVisitor(
+                    // Come up with new names for Kotlin Properties.
+                    new KotlinPropertyNameObfuscator(nameFactory),
+                    // Obfuscate alias names.
+                    new KotlinAliasNameObfuscator(nameFactory),
 
-                // Ensure companion classes have $CompanionName suffix.
-                new KotlinCompanionEqualizer(),
-                // Equalise/fix $DefaultImpls and $WhenMappings classes.
-                new KotlinSyntheticClassFixer(),
-                // Ensure object classes have the INSTANCE field.
-                new KotlinObjectFixer(),
+                    // Ensure companion classes have $CompanionName suffix.
+                    new KotlinCompanionEqualizer(),
+                    // Equalise/fix $DefaultImpls and $WhenMappings classes.
+                    new KotlinSyntheticClassFixer(),
+                    // Ensure object classes have the INSTANCE field.
+                    new KotlinObjectFixer(),
 
-                new AllFunctionVisitor(
-                    // Ensure that all default interface implementations of methods have the same names.
-                    new KotlinDefaultImplsMethodNameEqualizer(),
-                    // Ensure all $default methods match their counterpart but with a $default suffix.
-                    new KotlinDefaultMethodNameEqualizer(),
-                    // Obfuscate the throw new UnsupportedOperationExceptions in $default methods
-                    // because they contain the original function name in the string.
-                    new KotlinFunctionToDefaultMethodVisitor(
-                    new InstructionSequenceObfuscator(
-                        new KotlinUnsupportedExceptionReplacementSequences(appView.programClassPool, appView.libraryClassPool)))
-                ),
+                    new AllFunctionVisitor(
+                        // Ensure that all default interface implementations of methods have the same names.
+                        new KotlinDefaultImplsMethodNameEqualizer(),
+                        // Ensure all $default methods match their counterpart but with a $default suffix.
+                        new KotlinDefaultMethodNameEqualizer(),
+                        // Obfuscate the throw new UnsupportedOperationExceptions in $default methods
+                        // because they contain the original function name in the string.
+                        new KotlinFunctionToDefaultMethodVisitor(
+                        new InstructionSequenceObfuscator(
+                            new KotlinUnsupportedExceptionReplacementSequences(appView.programClassPool, appView.libraryClassPool)))
+                    ),
 
-                // Obfuscate toString methods in data classes.
-                new KotlinClassKindFilter(
-                    kc -> kc.flags.isData,
-                    new KotlinDataClassObfuscator())
-            ))));
+                    // Obfuscate toString & toString-impl methods in data classes and inline/value classes.
+                    new KotlinClassKindFilter(
+                        kc -> (kc.flags.isValue || kc.flags.isData),
+                        new KotlinSyntheticToStringObfuscator()))
+                    )
+                ));
 
             appView.resourceFilePool.resourceFilesAccept(
                 new ResourceFileProcessingFlagFilter(0, ProcessingFlags.DONT_OBFUSCATE,
