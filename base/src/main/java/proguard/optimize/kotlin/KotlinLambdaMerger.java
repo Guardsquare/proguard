@@ -6,6 +6,7 @@ import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.EnclosingMethodAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
