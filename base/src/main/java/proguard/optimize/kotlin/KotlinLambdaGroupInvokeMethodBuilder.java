@@ -177,7 +177,7 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
         return classBuilder.addAndReturnMethod(AccessConstants.PUBLIC | AccessConstants.SYNTHETIC,
                                                METHOD_NAME_INVOKE,
                                                getMethodDescriptorForArity(this.arity),
-                                               50,
+                                               this.methodsToBeCalled.size() * 10,
                                                this.buildCodeBuilder());
 
     }

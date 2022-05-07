@@ -211,6 +211,16 @@ public class Configuration
      */
     public boolean                      mergeKotlinLambdaClasses;
 
+    /**
+     * Specifies whether Kotlin lambda classes have to be merged before or after the other optimisations.
+     */
+    public boolean lambdaMergingAfterOptimizing;
+
+    /**
+     * Specifies whether Kotlin lambda classes may be merged if they contain unexpected methods.
+     */
+    public boolean mergeLambdaClassesWithUnexpectedMethods;
+
     ///////////////////////////////////////////////////////////////////////////
     // Obfuscation options.
     ///////////////////////////////////////////////////////////////////////////

@@ -29,7 +29,6 @@ import proguard.classfile.util.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
-import proguard.io.ExtraDataEntryNameMap;
 import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
@@ -178,7 +177,7 @@ public class ProGuard
                 shrink(false);
             }
 
-            if (configuration.mergeKotlinLambdaClasses)
+            if (configuration.mergeKotlinLambdaClasses && !configuration.lambdaMergingAfterOptimizing)
             {
                 mergeKotlinLambdaClasses();
             }
@@ -198,6 +197,11 @@ public class ProGuard
             {
                 optimize();
                 linearizeLineNumbers();
+            }
+
+            if (configuration.mergeKotlinLambdaClasses && configuration.lambdaMergingAfterOptimizing)
+            {
+                mergeKotlinLambdaClasses();
             }
 
             if (configuration.obfuscate)

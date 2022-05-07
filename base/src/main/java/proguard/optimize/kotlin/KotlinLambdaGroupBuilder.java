@@ -5,7 +5,10 @@ import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
+import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
+import proguard.classfile.attribute.visitor.ModifiedAllInnerClassesInfoVisitor;
 import proguard.classfile.editor.ClassBuilder;
 import proguard.classfile.editor.InterfaceAdder;
 import proguard.classfile.util.ClassUtil;
@@ -40,6 +43,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private final Map<Integer, KotlinLambdaGroupInvokeMethodBuilder> invokeMethodBuilders;
     private final InterfaceAdder interfaceAdder;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
+    private final KotlinLambdaGroupInitUpdater initUpdater;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaGroupBuilder.class);
 
     /**
@@ -63,6 +67,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         this.interfaceAdder         = new InterfaceAdder(this.classBuilder.getProgramClass());
         this.extraDataEntryNameMap  = extraDataEntryNameMap;
         this.notMergedLambdaVisitor = notMergedLambdaVisitor;
+        this.initUpdater            = new KotlinLambdaGroupInitUpdater(programClassPool, libraryClassPool);
         initialiseLambdaGroup();
     }
 
@@ -74,6 +79,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                        lambdaGroupName,
                                                        KotlinLambdaMerger.NAME_KOTLIN_LAMBDA);
         ProgramClass lambdaGroup = initialBuilder.getProgramClass();
+        lambdaGroup.accept(new ProgramClassOptimizationInfoSetter());
+
         // The new builder receives the class pools, such that references can be added when necessary
         return new ClassBuilder(lambdaGroup, programClassPool, libraryClassPool);
     }
@@ -122,7 +129,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         }
         catch(Exception exception)
         {
-            logger.error("Lambda class {} could not be merged: {}", lambdaClass, exception);
+            logger.error("Lambda class {} could not be merged: {}",
+                         ClassUtil.externalClassName(lambdaClass.getName()),
+                         exception);
             if (this.notMergedLambdaVisitor != null) {
                 lambdaClass.accept(this.notMergedLambdaVisitor);
             }
@@ -131,30 +140,62 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void mergeLambdaClass(ProgramClass lambdaClass)
     {
+        KotlinLambdaMerger.ensureCanMerge(lambdaClass, configuration.mergeLambdaClassesWithUnexpectedMethods);
+
+        ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
+
         // update optimisation info of lambda to show lambda has been merged or is going to be merged
         ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
-        optimizationInfo.setLambdaGroup(this.classBuilder.getProgramClass());
+        optimizationInfo.setLambdaGroup(lambdaGroup);
+        optimizationInfo.setTargetClass(lambdaGroup);
+
+        logger.info("Looking at inner lambda's of {}", ClassUtil.externalClassName(lambdaClass.getName()));
 
         // merge any inner lambda's before merging the current lambda
         lambdaClass.attributeAccept(Attribute.INNER_CLASSES,
                                     new ModifiedAllInnerClassesInfoVisitor(
                                     new InnerClassInfoClassConstantVisitor(
                                     new ClassConstantToClassVisitor(
-                                    new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
+                                    //new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                                           new ClassNameFilter(lambdaClass.getName(),
                                                           (ClassVisitor)null,
-                                                          (ClassVisitor)this),
-                                                          null)), // don't revisit the current lambda
+                                                          (ClassVisitor)this)//,
+                                    //                      null)
+                                    ), // don't revisit the current lambda
                                     null)));
+
+        // possibly, some inner lambda classes were not mentioned in the inner classes attribute of this lambda,
+        // so we have to find them by looking for their occurrence in this lambda class
+        // Normally, this should be redundant if all inner lambda classes are correctly mentioned as inner classes.
+        lambdaClass.constantPoolEntriesAccept(new ClassConstantToClassVisitor(
+                                              new ClassNameFilter(lambdaClass.getName(),
+                                              (ClassVisitor)null,
+                                              new ImplementedClassFilter(
+                                              programClassPool.getClass(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA),
+                                              false,
+                                              new MultiClassVisitor(this,
+                                              new SimpleClassPrinter(true)),
+                                              null))));
+
+        canonicalizeLambdaClassFields(lambdaClass);
 
         // Add interfaces of lambda class to the lambda group
         // TODO: ensure that only Function interfaces are added
         lambdaClass.interfaceConstantsAccept(this.interfaceAdder);
 
-        ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
-        logger.debug("Adding lambda {} to lambda group {}", lambdaClass.getName(), lambdaGroup.getName());
+        logger.info("Adding lambda {} to lambda group {}",
+                    ClassUtil.externalClassName(lambdaClass.getName()),
+                    ClassUtil.externalClassName(lambdaGroup.getName()));
 
+        // First copy the <init> constructors to the lambda group
+        Method initMethod = copyOrMergeLambdaInitIntoLambdaGroup(lambdaClass);
+
+        String constructorDescriptor = initMethod.getDescriptor(lambdaGroup);
+
+        // Then inline the specific invoke methods into the bridge invoke methods, within the lambda class
         inlineLambdaInvokeMethods(lambdaClass);
+
+        // and copy the bridge invoke methods to the lambda group
         ProgramMethod copiedMethod = copyLambdaInvokeToLambdaGroup(lambdaClass);
         int arity = ClassUtil.internalMethodParameterCount(copiedMethod.getDescriptor(lambdaGroup));
         if (arity == 1 && lambdaClass.extendsOrImplements(KotlinLambdaMerger.NAME_KOTLIN_FUNCTIONN)
@@ -164,9 +205,30 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         }
         int lambdaClassId = getInvokeMethodBuilder(arity).addCallTo(copiedMethod);
 
+
         // replace instantiation of lambda class with instantiation of lambda group with correct id
-        updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity);
+        updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, constructorDescriptor);
         optimizationInfo.setLambdaGroupClassId(lambdaClassId);
+    }
+
+    private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)
+    {
+        FieldRenamer fieldRenamer = new FieldRenamer(true);
+        // Note: the order of the fields is not necessarily the order in which they are assigned
+        // For now, let's assume the order matches the order in which they are assigned.
+        lambdaClass.fieldsAccept(
+                new MemberVisitor() {
+                    @Override
+                    public void visitProgramField(ProgramClass programClass, ProgramField programField) {
+                        // Assumption: the only name clash of fields of different classes is
+                        // for fields with the name "INSTANCE". We don't need these fields anyway, so we don't rename them.
+                        // TODO: handle name clashes correctly
+                        if (!programField.getName(programClass).equals("INSTANCE"))
+                        {
+                            fieldRenamer.visitProgramField(programClass, programField);
+                        }
+                    }
+                });
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
@@ -204,23 +266,66 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         inlineMethodsInsideClass(lambdaClass);
     }
 
+    private ProgramMethod copyOrMergeLambdaInitIntoLambdaGroup(ProgramClass lambdaClass)
+    {
+        ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
+        logger.trace("Copying <init> method of {} to lambda group {}",
+                     ClassUtil.externalClassName(lambdaClass.getName()),
+                     ClassUtil.externalClassName(this.classBuilder.getProgramClass().getName()));
+        ProgramMethod initMethod = (ProgramMethod)lambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null); //, 0, AccessConstants.PRIVATE);
+        if (initMethod == null)
+        {
+            throw new NullPointerException("No <init> method was found in lambda class " + lambdaClass);
+        }
+        logger.trace("<init> method of lambda class {}: {}",
+                     ClassUtil.externalClassName(lambdaClass.getName()),
+                     ClassUtil.externalFullMethodDescription(lambdaClass.getName(),
+                                                             initMethod.getAccessFlags(),
+                                                             initMethod.getName(lambdaClass),
+                                                             initMethod.getDescriptor(lambdaClass)));
+
+        String oldInitDescriptor = initMethod.getDescriptor(lambdaClass);
+        String newInitDescriptor = oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
+
+        // Check whether an init method with this descriptor exists already
+        ProgramMethod existingInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+
+        if (existingInitMethod != null)
+        {
+            //logger.info("Multiple lambda classes (of which {}) with the same <init> descriptor ({}) are merged in the same lambda group ({}).", lambdaClass, oldInitDescriptor, this.classBuilder.getProgramClass());
+            //new ClassEditor(lambdaGroup).removeMethod(existingInitMethod);
+            return existingInitMethod;
+        }
+
+        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, newInitDescriptor, AccessConstants.PUBLIC));//, true));
+        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+
+        // Add the necessary instructions to entirely new <init> methods
+        newInitMethod.accept(lambdaGroup, this.initUpdater);
+        return newInitMethod;
+    }
+
     private ProgramMethod copyLambdaInvokeToLambdaGroup(ProgramClass lambdaClass)
     {
-        logger.trace("Copying invoke method of {} to lambda group {}", lambdaClass.getName(), this.classBuilder.getProgramClass().getName());
+        logger.trace("Copying invoke method of {} to lambda group {}",
+                     ClassUtil.externalClassName(lambdaClass.getName()),
+                     ClassUtil.externalClassName(this.classBuilder.getProgramClass().getName()));
 
         // Note: the lambda class is expected to contain two invoke methods:
         //      - a bridge method that implements invoke()Ljava/lang/Object; for the Function0 interface
         //      - a specific method that contains the implementation of the lambda
         // Assumption: the specific invoke method has been inlined into the bridge invoke method, such that
-        // copying the bridge method to the lambda group is sufficient to retrieve the full implementation
-        ProgramMethod invokeMethod = getInvokeMethod(lambdaClass);
+        // copying the bridge method to th  e lambda group is sufficient to retrieve the full implementation
+        ProgramMethod invokeMethod = getBridgeInvokeMethod(lambdaClass);
         if (invokeMethod == null)
         {
-            throw new NullPointerException("No invoke method was found in lambda class " + lambdaClass);
+            throw new NullPointerException("No invoke method was found in lambda class " +
+                                           ClassUtil.externalClassName(lambdaClass.getName()));
         }
         String newMethodName = createDerivedInvokeMethodName(lambdaClass);
-        invokeMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), newMethodName));
-        return (ProgramMethod)this.classBuilder.getProgramClass().findMethod(newMethodName, invokeMethod.getDescriptor(lambdaClass));
+        invokeMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), newMethodName, AccessConstants.PRIVATE));
+        ProgramMethod newInitMethod = (ProgramMethod)this.classBuilder.getProgramClass().findMethod(newMethodName, invokeMethod.getDescriptor(lambdaClass));
+        return newInitMethod;
         // TODO: ensure that fields that are referenced by the copied method exist in the lambda group, are initialised,
         //  and cast to the correct type inside the copied method
     }
@@ -237,23 +342,29 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * invoke method is returned. If no invoke method was found, then null is returned.
      * @param lambdaClass the lambda class of which a (bridge) invoke method is to be returned
      */
-    private static ProgramMethod getInvokeMethod(ProgramClass lambdaClass)
+    private static ProgramMethod getBridgeInvokeMethod(ProgramClass lambdaClass)
     {
         // Assuming that all specific invoke methods have been inlined into the bridge invoke methods
         // we can take the bridge invoke method (which overrides the invoke method of the FunctionX interface)
-        ProgramMethod nonBridgeInvokeMethod = null;
+        return getInvokeMethod(lambdaClass, true);
+    }
+
+    public static ProgramMethod getInvokeMethod(ProgramClass lambdaClass, boolean isBridgeMethod)
+    {
+        ProgramMethod invokeMethod = null;
         for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++) {
             ProgramMethod method = lambdaClass.methods[methodIndex];
             if (method.getName(lambdaClass).equals(KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE))
             {
-                if ((method.u2accessFlags & AccessConstants.BRIDGE) != 0) {
-                    // we have found the bridge invoke method
+                if ((isBridgeMethod && (method.u2accessFlags & AccessConstants.BRIDGE) != 0) ||
+                        (!isBridgeMethod && (method.u2accessFlags & AccessConstants.BRIDGE) == 0)) {
+                    // we have found the bridge/non-bridge invoke method
                     return method;
                 }
-                nonBridgeInvokeMethod = method;
+                invokeMethod = method;
             }
         }
-        return nonBridgeInvokeMethod;
+        return invokeMethod;
     }
 
     /**
@@ -261,16 +372,25 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param lambdaClass the lambda class of which the enclosing method must be updated
      * @param lambdaClassId the id that is used for the given lambda class to identify its implementation in the lambda group
      */
-    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity)
+    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity, String constructorDescriptor)
     {
-        logger.debug("Updating instantiation of {} in enclosing method to use id {}.", lambdaClass.getName(), lambdaClassId);
-        lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD,
+        logger.info("Updating instantiation of {} in enclosing method(s) to use id {}.",
+                    ClassUtil.externalClassName(lambdaClass.getName()), lambdaClassId);
+        KotlinLambdaEnclosingMethodUpdater enclosingMethodUpdater =
                                     new KotlinLambdaEnclosingMethodUpdater(this.programClassPool,
                                                                            this.libraryClassPool,
+                                                                           lambdaClass,
                                                                            this.classBuilder.getProgramClass(),
                                                                            lambdaClassId,
                                                                            arity,
-                                                                           this.extraDataEntryNameMap));
+                                                                           constructorDescriptor,
+                                                                           this.extraDataEntryNameMap);
+        lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD, enclosingMethodUpdater);
+
+        // Also update any references that would occur in other classes of the same package.
+        this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
+                                            new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
+                                            enclosingMethodUpdater)));
     }
 
     private void addInitConstructors()
@@ -293,7 +413,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         // create <init>(int id)
         // create invoke(...) method, based on invokeArity
         //
-        addInitConstructors();
+        //addInitConstructors();
         addInvokeMethods();
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         lambdaGroup.setProcessingFlags(lambdaGroup.getProcessingFlags() | ProcessingFlags.INJECTED);
