@@ -53,7 +53,7 @@ public class AfterInitConfigurationChecker implements Pass
         @Override
         public void visitProgramClass(ProgramClass programClass)
         {
-            if (programClass.u4version > maxClassFileVersion)
+            if (programClass.u4version > maxClassFileVersion && programClass.u4version != target)
             {
                 throw new RuntimeException("-target can only be used with class file versions <= " + ClassUtil.internalMajorClassVersion(maxClassFileVersion) +
                                            " (Java " + ClassUtil.externalClassVersion(maxClassFileVersion) + ")." + System.lineSeparator() +
