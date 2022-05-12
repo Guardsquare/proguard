@@ -12,6 +12,7 @@ import proguard.classfile.attribute.visitor.ModifiedAllInnerClassesInfoVisitor;
 import proguard.classfile.editor.ClassBuilder;
 import proguard.classfile.editor.InterfaceAdder;
 import proguard.classfile.editor.SubclassRemover;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
@@ -226,8 +227,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                     public void visitProgramField(ProgramClass programClass, ProgramField programField) {
                         // Assumption: the only name clash of fields of different classes is
                         // for fields with the name "INSTANCE". We don't need these fields anyway, so we don't rename them.
-                        // TODO: handle name clashes correctly
-                        if (!programField.getName(programClass).equals("INSTANCE"))
+                        // TODO: handle name clashes correctly - this happens also in the case of inner lambda's accessing their
+                        //  enclosing lambda class via
+                        if (!programField.getName(programClass).equals(KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME))
                         {
                             fieldRenamer.visitProgramField(programClass, programField);
                         }
