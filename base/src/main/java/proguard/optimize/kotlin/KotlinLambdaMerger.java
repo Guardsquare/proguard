@@ -5,12 +5,16 @@ import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.EnclosingMethodAttribute;
+import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
+import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.FieldrefConstant;
+import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.editor.LineNumberTableAttributeTrimmer;
 import proguard.classfile.instruction.visitor.InstructionCounter;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
@@ -20,11 +24,12 @@ import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.pass.Pass;
-import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.*;
 import proguard.util.PrintWriterUtil;
 import proguard.util.ProcessingFlags;
+
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KotlinLambdaMerger implements Pass {
 
@@ -191,10 +196,15 @@ public class KotlinLambdaMerger implements Pass {
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
         // and make sure that the line numbers are updated
         //ClassPool newLambdaGroupClassPool = new ClassPool();
-        lambdaGroupClassPool.classesAccept(new UsedClassFilter(simpleUsageMarker,
-                                           new MultiClassVisitor(
-                                           new ClassShrinker(simpleUsageMarker),
-                                           new LineNumberLinearizer()));
+        lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
+                                           new UsedClassFilter(simpleUsageMarker,
+                                           new ClassShrinker(simpleUsageMarker)),
+                                           new LineNumberLinearizer(),
+                                           new AllAttributeVisitor(true,
+                                           new LineNumberTableAttributeTrimmer())));//,
+//                                           new ClassPoolFiller(newLambdaGroupClassPool))));
+        //lambdaGroupClassPool.clear();
+        //newLambdaGroupClassPool.classesAccept(new ClassPoolFiller(lambdaGroupClassPool));
     }
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
