@@ -221,12 +221,16 @@ public class KotlinLambdaMerger implements Pass {
                 && optimizationInfo.mayBeMerged();
     }
 
-    public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods) throws IllegalArgumentException
+    public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods, ClassPool programClassPool) throws IllegalArgumentException
     {
         String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
         if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
         {
             throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it has more than 1 <init> constructor.");
+        }
+        else if (!lambdaClassHasNoBootstrapMethod(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains a bootstrap method that would not be merged into the lambda group.");
         }
         else if (!lambdaClassHasNoAccessibleStaticMethods(lambdaClass))
         {
@@ -236,17 +240,29 @@ public class KotlinLambdaMerger implements Pass {
         {
             throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it is directly invoked with its specific invoke method.");
         }
-        else if (!lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        else if (!nonINSTANCEFieldsAreNotReferencedFromSamePackage(lambdaClass, programClassPool))
         {
-            if (!mergeLambdaClassesWithUnexpectedMethods)
-            {
-                throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods.");
-            }
-            else if (!lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(lambdaClass))
-            {
-                throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods that contain too much code all together.");
-            }
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because one of its fields, other than the 'INSTANCE' field is referenced by one of its inner classes.");
         }
+        else if (!lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because its methods are too big to be inlined.");
+        }
+        else if (!mergeLambdaClassesWithUnexpectedMethods && !lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods.");
+        }
+    }
+
+    private static boolean lambdaClassHasNoBootstrapMethod(ProgramClass lambdaClass) {
+        final boolean[] bootstrapMethodFound = {false};
+        lambdaClass.attributeAccept(Attribute.BOOTSTRAP_METHODS, new AttributeVisitor() {
+            @Override
+            public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute) {
+                bootstrapMethodFound[0] = true;
+            }
+        });
+        return !bootstrapMethodFound[0];
     }
 
     public static boolean canMerge(ProgramClass lambdaClass)
@@ -286,9 +302,7 @@ public class KotlinLambdaMerger implements Pass {
                                           totalCodeSize[0] += codeAttribute.u4codeLength;
                                       }
                                   })));
-        // TODO: replace 7000 by constant or
-        //  Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
-        return totalCodeSize[0] <= 7000;
+        return totalCodeSize[0] <= KotlinLambdaGroupBuilder.MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH;
     }
 
     public static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
@@ -344,5 +358,37 @@ public class KotlinLambdaMerger implements Pass {
             }
         });
         return !methodReferenceFinder.methodReferenceFound();
+    }
+
+    public static boolean nonINSTANCEFieldsAreNotReferencedFromSamePackage(ProgramClass lambdaClass, ClassPool programClassPool)
+    {
+        AtomicBoolean nonINSTANCEFieldReferenced = new AtomicBoolean(false);
+        programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
+                                       new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
+                                       clazz1 -> {
+                                           if (clazz1 != lambdaClass) {
+                                               clazz1.constantPoolEntriesAccept(new ConstantVisitor() {
+                                                   @Override
+                                                   public void visitAnyConstant(Clazz clazz, Constant constant) {
+                                                   }
+
+                                                   @Override
+                                                   public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
+                                                       if (fieldrefConstant.referencedClass == lambdaClass
+                                                               && !KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME.equals(fieldrefConstant.getName(clazz)))
+                                                       {
+                                                           nonINSTANCEFieldReferenced.set(true);
+                                                           logger.warn("{} references non-INSTANCE field {} of lambda class {}.",
+                                                                       ClassUtil.externalClassName(clazz.getName()),
+                                                                       ClassUtil.externalFullFieldDescription(fieldrefConstant.referencedField.getAccessFlags(),
+                                                                                                              fieldrefConstant.getName(clazz),
+                                                                                                              fieldrefConstant.getType(clazz)),
+                                                                       ClassUtil.externalClassName(lambdaClass.getName()));
+                                                       }
+                                                   }
+                                               });
+                                           }
+                                       })));
+        return !nonINSTANCEFieldReferenced.get();
     }
 }

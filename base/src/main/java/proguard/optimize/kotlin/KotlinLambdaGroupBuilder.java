@@ -29,11 +29,12 @@ import java.util.Objects;
  */
 public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
-    public static final String FIELD_NAME_ID = "classId";
-    public static final String FIELD_TYPE_ID = "I";
-    public static final String FIELD_NAME_PREFIX_FREE_VARIABLE = "freeVar";
-    public static final String FIELD_TYPE_FREE_VARIABLE = "Ljava/lang/Object;";
-    public static final String METHOD_NAME_SUFFIX_INVOKE = "$invoke";
+    public static final String FIELD_NAME_ID                             = "classId";
+    public static final String FIELD_TYPE_ID                             = "I";
+    public static final String FIELD_NAME_PREFIX_FREE_VARIABLE           = "freeVar";
+    public static final String FIELD_TYPE_FREE_VARIABLE                  = "Ljava/lang/Object;";
+    public static final String METHOD_NAME_SUFFIX_INVOKE                 = "$invoke";
+    protected static final int MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "65535"));
 
     private final ClassBuilder classBuilder;
     private final Configuration configuration;
@@ -140,7 +141,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void mergeLambdaClass(ProgramClass lambdaClass)
     {
-        KotlinLambdaMerger.ensureCanMerge(lambdaClass, configuration.mergeLambdaClassesWithUnexpectedMethods);
+        KotlinLambdaMerger.ensureCanMerge(lambdaClass, configuration.mergeLambdaClassesWithUnexpectedMethods, programClassPool);
 
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
 
