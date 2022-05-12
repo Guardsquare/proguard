@@ -11,6 +11,7 @@ import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
 import proguard.classfile.attribute.visitor.ModifiedAllInnerClassesInfoVisitor;
 import proguard.classfile.editor.ClassBuilder;
 import proguard.classfile.editor.InterfaceAdder;
+import proguard.classfile.editor.SubclassRemover;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
@@ -208,6 +209,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, constructorDescriptor);
         optimizationInfo.setLambdaGroupClassId(lambdaClassId);
+        SubclassRemover subclassRemover = new SubclassRemover(lambdaClass);
+        lambdaClass.getSuperClass().accept(subclassRemover);
+        lambdaClass.interfaceConstantsAccept(new ClassConstantToClassVisitor(
+                                             subclassRemover));
     }
 
     private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)
