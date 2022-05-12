@@ -88,9 +88,6 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
 
         // let the lambda group visitor visit the newly created lambda group
         this.lambdaGroupVisitor.visitProgramClass(lambdaGroup);
-
-        // ensure that this newly created class is part of the resulting output
-        //extraDataEntryNameMap.addExtraClass(lambdaGroup.getName());
     }
 
     private static String getPackagePrefixOfClasses(ClassPool classPool)
