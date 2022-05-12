@@ -142,6 +142,9 @@ public class KotlinLambdaMerger implements Pass {
             logger.info("Size of original program class pool: {}", appView.programClassPool.size());
             logger.info("Size of new program class pool: {}", newProgramClassPool.size());
 
+            appView.programClassPool.classesAccept(new ClassCleaner());
+            appView.libraryClassPool.classesAccept(new ClassCleaner());
+            newProgramClassPool.classesAccept(new ClassCleaner());
             appView.programClassPool.clear();
             newProgramClassPool.classesAccept(new ClassPoolFiller(appView.programClassPool));
         }
