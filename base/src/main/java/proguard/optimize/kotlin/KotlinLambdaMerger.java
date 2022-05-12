@@ -127,10 +127,10 @@ public class KotlinLambdaMerger implements Pass {
             newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, appView.libraryClassPool));
 
             // inline the helper invoke methods into the general invoke method
-            inlineMethodsInsideLambdaGroups(newProgramClassPool, appView.libraryClassPool, lambdaGroupClassPool);
+            inlineMethodsInsideLambdaGroups(lambdaGroupClassPool);
 
             // remove the unused helper methods from the lambda groups
-            shrinkLambdaGroups(newProgramClassPool, appView.libraryClassPool, appView.resourceFilePool, lambdaGroupClassPool);
+            shrinkLambdaGroups(newProgramClassPool, appView.libraryClassPool, lambdaGroupClassPool);
 
             logger.info("Considered {} lambda classes for merging", lambdaClassPool.size());
             logger.info("of which {} lambda classes were not merged.", notMergedLambdaClassPool.size());
@@ -150,7 +150,7 @@ public class KotlinLambdaMerger implements Pass {
         }
     }
 
-    private void inlineMethodsInsideLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
+    private void inlineMethodsInsideLambdaGroups(ClassPool lambdaGroupClassPool)
     {
         InstructionCounter methodInliningCounter = new InstructionCounter();
 
@@ -167,7 +167,7 @@ public class KotlinLambdaMerger implements Pass {
         logger.debug("{} methods inlined inside lambda groups.", methodInliningCounter.getCount());
     }
 
-    private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ResourceFilePool resourceFilePool, ClassPool lambdaGroupClassPool)
+    private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
     {
         SimpleUsageMarker simpleUsageMarker = new SimpleUsageMarker();
         ClassUsageMarker classUsageMarker = new ClassUsageMarker(simpleUsageMarker);
