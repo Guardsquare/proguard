@@ -191,6 +191,16 @@ public class KotlinLambdaMerger implements Pass {
                                        new AllMemberVisitor(
                                        classUsageMarker))));
 
+        lambdaGroupClassPool.classesAccept(new AllMemberVisitor(
+                                           new MultiMemberVisitor(
+                                           new MemberNameFilter(KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE,
+                                           classUsageMarker),
+                                           new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
+                                           classUsageMarker),
+                                           new MemberNameFilter(ClassConstants.METHOD_NAME_CLINIT,
+                                           classUsageMarker))));
+
+
         // ensure that the interfaces of the lambda group are not removed
         lambdaGroupClassPool.classesAccept(new InterfaceUsageMarker(
                                            classUsageMarker));
