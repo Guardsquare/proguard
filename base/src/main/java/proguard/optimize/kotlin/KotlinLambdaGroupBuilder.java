@@ -237,11 +237,15 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.accept(new AllMemberVisitor(
                            new ProgramMemberOptimizationInfoSetter()));
 
+        // Allow methods to become
         lambdaClass.accept(new AllMethodVisitor(
                            new AllAttributeVisitor(
                            new SameClassMethodInliner(configuration.microEdition,
                                                       configuration.android,
-                                                      configuration.allowAccessModification))));
+                                                      MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH,
+                                                      configuration.allowAccessModification,
+                                                      true,
+                                                      null))));
     }
 
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
