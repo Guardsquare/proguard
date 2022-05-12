@@ -9,6 +9,7 @@ import proguard.classfile.attribute.visitor.InnerClassesInfoVisitor;
 import proguard.classfile.constant.AnyMethodrefConstant;
 import proguard.classfile.constant.ClassConstant;
 import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.Utf8Constant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
@@ -275,14 +276,64 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
             }
             // This programClass references the lambda class, so any referencing instructions
             // must be updated.
+            // TODO: consider whether this can be removed, given the fact that all constants are updated anyway
             programClass.methodsAccept(this);
+
+            // In some cases a class uses the lambda class as a type in a field or method descriptor
+            // All those constants must be updated as well.
+            programClass.constantPoolEntriesAccept(new MultiConstantVisitor(
+                                                   new DescriptorTypeUpdater(
+                                                           ClassUtil.internalTypeFromClassName(this.currentLambdaClass.getName()),
+                                                           ClassUtil.internalTypeFromClassName(this.lambdaGroup.getName())),
+                                                   new ClassConstantReferenceUpdater(this.currentLambdaClass, this.lambdaGroup)));
 
             // remove any old links between lambda's and their inner classes
             programClass.accept(KotlinLambdaEnclosingMethodUpdater.retargetedInnerClassAttributeRemover);
 
             // Remove any constants referring to the old lambda class.
             programClass.accept(new ConstantPoolShrinker());
-            this.extraDataEntryNameMap.addExtraClassToClass(programClass, currentLambdaClass);
+            this.extraDataEntryNameMap.addExtraClassToClass(programClass, this.lambdaGroup);
+        }
+    }
+}
+
+class DescriptorTypeUpdater implements ConstantVisitor
+{
+    private final String originalType;
+    private final String replacingType;
+    public DescriptorTypeUpdater(String originalType, String replacingType)
+    {
+        this.originalType  = originalType;
+        this.replacingType = replacingType;
+    }
+
+    @Override
+    public void visitAnyConstant(Clazz clazz, Constant constant) {}
+
+    @Override
+    public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant) {
+        utf8Constant.setString(utf8Constant.getString().replace(originalType, replacingType));
+    }
+}
+
+class ClassConstantReferenceUpdater implements ConstantVisitor
+{
+    private final Clazz originalClass;
+    private final Clazz replacingClass;
+    public ClassConstantReferenceUpdater(Clazz originalClass, Clazz replacingClass)
+    {
+        this.originalClass  = originalClass;
+        this.replacingClass = replacingClass;
+    }
+
+    @Override
+    public void visitAnyConstant(Clazz clazz, Constant constant) {}
+
+    @Override
+    public void visitClassConstant(Clazz clazz, ClassConstant classConstant) {
+        if (classConstant.referencedClass == originalClass)
+        {
+            classConstant.referencedClass = replacingClass;
         }
     }
 }
