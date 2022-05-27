@@ -18,6 +18,7 @@ import proguard.classfile.VersionConstants.CLASS_VERSION_17
 import proguard.classfile.VersionConstants.CLASS_VERSION_18
 import proguard.classfile.VersionConstants.CLASS_VERSION_1_6
 import testutils.asConfiguration
+import testutils.getLogOutputOf
 import java.util.UUID
 
 /**
@@ -83,6 +84,19 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             }
 
             shouldNotThrow<RuntimeException> { AfterInitConfigurationChecker(configuration).execute(view) }
+        }
+
+        "It should print a warning" {
+            val view = AppView()
+            with(view.programClassPool) {
+                addClass(FakeClass(CLASS_VERSION_17))
+                addClass(FakeClass(CLASS_VERSION_17))
+            }
+
+            val output = getLogOutputOf {
+                AfterInitConfigurationChecker(configuration).execute(view)
+            }
+            output shouldContain "-target is deprecated when using class file above"
         }
 
         "It should throw an exception if -target is set and the version of one of the classes version is different from the target version" {
