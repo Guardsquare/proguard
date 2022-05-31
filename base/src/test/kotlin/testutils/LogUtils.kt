@@ -3,8 +3,7 @@ package testutils
 import org.apache.logging.log4j.core.LoggerContext
 import org.apache.logging.log4j.core.appender.OutputStreamAppender
 import java.io.ByteArrayOutputStream
-import java.util.*
-
+import java.util.UUID
 
 fun getLogOutputOf(closure: () -> Unit): String {
     val loggerOutput = ByteArrayOutputStream()
