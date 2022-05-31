@@ -21,6 +21,10 @@
 package proguard.util.kotlin.asserter.constraint;
 
 import proguard.classfile.Clazz;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeCounter;
+import proguard.classfile.attribute.visitor.AttributeNameFilter;
 import proguard.classfile.kotlin.*;
 import proguard.classfile.kotlin.visitor.*;
 import proguard.util.kotlin.asserter.AssertUtil;
@@ -86,22 +90,33 @@ extends      AbstractKotlinMetadataConstraint
         }
 
         // If the function is non-abstract and in an interface,
-        // then there must be a default implementation in the $DefaultImpls class.
+        // then there must be a default implementation in the $DefaultImpls class,
+        // unless using Java 8+ ability to have default methods in interfaces.
         if (!kotlinFunctionMetadata.flags.modality.isAbstract &&
             kotlinMetadata.k == KotlinConstants.METADATA_KIND_CLASS)
         {
             KotlinClassKindMetadata kotlinClassKindMetadata = (KotlinClassKindMetadata)kotlinMetadata;
             if (kotlinClassKindMetadata.flags.isInterface)
             {
-                util.reportIfNullReference("default implementation method",
-                                           kotlinFunctionMetadata.referencedDefaultImplementationMethod);
-                util.reportIfMethodDangling("default implementation method",
-                                            kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
-                                            kotlinFunctionMetadata.referencedDefaultImplementationMethod);
-                util.reportIfNullReference("default implementation method class",
-                                           kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
-                util.reportIfClassDangling("default implementation method class",
-                                           kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
+                AttributeCounter attributeCounter = new AttributeCounter();
+                kotlinFunctionMetadata.referencedMethodAccept(kotlinFunctionMetadata.referencedMethodClass,
+                    new AllAttributeVisitor(
+                        new AttributeNameFilter(Attribute.CODE, attributeCounter)
+                    )
+                );
+
+                if (attributeCounter.getCount() != 1)
+                {
+                    util.reportIfNullReference("default implementation method",
+                                               kotlinFunctionMetadata.referencedDefaultImplementationMethod);
+                    util.reportIfMethodDangling("default implementation method",
+                                                kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
+                                                kotlinFunctionMetadata.referencedDefaultImplementationMethod);
+                    util.reportIfNullReference("default implementation method class",
+                                               kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
+                    util.reportIfClassDangling("default implementation method class",
+                                               kotlinFunctionMetadata.referencedDefaultImplementationMethodClass);
+                }
             }
         }
     }
