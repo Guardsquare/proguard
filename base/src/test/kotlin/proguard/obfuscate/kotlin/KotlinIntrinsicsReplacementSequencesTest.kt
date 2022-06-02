@@ -16,14 +16,17 @@ import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.constant.StringConstant
 import proguard.classfile.constant.visitor.ConstantVisitor
 import proguard.classfile.editor.InstructionSequenceBuilder
-import proguard.classfile.editor.InstructionSequenceReplacer.X
 import proguard.classfile.instruction.Instruction
 import proguard.classfile.instruction.visitor.AllInstructionVisitor
 import proguard.classfile.instruction.visitor.InstructionVisitor
 import proguard.classfile.kotlin.KotlinConstants.KOTLIN_INTRINSICS_CLASS
 import proguard.classfile.util.InstructionSequenceMatcher
+import proguard.classfile.util.InstructionSequenceMatcher.*
+import proguard.classfile.visitor.AllMemberVisitor
 import proguard.classfile.visitor.MultiClassVisitor
 import proguard.obfuscate.util.InstructionSequenceObfuscator
+import proguard.util.ProcessingFlagSetter
+import proguard.util.ProcessingFlags
 import testutils.ClassPoolBuilder
 import testutils.KotlinSource
 
@@ -34,19 +37,16 @@ class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
             KotlinSource(
                 "Test.kt",
                 """
-                lateinit var lateVar : String
-                """
+                    lateinit var lateVar : String
+                    """
             )
         )
 
         val builder = InstructionSequenceBuilder(programClassPool, libraryClassPool)
         val intrinsicsSequence = builder.ldc_(X)
-            .invokestatic(
-                KOTLIN_INTRINSICS_CLASS,
+            .invokestatic(KOTLIN_INTRINSICS_CLASS,
                 "throwUninitializedPropertyAccessException",
-                "(Ljava/lang/String;)V"
-            )
-            .instructions()
+                "(Ljava/lang/String;)V").instructions()
         val constants = builder.constants()
         val intrinsicsSequenceMatcher = InstructionSequenceMatcher(constants, intrinsicsSequence)
 
@@ -61,45 +61,92 @@ class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
                             override fun visitAnyInstruction(clazz: Clazz, method: Method, codeAttribute: CodeAttribute, offset: Int, instruction: Instruction) {
                                 instruction.accept(clazz, method, codeAttribute, offset, intrinsicsSequenceMatcher)
                                 if (intrinsicsSequenceMatcher.isMatching) hasMatched = true
-                            }
-                        }
-                    )
-                )
-            )
+                            } })))
             hasMatched shouldBe true
         }
+    }
 
-        "Then InstructionSequenceObfuscator should replace the 'lateVar' with an empty string" {
+    "Given a class with a lateinit variable without the DONT_OBFUSCATE flag" - {
+        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
+            KotlinSource(
+                "Test.kt",
+                """
+                    lateinit var lateVar : String
+                    """
+            )
+        )
+
+        val builder = InstructionSequenceBuilder(programClassPool, libraryClassPool)
+        val intrinsicsSequence = builder.ldc_(X)
+            .invokestatic(KOTLIN_INTRINSICS_CLASS,
+                "throwUninitializedPropertyAccessException",
+                "(Ljava/lang/String;)V").instructions()
+        val constants = builder.constants()
+        val intrinsicsSequenceMatcher = InstructionSequenceMatcher(constants, intrinsicsSequence)
+
+        "Then InstructionSequenceObfuscator replaces the 'lateVar' with an empty string" {
 
             lateinit var matchedConstant: String
             programClassPool.classesAccept(
                 MultiClassVisitor(
                     InstructionSequenceObfuscator(KotlinIntrinsicsReplacementSequences(programClassPool, libraryClassPool)),
-                    AllAttributeVisitor(
-                        true,
+                    AllAttributeVisitor(true,
                         AllInstructionVisitor(
                             object : InstructionVisitor {
                                 override fun visitAnyInstruction(clazz: Clazz, method: Method, codeAttribute: CodeAttribute, offset: Int, instruction: Instruction) {
                                     instruction.accept(clazz, method, codeAttribute, offset, intrinsicsSequenceMatcher)
                                     if (intrinsicsSequenceMatcher.isMatching) {
                                         var constantIndex = intrinsicsSequenceMatcher.matchedConstantIndex(X)
-                                        clazz.constantPoolEntryAccept(
-                                            constantIndex,
+                                        clazz.constantPoolEntryAccept(constantIndex,
                                             object : ConstantVisitor {
                                                 override fun visitStringConstant(clazz: Clazz, stringConstant: StringConstant) {
                                                     matchedConstant = stringConstant.getString(clazz)
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        )
-                    )
-                )
-            )
+                                                } }) } } }))))
 
             matchedConstant shouldBe ""
+        }
+    }
+
+    "Given a class with a lateinit variable and the DONT_OBFUSCATE flag" - {
+        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
+            KotlinSource(
+                "Test.kt",
+                """
+                    lateinit var lateVar : String
+                    """
+            )
+        )
+
+        val builder = InstructionSequenceBuilder(programClassPool, libraryClassPool)
+        val intrinsicsSequence = builder.ldc_(X)
+            .invokestatic(KOTLIN_INTRINSICS_CLASS,
+                "throwUninitializedPropertyAccessException",
+                "(Ljava/lang/String;)V").instructions()
+        val constants = builder.constants()
+        val intrinsicsSequenceMatcher = InstructionSequenceMatcher(constants, intrinsicsSequence)
+
+        programClassPool.classesAccept(AllMemberVisitor(AllAttributeVisitor(ProcessingFlagSetter(ProcessingFlags.DONT_OBFUSCATE))))
+
+        "Then InstructionSequenceObfuscator doesn't replace the 'lateVar' if DONT_OBFUSCATE is set" {
+
+            lateinit var matchedConstant: String
+            programClassPool.classesAccept(
+                MultiClassVisitor(
+                    InstructionSequenceObfuscator(KotlinIntrinsicsReplacementSequences(programClassPool, libraryClassPool)),
+                    AllAttributeVisitor(true,
+                        AllInstructionVisitor(
+                            object : InstructionVisitor {
+                                override fun visitAnyInstruction(clazz: Clazz, method: Method, codeAttribute: CodeAttribute, offset: Int, instruction: Instruction) {
+                                    instruction.accept(clazz, method, codeAttribute, offset, intrinsicsSequenceMatcher)
+                                    if (intrinsicsSequenceMatcher.isMatching) {
+                                        var constantIndex = intrinsicsSequenceMatcher.matchedConstantIndex(X)
+                                        clazz.constantPoolEntryAccept(constantIndex,
+                                            object : ConstantVisitor {
+                                                override fun visitStringConstant(clazz: Clazz, stringConstant: StringConstant) {
+                                                    matchedConstant = stringConstant.getString(clazz)
+                                                } }) } } }))))
+
+            matchedConstant shouldBe "lateVar"
         }
     }
 })
