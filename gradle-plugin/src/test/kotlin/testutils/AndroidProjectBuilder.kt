@@ -192,7 +192,7 @@ private fun defaultBuildDotGradle(type: ProjectType) = """
 private val defaultBaseFeatureBuildDotGradle = """
     plugins {
         id 'com.android.application'
-        id 'com.guardsquare.proguard
+        id 'com.guardsquare.proguard'
     }
     android {
         compileSdkVersion 29
