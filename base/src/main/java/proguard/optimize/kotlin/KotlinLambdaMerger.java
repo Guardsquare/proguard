@@ -292,11 +292,6 @@ public class KotlinLambdaMerger implements Pass {
         return !bootstrapMethodFound[0];
     }
 
-    public static boolean canMerge(ProgramClass lambdaClass)
-    {
-        return lambdaClassHasExactlyOneInitConstructor(lambdaClass) && lambdaClassHasNoUnexpectedMethods(lambdaClass);
-    }
-
     public static boolean lambdaClassHasNoAccessibleStaticMethods(ProgramClass lambdaClass)
     {
         for (int index = 0; index < lambdaClass.u2methodsCount; index++)
