@@ -5,10 +5,12 @@ import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
-import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.BootstrapMethodsAttribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.EnclosingMethodAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.constant.FieldrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
@@ -34,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KotlinLambdaMerger implements Pass {
 
     public static final String NAME_KOTLIN_LAMBDA     = "kotlin/jvm/internal/Lambda";
+    public static final String NAME_KOTLIN_FUNCTION  = "kotlin/jvm/functions/Function";
     public static final String NAME_KOTLIN_FUNCTION0  = "kotlin/jvm/functions/Function0";
     public static final String NAME_KOTLIN_FUNCTIONN  = "kotlin/jvm/functions/FunctionN";
 
@@ -227,6 +230,19 @@ public class KotlinLambdaMerger implements Pass {
             kotlinLambdaClass = libraryClassPool.getClass(NAME_KOTLIN_LAMBDA);
         }
         return kotlinLambdaClass;
+    }
+
+    public static String getArityFromInterface(ProgramClass programClass)
+    {
+        for (int interfaceIndex = 0; interfaceIndex < programClass.u2interfacesCount; interfaceIndex++)
+        {
+            String interfaceName = programClass.getInterfaceName(interfaceIndex);
+            if (interfaceName.startsWith(NAME_KOTLIN_FUNCTION) && interfaceName.length() > NAME_KOTLIN_FUNCTION.length())
+            {
+                return String.valueOf(interfaceName.charAt(interfaceName.length()-1));
+            }
+        }
+        throw new IllegalArgumentException("Class " + ClassUtil.externalClassName(programClass.getName()) + " does not implement a Kotlin function interface.");
     }
 
     /**
