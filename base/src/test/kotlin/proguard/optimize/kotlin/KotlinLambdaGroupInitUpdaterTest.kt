@@ -44,13 +44,13 @@ class KotlinLambdaGroupInitUpdaterTest : FreeSpec({
             val newInitMethodDescriptor = initMethod.getDescriptor(lambdaGroup)
             val argumentCountAfter      = ClassUtil.internalMethodParameterCount(newInitMethodDescriptor, false)
             val argumentSizeAfter       = ClassUtil.internalMethodParameterSize(newInitMethodDescriptor, false)
-            "Then the init method contains two additional arguments" - {
+            "Then the init method contains two additional arguments" {
                 argumentCountAfter shouldBe argumentCountBefore + 2
             }
-            "Then the two additional arguments are each of size 1 byte" - {
+            "Then the two additional arguments are each of size 1 byte" {
                 argumentSizeAfter shouldBe argumentSizeBefore + 2
             }
-            "Then the two additional arguments are of type int" - {
+            "Then the two additional arguments are of type int" {
                 ClassUtil.internalMethodParameterType(newInitMethodDescriptor, argumentCountAfter - 3) shouldBe "I"
                 ClassUtil.internalMethodParameterType(newInitMethodDescriptor, argumentCountAfter - 2) shouldBe "I"
             }
@@ -76,7 +76,7 @@ class KotlinLambdaGroupInitUpdaterTest : FreeSpec({
                 }
             }
 
-            "Then the code of the <init> method calls the super constructor with the arity argument" - {
+            "Then the code of the <init> method calls the super constructor with the arity argument" {
                 val classIdBuilder = InstructionSequenceBuilder(ClassPool(lambdaGroup), ClassPool())
                 classIdBuilder
                     .aload_0()
@@ -91,7 +91,7 @@ class KotlinLambdaGroupInitUpdaterTest : FreeSpec({
                 classIdMatchDetector.matchIsFound shouldBe true
                 classIdMatchDetector.matchedArguments[0] shouldBe argumentSizeAfter - 2
             }
-            "Then the code of the <init> method stores the classId argument in the classId field" - {
+            "Then the code of the <init> method stores the classId argument in the classId field" {
                 val callBuilder = InstructionSequenceBuilder(ClassPool(lambdaGroup), ClassPool())
                 callBuilder
                     .aload_0()
