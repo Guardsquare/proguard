@@ -40,6 +40,7 @@ public class KotlinLambdaMerger implements Pass {
     public static final String NAME_KOTLIN_FUNCTION0  = "kotlin/jvm/functions/Function0";
     public static final String NAME_KOTLIN_FUNCTIONN  = "kotlin/jvm/functions/FunctionN";
 
+    public static boolean lambdaMergingDone = false;
     private static final Logger logger = LogManager.getLogger(KotlinLambdaMerger.class);
     private final Configuration configuration;
 
@@ -51,6 +52,10 @@ public class KotlinLambdaMerger implements Pass {
     @Override
     public void execute(AppView appView) throws Exception
     {
+        if (lambdaMergingDone)
+        {
+            return;
+        }
         // Remove old processing info
         appView.programClassPool.classesAccept(new ClassCleaner());
         appView.libraryClassPool.classesAccept(new ClassCleaner());
@@ -149,6 +154,7 @@ public class KotlinLambdaMerger implements Pass {
             appView.programClassPool.clear();
             newProgramClassPool.classesAccept(new ClassPoolFiller(appView.programClassPool));
         }
+        lambdaMergingDone = true;
     }
 
     private void inlineMethodsInsideLambdaGroups(ClassPool lambdaGroupClassPool)

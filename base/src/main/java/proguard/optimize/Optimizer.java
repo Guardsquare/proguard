@@ -38,6 +38,7 @@ import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.evaluation.*;
 import proguard.optimize.evaluation.InstructionUsageMarker;
 import proguard.optimize.info.*;
+import proguard.optimize.kotlin.KotlinLambdaMerger;
 import proguard.optimize.peephole.*;
 import proguard.pass.Pass;
 import proguard.util.*;
@@ -195,11 +196,18 @@ public class Optimizer implements Pass
 
 
     @Override
-    public void execute(AppView appView) throws IOException
+    public void execute(AppView appView) throws Exception
     {
         if (!moreOptimizationsPossible)
         {
-            return;
+            if (KotlinLambdaMerger.lambdaMergingDone)
+            {
+                return;
+            }
+            else
+            {
+                new KotlinLambdaMerger(configuration).execute(appView);
+            }
         }
 
         // Create a matcher for filtering optimizations.
