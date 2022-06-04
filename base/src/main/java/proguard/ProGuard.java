@@ -470,6 +470,10 @@ public class ProGuard
             {
                 shrink(true);
             }
+            if (optimizationPass == configuration.optimizationPasses - 2)
+            {
+                mergeKotlinLambdaClasses();
+            }
         }
     }
 
