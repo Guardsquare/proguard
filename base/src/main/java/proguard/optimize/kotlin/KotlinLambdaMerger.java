@@ -73,9 +73,7 @@ public class KotlinLambdaMerger implements Pass {
             appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
             appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_OPTIMIZE,
                                                    new ImplementedClassFilter(kotlinLambdaClass, false,
-                                                   //new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
                                                    new ClassPoolFiller(lambdaClassPool),
-                                                   //newProgramClassPoolFiller),
                                                    newProgramClassPoolFiller))
             );
 
@@ -177,12 +175,6 @@ public class KotlinLambdaMerger implements Pass {
 
         // make sure that the used methods of the lambda groups are marked as used
         // by marking all classes and methods
-        // note: if -dontshrink is
-        /*new UsageMarker(configuration).mark(programClassPool,
-                                            libraryClassPool,
-                                            resourceFilePool,
-                                            simpleUsageMarker,
-                                            classUsageMarker);*/
         libraryClassPool.classesAccept(classUsageMarker);
         // but don't mark the lambda groups and their members in case they are not used,
         // e.g. inlined helper invoke methods
@@ -211,16 +203,12 @@ public class KotlinLambdaMerger implements Pass {
         // mark the lambda groups themselves as used
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
         // and make sure that the line numbers are updated
-        //ClassPool newLambdaGroupClassPool = new ClassPool();
         lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
                                            new UsedClassFilter(simpleUsageMarker,
                                            new ClassShrinker(simpleUsageMarker)),
                                            new LineNumberLinearizer(),
                                            new AllAttributeVisitor(true,
-                                           new LineNumberTableAttributeTrimmer())));//,
-//                                           new ClassPoolFiller(newLambdaGroupClassPool))));
-        //lambdaGroupClassPool.clear();
-        //newLambdaGroupClassPool.classesAccept(new ClassPoolFiller(lambdaGroupClassPool));
+                                           new LineNumberTableAttributeTrimmer())));
     }
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
@@ -302,11 +290,6 @@ public class KotlinLambdaMerger implements Pass {
             }
         });
         return !bootstrapMethodFound[0];
-    }
-
-    public static boolean canMerge(ProgramClass lambdaClass)
-    {
-        return lambdaClassHasExactlyOneInitConstructor(lambdaClass) && lambdaClassHasNoUnexpectedMethods(lambdaClass);
     }
 
     public static boolean lambdaClassHasNoAccessibleStaticMethods(ProgramClass lambdaClass)
