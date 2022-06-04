@@ -24,6 +24,7 @@ package proguard.optimize.kotlin
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.shouldNotBe
 import io.mockk.*
 import proguard.AppView
 import proguard.Configuration
@@ -143,6 +144,11 @@ class KotlinLambdaMergerTest : FreeSpec({
                 newProgramClassPool.classes().forEach {
                     it.constantPoolEntriesAccept(visitor)
                 }
+            }
+
+            "Then for each package with lambda's a lambda group has been created." {
+                newProgramClassPool.getClass("app/package1/LambdaGroup") shouldNotBe null
+                newProgramClassPool.getClass("app/package2/LambdaGroup") shouldNotBe null
             }
         }
     }
