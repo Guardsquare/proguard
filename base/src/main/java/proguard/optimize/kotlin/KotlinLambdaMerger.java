@@ -251,7 +251,11 @@ public class KotlinLambdaMerger implements Pass {
     public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods, ClassPool programClassPool) throws IllegalArgumentException
     {
         String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
-        if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
+        if (!lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA))
+        {
+            throw new IllegalArgumentException("Class " + externalClassName + " cannot be merged in a Kotlin lambda group, because it is not a subclass of " + ClassUtil.externalClassName(NAME_KOTLIN_LAMBDA) + ".");
+        }
+        else if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
         {
             throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it has more than 1 <init> constructor.");
         }
