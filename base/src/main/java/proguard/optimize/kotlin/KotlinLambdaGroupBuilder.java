@@ -295,7 +295,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                              initMethod.getDescriptor(lambdaClass)));
 
         String oldInitDescriptor = initMethod.getDescriptor(lambdaClass);
-        String newInitDescriptor = oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
+        String newInitDescriptor = KotlinLambdaGroupInitUpdater.getNewInitMethodDescriptor(lambdaClass, initMethod);
 
         // Check whether an init method with this descriptor exists already
         ProgramMethod existingInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
@@ -307,9 +307,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
             return existingInitMethod;
         }
 
-        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, newInitDescriptor, AccessConstants.PUBLIC));//, true));
-        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, oldInitDescriptor, AccessConstants.PUBLIC));//, true));
+        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, oldInitDescriptor);
 
+        // Update the <init> descriptor
         // Add the necessary instructions to entirely new <init> methods
         newInitMethod.accept(lambdaGroup, this.initUpdater);
         return newInitMethod;
