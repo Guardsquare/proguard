@@ -20,6 +20,11 @@
  */
 package proguard.gui;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.OutputStreamAppender;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import proguard.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.gui.splash.*;
@@ -536,6 +541,9 @@ public class ProGuardGUI extends JFrame
         consoleTextArea.setEditable(false);
         consoleTextArea.setLineWrap(false);
         consoleTextArea.setWrapStyleWord(false);
+
+        createLogAppender(consoleTextArea);
+
         JScrollPane consoleScrollPane = new JScrollPane(consoleTextArea);
         consoleScrollPane.setBorder(new EmptyBorder(1, 1, 1, 1));
         addBorder(consoleScrollPane, "processingConsole");
@@ -669,6 +677,35 @@ public class ProGuardGUI extends JFrame
 
         // Initialize the GUI settings to reasonable defaults.
         loadConfiguration(this.getClass().getResource(DEFAULT_CONFIGURATION));
+    }
+
+
+    private void createLogAppender(JTextArea consoleTextArea)
+    {
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+        OutputStreamAppender writerAppender = OutputStreamAppender
+                .newBuilder()
+                .setName("writeLogger")
+                .setTarget(new PrintStream(new TextAreaOutputStream(consoleTextArea), true))
+                .setLayout(PatternLayout.newBuilder().withPattern("%msg%n").build())
+                        .build();
+
+        writerAppender.start();
+        config.getRootLogger().removeAppender("Console");
+        config.addAppender(writerAppender);
+        LoggerConfig loggerConfig = config.getLoggerConfig("TextAreaLogger") ;
+        loggerConfig.addAppender(writerAppender, null, null);
+
+        addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                LoggerContext.getContext(false).stop();
+                e.getWindow().dispose();
+            }
+        });
     }
 
 
