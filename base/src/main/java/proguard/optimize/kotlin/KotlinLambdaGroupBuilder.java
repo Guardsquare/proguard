@@ -11,6 +11,8 @@ import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
 import proguard.classfile.attribute.visitor.ModifiedAllInnerClassesInfoVisitor;
 import proguard.classfile.editor.ClassBuilder;
 import proguard.classfile.editor.InterfaceAdder;
+import proguard.classfile.editor.SubclassRemover;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
@@ -29,11 +31,12 @@ import java.util.Objects;
  */
 public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
-    public static final String FIELD_NAME_ID = "classId";
-    public static final String FIELD_TYPE_ID = "I";
-    public static final String FIELD_NAME_PREFIX_FREE_VARIABLE = "freeVar";
-    public static final String FIELD_TYPE_FREE_VARIABLE = "Ljava/lang/Object;";
-    public static final String METHOD_NAME_SUFFIX_INVOKE = "$invoke";
+    public static final String FIELD_NAME_ID                             = "classId";
+    public static final String FIELD_TYPE_ID                             = "I";
+    public static final String FIELD_NAME_PREFIX_FREE_VARIABLE           = "freeVar";
+    public static final String FIELD_TYPE_FREE_VARIABLE                  = "Ljava/lang/Object;";
+    public static final String METHOD_NAME_SUFFIX_INVOKE                 = "$invoke";
+    protected static final int MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "65535"));
 
     private final ClassBuilder classBuilder;
     private final Configuration configuration;
@@ -140,7 +143,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void mergeLambdaClass(ProgramClass lambdaClass)
     {
-        KotlinLambdaMerger.ensureCanMerge(lambdaClass, configuration.mergeLambdaClassesWithUnexpectedMethods);
+        KotlinLambdaMerger.ensureCanMerge(lambdaClass, configuration.mergeLambdaClassesWithUnexpectedMethods, programClassPool);
 
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
 
@@ -156,11 +159,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     new ModifiedAllInnerClassesInfoVisitor(
                                     new InnerClassInfoClassConstantVisitor(
                                     new ClassConstantToClassVisitor(
-                                    //new ClassMethodFilter(ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
-                                                          new ClassNameFilter(lambdaClass.getName(),
-                                                          (ClassVisitor)null,
-                                                          (ClassVisitor)this)//,
-                                    //                      null)
+                                    new ClassNameFilter(lambdaClass.getName(),
+                                    (ClassVisitor)null,
+                                    (ClassVisitor)this)
                                     ), // don't revisit the current lambda
                                     null)));
 
@@ -209,6 +210,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         // replace instantiation of lambda class with instantiation of lambda group with correct id
         updateLambdaInstantiationSite(lambdaClass, lambdaClassId, arity, constructorDescriptor);
         optimizationInfo.setLambdaGroupClassId(lambdaClassId);
+        SubclassRemover subclassRemover = new SubclassRemover(lambdaClass);
+        lambdaClass.getSuperClass().accept(subclassRemover);
+        lambdaClass.interfaceConstantsAccept(new ClassConstantToClassVisitor(
+                                             subclassRemover));
     }
 
     private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)
@@ -222,8 +227,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                     public void visitProgramField(ProgramClass programClass, ProgramField programField) {
                         // Assumption: the only name clash of fields of different classes is
                         // for fields with the name "INSTANCE". We don't need these fields anyway, so we don't rename them.
-                        // TODO: handle name clashes correctly
-                        if (!programField.getName(programClass).equals("INSTANCE"))
+                        // TODO: handle name clashes correctly - this happens also in the case of inner lambda's accessing their
+                        //  enclosing lambda class via
+                        if (!programField.getName(programClass).equals(KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME))
                         {
                             fieldRenamer.visitProgramField(programClass, programField);
                         }
@@ -238,11 +244,15 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.accept(new AllMemberVisitor(
                            new ProgramMemberOptimizationInfoSetter()));
 
+        // Allow methods to become
         lambdaClass.accept(new AllMethodVisitor(
                            new AllAttributeVisitor(
                            new SameClassMethodInliner(configuration.microEdition,
                                                       configuration.android,
-                                                      configuration.allowAccessModification))));
+                                                      MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH,
+                                                      configuration.allowAccessModification,
+                                                      true,
+                                                      null))));
     }
 
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
@@ -285,7 +295,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                                              initMethod.getDescriptor(lambdaClass)));
 
         String oldInitDescriptor = initMethod.getDescriptor(lambdaClass);
-        String newInitDescriptor = oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
+        String newInitDescriptor = KotlinLambdaGroupInitUpdater.getNewInitMethodDescriptor(lambdaClass, initMethod);
 
         // Check whether an init method with this descriptor exists already
         ProgramMethod existingInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
@@ -297,9 +307,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
             return existingInitMethod;
         }
 
-        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, newInitDescriptor, AccessConstants.PUBLIC));//, true));
-        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, oldInitDescriptor, AccessConstants.PUBLIC));//, true));
+        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, oldInitDescriptor);
 
+        // Update the <init> descriptor
         // Add the necessary instructions to entirely new <init> methods
         newInitMethod.accept(lambdaGroup, this.initUpdater);
         return newInitMethod;

@@ -6,11 +6,17 @@ import proguard.AppView;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.BootstrapMethodsAttribute;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.EnclosingMethodAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.FieldrefConstant;
+import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.editor.LineNumberTableAttributeTrimmer;
 import proguard.classfile.instruction.visitor.InstructionCounter;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
@@ -20,38 +26,18 @@ import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.pass.Pass;
-import proguard.resources.file.ResourceFilePool;
 import proguard.shrink.*;
 import proguard.util.PrintWriterUtil;
 import proguard.util.ProcessingFlags;
+
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KotlinLambdaMerger implements Pass {
 
     public static final String NAME_KOTLIN_LAMBDA     = "kotlin/jvm/internal/Lambda";
+    public static final String NAME_KOTLIN_FUNCTION  = "kotlin/jvm/functions/Function";
     public static final String NAME_KOTLIN_FUNCTION0  = "kotlin/jvm/functions/Function0";
-    public static final String NAME_KOTLIN_FUNCTION1  = "kotlin/jvm/functions/Function1";
-    public static final String NAME_KOTLIN_FUNCTION2  = "kotlin/jvm/functions/Function2";
-    public static final String NAME_KOTLIN_FUNCTION3  = "kotlin/jvm/functions/Function3";
-    public static final String NAME_KOTLIN_FUNCTION4  = "kotlin/jvm/functions/Function4";
-    public static final String NAME_KOTLIN_FUNCTION5  = "kotlin/jvm/functions/Function5";
-    public static final String NAME_KOTLIN_FUNCTION6  = "kotlin/jvm/functions/Function6";
-    public static final String NAME_KOTLIN_FUNCTION7  = "kotlin/jvm/functions/Function7";
-    public static final String NAME_KOTLIN_FUNCTION8  = "kotlin/jvm/functions/Function8";
-    public static final String NAME_KOTLIN_FUNCTION9  = "kotlin/jvm/functions/Function9";
-    public static final String NAME_KOTLIN_FUNCTION10 = "kotlin/jvm/functions/Function10";
-    public static final String NAME_KOTLIN_FUNCTION11 = "kotlin/jvm/functions/Function11";
-    public static final String NAME_KOTLIN_FUNCTION12 = "kotlin/jvm/functions/Function12";
-    public static final String NAME_KOTLIN_FUNCTION13 = "kotlin/jvm/functions/Function13";
-    public static final String NAME_KOTLIN_FUNCTION14 = "kotlin/jvm/functions/Function14";
-    public static final String NAME_KOTLIN_FUNCTION15 = "kotlin/jvm/functions/Function15";
-    public static final String NAME_KOTLIN_FUNCTION16 = "kotlin/jvm/functions/Function16";
-    public static final String NAME_KOTLIN_FUNCTION17 = "kotlin/jvm/functions/Function17";
-    public static final String NAME_KOTLIN_FUNCTION18 = "kotlin/jvm/functions/Function18";
-    public static final String NAME_KOTLIN_FUNCTION19 = "kotlin/jvm/functions/Function19";
-    public static final String NAME_KOTLIN_FUNCTION20 = "kotlin/jvm/functions/Function20";
-    public static final String NAME_KOTLIN_FUNCTION21 = "kotlin/jvm/functions/Function21";
-    public static final String NAME_KOTLIN_FUNCTION22 = "kotlin/jvm/functions/Function22";
     public static final String NAME_KOTLIN_FUNCTIONN  = "kotlin/jvm/functions/FunctionN";
 
     private static final Logger logger = LogManager.getLogger(KotlinLambdaMerger.class);
@@ -144,10 +130,10 @@ public class KotlinLambdaMerger implements Pass {
             newProgramClassPool.classesAccept(new ClassInitializer(newProgramClassPool, appView.libraryClassPool));
 
             // inline the helper invoke methods into the general invoke method
-            inlineMethodsInsideLambdaGroups(newProgramClassPool, appView.libraryClassPool, lambdaGroupClassPool);
+            inlineMethodsInsideLambdaGroups(lambdaGroupClassPool);
 
             // remove the unused helper methods from the lambda groups
-            shrinkLambdaGroups(newProgramClassPool, appView.libraryClassPool, appView.resourceFilePool, lambdaGroupClassPool);
+            shrinkLambdaGroups(newProgramClassPool, appView.libraryClassPool, lambdaGroupClassPool);
 
             logger.info("Considered {} lambda classes for merging", lambdaClassPool.size());
             logger.info("of which {} lambda classes were not merged.", notMergedLambdaClassPool.size());
@@ -159,12 +145,15 @@ public class KotlinLambdaMerger implements Pass {
             logger.info("Size of original program class pool: {}", appView.programClassPool.size());
             logger.info("Size of new program class pool: {}", newProgramClassPool.size());
 
+            appView.programClassPool.classesAccept(new ClassCleaner());
+            appView.libraryClassPool.classesAccept(new ClassCleaner());
+            newProgramClassPool.classesAccept(new ClassCleaner());
             appView.programClassPool.clear();
             newProgramClassPool.classesAccept(new ClassPoolFiller(appView.programClassPool));
         }
     }
 
-    private void inlineMethodsInsideLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
+    private void inlineMethodsInsideLambdaGroups(ClassPool lambdaGroupClassPool)
     {
         InstructionCounter methodInliningCounter = new InstructionCounter();
 
@@ -181,7 +170,7 @@ public class KotlinLambdaMerger implements Pass {
         logger.debug("{} methods inlined inside lambda groups.", methodInliningCounter.getCount());
     }
 
-    private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ResourceFilePool resourceFilePool, ClassPool lambdaGroupClassPool)
+    private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
     {
         SimpleUsageMarker simpleUsageMarker = new SimpleUsageMarker();
         ClassUsageMarker classUsageMarker = new ClassUsageMarker(simpleUsageMarker);
@@ -205,6 +194,16 @@ public class KotlinLambdaMerger implements Pass {
                                        new AllMemberVisitor(
                                        classUsageMarker))));
 
+        lambdaGroupClassPool.classesAccept(new AllMemberVisitor(
+                                           new MultiMemberVisitor(
+                                           new MemberNameFilter(KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE,
+                                           classUsageMarker),
+                                           new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
+                                           classUsageMarker),
+                                           new MemberNameFilter(ClassConstants.METHOD_NAME_CLINIT,
+                                           classUsageMarker))));
+
+
         // ensure that the interfaces of the lambda group are not removed
         lambdaGroupClassPool.classesAccept(new InterfaceUsageMarker(
                                            classUsageMarker));
@@ -213,10 +212,15 @@ public class KotlinLambdaMerger implements Pass {
         // remove the unused parts of the lambda groups, such as the inlined invoke helper methods
         // and make sure that the line numbers are updated
         //ClassPool newLambdaGroupClassPool = new ClassPool();
-        lambdaGroupClassPool.classesAccept(new UsedClassFilter(simpleUsageMarker,
-                                           new MultiClassVisitor(
-                                           new ClassShrinker(simpleUsageMarker),
-                                           new LineNumberLinearizer()));
+        lambdaGroupClassPool.classesAccept(new MultiClassVisitor(
+                                           new UsedClassFilter(simpleUsageMarker,
+                                           new ClassShrinker(simpleUsageMarker)),
+                                           new LineNumberLinearizer(),
+                                           new AllAttributeVisitor(true,
+                                           new LineNumberTableAttributeTrimmer())));//,
+//                                           new ClassPoolFiller(newLambdaGroupClassPool))));
+        //lambdaGroupClassPool.clear();
+        //newLambdaGroupClassPool.classesAccept(new ClassPoolFiller(lambdaGroupClassPool));
     }
 
     private Clazz getKotlinLambdaClass(ClassPool programClassPool, ClassPool libraryClassPool)
@@ -228,13 +232,17 @@ public class KotlinLambdaMerger implements Pass {
         return kotlinLambdaClass;
     }
 
-    private Clazz getKotlinFunction0Interface(ClassPool programClassPool, ClassPool libraryClassPool)
+    public static String getArityFromInterface(ProgramClass programClass)
     {
-        Clazz kotlinFunction0Interface = programClassPool.getClass(NAME_KOTLIN_FUNCTION0);
-        if (kotlinFunction0Interface == null) {
-            kotlinFunction0Interface = libraryClassPool.getClass(NAME_KOTLIN_FUNCTION0);
+        for (int interfaceIndex = 0; interfaceIndex < programClass.u2interfacesCount; interfaceIndex++)
+        {
+            String interfaceName = programClass.getInterfaceName(interfaceIndex);
+            if (interfaceName.startsWith(NAME_KOTLIN_FUNCTION) && interfaceName.length() > NAME_KOTLIN_FUNCTION.length())
+            {
+                return String.valueOf(interfaceName.charAt(interfaceName.length()-1));
+            }
         }
-        return kotlinFunction0Interface;
+        throw new IllegalArgumentException("Class " + ClassUtil.externalClassName(programClass.getName()) + " does not implement a Kotlin function interface.");
     }
 
     /**
@@ -252,12 +260,16 @@ public class KotlinLambdaMerger implements Pass {
                 && optimizationInfo.mayBeMerged();
     }
 
-    public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods) throws IllegalArgumentException
+    public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods, ClassPool programClassPool) throws IllegalArgumentException
     {
         String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
         if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
         {
             throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it has more than 1 <init> constructor.");
+        }
+        else if (!lambdaClassHasNoBootstrapMethod(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains a bootstrap method that would not be merged into the lambda group.");
         }
         else if (!lambdaClassHasNoAccessibleStaticMethods(lambdaClass))
         {
@@ -267,17 +279,29 @@ public class KotlinLambdaMerger implements Pass {
         {
             throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it is directly invoked with its specific invoke method.");
         }
-        else if (!lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        else if (!nonINSTANCEFieldsAreNotReferencedFromSamePackage(lambdaClass, programClassPool))
         {
-            if (!mergeLambdaClassesWithUnexpectedMethods)
-            {
-                throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods.");
-            }
-            else if (!lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(lambdaClass))
-            {
-                throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods that contain too much code all together.");
-            }
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because one of its fields, other than the 'INSTANCE' field is referenced by one of its inner classes.");
         }
+        else if (!lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because its methods are too big to be inlined.");
+        }
+        else if (!mergeLambdaClassesWithUnexpectedMethods && !lambdaClassHasNoUnexpectedMethods(lambdaClass))
+        {
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods.");
+        }
+    }
+
+    private static boolean lambdaClassHasNoBootstrapMethod(ProgramClass lambdaClass) {
+        final boolean[] bootstrapMethodFound = {false};
+        lambdaClass.attributeAccept(Attribute.BOOTSTRAP_METHODS, new AttributeVisitor() {
+            @Override
+            public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute) {
+                bootstrapMethodFound[0] = true;
+            }
+        });
+        return !bootstrapMethodFound[0];
     }
 
     public static boolean canMerge(ProgramClass lambdaClass)
@@ -317,9 +341,7 @@ public class KotlinLambdaMerger implements Pass {
                                           totalCodeSize[0] += codeAttribute.u4codeLength;
                                       }
                                   })));
-        // TODO: replace 7000 by constant or
-        //  Integer.parseInt(System.getProperty("maximum.resulting.code.length", "7000"));
-        return totalCodeSize[0] <= 7000;
+        return totalCodeSize[0] <= KotlinLambdaGroupBuilder.MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH;
     }
 
     public static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
@@ -375,5 +397,37 @@ public class KotlinLambdaMerger implements Pass {
             }
         });
         return !methodReferenceFinder.methodReferenceFound();
+    }
+
+    public static boolean nonINSTANCEFieldsAreNotReferencedFromSamePackage(ProgramClass lambdaClass, ClassPool programClassPool)
+    {
+        AtomicBoolean nonINSTANCEFieldReferenced = new AtomicBoolean(false);
+        programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
+                                       new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
+                                       clazz1 -> {
+                                           if (clazz1 != lambdaClass) {
+                                               clazz1.constantPoolEntriesAccept(new ConstantVisitor() {
+                                                   @Override
+                                                   public void visitAnyConstant(Clazz clazz, Constant constant) {
+                                                   }
+
+                                                   @Override
+                                                   public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
+                                                       if (fieldrefConstant.referencedClass == lambdaClass
+                                                               && !KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME.equals(fieldrefConstant.getName(clazz)))
+                                                       {
+                                                           nonINSTANCEFieldReferenced.set(true);
+                                                           logger.warn("{} references non-INSTANCE field {} of lambda class {}.",
+                                                                       ClassUtil.externalClassName(clazz.getName()),
+                                                                       ClassUtil.externalFullFieldDescription(fieldrefConstant.referencedField.getAccessFlags(),
+                                                                                                              fieldrefConstant.getName(clazz),
+                                                                                                              fieldrefConstant.getType(clazz)),
+                                                                       ClassUtil.externalClassName(lambdaClass.getName()));
+                                                       }
+                                                   }
+                                               });
+                                           }
+                                       })));
+        return !nonINSTANCEFieldReferenced.get();
     }
 }

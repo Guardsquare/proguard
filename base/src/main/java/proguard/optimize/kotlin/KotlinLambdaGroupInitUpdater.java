@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.Utf8Constant;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.util.BranchTargetFinder;
@@ -22,8 +23,8 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
     public KotlinLambdaGroupInitUpdater(ClassPool programClassPool,
                                         ClassPool libraryClassPool)
     {
-        this.programClassPool      = programClassPool;
-        this.libraryClassPool      = libraryClassPool;
+        this.programClassPool = programClassPool;
+        this.libraryClassPool = libraryClassPool;
     }
 
     @Override
@@ -35,7 +36,13 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
                                                              programMethod.getName(programClass),
                                                              programMethod.getDescriptor(programClass)),
                                                              ClassUtil.externalClassName(programClass.getName()));
+        updateInitMethodDescriptor(programClass, programMethod);
         programMethod.attributesAccept(programClass, this);
+    }
+
+    private void updateInitMethodDescriptor(ProgramClass programClass, ProgramMethod programMethod) {
+        String newInitDescriptor = getNewInitMethodDescriptor(programClass, programMethod);
+        programMethod.u2descriptorIndex = new ConstantAdder(programClass).addConstant(programClass, new Utf8Constant(newInitDescriptor));
     }
 
     @Override
@@ -48,7 +55,7 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
         }
         catch (ClassCastException exception)
         {
-            logger.error("{} is incorrectly used to visit non-program class / method {} / {}", this.getClass().getName(), clazz, method);
+            logger.error("{} is incorrectly used to visit non-program class / method {} / {}", this.getClass().getName(), ClassUtil.externalClassName(clazz.getName()), ClassUtil.externalFullMethodDescription(clazz.getName(), method.getAccessFlags(), method.getName(clazz), method.getDescriptor(clazz)));
         }
     }
 
@@ -57,11 +64,11 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
         CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
         BranchTargetFinder branchTargetFinder = new BranchTargetFinder();
 
-        // The arity argument is the last of all.
+        // The arity argument is the last of all and has a size of 1 byte.
         // Note that the arguments start counting from 1, as the class itself is at byte 0.
         // long and double arguments take 2 bytes.
         // The classId and arity arguments are the 2 last, which take 1 byte each, as they are of type int.
-        int arityIndex = KotlinLambdaGroupInitUpdater.countParameterBytes(programMethod.getDescriptor(programClass)) - 1;
+        int arityIndex = ClassUtil.internalMethodParameterSize(programMethod.getDescriptor(programClass), false) - 1;
 
         InstructionSequencesReplacer replacer = createInstructionSequenceReplacer(branchTargetFinder, codeAttributeEditor, arityIndex, programClass);
 
@@ -72,49 +79,13 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
                                                 replacer));
     }
 
-    private static int countParameterBytes(String descriptor)
+    public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+    public static String getNewInitMethodDescriptor(ProgramClass programClass, ProgramMethod programMethod)
     {
-        int counter = 1;
-        int index   = 1;
-
-        char oldC = 0;
-        char c = descriptor.charAt(index++);
-        while (true)
-        {
-            switch (c)
-            {
-                case TypeConstants.ARRAY:
-                {
-                    // Just ignore all array characters.
-                    break;
-                }
-                case TypeConstants.CLASS_START:
-                {
-                    counter++;
-
-                    // Skip the class name.
-                    index = descriptor.indexOf(TypeConstants.CLASS_END, index) + 1;
-                    break;
-                }
-                case TypeConstants.LONG:
-                case TypeConstants.DOUBLE:
-                    if (oldC != TypeConstants.ARRAY)
-                    {
-                        counter++;
-                    }
-                default:
-                {
-                    counter++;
-                    break;
-                }
-                case TypeConstants.METHOD_ARGUMENTS_CLOSE:
-                {
-                    return counter;
-                }
-            }
-            oldC = c;
-            c = descriptor.charAt(index++);
-        }
+        String oldInitDescriptor = programMethod.getDescriptor(programClass);
+        String newInitDescriptor =  oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
+        return newInitDescriptor;
     }
 
     private InstructionSequencesReplacer createInstructionSequenceReplacer(BranchTargetFinder branchTargetFinder,
@@ -125,16 +96,15 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
         InstructionSequenceBuilder builder = new InstructionSequenceBuilder(programClassPool, libraryClassPool);
         Instruction[][][] replacementPatterns = createReplacementPatternsForInit(builder, arityIndex, lambdaGroup);
         return new InstructionSequencesReplacer(builder.constants(),
-                replacementPatterns,
-                branchTargetFinder,
-                codeAttributeEditor);
+                                                replacementPatterns,
+                                                branchTargetFinder,
+                                                codeAttributeEditor);
     }
 
     private Instruction[][][] createReplacementPatternsForInit(InstructionSequenceBuilder builder,
                                                                int arityIndex,
                                                                ProgramClass lambdaGroup)
     {
-        // TODO: store classId in field
         final int X = InstructionSequenceMatcher.X;
         return new Instruction[][][]
                 {

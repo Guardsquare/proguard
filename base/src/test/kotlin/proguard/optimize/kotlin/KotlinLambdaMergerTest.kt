@@ -23,8 +23,9 @@ package proguard.optimize.kotlin
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.mockk.*
+import proguard.AppView
 import proguard.Configuration
 import proguard.classfile.ClassConstants
 import proguard.classfile.ClassPool
@@ -99,10 +100,13 @@ class KotlinLambdaMergerTest : FreeSpec({
         val merger = KotlinLambdaMerger(Configuration())
         val nameMapper = ExtraDataEntryNameMap()
         "When the merger is applied to the class pools" - {
-            val newProgramClassPool = merger.execute(programClassPool, libraryClassPool, null, nameMapper)
-            val newFullClassPool = newProgramClassPool.classes() union libraryClassPool.classes()
+            val oldProgramClassPool = ClassPool(programClassPool)
+            val appView = AppView(programClassPool, libraryClassPool, null, nameMapper)
+            merger.execute(appView)
+            val newProgramClassPool = appView.programClassPool
+            val newFullClassPool    = appView.programClassPool.classes() union libraryClassPool.classes()
             "Then the resulting program class pool contains less classes" {
-                programClassPool.size() shouldBeGreaterThanOrEqual newProgramClassPool.size()
+                oldProgramClassPool.size() shouldBeGreaterThan newProgramClassPool.size()
             }
 
             "Then the program classes should only refer to classes that are in the class pool" {

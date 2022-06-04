@@ -37,7 +37,9 @@ public class LambdaGroupMappingPrinter implements ClassVisitor {
             pw.println(ClassUtil.externalClassName(name) +
                     " -> " +
                     ClassUtil.externalClassName(lambdaGroupName) +
-                    " (case " +
+                    " (arity " +
+                    KotlinLambdaMerger.getArityFromInterface(programClass) +
+                    ", case " +
                     optimizationInfo.getLambdaGroupClassId() +
                     ")");
         }

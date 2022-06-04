@@ -50,6 +50,21 @@ public class SameClassMethodInliner extends MethodInliner {
         super(microEdition, android, allowAccessModification, extraInlinedInvocationVisitor);
     }
 
+    public SameClassMethodInliner(boolean            microEdition,
+                                  boolean            android,
+                                  int                maxResultingCodeLength,
+                                  boolean            allowAccessModification,
+                                  boolean            usesOptimizationInfo,
+                                  InstructionVisitor extraInlinedInvocationVisitor)
+    {
+        super(microEdition,
+              android,
+              maxResultingCodeLength,
+              allowAccessModification,
+              usesOptimizationInfo,
+              extraInlinedInvocationVisitor);
+    }
+
     // Implementations for MethodInliner.
 
     @Override
