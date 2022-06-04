@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -1506,6 +1506,16 @@ public class ProGuardGUI extends JFrame
                 Configuration configuration = new Configuration();
 
                 parser.parse(configuration);
+
+                configuration.libraryJars = new ClassPath();
+
+                if (JavaUtil.currentJavaVersion() > 8) {
+                    configuration.libraryJars.add(
+                            new ClassPathEntry(JavaUtil.getJmodBase(), false));
+                } else {
+                    configuration.libraryJars.add(
+                            new ClassPathEntry(JavaUtil.getRtJar(), false));
+                }
 
                 // Let the GUI reflect the configuration.
                 setProGuardConfiguration(configuration);
