@@ -13,6 +13,7 @@ import proguard.classfile.instruction.visitor.AllInstructionVisitor
 import proguard.classfile.instruction.visitor.InstructionVisitor
 import proguard.classfile.util.ClassUtil
 import proguard.classfile.util.InstructionSequenceMatcher
+import testutils.MatchDetector
 
 class KotlinLambdaGroupInitUpdaterTest : FreeSpec({
     val lambdaGroupName = "LambdaGroup"
@@ -53,27 +54,6 @@ class KotlinLambdaGroupInitUpdaterTest : FreeSpec({
             "Then the two additional arguments are of type int" {
                 ClassUtil.internalMethodParameterType(newInitMethodDescriptor, argumentCountAfter - 3) shouldBe "I"
                 ClassUtil.internalMethodParameterType(newInitMethodDescriptor, argumentCountAfter - 2) shouldBe "I"
-            }
-
-            // Find the match in the code and print it out.
-            class MatchDetector(val matcher: InstructionSequenceMatcher, vararg val arguments: Int) : InstructionVisitor {
-                var matchIsFound = false
-                var matchedArguments = IntArray(arguments.size)
-
-                override fun visitAnyInstruction(
-                    clazz: Clazz,
-                    method: Method,
-                    codeAttribute: CodeAttribute,
-                    offset: Int,
-                    instruction: Instruction
-                ) {
-                    println(instruction.toString(clazz, offset))
-                    instruction.accept(clazz, method, codeAttribute, offset, matcher)
-                    if (matcher.isMatching()) {
-                        matchIsFound = true
-                        matchedArguments = matcher.matchedArguments(arguments)
-                    }
-                }
             }
 
             "Then the code of the <init> method calls the super constructor with the arity argument" {
