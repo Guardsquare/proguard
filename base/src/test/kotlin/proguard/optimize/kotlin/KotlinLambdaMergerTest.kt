@@ -24,20 +24,40 @@ package proguard.optimize.kotlin
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
 import proguard.AppView
 import proguard.Configuration
-import proguard.classfile.ClassConstants
+import proguard.classfile.AccessConstants
 import proguard.classfile.ClassPool
+import proguard.classfile.Clazz
+import proguard.classfile.Method
+import proguard.classfile.attribute.CodeAttribute
+import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.constant.ClassConstant
 import proguard.classfile.constant.visitor.ConstantVisitor
-import proguard.classfile.visitor.ClassMethodFilter
-import proguard.classfile.visitor.ClassPoolFiller
-import proguard.classfile.visitor.ImplementedClassFilter
+import proguard.classfile.editor.InstructionSequenceBuilder
+import proguard.classfile.instruction.Instruction
+import proguard.classfile.instruction.visitor.AllInstructionVisitor
+import proguard.classfile.instruction.visitor.InstructionVisitor
+import proguard.classfile.instruction.visitor.MultiInstructionVisitor
+import proguard.classfile.util.InstructionSequenceMatcher
+import proguard.classfile.visitor.AllMemberVisitor
+import proguard.classfile.visitor.MemberAccessFilter
+import proguard.classfile.visitor.MemberNameFilter
 import proguard.io.ExtraDataEntryNameMap
 import testutils.ClassPoolBuilder
+import testutils.ClassPoolClassLoader
+import testutils.InstructionSequenceCollector
 import testutils.KotlinSource
+import testutils.MatchDetector
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 class KotlinLambdaMergerTest : FreeSpec({
 
@@ -84,28 +104,67 @@ class KotlinLambdaMergerTest : FreeSpec({
         )
     )
 
-
-    // A class pool where the applicable lambda's will be stored
-    val lambdaClassPool = ClassPool()
-    val kotlinLambdaClass = libraryClassPool.getClass(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA)
-    val kotlinFunction0Interface = libraryClassPool.getClass(KotlinLambdaMerger.NAME_KOTLIN_FUNCTION0)
-    programClassPool.classesAccept(ImplementedClassFilter(
-                                   kotlinFunction0Interface, false,
-                                   ImplementedClassFilter(
-                                   kotlinLambdaClass, false,
-                                   ClassMethodFilter(
-                                   ClassConstants.METHOD_NAME_INIT, ClassConstants.METHOD_TYPE_INIT,
-                                   ClassPoolFiller(lambdaClassPool), null), null), null))
-
     "Given a Kotlin Lambda Merger and entry name mapper" - {
         val merger = KotlinLambdaMerger(Configuration())
         val nameMapper = ExtraDataEntryNameMap()
+
+        class InstructionPrinter : InstructionVisitor {
+            override fun visitAnyInstruction(
+                clazz: Clazz,
+                method: Method,
+                codeAttribute: CodeAttribute,
+                offset: Int,
+                instruction: Instruction
+            ) {
+                println(instruction.toString(clazz, offset))
+            }
+        }
+
         "When the merger is applied to the class pools" - {
             val oldProgramClassPool = ClassPool(programClassPool)
+            val originalInvokeMethodCodeBuilder = InstructionSequenceBuilder(oldProgramClassPool, libraryClassPool)
+            oldProgramClassPool.getClass("app/package2/Test2Kt\$main\$lambda1\$1").accept(
+                AllMemberVisitor(
+                    MemberNameFilter(
+                        "invoke",
+                        MemberAccessFilter(
+                            0, AccessConstants.SYNTHETIC,
+                            AllAttributeVisitor(
+                                AllInstructionVisitor(
+                                    MultiInstructionVisitor(
+                                        InstructionPrinter(),
+                                        InstructionSequenceCollector(
+                                            originalInvokeMethodCodeBuilder
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+            val loaderBefore = ClassPoolClassLoader(oldProgramClassPool)
+            val testClassBefore = loaderBefore.loadClass("app.package2.Test2Kt")
+            val stdOutput = System.out
+            val capturedOutputBefore = ByteArrayOutputStream()
+            val capturedOutputStreamBefore = PrintStream(capturedOutputBefore)
+            System.setOut(capturedOutputStreamBefore)
+            try {
+                testClassBefore.declaredMethods.single { it.name == "main" && it.isSynthetic }
+                    .invoke(null, arrayOf<String>())
+            } catch (e: Exception) {
+                System.setOut(stdOutput)
+                println()
+                println("Exception: $e")
+                println("Output of method call:")
+                println(capturedOutputBefore)
+            }
+            System.setOut(stdOutput)
+
             val appView = AppView(programClassPool, libraryClassPool, null, nameMapper)
             merger.execute(appView)
             val newProgramClassPool = appView.programClassPool
-            val newFullClassPool    = appView.programClassPool.classes() union libraryClassPool.classes()
+            val newFullClassPool = appView.programClassPool.classes() union libraryClassPool.classes()
             "Then the resulting program class pool contains less classes" {
                 oldProgramClassPool.size() shouldBeGreaterThan newProgramClassPool.size()
             }
@@ -150,6 +209,67 @@ class KotlinLambdaMergerTest : FreeSpec({
                 newProgramClassPool.getClass("app/package1/LambdaGroup") shouldNotBe null
                 newProgramClassPool.getClass("app/package2/LambdaGroup") shouldNotBe null
             }
+
+            "Then the instructions of the original lambda's are found in the lambda group" {
+                val lambdaGroup = newProgramClassPool.getClass("app/package1/LambdaGroup")
+                val originalInstructionsMatcher = InstructionSequenceMatcher(
+                    originalInvokeMethodCodeBuilder.constants(),
+                    originalInvokeMethodCodeBuilder.instructions()
+                )
+                val originalInstructionsMatchDetector = MatchDetector(originalInstructionsMatcher)
+                lambdaGroup.accept(
+                    AllMemberVisitor(
+                        MemberNameFilter(
+                            "invoke",
+                            MemberAccessFilter(
+                                0, AccessConstants.SYNTHETIC,
+                                AllAttributeVisitor(
+                                    AllInstructionVisitor(
+                                        originalInstructionsMatchDetector
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+                originalInstructionsMatchDetector.matchIsFound shouldBe true
+            }
+
+            /*
+            "Then program output has not changed after optimisation" {
+
+                val loaderAfter = ClassPoolClassLoader(newProgramClassPool)
+                val testClassAfter = loaderAfter.loadClass("app.package2.Test2Kt")
+                val capturedOutputAfter = ByteArrayOutputStream()
+                val capturedOutputStreamAfter = PrintStream(capturedOutputBefore)
+                System.setOut(capturedOutputStreamAfter)
+
+                try {
+                    testClassAfter.declaredMethods.single { it.name == "main" && it.isSynthetic }
+                        .invoke(null, arrayOf<String>())
+                } catch (e: Exception) {
+                    System.setOut(stdOutput)
+                    println("Exception while executing test class after lambda merging.")
+                    println(e)
+                    e.printStackTrace()
+                    val lambdaGroup = newProgramClassPool.getClass("app/package2/LambdaGroup")
+                    lambdaGroup.accept(AllMemberVisitor(
+                                       MemberNameFilter("invoke",
+                                       AllAttributeVisitor(
+                                       AllInstructionVisitor(
+                                       InstructionPrinter()))))
+                    )
+                    throw e
+                }
+
+                System.setOut(stdOutput)
+
+                capturedOutputAfter.toString() shouldBe capturedOutputBefore.toString()
+                println(capturedOutputBefore)
+                println()
+                println(capturedOutputAfter)
+            }
+             */
         }
     }
 })
