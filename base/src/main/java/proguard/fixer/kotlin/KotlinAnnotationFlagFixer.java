@@ -153,7 +153,7 @@ implements   KotlinMetadataVisitor,
         kotlinFunctionMetadata.valueParametersAccept(clazz, kotlinMetadata, this);
         kotlinFunctionMetadata.returnTypeAccept(     clazz, kotlinMetadata, this);
 
-        kotlinFunctionMetadata.referencedMethod.accept(kotlinFunctionMetadata.referencedMethodClass, annotationCounter.reset());
+        kotlinFunctionMetadata.referencedMethodAccept(kotlinFunctionMetadata.referencedMethodClass, annotationCounter.reset());
         kotlinFunctionMetadata.flags.common.hasAnnotations = annotationCounter.getCount() != 0;
     }
 
@@ -173,7 +173,7 @@ implements   KotlinMetadataVisitor,
         }
         else
         {
-            kotlinConstructorMetadata.referencedMethod.accept(clazz, annotationCounter.reset());
+            kotlinConstructorMetadata.referencedMethodAccept(clazz, annotationCounter.reset());
             kotlinConstructorMetadata.flags.common.hasAnnotations = annotationCounter.getCount() != 0;
         }
     }
@@ -209,7 +209,7 @@ implements   KotlinMetadataVisitor,
                                           KotlinFunctionMetadata kotlinFunctionMetadata,
                                           KotlinTypeMetadata kotlinTypeMetadata)
     {
-        kotlinFunctionMetadata.referencedMethod.accept(kotlinFunctionMetadata.referencedMethodClass, this.annotationCounter.reset());
+        kotlinFunctionMetadata.referencedMethodAccept(kotlinFunctionMetadata.referencedMethodClass, this.annotationCounter.reset());
         kotlinTypeMetadata.flags.common.hasAnnotations = annotationCounter.getParameterAnnotationCount(0) > 0;
     }
 
@@ -241,7 +241,7 @@ implements   KotlinMetadataVisitor,
 
         if (kotlinValueParameterMetadata.flags.common.hasAnnotations)
         {
-            kotlinFunctionMetadata.referencedMethod.accept(kotlinFunctionMetadata.referencedMethodClass, annotationCounter.reset());
+            kotlinFunctionMetadata.referencedMethodAccept(kotlinFunctionMetadata.referencedMethodClass, annotationCounter.reset());
             kotlinValueParameterMetadata.flags.common.hasAnnotations =
                 annotationCounter.getParameterAnnotationCount(kotlinValueParameterMetadata.index) > 0;
         }
@@ -262,7 +262,7 @@ implements   KotlinMetadataVisitor,
         {
             if (!kotlinClassKindMetadata.flags.isAnnotationClass)
             {
-                kotlinConstructorMetadata.referencedMethod.accept(clazz, annotationCounter.reset());
+                kotlinConstructorMetadata.referencedMethodAccept(clazz, annotationCounter.reset());
                 kotlinValueParameterMetadata.flags.common.hasAnnotations =
                     annotationCounter.getParameterAnnotationCount(kotlinValueParameterMetadata.index) > 0;
             }

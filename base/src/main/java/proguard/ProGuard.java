@@ -567,7 +567,16 @@ public class ProGuard
      */
     private void sortClassElements()
     {
-        appView.programClassPool.classesAccept(new ClassElementSorter());
+        appView.programClassPool.classesAccept(
+            new ClassElementSorter(
+                /* sortInterfaces = */ true,
+                /* sortConstants = */ true,
+                // Sorting members can cause problems with code such as clazz.getMethods()[1]
+                /* sortMembers = */ false,
+                // PGD-192: Sorting attributes can cause problems for some compilers
+                /* sortAttributes = */ false
+            )
+        );
     }
 
 

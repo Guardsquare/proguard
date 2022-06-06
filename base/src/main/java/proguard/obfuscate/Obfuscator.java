@@ -491,14 +491,16 @@ public class Obfuscator implements Pass
             }
         }
 
+        // Obfuscate the Intrinsics.check* method calls.
+        appView.programClassPool.classesAccept(
+            new InstructionSequenceObfuscator(
+                new KotlinIntrinsicsReplacementSequences(appView.programClassPool, appView.libraryClassPool))
+        );
+
         if (configuration.keepKotlinMetadata)
         {
             appView.programClassPool.classesAccept(
                 new MultiClassVisitor(
-                // Obfuscate the Intrinsics.check* method calls.
-                new InstructionSequenceObfuscator(
-                    new KotlinIntrinsicsReplacementSequences(appView.programClassPool, appView.libraryClassPool)),
-
                 new ReferencedKotlinMetadataVisitor(
                     new MultiKotlinMetadataVisitor(
                     // Come up with new names for Kotlin Properties.

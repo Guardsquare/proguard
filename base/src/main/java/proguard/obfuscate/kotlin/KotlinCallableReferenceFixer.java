@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,25 +21,22 @@
 
 package proguard.obfuscate.kotlin;
 
-import proguard.classfile.ClassPool;
-import proguard.classfile.Clazz;
+import proguard.classfile.*;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.InstructionSequenceBuilder;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.kotlin.KotlinConstants;
-import proguard.classfile.kotlin.KotlinMetadata;
-import proguard.classfile.kotlin.KotlinSyntheticClassKindMetadata;
+import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.reflect.util.KotlinCallableReferenceInitializer.OptimizedCallableReferenceFilter;
 import proguard.classfile.kotlin.reflect.visitor.CallableReferenceInfoToOwnerVisitor;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
 import proguard.classfile.kotlin.visitor.filter.KotlinDeclarationContainerFilter;
 import proguard.classfile.util.InstructionSequenceMatcher;
-import proguard.classfile.visitor.MultiClassVisitor;
-import proguard.classfile.visitor.NamedMethodVisitor;
-import proguard.obfuscate.util.InstructionSequenceObfuscator;
-import proguard.obfuscate.util.ReplacementSequences;
+import proguard.classfile.visitor.*;
+import proguard.obfuscate.util.*;
 import proguard.resources.kotlinmodule.visitor.KotlinMetadataToModuleVisitor;
 
 import static proguard.classfile.ClassConstants.METHOD_NAME_INIT;
+import static proguard.classfile.kotlin.KotlinConstants.*;
 import static proguard.classfile.util.InstructionSequenceMatcher.*;
 
 /**
@@ -69,37 +66,39 @@ implements   KotlinMetadataVisitor
     {
         if (syntheticClass.callableReferenceInfo != null)
         {
-            if (syntheticClass.mv[0] == 1 && syntheticClass.mv[1] > 3)
-            {
-                clazz.methodAccept(METHOD_NAME_INIT,null,
-                new InstructionSequenceObfuscator(
-                        new NameAndSignatureReplacementSequences(
-                            syntheticClass.callableReferenceInfo.getName(),
-                            syntheticClass.callableReferenceInfo.getSignature(),
-                            programClassPool,
-                            libraryClassPool)));
-            }
-            else
-            {
-                clazz.accept(
-                    new MultiClassVisitor(
+            clazz.accept(
+                new OptimizedCallableReferenceFilter(
+                   new AllMethodVisitor(
+                       new MemberNameFilter(METHOD_NAME_INIT,
+                       new InstructionSequenceObfuscator(
+                           new NameAndSignatureReplacementSequences(
+                               syntheticClass.callableReferenceInfo.getName(),
+                               syntheticClass.callableReferenceInfo.getSignature(),
+                               programClassPool,
+                               libraryClassPool)))
+                   ),
+                   new MultiClassVisitor(
                         new NamedMethodVisitor(
-                            KotlinConstants.REFLECTION.GETNAME_METHOD_NAME,
-                            KotlinConstants.REFLECTION.GETNAME_METHOD_DESC,
+                            REFLECTION.GETNAME_METHOD_NAME,
+                            REFLECTION.GETNAME_METHOD_DESC,
                             // getName() returns the Kotlin name of the callable, the one which was declared in the source code (@JvmName doesn't change it).
                             new InstructionSequenceObfuscator(
                             new NameOrSignatureReplacementSequences(
                                 syntheticClass.callableReferenceInfo.getName(), programClassPool, libraryClassPool))),
 
                         new NamedMethodVisitor(
-                            KotlinConstants.REFLECTION.GETSIGNATURE_METHOD_NAME,
-                            KotlinConstants.REFLECTION.GETSIGNATURE_METHOD_DESC,
+                            REFLECTION.GETSIGNATURE_METHOD_NAME,
+                            REFLECTION.GETSIGNATURE_METHOD_DESC,
                             //getSignature() returns the signature.
                             new InstructionSequenceObfuscator(
                             new NameOrSignatureReplacementSequences(
                                 syntheticClass.callableReferenceInfo.getSignature(), programClassPool, libraryClassPool)))
-                        ));
+                        )
+                )
+            );
 
+            if (clazz.findMethod(REFLECTION.GETOWNER_METHOD_NAME, REFLECTION.GETOWNER_METHOD_DESC) != null)
+            {
                 // getOwner() returns the Kotlin class or package (for file facades and multi-file class parts)
                 // where the callable should be located, usually specified on the LHS of the '::' operator but it could also be a superclass.
                 // We update getOwner() only for file facades and multi-file class parts because creating a Kotlin package
@@ -107,17 +106,17 @@ implements   KotlinMetadataVisitor
 
                 syntheticClass.callableReferenceInfoAccept(
                     new CallableReferenceInfoToOwnerVisitor(
-                    new KotlinDeclarationContainerFilter(
-                        declarationContainer -> declarationContainer.k == KotlinConstants.METADATA_KIND_FILE_FACADE ||
-                                                declarationContainer.k == KotlinConstants.METADATA_KIND_MULTI_FILE_CLASS_PART,
-                    new KotlinMetadataToModuleVisitor(
-                        kotlinModule         -> clazz.accept(
-                                                    new NamedMethodVisitor(
-                                                        KotlinConstants.REFLECTION.GETOWNER_METHOD_NAME,
-                                                        KotlinConstants.REFLECTION.GETOWNER_METHOD_DESC,
-                                                        new InstructionSequenceObfuscator(
-                                                        new OwnerReplacementSequences(
-                                                            kotlinModule.name, programClassPool, libraryClassPool))))))));
+                        new KotlinDeclarationContainerFilter(
+                            declarationContainer -> declarationContainer.k == METADATA_KIND_FILE_FACADE ||
+                                                    declarationContainer.k == METADATA_KIND_MULTI_FILE_CLASS_PART,
+                            new KotlinMetadataToModuleVisitor(
+                                kotlinModule         -> clazz.accept(
+                                    new NamedMethodVisitor(
+                                        REFLECTION.GETOWNER_METHOD_NAME,
+                                        REFLECTION.GETOWNER_METHOD_DESC,
+                                        new InstructionSequenceObfuscator(
+                                            new OwnerReplacementSequences(
+                                                kotlinModule.name, programClassPool, libraryClassPool))))))));
             }
         }
     }
@@ -191,17 +190,17 @@ implements   KotlinMetadataVisitor
                 },
                 {
                     ____.ldc_(OWNER_INDEX)
-                            .ldc_(NAME_INDEX)
-                            .ldc_(SIGNATURE_INDEX)
-                            .iconst(I)
-                            .invokespecial(X).__(),
+                        .ldc_(NAME_INDEX)
+                        .ldc_(SIGNATURE_INDEX)
+                        .iconst(I)
+                        .invokespecial(X).__(),
 
                     ____.ldc_(OWNER_INDEX)
-                            .ldc(name)
-                            .ldc(signature)
-                            .iconst(I)
-                            .invokespecial(X).__(),
-                },
+                        .ldc(name)
+                        .ldc(signature)
+                        .iconst(I)
+                        .invokespecial(X).__(),
+                }
             };
 
             CONSTANTS = ____.constants();
@@ -235,18 +234,16 @@ implements   KotlinMetadataVisitor
                     ____
                         .ldc_(InstructionSequenceMatcher.X)
                         .ldc_(InstructionSequenceMatcher.Y)
-                        .invokestatic(KotlinConstants.REFLECTION.CLASS_NAME,
-                                      KotlinConstants.REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_NAME,
-                                      KotlinConstants.REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_DESC)
-                        .areturn().__(),
+                        .invokestatic(REFLECTION.CLASS_NAME,
+                                      REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_NAME,
+                                      REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_DESC).__(),
 
                     ____
                         .ldc_(InstructionSequenceMatcher.X)
                         .ldc(name)
-                        .invokestatic(KotlinConstants.REFLECTION.CLASS_NAME,
-                                      KotlinConstants.REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_NAME,
-                                      KotlinConstants.REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_DESC)
-                        .areturn().__(),
+                        .invokestatic(REFLECTION.CLASS_NAME,
+                                      REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_NAME,
+                                      REFLECTION.GETORCREATEKOTLINPACKAGE_METHOD_DESC).__(),
                 },
             };
 

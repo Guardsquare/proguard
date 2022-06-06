@@ -21,12 +21,14 @@
 package proguard.obfuscate.util;
 
 import proguard.classfile.*;
+import proguard.classfile.attribute.visitor.AttributeProcessingFlagFilter;
 import proguard.classfile.constant.Constant;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.*;
 import proguard.classfile.util.BranchTargetFinder;
 import proguard.classfile.visitor.*;
+import proguard.util.ProcessingFlags;
 
 import java.util.Arrays;
 
@@ -73,7 +75,9 @@ implements   ClassVisitor,
     @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
-        programMethod.attributesAccept(programClass, peepholeEditor);
+        programMethod.attributesAccept(
+                programClass,
+                new AttributeProcessingFlagFilter(0, ProcessingFlags.DONT_OBFUSCATE, peepholeEditor));
     }
 
 

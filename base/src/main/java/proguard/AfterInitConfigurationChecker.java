@@ -7,6 +7,8 @@
 
 package proguard;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.ClassVisitor;
@@ -19,6 +21,8 @@ import proguard.pass.Pass;
 public class AfterInitConfigurationChecker implements Pass
 {
     private final Configuration configuration;
+
+    private static final Logger logger = LogManager.getLogger(AfterInitConfigurationChecker.class);
 
     public AfterInitConfigurationChecker(Configuration configuration)
     {
@@ -55,10 +59,18 @@ public class AfterInitConfigurationChecker implements Pass
         {
             if (programClass.u4version > maxClassFileVersion)
             {
-                throw new RuntimeException("-target can only be used with class file versions <= " + ClassUtil.internalMajorClassVersion(maxClassFileVersion) +
-                                           " (Java " + ClassUtil.externalClassVersion(maxClassFileVersion) + ")." + System.lineSeparator() +
-                                           "The input classes contain version " + ClassUtil.internalMajorClassVersion(programClass.u4version)   +
-                                           " class files which cannot be backported to target version (" + ClassUtil.internalMajorClassVersion(target) + ").");
+                if (programClass.u4version != target)
+                {
+                    throw new RuntimeException("-target can only be used with class file versions <= " + ClassUtil.internalMajorClassVersion(maxClassFileVersion) +
+                            " (Java " + ClassUtil.externalClassVersion(maxClassFileVersion) + ")." + System.lineSeparator() +
+                            "The input classes contain version " + ClassUtil.internalMajorClassVersion(programClass.u4version)   +
+                            " class files which cannot be backported to target version (" + ClassUtil.internalMajorClassVersion(target) + ").");
+                }
+
+                logger.warn(
+                        "-target is deprecated when using class file above "+ ClassUtil.internalMajorClassVersion(maxClassFileVersion) +
+                        " (Java " + ClassUtil.externalClassVersion(maxClassFileVersion) + ")."
+                );
             }
         }
 

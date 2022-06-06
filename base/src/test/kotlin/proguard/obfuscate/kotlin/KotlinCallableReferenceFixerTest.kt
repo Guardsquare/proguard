@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -61,6 +61,72 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                 fun ref() = ::original
                 """.trimIndent()
             )
+        )
+
+        programClassPool.classesAccept(
+            MultiClassVisitor(
+                ClassNameFilter(
+                    "TestKt",
+                    ClassRenamer(
+                        { "Obfuscated" },
+                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) }
+                    )
+                ),
+                createFixer(programClassPool, libraryClassPool)
+            )
+        )
+
+        val callableRefInfoVisitor = spyk<CallableReferenceInfoVisitor>()
+        val ownerVisitor = spyk< KotlinMetadataVisitor>()
+        val testVisitor = createVisitor(callableRefInfoVisitor, ownerVisitor)
+
+        programClassPool.classesAccept("TestKt\$ref\$1", testVisitor)
+
+        "Then the callableReferenceInfo should be initialized" {
+            verify(exactly = 1) {
+                callableRefInfoVisitor.visitFunctionReferenceInfo(
+                    withArg {
+                        it.name shouldBe "obfuscated"
+                        it.signature shouldBe "obfuscated()Ljava/lang/String;"
+                        it.owner shouldNotBe null
+                    }
+                )
+            }
+
+            verify(exactly = 1) {
+                ownerVisitor.visitKotlinFileFacadeMetadata(
+                    withArg {
+                        it.name shouldBe "Obfuscated"
+                    },
+                    ofType(KotlinFileFacadeKindMetadata::class)
+                )
+            }
+        }
+
+        "Then the callable reference class should not mention the original name" {
+            programClassPool.classesAccept(
+                "TestKt\$ref\$1",
+                AllConstantVisitor(
+                    object : ConstantVisitor {
+                        override fun visitAnyConstant(clazz: Clazz, constant: Constant) {
+                            constant.toString() shouldNotContainIgnoringCase "original"
+                        }
+                    }
+                )
+            )
+        }
+    }
+
+    "Given a non-optimized function callable reference" - {
+        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
+            KotlinSource(
+                "Test.kt",
+                """
+                fun original() = "bar"
+                fun ref() = ::original
+                """.trimIndent()
+            ),
+            kotlincArguments = listOf("-Xno-optimized-callable-references")
         )
 
         programClassPool.classesAccept(

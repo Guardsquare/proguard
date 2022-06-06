@@ -5,6 +5,12 @@
 - Fix "Can't save configuration file" error in ProGuardGUI. (`PGD-220`)
 - Fix rule configurations that extend annotation classes. (`PGD-229`)
 - Fix "No matching variant" Gradle plugin error when using Gradle 7.4 and Java 8. (`PGD-2311`)
+- Fix potential Kotlin metadata initialization issue when using the `-Xno-optimized-callable-references` compiler option. (`T16486`)
+- Fix missing warnings in ProGuardGUI. (`PGD-239`)
+
+### Improved
+
+- Remove Kotlin Intrinsics strings by default, without requiring the `-keepkotlinmetadata` option. (`T16518`)
 
 ## Version 7.2.1
 
