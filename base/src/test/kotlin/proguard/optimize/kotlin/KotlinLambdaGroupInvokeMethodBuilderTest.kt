@@ -25,9 +25,11 @@ class KotlinLambdaGroupInvokeMethodBuilderTest : FreeSpec({
             "TargetClass",
             ClassConstants.NAME_JAVA_LANG_OBJECT
         )
-        val method = classBuilder.addAndReturnMethod(AccessConstants.PUBLIC,
+        val method = classBuilder.addAndReturnMethod(
+            AccessConstants.PUBLIC,
             ClassConstants.METHOD_NAME_INIT,
-            ClassConstants.METHOD_TYPE_INIT)
+            ClassConstants.METHOD_TYPE_INIT
+        )
         val targetClass = classBuilder.programClass
         val invokeMethodBuilder = KotlinLambdaGroupInvokeMethodBuilder(arity, classBuilder, ClassPool(), ClassPool())
         "When a call to the method is added to the invoke method" - {
@@ -35,12 +37,20 @@ class KotlinLambdaGroupInvokeMethodBuilderTest : FreeSpec({
             "Then the invoke method contains a call to the method" {
                 val invokeMethod = invokeMethodBuilder.build()
                 val matchingSequenceBuilder = InstructionSequenceBuilder().invokevirtual(targetClass, method)
-                val matchDetector = MatchDetector(InstructionSequenceMatcher(matchingSequenceBuilder.constants(),
-                                                                             matchingSequenceBuilder.instructions()))
-                invokeMethod.accept(targetClass,
-                                    AllAttributeVisitor(
-                                    AllInstructionVisitor(
-                                    matchDetector)))
+                val matchDetector = MatchDetector(
+                    InstructionSequenceMatcher(
+                        matchingSequenceBuilder.constants(),
+                        matchingSequenceBuilder.instructions()
+                    )
+                )
+                invokeMethod.accept(
+                    targetClass,
+                    AllAttributeVisitor(
+                        AllInstructionVisitor(
+                            matchDetector
+                        )
+                    )
+                )
                 matchDetector.matchIsFound shouldBe true
             }
         }

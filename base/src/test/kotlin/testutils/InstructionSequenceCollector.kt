@@ -29,14 +29,17 @@ class InstructionSequenceCollector(val builder: InstructionSequenceBuilder) : In
     ) {
         val constantPoolEditor = builder.constantPoolEditor
         var constantIndex = 0
-        assert (constantInstruction != null)
-        assert (constantInstruction!!.constantIndex > 0)
-        clazz?.constantPoolEntryAccept(constantInstruction.constantIndex, object : ConstantVisitor {
-            override fun visitAnyConstant(clazz: Clazz?, constant: Constant?) {
-                constantIndex = constantPoolEditor.addConstant(constant)
+        assert(constantInstruction != null)
+        assert(constantInstruction!!.constantIndex > 0)
+        clazz?.constantPoolEntryAccept(
+            constantInstruction.constantIndex,
+            object : ConstantVisitor {
+                override fun visitAnyConstant(clazz: Clazz?, constant: Constant?) {
+                    constantIndex = constantPoolEditor.addConstant(constant)
+                }
             }
-        })
-        assert (constantIndex == 0 )
+        )
+        assert(constantIndex == 0)
         val newConstantInstruction = ConstantInstruction().copy(constantInstruction)
         newConstantInstruction.constantIndex = constantIndex
         visitAnyInstruction(clazz!!, method!!, codeAttribute!!, offset, newConstantInstruction)
