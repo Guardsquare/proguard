@@ -404,13 +404,6 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                             enclosingMethodUpdater)));
     }
 
-    private void addInitConstructors()
-    {
-        // TODO: add support for non-empty closures
-        KotlinLambdaGroupInitBuilder builder = new KotlinLambdaGroupInitBuilder(0, this.classBuilder);
-        builder.build();
-    }
-
     private void addInvokeMethods()
     {
         for (KotlinLambdaGroupInvokeMethodBuilder builder : this.invokeMethodBuilders.values())
