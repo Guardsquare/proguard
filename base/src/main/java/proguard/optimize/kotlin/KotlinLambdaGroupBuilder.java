@@ -380,10 +380,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD, enclosingMethodUpdater);
 
         // Also update any references that would occur in other classes of the same package.
-        this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
-                                            new ClassNameFilter(lambdaClass.getName(),
-                                                                (ClassVisitor)null,
-                                                                 enclosingMethodUpdater)));
+        String regularExpression = ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*";
+        regularExpression       += ",!" + lambdaClass.getName();
+        this.programClassPool.classesAccept(new ClassNameFilter(regularExpression,
+                                                                enclosingMethodUpdater));
     }
 
     private void addInvokeMethods()
