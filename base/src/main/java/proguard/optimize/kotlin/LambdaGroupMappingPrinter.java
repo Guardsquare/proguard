@@ -28,7 +28,8 @@ public class LambdaGroupMappingPrinter implements ClassVisitor {
     @Override
     public void visitProgramClass(ProgramClass programClass) {
         String name    = programClass.getName();
-        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(programClass);
+        ProgramClassOptimizationInfo optimizationInfo = 
+                ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(programClass);
         Clazz lambdaGroup = optimizationInfo.getLambdaGroup();
         if (lambdaGroup != null)
         {
