@@ -54,48 +54,10 @@ class KotlinLambdaGroupBuilderTest : FreeSpec({
         val lambdaClass = programClassPool.getClass("TestKt\$main\$lambda1\$1") as ProgramClass
         lambdaClass.accept(ProgramClassOptimizationInfoSetter())
         val optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass)
-        val originalInvokeMethodCodeBuilder = InstructionSequenceBuilder(programClassPool, libraryClassPool)
-        /*
-        lambdaClass.accept(
-            AllMemberVisitor(
-                MemberNameFilter(
-                    "invoke",
-                    MemberAccessFilter(
-                        0, AccessConstants.SYNTHETIC,
-                        AllAttributeVisitor(
-                            AllInstructionVisitor(
-                                InstructionSequenceCollector(
-                                    originalInvokeMethodCodeBuilder
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        )
-         */
-        val originalInstructionsMatcher = InstructionSequenceMatcher(
-            originalInvokeMethodCodeBuilder.constants(),
-            originalInvokeMethodCodeBuilder.instructions()
-        )
-        val originalInstructionsMatchDetector = MatchDetector(originalInstructionsMatcher)
+
         "When the builder adds a lambda class to the lambda group under construction" - {
             builder.visitProgramClass(lambdaClass)
             val lambdaGroup = builder.build()
-            /*
-            "Then the lambda class implementation has been added to the lambda group" {
-                lambdaGroup.accept(
-                    AllMemberVisitor(
-                        AllAttributeVisitor(
-                            AllInstructionVisitor(
-                                originalInstructionsMatchDetector
-                            )
-                        )
-                    )
-                )
-                originalInstructionsMatchDetector.matchIsFound shouldBe true
-            }
-            */
 
             "Then the optimization info lambda group of the lambda class refers to the lambda group" {
                 optimizationInfo.lambdaGroup shouldBe lambdaGroup
