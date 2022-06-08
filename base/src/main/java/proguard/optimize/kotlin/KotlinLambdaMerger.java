@@ -326,7 +326,9 @@ public class KotlinLambdaMerger implements Pass {
     private static boolean lambdaClassHasNoAccessibleStaticMethods(ProgramClass lambdaClass)
     {
         MethodCounter nonPrivateStaticMethodCounter = new MethodCounter();
+        String regularExpression = "!" + ClassConstants.METHOD_NAME_CLINIT;
         lambdaClass.methodsAccept(new MemberAccessFilter(AccessConstants.STATIC, AccessConstants.PRIVATE,
+                                  new MemberNameFilter(regularExpression,
                                   new MultiMemberVisitor(
                                   nonPrivateStaticMethodCounter,
                                   new MemberVisitor() {
@@ -340,7 +342,7 @@ public class KotlinLambdaMerger implements Pass {
                                                                                               programMethod.getName(lambdaClass),
                                                                                               programMethod.getDescriptor(lambdaClass)));
                                       }
-                                  })));
+                                  }))));
         return nonPrivateStaticMethodCounter.getCount() == 0;
     }
 
