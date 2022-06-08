@@ -5,23 +5,15 @@ import org.apache.logging.log4j.Logger;
 import proguard.Configuration;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.attribute.visitor.ClassConstantToClassVisitor;
-import proguard.classfile.attribute.visitor.InnerClassInfoClassConstantVisitor;
-import proguard.classfile.attribute.visitor.ModifiedAllInnerClassesInfoVisitor;
-import proguard.classfile.editor.ClassBuilder;
-import proguard.classfile.editor.InterfaceAdder;
-import proguard.classfile.editor.SubclassRemover;
+import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.editor.*;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
-import proguard.optimize.info.ProgramClassOptimizationInfo;
-import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
-import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
+import proguard.optimize.info.*;
 import proguard.optimize.peephole.SameClassMethodInliner;
 import proguard.util.ProcessingFlags;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -219,14 +211,16 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         FieldRenamer fieldRenamer = new FieldRenamer(true);
         // Note: the order of the fields is not necessarily the order in which they are assigned
         // For now, let's assume the order matches the order in which they are assigned.
+        // TODO: move visitor to separate class
         lambdaClass.fieldsAccept(
                 new MemberVisitor() {
                     @Override
                     public void visitProgramField(ProgramClass programClass, ProgramField programField) {
                         // Assumption: the only name clash of fields of different classes is
-                        // for fields with the name "INSTANCE". We don't need these fields anyway, so we don't rename them.
-                        // TODO: handle name clashes correctly - this happens also in the case of inner lambda's accessing their
-                        //  enclosing lambda class via
+                        // for fields with the name "INSTANCE".
+                        // We don't need these fields anyway, so we don't rename them.
+                        // TODO: handle name clashes correctly - this happens also in the case of inner lambda's
+                        //  accessing their enclosing lambda class via a public field
                         if (!programField.getName(programClass).equals(KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME))
                         {
                             fieldRenamer.visitProgramField(programClass, programField);
@@ -256,13 +250,14 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
     {
         // Make the non-bridge invoke methods private, so they can be inlined.
+        // TODO: move visitor to separate class
         lambdaClass.accept(new AllMethodVisitor(
                 new MemberVisitor() {
                     @Override
                     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
                         if ((programMethod.u2accessFlags & AccessConstants.BRIDGE) == 0)
                         {
-                            if (Objects.equals(programMethod.getName(programClass), KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE))
+                            if (Objects.equals(programMethod.getName(programClass), KotlinConstants.METHOD_NAME_LAMBDA_INVOKE))
                             {
                                 programMethod.u2accessFlags &= ~AccessConstants.PUBLIC;
                                 programMethod.u2accessFlags |= AccessConstants.PRIVATE;
@@ -367,7 +362,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         ProgramMethod invokeMethod = null;
         for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++) {
             ProgramMethod method = lambdaClass.methods[methodIndex];
-            if (method.getName(lambdaClass).equals(KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE))
+            if (method.getName(lambdaClass).equals(KotlinConstants.METHOD_NAME_LAMBDA_INVOKE))
             {
                 if ((isBridgeMethod && (method.u2accessFlags & AccessConstants.BRIDGE) != 0) ||
                         (!isBridgeMethod && (method.u2accessFlags & AccessConstants.BRIDGE) == 0)) {

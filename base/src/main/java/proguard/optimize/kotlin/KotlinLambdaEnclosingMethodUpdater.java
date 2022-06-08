@@ -5,22 +5,13 @@ import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.attribute.visitor.InnerClassesInfoVisitor;
-import proguard.classfile.constant.AnyMethodrefConstant;
-import proguard.classfile.constant.ClassConstant;
-import proguard.classfile.constant.Constant;
-import proguard.classfile.constant.Utf8Constant;
-import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.kotlin.KotlinConstants;
-import proguard.classfile.util.BranchTargetFinder;
-import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.peephole.RetargetedInnerClassAttributeRemover;
-
-import java.util.*;
 
 public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, AttributeVisitor, MemberVisitor {
 
