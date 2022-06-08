@@ -328,97 +328,90 @@ public class KotlinLambdaMerger implements Pass {
     }
 
     private static boolean lambdaClassHasNoBootstrapMethod(ProgramClass lambdaClass) {
-        final boolean[] bootstrapMethodFound = {false};
-        lambdaClass.attributeAccept(Attribute.BOOTSTRAP_METHODS, new AttributeVisitor() {
-            @Override
-            public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute) {
-                bootstrapMethodFound[0] = true;
-            }
-        });
-        return !bootstrapMethodFound[0];
+        AttributeCounter attributeCounter = new AttributeCounter();
+        lambdaClass.attributeAccept(Attribute.BOOTSTRAP_METHODS, attributeCounter);
+        return attributeCounter.getCount() == 0;
     }
 
-    public static boolean lambdaClassHasNoAccessibleStaticMethods(ProgramClass lambdaClass)
+    private static boolean lambdaClassHasNoAccessibleStaticMethods(ProgramClass lambdaClass)
     {
-        for (int index = 0; index < lambdaClass.u2methodsCount; index++)
-        {
-            ProgramMethod method = lambdaClass.methods[index];
-            if (!method.getName(lambdaClass).equals(ClassConstants.METHOD_NAME_CLINIT)
-                && (method.getAccessFlags() & AccessConstants.STATIC) != 0
-                && ((method.getAccessFlags() & AccessConstants.PRIVATE) == 0))
-            {
-                logger.warn("Lambda class {} contains a static method that cannot be merged: {}", ClassUtil.externalClassName(lambdaClass.getName()), ClassUtil.externalFullMethodDescription(lambdaClass.getName(), method.getAccessFlags(), method.getName(lambdaClass), method.getDescriptor(lambdaClass)));
-                return false;
-            }
-        }
-        return true;
+        MethodCounter nonPrivateStaticMethodCounter = new MethodCounter();
+        lambdaClass.methodsAccept(new MemberAccessFilter(AccessConstants.STATIC, AccessConstants.PRIVATE,
+                                  new MultiMemberVisitor(
+                                  nonPrivateStaticMethodCounter,
+                                  new MemberVisitor() {
+                                      @Override
+                                      public void visitProgramMethod(ProgramClass programClass,
+                                                                     ProgramMethod programMethod) {
+                                          logger.warn("Lambda class {} contains a static method that cannot be merged: {}",
+                                                      ClassUtil.externalClassName(lambdaClass.getName()),
+                                                      ClassUtil.externalFullMethodDescription(lambdaClass.getName(),
+                                                                                              programMethod.getAccessFlags(),
+                                                                                              programMethod.getName(lambdaClass),
+                                                                                              programMethod.getDescriptor(lambdaClass)));
+                                      }
+                                  })));
+        return nonPrivateStaticMethodCounter.getCount() == 0;
     }
 
-    public static boolean lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(ProgramClass lambdaClass)
+    private static boolean lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(ProgramClass lambdaClass)
     {
         String methodNameRegularExpression = "!" + ClassConstants.METHOD_NAME_INIT;
         methodNameRegularExpression += ",!" + ClassConstants.METHOD_NAME_CLINIT;
-        // TODO: create a dedicated CodeSizeCounter visitor
-        final int[] totalCodeSize = {0};
+        CodeSizeCounter codeSizeCounter = new CodeSizeCounter();
         lambdaClass.methodsAccept(new MemberNameFilter(methodNameRegularExpression,
-                                  new AllAttributeVisitor(new AttributeVisitor() {
-                                      @Override
-                                      public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
-
-                                      @Override
-                                      public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-                                          totalCodeSize[0] += codeAttribute.u4codeLength;
-                                      }
-                                  })));
-        return totalCodeSize[0] <= KotlinLambdaGroupBuilder.MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH;
+                                  new AllAttributeVisitor(
+                                  codeSizeCounter)));
+        return codeSizeCounter.getCount() <= KotlinLambdaGroupBuilder.MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH;
     }
 
-    public static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
+    private static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
     {
-        for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++)
-        {
-            Method method = lambdaClass.methods[methodIndex];
-            String methodName = method.getName(lambdaClass);
-            switch (methodName)
-            {
-                case ClassConstants.METHOD_NAME_INIT:
-                case ClassConstants.METHOD_NAME_CLINIT:
-                case KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE:
-                    break;
-                default:
-                    logger.warn("Lambda class {} contains an unexpected method: {}", ClassUtil.externalClassName(lambdaClass.getName()), ClassUtil.externalFullMethodDescription(lambdaClass.getName(), method.getAccessFlags(), methodName, method.getDescriptor(lambdaClass)));
-                    return false;
-            }
-        }
-        return true;
+        String methodNameRegularExpression = "!"  + ClassConstants.METHOD_NAME_INIT;
+        methodNameRegularExpression       += ",!" + ClassConstants.METHOD_NAME_CLINIT;
+        methodNameRegularExpression       += ",!" + ClassConstants.METHOD_NAME_CLINIT;
+        methodNameRegularExpression       += ",!" + KotlinConstants.METHOD_NAME_LAMBDA_INVOKE;
+        MethodCounter methodCounter = new MethodCounter();
+        lambdaClass.methodsAccept(new MemberNameFilter(methodNameRegularExpression,
+                                 new MultiMemberVisitor(
+                                 methodCounter,
+                                 new MemberVisitor() {
+                                     @Override
+                                     public void visitProgramMethod(ProgramClass programClass,
+                                                                    ProgramMethod programMethod) {
+                                         logger.warn("Lambda class {} contains an unexpected method: {}",
+                                                     ClassUtil.externalClassName(lambdaClass.getName()),
+                                                     ClassUtil.externalFullMethodDescription(lambdaClass.getName(),
+                                                                                             programMethod.getAccessFlags(),
+                                                                                             programMethod.getName(programClass),
+                                                                                             programMethod.getDescriptor(lambdaClass)));
+                                     }
+                                 })));
+        return methodCounter.getCount() == 0;
     }
 
-    public static boolean lambdaClassHasExactlyOneInitConstructor(ProgramClass lambdaClass)
+    private static boolean lambdaClassHasExactlyOneInitConstructor(ProgramClass lambdaClass)
     {
-        int count = 0;
-        for (int methodIndex = 0; methodIndex < lambdaClass.u2methodsCount; methodIndex++)
+        MethodCounter initMethodCounter = new MethodCounter();
+        lambdaClass.methodsAccept(new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
+                                  initMethodCounter));
+        if (initMethodCounter.getCount() != 1)
         {
-            Method method = lambdaClass.methods[methodIndex];
-            if (method.getName(lambdaClass).equals(ClassConstants.METHOD_NAME_INIT))
-            {
-                count++;
-            }
+            logger.warn("Lambda class {} has {} <init> constructors.",
+                        ClassUtil.externalClassName(lambdaClass.getName()), initMethodCounter.getCount());
         }
-        if (count != 1)
-        {
-            logger.warn("Lambda class {} has {} <init> constructors.", ClassUtil.externalClassName(lambdaClass.getName()), count);
-        }
-        return count == 1;
+        return initMethodCounter.getCount() == 1;
     }
 
-    public static boolean lambdaClassIsNotDirectlyInvoked(ProgramClass lambdaClass)
+    private static boolean lambdaClassIsNotDirectlyInvoked(ProgramClass lambdaClass)
     {
         Method invokeMethod = KotlinLambdaGroupBuilder.getInvokeMethod(lambdaClass, false);
         if (invokeMethod == null)
         {
             return true;
         }
-        MethodReferenceFinder methodReferenceFinder = new MethodReferenceFinder(invokeMethod, lambdaClass);
+        MethodReferenceFinder methodReferenceFinder = new MethodReferenceFinder(invokeMethod);
+        // TODO: move visitors to separate classes
         lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD, new AttributeVisitor() {
             @Override
             public void visitEnclosingMethodAttribute(Clazz clazz, EnclosingMethodAttribute enclosingMethodAttribute) {
