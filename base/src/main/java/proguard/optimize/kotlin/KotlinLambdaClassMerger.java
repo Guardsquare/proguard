@@ -83,7 +83,8 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
         ProgramClass lambdaGroup = lambdaGroupBuilder.build();
 
         ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(lambdaGroup);
-        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaGroup);
+        ProgramClassOptimizationInfo optimizationInfo =
+                ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaGroup);
         optimizationInfo.setLambdaGroup(lambdaGroup);
 
         // let the lambda group visitor visit the newly created lambda group

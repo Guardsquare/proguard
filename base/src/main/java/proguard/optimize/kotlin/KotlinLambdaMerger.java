@@ -75,9 +75,13 @@ public class KotlinLambdaMerger implements Pass {
             // find all lambda classes with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
-            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE, 0, newProgramClassPoolFiller));
-            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(0, ProcessingFlags.DONT_OPTIMIZE,
-                                                   new ImplementedClassFilter(kotlinLambdaClass, false,
+            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE,
+                                                                                 0,
+                                                   newProgramClassPoolFiller));
+            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(0,
+                                                                                 ProcessingFlags.DONT_OPTIMIZE,
+                                                   new ImplementedClassFilter(kotlinLambdaClass,
+                                                                              false,
                                                    new ClassPoolFiller(lambdaClassPool),
                                                    newProgramClassPoolFiller))
             );
@@ -111,7 +115,8 @@ public class KotlinLambdaMerger implements Pass {
             PrintWriter out = new PrintWriter(System.out, true);
             if (configuration.printLambdaGroupMapping != null)
             {
-                logger.info("Printing lambda group mapping to [{}]...", PrintWriterUtil.fileName(configuration.printLambdaGroupMapping));
+                logger.info("Printing lambda group mapping to [{}]...",
+                            PrintWriterUtil.fileName(configuration.printLambdaGroupMapping));
 
                 PrintWriter mappingWriter =
                          PrintWriterUtil.createPrintWriter(configuration.printLambdaGroupMapping, out);
@@ -174,7 +179,9 @@ public class KotlinLambdaMerger implements Pass {
         logger.debug("{} methods inlined inside lambda groups.", methodInliningCounter.getCount());
     }
 
-    private void shrinkLambdaGroups(ClassPool programClassPool, ClassPool libraryClassPool, ClassPool lambdaGroupClassPool)
+    private void shrinkLambdaGroups(ClassPool programClassPool,
+                                    ClassPool libraryClassPool,
+                                    ClassPool lambdaGroupClassPool)
     {
         SimpleUsageMarker simpleUsageMarker = new SimpleUsageMarker();
         ClassUsageMarker classUsageMarker = new ClassUsageMarker(simpleUsageMarker);
@@ -233,7 +240,7 @@ public class KotlinLambdaMerger implements Pass {
             String interfaceName = programClass.getInterfaceName(interfaceIndex);
             if (interfaceName.startsWith(NAME_KOTLIN_FUNCTION) && interfaceName.length() > NAME_KOTLIN_FUNCTION.length())
             {
-                return String.valueOf(interfaceName.charAt(interfaceName.length()-1));
+                return interfaceName.substring(NAME_KOTLIN_FUNCTION.length());
             }
         }
         throw new IllegalArgumentException("Class " + ClassUtil.externalClassName(programClass.getName()) + " does not implement a Kotlin function interface.");
@@ -246,10 +253,12 @@ public class KotlinLambdaMerger implements Pass {
      */
     public static boolean shouldMerge(ProgramClass lambdaClass)
     {
-        ProgramClassOptimizationInfo optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
+        ProgramClassOptimizationInfo optimizationInfo =
+                ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass);
         return (lambdaClass.getProcessingFlags() & (ProcessingFlags.DONT_OPTIMIZE | ProcessingFlags.DONT_SHRINK)) == 0
                 && lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA)
-                && optimizationInfo != null // if optimisation info is null, then the lambda was not enqueued to be merged
+                // if optimisation info is null, then the lambda was not enqueued to be merged
+                && optimizationInfo != null
                 && optimizationInfo.getLambdaGroup() == null
                 && optimizationInfo.mayBeMerged();
     }
@@ -259,35 +268,45 @@ public class KotlinLambdaMerger implements Pass {
         String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
         if (!lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA))
         {
-            throw new IllegalArgumentException("Class " + externalClassName + " cannot be merged in a Kotlin lambda group, because it is not a subclass of " + ClassUtil.externalClassName(NAME_KOTLIN_LAMBDA) + ".");
+            throw new IllegalArgumentException("Class " + externalClassName + " cannot be merged in a Kotlin " +
+                                               "lambda group, because it is not a subclass of " +
+                                               ClassUtil.externalClassName(NAME_KOTLIN_LAMBDA) + ".");
         }
         else if (!lambdaClassHasExactlyOneInitConstructor(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it has more than 1 <init> constructor.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because " +
+                                               "it has more than 1 <init> constructor.");
         }
         else if (!lambdaClassHasNoBootstrapMethod(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains a bootstrap method that would not be merged into the lambda group.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it " +
+                                               "contains a bootstrap method that would not be merged into the lambda group.");
         }
         else if (!lambdaClassHasNoAccessibleStaticMethods(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains a static method that could be used outside the class itself.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it " +
+                                               "contains a static method that could be used outside the class itself.");
         }
         else if (!lambdaClassIsNotDirectlyInvoked(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it is directly invoked with its specific invoke method.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it is " +
+                                               "directly invoked with its specific invoke method.");
         }
         else if (!nonINSTANCEFieldsAreNotReferencedFromSamePackage(lambdaClass, programClassPool))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because one of its fields, other than the 'INSTANCE' field is referenced by one of its inner classes.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because one of " +
+                                               "its fields, other than the 'INSTANCE' field is referenced by one of its " +
+                                               "inner classes.");
         }
         else if (!lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because its methods are too big to be inlined.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because its " +
+                                               "methods are too big to be inlined.");
         }
         else if (!mergeLambdaClassesWithUnexpectedMethods && !lambdaClassHasNoUnexpectedMethods(lambdaClass))
         {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it contains unexpected methods.");
+            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it " +
+                                               "contains unexpected methods.");
         }
     }
 
@@ -392,11 +411,13 @@ public class KotlinLambdaMerger implements Pass {
         return !methodReferenceFinder.methodReferenceFound();
     }
 
-    public static boolean nonINSTANCEFieldsAreNotReferencedFromSamePackage(ProgramClass lambdaClass, ClassPool programClassPool)
+    private static boolean nonINSTANCEFieldsAreNotReferencedFromSamePackage(ProgramClass lambdaClass,
+                                                                            ClassPool programClassPool)
     {
         AtomicBoolean nonINSTANCEFieldReferenced = new AtomicBoolean(false);
         programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
                                        new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
+                                       // TODO: move visitors to separate classes
                                        clazz1 -> {
                                            if (clazz1 != lambdaClass) {
                                                clazz1.constantPoolEntriesAccept(new ConstantVisitor() {

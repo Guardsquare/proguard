@@ -42,7 +42,8 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
 
     private void updateInitMethodDescriptor(ProgramClass programClass, ProgramMethod programMethod) {
         String newInitDescriptor = getNewInitMethodDescriptor(programClass, programMethod);
-        programMethod.u2descriptorIndex = new ConstantAdder(programClass).addConstant(programClass, new Utf8Constant(newInitDescriptor));
+        programMethod.u2descriptorIndex = new ConstantAdder(programClass).addConstant(programClass,
+                                                                                      new Utf8Constant(newInitDescriptor));
     }
 
     @Override
@@ -55,7 +56,10 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
         }
         catch (ClassCastException exception)
         {
-            logger.error("{} is incorrectly used to visit non-program class / method {} / {}", this.getClass().getName(), ClassUtil.externalClassName(clazz.getName()), ClassUtil.externalFullMethodDescription(clazz.getName(), method.getAccessFlags(), method.getName(clazz), method.getDescriptor(clazz)));
+            logger.error("{} is incorrectly used to visit non-program class / method {} / {}",
+                         this.getClass().getName(), ClassUtil.externalClassName(clazz.getName()),
+                         ClassUtil.externalFullMethodDescription(clazz.getName(),
+                         method.getAccessFlags(), method.getName(clazz), method.getDescriptor(clazz)));
         }
     }
 
@@ -70,7 +74,10 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
         // The classId and arity arguments are the 2 last, which take 1 byte each, as they are of type int.
         int arityIndex = ClassUtil.internalMethodParameterSize(programMethod.getDescriptor(programClass), false) - 1;
 
-        InstructionSequencesReplacer replacer = createInstructionSequenceReplacer(branchTargetFinder, codeAttributeEditor, arityIndex, programClass);
+        InstructionSequencesReplacer replacer = createInstructionSequenceReplacer(branchTargetFinder,
+                                                                                  codeAttributeEditor,
+                                                                                  arityIndex,
+                                                                                  programClass);
 
         codeAttribute.accept(programClass,
                              programMethod,
@@ -111,7 +118,9 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
                         {
                                 builder.aload_0()
                                        .iconst(X)
-                                       .invokespecial(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA, ClassConstants.METHOD_NAME_INIT, "(I)V")
+                                       .invokespecial(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA,
+                                                      ClassConstants.METHOD_NAME_INIT,
+                                                      "(I)V")
                                        .__(),
                                 builder.aload_0()
                                        .iload(arityIndex - 1)
@@ -121,7 +130,9 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
                                                             KotlinLambdaGroupBuilder.FIELD_TYPE_ID))
                                        .aload_0()
                                        .iload(arityIndex)
-                                       .invokespecial(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA, ClassConstants.METHOD_NAME_INIT, "(I)V")
+                                       .invokespecial(KotlinLambdaMerger.NAME_KOTLIN_LAMBDA,
+                                                      ClassConstants.METHOD_NAME_INIT,
+                                                      "(I)V")
                                        .__()
                         }
                 };

@@ -62,7 +62,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     final ExtraDataEntryNameMap extraDataEntryNameMap,
                                     final ClassVisitor notMergedLambdaVisitor)
     {
-        this.classBuilder           = getNewLambdaGroupClassBuilder(lambdaGroupName, programClassPool, libraryClassPool);
+        this.classBuilder           = getNewLambdaGroupClassBuilder(lambdaGroupName,
+                                                                    programClassPool,
+                                                                    libraryClassPool);
         this.configuration          = configuration;
         this.programClassPool       = programClassPool;
         this.libraryClassPool       = libraryClassPool;
@@ -74,7 +76,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         initialiseLambdaGroup();
     }
 
-    private static ClassBuilder getNewLambdaGroupClassBuilder(String lambdaGroupName, ClassPool programClassPool, ClassPool libraryClassPool)
+    private static ClassBuilder getNewLambdaGroupClassBuilder(String lambdaGroupName,
+                                                              ClassPool programClassPool,
+                                                              ClassPool libraryClassPool)
     {
         // The initial builder is used to set up the initial lambda group class
         ClassBuilder initialBuilder = new ClassBuilder(VersionConstants.CLASS_VERSION_1_8,
@@ -110,7 +114,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         KotlinLambdaGroupInvokeMethodBuilder builder = this.invokeMethodBuilders.get(arity);
         if (builder == null)
         {
-            builder = new KotlinLambdaGroupInvokeMethodBuilder(arity, this.classBuilder, this.programClassPool, this.libraryClassPool);
+            builder = new KotlinLambdaGroupInvokeMethodBuilder(arity,
+                                                               this.classBuilder,
+                                                               this.programClassPool,
+                                                               this.libraryClassPool);
             this.invokeMethodBuilders.put(arity, builder);
         }
         return builder;
@@ -282,7 +289,8 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         logger.trace("Copying <init> method of {} to lambda group {}",
                      ClassUtil.externalClassName(lambdaClass.getName()),
                      ClassUtil.externalClassName(this.classBuilder.getProgramClass().getName()));
-        ProgramMethod initMethod = (ProgramMethod)lambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT, null); //, 0, AccessConstants.PRIVATE);
+        ProgramMethod initMethod = (ProgramMethod)lambdaClass.findMethod(ClassConstants.METHOD_NAME_INIT,
+                                                                         null);
         if (initMethod == null)
         {
             throw new NullPointerException("No <init> method was found in lambda class " + lambdaClass);
@@ -298,17 +306,20 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         String newInitDescriptor = KotlinLambdaGroupInitUpdater.getNewInitMethodDescriptor(lambdaClass, initMethod);
 
         // Check whether an init method with this descriptor exists already
-        ProgramMethod existingInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, newInitDescriptor);
+        ProgramMethod existingInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT,
+                                                                                 newInitDescriptor);
 
         if (existingInitMethod != null)
         {
-            //logger.info("Multiple lambda classes (of which {}) with the same <init> descriptor ({}) are merged in the same lambda group ({}).", lambdaClass, oldInitDescriptor, this.classBuilder.getProgramClass());
-            //new ClassEditor(lambdaGroup).removeMethod(existingInitMethod);
             return existingInitMethod;
         }
 
-        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup, ClassConstants.METHOD_NAME_INIT, oldInitDescriptor, AccessConstants.PUBLIC));//, true));
-        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT, oldInitDescriptor);
+        initMethod.accept(lambdaClass, new MethodCopier(lambdaGroup,
+                                                        ClassConstants.METHOD_NAME_INIT,
+                                                        oldInitDescriptor,
+                                                        AccessConstants.PUBLIC));
+        ProgramMethod newInitMethod = (ProgramMethod)lambdaGroup.findMethod(ClassConstants.METHOD_NAME_INIT,
+                                                                            oldInitDescriptor);
 
         // Update the <init> descriptor
         // Add the necessary instructions to entirely new <init> methods
@@ -334,11 +345,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                            ClassUtil.externalClassName(lambdaClass.getName()));
         }
         String newMethodName = createDerivedInvokeMethodName(lambdaClass);
-        invokeMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(), newMethodName, AccessConstants.PRIVATE));
-        ProgramMethod newInitMethod = (ProgramMethod)this.classBuilder.getProgramClass().findMethod(newMethodName, invokeMethod.getDescriptor(lambdaClass));
-        return newInitMethod;
-        // TODO: ensure that fields that are referenced by the copied method exist in the lambda group, are initialised,
-        //  and cast to the correct type inside the copied method
+        invokeMethod.accept(lambdaClass, new MethodCopier(this.classBuilder.getProgramClass(),
+                                                          newMethodName,
+                                                          AccessConstants.PRIVATE));
+        return (ProgramMethod) this.classBuilder.getProgramClass().findMethod(newMethodName,
+                                                                              invokeMethod.getDescriptor(lambdaClass));
     }
 
     private static String createDerivedInvokeMethodName(ProgramClass lambdaClass)
@@ -383,7 +394,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param lambdaClass the lambda class of which the enclosing method must be updated
      * @param lambdaClassId the id that is used for the given lambda class to identify its implementation in the lambda group
      */
-    private void updateLambdaInstantiationSite(ProgramClass lambdaClass, int lambdaClassId, int arity, String constructorDescriptor)
+    private void updateLambdaInstantiationSite(ProgramClass lambdaClass,
+                                               int lambdaClassId,
+                                               int arity,
+                                               String constructorDescriptor)
     {
         logger.info("Updating instantiation of {} in enclosing method(s) to use id {}.",
                     ClassUtil.externalClassName(lambdaClass.getName()), lambdaClassId);
@@ -400,8 +414,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
         // Also update any references that would occur in other classes of the same package.
         this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
-                                            new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
-                                            enclosingMethodUpdater)));
+                                            new ClassNameFilter(lambdaClass.getName(),
+                                                                (ClassVisitor)null,
+                                                                 enclosingMethodUpdater)));
     }
 
     private void addInvokeMethods()
