@@ -6,9 +6,8 @@ import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.attribute.*;
 import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
 import proguard.classfile.constant.FieldrefConstant;
-import proguard.classfile.constant.visitor.ConstantVisitor;
+import proguard.classfile.constant.visitor.*;
 import proguard.classfile.editor.LineNumberTableAttributeTrimmer;
 import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.kotlin.KotlinConstants;
@@ -20,7 +19,6 @@ import proguard.pass.Pass;
 import proguard.shrink.*;
 import proguard.util.*;
 import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KotlinLambdaMerger implements Pass {
 
@@ -416,34 +414,25 @@ public class KotlinLambdaMerger implements Pass {
     private static boolean nonINSTANCEFieldsAreNotReferencedFromSamePackage(ProgramClass lambdaClass,
                                                                             ClassPool programClassPool)
     {
-        AtomicBoolean nonINSTANCEFieldReferenced = new AtomicBoolean(false);
-        programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
-                                       new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
-                                       // TODO: move visitors to separate classes
-                                       clazz1 -> {
-                                           if (clazz1 != lambdaClass) {
-                                               clazz1.constantPoolEntriesAccept(new ConstantVisitor() {
-                                                   @Override
-                                                   public void visitAnyConstant(Clazz clazz, Constant constant) {
-                                                   }
-
-                                                   @Override
-                                                   public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
-                                                       if (fieldrefConstant.referencedClass == lambdaClass
-                                                               && !KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME.equals(fieldrefConstant.getName(clazz)))
-                                                       {
-                                                           nonINSTANCEFieldReferenced.set(true);
-                                                           logger.warn("{} references non-INSTANCE field {} of lambda class {}.",
-                                                                       ClassUtil.externalClassName(clazz.getName()),
-                                                                       ClassUtil.externalFullFieldDescription(fieldrefConstant.referencedField.getAccessFlags(),
-                                                                                                              fieldrefConstant.getName(clazz),
-                                                                                                              fieldrefConstant.getType(clazz)),
-                                                                       ClassUtil.externalClassName(lambdaClass.getName()));
-                                                       }
-                                                   }
-                                               });
-                                           }
-                                       })));
-        return !nonINSTANCEFieldReferenced.get();
+        String regularExpression = ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*";
+        regularExpression       += ",!" + lambdaClass.getName();
+        String fieldRegularExpression = "!" + KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME;
+        FieldReferenceFinder fieldReferenceFinder = new FieldReferenceFinder(lambdaClass,
+                                                                             fieldRegularExpression,
+                                                                             new ConstantVisitor() {
+            @Override
+            public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
+                logger.warn("{} references non-INSTANCE field {} of lambda class {}.",
+                            ClassUtil.externalClassName(clazz.getName()),
+                            ClassUtil.externalFullFieldDescription(fieldrefConstant.referencedField.getAccessFlags(),
+                                                                   fieldrefConstant.getName(clazz),
+                                                                   fieldrefConstant.getType(clazz)),
+                            ClassUtil.externalClassName(lambdaClass.getName()));
+            }
+        });
+        programClassPool.classesAccept(new ClassNameFilter(regularExpression,
+                                       new AllConstantVisitor(
+                                       fieldReferenceFinder)));
+        return !fieldReferenceFinder.isFieldReferenceFound();
     }
 }
