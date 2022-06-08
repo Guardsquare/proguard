@@ -1,11 +1,13 @@
 package testutils
 
 import proguard.classfile.ClassPool
+import proguard.classfile.ProgramClass
 import proguard.classfile.io.ProgramClassWriter
 import proguard.classfile.util.ClassUtil.internalClassName
 import proguard.classfile.visitor.ProgramClassFilter
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
+import java.io.PrintStream
 
 /**
  * A ClassLoader that can load classes from a ProGuardCORE ClassPool.
@@ -25,4 +27,25 @@ class ClassPoolClassLoader(private val classPool: ClassPool) : ClassLoader() {
         if (clazz != null) return defineClass(name, bytes, 0, bytes.size)
         return super.findClass(name)
     }
+}
+
+
+fun captureExecutionOutput(programClassPool: ClassPool, programClassName: String, operation: (Class<*>) -> Unit): String {
+    val loader = ClassPoolClassLoader(programClassPool)
+    val loadedClass = loader.loadClass(programClassName)
+    val stdOutput = System.out
+    val capturedOutput = ByteArrayOutputStream()
+    val capturedOutputStream = PrintStream(capturedOutput)
+    System.setOut(capturedOutputStream)
+    try {
+        operation(loadedClass)
+    } catch (e: Exception) {
+        System.setOut(stdOutput)
+        println()
+        println("Exception: $e")
+        println("Output of method call:")
+        println(capturedOutput)
+    }
+    System.setOut(stdOutput)
+    return capturedOutput.toString()
 }

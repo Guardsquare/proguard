@@ -5,10 +5,12 @@ import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import proguard.Configuration
 import proguard.classfile.AccessConstants
+import proguard.classfile.ClassPool
 import proguard.classfile.ProgramClass
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.editor.InstructionSequenceBuilder
 import proguard.classfile.instruction.visitor.AllInstructionVisitor
+import proguard.classfile.util.ClassUtil
 import proguard.classfile.util.InstructionSequenceMatcher
 import proguard.classfile.visitor.AllMemberVisitor
 import proguard.classfile.visitor.MemberAccessFilter
@@ -16,10 +18,7 @@ import proguard.classfile.visitor.MemberNameFilter
 import proguard.io.ExtraDataEntryNameMap
 import proguard.optimize.info.ProgramClassOptimizationInfo
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter
-import testutils.ClassPoolBuilder
-import testutils.InstructionSequenceCollector
-import testutils.KotlinSource
-import testutils.MatchDetector
+import testutils.*
 
 class KotlinLambdaGroupBuilderTest : FreeSpec({
     val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
@@ -51,9 +50,18 @@ class KotlinLambdaGroupBuilderTest : FreeSpec({
             entryMapper,
             notMergedLambdaVisitor
         )
-        val lambdaClass = programClassPool.getClass("TestKt\$main\$lambda1\$1") as ProgramClass
+        val lambdaClassName = "TestKt\$main\$lambda1\$1"
+        val arity = 0
+        val lambdaClass = programClassPool.getClass(lambdaClassName) as ProgramClass
         lambdaClass.accept(ProgramClassOptimizationInfoSetter())
         val optimizationInfo = ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(lambdaClass)
+        val capturedExecutionOutputBefore = captureExecutionOutput(programClassPool,
+            lambdaClassName) {
+                testClassBefore ->
+            val instance = testClassBefore.getDeclaredConstructor().newInstance()
+            testClassBefore.declaredMethods.single { it.name == "invoke" && it.isBridge }
+                .invoke(instance, null)
+        }
 
         "When the builder adds a lambda class to the lambda group under construction" - {
             builder.visitProgramClass(lambdaClass)
@@ -71,32 +79,18 @@ class KotlinLambdaGroupBuilderTest : FreeSpec({
                 optimizationInfo.lambdaGroupClassId shouldBeGreaterThanOrEqual 0
             }
 
-            /*
+
             "Then the lambda group has the same output on invocation as the original lambda class" {
-                /*val stdOutput = System.out
-                val capturedOutputBefore = ByteArrayOutputStream()
-                val capturedOutputStreamBefore = PrintStream(capturedOutputBefore)
-                //System.setOut(capturedOutputStreamBefore)
-
-                testClassBefore.declaredMethods.single { it.name == "main" && it.isSynthetic}.invoke(null, arrayOf<String>())
-
-                val loaderAfter = ClassPoolClassLoader(newProgramClassPool)
-                val testClassAfter = loaderAfter.loadClass("app.package2.Test2Kt")
-                val capturedOutputAfter = ByteArrayOutputStream()
-                val capturedOutputStreamAfter = PrintStream(capturedOutputBefore)
-                //System.setOut(capturedOutputStreamAfter)
-
-                testClassAfter.declaredMethods.single { it.name == "main" && it.isSynthetic}.invoke(null, arrayOf<String>())
-
-                System.setOut(stdOutput)
-
-                capturedOutputAfter.toByteArray().toString() shouldBe capturedOutputBefore.toByteArray().toString()
-                println(capturedOutputAfter.toByteArray())
-                println()
-                println(capturedOutputBefore.toByteArray())
-            */
+                val capturedExecutionOutputAfter = captureExecutionOutput(ClassPool(lambdaGroup),
+                    lambdaGroupName) {
+                        testClassBefore ->
+                    val instance = testClassBefore.getDeclaredConstructor().newInstance(
+                        optimizationInfo.lambdaGroupClassId, arity)
+                    testClassBefore.declaredMethods.single { it.name == "invoke" && it.isBridge }
+                        .invoke(instance)
+                }
+                capturedExecutionOutputAfter shouldBe capturedExecutionOutputBefore
             }
-             */
         }
     }
 })
