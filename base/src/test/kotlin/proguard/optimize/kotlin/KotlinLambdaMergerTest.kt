@@ -123,6 +123,7 @@ class KotlinLambdaMergerTest : FreeSpec({
         "When the merger is applied to the class pools" - {
             val oldProgramClassPool = ClassPool(programClassPool)
             val originalInvokeMethodCodeBuilder = InstructionSequenceBuilder(oldProgramClassPool, libraryClassPool)
+            /*
             oldProgramClassPool.getClass("app/package2/Test2Kt\$main\$lambda1\$1").accept(
                 AllMemberVisitor(
                     MemberNameFilter(
@@ -143,6 +144,7 @@ class KotlinLambdaMergerTest : FreeSpec({
                     )
                 )
             )
+             */
             val loaderBefore = ClassPoolClassLoader(oldProgramClassPool)
             val testClassBefore = loaderBefore.loadClass("app.package2.Test2Kt")
             val stdOutput = System.out
@@ -210,6 +212,7 @@ class KotlinLambdaMergerTest : FreeSpec({
                 newProgramClassPool.getClass("app/package2/LambdaGroup") shouldNotBe null
             }
 
+            /*
             "Then the instructions of the original lambda's are found in the lambda group" {
                 val lambdaGroup = newProgramClassPool.getClass("app/package1/LambdaGroup")
                 val originalInstructionsMatcher = InstructionSequenceMatcher(
@@ -234,7 +237,7 @@ class KotlinLambdaMergerTest : FreeSpec({
                 )
                 originalInstructionsMatchDetector.matchIsFound shouldBe true
             }
-
+            */
             /*
             "Then program output has not changed after optimisation" {
 
