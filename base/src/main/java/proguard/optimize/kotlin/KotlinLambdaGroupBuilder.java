@@ -209,24 +209,16 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)
     {
         FieldRenamer fieldRenamer = new FieldRenamer(true);
+        // Assumption: the only name clash of fields of different classes is
+        // for fields with the name "INSTANCE".
+        // We don't need these fields anyway, so we don't rename them.
+        // TODO: handle name clashes correctly - this happens also in the case of inner lambda's
+        //  accessing their enclosing lambda class via a public field
+        String fieldNameRegularExpression = "!" + KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME;
         // Note: the order of the fields is not necessarily the order in which they are assigned
         // For now, let's assume the order matches the order in which they are assigned.
-        // TODO: move visitor to separate class
-        lambdaClass.fieldsAccept(
-                new MemberVisitor() {
-                    @Override
-                    public void visitProgramField(ProgramClass programClass, ProgramField programField) {
-                        // Assumption: the only name clash of fields of different classes is
-                        // for fields with the name "INSTANCE".
-                        // We don't need these fields anyway, so we don't rename them.
-                        // TODO: handle name clashes correctly - this happens also in the case of inner lambda's
-                        //  accessing their enclosing lambda class via a public field
-                        if (!programField.getName(programClass).equals(KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME))
-                        {
-                            fieldRenamer.visitProgramField(programClass, programField);
-                        }
-                    }
-                });
+        lambdaClass.fieldsAccept(new MemberNameFilter(fieldNameRegularExpression,
+                                 fieldRenamer));
     }
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
@@ -236,7 +228,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.accept(new AllMemberVisitor(
                            new ProgramMemberOptimizationInfoSetter()));
 
-        // Allow methods to become
+        // Allow methods to be inlined
         lambdaClass.accept(new AllMethodVisitor(
                            new AllAttributeVisitor(
                            new SameClassMethodInliner(configuration.microEdition,
@@ -250,22 +242,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
     {
         // Make the non-bridge invoke methods private, so they can be inlined.
-        // TODO: move visitor to separate class
-        lambdaClass.accept(new AllMethodVisitor(
-                new MemberVisitor() {
-                    @Override
-                    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
-                        if ((programMethod.u2accessFlags & AccessConstants.BRIDGE) == 0)
-                        {
-                            if (Objects.equals(programMethod.getName(programClass), KotlinConstants.METHOD_NAME_LAMBDA_INVOKE))
-                            {
-                                programMethod.u2accessFlags &= ~AccessConstants.PUBLIC;
-                                programMethod.u2accessFlags |= AccessConstants.PRIVATE;
-                            }
-                        }
-                    }
-                }
-        ));
+        lambdaClass.methodsAccept(new MemberNameFilter(KotlinConstants.METHOD_NAME_LAMBDA_INVOKE,
+                                  new MemberAccessFilter(0, AccessConstants.BRIDGE,
+                                  new MultiMemberVisitor(
+                                  new MemberAccessFlagCleaner(AccessConstants.PUBLIC),
+                                  new MemberAccessFlagSetter(AccessConstants.PRIVATE)))));
         inlineMethodsInsideClass(lambdaClass);
     }
 
@@ -399,10 +380,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.attributeAccept(Attribute.ENCLOSING_METHOD, enclosingMethodUpdater);
 
         // Also update any references that would occur in other classes of the same package.
-        this.programClassPool.classesAccept(new ClassNameFilter(ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*",
-                                            new ClassNameFilter(lambdaClass.getName(),
-                                                                (ClassVisitor)null,
-                                                                 enclosingMethodUpdater)));
+        String regularExpression = ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*";
+        regularExpression       += ",!" + lambdaClass.getName();
+        this.programClassPool.classesAccept(new ClassNameFilter(regularExpression,
+                                                                enclosingMethodUpdater));
     }
 
     private void addInvokeMethods()

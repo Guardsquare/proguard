@@ -347,7 +347,7 @@ public class KotlinLambdaMerger implements Pass {
     private static boolean lambdaClassHasTotalMethodCodeSizeThatCanBeInlined(ProgramClass lambdaClass)
     {
         String methodNameRegularExpression = "!" + ClassConstants.METHOD_NAME_INIT;
-        methodNameRegularExpression += ",!" + ClassConstants.METHOD_NAME_CLINIT;
+        methodNameRegularExpression       += ",!" + ClassConstants.METHOD_NAME_CLINIT;
         CodeSizeCounter codeSizeCounter = new CodeSizeCounter();
         lambdaClass.methodsAccept(new MemberNameFilter(methodNameRegularExpression,
                                   new AllAttributeVisitor(
