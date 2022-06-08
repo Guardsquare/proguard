@@ -237,14 +237,12 @@ class KotlinLambdaMergerTest : FreeSpec({
                 )
                 originalInstructionsMatchDetector.matchIsFound shouldBe true
             }
-            */
-            /*
-            "Then program output has not changed after optimisation" {
 
+            "Then the program output has not changed after optimisation" {
                 val loaderAfter = ClassPoolClassLoader(newProgramClassPool)
                 val testClassAfter = loaderAfter.loadClass("app.package2.Test2Kt")
                 val capturedOutputAfter = ByteArrayOutputStream()
-                val capturedOutputStreamAfter = PrintStream(capturedOutputBefore)
+                val capturedOutputStreamAfter = PrintStream(capturedOutputAfter)
                 System.setOut(capturedOutputStreamAfter)
 
                 try {
@@ -264,15 +262,9 @@ class KotlinLambdaMergerTest : FreeSpec({
                     )
                     throw e
                 }
-
                 System.setOut(stdOutput)
-
                 capturedOutputAfter.toString() shouldBe capturedOutputBefore.toString()
-                println(capturedOutputBefore)
-                println()
-                println(capturedOutputAfter)
             }
-             */
         }
     }
 })

@@ -13,6 +13,7 @@ import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.info.*;
 import proguard.optimize.peephole.SameClassMethodInliner;
+import proguard.preverify.CodePreverifier;
 import proguard.util.ProcessingFlags;
 import java.util.HashMap;
 import java.util.Map;
@@ -399,6 +400,9 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         addInvokeMethods();
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         lambdaGroup.setProcessingFlags(lambdaGroup.getProcessingFlags() | ProcessingFlags.INJECTED);
+        lambdaGroup.accept(new AllMemberVisitor(
+                           new AllAttributeVisitor(
+                           new CodePreverifier(configuration.microEdition))));
         return lambdaGroup;
     }
 }

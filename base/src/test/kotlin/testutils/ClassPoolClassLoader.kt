@@ -16,7 +16,6 @@ class ClassPoolClassLoader(private val classPool: ClassPool) : ClassLoader() {
         val clazz = classPool.getClass(internalClassName(name))
         val byteArrayOutputStream = ByteArrayOutputStream()
         try {
-            println(name)
             clazz.accept(ProgramClassFilter(ProgramClassWriter(DataOutputStream(byteArrayOutputStream))))
         } catch (e: Exception) {
             println("Exception for class $name: $e")
