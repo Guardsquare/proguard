@@ -111,23 +111,11 @@ class KotlinLambdaMergerTest : FreeSpec({
 
         "When the merger is applied to the class pools" - {
             val oldProgramClassPool = ClassPool(programClassPool)
-            val loaderBefore = ClassPoolClassLoader(oldProgramClassPool)
-            val testClassBefore = loaderBefore.loadClass("app.package2.Test2Kt")
-            val stdOutput = System.out
-            val capturedOutputBefore = ByteArrayOutputStream()
-            val capturedOutputStreamBefore = PrintStream(capturedOutputBefore)
-            System.setOut(capturedOutputStreamBefore)
-            try {
-                testClassBefore.declaredMethods.single { it.name == "main" && it.isSynthetic }
-                    .invoke(null, arrayOf<String>())
-            } catch (e: Exception) {
-                System.setOut(stdOutput)
-                println()
-                println("Exception: $e")
-                println("Output of method call:")
-                println(capturedOutputBefore)
+            val capturedExecutionOutputBefore = captureExecutionOutput(oldProgramClassPool,
+                "app.package2.Test2Kt") {
+                    testClassBefore -> testClassBefore.declaredMethods.single { it.name == "main" && it.isSynthetic }
+                .invoke(null, arrayOf<String>())
             }
-            System.setOut(stdOutput)
 
             val appView = AppView(programClassPool, libraryClassPool, null, nameMapper)
             merger.execute(appView)
@@ -179,31 +167,12 @@ class KotlinLambdaMergerTest : FreeSpec({
             }
 
             "Then the program output has not changed after optimisation" {
-                val loaderAfter = ClassPoolClassLoader(newProgramClassPool)
-                val testClassAfter = loaderAfter.loadClass("app.package2.Test2Kt")
-                val capturedOutputAfter = ByteArrayOutputStream()
-                val capturedOutputStreamAfter = PrintStream(capturedOutputAfter)
-                System.setOut(capturedOutputStreamAfter)
-
-                try {
-                    testClassAfter.declaredMethods.single { it.name == "main" && it.isSynthetic }
-                        .invoke(null, arrayOf<String>())
-                } catch (e: Exception) {
-                    System.setOut(stdOutput)
-                    println("Exception while executing test class after lambda merging.")
-                    println(e)
-                    e.printStackTrace()
-                    val lambdaGroup = newProgramClassPool.getClass("app/package2/LambdaGroup")
-                    lambdaGroup.accept(AllMemberVisitor(
-                                       MemberNameFilter("invoke",
-                                       AllAttributeVisitor(
-                                       AllInstructionVisitor(
-                                       InstructionPrinter()))))
-                    )
-                    throw e
+                val capturedExecutionOutputAfter = captureExecutionOutput(newProgramClassPool,
+                    "app.package2.Test2Kt") {
+                        testClassBefore -> testClassBefore.declaredMethods.single { it.name == "main" && it.isSynthetic }
+                    .invoke(null, arrayOf<String>())
                 }
-                System.setOut(stdOutput)
-                capturedOutputAfter.toString() shouldBe capturedOutputBefore.toString()
+                capturedExecutionOutputAfter shouldBe capturedExecutionOutputBefore
             }
         }
     }
