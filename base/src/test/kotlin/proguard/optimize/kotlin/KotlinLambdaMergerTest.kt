@@ -26,20 +26,14 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import proguard.AppView
 import proguard.Configuration
-import proguard.classfile.AccessConstants
-import proguard.classfile.ClassPool
-import proguard.classfile.Clazz
-import proguard.classfile.Method
+import proguard.classfile.*
 import proguard.classfile.attribute.CodeAttribute
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.constant.ClassConstant
+import proguard.classfile.constant.Constant
 import proguard.classfile.constant.visitor.ConstantVisitor
 import proguard.classfile.editor.InstructionSequenceBuilder
 import proguard.classfile.instruction.Instruction
@@ -51,13 +45,8 @@ import proguard.classfile.visitor.AllMemberVisitor
 import proguard.classfile.visitor.MemberAccessFilter
 import proguard.classfile.visitor.MemberNameFilter
 import proguard.io.ExtraDataEntryNameMap
-import testutils.ClassPoolBuilder
-import testutils.ClassPoolClassLoader
-import testutils.InstructionSequenceCollector
-import testutils.KotlinSource
-import testutils.MatchDetector
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
+import testutils.*
+import java.io.*
 
 class KotlinLambdaMergerTest : FreeSpec({
 
@@ -122,29 +111,6 @@ class KotlinLambdaMergerTest : FreeSpec({
 
         "When the merger is applied to the class pools" - {
             val oldProgramClassPool = ClassPool(programClassPool)
-            val originalInvokeMethodCodeBuilder = InstructionSequenceBuilder(oldProgramClassPool, libraryClassPool)
-            /*
-            oldProgramClassPool.getClass("app/package2/Test2Kt\$main\$lambda1\$1").accept(
-                AllMemberVisitor(
-                    MemberNameFilter(
-                        "invoke",
-                        MemberAccessFilter(
-                            0, AccessConstants.SYNTHETIC,
-                            AllAttributeVisitor(
-                                AllInstructionVisitor(
-                                    MultiInstructionVisitor(
-                                        InstructionPrinter(),
-                                        InstructionSequenceCollector(
-                                            originalInvokeMethodCodeBuilder
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-             */
             val loaderBefore = ClassPoolClassLoader(oldProgramClassPool)
             val testClassBefore = loaderBefore.loadClass("app.package2.Test2Kt")
             val stdOutput = System.out
@@ -210,32 +176,6 @@ class KotlinLambdaMergerTest : FreeSpec({
             "Then for each package with lambda's a lambda group has been created." {
                 newProgramClassPool.getClass("app/package1/LambdaGroup") shouldNotBe null
                 newProgramClassPool.getClass("app/package2/LambdaGroup") shouldNotBe null
-            }
-
-            /*
-            "Then the instructions of the original lambda's are found in the lambda group" {
-                val lambdaGroup = newProgramClassPool.getClass("app/package1/LambdaGroup")
-                val originalInstructionsMatcher = InstructionSequenceMatcher(
-                    originalInvokeMethodCodeBuilder.constants(),
-                    originalInvokeMethodCodeBuilder.instructions()
-                )
-                val originalInstructionsMatchDetector = MatchDetector(originalInstructionsMatcher)
-                lambdaGroup.accept(
-                    AllMemberVisitor(
-                        MemberNameFilter(
-                            "invoke",
-                            MemberAccessFilter(
-                                0, AccessConstants.SYNTHETIC,
-                                AllAttributeVisitor(
-                                    AllInstructionVisitor(
-                                        originalInstructionsMatchDetector
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-                originalInstructionsMatchDetector.matchIsFound shouldBe true
             }
 
             "Then the program output has not changed after optimisation" {
