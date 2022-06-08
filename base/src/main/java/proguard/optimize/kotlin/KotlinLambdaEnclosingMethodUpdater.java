@@ -97,7 +97,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
         // remove all references to lambda class from the constant pool of its enclosing class
         enclosingClass.accept(new ConstantPoolShrinker());
 
-        // ensure that the newly created lambda group is part of the resulting output as a dependency of this enclosing class
+        // ensure that the newly created lambda group is part of the resulting output
+        // as a dependency of this enclosing class
         extraDataEntryNameMap.addExtraClassToClass(enclosingClass, this.lambdaGroup);
     }
 

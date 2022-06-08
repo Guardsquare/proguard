@@ -232,7 +232,15 @@ public class KotlinLambdaMerger implements Pass {
         return kotlinLambdaClass;
     }
 
-    public static String getArityFromInterface(ProgramClass programClass)
+    /**
+     * Returns the arity of the function interface that is implemented by a given class.
+     * @param programClass the class of which the arity must be determined
+     * @return the value following the base name "kotlin/jvm/functions/Function". This can be a number going from
+     *         0 to 22 or the character "N". For example, for a class implementing the interface
+     *         "kotlin/jvm/functions/Function5" the value "5" is returned.
+     * @throws IllegalArgumentException if the given programClass does not implement a Kotlin function interface.
+     */
+    public static String getArityFromInterface(ProgramClass programClass) throws IllegalArgumentException
     {
         for (int interfaceIndex = 0; interfaceIndex < programClass.u2interfacesCount; interfaceIndex++)
         {
@@ -262,7 +270,17 @@ public class KotlinLambdaMerger implements Pass {
                 && optimizationInfo.mayBeMerged();
     }
 
-    public static void ensureCanMerge(ProgramClass lambdaClass, boolean mergeLambdaClassesWithUnexpectedMethods, ClassPool programClassPool) throws IllegalArgumentException
+    /**
+     * Checks whether the given lambda class can be merged and throws an exception if it cannot be merged.
+     * @param lambdaClass the lambda class for which it should be checked whether it can be merged
+     * @param mergeLambdaClassesWithUnexpectedMethods a configuration setting that allows merging lambda classes that
+ *                                                    contain unexpected instance methods
+     * @param programClassPool the program class pool in which the lambda class is defined and used
+     * @throws IllegalArgumentException if the given lambda class cannot be merged
+     */
+    public static void ensureCanMerge(ProgramClass lambdaClass,
+                                      boolean mergeLambdaClassesWithUnexpectedMethods,
+                                      ClassPool programClassPool) throws IllegalArgumentException
     {
         String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
         if (!lambdaClass.extendsOrImplements(NAME_KOTLIN_LAMBDA))
