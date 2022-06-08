@@ -242,22 +242,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)
     {
         // Make the non-bridge invoke methods private, so they can be inlined.
-        // TODO: move visitor to separate class
-        lambdaClass.accept(new AllMethodVisitor(
-                new MemberVisitor() {
-                    @Override
-                    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
-                        if ((programMethod.u2accessFlags & AccessConstants.BRIDGE) == 0)
-                        {
-                            if (Objects.equals(programMethod.getName(programClass), KotlinConstants.METHOD_NAME_LAMBDA_INVOKE))
-                            {
-                                programMethod.u2accessFlags &= ~AccessConstants.PUBLIC;
-                                programMethod.u2accessFlags |= AccessConstants.PRIVATE;
-                            }
-                        }
-                    }
-                }
-        ));
+        lambdaClass.methodsAccept(new MemberNameFilter(KotlinConstants.METHOD_NAME_LAMBDA_INVOKE,
+                                  new MemberAccessFilter(0, AccessConstants.BRIDGE,
+                                  new MultiMemberVisitor(
+                                  new MemberAccessFlagCleaner(AccessConstants.PUBLIC),
+                                  new MemberAccessFlagSetter(AccessConstants.PRIVATE)))));
         inlineMethodsInsideClass(lambdaClass);
     }
 
