@@ -59,6 +59,24 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
         this.extraDataEntryNameMap = extraDataEntryNameMap;
     }
 
+    // Implementations for MemberVisitor
+
+    @Override
+    public void visitProgramMethod(ProgramClass enclosingClass, ProgramMethod enclosingMethod)
+    {
+        // the given class must be the class that defines the lambda
+        // the given method must be the method where the lambda is defined
+
+        if (visitEnclosingMethod) {
+            return;
+        }
+        visitEnclosingMethod = true;
+        enclosingMethod.attributesAccept(enclosingClass, this);
+        visitEnclosingMethod = false;
+    }
+
+    // Implementations for AttributeVisitor
+
     @Override
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
@@ -90,20 +108,6 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
 
         // ensure that the newly created lambda group is part of the resulting output as a dependency of this enclosing class
         extraDataEntryNameMap.addExtraClassToClass(enclosingClass, this.lambdaGroup);
-    }
-
-    @Override
-    public void visitProgramMethod(ProgramClass enclosingClass, ProgramMethod enclosingMethod)
-    {
-        // the given class must be the class that defines the lambda
-        // the given method must be the method where the lambda is defined
-
-        if (visitEnclosingMethod) {
-            return;
-        }
-        visitEnclosingMethod = true;
-        enclosingMethod.attributesAccept(enclosingClass, this);
-        visitEnclosingMethod = false;
     }
 
     @Override
