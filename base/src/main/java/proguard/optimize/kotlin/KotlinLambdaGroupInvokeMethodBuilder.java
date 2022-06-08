@@ -1,10 +1,9 @@
 package proguard.optimize.kotlin;
 
 import proguard.classfile.*;
-import proguard.classfile.editor.ClassBuilder;
-import proguard.classfile.editor.CompactCodeAttributeComposer;
-import proguard.classfile.editor.InstructionSequenceBuilder;
+import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
+import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.ClassUtil;
 
 import java.util.ArrayList;
@@ -175,7 +174,7 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
     public ProgramMethod build()
     {
         return classBuilder.addAndReturnMethod(AccessConstants.PUBLIC | AccessConstants.SYNTHETIC,
-                                               METHOD_NAME_INVOKE,
+                                               KotlinConstants.METHOD_NAME_LAMBDA_INVOKE,
                                                getMethodDescriptorForArity(this.arity),
                                                this.methodsToBeCalled.size() * 10,
                                                this.buildCodeBuilder());
