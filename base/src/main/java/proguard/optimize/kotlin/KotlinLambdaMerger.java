@@ -37,7 +37,6 @@ public class KotlinLambdaMerger implements Pass {
 
     public static final String NAME_KOTLIN_LAMBDA     = "kotlin/jvm/internal/Lambda";
     public static final String NAME_KOTLIN_FUNCTION  = "kotlin/jvm/functions/Function";
-    public static final String NAME_KOTLIN_FUNCTION0  = "kotlin/jvm/functions/Function0";
     public static final String NAME_KOTLIN_FUNCTIONN  = "kotlin/jvm/functions/FunctionN";
 
     public static boolean lambdaMergingDone = false;

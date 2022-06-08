@@ -9,9 +9,7 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.Utf8Constant;
 import proguard.classfile.editor.*;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.util.BranchTargetFinder;
-import proguard.classfile.util.ClassUtil;
-import proguard.classfile.util.InstructionSequenceMatcher;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.MemberVisitor;
 
 public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVisitor {
@@ -91,8 +89,7 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
     public static String getNewInitMethodDescriptor(ProgramClass programClass, ProgramMethod programMethod)
     {
         String oldInitDescriptor = programMethod.getDescriptor(programClass);
-        String newInitDescriptor =  oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
-        return newInitDescriptor;
+        return oldInitDescriptor.substring(0, oldInitDescriptor.length() - 2) + "II)V";
     }
 
     private InstructionSequencesReplacer createInstructionSequenceReplacer(BranchTargetFinder branchTargetFinder,

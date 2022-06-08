@@ -33,8 +33,6 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     public static final String FIELD_NAME_ID                             = "classId";
     public static final String FIELD_TYPE_ID                             = "I";
-    public static final String FIELD_NAME_PREFIX_FREE_VARIABLE           = "freeVar";
-    public static final String FIELD_TYPE_FREE_VARIABLE                  = "Ljava/lang/Object;";
     public static final String METHOD_NAME_SUFFIX_INVOKE                 = "$invoke";
     protected static final int MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH = Integer.parseInt(System.getProperty("maximum.resulting.code.length", "65535"));
 
@@ -95,18 +93,11 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private void initialiseLambdaGroup()
     {
         addIdField();
-        addFreeVariableFields();
     }
 
     private void addIdField()
     {
         classBuilder.addAndReturnField(AccessConstants.PRIVATE, FIELD_NAME_ID, FIELD_TYPE_ID);
-    }
-
-    private void addFreeVariableFields()
-    {
-        // TODO: add support for non-empty closures
-        //  by adding fields
     }
 
     private KotlinLambdaGroupInvokeMethodBuilder getInvokeMethodBuilder(int arity)
@@ -429,10 +420,6 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     public ProgramClass build()
     {
-        // create <init>(int id)
-        // create invoke(...) method, based on invokeArity
-        //
-        //addInitConstructors();
         addInvokeMethods();
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
         lambdaGroup.setProcessingFlags(lambdaGroup.getProcessingFlags() | ProcessingFlags.INJECTED);

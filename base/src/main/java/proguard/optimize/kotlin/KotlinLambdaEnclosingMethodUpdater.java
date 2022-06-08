@@ -74,31 +74,6 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
         visitEnclosingMethodAttribute = true;
         currentLambdaClass = lambdaClass;
         currentEnclosingClass = enclosingClass;
-        /*
-        enclosingMethodAttribute.referencedMethodAccept(this);
-        if (enclosingMethodAttribute.referencedMethod == null)
-        {
-            logger.warn("No enclosing method was found for {}, so lambda merging will break the code that uses this class.", lambdaClass);
-            logger.info("Assuming that {} is used in the <clinit> constructor of {}", lambdaClass, enclosingClass);
-            Method clinitMethod = enclosingClass.findMethod(ClassConstants.METHOD_NAME_CLINIT, null);
-            if (clinitMethod == null)
-            {
-                logger.warn("No <clinit> method found for {}, so the usage of {} will not be updated ...", enclosingClass, lambdaClass);
-            }
-            else
-            {
-                clinitMethod.accept(enclosingClass, this);
-            }
-        }
-        else {
-            Method inlinedMethod = enclosingClass.findMethod(enclosingMethodAttribute.referencedMethod.getName(enclosingClass) + "$$forInline", null);
-            if (inlinedMethod != null)
-            {
-                logger.info("The enclosing method of lambda class {} has an inlined version, which will also be updated.", lambdaClass);
-                inlinedMethod.accept(enclosingClass, this);
-            }
-        }
-        */
 
         // Visit all methods of the enclosing class, assuming that those are the only methods that can contain
         // references to this lambda class.
