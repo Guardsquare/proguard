@@ -37,6 +37,7 @@ public class KotlinLambdaMerger implements Pass {
         this.configuration = configuration;
     }
 
+    // Implementations for Pass
     @Override
     public void execute(AppView appView) throws Exception
     {
@@ -51,7 +52,8 @@ public class KotlinLambdaMerger implements Pass {
         // get the Lambda class and the Function0 interface
         Clazz kotlinLambdaClass = getKotlinLambdaClass(appView.programClassPool, appView.libraryClassPool);
         if (kotlinLambdaClass == null) {
-            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.", NAME_KOTLIN_LAMBDA);
+            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.",
+                        NAME_KOTLIN_LAMBDA);
         }
         else
         {
@@ -239,7 +241,8 @@ public class KotlinLambdaMerger implements Pass {
                 return interfaceName.substring(NAME_KOTLIN_FUNCTION.length());
             }
         }
-        throw new IllegalArgumentException("Class " + ClassUtil.externalClassName(programClass.getName()) + " does not implement a Kotlin function interface.");
+        throw new IllegalArgumentException("Class " + ClassUtil.externalClassName(programClass.getName()) +
+                                           " does not implement a Kotlin function interface.");
     }
 
     /**
