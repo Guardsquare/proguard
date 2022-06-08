@@ -417,7 +417,6 @@ public class KotlinLambdaMerger implements Pass {
                                                                             ClassPool programClassPool)
     {
         String regularExpression = ClassUtil.internalPackagePrefix(lambdaClass.getName()) + "*";
-        regularExpression       += ",!" + lambdaClass.getName();
         String fieldRegularExpression = "!" + KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME;
         FieldReferenceFinder fieldReferenceFinder = new FieldReferenceFinder(lambdaClass,
                                                                              fieldRegularExpression,
@@ -433,8 +432,9 @@ public class KotlinLambdaMerger implements Pass {
             }
         });
         programClassPool.classesAccept(new ClassNameFilter(regularExpression,
+                                       new ClassNameFilter(lambdaClass.getName(), (ClassVisitor)null,
                                        new AllConstantVisitor(
-                                       fieldReferenceFinder)));
+                                       fieldReferenceFinder))));
         return !fieldReferenceFinder.isFieldReferenceFound();
     }
 }
