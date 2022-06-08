@@ -2,34 +2,23 @@ package proguard.optimize.kotlin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.AppView;
-import proguard.Configuration;
+import proguard.*;
 import proguard.classfile.*;
-import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.BootstrapMethodsAttribute;
-import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.EnclosingMethodAttribute;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.Constant;
+import proguard.classfile.attribute.*;
+import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.constant.*;
 import proguard.classfile.constant.FieldrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.LineNumberTableAttributeTrimmer;
 import proguard.classfile.instruction.visitor.InstructionCounter;
 import proguard.classfile.kotlin.KotlinConstants;
-import proguard.classfile.util.ClassInitializer;
-import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
-import proguard.optimize.info.ProgramClassOptimizationInfo;
-import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
-import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
-import proguard.optimize.peephole.LineNumberLinearizer;
-import proguard.optimize.peephole.SameClassMethodInliner;
+import proguard.optimize.info.*;
+import proguard.optimize.peephole.*;
 import proguard.pass.Pass;
 import proguard.shrink.*;
-import proguard.util.PrintWriterUtil;
-import proguard.util.ProcessingFlags;
-
+import proguard.util.*;
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -200,7 +189,7 @@ public class KotlinLambdaMerger implements Pass {
 
         lambdaGroupClassPool.classesAccept(new AllMemberVisitor(
                                            new MultiMemberVisitor(
-                                           new MemberNameFilter(KotlinLambdaGroupInvokeMethodBuilder.METHOD_NAME_INVOKE,
+                                           new MemberNameFilter(KotlinConstants.METHOD_NAME_LAMBDA_INVOKE,
                                            classUsageMarker),
                                            new MemberNameFilter(ClassConstants.METHOD_NAME_INIT,
                                            classUsageMarker),
