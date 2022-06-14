@@ -40,14 +40,18 @@ class GradlePluginIntegrationTest : FreeSpec({
         FileUtils.copyDirectory(fixture, projectRoot)
         TestPluginClasspath.applyToRootGradle(projectRoot)
 
-        val result = GradleRunner.create()
-            .forwardOutput()
-            .withArguments("proguard")
-            .withPluginClasspath()
-            .withProjectDir(projectRoot)
-            .build()
+        "When the build is executed" - {
+            val result = GradleRunner.create()
+                .forwardOutput()
+                .withArguments("proguard")
+                .withPluginClasspath()
+                .withProjectDir(projectRoot)
+                .build()
 
-        result.output shouldContain "SUCCESSFUL"
+            "Then the build was successful" {
+                result.output shouldContain "SUCCESSFUL"
+            }
+        }
     }
 
     "gradle plugin can be configured via #configOption" - {
