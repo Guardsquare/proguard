@@ -96,6 +96,7 @@ def copyExamples = tasks.register('copyExamples', Copy) {
     from("$rootProject.rootDir/examples") {
         include 'spring-boot/**'
         include 'gradle-kotlin-dsl/**'
+        include 'application/**'
     }
     into "$buildDir/fixtures"
 }

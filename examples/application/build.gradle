@@ -1,0 +1,62 @@
+import proguard.gradle.ProGuardTask
+import org.gradle.internal.jvm.Jvm
+
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.2.1'
+    }
+}
+
+plugins {
+    id 'application'
+    id 'com.guardsquare.proguard' apply false
+}
+
+group = 'com.example'
+version = '0.0.1'
+
+application {
+    mainClass.set('com.example.App')
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:30.1.1-jre'
+}
+
+ext.baseCoordinates = "${project.name}-${project.version}"
+
+tasks.register('proguard', ProGuardTask) {
+    configuration file('proguard.pro')
+
+    injars(tasks.named('jar', Jar).flatMap { it.archiveFile })
+    libraryjars(javaRuntime())// + configurations.proguard)
+
+    outjars(layout.buildDirectory.file("libs/${baseCoordinates}-minified.jar"))
+}
+
+/**
+ * @return The JDK, for use by Proguard.
+ */
+List<File> javaRuntime() {
+    Jvm jvm = Jvm.current()
+    FilenameFilter filter = { _, fileName -> fileName.endsWith(".jar") || fileName.endsWith(".jmod") }
+
+    return ['jmods' /* JDK 9+ */, 'bundle/Classes' /* mac */, 'jre/lib' /* linux */]
+            .collect { new File(jvm.javaHome, it) }
+            .findAll { it.exists() }
+            .collectMany { it.listFiles(filter) as List }
+            .toSorted()
+            .tap {
+                if (isEmpty()) {
+                    throw new IllegalStateException("Could not find JDK ${jvm.javaVersion.majorVersion} runtime")
+                }
+            }
+}

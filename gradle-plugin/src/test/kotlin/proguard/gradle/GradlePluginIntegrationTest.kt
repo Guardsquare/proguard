@@ -54,6 +54,26 @@ class GradlePluginIntegrationTest : FreeSpec({
         }
     }
 
+    "Gradle plugin is compatible with the configuration cache" - {
+        val projectRoot = tempdir()
+        val fixture = File(GradlePluginIntegrationTest::class.java.classLoader.getResource("application").path)
+        FileUtils.copyDirectory(fixture, projectRoot)
+        TestPluginClasspath.applyToRootGradle(projectRoot)
+
+        "When the build is executed" - {
+            val result = GradleRunner.create()
+                .forwardOutput()
+                .withArguments("proguard", "--configuration-cache")
+                .withPluginClasspath()
+                .withProjectDir(projectRoot)
+                .build()
+
+            "Then the build was successful with configuration cache" {
+                result.output shouldContain "SUCCESSFUL"
+            }
+        }
+    }
+
     "gradle plugin can be configured via #configOption" - {
         include(testConfigOption("proguard"))
         include(testConfigOption("proguardWithConfigFile"))
