@@ -32,6 +32,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.TestPluginClasspath
+import java.lang.management.ManagementFactory
 
 class GradlePluginIntegrationTest : FreeSpec({
     "Gradle plugin can be applied to spring-boot sample" - {
@@ -54,7 +55,9 @@ class GradlePluginIntegrationTest : FreeSpec({
         }
     }
 
-    "Gradle plugin is compatible with the configuration cache" - {
+    // ProguardTask is still incompatible, but will not fail the build. Once the issue is resolved, this test will fail
+    // and should be updated to demonstrate compatibility.
+    "ProguardTask will not fail when configuration cache is used" - {
         val projectRoot = tempdir()
         val fixture = File(GradlePluginIntegrationTest::class.java.classLoader.getResource("application").path)
         FileUtils.copyDirectory(fixture, projectRoot)
@@ -65,11 +68,16 @@ class GradlePluginIntegrationTest : FreeSpec({
                 .forwardOutput()
                 .withArguments("proguard", "--configuration-cache")
                 .withPluginClasspath()
+                .withGradleVersion("7.4")
                 .withProjectDir(projectRoot)
+                // Ensure this value is true when `--debug-jvm` is passed to Gradle, and false otherwise
+                .withDebug(ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0)
                 .build()
 
             "Then the build was successful with configuration cache" {
                 result.output shouldContain "SUCCESSFUL"
+                // E.g., "Configuration cache entry discarded with 4 problems."
+                result.output shouldContain "Configuration cache entry discarded with"
             }
         }
     }
