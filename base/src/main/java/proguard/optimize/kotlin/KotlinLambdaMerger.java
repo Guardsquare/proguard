@@ -328,7 +328,7 @@ public class KotlinLambdaMerger implements Pass
                                       @Override
                                       public void visitProgramMethod(ProgramClass programClass,
                                                                      ProgramMethod programMethod) {
-                                          logger.warn("Lambda class {} contains a static method that cannot be merged: {}",
+                                          logger.trace("Lambda class {} contains a static method that cannot be merged: {}",
                                                       ClassUtil.externalClassName(lambdaClass.getName()),
                                                       ClassUtil.externalFullMethodDescription(lambdaClass.getName(),
                                                                                               programMethod.getAccessFlags(),
@@ -357,7 +357,7 @@ public class KotlinLambdaMerger implements Pass
                                   initMethodCounter));
         if (initMethodCounter.getCount() != 1)
         {
-            logger.warn("Lambda class {} has {} <init> constructors.",
+            logger.trace("Lambda class {} has {} <init> constructors.",
                         ClassUtil.externalClassName(lambdaClass.getName()), initMethodCounter.getCount());
         }
         return initMethodCounter.getCount() == 1;
@@ -391,7 +391,7 @@ public class KotlinLambdaMerger implements Pass
                                                                              new ConstantVisitor() {
             @Override
             public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
-                logger.warn("{} references non-INSTANCE field {} of lambda class {}.",
+                logger.trace("{} references non-INSTANCE field {} of lambda class {}.",
                             ClassUtil.externalClassName(clazz.getName()),
                             ClassUtil.externalFullFieldDescription(fieldrefConstant.referencedField.getAccessFlags(),
                                                                    fieldrefConstant.getName(clazz),
