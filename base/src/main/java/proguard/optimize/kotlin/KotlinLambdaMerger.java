@@ -57,8 +57,8 @@ public class KotlinLambdaMerger implements Pass
         else
         {
             // A class pool where the applicable lambda's will be stored
-            ClassPool lambdaClassPool = new ClassPool();
-            ClassPool newProgramClassPool = new ClassPool();
+            ClassPool       lambdaClassPool           = new ClassPool();
+            ClassPool       newProgramClassPool       = new ClassPool();
             ClassPoolFiller newProgramClassPoolFiller = new ClassPoolFiller(newProgramClassPool);
 
             // find all lambda classes with an empty closure
@@ -95,6 +95,7 @@ public class KotlinLambdaMerger implements Pass
                                                                          new MultiClassVisitor(
                                                                          new ClassPoolFiller(lambdaGroupClassPool),
                                                                          newProgramClassPoolFiller),
+                                                                         mergedLambdaClassCounter,
                                                                          new MultiClassVisitor(
                                                                          new ClassPoolFiller(notMergedLambdaClassPool),
                                                                          newProgramClassPoolFiller),
@@ -105,7 +106,7 @@ public class KotlinLambdaMerger implements Pass
             PrintWriter out = new PrintWriter(System.out, true);
             if (configuration.printLambdaGroupMapping != null)
             {
-                logger.info("Printing lambda group mapping to [{}]...",
+                logger.trace("Printing lambda group mapping to [{}]...",
                             PrintWriterUtil.fileName(configuration.printLambdaGroupMapping));
 
                 PrintWriter mappingWriter =
@@ -133,15 +134,13 @@ public class KotlinLambdaMerger implements Pass
             // remove the unused helper methods from the lambda groups
             shrinkLambdaGroups(newProgramClassPool, appView.libraryClassPool, lambdaGroupClassPool);
 
-            logger.info("Considered {} lambda classes for merging", lambdaClassPool.size());
-            logger.info("of which {} lambda classes were not merged.", notMergedLambdaClassPool.size());
-            logger.info("{} lambda group(s) created.", lambdaGroupClassPool.size());
-            logger.info("#lambda groups/#merged lambda classes ratio = {}/{} = {}%",
-                        lambdaGroupClassPool.size(),
-                        lambdaClassPool.size() - notMergedLambdaClassPool.size(),
-                        100 * lambdaGroupClassPool.size() / (lambdaClassPool.size() - notMergedLambdaClassPool.size()));
-            logger.info("Size of original program class pool: {}", appView.programClassPool.size());
-            logger.info("Size of new program class pool: {}", newProgramClassPool.size());
+            logger.info("Number of merged lambda classes:   {}", mergedLambdaClassCounter.getCount());
+
+            logger.trace("Considered {} lambda classes for merging", lambdaClassPool.size());
+            logger.trace("of which {} lambda classes were not merged.", notMergedLambdaClassPool.size());
+            logger.trace("{} lambda group(s) created.", lambdaGroupClassPool.size());
+            logger.trace("Size of original program class pool: {}", appView.programClassPool.size());
+            logger.trace("Size of new program class pool: {}", newProgramClassPool.size());
 
             appView.programClassPool.classesAccept(new ClassCleaner());
             appView.libraryClassPool.classesAccept(new ClassCleaner());

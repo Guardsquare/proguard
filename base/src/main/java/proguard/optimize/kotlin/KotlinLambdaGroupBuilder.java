@@ -33,6 +33,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
     private final Configuration configuration;
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
+    private final ClassVisitor mergedLambdaVisitor;
     private final ClassVisitor notMergedLambdaVisitor;
     private final Map<Integer, KotlinLambdaGroupInvokeMethodBuilder> invokeMethodBuilders;
     private final InterfaceAdder interfaceAdder;
@@ -46,12 +47,13 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
      * @param programClassPool a program class pool containing classes that can be referenced by the new lambda group
      * @param libraryClassPool a library class pool containing classes that can be referenced by the new lambda group
      */
-    public KotlinLambdaGroupBuilder(final String lambdaGroupName,
-                                    final Configuration configuration,
-                                    final ClassPool programClassPool,
-                                    final ClassPool libraryClassPool,
+    public KotlinLambdaGroupBuilder(final String                lambdaGroupName,
+                                    final Configuration         configuration,
+                                    final ClassPool             programClassPool,
+                                    final ClassPool             libraryClassPool,
                                     final ExtraDataEntryNameMap extraDataEntryNameMap,
-                                    final ClassVisitor notMergedLambdaVisitor)
+                                    final ClassVisitor          mergedLambdaVisitor,
+                                    final ClassVisitor          notMergedLambdaVisitor)
     {
         this.classBuilder           = getNewLambdaGroupClassBuilder(lambdaGroupName,
                                                                     programClassPool,
@@ -62,6 +64,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         this.invokeMethodBuilders   = new HashMap<>();
         this.interfaceAdder         = new InterfaceAdder(this.classBuilder.getProgramClass());
         this.extraDataEntryNameMap  = extraDataEntryNameMap;
+        this.mergedLambdaVisitor    = mergedLambdaVisitor;
         this.notMergedLambdaVisitor = notMergedLambdaVisitor;
         this.initUpdater            = new KotlinLambdaGroupInitUpdater(programClassPool, libraryClassPool);
         initialiseLambdaGroup();
@@ -152,7 +155,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
                                     new ClassConstantToClassVisitor(
                                     new ClassNameFilter(lambdaClass.getName(),
                                     (ClassVisitor)null,
-                                    (ClassVisitor)this)
+                                    this)
                                     ), // don't revisit the current lambda
                                     null)));
 
@@ -205,6 +208,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.getSuperClass().accept(subclassRemover);
         lambdaClass.interfaceConstantsAccept(new ClassConstantToClassVisitor(
                                              subclassRemover));
+        lambdaClass.accept(this.mergedLambdaVisitor);
     }
 
     private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)

@@ -32,6 +32,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor
     public static final String NAME_LAMBDA_GROUP = "LambdaGroup";
     private final ClassVisitor lambdaGroupVisitor;
     private final ClassVisitor notMergedLambdaVisitor;
+    private final ClassVisitor mergedLambdaVisitor;
     private final Configuration configuration;
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
@@ -42,6 +43,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor
                                    final ClassPool             programClassPool,
                                    final ClassPool             libraryClassPool,
                                    final ClassVisitor          lambdaGroupVisitor,
+                                   final ClassVisitor          mergedLambdaVisitor,
                                    final ClassVisitor          notMergedLambdaVisitor,
                                    final ExtraDataEntryNameMap extraDataEntryNameMap)
     {
@@ -49,6 +51,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor
         this.programClassPool       = programClassPool;
         this.libraryClassPool       = libraryClassPool;
         this.lambdaGroupVisitor     = lambdaGroupVisitor;
+        this.mergedLambdaVisitor = mergedLambdaVisitor;
         this.notMergedLambdaVisitor = notMergedLambdaVisitor;
         this.extraDataEntryNameMap  = extraDataEntryNameMap;
     }
@@ -76,6 +79,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor
                                                                                    this.programClassPool,
                                                                                    this.libraryClassPool,
                                                                                    this.extraDataEntryNameMap,
+                                                                                   this.mergedLambdaVisitor,
                                                                                    this.notMergedLambdaVisitor);
 
         // visit each lambda of this package to add their implementations to the lambda group
