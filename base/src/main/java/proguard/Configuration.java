@@ -206,21 +206,6 @@ public class Configuration
      */
     public File                         printLambdaGroupMapping;
 
-    /**
-     * Specifies whether Kotlin lambda classes can be merged into lambda groups.
-     */
-    public boolean                      mergeKotlinLambdaClasses;
-
-    /**
-     * Specifies whether Kotlin lambda classes have to be merged before or after the other optimisations.
-     */
-    public boolean lambdaMergingAfterOptimizing;
-
-    /**
-     * Specifies whether Kotlin lambda classes may be merged if they contain unexpected methods.
-     */
-    public boolean mergeLambdaClassesWithUnexpectedMethods;
-
     ///////////////////////////////////////////////////////////////////////////
     // Obfuscation options.
     ///////////////////////////////////////////////////////////////////////////

@@ -177,11 +177,6 @@ public class ProGuard
                 shrink(false);
             }
 
-            if (configuration.mergeKotlinLambdaClasses && !configuration.lambdaMergingAfterOptimizing)
-            {
-                mergeKotlinLambdaClasses();
-            }
-
             // Create a matcher for filtering optimizations.
             StringMatcher filter = configuration.optimizations != null ?
                 new ListParser(new NameParser()).parse(configuration.optimizations) :
@@ -197,11 +192,6 @@ public class ProGuard
             {
                 optimize();
                 linearizeLineNumbers();
-            }
-
-            if (configuration.mergeKotlinLambdaClasses && configuration.lambdaMergingAfterOptimizing)
-            {
-                mergeKotlinLambdaClasses();
             }
 
             if (configuration.obfuscate)

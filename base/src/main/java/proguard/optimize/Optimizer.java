@@ -64,6 +64,7 @@ public class Optimizer implements Pass
     private static final String CLASS_MERGING_VERTICAL               = "class/merging/vertical";
     private static final String CLASS_MERGING_HORIZONTAL             = "class/merging/horizontal";
     private static final String CLASS_MERGING_WRAPPER                = "class/merging/wrapper";
+    private static final String CLASS_MERGING_KOTLINLAMBDA           = "class/merging/kotlinlambda";
     private static final String FIELD_REMOVAL_WRITEONLY              = "field/removal/writeonly";
     private static final String FIELD_MARKING_PRIVATE                = "field/marking/private";
     private static final String FIELD_GENERALIZATION_CLASS           = "field/generalization/class";
@@ -146,6 +147,7 @@ public class Optimizer implements Pass
     private boolean classMergingVertical;
     private boolean classMergingHorizontal;
     private boolean classMergingWrapper;
+    private boolean classMergingKotlinlambda;
     private boolean fieldRemovalWriteonly;
     private boolean fieldMarkingPrivate;
     private boolean fieldGeneralizationClass;
@@ -221,6 +223,7 @@ public class Optimizer implements Pass
         classMergingVertical              = filter.matches(CLASS_MERGING_VERTICAL);
         classMergingHorizontal            = filter.matches(CLASS_MERGING_HORIZONTAL);
         classMergingWrapper               = filter.matches(CLASS_MERGING_WRAPPER);
+        classMergingKotlinlambda          = filter.matches(CLASS_MERGING_KOTLINLAMBDA);
         fieldRemovalWriteonly             = filter.matches(FIELD_REMOVAL_WRITEONLY);
         fieldMarkingPrivate               = filter.matches(FIELD_MARKING_PRIVATE);
         fieldGeneralizationClass          = filter.matches(FIELD_GENERALIZATION_CLASS);
