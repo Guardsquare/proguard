@@ -208,7 +208,10 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
         lambdaClass.getSuperClass().accept(subclassRemover);
         lambdaClass.interfaceConstantsAccept(new ClassConstantToClassVisitor(
                                              subclassRemover));
-        lambdaClass.accept(this.mergedLambdaVisitor);
+        if (this.mergedLambdaVisitor != null)
+        {
+            lambdaClass.accept(this.mergedLambdaVisitor);
+        }
     }
 
     private void canonicalizeLambdaClassFields(ProgramClass lambdaClass)
