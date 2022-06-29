@@ -20,7 +20,8 @@ import proguard.shrink.*;
 import proguard.util.*;
 import java.io.PrintWriter;
 
-public class KotlinLambdaMerger implements Pass {
+public class KotlinLambdaMerger implements Pass
+{
 
     public static final String NAME_KOTLIN_LAMBDA     = "kotlin/jvm/internal/Lambda";
     public static final String NAME_KOTLIN_FUNCTION  = "kotlin/jvm/functions/Function";

@@ -26,7 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class KotlinLambdaClassMerger implements ClassPoolVisitor {
+public class KotlinLambdaClassMerger implements ClassPoolVisitor
+{
 
     public static final String NAME_LAMBDA_GROUP = "LambdaGroup";
     private final ClassVisitor lambdaGroupVisitor;

@@ -13,7 +13,11 @@ import proguard.classfile.visitor.*;
 import proguard.io.ExtraDataEntryNameMap;
 import proguard.optimize.peephole.RetargetedInnerClassAttributeRemover;
 
-public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, AttributeVisitor, MemberVisitor {
+public class KotlinLambdaEnclosingMethodUpdater
+implements ClassVisitor,
+           AttributeVisitor,
+           MemberVisitor
+{
 
     private final ClassPool programClassPool;
     private final ClassPool libraryClassPool;
@@ -31,13 +35,13 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
     private static final RetargetedInnerClassAttributeRemover retargetedInnerClassAttributeRemover =
             new RetargetedInnerClassAttributeRemover();
 
-    public KotlinLambdaEnclosingMethodUpdater(ClassPool        programClassPool,
-                                              ClassPool        libraryClassPool,
-                                              ProgramClass lambdaClass,
-                                              ProgramClass lambdaGroup,
-                                              int classId,
-                                              int arity,
-                                              String constructorDescriptor,
+    public KotlinLambdaEnclosingMethodUpdater(ClassPool             programClassPool,
+                                              ClassPool             libraryClassPool,
+                                              ProgramClass          lambdaClass,
+                                              ProgramClass          lambdaGroup,
+                                              int                   classId,
+                                              int                   arity,
+                                              String                constructorDescriptor,
                                               ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool      = programClassPool;
@@ -76,7 +80,8 @@ public class KotlinLambdaEnclosingMethodUpdater implements ClassVisitor, Attribu
     {
         // the given method must be the method where the lambda is defined
         Clazz enclosingClass = enclosingMethodAttribute.referencedClass;
-        if (visitEnclosingMethodAttribute || enclosingClass == lambdaClass) {
+        if (visitEnclosingMethodAttribute || enclosingClass == lambdaClass)
+        {
             return;
         }
 
