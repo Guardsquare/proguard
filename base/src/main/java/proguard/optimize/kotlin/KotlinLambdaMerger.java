@@ -264,13 +264,10 @@ public class KotlinLambdaMerger implements Pass
     /**
      * Checks whether the given lambda class can be merged and throws an exception if it cannot be merged.
      * @param lambdaClass the lambda class for which it should be checked whether it can be merged
-     * @param mergeLambdaClassesWithUnexpectedMethods a configuration setting that allows merging lambda classes that
- *                                                    contain unexpected instance methods
      * @param programClassPool the program class pool in which the lambda class is defined and used
      * @throws IllegalArgumentException if the given lambda class cannot be merged
      */
     public static void ensureCanMerge(ProgramClass lambdaClass,
-                                      boolean mergeLambdaClassesWithUnexpectedMethods,
                                       ClassPool programClassPool) throws IllegalArgumentException
     {
         String externalClassName = ClassUtil.externalClassName(lambdaClass.getName());
@@ -310,11 +307,6 @@ public class KotlinLambdaMerger implements Pass
         {
             throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because its " +
                                                "methods are too big to be inlined.");
-        }
-        else if (!mergeLambdaClassesWithUnexpectedMethods && !lambdaClassHasNoUnexpectedMethods(lambdaClass))
-        {
-            throw new IllegalArgumentException("Lambda class " + externalClassName + " cannot be merged, because it " +
-                                               "contains unexpected methods.");
         }
     }
 
@@ -356,31 +348,6 @@ public class KotlinLambdaMerger implements Pass
                                   new AllAttributeVisitor(
                                   codeSizeCounter)));
         return codeSizeCounter.getCount() <= KotlinLambdaGroupBuilder.MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH;
-    }
-
-    private static boolean lambdaClassHasNoUnexpectedMethods(ProgramClass lambdaClass)
-    {
-        String methodNameRegularExpression = "!"  + ClassConstants.METHOD_NAME_INIT;
-        methodNameRegularExpression       += ",!" + ClassConstants.METHOD_NAME_CLINIT;
-        methodNameRegularExpression       += ",!" + ClassConstants.METHOD_NAME_CLINIT;
-        methodNameRegularExpression       += ",!" + KotlinConstants.METHOD_NAME_LAMBDA_INVOKE;
-        MethodCounter methodCounter = new MethodCounter();
-        lambdaClass.methodsAccept(new MemberNameFilter(methodNameRegularExpression,
-                                 new MultiMemberVisitor(
-                                 methodCounter,
-                                 new MemberVisitor() {
-                                     @Override
-                                     public void visitProgramMethod(ProgramClass programClass,
-                                                                    ProgramMethod programMethod) {
-                                         logger.warn("Lambda class {} contains an unexpected method: {}",
-                                                     ClassUtil.externalClassName(lambdaClass.getName()),
-                                                     ClassUtil.externalFullMethodDescription(lambdaClass.getName(),
-                                                                                             programMethod.getAccessFlags(),
-                                                                                             programMethod.getName(programClass),
-                                                                                             programMethod.getDescriptor(lambdaClass)));
-                                     }
-                                 })));
-        return methodCounter.getCount() == 0;
     }
 
     private static boolean lambdaClassHasExactlyOneInitConstructor(ProgramClass lambdaClass)

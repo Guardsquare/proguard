@@ -134,7 +134,7 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void mergeLambdaClass(ProgramClass lambdaClass)
     {
-        KotlinLambdaMerger.ensureCanMerge(lambdaClass, configuration.mergeLambdaClassesWithUnexpectedMethods, programClassPool);
+        KotlinLambdaMerger.ensureCanMerge(lambdaClass, programClassPool);
 
         ProgramClass lambdaGroup = this.classBuilder.getProgramClass();
 
