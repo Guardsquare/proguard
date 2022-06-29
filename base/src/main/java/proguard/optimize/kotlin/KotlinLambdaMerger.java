@@ -48,10 +48,10 @@ public class KotlinLambdaMerger implements Pass
         appView.programClassPool.classesAccept(new ClassCleaner());
         appView.libraryClassPool.classesAccept(new ClassCleaner());
 
-        // get the Lambda class and the Function0 interface
+        // Get the Lambda class
         Clazz kotlinLambdaClass = getKotlinLambdaClass(appView.programClassPool, appView.libraryClassPool);
         if (kotlinLambdaClass == null) {
-            logger.warn("The Kotlin class '{}' is not found, but it is needed to perform lambda merging.",
+            logger.trace("The Kotlin class '{}' is not found, so merging of Kotlin lambda classes is skipped.",
                         NAME_KOTLIN_LAMBDA);
         }
         else
