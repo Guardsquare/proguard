@@ -62,7 +62,8 @@ implements ClassVisitor,
         // the given class must be the class that defines the lambda
         // the given method must be the method where the lambda is defined
 
-        if (visitEnclosingMethod) {
+        if (visitEnclosingMethod)
+        {
             return;
         }
         visitEnclosingMethod = true;
@@ -252,7 +253,8 @@ implements ClassVisitor,
     public void visitAnyClass(Clazz clazz) {}
 
     @Override
-    public void visitProgramClass(ProgramClass programClass) {
+    public void visitProgramClass(ProgramClass programClass)
+    {
         ClassReferenceFinder classReferenceFinder = new ClassReferenceFinder(this.currentLambdaClass);
         programClass.constantPoolEntriesAccept(classReferenceFinder);
         if (classReferenceFinder.classReferenceFound())
