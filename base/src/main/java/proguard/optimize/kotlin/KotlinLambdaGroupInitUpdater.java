@@ -48,17 +48,7 @@ public class KotlinLambdaGroupInitUpdater implements AttributeVisitor, MemberVis
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
         // This attribute visitor should only be used for program classes.
-        try
-        {
-            visitCodeAttribute((ProgramClass) clazz, (ProgramMethod) method, codeAttribute);
-        }
-        catch (ClassCastException exception)
-        {
-            logger.error("{} is incorrectly used to visit non-program class / method {} / {}",
-                         this.getClass().getName(), ClassUtil.externalClassName(clazz.getName()),
-                         ClassUtil.externalFullMethodDescription(clazz.getName(),
-                         method.getAccessFlags(), method.getName(clazz), method.getDescriptor(clazz)));
-        }
+        visitCodeAttribute((ProgramClass) clazz, (ProgramMethod) method, codeAttribute);
     }
 
     public void visitCodeAttribute(ProgramClass programClass, ProgramMethod programMethod, CodeAttribute codeAttribute)
