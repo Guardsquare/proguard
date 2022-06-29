@@ -41,6 +41,7 @@ class KotlinLambdaGroupBuilderTest : FreeSpec({
         val lambdaGroupName = "LambdaGroup"
         val configuration = Configuration()
         val entryMapper = ExtraDataEntryNameMap()
+        val mergedLambdaVisitor = null
         val notMergedLambdaVisitor = null
         val builder = KotlinLambdaGroupBuilder(
             lambdaGroupName,
@@ -48,6 +49,7 @@ class KotlinLambdaGroupBuilderTest : FreeSpec({
             programClassPool,
             libraryClassPool,
             entryMapper,
+            mergedLambdaVisitor,
             notMergedLambdaVisitor
         )
         val lambdaClassName = "TestKt\$main\$lambda1\$1"
