@@ -67,7 +67,7 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
         builder.invokevirtual(this.classBuilder.getProgramClass(), methodToBeCalled); // invoke the lambda implementation
         if (methodDoesNotHaveReturnValue(methodToBeCalled)) {
             // ensure there is a return value
-            builder.getstatic(ClassConstants.NAME_KOTLIN_UNIT, ClassConstants.FIELD_NAME_KOTLIN_UNIT_INSTANCE, ClassConstants.TYPE_KOTLIN_UNIT);
+            builder.getstatic(KotlinConstants.NAME_KOTLIN_UNIT, KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME, KotlinConstants.TYPE_KOTLIN_UNIT);
         }
         builder.areturn(); // return
         return builder.instructions();
@@ -108,7 +108,7 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
             //  - or throw an exception
             if (cases == 0)
             {
-                composer.getstatic(ClassConstants.NAME_KOTLIN_UNIT, ClassConstants.FIELD_NAME_KOTLIN_UNIT_INSTANCE, ClassConstants.TYPE_KOTLIN_UNIT);
+                composer.getstatic(KotlinConstants.NAME_KOTLIN_UNIT, KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME, KotlinConstants.TYPE_KOTLIN_UNIT);
                 composer.areturn();
                 return;
             }
