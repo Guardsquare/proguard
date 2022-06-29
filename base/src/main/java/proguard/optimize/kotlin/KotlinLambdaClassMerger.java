@@ -67,7 +67,7 @@ public class KotlinLambdaClassMerger implements ClassPoolVisitor {
         // choose a name for the lambda group
         // ensure that the lambda group is in the same package as the classes of the class pool
         String lambdaGroupName = getPackagePrefixOfClasses(lambdaClassPool) + NAME_LAMBDA_GROUP;
-        logger.info("Creating lambda group with name {}", ClassUtil.externalClassName(lambdaGroupName));
+        logger.trace("Creating lambda group with name {}", ClassUtil.externalClassName(lambdaGroupName));
 
         // create a lambda group builder
         KotlinLambdaGroupBuilder lambdaGroupBuilder = new KotlinLambdaGroupBuilder(lambdaGroupName,
