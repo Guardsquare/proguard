@@ -224,20 +224,19 @@ public class KotlinLambdaGroupBuilder implements ClassVisitor {
 
     private void inlineMethodsInsideClass(ProgramClass lambdaClass)
     {
-        lambdaClass.accept(new ProgramClassOptimizationInfoSetter());
-
-        lambdaClass.accept(new AllMemberVisitor(
-                           new ProgramMemberOptimizationInfoSetter()));
-
-        // Allow methods to be inlined
-        lambdaClass.accept(new AllMethodVisitor(
+        lambdaClass.accept(new MultiClassVisitor(
+                           new ProgramClassOptimizationInfoSetter(),
+                           new AllMemberVisitor(
+                           new ProgramMemberOptimizationInfoSetter()),
+                           // Allow methods to be inlined
+                           new AllMethodVisitor(
                            new AllAttributeVisitor(
                            new SameClassMethodInliner(configuration.microEdition,
                                                       configuration.android,
                                                       MAXIMUM_INLINED_INVOKE_METHOD_CODE_LENGTH,
                                                       configuration.allowAccessModification,
                                                       true,
-                                                      null))));
+                                                      null)))));
     }
 
     private void inlineLambdaInvokeMethods(ProgramClass lambdaClass)

@@ -64,28 +64,29 @@ public class KotlinLambdaMerger implements Pass
             // find all lambda classes with an empty closure
             // assume that the lambda classes have exactly 1 instance constructor, which has descriptor ()V
             //  (i.e. no arguments) if the closure is empty
-            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE,
+            appView.programClassPool.classesAccept(new MultiClassVisitor(
+                                                   new ClassProcessingFlagFilter(ProcessingFlags.DONT_OPTIMIZE,
                                                                                  0,
-                                                   newProgramClassPoolFiller));
-            appView.programClassPool.classesAccept(new ClassProcessingFlagFilter(0,
+                                                   newProgramClassPoolFiller),
+                                                   new ClassProcessingFlagFilter(0,
                                                                                  ProcessingFlags.DONT_OPTIMIZE,
                                                    new ImplementedClassFilter(kotlinLambdaClass,
                                                                               false,
                                                    new ClassPoolFiller(lambdaClassPool),
-                                                   newProgramClassPoolFiller))
-            );
+                                                   newProgramClassPoolFiller)),
+                                                   // add optimisation info to the lambda's,
+                                                   // so that it can be filled out later
+                                                   new ProgramClassOptimizationInfoSetter(),
+                                                   new AllMemberVisitor(
+                                                   new ProgramMemberOptimizationInfoSetter())));
 
             // group the lambda's per package
             PackageGrouper packageGrouper = new PackageGrouper();
             lambdaClassPool.classesAccept(packageGrouper);
 
-            // add optimisation info to the lambda's, so that it can be filled out later
-            appView.programClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
-            appView.programClassPool.classesAccept(new AllMemberVisitor(
-                                                   new ProgramMemberOptimizationInfoSetter()));
-
-            ClassPool lambdaGroupClassPool = new ClassPool();
-            ClassPool notMergedLambdaClassPool = new ClassPool();
+            ClassPool    lambdaGroupClassPool     = new ClassPool();
+            ClassPool    notMergedLambdaClassPool = new ClassPool();
+            ClassCounter mergedLambdaClassCounter = new ClassCounter();
 
             // merge the lambda's per package
             KotlinLambdaClassMerger merger = new KotlinLambdaClassMerger(this.configuration,
