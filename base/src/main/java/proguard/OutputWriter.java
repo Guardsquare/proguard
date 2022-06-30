@@ -42,7 +42,6 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-import static proguard.KotlinMetadataAdapter.KOTLIN_METADATA_VERSION;
 
 /**
  * This pass writes the output class files and resource files, packaged in
@@ -323,7 +322,7 @@ public class OutputWriter implements Pass
                     new NameFilteredDataEntryWriter(KotlinConstants.MODULE.FILE_EXPRESSION,
                     new FilteredDataEntryWriter(
                         new ProcessingFlagDataEntryFilter(resourceFilePool, 0, ProcessingFlags.DONT_PROCESS_KOTLIN_MODULE),
-                        new KotlinModuleDataEntryWriter(resourceFilePool, resourceWriter, KOTLIN_METADATA_VERSION)),
+                        new KotlinModuleDataEntryWriter(resourceFilePool, resourceWriter)),
                         resourceWriter);
             }
 

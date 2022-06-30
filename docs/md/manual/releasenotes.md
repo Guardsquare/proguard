@@ -1,3 +1,9 @@
+## Version 7.2.3
+
+### Improved
+
+- Add support for Kotlin 1.7.
+
 ## Version 7.2.2
 
 ### Bug fixes

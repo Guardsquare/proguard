@@ -28,11 +28,11 @@ dependencies {
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.7'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.0.3' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.0.3' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.0.3' // for kotest property test
-    testImplementation "io.mockk:mockk:1.12.1" // for mocking
+    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.9'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.3.1' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.3.1' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:5.3.1' // for kotest property test
+    testImplementation "io.mockk:mockk:1.12.3" // for mocking
 
     // For assembling ProGuard assembler snippets
     testImplementation ('com.github.Guardsquare:proguard-assembler:master-SNAPSHOT') {

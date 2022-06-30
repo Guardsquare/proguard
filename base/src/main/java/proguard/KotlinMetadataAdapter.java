@@ -21,11 +21,6 @@ implements Pass
 {
     private static final Logger logger = LogManager.getLogger(KotlinMetadataAdapter.class);
 
-    // TODO(T14074): Fix the Kotlin metadata version until Kotlin 1.7 is released. Normally, ProGuardCORE
-    //               will write out the kotlinx.metadata "compatible" version, which for 0.3 is 1.5.1.
-    //               ProGuardCORE 8.0.7 uses kotlinx.metadata 0.4.1 so fix the written version until 1.7 is released.
-    public static final KotlinMetadataVersion KOTLIN_METADATA_VERSION = new KotlinMetadataVersion(1, 5, 1);
-
 
     @Override
     public void execute(AppView appView)
@@ -37,7 +32,6 @@ implements Pass
             new ReferencedKotlinMetadataVisitor(
             new KotlinMetadataWriter(
                 (clazz, message) -> logger.warn(clazz.getName(), message),
-                KOTLIN_METADATA_VERSION,
                 counter
             )));
 
