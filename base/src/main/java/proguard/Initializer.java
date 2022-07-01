@@ -28,9 +28,8 @@ import proguard.classfile.attribute.annotation.visitor.*;
 import proguard.classfile.attribute.visitor.*;
 import proguard.classfile.constant.visitor.AllConstantVisitor;
 import proguard.classfile.instruction.visitor.AllInstructionVisitor;
-import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.classfile.util.*;
-import proguard.classfile.util.kotlin.KotlinMetadataInitializer;
 import proguard.classfile.visitor.*;
 import proguard.pass.Pass;
 import proguard.resources.file.visitor.ResourceJavaReferenceClassInitializer;
@@ -153,22 +152,6 @@ public class Initializer implements Pass
                                                null,
                                                dependencyWarningPrinter));
 
-        WarningPrinter kotlinInitializationWarningPrinter = new WarningLogger(logger, configuration.warn);
-
-        // Initialize the Kotlin Metadata for Kotlin classes.
-        if (configuration.keepKotlinMetadata)
-        {
-            ClassVisitor kotlinMetadataInitializer =
-                new AllAttributeVisitor(
-                new AttributeNameFilter(Attribute.RUNTIME_VISIBLE_ANNOTATIONS,
-                new AllAnnotationVisitor(
-                new AnnotationTypeFilter(KotlinConstants.TYPE_KOTLIN_METADATA,
-                new KotlinMetadataInitializer(kotlinInitializationWarningPrinter)))));
-
-            appView.programClassPool.classesAccept(kotlinMetadataInitializer);
-            appView.libraryClassPool.classesAccept(kotlinMetadataInitializer);
-        }
-
         // Initialize the class references of program class members and
         // attributes. Note that all superclass hierarchies have to be
         // initialized for this purpose.
@@ -185,6 +168,16 @@ public class Initializer implements Pass
 
         if (reducedLibraryClassPool != null)
         {
+            if (configuration.keepKotlinMetadata)
+            {
+                // TODO(T16917): Improve this, so that only relevant classes are kept.
+                appView.libraryClassPool.classesAccept(
+                    new ReferencedKotlinMetadataVisitor(
+                        (clazz, kotlinMetadata) -> clazz.accept(new ClassPoolFiller(reducedLibraryClassPool))
+                    )
+                );
+            }
+
             // Collect the library classes that are directly referenced by
             // program classes, without reflection.
             appView.programClassPool.classesAccept(
@@ -278,7 +271,7 @@ public class Initializer implements Pass
                     new LibraryClassFilter(
                     new ClassPoolFiller(appView.libraryClassPool))),
 
-                    new ReferencedClassVisitor(
+                    new ReferencedClassVisitor(true,
                     new LibraryClassFilter(
                     new ClassHierarchyTraveler(true, true, true, false,
                     new LibraryClassFilter(
@@ -516,17 +509,6 @@ public class Initializer implements Pass
             logger.warn("         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedlibraryclassmember)");
         }
 
-        if (configuration.keepKotlinMetadata)
-        {
-            int kotlinInitializationWarningCount = kotlinInitializationWarningPrinter.getWarningCount();
-
-            if (kotlinInitializationWarningCount > 0)
-            {
-                logger.warn("Warning: there were {} errors during Kotlin metadata initialisation.",
-                             kotlinInitializationWarningCount);
-            }
-        }
-
         boolean incompatibleOptimization = configuration.optimize && !configuration.shrink;
 
         if (incompatibleOptimization)
@@ -554,8 +536,18 @@ public class Initializer implements Pass
         }
 
         logger.info("Ignoring unused library classes...");
-        logger.info("  Original number of library classes: {}", originalLibraryClassPoolSize);
-        logger.info("  Final number of library classes:    {}", appView.libraryClassPool.size());
+        logger.info("  Original number of library classes:              {}", originalLibraryClassPoolSize);
+        logger.info("  Final number of library classes:                 {}", appView.libraryClassPool.size());
+        if (configuration.keepKotlinMetadata)
+        {
+            ClassCounter counter = new ClassCounter();
+            appView.libraryClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                    (clazz, kotlinMetadata) -> clazz.accept(counter)
+                )
+            );
+            logger.info("  Number of library classes with @kotlin.Metadata: {}", counter.getCount());
+        }
     }
 
 

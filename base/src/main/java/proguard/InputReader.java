@@ -45,10 +45,7 @@ public class InputReader implements Pass
 {
     private static final Logger logger = LogManager.getLogger(InputReader.class);
 
-    // Option to favor library classes over program classes, in case of
-    // duplicates.
-    // https://sourceforge.net/p/proguard/discussion/182455/thread/76430d9e
-    private static final boolean FAVOR_LIBRARY_CLASSES = System.getProperty("favor.library.classes") != null;
+    private static final boolean DONT_READ_LIBRARY_KOTLIN_METADATA = System.getProperty("proguard.dontreadlibrarykotlinmetadata") != null;
 
 
     private final Configuration configuration;
@@ -103,6 +100,7 @@ public class InputReader implements Pass
                             configuration.shrink   ||
                             configuration.optimize ||
                             configuration.obfuscate,
+                            configuration.keepKotlinMetadata,
                             warningPrinter,
                             classPoolFiller);
 
@@ -166,6 +164,7 @@ public class InputReader implements Pass
                                       configuration.skipNonPublicLibraryClasses,
                                       configuration.skipNonPublicLibraryClassMembers,
                                       true,
+                                      !DONT_READ_LIBRARY_KOTLIN_METADATA && configuration.keepKotlinMetadata,
                                       warningPrinter,
                       new ClassPresenceFilter(appView.programClassPool, duplicateClassPrinter,
                       new ClassPresenceFilter(appView.libraryClassPool, duplicateClassPrinter,

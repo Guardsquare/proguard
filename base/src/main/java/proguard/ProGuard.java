@@ -45,6 +45,7 @@ import proguard.preverify.*;
 import proguard.shrink.Shrinker;
 import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.*;
+import proguard.util.kotlin.KotlinUnsupportedVersionChecker;
 import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
 import java.io.*;
@@ -325,6 +326,10 @@ public class ProGuard
      */
     private void initialize() throws Exception
     {
+        if (configuration.keepKotlinMetadata)
+        {
+            passRunner.run(new KotlinUnsupportedVersionChecker(), appView);
+        }
         passRunner.run(new Initializer(configuration), appView);
 
         if (configuration.keepKotlinMetadata &&

@@ -3,6 +3,7 @@
 ### Improved
 
 - Add support for Kotlin 1.7.
+- Improved support for Kotlin library projects. (`T3752`)
 
 ## Version 7.2.2
 
