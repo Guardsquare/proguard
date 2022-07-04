@@ -249,4 +249,4 @@ guide](CONTRIBUTING.md) if you would like to contribute.
 Copyright (c) 2002-2022 [Guardsquare NV](https://www.guardsquare.com/).
 ProGuard is released under the [GNU General Public License, version
 2](LICENSE), with [exceptions granted to a number of
-projects](docs/md/license.md).
+projects](docs/md/manual/license/gplexception.md).
