@@ -13,7 +13,6 @@ buildscript {
 
 plugins {
     id 'application'
-    id 'com.guardsquare.proguard' apply false
 }
 
 group = 'com.example'
