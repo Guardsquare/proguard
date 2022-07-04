@@ -1,5 +1,4 @@
 import proguard.gradle.ProGuardTask
-import org.gradle.internal.jvm.Jvm
 
 buildscript {
     repositories {
@@ -39,6 +38,8 @@ tasks.register('proguard', ProGuardTask) {
     injars(tasks.named('jar', Jar).flatMap { it.archiveFile })
     libraryjars(javaRuntime())// + configurations.proguard)
 
+    verbose()
+
     outjars(layout.buildDirectory.file("libs/${baseCoordinates}-minified.jar"))
 }
 
@@ -46,11 +47,10 @@ tasks.register('proguard', ProGuardTask) {
  * @return The JDK, for use by Proguard.
  */
 List<File> javaRuntime() {
-    Jvm jvm = Jvm.current()
     FilenameFilter filter = { _, fileName -> fileName.endsWith(".jar") || fileName.endsWith(".jmod") }
 
     return ['jmods' /* JDK 9+ */, 'bundle/Classes' /* mac */, 'jre/lib' /* linux */]
-            .collect { new File(jvm.javaHome, it) }
+            .collect { new File(System.getProperty('java.home'), it) }
             .findAll { it.exists() }
             .collectMany { it.listFiles(filter) as List }
             .toSorted()
