@@ -27,12 +27,12 @@ import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
+import java.lang.management.ManagementFactory
 import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.TestPluginClasspath
-import java.lang.management.ManagementFactory
 
 class GradlePluginIntegrationTest : FreeSpec({
     "Gradle plugin can be applied to spring-boot sample" - {
