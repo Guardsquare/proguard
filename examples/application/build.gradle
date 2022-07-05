@@ -36,27 +36,18 @@ tasks.register('proguard', ProGuardTask) {
     configuration file('proguard.pro')
 
     injars(tasks.named('jar', Jar).flatMap { it.archiveFile })
-    libraryjars(javaRuntime())// + configurations.proguard)
 
-    verbose()
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        //libraryjars "${System.getProperty('java.home')}/jmods/....."
+    }
+
+    verbose
 
     outjars(layout.buildDirectory.file("libs/${baseCoordinates}-minified.jar"))
-}
-
-/**
- * @return The JDK, for use by Proguard.
- */
-List<File> javaRuntime() {
-    FilenameFilter filter = { _, fileName -> fileName.endsWith(".jar") || fileName.endsWith(".jmod") }
-
-    return ['jmods' /* JDK 9+ */, 'bundle/Classes' /* mac */, 'jre/lib' /* linux */]
-            .collect { new File(System.getProperty('java.home'), it) }
-            .findAll { it.exists() }
-            .collectMany { it.listFiles(filter) as List }
-            .toSorted()
-            .tap {
-                if (isEmpty()) {
-                    throw new IllegalStateException("Could not find JDK ${jvm.javaVersion.majorVersion} runtime")
-                }
-            }
 }
