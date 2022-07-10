@@ -122,10 +122,6 @@ public class KotlinLambdaGroupInvokeMethodBuilder {
     {
         return composer -> {
             int cases = getCaseIndexCounter();
-
-            // TODO: decide what to do when no cases have been added
-            //  - create an implementation that simply returns Unit
-            //  - or throw an exception
             if (cases == 0)
             {
                 composer.getstatic(KotlinConstants.NAME_KOTLIN_UNIT, KotlinConstants.KOTLIN_OBJECT_INSTANCE_FIELD_NAME, KotlinConstants.TYPE_KOTLIN_UNIT);
