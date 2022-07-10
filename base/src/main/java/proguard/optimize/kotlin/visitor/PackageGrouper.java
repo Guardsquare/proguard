@@ -1,16 +1,41 @@
-package proguard.classfile.visitor;
+/*
+ * ProGuard -- shrinking, optimization, obfuscation, and preverification
+ *             of Java bytecode.
+ *
+ * Copyright (c) 2002-2022 Guardsquare NV
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+package proguard.optimize.kotlin.visitor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.util.ClassUtil;
+import proguard.classfile.visitor.ClassPoolVisitor;
+import proguard.classfile.visitor.ClassVisitor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class
+ * This {@link ClassVisitor} groups the visited classes per package,
+ * after which the classes can be visited per package.
+ * @author Joren Van Hecke
+ * @see proguard.optimize.kotlin.KotlinLambdaMerger
  */
 public class PackageGrouper implements ClassVisitor {
 
@@ -21,8 +46,6 @@ public class PackageGrouper implements ClassVisitor {
     public void visitAnyClass(Clazz clazz)
     {
         String classPackageName = ClassUtil.internalPackageName(clazz.getName());
-        // or
-        // String classPackageName = ClassUtil.internalPackageName(clazz.getName());
         if (!packageClassPools.containsKey(classPackageName))
         {
             logger.info("New package found: {}",

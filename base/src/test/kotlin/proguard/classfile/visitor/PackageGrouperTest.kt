@@ -26,6 +26,7 @@ import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
 import proguard.classfile.ClassPool
 import proguard.classfile.util.ClassUtil
+import proguard.optimize.kotlin.visitor.PackageGrouper
 import testutils.ClassPoolBuilder
 import testutils.KotlinSource
 

@@ -11,6 +11,7 @@ import proguard.classfile.editor.ClassBuilder
 import proguard.classfile.editor.InstructionSequenceBuilder
 import proguard.classfile.instruction.visitor.AllInstructionVisitor
 import proguard.classfile.util.InstructionSequenceMatcher
+import proguard.optimize.kotlin.visitor.MethodCopier
 import testutils.MatchDetector
 
 class MethodCopierTest : FreeSpec({
@@ -48,7 +49,11 @@ class MethodCopierTest : FreeSpec({
             ClassConstants.NAME_JAVA_LANG_OBJECT
         ).programClass
         "When the method is copied to the target class" - {
-            val methodCopier = MethodCopier(targetClass, ClassConstants.METHOD_NAME_INIT, methodAccessFlags)
+            val methodCopier = MethodCopier(
+                targetClass,
+                ClassConstants.METHOD_NAME_INIT,
+                methodAccessFlags
+            )
             method.accept(testClass, methodCopier)
             "Then the target class contains a method with the correct name and descriptor" {
                 targetClass.findMethod(methodName, methodDescriptor) shouldNotBe null
@@ -86,7 +91,12 @@ class MethodCopierTest : FreeSpec({
 
         "When the method is copied to the target class with a new descriptor" - {
             val newDescriptor = "(I)V"
-            val methodCopier = MethodCopier(targetClass, methodName, newDescriptor, methodAccessFlags)
+            val methodCopier = MethodCopier(
+                targetClass,
+                methodName,
+                newDescriptor,
+                methodAccessFlags
+            )
             method.accept(testClass, methodCopier)
             "Then the target class contains a method with the correct name and descriptor" {
                 targetClass.findMethod(methodName, newDescriptor) shouldNotBe null
@@ -95,7 +105,11 @@ class MethodCopierTest : FreeSpec({
 
         "When the method is copied to the target class with a new name prefix" - {
             val newNamePrefix = "copiedMethod"
-            val methodCopier = MethodCopier(targetClass, newNamePrefix, methodAccessFlags)
+            val methodCopier = MethodCopier(
+                targetClass,
+                newNamePrefix,
+                methodAccessFlags
+            )
             method.accept(testClass, methodCopier)
             "Then the target class contains a method with the correct name and descriptor" {
                 targetClass.findMethod(newNamePrefix, methodDescriptor) shouldNotBe null

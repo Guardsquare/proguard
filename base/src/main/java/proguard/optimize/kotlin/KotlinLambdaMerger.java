@@ -1,3 +1,23 @@
+/*
+ * ProGuard -- shrinking, optimization, obfuscation, and preverification
+ *             of Java bytecode.
+ *
+ * Copyright (c) 2002-2022 Guardsquare NV
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
 package proguard.optimize.kotlin;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,12 +34,21 @@ import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
 import proguard.optimize.info.*;
+import proguard.optimize.kotlin.visitor.FieldReferenceFinder;
+import proguard.optimize.kotlin.visitor.MethodReferenceFinder;
+import proguard.optimize.kotlin.visitor.PackageGrouper;
 import proguard.optimize.peephole.*;
 import proguard.pass.Pass;
 import proguard.shrink.*;
 import proguard.util.*;
 import java.io.PrintWriter;
 
+/**
+ * This {@link Pass} provides the Kotlin Lambda Merging optimisation.
+ * It merges the implementations of eligible Kotlin Lambda classes into
+ * lambda groups per package.
+ * @author Joren Van Hecke
+ */
 public class KotlinLambdaMerger implements Pass
 {
 
