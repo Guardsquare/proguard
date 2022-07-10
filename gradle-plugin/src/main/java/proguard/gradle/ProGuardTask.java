@@ -26,6 +26,7 @@ import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.Optional;
+import org.gradle.util.GradleVersion;
 import proguard.*;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
@@ -66,6 +67,13 @@ public abstract class ProGuardTask extends DefaultTask
 
     // INTERNAL USE ONLY - write extra data entries to this jar
     private File extraJar;
+
+    public ProGuardTask() {
+        if (GradleVersion.current().compareTo(GradleVersion.version("7.4")) >= 0) {
+            // This method was added in Gradle 7.4
+            notCompatibleWithConfigurationCache("https://github.com/Guardsquare/proguard/issues/254");
+        }
+    }
 
     // Gradle task inputs and outputs, because annotations on the List fields
     // (private or not) don't seem to work. Private methods don't work either,
