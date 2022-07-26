@@ -50,9 +50,8 @@ jar {
 
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814
-// But it will work if e.g. Java 17-ea is pre-installed
-// TODO: Skip Java 9 until updating Gradle to 7.5 https://github.com/gradle/gradle/issues/20369
-def javaVersionsForTest = 10..17
+// But it will work if e.g. Java N-ea is pre-installed
+def javaVersionsForTest = 9..18
 
 test {
     useJUnitPlatform()
