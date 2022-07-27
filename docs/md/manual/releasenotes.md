@@ -1,3 +1,9 @@
+## Version 7.2.4
+
+### Bug fixes
+
+- Prevent merging classes with native methods that would result in UnsatisfiedLinkError.
+
 ## Version 7.2.3
 
 ### Improved

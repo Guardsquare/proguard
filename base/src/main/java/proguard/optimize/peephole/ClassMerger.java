@@ -445,6 +445,10 @@ implements   ClassVisitor,
                 (!introducesUnwantedAbstractMethods(programClass, targetClass) &&
                  !introducesUnwantedAbstractMethods(targetClass, programClass))) &&
 
+               (!DETAILS || print(programClass, "No native methods?")) &&
+               // No native methods in the program class that is getting inlined.
+               noNativeMethodIn(programClass) &&
+
                (!DETAILS || print(programClass, "No overridden methods?")) &&
 
                // The classes must not override each others concrete methods.
@@ -464,9 +468,15 @@ implements   ClassVisitor,
                !hasSignatureAttribute(programClass) &&
                !hasSignatureAttribute(targetClass);
     }
-    
 
-private boolean print(ProgramClass programClass, String message)
+    private boolean noNativeMethodIn(ProgramClass programClass)
+    {
+        MemberCounter counter = new MemberCounter();
+        programClass.methodsAccept(new MemberAccessFilter(AccessConstants.NATIVE, 0, counter));
+        return counter.getCount() == 0;
+    }
+
+    private boolean print(ProgramClass programClass, String message)
     {
         logger.debug("Merge [{}] <- [{}] {}", targetClass.getName(), programClass.getName(), message);
 
