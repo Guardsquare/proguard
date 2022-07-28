@@ -1,15 +1,14 @@
-## Version 7.2.4
-
-### Bug fixes
-
-- Prevent merging classes with native methods that would result in UnsatisfiedLinkError.
-
 ## Version 7.2.3
 
 ### Improved
 
 - Add support for Kotlin 1.7.
 - Improved support for Kotlin library projects. (`T3752`)
+- Improve app startup times when using `-addconfigurationdebugging`. (`T17153`)
+
+### Bug fixes
+
+- Prevent merging classes with native methods that would result in UnsatisfiedLinkError.
 
 ## Version 7.2.2
 

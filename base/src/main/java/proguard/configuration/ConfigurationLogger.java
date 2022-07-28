@@ -24,10 +24,10 @@ package proguard.configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -1031,7 +1031,8 @@ public class ConfigurationLogger implements Runnable
             return;
         }
 
-        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        DataInputStream dataInputStream = new DataInputStream(
+                                          new BufferedInputStream(inputStream));
 
         int classCount = dataInputStream.readInt();
         for (int i = 0; i < classCount; i++)
