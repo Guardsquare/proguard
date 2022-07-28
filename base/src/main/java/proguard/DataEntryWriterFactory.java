@@ -42,6 +42,8 @@ public class DataEntryWriterFactory
 {
     private static final Logger logger = LogManager.getLogger(DataEntryWriterFactory.class);
 
+    private static final boolean ENABLE_ZIP64_SUPPORT = System.getProperty("enable.zip64.support") != null;
+
     private static final String CLASS_FILE_PATTERN = "**.class";
     private static final String CLASS_FILE_PREFIX  = "classes/";
 
@@ -445,6 +447,7 @@ public class DataEntryWriterFactory
         DataEntryWriter zipWriter =
             new ZipWriter(uncompressedFilter,
                           uncompressedAlignment,
+                          ENABLE_ZIP64_SUPPORT,
                           pageAlignmentFilter,
                           PAGE_ALIGNMENT,
                           modificationTime,
