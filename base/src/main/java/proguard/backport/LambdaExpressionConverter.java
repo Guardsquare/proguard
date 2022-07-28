@@ -59,7 +59,7 @@ implements ClassVisitor,
     private final ExtraDataEntryNameMap          extraDataEntryNameMap;
     private final ClassVisitor                   extraClassVisitor;
 
-    private final Map<Integer, LambdaExpression> lambdaExpressionMap;
+    private final Map<InvokeDynamicConstant, LambdaExpression> lambdaExpressionMap;
     private final CodeAttributeEditor            codeAttributeEditor;
     private final MemberRemover                  memberRemover;
 
@@ -74,7 +74,7 @@ implements ClassVisitor,
         this.extraDataEntryNameMap = extraDataEntryNameMap;
         this.extraClassVisitor     = extraClassVisitor;
 
-        this.lambdaExpressionMap  = new HashMap<Integer, LambdaExpression>();
+        this.lambdaExpressionMap  = new HashMap<InvokeDynamicConstant, LambdaExpression>();
         this.codeAttributeEditor  = new CodeAttributeEditor(true, true);
         this.memberRemover        = new MemberRemover();
     }
