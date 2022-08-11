@@ -15,8 +15,8 @@ import proguard.Configuration
 import proguard.classfile.kotlin.KotlinClassKindMetadata
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor
 import proguard.resources.file.ResourceFilePool
-import testutils.ClassPoolBuilder
-import testutils.KotlinSource
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.KotlinSource
 
 class KotlinMetadataAsserterTest : FreeSpec({
     "Given an interface with default implementation" - {

@@ -38,8 +38,8 @@ import proguard.classfile.kotlin.visitor.AllFunctionVisitor
 import proguard.classfile.kotlin.visitor.AllPropertyVisitor
 import proguard.classfile.kotlin.visitor.AllValueParameterVisitor
 import proguard.classfile.kotlin.visitor.KotlinValueParameterVisitor
-import testutils.ClassPoolBuilder
-import testutils.KotlinSource
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.KotlinSource
 import proguard.classfile.kotlin.KotlinValueParameterMetadata as ValueParameter
 import proguard.obfuscate.kotlin.KotlinValueParameterUsageMarker as VpUsageMarker
 

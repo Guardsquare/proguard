@@ -12,8 +12,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import proguard.classfile.ProgramClass
 import proguard.classfile.constant.Utf8Constant
-import testutils.AssemblerSource
-import testutils.ClassPoolBuilder
+import proguard.testutils.AssemblerSource
+import proguard.testutils.ClassPoolBuilder
 
 class ProguardAssemblerTest : FreeSpec({
     "Given Java bytecode" - {
