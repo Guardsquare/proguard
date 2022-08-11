@@ -11,11 +11,11 @@ import io.kotest.core.spec.style.FreeSpec
 import proguard.io.ExtraDataEntryNameMap
 import proguard.mark.Marker
 import proguard.resources.file.ResourceFilePool
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.KotlinSource
 import proguard.util.ProcessingFlags.DONT_OBFUSCATE
 import proguard.util.ProcessingFlags.DONT_OPTIMIZE
 import proguard.util.ProcessingFlags.DONT_SHRINK
-import testutils.ClassPoolBuilder
-import testutils.KotlinSource
 import testutils.asConfiguration
 import testutils.shouldHaveFlag
 import testutils.shouldNotHaveFlag

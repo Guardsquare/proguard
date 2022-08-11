@@ -11,8 +11,8 @@ import io.kotest.core.spec.style.FreeSpec
 import io.mockk.spyk
 import io.mockk.verify
 import proguard.classfile.visitor.ClassVisitor
-import testutils.ClassPoolBuilder
-import testutils.JavaSource
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.JavaSource
 import testutils.asConfiguration
 
 class ClassSpecificationVisitorFactoryTest : FreeSpec({

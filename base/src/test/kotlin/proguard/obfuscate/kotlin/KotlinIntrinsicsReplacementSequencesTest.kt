@@ -25,10 +25,10 @@ import proguard.classfile.util.InstructionSequenceMatcher.X
 import proguard.classfile.visitor.AllMemberVisitor
 import proguard.classfile.visitor.MultiClassVisitor
 import proguard.obfuscate.util.InstructionSequenceObfuscator
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.KotlinSource
 import proguard.util.ProcessingFlagSetter
 import proguard.util.ProcessingFlags
-import testutils.ClassPoolBuilder
-import testutils.KotlinSource
 
 class KotlinIntrinsicsReplacementSequencesTest : FreeSpec({
 

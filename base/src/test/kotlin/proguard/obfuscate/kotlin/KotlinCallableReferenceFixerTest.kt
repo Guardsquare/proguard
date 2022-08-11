@@ -46,9 +46,9 @@ import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor
 import proguard.classfile.util.ClassRenamer
 import proguard.classfile.visitor.ClassNameFilter
 import proguard.classfile.visitor.MultiClassVisitor
-import testutils.ClassPoolBuilder
-import testutils.JavaSource
-import testutils.KotlinSource
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.JavaSource
+import proguard.testutils.KotlinSource
 
 class KotlinCallableReferenceFixerTest : FreeSpec({
 

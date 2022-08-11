@@ -17,8 +17,8 @@ import proguard.classfile.attribute.annotation.visitor.AnnotationTypeFilter
 import proguard.classfile.attribute.annotation.visitor.AnnotationVisitor
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.visitor.ProcessingInfoSetter
-import testutils.ClassPoolBuilder
-import testutils.JavaSource
+import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.JavaSource
 
 class MarkedAnnotationDeleterTest : FreeSpec({
     "Given a class with two annotations on its field" - {
