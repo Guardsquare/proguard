@@ -10,6 +10,8 @@ package proguard.optimize.peephole
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import proguard.classfile.ProgramClass
+import proguard.classfile.VersionConstants.CLASS_VERSION_1_8
+import proguard.classfile.visitor.ClassVersionSetter
 import proguard.classfile.visitor.ProcessingInfoSetter
 import proguard.optimize.info.ClassOptimizationInfo
 import proguard.optimize.info.ProgramClassOptimizationInfo
@@ -28,6 +30,7 @@ class ClassMergerTest : FreeSpec({
     )
 
     val classB = classBPools.programClassPool.getClass("B") as ProgramClass
+    classB.accept(ClassVersionSetter(CLASS_VERSION_1_8))
     classBPools.libraryClassPool.classesAccept(ProcessingInfoSetter(ClassOptimizationInfo()))
     classBPools.programClassPool.classesAccept(ProcessingInfoSetter(ProgramClassOptimizationInfo()))
 
