@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,7 +22,6 @@ package proguard;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.*;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
@@ -247,7 +246,7 @@ public class InputReader implements Pass
         {
             // Create a reader that can unwrap jars, wars, ears, jmods and zips.
             DataEntryReader reader =
-                new DataEntryReaderFactory(configuration.android, configuration.verbose)
+                new DataEntryReaderFactory(configuration.android)
                     .createDataEntryReader(messagePrefix,
                                            classPathEntry,
                                            dataEntryReader);

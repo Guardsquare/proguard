@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,10 +22,11 @@ package proguard;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.ClassConstants;
 import proguard.io.*;
 import proguard.util.*;
 import java.util.*;
+
+import static proguard.classfile.ClassConstants.*;
 
 /**
  * This class can create DataEntryReader instances based on class path entries.
@@ -41,11 +42,10 @@ public class DataEntryReaderFactory
     private static final String VERSIONS_PATTERN = "META-INF/versions";
     private static final String VERSIONS_EXCLUDE = "!META-INF/versions/**";
 
-    private static final String CLASS_FILE_PREFIX = "classes/";
+    private static final String JMOD_CLASS_FILE_PREFIX = "classes/";
 
 
     private final boolean android;
-    private final boolean verbose;
 
 
     /**
@@ -54,13 +54,10 @@ public class DataEntryReaderFactory
      * @param android Specifies whether the packaging is targeted at the
      *                Android platform. Archives inside the assets directory
      *                then aren't unpacked but simply read as data files.
-     * @param verbose Specifies if verbose messages should be emitted when
-     *                creating the DataEntryReader.
      */
-    public DataEntryReaderFactory(boolean android, boolean verbose)
+    public DataEntryReaderFactory(boolean android)
     {
         this.android = android;
-        this.verbose = verbose;
     }
 
     /**
@@ -76,6 +73,7 @@ public class DataEntryReaderFactory
                                                  ClassPathEntry  classPathEntry,
                                                  DataEntryReader reader)
     {
+        boolean isDex  = classPathEntry.isDex();
         boolean isApk  = classPathEntry.isApk();
         boolean isAab  = classPathEntry.isAab();
         boolean isJar  = classPathEntry.isJar();
@@ -85,19 +83,20 @@ public class DataEntryReaderFactory
         boolean isJmod = classPathEntry.isJmod();
         boolean isZip  = classPathEntry.isZip();
 
-        List filter     = getFilterExcludingVersionedClasses(classPathEntry);
-        List apkFilter  = classPathEntry.getApkFilter();
-        List aabFilter  = classPathEntry.getAabFilter();
-        List jarFilter  = classPathEntry.getJarFilter();
-        List aarFilter  = classPathEntry.getAarFilter();
-        List warFilter  = classPathEntry.getWarFilter();
-        List earFilter  = classPathEntry.getEarFilter();
-        List jmodFilter = classPathEntry.getJmodFilter();
-        List zipFilter  = classPathEntry.getZipFilter();
+        List<String> filter     = getFilterExcludingVersionedClasses(classPathEntry);
+        List<String> apkFilter  = classPathEntry.getApkFilter();
+        List<String> aabFilter  = classPathEntry.getAabFilter();
+        List<String> jarFilter  = classPathEntry.getJarFilter();
+        List<String> aarFilter  = classPathEntry.getAarFilter();
+        List<String> warFilter  = classPathEntry.getWarFilter();
+        List<String> earFilter  = classPathEntry.getEarFilter();
+        List<String> jmodFilter = classPathEntry.getJmodFilter();
+        List<String> zipFilter  = classPathEntry.getZipFilter();
 
         logger.info("{}{} [{}]{}",
                     messagePrefix,
-                    (isApk  ? "apk"  :
+                    (isDex  ? "dex"  :
+                     isApk  ? "apk"  :
                      isAab  ? "aab"  :
                      isJar  ? "jar"  :
                      isAar  ? "aar"  :
@@ -195,14 +194,14 @@ public class DataEntryReaderFactory
                                             boolean         stripClassesPrefix,
                                             boolean         stripJmodHeader,
                                             boolean         isJar,
-                                            List            jarFilter,
+                                            List<String>    jarFilter,
                                             String          jarExtension)
     {
         if (stripClassesPrefix)
         {
             reader = new FilteredDataEntryReader(
-                new DataEntryNameFilter(new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION)),
-                new PrefixStrippingDataEntryReader(CLASS_FILE_PREFIX, reader),
+                new DataEntryNameFilter(new ExtensionMatcher(CLASS_FILE_EXTENSION)),
+                new PrefixStrippingDataEntryReader(JMOD_CLASS_FILE_PREFIX, reader),
                 reader);
         }
 
@@ -232,11 +231,15 @@ public class DataEntryReaderFactory
             if (android)
             {
                 jarMatcher =
-                    new AndMatcher(new NotMatcher(
-                                   new FixedStringMatcher("assets/",
-                                   new ConstantMatcher(true))),
+                    new AndMatcher(
+                        new AndMatcher(
+                            new NotMatcher(
+                            new ListParser(new FileNameParser()).parse("assets/**,*/assets/**")),
 
-                                   jarMatcher);
+                            new NotMatcher(
+                            new ListParser(new FileNameParser()).parse("res/**,*/res/**"))),
+
+                            jarMatcher);
             }
 
             // Only unzip the right type of jars.
@@ -256,29 +259,25 @@ public class DataEntryReaderFactory
      * If no custom filter targeting a specific version is used, exclude such classes
      * from being read.
      */
-    public static List getFilterExcludingVersionedClasses(ClassPathEntry classPathEntry)
+    public static List<String>  getFilterExcludingVersionedClasses(ClassPathEntry classPathEntry)
     {
-        List originalFilter = classPathEntry.getFilter();
+        List<String>  originalFilter = classPathEntry.getFilter();
         if (originalFilter == null)
         {
-            return Arrays.asList(VERSIONS_EXCLUDE);
+            return Collections.singletonList(VERSIONS_EXCLUDE);
         }
         else
         {
             // If there is already a custom filter for versioned classes
             // assume that the filter is properly setup.
-            ListIterator it = originalFilter.listIterator();
-            while (it.hasNext())
-            {
-                String element = (String) it.next();
-                if (element.contains(VERSIONS_PATTERN))
-                {
+            for (String element : originalFilter) {
+                if (element.contains(VERSIONS_PATTERN)) {
                     return originalFilter;
                 }
             }
 
             // Otherwise, exclude all versioned classes.
-            List filter = new ArrayList();
+            List<String>  filter = new ArrayList<>();
             filter.add(VERSIONS_EXCLUDE);
             filter.addAll(originalFilter);
             return filter;
