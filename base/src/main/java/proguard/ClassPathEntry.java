@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -41,18 +41,18 @@ import java.util.List;
  */
 public class ClassPathEntry
 {
-    private File    file;
-    private boolean output;
-    private String  featureName;
-    private List    filter;
-    private List    apkFilter;
-    private List    aabFilter;
-    private List    jarFilter;
-    private List    aarFilter;
-    private List    warFilter;
-    private List    earFilter;
-    private List    jmodFilter;
-    private List    zipFilter;
+    private File            file;
+    private boolean         output;
+    private String          featureName;
+    private List<String>    filter;
+    private List<String>    apkFilter;
+    private List<String>    aabFilter;
+    private List<String>    jarFilter;
+    private List<String>    aarFilter;
+    private List<String>    warFilter;
+    private List<String>    earFilter;
+    private List<String>    jmodFilter;
+    private List<String>    zipFilter;
 
     private String cachedName;
 
@@ -289,7 +289,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to bottom-level files in this entry.
      */
-    public List getFilter()
+    public List<String> getFilter()
     {
         return filter;
     }
@@ -297,7 +297,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to bottom-level files in this entry.
      */
-    public void setFilter(List filter)
+    public void setFilter(List<String> filter)
     {
         this.filter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -306,7 +306,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to apk files in this entry, if any.
      */
-    public List getApkFilter()
+    public List<String> getApkFilter()
     {
         return apkFilter;
     }
@@ -314,7 +314,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to apk files in this entry, if any.
      */
-    public void setApkFilter(List filter)
+    public void setApkFilter(List<String> filter)
     {
         this.apkFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -323,7 +323,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to aab files in this entry, if any.
      */
-    public List getAabFilter()
+    public List<String> getAabFilter()
     {
         return aabFilter;
     }
@@ -331,7 +331,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to aab files in this entry, if any.
      */
-    public void setAabFilter(List filter)
+    public void setAabFilter(List<String> filter)
     {
         this.aabFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -340,7 +340,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to jar files in this entry, if any.
      */
-    public List getJarFilter()
+    public List<String> getJarFilter()
     {
         return jarFilter;
     }
@@ -348,7 +348,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to jar files in this entry, if any.
      */
-    public void setJarFilter(List filter)
+    public void setJarFilter(List<String> filter)
     {
         this.jarFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -357,7 +357,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to aar files in this entry, if any.
      */
-    public List getAarFilter()
+    public List<String> getAarFilter()
     {
         return aarFilter;
     }
@@ -365,7 +365,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to aar files in this entry, if any.
      */
-    public void setAarFilter(List filter)
+    public void setAarFilter(List<String> filter)
     {
         this.aarFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -374,7 +374,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to war files in this entry, if any.
      */
-    public List getWarFilter()
+    public List<String> getWarFilter()
     {
         return warFilter;
     }
@@ -382,7 +382,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to war files in this entry, if any.
      */
-    public void setWarFilter(List filter)
+    public void setWarFilter(List<String> filter)
     {
         this.warFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -391,7 +391,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to ear files in this entry, if any.
      */
-    public List getEarFilter()
+    public List<String> getEarFilter()
     {
         return earFilter;
     }
@@ -399,7 +399,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to ear files in this entry, if any.
      */
-    public void setEarFilter(List filter)
+    public void setEarFilter(List<String> filter)
     {
         this.earFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -408,7 +408,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to jmod files in this entry, if any.
      */
-    public List getJmodFilter()
+    public List<String> getJmodFilter()
     {
         return jmodFilter;
     }
@@ -416,7 +416,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to jmod files in this entry, if any.
      */
-    public void setJmodFilter(List filter)
+    public void setJmodFilter(List<String> filter)
     {
         this.jmodFilter = filter == null || filter.size() == 0 ? null : filter;
     }
@@ -424,7 +424,7 @@ public class ClassPathEntry
     /**
      * Returns the name filter that is applied to zip files in this entry, if any.
      */
-    public List getZipFilter()
+    public List<String> getZipFilter()
     {
         return zipFilter;
     }
@@ -432,7 +432,7 @@ public class ClassPathEntry
     /**
      * Sets the name filter that is applied to zip files in this entry, if any.
      */
-    public void setZipFilter(List filter)
+    public void setZipFilter(List<String> filter)
     {
         this.zipFilter = filter == null || filter.size() == 0 ? null : filter;
     }

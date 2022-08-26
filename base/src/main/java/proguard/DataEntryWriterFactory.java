@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -30,6 +30,9 @@ import proguard.util.*;
 import java.io.File;
 import java.security.KeyStore;
 import java.util.*;
+import java.util.function.Function;
+
+import static proguard.classfile.ClassConstants.CLASS_FILE_EXTENSION;
 
 /**
  * This class can create DataEntryWriter instances based on class paths. The
@@ -70,9 +73,9 @@ public class DataEntryWriterFactory
     private final boolean                    pageAlignNativeLibs;
     private final boolean                    mergeBundleJars;
     private final KeyStore.PrivateKeyEntry[] privateKeyEntries;
-    private final boolean                    verbose;
 
-    private Map<File,DataEntryWriter> jarWriterCache = new HashMap();
+    private final Map<File,DataEntryWriter> jarWriterCache = new HashMap<>();
+    private final Function<DataEntryWriter, DataEntryWriter> classDataEntryWriterProvider;
 
 
     /**
@@ -93,8 +96,49 @@ public class DataEntryWriterFactory
      *                              in an Android app bundle into a
      *                              single jar.
      * @param privateKeyEntries     optional private keys to sign jars.
-     * @param verbose               specifies if verbose messages should be emitted when
-     *                              creating the DataEntryWriter.
+     */
+    public DataEntryWriterFactory(ClassPool                  programClassPool,
+                                  ResourceFilePool           resourceFilePool,
+                                  int                        modificationTime,
+                                  StringMatcher              uncompressedFilter,
+                                  int                        uncompressedAlignment,
+                                  boolean                    pageAlignNativeLibs,
+                                  boolean                    mergeBundleJars,
+                                  KeyStore.PrivateKeyEntry[] privateKeyEntries)
+    {
+        this(
+                programClassPool,
+                resourceFilePool,
+                modificationTime,
+                uncompressedFilter,
+                uncompressedAlignment,
+                pageAlignNativeLibs,
+                mergeBundleJars,
+                privateKeyEntries,
+                null
+        );
+    }
+
+    /**
+     * Creates a new DataEntryWriterFactory.
+     *
+     * @param programClassPool          the program class pool to process.
+     * @param resourceFilePool          the resource file pool to process.
+     * @param modificationTime          the modification date and time of
+     *                                  the zip entries, in DOS
+     *                                  format.
+     * @param uncompressedFilter        an optional filter for files that
+     *                                  should not be compressed.
+     * @param uncompressedAlignment     the desired alignment for the data
+     *                                  of uncompressed entries.
+     * @param pageAlignNativeLibs       specifies whether to align native
+     *                                  libraries at page boundaries.
+     * @param mergeBundleJars           specifies whether to merge all jars
+     *                                  in an Android app bundle into a
+     *                                  single jar.
+     * @param privateKeyEntries         optional private keys to sign jars.
+     * @param alternativeClassDataEntryWriterProvider optional, to provide an alternative class writer,
+     *                                                instead of the default {@link ClassDataEntryWriter}.
      */
     public DataEntryWriterFactory(ClassPool                  programClassPool,
                                   ResourceFilePool           resourceFilePool,
@@ -104,17 +148,17 @@ public class DataEntryWriterFactory
                                   boolean                    pageAlignNativeLibs,
                                   boolean                    mergeBundleJars,
                                   KeyStore.PrivateKeyEntry[] privateKeyEntries,
-                                  boolean                    verbose)
+                                  Function<DataEntryWriter, DataEntryWriter> alternativeClassDataEntryWriterProvider)
     {
-        this.programClassPool      = programClassPool;
-        this.resourceFilePool      = resourceFilePool;
-        this.modificationTime      = modificationTime;
-        this.uncompressedFilter    = uncompressedFilter;
-        this.uncompressedAlignment = uncompressedAlignment;
-        this.pageAlignNativeLibs   = pageAlignNativeLibs;
-        this.mergeBundleJars       = mergeBundleJars;
-        this.privateKeyEntries     = privateKeyEntries;
-        this.verbose = verbose;
+        this.programClassPool             = programClassPool;
+        this.resourceFilePool             = resourceFilePool;
+        this.modificationTime             = modificationTime;
+        this.uncompressedFilter           = uncompressedFilter;
+        this.uncompressedAlignment        = uncompressedAlignment;
+        this.pageAlignNativeLibs          = pageAlignNativeLibs;
+        this.mergeBundleJars              = mergeBundleJars;
+        this.privateKeyEntries            = privateKeyEntries;
+        this.classDataEntryWriterProvider = alternativeClassDataEntryWriterProvider;
     }
 
 
@@ -210,15 +254,15 @@ public class DataEntryWriterFactory
         boolean isJmod = classPathEntry.isJmod();
         boolean isZip  = classPathEntry.isZip();
 
-        List filter     = DataEntryReaderFactory.getFilterExcludingVersionedClasses(classPathEntry);
-        List apkFilter  = classPathEntry.getApkFilter();
-        List aabFilter  = classPathEntry.getAabFilter();
-        List jarFilter  = classPathEntry.getJarFilter();
-        List aarFilter  = classPathEntry.getAarFilter();
-        List warFilter  = classPathEntry.getWarFilter();
-        List earFilter  = classPathEntry.getEarFilter();
-        List jmodFilter = classPathEntry.getJmodFilter();
-        List zipFilter  = classPathEntry.getZipFilter();
+        List<String> filter     = DataEntryReaderFactory.getFilterExcludingVersionedClasses(classPathEntry);
+        List<String> apkFilter  = classPathEntry.getApkFilter();
+        List<String> aabFilter  = classPathEntry.getAabFilter();
+        List<String> jarFilter  = classPathEntry.getJarFilter();
+        List<String> aarFilter  = classPathEntry.getAarFilter();
+        List<String> warFilter  = classPathEntry.getWarFilter();
+        List<String> earFilter  = classPathEntry.getEarFilter();
+        List<String> jmodFilter = classPathEntry.getJmodFilter();
+        List<String> zipFilter  = classPathEntry.getZipFilter();
 
         logger.info("Preparing {}output {} [{}]{}",
                    privateKeyEntries == null ? "" : "signed ",
@@ -320,8 +364,10 @@ public class DataEntryWriterFactory
         writer =
             // Filter on class files.
             new NameFilteredDataEntryWriter(
-            new ExtensionMatcher(ClassConstants.CLASS_FILE_EXTENSION),
-                classWriter,
+            new ExtensionMatcher(CLASS_FILE_EXTENSION),
+                    classDataEntryWriterProvider != null ?
+                        classDataEntryWriterProvider.apply(writer) :
+                        classWriter,
                 writer);
 
         // Let the writer cascade, if specified.
@@ -343,7 +389,7 @@ public class DataEntryWriterFactory
                                             boolean         isJar,
                                             boolean         isAab,
                                             String          jarFilterExtension,
-                                            List            jarFilter,
+                                            List<String>    jarFilter,
                                             byte[]          jarHeader,
                                             boolean         pageAlignNativeLibs,
                                             String[][]      prefixes)

@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -105,8 +105,8 @@ public class OutputWriter implements Pass
                                        configuration.zipAlign,
                                        configuration.android, //resourceInfo.pageAlignNativeLibs,
                                        configuration.obfuscate,
-                                       privateKeyEntries,
-                                       configuration.verbose);
+                                       privateKeyEntries
+            );
 
         DataEntryWriter extraDataEntryWriter = null;
         if (configuration.extraJar != null)
