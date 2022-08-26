@@ -74,8 +74,9 @@ public class DataEntryWriterFactory
     private final boolean                    mergeBundleJars;
     private final KeyStore.PrivateKeyEntry[] privateKeyEntries;
 
-    private final Map<File,DataEntryWriter> jarWriterCache = new HashMap<>();
-    private final Function<DataEntryWriter, DataEntryWriter> classDataEntryWriterProvider;
+    private final Map<File,DataEntryWriter>                  jarWriterCache = new HashMap<>();
+
+    private final Function<DataEntryWriter, DataEntryWriter> alternativeClassDataEntryWriterProvider;
 
 
     /**
@@ -158,7 +159,7 @@ public class DataEntryWriterFactory
         this.pageAlignNativeLibs          = pageAlignNativeLibs;
         this.mergeBundleJars              = mergeBundleJars;
         this.privateKeyEntries            = privateKeyEntries;
-        this.classDataEntryWriterProvider = alternativeClassDataEntryWriterProvider;
+        this.alternativeClassDataEntryWriterProvider = alternativeClassDataEntryWriterProvider;
     }
 
 
@@ -365,8 +366,8 @@ public class DataEntryWriterFactory
             // Filter on class files.
             new NameFilteredDataEntryWriter(
             new ExtensionMatcher(CLASS_FILE_EXTENSION),
-                    classDataEntryWriterProvider != null ?
-                        classDataEntryWriterProvider.apply(writer) :
+                    alternativeClassDataEntryWriterProvider != null ?
+                        alternativeClassDataEntryWriterProvider.apply(writer) :
                         classWriter,
                 writer);
 
