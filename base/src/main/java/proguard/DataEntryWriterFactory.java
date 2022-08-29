@@ -71,7 +71,7 @@ public class DataEntryWriterFactory
     private final StringMatcher              uncompressedFilter;
     private final int                        uncompressedAlignment;
     private final boolean                    pageAlignNativeLibs;
-    private final boolean                    mergeBundleJars;
+    private final boolean                    mergeAarJars;
     private final KeyStore.PrivateKeyEntry[] privateKeyEntries;
 
     private final Map<File,DataEntryWriter>                  jarWriterCache = new HashMap<>();
@@ -93,8 +93,8 @@ public class DataEntryWriterFactory
      *                              of uncompressed entries.
      * @param pageAlignNativeLibs   specifies whether to align native
      *                              libraries at page boundaries.
-     * @param mergeBundleJars       specifies whether to merge all jars
-     *                              in an Android app bundle into a
+     * @param mergeAarJars          specifies whether to merge all jars
+     *                              in an Android library aar into a
      *                              single jar.
      * @param privateKeyEntries     optional private keys to sign jars.
      */
@@ -104,7 +104,7 @@ public class DataEntryWriterFactory
                                   StringMatcher              uncompressedFilter,
                                   int                        uncompressedAlignment,
                                   boolean                    pageAlignNativeLibs,
-                                  boolean                    mergeBundleJars,
+                                  boolean                    mergeAarJars,
                                   KeyStore.PrivateKeyEntry[] privateKeyEntries)
     {
         this(
@@ -114,7 +114,7 @@ public class DataEntryWriterFactory
                 uncompressedFilter,
                 uncompressedAlignment,
                 pageAlignNativeLibs,
-                mergeBundleJars,
+                mergeAarJars,
                 privateKeyEntries,
                 null
         );
@@ -134,7 +134,7 @@ public class DataEntryWriterFactory
      *                                  of uncompressed entries.
      * @param pageAlignNativeLibs       specifies whether to align native
      *                                  libraries at page boundaries.
-     * @param mergeBundleJars           specifies whether to merge all jars
+     * @param mergeAarJars           specifies whether to merge all jars
      *                                  in an Android app bundle into a
      *                                  single jar.
      * @param privateKeyEntries         optional private keys to sign jars.
@@ -147,7 +147,7 @@ public class DataEntryWriterFactory
                                   StringMatcher              uncompressedFilter,
                                   int                        uncompressedAlignment,
                                   boolean                    pageAlignNativeLibs,
-                                  boolean                    mergeBundleJars,
+                                  boolean                    mergeAarJars,
                                   KeyStore.PrivateKeyEntry[] privateKeyEntries,
                                   Function<DataEntryWriter, DataEntryWriter> alternativeClassDataEntryWriterProvider)
     {
@@ -157,7 +157,7 @@ public class DataEntryWriterFactory
         this.uncompressedFilter           = uncompressedFilter;
         this.uncompressedAlignment        = uncompressedAlignment;
         this.pageAlignNativeLibs          = pageAlignNativeLibs;
-        this.mergeBundleJars              = mergeBundleJars;
+        this.mergeAarJars                 = mergeAarJars;
         this.privateKeyEntries            = privateKeyEntries;
         this.alternativeClassDataEntryWriterProvider = alternativeClassDataEntryWriterProvider;
     }
@@ -327,14 +327,36 @@ public class DataEntryWriterFactory
             writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenWars,  isWar,  false, ".war",  warFilter,  null,        false, WAR_PREFIXES);
             writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenAars,  isAar,  false, ".aar",  aarFilter,  null,        false, null);
 
-            if (isAar && mergeBundleJars)
+            if (isAar)
             {
-                // If we're writing an obfuscated AAR, all input jars need to
-                // be merged into a final classes.jar file.
-                writer =
-                    new FilteredDataEntryWriter(new DataEntryNameFilter(new ExtensionMatcher(".jar")),
-                    new RenamedDataEntryWriter(new ConstantStringFunction("classes.jar"), writer),
-                        writer);
+                // If we're writing an AAR, all input jars need to
+                // be merged into a final classes.jar file or need to be put in the lib folder.
+                if (mergeAarJars)
+                {
+
+                    writer =
+                        new FilteredDataEntryWriter(new DataEntryNameFilter(new ExtensionMatcher(".jar")),
+                                                    new RenamedDataEntryWriter(
+                                                        new ConstantStringFunction("classes.jar"), writer),
+                                                    writer);
+                }
+                else
+                {
+                    writer =
+                        new FilteredDataEntryWriter(new DataEntryNameFilter(new ExtensionMatcher(".jar")),
+                                                    new RenamedDataEntryWriter(string -> {
+                                                        String fileName = string.substring(string.lastIndexOf('/') + 1);
+                                                        if (fileName.equals("classes.jar"))
+                                                        {
+                                                            return fileName;
+                                                        }
+                                                        else
+                                                        {
+                                                            return "libs/" + fileName;
+                                                        }
+                                                    }, writer),
+                                                    writer);
+                }
             }
 
             writer = wrapInJarWriter(file, writer, extraDataEntryWriter, closeCachedJarWriter, flattenJars,  isJar,  false, ".jar",  jarFilter,  null,        false, null);
