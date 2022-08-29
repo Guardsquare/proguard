@@ -20,13 +20,28 @@
  */
 package proguard;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import proguard.io.*;
-import proguard.util.*;
-import java.util.*;
+import proguard.io.DataEntryNameFilter;
+import proguard.io.DataEntryReader;
+import proguard.io.FilteredDataEntryReader;
+import proguard.io.JarReader;
+import proguard.io.PrefixStrippingDataEntryReader;
+import proguard.io.RenamedDataEntryReader;
+import proguard.util.AndMatcher;
+import proguard.util.ExtensionMatcher;
+import proguard.util.FileNameParser;
+import proguard.util.ListFunctionParser;
+import proguard.util.ListParser;
+import proguard.util.NotMatcher;
+import proguard.util.SingleFunctionParser;
+import proguard.util.StringFunction;
+import proguard.util.StringMatcher;
+import proguard.util.WildcardManager;
 
-import static proguard.classfile.ClassConstants.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static proguard.classfile.ClassConstants.CLASS_FILE_EXTENSION;
 
 /**
  * This class can create DataEntryReader instances based on class path entries.
@@ -37,7 +52,6 @@ import static proguard.classfile.ClassConstants.*;
  */
 public class DataEntryReaderFactory
 {
-    private static final Logger logger = LogManager.getLogger(DataEntryReaderFactory.class);
 
     private static final String VERSIONS_PATTERN = "META-INF/versions";
     private static final String VERSIONS_EXCLUDE = "!META-INF/versions/**";
@@ -63,17 +77,13 @@ public class DataEntryReaderFactory
     /**
      * Creates a DataEntryReader that can read the given class path entry.
      *
-     * @param messagePrefix  a prefix for messages that are printed out (with System.out)
      * @param classPathEntry the input class path entry.
      * @param reader         a data entry reader to which the reading of actual
      *                       classes and resource files can be delegated.
      * @return a DataEntryReader for reading the given class path entry.
      */
-    public DataEntryReader createDataEntryReader(String          messagePrefix,
-                                                 ClassPathEntry  classPathEntry,
-                                                 DataEntryReader reader)
+    public DataEntryReader createDataEntryReader(ClassPathEntry classPathEntry, DataEntryReader reader)
     {
-        boolean isDex  = classPathEntry.isDex();
         boolean isApk  = classPathEntry.isApk();
         boolean isAab  = classPathEntry.isAab();
         boolean isJar  = classPathEntry.isJar();
@@ -92,30 +102,6 @@ public class DataEntryReaderFactory
         List<String> earFilter  = classPathEntry.getEarFilter();
         List<String> jmodFilter = classPathEntry.getJmodFilter();
         List<String> zipFilter  = classPathEntry.getZipFilter();
-
-        logger.info("{}{} [{}]{}",
-                    messagePrefix,
-                    (isDex  ? "dex"  :
-                     isApk  ? "apk"  :
-                     isAab  ? "aab"  :
-                     isJar  ? "jar"  :
-                     isAar  ? "aar"  :
-                     isWar  ? "war"  :
-                     isEar  ? "ear"  :
-                     isJmod ? "jmod" :
-                     isZip  ? "zip"  :
-                              "directory"),
-                    classPathEntry.getName(),
-                    (filter     != null ||
-                     apkFilter  != null ||
-                     aabFilter  != null ||
-                     jarFilter  != null ||
-                     aarFilter  != null ||
-                     warFilter  != null ||
-                     earFilter  != null ||
-                     jmodFilter != null ||
-                     zipFilter  != null ? " (filtered)" : "")
-        );
 
         // Add a renaming filter, if specified.
         if (filter != null)
@@ -259,9 +245,9 @@ public class DataEntryReaderFactory
      * If no custom filter targeting a specific version is used, exclude such classes
      * from being read.
      */
-    public static List<String>  getFilterExcludingVersionedClasses(ClassPathEntry classPathEntry)
+    public static List<String> getFilterExcludingVersionedClasses(ClassPathEntry classPathEntry)
     {
-        List<String>  originalFilter = classPathEntry.getFilter();
+        List<String> originalFilter = classPathEntry.getFilter();
         if (originalFilter == null)
         {
             return Collections.singletonList(VERSIONS_EXCLUDE);

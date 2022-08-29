@@ -34,6 +34,9 @@ import proguard.resources.kotlinmodule.io.KotlinModuleDataEntryReader;
 import proguard.util.*;
 
 import java.io.*;
+import java.util.List;
+
+import static proguard.DataEntryReaderFactory.getFilterExcludingVersionedClasses;
 
 /**
  * This pass reads the input class files.
@@ -71,11 +74,6 @@ public class InputReader implements Pass
     public void execute(AppView appView) throws IOException
     {
         logger.info("Reading input...");
-
-        // We're using the system's default character encoding for writing to
-        // the standard output and error output.
-        PrintWriter out = new PrintWriter(System.out, true);
-        PrintWriter err = new PrintWriter(System.err, true);
 
         WarningPrinter notePrinter    = new WarningLogger(logger, configuration.note);
         WarningPrinter warningPrinter = new WarningLogger(logger, configuration.warn);
@@ -244,12 +242,29 @@ public class InputReader implements Pass
     {
         try
         {
+            List<String> filter = getFilterExcludingVersionedClasses(classPathEntry);
+
+            logger.info("{}{} [{}]{}",
+                messagePrefix,
+                classPathEntry.isDex()  ? "dex"  :
+                classPathEntry.isApk()  ? "apk"  :
+                classPathEntry.isAab()  ? "aab"  :
+                classPathEntry.isJar()  ? "jar"  :
+                classPathEntry.isAar()  ? "aar"  :
+                classPathEntry.isWar()  ? "war"  :
+                classPathEntry.isEar()  ? "ear"  :
+                classPathEntry.isJmod() ? "jmod" :
+                classPathEntry.isZip()  ? "zip"  :
+                                          "directory",
+                classPathEntry.getName(),
+                filter != null || classPathEntry.isFiltered() ? " (filtered)" : ""
+            );
+ 
             // Create a reader that can unwrap jars, wars, ears, jmods and zips.
             DataEntryReader reader =
                 new DataEntryReaderFactory(configuration.android)
-                    .createDataEntryReader(messagePrefix,
-                                           classPathEntry,
-                                           dataEntryReader);
+                    .createDataEntryReader(classPathEntry,
+                            dataEntryReader);
 
             // Create the data entry source.
             DataEntrySource source =
