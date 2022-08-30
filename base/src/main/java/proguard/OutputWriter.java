@@ -116,6 +116,7 @@ public class OutputWriter implements Pass
             // combined together, after ProGuard processing.
             ClassPath extraClassPath = new ClassPath();
             extraClassPath.add(new ClassPathEntry(configuration.extraJar, true));
+            log(extraClassPath, 0, 1, privateKeyEntries);
             extraDataEntryWriter =
                     new UniqueDataEntryWriter(
                     dataEntryWriterFactory.createDataEntryWriter(extraClassPath, 0, 1, null));
@@ -142,6 +143,7 @@ public class OutputWriter implements Pass
                 if (nextIndex == programJars.size() ||
                     !programJars.get(nextIndex).isOutput())
                 {
+                    log(programJars, lastInputIndex + 1, nextIndex, privateKeyEntries);
                     // Write the processed input entries to the output entries.
                     writeOutput(dataEntryWriterFactory,
                                 configuration,
@@ -171,7 +173,6 @@ public class OutputWriter implements Pass
             extraDataEntryWriter.close();
         }
     }
-
 
     /**
      * Gets the private keys from the key stores, based on the given configuration.
@@ -521,5 +522,31 @@ public class OutputWriter implements Pass
         }
 
         return packagePrefixMap;
+    }
+
+
+    private static void log(ClassPath classPath, int fromIndex, int toIndex, KeyStore.PrivateKeyEntry[] privateKeyEntries)
+    {
+        for (int index = toIndex - 1; index >= fromIndex; index--)
+        {
+            ClassPathEntry classPathEntry = classPath.get(index);
+            List<String> filter = DataEntryReaderFactory.getFilterExcludingVersionedClasses(classPathEntry);
+
+            logger.info("Preparing {}output {} [{}]{}",
+                   privateKeyEntries == null ? "" : "signed ",
+                   classPathEntry.isDex()  ? "dex"  :
+                   classPathEntry.isApk()  ? "apk"  :
+                   classPathEntry.isAab()  ? "aab"  :
+                   classPathEntry.isJar()  ? "jar"  :
+                   classPathEntry.isAar()  ? "aar"  :
+                   classPathEntry.isWar()  ? "war"  :
+                   classPathEntry.isEar()  ? "ear"  :
+                   classPathEntry.isJmod() ? "jmod" :
+                   classPathEntry.isZip()  ? "zip"  :
+                                             "directory",
+                   classPathEntry.getName(),
+                   filter != null || classPathEntry.isFiltered() ? " (filtered)" : ""
+             );
+        }
     }
 }
