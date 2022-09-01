@@ -10,6 +10,7 @@
 ### Bug fixes
 
 - Prevent merging classes with native methods that would result in UnsatisfiedLinkError.
+- Fix optimization of simple enums (optimization `class/unboxing/enums`).
 
 ## Version 7.2.2
 
