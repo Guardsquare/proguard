@@ -676,7 +676,7 @@ implements   ClassVisitor,
     {
         return isPoppingExpectedType(offset,
                                      stackEntryIndex,
-                                     clazz.getClassName(constantIndex));
+                                     ClassUtil.internalTypeFromClassType(clazz.getClassName(constantIndex)));
     }
 
 
