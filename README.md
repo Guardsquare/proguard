@@ -85,7 +85,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:x.y.z'    // The Android Gradle plugin.
-        classpath 'com.guardsquare:proguard-gradle:7.2.1'  // The ProGuard Gradle plugin.
+        classpath 'com.guardsquare:proguard-gradle:7.3.0-beta1'  // The ProGuard Gradle plugin.
     }
 }
 ```
@@ -158,7 +158,7 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.2.1')
+                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.3.0-beta1')
             }
         }
     }
