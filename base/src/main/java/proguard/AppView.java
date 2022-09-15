@@ -26,6 +26,10 @@ public class AppView
      */
     public       InitialStateInfo      initialStateInfo;
 
+    public AppView(ClassPool programClassPool, ClassPool libraryClassPool)
+    {
+        this(programClassPool, libraryClassPool, new ResourceFilePool(), new ExtraDataEntryNameMap());
+    }
 
     public AppView()
     {

@@ -11,6 +11,7 @@
 
 - Prevent merging classes with native methods that would result in UnsatisfiedLinkError.
 - Fix optimization of simple enums (optimization `class/unboxing/enums`).
+- Prevent potential build time `NullPointerException` when processing Kotlin interface methods.
 
 ## Version 7.2.2
 

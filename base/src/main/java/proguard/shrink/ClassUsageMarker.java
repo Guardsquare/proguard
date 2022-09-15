@@ -1753,11 +1753,25 @@ implements   ClassVisitor,
                     !kotlinFunctionMetadata.flags.modality.isAbstract &&
                     (kotlinFunctionMetadata.referencedMethod.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0)
                 {
-                    kotlinFunctionMetadata.referencedDefaultImplementationMethodClass
-                        .accept(ClassUsageMarker.this);
-                    kotlinFunctionMetadata.referencedDefaultImplementationMethod
-                        .accept(kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
-                                ClassUsageMarker.this);
+                    /*
+                    TODO: use this when referencedDefaultImplementationMethodAccept is available in ProGuardCORE
+                    kotlinFunctionMetadata.referencedDefaultImplementationMethodAccept(
+                        new MultiMemberVisitor(
+                            ClassUsageMarker.this,
+                            new MemberToClassVisitor(ClassUsageMarker.this)
+                        )
+                    );
+                    */
+
+                    if (kotlinFunctionMetadata.referencedDefaultImplementationMethod      != null &&
+                        kotlinFunctionMetadata.referencedDefaultImplementationMethodClass != null)
+                    {
+                        kotlinFunctionMetadata.referencedDefaultImplementationMethodClass
+                            .accept(ClassUsageMarker.this);
+                        kotlinFunctionMetadata.referencedDefaultImplementationMethod
+                            .accept(kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
+                                    ClassUsageMarker.this);
+                    }
                 }
             }
         }
