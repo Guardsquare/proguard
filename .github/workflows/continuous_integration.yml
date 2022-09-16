@@ -8,10 +8,7 @@ on:
       - master
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -24,3 +21,8 @@ jobs:
           build-root-directory: proguard-main/
           wrapper-directory: proguard-main/
           arguments: :gradle:test
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1.19
+        if: always()
+        with:
+          files: gradle-plugin/build/test-results/**/*.xml
