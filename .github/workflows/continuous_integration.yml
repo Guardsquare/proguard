@@ -20,9 +20,4 @@ jobs:
         with:
           build-root-directory: proguard-main/
           wrapper-directory: proguard-main/
-          arguments: :gradle:test
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1.19
-        if: always()
-        with:
-          files: gradle-plugin/build/test-results/**/*.xml
+          arguments: :gradle:test --info
