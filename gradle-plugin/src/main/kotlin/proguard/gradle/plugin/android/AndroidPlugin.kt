@@ -110,7 +110,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         if (!androidExtension.aaptAdditionalParameters.contains("--proguard")) {
             androidExtension.aaptAdditionalParameters.addAll(listOf(
                     "--proguard",
-                    "${project.buildDir.absolutePath}/intermediates/proguard/configs/aapt_rules.pro"))
+                    project.buildDir.resolve("intermediates/proguard/configs/aapt_rules.pro").absolutePath)
         }
 
         if (!androidExtension.aaptAdditionalParameters.contains("--proguard-conditional-keep-rules")) {
@@ -129,7 +129,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
                     variant,
                     createConsumerRulesConfiguration(project, variant),
                     matchingConfiguration.consumerRuleFilter,
-                    File("${project.buildDir}/intermediates/proguard/configs")))
+                    project.buildDir.resolve("intermediates/proguard/configs")))
         }
         return matchingConfiguration
     }
@@ -217,7 +217,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             val processResourcesTask = project.tasks.findByName("process${variant.name.capitalize()}Resources")
             processResourcesTask?.outputs?.doNotCacheIf("We need to regenerate the aapt_rules.pro file, sorry!") {
                 project.logger.debug("Disabling AAPT caching for ${variant.name}")
-                !File("${project.buildDir.absolutePath}/intermediates/proguard/configs/aapt_rules.pro").exists()
+                !project.buildDir.resolve("intermediates/proguard/configs/aapt_rules.pro").exists()
             }
         }
     }
