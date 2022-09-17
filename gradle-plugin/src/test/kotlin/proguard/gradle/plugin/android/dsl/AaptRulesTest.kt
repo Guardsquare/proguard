@@ -83,7 +83,7 @@ class AaptRulesTest : FreeSpec({
                     }
                 }
 
-                aaptOptions.additionalParameters = ["--proguard", "${rootDir.canonicalPath}/test.pro"]
+                aaptOptions.additionalParameters = ["--proguard", "${rootDir.resolve("test.pro")}]
             }
 
             proguard {
