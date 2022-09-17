@@ -83,7 +83,7 @@ class ProGuardTransform(
             project.logger.warn("AAPT rules file not found: you may need to apply some extra keep rules for classes referenced from resources in your own ProGuard configuration.")
         }
 
-        val mappingDir = File("${project.buildDir.absolutePath}/outputs/proguard/$variantName/mapping")
+        val mappingDir = project.buildDir.resolve("outputs/proguard/$variantName/mapping")
         if (!mappingDir.exists()) mappingDir.mkdirs()
         proguardTask.printmapping(File(mappingDir, "mapping.txt"))
         proguardTask.printseeds(File(mappingDir, "seeds.txt"))
@@ -143,10 +143,10 @@ class ProGuardTransform(
     private fun createLibraryJars(inputs: Collection<TransformInput>): List<File> =
         inputs.flatMap { input -> input.directoryInputs.map { it.file } + input.jarInputs.map { it.file } } +
 
-                listOf(File(androidExtension.sdkDirectory, "platforms/${androidExtension.compileSdkVersion}/android.jar")) +
+                listOf(androidExtension.sdkDirectory.resolve("platforms/${androidExtension.compileSdkVersion}/android.jar")) +
 
                 androidExtension.libraryRequests.map {
-                    File(androidExtension.sdkDirectory, "platforms/${androidExtension.compileSdkVersion}/optional/${it.name}.jar")
+                    androidExtension.sdkDirectory.resolve("platforms/${androidExtension.compileSdkVersion}/optional/${it.name}.jar")
                 }
 
     private fun getAaptRulesFile() = androidExtension.aaptAdditionalParameters
