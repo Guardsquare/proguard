@@ -111,6 +111,7 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             androidExtension.aaptAdditionalParameters.addAll(listOf(
                     "--proguard",
                     project.buildDir.resolve("intermediates/proguard/configs/aapt_rules.pro").absolutePath)
+            )
         }
 
         if (!androidExtension.aaptAdditionalParameters.contains("--proguard-conditional-keep-rules")) {
