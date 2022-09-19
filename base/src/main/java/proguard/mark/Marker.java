@@ -316,11 +316,22 @@ public class Marker implements Pass
                 hasAnyOf(kotlinFunctionMetadata.referencedMethod.getProcessingFlags(),
                                  DONT_OPTIMIZE, DONT_SHRINK, DONT_OBFUSCATE))
             {
-                kotlinFunctionMetadata.referencedDefaultImplementationMethod
-                    .accept(kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
-                            new ProcessingFlagSetter(ProcessingFlags.DONT_OPTIMIZE));
-                kotlinFunctionMetadata.referencedDefaultImplementationMethodClass
-                    .accept(new ProcessingFlagSetter(ProcessingFlags.DONT_OPTIMIZE));
+/*              TODO: use this when referencedDefaultImplementationMethodAccept is available in ProGuardCORE
+                kotlinFunctionMetadata.referencedDefaultImplementationMethodAccept(
+                    new MultiMemberVisitor(
+                        new ProcessingFlagSetter(DONT_OPTIMIZE),
+                        new MemberToClassVisitor(new ProcessingFlagSetter(DONT_OPTIMIZE))
+                    )
+                );*/
+                if (kotlinFunctionMetadata.referencedDefaultImplementationMethod      != null &&
+                    kotlinFunctionMetadata.referencedDefaultImplementationMethodClass != null)
+                {
+                    kotlinFunctionMetadata.referencedDefaultImplementationMethod
+                        .accept(kotlinFunctionMetadata.referencedDefaultImplementationMethodClass,
+                                new ProcessingFlagSetter(ProcessingFlags.DONT_OPTIMIZE));
+                    kotlinFunctionMetadata.referencedDefaultImplementationMethodClass
+                        .accept(new ProcessingFlagSetter(ProcessingFlags.DONT_OPTIMIZE));
+                }
             }
         }
 
