@@ -12,6 +12,7 @@
 - Prevent merging classes with native methods that would result in UnsatisfiedLinkError.
 - Fix optimization of simple enums (optimization `class/unboxing/enums`).
 - Prevent potential build time `NullPointerException` when processing Kotlin interface methods.
+- Fix ProGuard Gradle Plugin not working correctly on Windows. (`PGD-272`)
 
 ## Version 7.2.2
 
