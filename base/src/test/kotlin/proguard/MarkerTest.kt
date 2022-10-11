@@ -114,6 +114,9 @@ class MarkerTest : FreeSpec({
             -keep class Test {
                 <methods>;
             }
+            # This option is deprecated and one should use '-keep class kotlin.Metadata' instead.
+            # In this test we use the deprecated option, as its value is set in ProGuard.java and not in
+            # the ConfigurationParser which is used by this unit test.
             -keepkotlinmetadata
             """.asConfiguration()
             val marker = Marker(config)
@@ -153,6 +156,9 @@ class MarkerTest : FreeSpec({
             -keep class Test {
                 <methods>;
             }
+            # This option is deprecated and one should use '-keep class kotlin.Metadata' instead.
+            # In this test we use the deprecated option, as its value is set in ProGuard.java and not in
+            # the ConfigurationParser which is used by this unit test.
             -keepkotlinmetadata
             """.asConfiguration()
             val marker = Marker(config)

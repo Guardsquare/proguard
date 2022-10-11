@@ -18,6 +18,7 @@ To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated
 ### Improved
 
 - Improve app startup times when using `-addconfigurationdebugging`. (`T17153`)
+- Automatically process Kotlin Metadata when keeping the `kotlin.Metadata` annotation. (`T3116`)
 
 ### Bug fixes
 

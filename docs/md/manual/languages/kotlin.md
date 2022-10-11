@@ -5,8 +5,10 @@ The Kotlin compiler injects code and metadata into the classes that it generates
 ## Configuration
 
 In most cases, you do not need to keep Kotlin metadata for app projects - therefore, no configuration changes are necessary and the Kotlin metadata can be safely removed.
+However, there are two common reasons to explicitly keep the metadata, [reflection](#reflection) and [libraries](#library-projects).
 
-ProGuard will only keep the Kotlin metadata of a class if you explicitly keep that class or one of its members and you add `-keepkotlinmetadata` option to your configuration.
+ProGuard will only keep the Kotlin metadata of a class if you explicitly keep that class or one of its members, and you add the `-keep class kotlin.Metadata` option to your configuration.
+Note that this option may also be required by an SDK of your project, and indirectly added as a consumer rule.
 
 For example, if you have the following keep rule for a Kotlin class named `com.example.KotlinExample`, by default the class will be kept but its metadata will not:
 
@@ -15,11 +17,11 @@ For example, if you have the following keep rule for a Kotlin class named `com.e
 -keep class com.example.KotlinExample
 ```
 
-You can add `-keepkotlinmetadata` to your configuration to instruct ProGuard to keep and adapt Kotlin metadata:
+You can add `-keep class kotlin.Metadata` to your configuration to instruct ProGuard to keep and adapt Kotlin metadata:
 
 ```
 # Add this option to tell ProGuard to keep and adapt Kotlin metadata
--keepkotlinmetadata
+-keep class kotlin.Metadata
 ```
 
 
@@ -31,7 +33,7 @@ The most common case to keep Kotlin metadata would be if you use the [kotlin-ref
 In this case, to instruct ProGuard to keep and adapt the corresponding Kotlin metadata, add the following to your configuration:
 
 ```
--keepkotlinmetadata
+-keep class kotlin.Metadata
 ```
 
 A popular framework that relies on reflection is [Jackson](https://github.com/FasterXML/jackson-module-kotlin).
@@ -41,11 +43,11 @@ A popular framework that relies on reflection is [Jackson](https://github.com/Fa
 When developing an SDK that exposes Kotlin-specific features to its users, you need to preserve the metadata of the public API.
 These include features such as named parameters, suspend functions, top-level functions and type aliases.
 
-In the case of a library, you would already be keeping the public API so you can simply add the following
+In the case of a library, you would already be keeping the public API, so you can simply add the following
 to your configuration:
 
 ```
--keepkotlinmetadata
+-keep class kotlin.Metadata
 ```
 
 ## Protection

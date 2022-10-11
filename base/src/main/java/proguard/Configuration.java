@@ -418,6 +418,11 @@ public class Configuration
      */
     public boolean                      keepKotlinMetadata               = false;
 
+    /**
+     * Specifies not to process Kotlin metadata. Overwrites KeepKotlinMetadata.
+     */
+    public boolean                      dontProcessKotlinMetadata        = false;
+
     // INTERNAL OPTIONS
 
     /**

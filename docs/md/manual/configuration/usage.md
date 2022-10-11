@@ -515,8 +515,9 @@ This page lists all available options for ProGuard, grouped logically.
   obfuscated stack traces](examples.md#stacktrace). Only applicable when
   obfuscating.
 
-`-keepkotlinmetadata`{: #keepkotlinmetadata}
-: Specifies to process `kotlin.Metadata` annotations if present.
+`-keepkotlinmetadata`{: #keepkotlinmetadata} {: .deprecated}
+: ** Deprecated: use `-keep class kotlin.Metadata` instead. **
+  Specifies to process `kotlin.Metadata` annotations if present.
   Currently only shrinking and obfuscation of its content is supported.
   Classes containing such annotations should be excuded from optimization
   if this option is enabled.
