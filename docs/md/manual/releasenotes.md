@@ -6,6 +6,7 @@
 - Add support for Java 19-ea. (`PGD-247`)
 - Improve support for Kotlin library projects. (`T3752`)
 - Improve app startup times when using `-addconfigurationdebugging`. (`T17153`)
+- Automatically process Kotlin Metadata when keeping the `kotlin.Metadata` annotation. (`T3116`)
 
 ### Bug fixes
 

@@ -210,7 +210,8 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.ADAPT_CLASS_STRINGS_OPTION                       .startsWith(nextWord)) configuration.adaptClassStrings                     = parseCommaSeparatedList("class name", true, true, false, false, true, false, false, true, false, configuration.adaptClassStrings);
             else if (ConfigurationConstants.ADAPT_RESOURCE_FILE_NAMES_OPTION                 .startsWith(nextWord)) configuration.adaptResourceFileNames                = parseCommaSeparatedList("resource file name", true, true, false, true, false, true, false, false, false, configuration.adaptResourceFileNames);
             else if (ConfigurationConstants.ADAPT_RESOURCE_FILE_CONTENTS_OPTION              .startsWith(nextWord)) configuration.adaptResourceFileContents             = parseCommaSeparatedList("resource file name", true, true, false, true, false, true, false, false, false, configuration.adaptResourceFileContents);
-            else if (ConfigurationConstants.KEEP_KOTLIN_METADATA                             .startsWith(nextWord)) configuration.keepKotlinMetadata                    = parseNoArgument(true);
+            else if (ConfigurationConstants.DONT_PROCESS_KOTLIN_METADATA                     .startsWith(nextWord)) configuration.dontProcessKotlinMetadata             = parseNoArgument(true);
+            else if (ConfigurationConstants.KEEP_KOTLIN_METADATA                             .startsWith(nextWord)) configuration.keepKotlinMetadata                    = parseKeepKotlinMetadata();
 
             else if (ConfigurationConstants.DONT_PREVERIFY_OPTION                            .startsWith(nextWord)) configuration.preverify                             = parseNoArgument(false);
             else if (ConfigurationConstants.MICRO_EDITION_OPTION                             .startsWith(nextWord)) configuration.microEdition                          = parseNoArgument(true);
@@ -247,6 +248,14 @@ public class ConfigurationParser implements AutoCloseable
         {
             reader.close();
         }
+    }
+
+
+    private boolean parseKeepKotlinMetadata() throws IOException
+    {
+        System.err.println("The `-keepkotlinmetadata` option is deprecated and will be removed in a future ProGuard release." +
+                           "Please use `-keep class kotlin.Metadata` instead.");
+        return parseNoArgument(true);
     }
 
 

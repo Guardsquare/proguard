@@ -92,6 +92,12 @@ public class ProGuard
         {
             checkGpl();
 
+            // Set the -keepkotlinmetadata option if necessary.
+            if (!configuration.dontProcessKotlinMetadata)
+            {
+                configuration.keepKotlinMetadata = requiresKotlinMetadata();
+            }
+
             if (configuration.printConfiguration != null)
             {
                 printConfiguration();
@@ -266,6 +272,17 @@ public class ProGuard
     private void checkGpl()
     {
         GPL.check();
+    }
+
+    private boolean requiresKotlinMetadata()
+    {
+        return configuration.keepKotlinMetadata ||
+            (configuration.keep != null &&
+                configuration.keep.stream().anyMatch(
+                    keepClassSpecification -> ! keepClassSpecification.allowObfuscation &&
+                                              ! keepClassSpecification.allowShrinking   &&
+                                              "kotlin/Metadata".equals(keepClassSpecification.className)
+                ));
     }
 
 
