@@ -22,17 +22,17 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
 dependencies {
     api "com.guardsquare:proguard-core:${proguardCoreVersion}"
     implementation "com.google.code.gson:gson:${gsonVersion}"
-    implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
-    implementation 'org.json:json:20211205'
+    implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+    implementation 'org.json:json:20220924'
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.9'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.3.1' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.3.1' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.3.1' // for kotest property test
-    testImplementation "io.mockk:mockk:1.12.3" // for mocking
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.5.0' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.5.0' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:5.5.0' // for kotest property test
+    testImplementation 'io.mockk:mockk:1.13.2' // for mocking
 
     testImplementation(testFixtures("com.guardsquare:proguard-core:9.0.5")) {
         exclude group: 'com.guardsquare', module: 'proguard-core'
