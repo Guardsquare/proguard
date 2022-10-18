@@ -29,7 +29,6 @@ import proguard.classfile.util.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
-import proguard.io.ExtraDataEntryNameMap;
 import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
@@ -39,6 +38,7 @@ import proguard.obfuscate.ResourceFileNameAdapter;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
+import proguard.optimize.kotlin.KotlinLambdaMerger;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.pass.PassRunner;
 import proguard.preverify.*;
@@ -429,6 +429,14 @@ public class ProGuard
         }
     }
 
+    /**
+     * Reduce the size needed to represent Kotlin lambda's.
+     * The classes that are generated for lambda's with a same structure and from the same package are merged into a group.
+     */
+    private void mergeKotlinLambdaClasses() throws Exception {
+        passRunner.run(new KotlinLambdaMerger(configuration), appView);
+    }
+
 
     /**
      * Optimizes usages of the Gson library.
@@ -456,6 +464,10 @@ public class ProGuard
             if (configuration.shrink)
             {
                 shrink(true);
+            }
+            if (optimizationPass == configuration.optimizationPasses - 2)
+            {
+                mergeKotlinLambdaClasses();
             }
         }
     }

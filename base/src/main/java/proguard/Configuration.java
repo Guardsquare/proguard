@@ -200,6 +200,12 @@ public class Configuration
      */
     public boolean                      mergeInterfacesAggressively      = false;
 
+    /**
+     * An optional output file for listing the lambda to lambdagroup mapping.
+     * An empty file name means the standard output.
+     */
+    public File                         printLambdaGroupMapping;
+
     ///////////////////////////////////////////////////////////////////////////
     // Obfuscation options.
     ///////////////////////////////////////////////////////////////////////////

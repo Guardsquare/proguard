@@ -124,6 +124,7 @@ public class ConfigurationWriter implements AutoCloseable
         writeOption(ConfigurationConstants.OPTIMIZATION_PASSES,                  configuration.optimizationPasses);
         writeOption(ConfigurationConstants.ALLOW_ACCESS_MODIFICATION_OPTION,     configuration.allowAccessModification);
         writeOption(ConfigurationConstants.MERGE_INTERFACES_AGGRESSIVELY_OPTION, configuration.mergeInterfacesAggressively);
+        writeOption(ConfigurationConstants.PRINT_LAMBDAGROUP_MAPPING_OPTION,     configuration.printLambdaGroupMapping);
 
         writeOption(ConfigurationConstants.DONT_OBFUSCATE_OPTION,                            !configuration.obfuscate);
         writeOption(ConfigurationConstants.PRINT_MAPPING_OPTION,                             configuration.printMapping);

@@ -66,6 +66,7 @@ public class ConfigurationConstants
     public static final String ASSUME_VALUES_OPTION                    = "-assumevalues";
     public static final String ALLOW_ACCESS_MODIFICATION_OPTION        = "-allowaccessmodification";
     public static final String MERGE_INTERFACES_AGGRESSIVELY_OPTION    = "-mergeinterfacesaggressively";
+    public static final String PRINT_LAMBDAGROUP_MAPPING_OPTION        = "-printlambdagroupmapping";
 
     public static final String DONT_OBFUSCATE_OPTION                  = "-dontobfuscate";
     public static final String PRINT_MAPPING_OPTION                   = "-printmapping";
