@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,14 +22,25 @@ package proguard.optimize;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.annotation.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
+import proguard.classfile.TypeConstants;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.SignatureAttribute;
+import proguard.classfile.attribute.annotation.Annotation;
+import proguard.classfile.attribute.annotation.ParameterAnnotationsAttribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.editor.ConstantPoolEditor;
-import proguard.classfile.util.*;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.DescriptorClassEnumeration;
+import proguard.classfile.util.InternalTypeEnumeration;
 import proguard.classfile.visitor.MemberVisitor;
-import proguard.optimize.info.*;
+import proguard.optimize.info.ParameterUsageMarker;
+import proguard.optimize.info.VariableUsageMarker;
 
 /**
  * This MemberVisitor removes unused parameters in the descriptors of the

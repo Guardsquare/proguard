@@ -22,32 +22,180 @@ package proguard.optimize;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.*;
-import proguard.classfile.*;
+import proguard.AppView;
+import proguard.ClassSpecificationVisitorFactory;
+import proguard.Configuration;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassPool;
+import proguard.classfile.VersionConstants;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AllBootstrapMethodInfoVisitor;
+import proguard.classfile.attribute.visitor.AllExceptionInfoVisitor;
+import proguard.classfile.attribute.visitor.AllInnerClassesInfoVisitor;
+import proguard.classfile.attribute.visitor.AttributeNameFilter;
+import proguard.classfile.attribute.visitor.AttributeProcessingFlagFilter;
+import proguard.classfile.attribute.visitor.CodeAttributeToMethodVisitor;
+import proguard.classfile.attribute.visitor.DebugAttributeVisitor;
+import proguard.classfile.attribute.visitor.MultiAttributeVisitor;
+import proguard.classfile.attribute.visitor.StackSizeComputer;
 import proguard.classfile.constant.Constant;
-import proguard.classfile.constant.visitor.*;
-import proguard.classfile.editor.*;
-import proguard.classfile.instruction.visitor.*;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
-import proguard.evaluation.*;
-import proguard.evaluation.value.*;
+import proguard.classfile.constant.visitor.AllBootstrapMethodArgumentVisitor;
+import proguard.classfile.constant.visitor.AllConstantVisitor;
+import proguard.classfile.constant.visitor.BootstrapMethodHandleTraveler;
+import proguard.classfile.constant.visitor.ConstantTagFilter;
+import proguard.classfile.constant.visitor.MethodrefTraveler;
+import proguard.classfile.editor.AccessFixer;
+import proguard.classfile.editor.ClassReferenceFixer;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.ConstantPoolShrinker;
+import proguard.classfile.editor.InnerClassesAccessFixer;
+import proguard.classfile.editor.InstructionSequencesReplacer;
+import proguard.classfile.editor.MemberReferenceFixer;
+import proguard.classfile.editor.MethodInvocationFixer;
+import proguard.classfile.editor.PeepholeEditor;
+import proguard.classfile.editor.StackSizeUpdater;
+import proguard.classfile.instruction.visitor.AllInstructionVisitor;
+import proguard.classfile.instruction.visitor.InstructionConstantVisitor;
+import proguard.classfile.instruction.visitor.InstructionCounter;
+import proguard.classfile.instruction.visitor.InstructionVisitor;
+import proguard.classfile.instruction.visitor.MultiInstructionVisitor;
+import proguard.classfile.kotlin.visitor.AllFunctionVisitor;
+import proguard.classfile.kotlin.visitor.AllPropertyVisitor;
+import proguard.classfile.kotlin.visitor.MultiKotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.util.BranchTargetFinder;
+import proguard.classfile.util.MethodLinker;
+import proguard.classfile.visitor.AllClassVisitor;
+import proguard.classfile.visitor.AllFieldVisitor;
+import proguard.classfile.visitor.AllMemberVisitor;
+import proguard.classfile.visitor.AllMethodVisitor;
+import proguard.classfile.visitor.BottomClassFilter;
+import proguard.classfile.visitor.ClassAccessFilter;
+import proguard.classfile.visitor.ClassCleaner;
+import proguard.classfile.visitor.ClassCounter;
+import proguard.classfile.visitor.ClassHierarchyTraveler;
+import proguard.classfile.visitor.ClassPoolVisitor;
+import proguard.classfile.visitor.ClassProcessingFlagFilter;
+import proguard.classfile.visitor.ClassVersionFilter;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.DotClassClassVisitor;
+import proguard.classfile.visitor.DynamicReturnedClassVisitor;
+import proguard.classfile.visitor.ExceptionCounter;
+import proguard.classfile.visitor.ExceptionHandlerConstantVisitor;
+import proguard.classfile.visitor.FunctionalInterfaceFilter;
+import proguard.classfile.visitor.InjectedClassFilter;
+import proguard.classfile.visitor.MemberAccessFilter;
+import proguard.classfile.visitor.MemberAccessFlagCleaner;
+import proguard.classfile.visitor.MemberCounter;
+import proguard.classfile.visitor.MemberDescriptorReferencedClassVisitor;
+import proguard.classfile.visitor.MemberProcessingFlagFilter;
+import proguard.classfile.visitor.MultiClassVisitor;
+import proguard.classfile.visitor.MultiConstantVisitor;
+import proguard.classfile.visitor.MultiMemberVisitor;
+import proguard.classfile.visitor.ParallelAllClassVisitor;
+import proguard.classfile.visitor.ReferencedClassVisitor;
+import proguard.classfile.visitor.ReferencedMemberVisitor;
+import proguard.evaluation.AssumeClassSpecificationVisitorFactory;
+import proguard.evaluation.InvocationUnit;
+import proguard.evaluation.PartialEvaluator;
+import proguard.evaluation.ReferenceTracingValueFactory;
+import proguard.evaluation.SimplifiedInvocationUnit;
+import proguard.evaluation.value.BasicRangeValueFactory;
+import proguard.evaluation.value.DetailedArrayValueFactory;
+import proguard.evaluation.value.IdentifiedValueFactory;
+import proguard.evaluation.value.ParticularValueFactory;
+import proguard.evaluation.value.ValueFactory;
 import proguard.io.ExtraDataEntryNameMap;
-import proguard.optimize.evaluation.*;
+import proguard.optimize.evaluation.EvaluationShrinker;
+import proguard.optimize.evaluation.EvaluationSimplifier;
 import proguard.optimize.evaluation.InstructionUsageMarker;
-import proguard.optimize.info.*;
-import proguard.optimize.peephole.*;
+import proguard.optimize.evaluation.InstructionUsageMarker;
+import proguard.optimize.evaluation.LoadingInvocationUnit;
+import proguard.optimize.evaluation.ParameterTracingInvocationUnit;
+import proguard.optimize.evaluation.SimpleEnumArrayPropagator;
+import proguard.optimize.evaluation.SimpleEnumClassChecker;
+import proguard.optimize.evaluation.SimpleEnumClassSimplifier;
+import proguard.optimize.evaluation.SimpleEnumDescriptorSimplifier;
+import proguard.optimize.evaluation.SimpleEnumUseChecker;
+import proguard.optimize.evaluation.SimpleEnumUseSimplifier;
+import proguard.optimize.evaluation.StoringInvocationUnit;
+import proguard.optimize.evaluation.VariableOptimizer;
+import proguard.optimize.info.AccessMethodMarker;
+import proguard.optimize.info.BackwardBranchMarker;
+import proguard.optimize.info.CatchExceptionMarker;
+import proguard.optimize.info.CaughtClassMarker;
+import proguard.optimize.info.ContainsConstructorsMarker;
+import proguard.optimize.info.DotClassMarker;
+import proguard.optimize.info.DynamicInvocationMarker;
+import proguard.optimize.info.EscapingClassFilter;
+import proguard.optimize.info.EscapingClassMarker;
+import proguard.optimize.info.FinalFieldAssignmentMarker;
+import proguard.optimize.info.InstanceofClassMarker;
+import proguard.optimize.info.InstantiationClassMarker;
+import proguard.optimize.info.MethodInvocationMarker;
+import proguard.optimize.info.MutableBoolean;
+import proguard.optimize.info.NoEscapingParametersMethodMarker;
+import proguard.optimize.info.NoExternalReturnValuesMethodMarker;
+import proguard.optimize.info.NoExternalSideEffectMethodMarker;
+import proguard.optimize.info.NoSideEffectClassMarker;
+import proguard.optimize.info.NoSideEffectMethodMarker;
+import proguard.optimize.info.NonEmptyStackReturnMarker;
+import proguard.optimize.info.NonPrivateMemberMarker;
+import proguard.optimize.info.OptimizationCodeAttributeFilter;
+import proguard.optimize.info.PackageVisibleMemberContainingClassMarker;
+import proguard.optimize.info.PackageVisibleMemberInvokingClassMarker;
+import proguard.optimize.info.ParameterEscapeMarker;
+import proguard.optimize.info.ParameterUsageMarker;
+import proguard.optimize.info.ProgramClassOptimizationInfoSetter;
+import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
+import proguard.optimize.info.ReadWriteFieldMarker;
+import proguard.optimize.info.SideEffectMethodMarker;
+import proguard.optimize.info.SimpleEnumFilter;
+import proguard.optimize.info.SimpleEnumMarker;
+import proguard.optimize.info.SuperInvocationMarker;
+import proguard.optimize.info.SynchronizedBlockMethodMarker;
+import proguard.optimize.info.UnusedParameterMethodFilter;
+import proguard.optimize.info.UnusedParameterOptimizationInfoUpdater;
+import proguard.optimize.info.WrapperClassMarker;
+import proguard.optimize.kotlin.KotlinContextReceiverUsageMarker;
+import proguard.optimize.peephole.ClassFinalizer;
+import proguard.optimize.peephole.GotoCommonCodeReplacer;
+import proguard.optimize.peephole.GotoGotoReplacer;
+import proguard.optimize.peephole.GotoReturnReplacer;
+import proguard.optimize.peephole.HorizontalClassMerger;
+import proguard.optimize.peephole.InstructionSequenceConstants;
+import proguard.optimize.peephole.MemberPrivatizer;
+import proguard.optimize.peephole.MethodFinalizer;
+import proguard.optimize.peephole.NoConstructorReferenceReplacer;
+import proguard.optimize.peephole.RetargetedClassFilter;
+import proguard.optimize.peephole.RetargetedInnerClassAttributeRemover;
+import proguard.optimize.peephole.ShortMethodInliner;
+import proguard.optimize.peephole.SingleInvocationMethodInliner;
+import proguard.optimize.peephole.TargetClassChanger;
+import proguard.optimize.peephole.UnreachableCodeRemover;
+import proguard.optimize.peephole.UnreachableExceptionRemover;
+import proguard.optimize.peephole.VariableShrinker;
+import proguard.optimize.peephole.VerticalClassMerger;
+import proguard.optimize.peephole.WrapperClassMerger;
+import proguard.optimize.peephole.WrapperClassUseSimplifier;
 import proguard.pass.Pass;
-import proguard.util.*;
+import proguard.util.ConstantMatcher;
+import proguard.util.ListParser;
+import proguard.util.NameParser;
+import proguard.util.ProcessingFlagSetter;
+import proguard.util.ProcessingFlags;
+import proguard.util.StringMatcher;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This pass optimizes class pools according to a given configuration.
- *
+ * <p>
  * This pass is stateful. It tracks when no more optimizations are
  * possible, and then all further runs of this pass will have no effect.
  *
@@ -747,8 +895,17 @@ public class Optimizer implements Pass
                     new ParameterUsageMarker(true, true, false))))))))
             )))));
 
-//        System.out.println("Optimizer.execute: before evaluation simplification");
-//        programClassPool.classAccept("abc/Def", new NamedMethodVisitor("abc", null, new ClassPrinter()));
+        // Mark parameter usage based on Kotlin Context receivers
+        KotlinContextReceiverUsageMarker kotlinContextReceiverUsageMarker = new KotlinContextReceiverUsageMarker();
+        programClassPool.accept(
+            new AllClassVisitor(
+            new ReferencedKotlinMetadataVisitor(
+                new MultiKotlinMetadataVisitor(
+                kotlinContextReceiverUsageMarker,
+                new AllFunctionVisitor(kotlinContextReceiverUsageMarker),
+                new AllPropertyVisitor(kotlinContextReceiverUsageMarker)
+            )))
+        );
 
         // Perform partial evaluation for filling out fields, method parameters,
         // and method return values, so they can be propagated.
