@@ -233,3 +233,8 @@ div.row:after {
   margin-left: -40px;
   border-top-color: #004f91;
 }
+
+p {
+  text-align: justify;
+  text-justify: inter-word;
+}
