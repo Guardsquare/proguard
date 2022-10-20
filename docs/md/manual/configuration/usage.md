@@ -968,7 +968,7 @@ irrelevant in actual configuration files.
 
     | Wildcard | Meaning
     |-------|-----------------------------------------------------------------------------------------
-    | `%`   | matches any primitive type ("`boolean`", "`int`", etc, but not "`void`").
+    | `%`   | matches any primitive type ("`boolean`", "`int`", etc) or "`void`" type.
     | `?`   | matches any single character in a class name.
     | `*`   | matches any part of a class name not containing the package separator.
     | `**`  | matches any part of a class name, possibly containing any number of package separators.
