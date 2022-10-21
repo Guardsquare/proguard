@@ -1,24 +1,24 @@
-## Version 7.3.0-beta1
+## Version 7.3.0
 
 ### Java support
 
-New Java versions are released every 6 months.
 To allow ProGuard to continue to optimize, obfuscate and shrink Java class files ProGuard now supports all Java versions including Java 19.
 
 - Add support for Java 19. (`PGD-247`)
 
 ### Kotlin support
 
-New Kotlin versions are released every 6 months.
-To allow ProGuard to continue to optimize, obfuscate and shrink Kotlin generated class files and their corresponding metadata ProGuard now supports Kotlin reading Kotlin classes from version 1.0 to 1.7 and writing Kotlin metadata with version 1.6 (readable by Kotlin reflection library / compiler 1.5 - 1.7).
+ProGuard 7.3 deprecates the `-keepkotlinmetadata` option. You can use `-keep class kotlin.Metadata` instead
+which automatically enables processing of Kotlin metadata. Some consumer rules, from libraries 
+such as `kotlin-reflect`, already contain this rule.
 
 - Add support for Kotlin 1.7.
 - Improve support for Kotlin library projects. (`T3752`)
+- Automatically process Kotlin Metadata when keeping the `kotlin.Metadata` annotation. (`T3116`)
 
 ### Improved
 
 - Improve app startup times when using `-addconfigurationdebugging`. (`T17153`)
-- Automatically process Kotlin Metadata when keeping the `kotlin.Metadata` annotation. (`T3116`)
 
 ### Bug fixes
 
