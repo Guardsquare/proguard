@@ -269,6 +269,16 @@ public class Obfuscator implements Pass
                                 configuration.allowAccessModification,
                                 configuration.keepKotlinMetadata));
 
+        if (configuration.keepKotlinMetadata)
+        {
+            // Ensure that the companion instance field is named
+            // the same as the companion class.
+            appView.programClassPool.classesAccept(
+                new ReferencedKotlinMetadataVisitor(
+                new KotlinCompanionEqualizer())
+            );
+        }
+
         // Come up with new names for all class members.
         NameFactory nameFactory = new SimpleNameFactory();
         if (configuration.obfuscationDictionary != null)
@@ -508,8 +518,6 @@ public class Obfuscator implements Pass
                     // Obfuscate alias names.
                     new KotlinAliasNameObfuscator(nameFactory),
 
-                    // Ensure companion classes have $CompanionName suffix.
-                    new KotlinCompanionEqualizer(),
                     // Equalise/fix $DefaultImpls and $WhenMappings classes.
                     new KotlinSyntheticClassFixer(),
                     // Ensure object classes have the INSTANCE field.

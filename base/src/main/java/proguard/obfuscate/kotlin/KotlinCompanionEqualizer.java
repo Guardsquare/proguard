@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,10 +21,13 @@
 package proguard.obfuscate.kotlin;
 
 import proguard.classfile.Clazz;
-import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.KotlinClassKindMetadata;
+import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
-import proguard.classfile.util.ClassUtil;
-import proguard.obfuscate.MemberObfuscator;
+
+import static proguard.classfile.util.ClassUtil.internalSimpleClassName;
+import static proguard.obfuscate.ClassObfuscator.newClassName;
+import static proguard.obfuscate.MemberObfuscator.setFixedNewMemberName;
 
 public class KotlinCompanionEqualizer
 implements   KotlinMetadataVisitor
@@ -38,7 +41,9 @@ implements   KotlinMetadataVisitor
     {
         if (kotlinClassKindMetadata.companionObjectName != null)
         {
-            String newCompanionClassName = (String)kotlinClassKindMetadata.referencedCompanionClass.getProcessingInfo();
+            String newCompanionClassName = newClassName(kotlinClassKindMetadata.referencedCompanionClass);
+
+            if (newCompanionClassName == null) return;
 
             // The name should be an inner class, but if for some reason it isn't
             // then don't try to rename it as it could lead to problems.
@@ -47,8 +52,10 @@ implements   KotlinMetadataVisitor
 
             if (newCompanionClassName.contains("$"))
             {
-                MemberObfuscator.setNewMemberName(kotlinClassKindMetadata.referencedCompanionField,
-                                                  ClassUtil.internalSimpleClassName(newCompanionClassName));
+                // Set a fixed member name to make sure it gets priority when resolving naming conflicts and collecting
+                // already used member names.
+                setFixedNewMemberName(kotlinClassKindMetadata.referencedCompanionField,
+                                      internalSimpleClassName(newCompanionClassName));
             }
         }
     }

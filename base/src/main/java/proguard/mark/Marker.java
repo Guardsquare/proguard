@@ -256,7 +256,16 @@ public class Marker implements Pass
             // Mark the field that stores the companion object.
             if (kotlinClassKindMetadata.companionObjectName != null)
             {
-                clazz.fieldAccept(kotlinClassKindMetadata.companionObjectName, null, MEMBER_AND_CLASS_MARKER);
+                // TODO uncomment and remove inlined version when a new proguard-core release is available.
+                //kotlinClassKindMetadata.referencedCompanionFieldAccept(MEMBER_AND_CLASS_MARKER);
+                if (kotlinClassKindMetadata.referencedClass != null &&
+                    kotlinClassKindMetadata.referencedCompanionField != null)
+                {
+                    kotlinClassKindMetadata.referencedCompanionField.accept(
+                        kotlinClassKindMetadata.referencedClass,
+                        MEMBER_AND_CLASS_MARKER
+                    );
+                }
             }
         }
 

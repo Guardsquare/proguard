@@ -145,7 +145,7 @@ implements   MemberVisitor
      * @param member the class member.
      * @param name   the new name.
      */
-    static void setFixedNewMemberName(Member member, String name)
+    public static void setFixedNewMemberName(Member member, String name)
     {
         Processable lastProcessable = MethodLinker.lastProcessable(member);
 
