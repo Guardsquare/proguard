@@ -124,7 +124,7 @@ public final class _GsonUtil
      * Determines whether a given type adapter is a custom type adapter, i.e.
      * a type adapter that is registered by the user of the Gson API and not
      * the GSON reflection based type adapter or the optimized type adapter
-     * injected by DexGuard.
+     * injected.
      */
     private static boolean isCustomTypeAdapter(TypeAdapter declaredTypeAdapter)
     {
