@@ -57,7 +57,7 @@ public class KotlinUnsupportedVersionChecker implements Pass
                 throw new RuntimeException(
                     "Unsupported Kotlin metadata version found on class '" + clazz.getName() + "'." +
                     System.lineSeparator() +
-                    "DexGuard currently supports Kotlin versions up to " + MAX_SUPPORTED_VERSION.major + "." + MAX_SUPPORTED_VERSION.minor + ".");
+                    "Kotlin versions up to " + MAX_SUPPORTED_VERSION.major + "." + MAX_SUPPORTED_VERSION.minor + " are supported.");
             }
             else
             {
