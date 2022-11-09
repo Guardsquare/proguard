@@ -292,8 +292,7 @@ implements   ClassVisitor
         {
             warningPrinter.print(programClass.getName(), note);
             warningPrinter.print(programClass.getName(),
-                                 "      You should consider including dexguard-gson.pro " +
-                                 "or keeping this class and its members in your configuration " +
+                                 "      You should consider keeping this class and its members in your configuration " +
                                  "as follows:");
             warningPrinter.print(programClass.getName(),
                                  "      -keep class " +
