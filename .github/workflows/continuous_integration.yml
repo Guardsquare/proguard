@@ -3,9 +3,11 @@ on:
   pull_request:
     branches:
       - master
+      - beta
   push:
     branches:
       - master
+      - beta
 jobs:
   build:
     runs-on: ${{ matrix.os }}
