@@ -27,6 +27,7 @@ such as `kotlin-reflect`, already contain this rule.
 - Fix optimization of simple enums (optimization `class/unboxing/enums`).
 - Prevent potential build time `NullPointerException` when processing Kotlin interface methods.
 - Fix ProGuard Gradle Plugin not working correctly on Windows. (`PGD-272`)
+- Fix potential `NullPointerException` while processing enum classes with invalid Kotlin metadata.
 
 ## Version 7.2.2
 

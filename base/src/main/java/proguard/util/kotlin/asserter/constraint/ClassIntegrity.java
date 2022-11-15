@@ -84,7 +84,10 @@ extends AbstractKotlinMetadataConstraint
         }
 
         kotlinClassKindMetadata.referencedEnumEntries
-            .forEach(enumEntry -> util.reportIfFieldDangling("enum entries", clazz, enumEntry));
+            .forEach(enumEntry -> {
+                util.reportIfNullReference("enum entries", enumEntry);
+                util.reportIfFieldDangling("enum entries", clazz, enumEntry);
+            });
 
         kotlinClassKindMetadata.referencedNestedClasses
             .forEach(nestedClass -> {
