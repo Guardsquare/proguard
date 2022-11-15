@@ -66,9 +66,13 @@ public class FrameRemapper implements MappingProcessor
 
         if (originalFrames.isEmpty())
         {
+            String sourceFile = obfuscatedFrame.getSourceFile();
             // Create a transformed frame with the remapped class name.
             originalFrames.add(new FrameInfo(originalClassName,
-                                             sourceFileName(originalClassName),
+                                             sourceFile == null ? sourceFileName(originalClassName) :
+                                                     sourceFile.equals("Unknown Source") ?
+                                                             "Unknown Source" :
+                                                             sourceFileName(originalClassName),
                                              obfuscatedFrame.getLineNumber(),
                                              obfuscatedFrame.getType(),
                                              obfuscatedFrame.getFieldName(),
@@ -112,7 +116,9 @@ public class FrameRemapper implements MappingProcessor
                     if (fieldInfo.matches(originalType))
                     {
                         originalFieldFrames.add(new FrameInfo(fieldInfo.originalClassName,
-                                                              sourceFileName(fieldInfo.originalClassName),
+                                                              obfuscatedFrame.getSourceFile().equals("Unknown Source") ?
+                                                                      "Unknown Source" :
+                                                                      sourceFileName(fieldInfo.originalClassName),
                                                               obfuscatedFrame.getLineNumber(),
                                                               fieldInfo.originalType,
                                                               fieldInfo.originalName,
@@ -180,7 +186,9 @@ public class FrameRemapper implements MappingProcessor
                         }
 
                         originalMethodFrames.add(new FrameInfo(methodInfo.originalClassName,
-                                                               sourceFileName(methodInfo.originalClassName),
+                                                               obfuscatedFrame.getSourceFile().equals("Unknown Source") ?
+                                                                       "Unknown Source" :
+                                                                       sourceFileName(methodInfo.originalClassName),
                                                                lineNumber,
                                                                methodInfo.originalType,
                                                                obfuscatedFrame.getFieldName(),
