@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,26 +22,93 @@ package proguard.obfuscate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.*;
-import proguard.classfile.*;
+import proguard.AppView;
+import proguard.Configuration;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.VersionConstants;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.visitor.*;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AllBootstrapMethodInfoVisitor;
+import proguard.classfile.attribute.visitor.AllInnerClassesInfoVisitor;
+import proguard.classfile.attribute.visitor.AttributeNameFilter;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.MultiAttributeVisitor;
+import proguard.classfile.attribute.visitor.NonEmptyAttributeFilter;
+import proguard.classfile.attribute.visitor.RequiredAttributeFilter;
 import proguard.classfile.constant.Constant;
-import proguard.classfile.constant.visitor.*;
-import proguard.classfile.editor.*;
-import proguard.classfile.kotlin.visitor.*;
-import proguard.classfile.kotlin.visitor.filter.*;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.constant.visitor.AllBootstrapMethodArgumentVisitor;
+import proguard.classfile.constant.visitor.AllConstantVisitor;
+import proguard.classfile.constant.visitor.ConstantTagFilter;
+import proguard.classfile.editor.AccessFixer;
+import proguard.classfile.editor.BridgeMethodFixer;
+import proguard.classfile.editor.ClassReferenceFixer;
+import proguard.classfile.editor.ConstantPoolShrinker;
+import proguard.classfile.editor.InnerClassesAccessFixer;
+import proguard.classfile.editor.MemberReferenceFixer;
+import proguard.classfile.kotlin.visitor.AllConstructorVisitor;
+import proguard.classfile.kotlin.visitor.AllFunctionVisitor;
+import proguard.classfile.kotlin.visitor.AllPropertyVisitor;
+import proguard.classfile.kotlin.visitor.AllTypeVisitor;
+import proguard.classfile.kotlin.visitor.AllValueParameterVisitor;
+import proguard.classfile.kotlin.visitor.KotlinClassToDefaultImplsClassVisitor;
+import proguard.classfile.kotlin.visitor.KotlinFunctionToDefaultMethodVisitor;
+import proguard.classfile.kotlin.visitor.KotlinMetadataToClazzVisitor;
+import proguard.classfile.kotlin.visitor.MethodToKotlinFunctionVisitor;
+import proguard.classfile.kotlin.visitor.MultiKotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.filter.KotlinClassKindFilter;
+import proguard.classfile.kotlin.visitor.filter.KotlinSyntheticClassKindFilter;
+import proguard.classfile.util.MethodLinker;
+import proguard.classfile.util.WarningLogger;
+import proguard.classfile.util.WarningPrinter;
+import proguard.classfile.visitor.AllMemberVisitor;
+import proguard.classfile.visitor.AllMethodVisitor;
+import proguard.classfile.visitor.BottomClassFilter;
+import proguard.classfile.visitor.ClassAccessFilter;
+import proguard.classfile.visitor.ClassCounter;
+import proguard.classfile.visitor.ClassHierarchyTraveler;
+import proguard.classfile.visitor.ClassProcessingFlagFilter;
+import proguard.classfile.visitor.ClassVersionFilter;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.DynamicReturnedClassVisitor;
+import proguard.classfile.visitor.FunctionalInterfaceFilter;
+import proguard.classfile.visitor.MemberAccessFilter;
+import proguard.classfile.visitor.MemberCounter;
+import proguard.classfile.visitor.MemberProcessingFlagFilter;
+import proguard.classfile.visitor.MethodFilter;
+import proguard.classfile.visitor.MultiClassVisitor;
+import proguard.classfile.visitor.ProgramClassFilter;
+import proguard.classfile.visitor.ProgramMemberFilter;
+import proguard.classfile.visitor.ReferencedClassVisitor;
 import proguard.fixer.kotlin.KotlinAnnotationFlagFixer;
-import proguard.obfuscate.kotlin.*;
+import proguard.obfuscate.kotlin.KotlinAliasNameObfuscator;
+import proguard.obfuscate.kotlin.KotlinAliasReferenceFixer;
+import proguard.obfuscate.kotlin.KotlinCallableReferenceFixer;
+import proguard.obfuscate.kotlin.KotlinCompanionEqualizer;
+import proguard.obfuscate.kotlin.KotlinDefaultImplsMethodNameEqualizer;
+import proguard.obfuscate.kotlin.KotlinDefaultMethodNameEqualizer;
+import proguard.obfuscate.kotlin.KotlinIntrinsicsReplacementSequences;
+import proguard.obfuscate.kotlin.KotlinModuleNameObfuscator;
+import proguard.obfuscate.kotlin.KotlinMultiFileFacadeFixer;
+import proguard.obfuscate.kotlin.KotlinObjectFixer;
+import proguard.obfuscate.kotlin.KotlinPropertyNameObfuscator;
+import proguard.obfuscate.kotlin.KotlinPropertyRenamer;
+import proguard.obfuscate.kotlin.KotlinSourceDebugExtensionAttributeObfuscator;
+import proguard.obfuscate.kotlin.KotlinSyntheticClassFixer;
+import proguard.obfuscate.kotlin.KotlinSyntheticToStringObfuscator;
+import proguard.obfuscate.kotlin.KotlinUnsupportedExceptionReplacementSequences;
+import proguard.obfuscate.kotlin.KotlinValueParameterNameShrinker;
+import proguard.obfuscate.kotlin.KotlinValueParameterUsageMarker;
 import proguard.obfuscate.util.InstructionSequenceObfuscator;
 import proguard.pass.Pass;
 import proguard.resources.file.visitor.ResourceFileProcessingFlagFilter;
-import proguard.util.*;
+import proguard.util.PrintWriterUtil;
+import proguard.util.ProcessingFlags;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This pass can perform obfuscation of class pools according to a given
@@ -163,6 +230,10 @@ public class Obfuscator implements Pass
         if (configuration.keepParameterNames)
         {
             appView.programClassPool.classesAccept(
+                // Only visits methods that have a name set in their processing info.
+                // At this step, all methods that have to be kept have been marked
+                // by the NameMarker with their original name, so this will visit
+                // only methods that will not be obfuscated.
                 new AllMethodVisitor(
                 new NewMemberNameFilter(
                 new AllAttributeVisitor(true,
@@ -171,8 +242,30 @@ public class Obfuscator implements Pass
             if (configuration.keepKotlinMetadata)
             {
                 appView.programClassPool.classesAccept(
-                    new ReferencedKotlinMetadataVisitor(
-                    new KotlinValueParameterUsageMarker()));
+                    new MultiClassVisitor(
+                        // javac and kotlinc don't create the required attributes on interface methods
+                        // so we conservatively mark the parameters as used.
+                        new ClassAccessFilter(AccessConstants.INTERFACE, 0,
+                        new AllMethodVisitor(
+                        new NewMemberNameFilter(
+                        new MethodToKotlinFunctionVisitor(
+                        new AllValueParameterVisitor(
+                        new KotlinValueParameterUsageMarker()))))),
+
+                        // T14916: Annotation classes don't have underlying JVM constructors,
+                        // so we conservatively mark the parameters as used, if the class is kept.
+                        new ClassAccessFilter(AccessConstants.INTERFACE, 0,
+                        new ClassProcessingFlagFilter(ProcessingFlags.DONT_OBFUSCATE, 0,
+                        new ReferencedKotlinMetadataVisitor(
+                        new KotlinClassKindFilter(metadata -> metadata.flags.isAnnotationClass,
+                                                  new AllConstructorVisitor(
+                                                  new AllValueParameterVisitor(
+                                                  new KotlinValueParameterUsageMarker())))))),
+
+                        // For all other classes, first check if we should keep
+                        // the parameter names.
+                        new ReferencedKotlinMetadataVisitor(
+                        new KotlinValueParameterUsageMarker())));
             }
         }
 

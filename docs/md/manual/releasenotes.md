@@ -3,6 +3,8 @@
 ### Bugfixes
 
 - Fix `-keepparameternames` to keep Kotlin function, constructor and property setter parameter names.
+- Fix `-keepparameternames` to keep Kotlin annotation constructor parameter names.
+- Fix `-keepparameternames` to keep Kotlin interface parameter names.
 
 ## Version 7.3.0
 
