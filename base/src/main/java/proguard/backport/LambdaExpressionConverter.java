@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,18 +22,49 @@ package proguard.backport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
-import proguard.classfile.editor.*;
-import proguard.classfile.instruction.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.Member;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
+import proguard.classfile.TypeConstants;
+import proguard.classfile.VersionConstants;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.InvokeDynamicConstant;
+import proguard.classfile.constant.MethodHandleConstant;
+import proguard.classfile.editor.ClassBuilder;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.CompactCodeAttributeComposer;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.editor.InstructionSequenceBuilder;
+import proguard.classfile.editor.MemberRemover;
+import proguard.classfile.instruction.ConstantInstruction;
+import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.util.ClassReferenceInitializer;
+import proguard.classfile.util.ClassSubHierarchyInitializer;
+import proguard.classfile.util.ClassSuperHierarchyInitializer;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.InternalTypeEnumeration;
+import proguard.classfile.visitor.AllMethodVisitor;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.MemberAccessFlagSetter;
+import proguard.classfile.visitor.MemberAccessSetter;
+import proguard.classfile.visitor.MemberVisitor;
+import proguard.classfile.visitor.MultiClassVisitor;
 import proguard.io.ExtraDataEntryNameMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * This ClassVisitor converts all lambda expressions in the visited
@@ -74,7 +105,7 @@ implements ClassVisitor,
         this.extraDataEntryNameMap = extraDataEntryNameMap;
         this.extraClassVisitor     = extraClassVisitor;
 
-        this.lambdaExpressionMap  = new HashMap<Integer, LambdaExpression>();
+        this.lambdaExpressionMap  = new HashMap<>();
         this.codeAttributeEditor  = new CodeAttributeEditor(true, true);
         this.memberRemover        = new MemberRemover();
     }
