@@ -2,30 +2,47 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  */
 package proguard.obfuscate.kotlin;
 
-import proguard.KotlinMetadataAdapter;
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.StringConstant;
+import proguard.classfile.constant.Utf8Constant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.*;
-import proguard.classfile.instruction.*;
-import proguard.classfile.instruction.visitor.*;
-import proguard.classfile.kotlin.*;
-import proguard.classfile.kotlin.visitor.*;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.instruction.ConstantInstruction;
+import proguard.classfile.instruction.Instruction;
+import proguard.classfile.instruction.visitor.InstructionVisitor;
+import proguard.classfile.kotlin.KotlinClassKindMetadata;
+import proguard.classfile.kotlin.KotlinDeclarationContainerMetadata;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.KotlinPropertyMetadata;
+import proguard.classfile.kotlin.visitor.KotlinFunctionToMethodVisitor;
+import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.KotlinPropertyVisitor;
 import proguard.classfile.kotlin.visitor.filter.KotlinFunctionFilter;
 import proguard.obfuscate.ClassObfuscator;
 import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
-import static proguard.classfile.ClassConstants.*;
+import static proguard.classfile.ClassConstants.METHOD_NAME_TOSTRING;
+import static proguard.classfile.ClassConstants.METHOD_NAME_TOSTRING_IMPL;
+import static proguard.classfile.ClassConstants.METHOD_TYPE_TOSTRING;
+import static proguard.classfile.ClassConstants.METHOD_TYPE_TOSTRING_IMPL;
 import static proguard.classfile.util.ClassUtil.internalSimpleClassName;
 import static proguard.obfuscate.ClassObfuscator.hasOriginalClassName;
 import static proguard.obfuscate.ClassObfuscator.newClassName;
@@ -53,11 +70,6 @@ import static proguard.obfuscate.ClassObfuscator.newClassName;
 public class KotlinSyntheticToStringObfuscator
 implements   KotlinMetadataVisitor
 {
-
-    // TODO When a new release for ProGuard-Core (> 8.0.7) is available, these hardcoded strings should
-    //  be replaced with the constants in {@link ClassConstants}.
-    private final String METHOD_NAME_TOSTRING_IMPL = "toString-impl";
-    private final String METHOD_TYPE_TOSTRING_IMPL = "(Ljava/lang/String;)Ljava/lang/String;";
 
     private static final Comparator<String> REVERSE_LENGTH_STRING_ORDER =
         Comparator
