@@ -99,7 +99,7 @@ extends      AbstractKotlinMetadataConstraint
             if (kotlinClassKindMetadata.flags.isInterface)
             {
                 AttributeCounter attributeCounter = new AttributeCounter();
-                kotlinFunctionMetadata.referencedMethodAccept(kotlinFunctionMetadata.referencedMethodClass,
+                kotlinFunctionMetadata.referencedMethodAccept(
                     new AllAttributeVisitor(
                         new AttributeNameFilter(Attribute.CODE, attributeCounter)
                     )
