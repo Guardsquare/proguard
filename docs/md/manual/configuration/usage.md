@@ -505,6 +505,9 @@ This page lists all available options for ProGuard, grouped logically.
   [processing a library](examples.md#library). Some IDEs can use the
   information to assist developers who use the library, for example with tool
   tips or autocompletion. Only applicable when obfuscating.
+ 
+    When processing Kotlin metadata the Kotlin function, constructor and property setter
+    parameter names are also kept.
 
 `-renamesourcefileattribute`{: #renamesourcefileattribute} \[*string*\]
 : Specifies a constant string to be put in the `SourceFile` attributes (and

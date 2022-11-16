@@ -1,3 +1,9 @@
+## Version 7.3.1
+
+### Bugfixes
+
+- Fix `-keepparameternames` to keep Kotlin function, constructor and property setter parameter names.
+
 ## Version 7.3.0
 
 ### Java support
