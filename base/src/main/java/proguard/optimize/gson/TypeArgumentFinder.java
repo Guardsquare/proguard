@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,26 +20,53 @@
  */
 package proguard.optimize.gson;
 
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.constant.*;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.SignatureAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.MethodrefConstant;
+import proguard.classfile.constant.RefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.instruction.*;
+import proguard.classfile.instruction.ConstantInstruction;
+import proguard.classfile.instruction.Instruction;
+import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.evaluation.*;
+import proguard.evaluation.PartialEvaluator;
+import proguard.evaluation.TracedStack;
 import proguard.evaluation.value.InstructionOffsetValue;
 import proguard.util.ArrayUtil;
 
 /**
- * This instruction visitor searches for the types that are passed as arguments
- * to a method. The visited instruction is assumed to be the producer that put
- * the types on the stack.
+ * This instructions visitor is used for 2 purposes.
  *
- * It can recognize Class objects and Type objects that were derived from
- * TypeToken.getType().
+ * 1. This instruction visitor searches for types behind Class and TypeToken
+ * (from the Gson library) arguments. The intent is to let a producing instruction
+ * that put a Type/Class/TypeToken on the stack accept this visitor, which determines
+ * the actual type that is being deserialized.
  *
- * @author Lars Vandenbergh
+ * Currently two types of situations are supported:
+ * - You pass the type via a .class call (ldc instruction)
+ *   example:
+ *     fromJson("", MyClass.class)
+ *   result: MyClass
+ * - You pass the type from a getType call via a variable (aload instruction)
+ *   example:
+ *     Type type = new TypeToken<MyClass>() {}.getType();
+ *     fromJson("", type);
+ *   result: MyClass
+ *
+ * 2. This instruction visitor returns the type of a TypeAdapter argument.
+ *
+ * - When a TypeAdapter is created (new instruction)
+ *   example:
+ *     registerTypeHierarchyAdapter(MyClass.class, new MyTypeAdapter())
+ *   result: MyTypeAdapter
  */
 class      TypeArgumentFinder
 implements InstructionVisitor,
@@ -134,7 +161,19 @@ implements InstructionVisitor,
                                          int                 offset,
                                          ConstantInstruction constantInstruction)
     {
-        clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
+        switch (constantInstruction.opcode)
+        {
+            // Used in cases where a .class argument is passed.
+            case Instruction.OP_LDC: // Fallthrough
+            case Instruction.OP_LDC2_W: // Fallthrough
+            case Instruction.OP_LDC_W: // Fallthrough
+            // Used in the case where a new TypeAdapter is passed.
+            case Instruction.OP_NEW:
+                clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
+                break;
+            default:
+                // These cases are not supported, so we do not update the typeArgumentClasses array.
+        }
     }
 
     // Implementations for ConstantVisitor.
@@ -255,3 +294,4 @@ implements InstructionVisitor,
         }
     }
 }
+

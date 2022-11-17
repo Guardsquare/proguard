@@ -6,6 +6,7 @@
 - Fix `-keepparameternames` to keep Kotlin annotation constructor parameter names.
 - Fix `-keepparameternames` to keep Kotlin interface parameter names.
 - Fix potential `NullPointerException` while processing enum classes with invalid Kotlin metadata.
+- Fix potential `Instruction has invalid constant index size` error during GSON optimization.
 
 ## Version 7.3.0
 
