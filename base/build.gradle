@@ -29,9 +29,9 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.9'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.5.0' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.5.0' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.5.0' // for kotest property test
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.5.4' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.5.4' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:5.5.4' // for kotest property test
     testImplementation 'io.mockk:mockk:1.13.2' // for mocking
 
     testImplementation(testFixtures("com.guardsquare:proguard-core:9.0.5")) {
