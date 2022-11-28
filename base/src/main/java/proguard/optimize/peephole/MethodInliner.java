@@ -801,6 +801,15 @@ implements            AttributeVisitor,
         }
     }
 
+    @Override
+    public void visitLibraryMethod(LibraryClass libraryClass, LibraryMethod libraryMethod)
+    {
+        if (libraryMethod.getName(libraryClass).equals(ClassConstants.METHOD_NAME_INIT))
+        {
+            uninitializedObjectCount--;
+        }
+    }
+
 
     // Implementations for LineNumberInfoVisitor.
 
