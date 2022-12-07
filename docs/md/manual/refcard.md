@@ -77,6 +77,7 @@ Typically:
 | [`-printconfiguration`](configuration/usage.md#printconfiguration) \[[*filename*](configuration/usage.md#filename)\]                                                                                             | Write out the entire configuration, in traditional ProGuard style, to the standard output or to the given file.
 | [`-dump`](configuration/usage.md#dump) \[[*filename*](configuration/usage.md#filename)\]                                                                                                                         | Write out the internal structure of the processed class files, to the standard output or to the given file.
 | [`-addconfigurationdebugging`](configuration/usage.md#addconfigurationdebugging)                                                                                                                                 | Instrument the processed code with debugging statements that print out suggestions for missing ProGuard configuration.
+| [`-optimizeaggressively`](configuration/usage.md#optimizeaggressively)                                                                                                                                           | Enables more aggressive assumptions during optimization
 
 Notes:
 

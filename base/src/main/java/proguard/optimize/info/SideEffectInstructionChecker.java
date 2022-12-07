@@ -49,11 +49,9 @@ implements   InstructionVisitor,
              ConstantVisitor,
              MemberVisitor
 {
-    public static final boolean OPTIMIZE_CONSERVATIVELY = System.getProperty("optimize.conservatively") != null;
-
-
     private final boolean includeReturnInstructions;
     private final boolean includeArrayStoreInstructions;
+    private final boolean includeBuiltInExceptions;
 
     // Parameters and return values for the visitor methods.
     private boolean writingField;
@@ -68,12 +66,17 @@ implements   InstructionVisitor,
      *                                      effects.
      * @param includeArrayStoreInstructions specifies whether storing values
      *                                      in arrays counts as side effects.
+     * @param includeBuiltInExceptions      specifies whether built-in exceptions
+     *                                      count as side effects (e.g. calling getfield
+     *                                      on null object reference)
      */
     public SideEffectInstructionChecker(boolean includeReturnInstructions,
-                                        boolean includeArrayStoreInstructions)
+                                        boolean includeArrayStoreInstructions,
+                                        boolean includeBuiltInExceptions)
     {
         this.includeReturnInstructions     = includeReturnInstructions;
         this.includeArrayStoreInstructions = includeArrayStoreInstructions;
+        this.includeBuiltInExceptions      = includeBuiltInExceptions;
     }
 
 
@@ -120,7 +123,7 @@ implements   InstructionVisitor,
                 // These instructions strictly taken may cause a side effect
                 // (ArithmeticException, NullPointerException,
                 // ArrayIndexOutOfBoundsException, NegativeArraySizeException).
-                hasSideEffects = OPTIMIZE_CONSERVATIVELY;
+                hasSideEffects = includeBuiltInExceptions;
                 break;
 
             case Instruction.OP_IASTORE:
@@ -190,7 +193,7 @@ implements   InstructionVisitor,
                 break;
 
             case Instruction.OP_GETFIELD:
-                if (OPTIMIZE_CONSERVATIVELY)
+                if (includeBuiltInExceptions)
                 {
                     // These instructions strictly taken may cause a side effect
                     // (NullPointerException).
@@ -205,7 +208,7 @@ implements   InstructionVisitor,
                 break;
 
             case Instruction.OP_PUTFIELD:
-                if (OPTIMIZE_CONSERVATIVELY)
+                if (includeBuiltInExceptions)
                 {
                     // These instructions strictly taken may cause a side effect
                     // (NullPointerException).
@@ -228,7 +231,7 @@ implements   InstructionVisitor,
             case Instruction.OP_INVOKEVIRTUAL:
             case Instruction.OP_INVOKEINTERFACE:
             case Instruction.OP_INVOKEDYNAMIC:
-                if (OPTIMIZE_CONSERVATIVELY)
+                if (includeBuiltInExceptions)
                 {
                     // These instructions strictly taken may cause a side effect
                     // (NullPointerException).
@@ -246,7 +249,7 @@ implements   InstructionVisitor,
             case Instruction.OP_CHECKCAST:
                 // This instructions strictly taken may cause a side effect
                 // (ClassCastException, NegativeArraySizeException).
-                hasSideEffects = OPTIMIZE_CONSERVATIVELY;
+                hasSideEffects = includeBuiltInExceptions;
                 break;
         }
     }

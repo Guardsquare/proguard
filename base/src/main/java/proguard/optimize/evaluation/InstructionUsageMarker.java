@@ -64,8 +64,9 @@ implements   AttributeVisitor
     private final PartialEvaluator                partialEvaluator;
     private final boolean                         runPartialEvaluator;
     private final boolean                         ensureSafetyForVerifier;
+    private final boolean                         markExternalSideEffects;
     private final PartialEvaluator                simplePartialEvaluator;
-    private final SideEffectInstructionChecker    sideEffectInstructionChecker  = new SideEffectInstructionChecker(true, true);
+    private final SideEffectInstructionChecker    sideEffectInstructionChecker;
     private final MyParameterUsageMarker          parameterUsageMarker          = new MyParameterUsageMarker();
     private final MyInitialUsageMarker            initialUsageMarker            = new MyInitialUsageMarker();
     private final MyProducerMarker                producerMarker                = new MyProducerMarker();
@@ -85,22 +86,26 @@ implements   AttributeVisitor
 
     /**
      * Creates a new InstructionUsageMarker.
+     *
+     * @param markExternalSideEffects specifies whether instructions with external side effects should be marked
      */
-    public InstructionUsageMarker()
+    public InstructionUsageMarker(boolean markExternalSideEffects)
     {
-        this(new PartialEvaluator(), true, true);
+        this(new PartialEvaluator(), true, true, markExternalSideEffects);
     }
 
     /**
      * Creates a new InstructionUsageMarker.
-     * @param partialEvaluator    the evaluator to be used for the analysis.
-     * @param runPartialEvaluator specifies whether to run this evaluator on
-     *                            every code attribute that is visited.
+     * @param partialEvaluator        the evaluator to be used for the analysis.
+     * @param runPartialEvaluator     specifies whether to run this evaluator on
+     *                                every code attribute that is visited.
+     * @param markExternalSideEffects specifies whether instructions with external side effects should be marked
      */
     public InstructionUsageMarker(PartialEvaluator partialEvaluator,
-                                  boolean          runPartialEvaluator)
+                                  boolean          runPartialEvaluator,
+                                  boolean          markExternalSideEffects)
     {
-        this(partialEvaluator, runPartialEvaluator, true);
+        this(partialEvaluator, runPartialEvaluator, true, markExternalSideEffects);
     }
 
     /**
@@ -112,14 +117,18 @@ implements   AttributeVisitor
      *                                 code correctness but are necessary for the
      *                                 java verifier. This flag determines whether
      *                                 these instructions are visited (default: true).
+     * @param markExternalSideEffects  specifies whether instructions with external side effects should be marked
      */
     public InstructionUsageMarker(PartialEvaluator partialEvaluator,
                                   boolean          runPartialEvaluator,
-                                  boolean          ensureSafetyForVerifier)
+                                  boolean          ensureSafetyForVerifier,
+                                  boolean          markExternalSideEffects)
     {
-        this.partialEvaluator    = partialEvaluator;
-        this.runPartialEvaluator = runPartialEvaluator;
-        this.ensureSafetyForVerifier = ensureSafetyForVerifier;
+        this.partialEvaluator             = partialEvaluator;
+        this.runPartialEvaluator          = runPartialEvaluator;
+        this.ensureSafetyForVerifier      = ensureSafetyForVerifier;
+        this.markExternalSideEffects      = markExternalSideEffects;
+        this.sideEffectInstructionChecker = new SideEffectInstructionChecker(true, true, markExternalSideEffects);
         if (ensureSafetyForVerifier)
         {
             this.simplePartialEvaluator = new PartialEvaluator(new TypedReferenceValueFactory());
@@ -823,7 +832,7 @@ implements   AttributeVisitor
 //            }
 
             // Is the method invocation really necessary?
-            if (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY     &&
+            if (markExternalSideEffects                                  &&
                 referencedMethod != null                                 &&
                 SideEffectMethodMarker.hasSideEffects(referencedMethod)  &&
                 // Skip if the method was explicitly marked as having no external side-effects.

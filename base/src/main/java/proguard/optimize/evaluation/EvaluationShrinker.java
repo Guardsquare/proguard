@@ -114,7 +114,7 @@ implements   AttributeVisitor,
      */
     public EvaluationShrinker()
     {
-        this(new PartialEvaluator(), true, null, null);
+        this(new PartialEvaluator(), true, false, null, null);
     }
 
 
@@ -126,6 +126,8 @@ implements   AttributeVisitor,
      *                                       evaluator should be run for each
      *                                       method, or if some other class is
      *                                       already doing this.
+     * @param optimizeConservatively         specifies whether conservative
+     *                                       optimization should be applied
      * @param extraDeletedInstructionVisitor an optional extra visitor for all
      *                                       deleted instructions.
      * @param extraAddedInstructionVisitor   an optional extra visitor for all
@@ -133,10 +135,11 @@ implements   AttributeVisitor,
      */
     public EvaluationShrinker(PartialEvaluator   partialEvaluator,
                               boolean            runPartialEvaluator,
+                              boolean            optimizeConservatively,
                               InstructionVisitor extraDeletedInstructionVisitor,
                               InstructionVisitor extraAddedInstructionVisitor)
     {
-        this(new InstructionUsageMarker(partialEvaluator, runPartialEvaluator, true),
+        this(new InstructionUsageMarker(partialEvaluator, runPartialEvaluator, optimizeConservatively),
              true,
              extraDeletedInstructionVisitor,
              extraAddedInstructionVisitor);

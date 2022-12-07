@@ -624,7 +624,8 @@ public class Optimizer implements Pass
         programClassPool.classesAccept(new ProgramClassOptimizationInfoSetter());
 
         programClassPool.classesAccept(new AllMemberVisitor(
-                                       new ProgramMemberOptimizationInfoSetter()));
+                                       new ProgramMemberOptimizationInfoSetter(
+                                       false, configuration.optimizeConservatively)));
 
         if (configuration.assumeNoSideEffects != null)
         {
@@ -735,12 +736,12 @@ public class Optimizer implements Pass
             new AllMethodVisitor(
             new OptimizationInfoMemberFilter(
             new MultiMemberVisitor(
-                new SideEffectMethodMarker(),
+                new SideEffectMethodMarker(configuration.optimizeConservatively),
                 new ParameterEscapeMarker()
             ))));
 
         programClassPool.accept(new InfluenceFixpointVisitor(
-                                new SideEffectVisitorMarkerFactory()));
+                                new SideEffectVisitorMarkerFactory(configuration.optimizeConservatively)));
 
         if (methodMarkingSynchronized)
         {
@@ -1083,7 +1084,8 @@ public class Optimizer implements Pass
                             new OptimizationCodeAttributeFilter(
                             new EvaluationSimplifier(
                             new PartialEvaluator(valueFactory, loadingInvocationUnit, false),
-                            codeSimplificationAdvancedCounter)))));
+                            codeSimplificationAdvancedCounter,
+                            configuration.optimizeConservatively)))));
                     }
                 };
 
@@ -1127,7 +1129,7 @@ public class Optimizer implements Pass
                                                  new ParameterTracingInvocationUnit(loadingInvocationUnit),
                                                  !codeSimplificationAdvanced,
                                                  referenceTracingValueFactory),
-                            true), true, deletedCounter, addedCounter)))));
+                            true, configuration.optimizeConservatively), true, deletedCounter, addedCounter)))));
                     }
                 };
 

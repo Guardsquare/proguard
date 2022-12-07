@@ -61,6 +61,7 @@ implements   ClassVisitor,
     private final GsonRuntimeSettings   gsonRuntimeSettings;
     private final OptimizedJsonInfo     deserializationInfo;
     private final boolean               supportExposeAnnotation;
+    private final boolean               optimizeConservatively;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
 
     private OptimizedJsonInfo.ClassJsonInfo                 classDeserializationInfo;
@@ -83,20 +84,23 @@ implements   ClassVisitor,
     /**
      * Creates a new GsonDeserializationOptimizer.
      *
-     * @param programClassPool      the program class pool to initialize added
-     *                              references.
-     * @param libraryClassPool      the library class pool to initialize added
-     *                              references.
-     * @param gsonRuntimeSettings   keeps track of all GsonBuilder invocations.
-     * @param deserializationInfo   contains information on which class and
-     *                              fields need to be optimized and how.
-     * @param extraDataEntryNameMap the map that keeps track of injected
-     *                              classes.
+     * @param programClassPool       the program class pool to initialize added
+     *                               references.
+     * @param libraryClassPool       the library class pool to initialize added
+     *                               references.
+     * @param gsonRuntimeSettings    keeps track of all GsonBuilder invocations.
+     * @param deserializationInfo    contains information on which class and
+     *                               fields need to be optimized and how.
+     * @param optimizeConservatively specifies whether conservative
+     *                               optimization should be applied
+     * @param extraDataEntryNameMap  the map that keeps track of injected
+     *                               classes.
      */
     public GsonDeserializationOptimizer(ClassPool             programClassPool,
                                         ClassPool             libraryClassPool,
                                         GsonRuntimeSettings   gsonRuntimeSettings,
                                         OptimizedJsonInfo     deserializationInfo,
+                                        boolean               optimizeConservatively,
                                         ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool        = programClassPool;
@@ -104,6 +108,7 @@ implements   ClassVisitor,
         this.gsonRuntimeSettings     = gsonRuntimeSettings;
         this.deserializationInfo     = deserializationInfo;
         this.supportExposeAnnotation = gsonRuntimeSettings.excludeFieldsWithoutExposeAnnotation;
+        this.optimizeConservatively  = optimizeConservatively;
         this.extraDataEntryNameMap   = extraDataEntryNameMap;
     }
 
@@ -174,7 +179,7 @@ implements   ClassVisitor,
                                ClassConstants.METHOD_NAME_INIT,
                                ClassConstants.METHOD_TYPE_INIT)
                 .return_(),
-            new ProgramMemberOptimizationInfoSetter());
+            new ProgramMemberOptimizationInfoSetter(false, optimizeConservatively));
     }
 
 
@@ -250,7 +255,7 @@ implements   ClassVisitor,
                                GsonClassConstants.METHOD_TYPE_READER_END_OBJECT)
                 .return_();
             },
-            new ProgramMemberOptimizationInfoSetter());
+            new ProgramMemberOptimizationInfoSetter(false, optimizeConservatively));
     }
 
 
@@ -338,7 +343,7 @@ implements   ClassVisitor,
             ____.label(endSwitch)
                 .return_();
             },
-            new ProgramMemberOptimizationInfoSetter());
+            new ProgramMemberOptimizationInfoSetter(false, optimizeConservatively));
     }
 
 

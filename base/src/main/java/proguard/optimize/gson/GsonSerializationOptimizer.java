@@ -68,6 +68,7 @@ implements   MemberVisitor,
 //    private final CodeAttributeEditor   codeAttributeEditor;
     private final OptimizedJsonInfo     serializationInfo;
     private final boolean               supportExposeAnnotation;
+    private final boolean               optimizeConservatively;
     private final ExtraDataEntryNameMap extraDataEntryNameMap;
 
 //    private InstructionSequenceBuilder ____;
@@ -91,21 +92,24 @@ implements   MemberVisitor,
     /**
      * Creates a new GsonSerializationOptimizer.
      *
-     * @param programClassPool      the program class pool to initialize
-     *                              added references.
-     * @param libraryClassPool      the library class pool to initialize
-     *                              added references.
-     * @param gsonRuntimeSettings   keeps track of all GsonBuilder
-     *                              invocations.
-     * @param serializationInfo     contains information on which class
-     *                              and fields need to be optimized and how.
-     * @param extraDataEntryNameMap the map that keeps track of injected
-     *                              classes.
+     * @param programClassPool       the program class pool to initialize
+     *                               added references.
+     * @param libraryClassPool       the library class pool to initialize
+     *                               added references.
+     * @param gsonRuntimeSettings    keeps track of all GsonBuilder
+     *                               invocations.
+     * @param serializationInfo      contains information on which class
+     *                               and fields need to be optimized and how.
+     * @param optimizeConservatively specifies whether conservative
+     *                               optimization should be applied
+     * @param extraDataEntryNameMap  the map that keeps track of injected
+     *                               classes.
      */
     public GsonSerializationOptimizer(ClassPool             programClassPool,
                                       ClassPool             libraryClassPool,
                                       GsonRuntimeSettings   gsonRuntimeSettings,
                                       OptimizedJsonInfo     serializationInfo,
+                                      boolean               optimizeConservatively,
                                       ExtraDataEntryNameMap extraDataEntryNameMap)
     {
         this.programClassPool        = programClassPool;
@@ -113,6 +117,7 @@ implements   MemberVisitor,
         this.gsonRuntimeSettings     = gsonRuntimeSettings;
         this.serializationInfo       = serializationInfo;
         this.supportExposeAnnotation = gsonRuntimeSettings.excludeFieldsWithoutExposeAnnotation;
+        this.optimizeConservatively  = optimizeConservatively;
         this.extraDataEntryNameMap   = extraDataEntryNameMap;
     }
 
@@ -172,7 +177,7 @@ implements   MemberVisitor,
                                GsonClassConstants.METHOD_TYPE_WRITER_END_OBJECT)
                 .return_(),
 
-            new ProgramMemberOptimizationInfoSetter());
+            new ProgramMemberOptimizationInfoSetter(false, optimizeConservatively));
 
         addToJsonBodyMethod(programClass, classBuilder);
 
@@ -235,7 +240,7 @@ implements   MemberVisitor,
 
                 ____.return_();
             },
-            new ProgramMemberOptimizationInfoSetter());
+            new ProgramMemberOptimizationInfoSetter(false, optimizeConservatively));
     }
 
 

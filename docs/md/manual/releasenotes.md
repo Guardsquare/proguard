@@ -1,5 +1,9 @@
 ## Version 7.3.1
 
+### Improved
+
+- Conservative optimization is now the default. Previously, it could be enabled by setting the `optimize.conservatively` system property. This has been replaced with the `-optimizeaggressively` option, which sets optimization to aggressive.
+
 ### Bugfixes
 
 - Fix `-keepparameternames` to keep Kotlin function, constructor and property setter parameter names.

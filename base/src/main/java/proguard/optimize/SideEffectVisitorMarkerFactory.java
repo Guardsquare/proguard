@@ -34,8 +34,15 @@ import proguard.optimize.info.*;
 class SideEffectVisitorMarkerFactory
 implements InfluenceFixpointVisitor.MemberVisitorFactory
 {
-    public SideEffectVisitorMarkerFactory()
+    private final boolean optimizeConservatively;
+
+    /**
+     * @param optimizeConservatively specifies whether conservative
+     *                               optimization should be applied
+     */
+    public SideEffectVisitorMarkerFactory(boolean optimizeConservatively)
     {
+        this.optimizeConservatively = optimizeConservatively;
     }
 
     // Implementations for MemberVisitorFactory
@@ -61,7 +68,8 @@ implements InfluenceFixpointVisitor.MemberVisitorFactory
         // at the cost of some effectiveness (test2209).
         //ReadWriteFieldMarker readWriteFieldMarker =
         //    new ReadWriteFieldMarker(repeatTrigger);
-        SideEffectMethodMarker sideEffectMethodMarker = new SideEffectMethodMarker(influencedMethodCollector);
+        SideEffectMethodMarker sideEffectMethodMarker = new SideEffectMethodMarker(influencedMethodCollector,
+                                                                                   optimizeConservatively);
         ParameterEscapeMarker parameterEscapeMarker =
             new ParameterEscapeMarker(partialEvaluator, false, influencedMethodCollector);
 

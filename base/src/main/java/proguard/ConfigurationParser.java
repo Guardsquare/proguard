@@ -229,6 +229,7 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.PRINT_CONFIGURATION_OPTION                       .startsWith(nextWord)) configuration.printConfiguration                    = parseOptionalFile();
             else if (ConfigurationConstants.DUMP_OPTION                                      .startsWith(nextWord)) configuration.dump                                  = parseOptionalFile();
             else if (ConfigurationConstants.ADD_CONFIGURATION_DEBUGGING_OPTION               .startsWith(nextWord)) configuration.addConfigurationDebugging             = parseNoArgument(true);
+            else if (ConfigurationConstants.OPTIMIZE_AGGRESSIVELY                            .startsWith(nextWord)) configuration.optimizeConservatively                = parseNoArgument(false);
             else
             {
                 throw new ParseException("Unknown option " + reader.locationDescription());

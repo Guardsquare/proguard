@@ -53,35 +53,44 @@ implements   AttributeVisitor,
 
     private static final Logger logger = LogManager.getLogger(EvaluationSimplifier.class);
 
+    private final boolean            predictNullPointerExceptions;
     private final InstructionVisitor extraInstructionVisitor;
 
     private final PartialEvaluator             partialEvaluator;
-    private final SideEffectInstructionChecker sideEffectInstructionChecker = new SideEffectInstructionChecker(true, true);
+    private final SideEffectInstructionChecker sideEffectInstructionChecker;
     private final CodeAttributeEditor          codeAttributeEditor          = new CodeAttributeEditor(true, true);
 
 
     /**
      * Creates a new EvaluationSimplifier.
+     *
+     * @param predictNullPointerExceptions specifies whether instructions that will always result in a
+     *                                     NullPointerException should be replaced with an explicit NullPointerException
      */
-    public EvaluationSimplifier()
+    public EvaluationSimplifier(boolean predictNullPointerExceptions)
     {
-        this(new PartialEvaluator(), null);
+        this(new PartialEvaluator(), null, predictNullPointerExceptions);
     }
 
 
     /**
      * Creates a new EvaluationSimplifier.
-     * @param partialEvaluator        the partial evaluator that will
-     *                                execute the code and provide
-     *                                information about the results.
-     * @param extraInstructionVisitor an optional extra visitor for all
-     *                                simplified instructions.
+     * @param partialEvaluator             the partial evaluator that will
+     *                                     execute the code and provide
+     *                                     information about the results.
+     * @param extraInstructionVisitor      an optional extra visitor for all
+     *                                     simplified instructions.
+     * @param predictNullPointerExceptions specifies whether instructions that will always result in a
+     *                                     NullPointerException should be replaced with an explicit NullPointerException
      */
     public EvaluationSimplifier(PartialEvaluator partialEvaluator,
-                                InstructionVisitor extraInstructionVisitor)
+                                InstructionVisitor extraInstructionVisitor,
+                                boolean predictNullPointerExceptions)
     {
-        this.partialEvaluator        = partialEvaluator;
-        this.extraInstructionVisitor = extraInstructionVisitor;
+        this.predictNullPointerExceptions = predictNullPointerExceptions;
+        this.partialEvaluator             = partialEvaluator;
+        this.extraInstructionVisitor      = extraInstructionVisitor;
+        this.sideEffectInstructionChecker = new SideEffectInstructionChecker(true, true, predictNullPointerExceptions);
     }
 
 
@@ -412,11 +421,12 @@ implements   AttributeVisitor,
             case Instruction.OP_FASTORE:
             case Instruction.OP_DASTORE:
             case Instruction.OP_AASTORE:
-                if (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY &&
+                if (predictNullPointerExceptions &&
                     isNullReference(offset, simpleInstruction.stackPopCount(clazz) - 1))
                 {
-                    // In case we detected a certain access to a null array, and OPTIMIZE.CONSERVATIVELY
-                    // is enabled, replace the instruction by the explicit exception.
+                    // In case we detected access to an array which we are absolutely certain is a null reference,
+                    // and we are predicting null pointer exceptions, replace the instruction with an explicit
+                    // NullPointerException.
                     replaceByException(clazz, offset, simpleInstruction, "java/lang/NullPointerException");
                 }
                 break;
@@ -492,7 +502,7 @@ implements   AttributeVisitor,
             case Instruction.OP_INVOKEVIRTUAL:
             case Instruction.OP_INVOKESPECIAL:
             case Instruction.OP_INVOKEINTERFACE:
-                if (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY &&
+                if (predictNullPointerExceptions &&
                     isNullReference(offset, constantInstruction.stackPopCount(clazz) - 1))
                 {
                     // In case a method is invoked on a null reference

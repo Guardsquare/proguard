@@ -45,26 +45,33 @@ implements   MemberVisitor,
 
     private final MemberVisitor extraMemberVisitor;
 
-    private final SideEffectInstructionChecker sideEffectInstructionChecker = new SideEffectInstructionChecker(false, true);
+    private final SideEffectInstructionChecker sideEffectInstructionChecker;
     private final ClassVisitor                 sideEffectClassMarker        = new OptimizationInfoClassFilter(
                                                                               new SideEffectClassMarker());
 
 
     /**
      * Creates a new SideEffectMethodMarker.
+     * @param optimizeConservatively specifies whether conservative
+     *                               optimization should be applied
      */
-    public SideEffectMethodMarker()
+    public SideEffectMethodMarker(boolean optimizeConservatively)
     {
-        this(null);
+        this(null, optimizeConservatively);
     }
 
 
     /**
      * Creates a new SideEffectMethodMarker.
+     *
+     * @param extraMemberVisitor     optional visitor to apply to marked methods
+     * @param optimizeConservatively specifies whether conservative optimization
+     *                               should be applied
      */
-    public SideEffectMethodMarker(MemberVisitor extraMemberVisitor)
+    public SideEffectMethodMarker(MemberVisitor extraMemberVisitor, boolean optimizeConservatively)
     {
-        this.extraMemberVisitor = extraMemberVisitor;
+        this.extraMemberVisitor           = extraMemberVisitor;
+        this.sideEffectInstructionChecker = new SideEffectInstructionChecker(false, true, optimizeConservatively);
     }
 
 

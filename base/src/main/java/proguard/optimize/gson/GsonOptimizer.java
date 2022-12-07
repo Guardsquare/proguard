@@ -236,6 +236,7 @@ public class GsonOptimizer implements Pass
                                                               appView.libraryClassPool,
                                                               gsonContext.gsonRuntimeSettings,
                                                               serializationInfo,
+                                                              configuration.optimizeConservatively,
                                                               appView.extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool
                 .classesAccept(new ClassAccessFilter(0, AccessConstants.ENUM,
@@ -243,6 +244,7 @@ public class GsonOptimizer implements Pass
                                                                 appView.libraryClassPool,
                                                                 gsonContext.gsonRuntimeSettings,
                                                                 deserializationInfo,
+                                                                configuration.optimizeConservatively,
                                                                 appView.extraDataEntryNameMap)));
             gsonContext.gsonDomainClassPool
                 .classesAccept(new ClassReferenceInitializer(appView.programClassPool, appView.libraryClassPool));

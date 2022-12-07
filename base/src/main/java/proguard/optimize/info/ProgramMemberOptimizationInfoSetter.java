@@ -35,12 +35,13 @@ public class ProgramMemberOptimizationInfoSetter
 implements   MemberVisitor
 {
     private final boolean overwrite;
+    private final boolean optimizeConservatively;
 
 
     /**
      * Creates a new ProgramMemberOptimizationInfoSetter that only attaches a
      * ProgramFieldOptimizationInfo to a member if no other info is present
-     * on the member yet.
+     * on the member yet, and does not apply conservative optimization
      */
     public ProgramMemberOptimizationInfoSetter()
     {
@@ -49,14 +50,30 @@ implements   MemberVisitor
 
 
     /**
-     * Creates a new ProgramMemberOptimizationInfoSetter.
+     * Creates a new ProgramMemberOptimizationInfoSetter that does not
+     * apply conservative optimization.
      *
      * @param overwrite boolean indicating whether an existing processing info on
      *                  a visited member should be overwritten or not.
      */
     public ProgramMemberOptimizationInfoSetter(boolean overwrite)
     {
-        this.overwrite = overwrite;
+        this(overwrite, false);
+    }
+
+    /**
+     * Creates a new ProgramMemberOptimizationInfoSetter
+     * @param overwrite              boolean indicating whether an existing
+     *                               processing info on a visited member should
+     *                               be overwritten or not.
+     * @param optimizeConservatively boolean indicating whether conservative
+     *                               optimization should be applied
+     */
+    public ProgramMemberOptimizationInfoSetter(boolean overwrite,
+                                               boolean optimizeConservatively)
+    {
+        this.overwrite              = overwrite;
+        this.optimizeConservatively = optimizeConservatively;
     }
 
     // Implementations for MemberVisitor.
@@ -66,7 +83,8 @@ implements   MemberVisitor
         if (programField.getProcessingInfo() == null || overwrite)
         {
             ProgramFieldOptimizationInfo.setProgramFieldOptimizationInfo(programClass,
-                                                                         programField);
+                                                                         programField,
+                                                                         optimizeConservatively);
         }
     }
 

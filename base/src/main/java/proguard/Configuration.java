@@ -436,4 +436,9 @@ public class Configuration
      * their respective jars. See {@link proguard.io.ExtraDataEntryNameMap}.
      */
     public File extraJar;
+
+    /**
+     * Specifies whether conservative optimization should be applied
+     */
+    public boolean                      optimizeConservatively  = true;
 }

@@ -45,15 +45,17 @@ implements   AttributeVisitor
     private volatile boolean        isWritten;
     private volatile boolean        isRead;
     private volatile boolean        canBeMadePrivate = true;
+    private final boolean           alwaysInitializeValue;
     private volatile ReferenceValue referencedClass;
 
 
-    public ProgramFieldOptimizationInfo(Clazz clazz, Field field)
+    public ProgramFieldOptimizationInfo(Clazz clazz, Field field, boolean alwaysInitializeValue)
     {
         int accessFlags = field.getAccessFlags();
 
         isWritten =
         isRead    = (accessFlags & AccessConstants.VOLATILE) != 0;
+        this.alwaysInitializeValue = alwaysInitializeValue;
 
         resetValue(clazz, field);
     }
@@ -61,11 +63,12 @@ implements   AttributeVisitor
 
     public ProgramFieldOptimizationInfo(ProgramFieldOptimizationInfo programFieldOptimizationInfo)
     {
-        this.value            = programFieldOptimizationInfo.value;
-        this.isWritten        = programFieldOptimizationInfo.isWritten;
-        this.isRead           = programFieldOptimizationInfo.isRead;
-        this.canBeMadePrivate = programFieldOptimizationInfo.canBeMadePrivate;
-        this.referencedClass  = programFieldOptimizationInfo.referencedClass;
+        this.value                 = programFieldOptimizationInfo.value;
+        this.isWritten             = programFieldOptimizationInfo.isWritten;
+        this.isRead                = programFieldOptimizationInfo.isRead;
+        this.canBeMadePrivate      = programFieldOptimizationInfo.canBeMadePrivate;
+        this.alwaysInitializeValue = programFieldOptimizationInfo.alwaysInitializeValue;
+        this.referencedClass       = programFieldOptimizationInfo.referencedClass;
     }
 
 
@@ -159,7 +162,7 @@ implements   AttributeVisitor
         // Conservatively, even a final field needs to be initialized with the
         // default value, because it may be accessed before it is set.
         if (value == null &&
-            (SideEffectInstructionChecker.OPTIMIZE_CONSERVATIVELY           ||
+            (alwaysInitializeValue ||
              // Final reference fields can not be inlined by the compiler and thus
              // can be null in certain cases.
              !ClassUtil.isInternalPrimitiveType(field.getDescriptor(clazz)) ||
@@ -199,9 +202,9 @@ implements   AttributeVisitor
     /**
      * Creates and sets a ProgramFieldOptimizationInfo instance on the given field.
      */
-    public static void setProgramFieldOptimizationInfo(Clazz clazz, Field field)
+    public static void setProgramFieldOptimizationInfo(Clazz clazz, Field field, boolean optimizeConservatively)
     {
-        field.setProcessingInfo(new ProgramFieldOptimizationInfo(clazz, field));
+        field.setProcessingInfo(new ProgramFieldOptimizationInfo(clazz, field, optimizeConservatively));
     }
 
 

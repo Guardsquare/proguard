@@ -166,12 +166,18 @@ system properties, which can be set as JVM arguments (with `-D...`):
   compilation to methods that are too long, so it's important not to let them
   grow too large.
 
-`optimize.conservatively` (default = unset)
-: Allows input code with ordinary instructions intentionally throwing
-  **`NullPointerException`**, `ArrayIndexOutOfBoundsException`, or
-  **`ClassCastException`**, without any other useful purposes. By default,
-  ProGuard may just discard such seemingly useless instructions,
-  resulting in better optimization of most common code.
+## Aggressive optimization
+
+ProGuard provides the `-optimizeaggressively` option. If set, this enables more
+aggressive assumptions during optimization. This might lead to
+improved performance and/or reduced code size, but might result in different behavior in rare cases.
+For example, reading from an array might cause an
+`ArrayIndexOutOfBoundsException` to be thrown. Strictly speaking, this means
+that such an instruction can have a side effect. If this instruction is removed
+during optimization, the code will thus behave differently under specific
+circumstances. By default, such instructions are always preserved. Setting this
+option will lead to these instructions being candidates for removal during
+optimization.
 
 ## Gson optimization {: #gson}
 

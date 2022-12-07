@@ -324,6 +324,17 @@ This page lists all available options for ProGuard, grouped logically.
         more than 256 *Miranda* methods (interface methods
         without implementations) in a class.
 
+`-optimizeaggressively`{: #optimizeaggressively}
+: Enables more aggressive assumptions during optimization. This might lead to
+  improved performance and/or reduced code size, but might result in different behavior in rare cases.
+  For example, reading from an array might cause an
+  `ArrayIndexOutOfBoundsException` to be thrown. Strictly speaking, this means
+  that such an instruction can have a side effect. If this instruction is removed
+  during optimization, the code will thus behave differently under specific
+  circumstances. By default, such instructions are always preserved. Setting this
+  option will lead to these instructions being candidates for removal during
+  optimization.
+
 ## Obfuscation Options {: #obfuscationoptions}
 
 `-dontobfuscate`{: #dontobfuscate}

@@ -163,7 +163,8 @@ public class ConfigurationWriter implements AutoCloseable
         writeOption(ConfigurationConstants.DUMP_OPTION,                        configuration.dump);
         writeOption(ConfigurationConstants.ADD_CONFIGURATION_DEBUGGING_OPTION, configuration.addConfigurationDebugging);
 
-        writeOption(ConfigurationConstants.PRINT_SEEDS_OPTION, configuration.printSeeds);
+        writeOption(ConfigurationConstants.PRINT_SEEDS_OPTION,                 configuration.printSeeds);
+        writeOption(ConfigurationConstants.OPTIMIZE_AGGRESSIVELY,              !configuration.optimizeConservatively);
         writer.println();
 
         // Write the "why are you keeping" options.
