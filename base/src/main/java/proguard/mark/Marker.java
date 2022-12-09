@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,21 +22,56 @@ package proguard.mark;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.*;
-import proguard.classfile.*;
+import proguard.AppView;
+import proguard.Configuration;
+import proguard.KeepClassSpecificationVisitorFactory;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.ClassPool;
+import proguard.classfile.Clazz;
 import proguard.classfile.attribute.Attribute;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.kotlin.*;
-import proguard.classfile.kotlin.visitor.*;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AttributeNameFilter;
+import proguard.classfile.attribute.visitor.AttributeProcessingFlagFilter;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.kotlin.KotlinClassKindMetadata;
+import proguard.classfile.kotlin.KotlinConstants;
+import proguard.classfile.kotlin.KotlinDeclarationContainerMetadata;
+import proguard.classfile.kotlin.KotlinFunctionMetadata;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.KotlinSyntheticClassKindMetadata;
+import proguard.classfile.kotlin.visitor.KotlinFunctionToDefaultMethodVisitor;
+import proguard.classfile.kotlin.visitor.KotlinFunctionToMethodVisitor;
+import proguard.classfile.kotlin.visitor.KotlinFunctionVisitor;
+import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
 import proguard.classfile.util.AllParameterVisitor;
-import proguard.classfile.visitor.*;
+import proguard.classfile.visitor.AllMemberVisitor;
+import proguard.classfile.visitor.ClassAccessFilter;
+import proguard.classfile.visitor.ClassNameFilter;
+import proguard.classfile.visitor.ClassPoolVisitor;
+import proguard.classfile.visitor.ClassProcessingFlagFilter;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.MemberAccessFilter;
+import proguard.classfile.visitor.MemberDescriptorReferencedClassVisitor;
+import proguard.classfile.visitor.MemberNameFilter;
+import proguard.classfile.visitor.MemberProcessingFlagFilter;
+import proguard.classfile.visitor.MemberToClassVisitor;
+import proguard.classfile.visitor.MemberVisitor;
+import proguard.classfile.visitor.MultiClassPoolVisitor;
+import proguard.classfile.visitor.MultiClassVisitor;
+import proguard.classfile.visitor.MultiMemberVisitor;
+import proguard.classfile.visitor.NamedMethodVisitor;
 import proguard.pass.Pass;
-import proguard.util.*;
+import proguard.util.ProcessingFlagSetter;
+import proguard.util.ProcessingFlags;
 
 import java.util.Arrays;
 
-import static proguard.util.ProcessingFlags.*;
 import static proguard.util.ProcessingFlags.DONT_OBFUSCATE;
+import static proguard.util.ProcessingFlags.DONT_OPTIMIZE;
+import static proguard.util.ProcessingFlags.DONT_SHRINK;
+import static proguard.util.ProcessingFlags.INJECTED;
 
 /**
  * This pass translates the keep rules and other class specifications from the
@@ -89,6 +124,13 @@ public class Marker implements Pass
                         new ProcessingFlagSetter(ProcessingFlags.DONT_SHRINK | ProcessingFlags.DONT_OPTIMIZE | ProcessingFlags.DONT_OBFUSCATE))));
             appView.programClassPool.classesAccept(classVisitor);
             appView.libraryClassPool.classesAccept(classVisitor);
+        }
+
+        // Mark members that can be safely used for generalization,
+        // but only if optimization is enabled.
+        if (configuration.optimize)
+        {
+            markSafeGeneralizationMembers(appView.programClassPool, appView.libraryClassPool);
         }
 
         if (configuration.keepKotlinMetadata)
@@ -184,6 +226,24 @@ public class Marker implements Pass
                                     memberMarker,
                                     memberMarker,
                                     attributeMarker);
+    }
+
+
+    private void markSafeGeneralizationMembers(ClassPool programClassPool,
+                                               ClassPool libraryClassPool)
+    {
+        // Program classes are always available and safe to generalize/specialize from/to.
+        ClassVisitor isClassAvailableMarker =
+                new AllMemberVisitor(
+                new ProcessingFlagSetter(ProcessingFlags.IS_CLASS_AVAILABLE));
+
+        programClassPool.classesAccept(isClassAvailableMarker);
+
+        if (!configuration.optimizeConservatively)
+        {
+            libraryClassPool.classesAccept(isClassAvailableMarker);
+        }
+        // TODO: Mark library class members where appropriate in the conservative case.
     }
 
 

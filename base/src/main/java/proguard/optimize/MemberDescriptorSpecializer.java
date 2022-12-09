@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2022 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,9 +22,18 @@ package proguard.optimize;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.*;
-import proguard.classfile.editor.*;
-import proguard.classfile.util.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.Clazz;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramField;
+import proguard.classfile.ProgramMember;
+import proguard.classfile.ProgramMethod;
+import proguard.classfile.TypeConstants;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.editor.MemberReferenceFixer;
+import proguard.classfile.util.ClassUtil;
+import proguard.classfile.util.InternalTypeEnumeration;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.value.Value;
 import proguard.optimize.evaluation.StoringInvocationUnit;
@@ -132,7 +141,7 @@ implements   MemberVisitor
 
                 if (valueClass != null &&
                     valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(fieldType)) &&
-                    (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+                    (programField.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                 {
                     logger.debug("MemberDescriptorSpecializer [{}.{} {}] -> {}",
                                  programClass.getName(),
@@ -179,7 +188,7 @@ implements   MemberVisitor
             InternalTypeEnumeration parameterTypeEnumeration =
                 new InternalTypeEnumeration(descriptor);
 
-            StringBuffer newDescriptorBuffer = new StringBuffer(descriptor.length());
+            StringBuilder newDescriptorBuffer = new StringBuilder(descriptor.length());
             newDescriptorBuffer.append(TypeConstants.METHOD_ARGUMENTS_OPEN);
 
             while (parameterTypeEnumeration.hasMoreTypes())
@@ -201,7 +210,7 @@ implements   MemberVisitor
 
                         if (valueClass != null &&
                             valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(parameterType)) &&
-                            (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+                            (programMethod.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                         {
                             logger.debug("MemberDescriptorSpecializer [{}.{}{}]: parameter #{}: {} -> {}",
                                     programClass.getName(),
@@ -318,7 +327,7 @@ implements   MemberVisitor
             return type;
         }
 
-        return ClassUtil.internalTypeFromClassType(valueType);
+        return valueType;
     }
 
 
