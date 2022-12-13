@@ -1,17 +1,15 @@
 Welcome to the manual for **ProGuard** version 7.3 ([what's new?](releasenotes.md)).
 
 ProGuard is an open-sourced Java class file shrinker, optimizer, obfuscator, and
-preverifier. As a result, ProGuard processed applications and libraries are smaller, faster, and somewhat hardened against reverse engineering.
+preverifier. As a result, ProGuard processed applications and libraries are smaller and faster.
 
 - The ***shrinking step*** detects and removes unused classes, fields, methods, and
 attributes. 
 - The ***optimizer step*** optimizes bytecode and removes unused instructions. 
-- The ***obfuscation step*** renames the remaining classes, fields, and methods using short meaningless names. 
+- The ***name obfuscation step*** renames the remaining classes, fields, and methods using short meaningless names. 
 - The final ***preverification step*** adds preverification information to the classes, which is required for Java Micro Edition and for Java 6 and higher.
 
-Each of the above steps is optional, ProGuard can perfectly be used
-to just list dead code in an application, or to preverify class files
-for efficient use in Java 6.
+The default Android shrinker, R8, is compatible with ProGuard [configuration](configuration/usage.md).
 
 If you are getting started with ProGuard, please follow the [Quick Start](building.md) guide in order to arrive at a basic setup for your application or library as quickly as possible.
 
@@ -68,7 +66,7 @@ applets, midlets, activities, etc.
   other optimizations, classes and methods that are not entry points can be
   made private, static, or final, unused parameters can be removed, and some
   methods may be inlined.
-- In the **obfuscation step**, ProGuard renames classes and class members that
+- In the **name obfuscation step**, ProGuard renames classes and class members that
   are not entry points. In this entire process, keeping the entry points
   ensures that they can still be accessed by their original names.
 - The **preverification step** is the only step that doesn't have to know the

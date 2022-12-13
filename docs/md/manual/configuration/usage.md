@@ -1,5 +1,8 @@
 This page lists all available options for ProGuard, grouped logically.
 
+!!! android R8
+    R8, the default Android shrinker, is compatible with ProGuard keep rules.
+
 ## Input/Output Options {: #iooptions}
 
 `@`{: #at} [*filename*](#filename)
@@ -114,6 +117,12 @@ This page lists all available options for ProGuard, grouped logically.
   specified input, output, and configuration files or directories.
 
 ## Keep Options {: #keepoptions}
+
+!!! tip "ProGuard Playground"
+    The [**ProGuard Playground**](https://playground.proguard.com) is a useful tool to help you further tweak the keep rules. 
+
+    <iframe frameborder="0" width="100%" height="200px" style="border-radius: 0.25rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);" src="https://playground.proguard.com/p/FT5qr8?embed"></iframe>
+
 
 `-keep`{: #keep} \[[,*modifier*](#keepoptionmodifiers),...\] [*class\_specification*](#classspecification)
 : Specifies classes and class members (fields and methods) to be preserved

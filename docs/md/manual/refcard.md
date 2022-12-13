@@ -96,6 +96,10 @@ Notes:
 | Class members only                                  | [`-keepclassmembers`](configuration/usage.md#keepclassmembers)             | [`-keepclassmembernames`](configuration/usage.md#keepclassmembernames)
 | Classes and class members, if class members present | [`-keepclasseswithmembers`](configuration/usage.md#keepclasseswithmembers) | [`-keepclasseswithmembernames`](configuration/usage.md#keepclasseswithmembernames)
 
+The [**ProGuard Playground**](https://playground.proguard.com) is a useful tool to help you further tweak the keep rules. 
+
+<iframe frameborder="0" width="100%" height="200px" style="border-radius: 0.25rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);" src="https://playground.proguard.com/p/FT5qr8?embed"></iframe>
+
 ## Keep Option Modifiers {: #keepoptionmodifiers}
 
 | Modifier                                                        | Meaning

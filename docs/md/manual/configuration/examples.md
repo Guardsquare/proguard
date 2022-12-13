@@ -40,6 +40,11 @@ familiar this way.
 Note that all type names are fully specified: `com.example.MyMain` and
 `java.lang.String[]`.
 
+You can refine your keep rules using the ProGuard Playground which visualizes
+how your keep rules match the entities in your app.
+
+<iframe frameborder="0" width="100%" height="200px" style="border-radius: 0.25rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);" src="https://playground.proguard.com/p/FT5qr8?embed"></iframe>
+
 We're writing out an obfuscation mapping file with
 [`-printmapping`](usage.md#printmapping), for de-obfuscating any stack traces
 later on, or for incremental obfuscation of extensions.

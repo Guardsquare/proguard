@@ -91,6 +91,8 @@ nav:
     - Kotlin:          manual/languages/kotlin.md
 - Tools:
     - ReTrace:         manual/tools/retrace.md
+    - Playground:      manual/tools/playground.md
+    - AppSweep:        manual/tools/appsweep.md
 - Troubleshooting:
     - Overview:        manual/troubleshooting/troubleshooting.md
     - Limitations:     manual/troubleshooting/limitations.md
