@@ -23,13 +23,25 @@ package proguard.optimize.peephole;
 import proguard.AppView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
-import proguard.classfile.attribute.visitor.*;
-import proguard.classfile.visitor.*;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
+import proguard.classfile.attribute.Attribute;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.attribute.ExtendedLineNumberInfo;
+import proguard.classfile.attribute.LineNumberInfo;
+import proguard.classfile.attribute.LineNumberTableAttribute;
+import proguard.classfile.attribute.visitor.AllAttributeVisitor;
+import proguard.classfile.attribute.visitor.AllLineNumberInfoVisitor;
+import proguard.classfile.attribute.visitor.AttributeVisitor;
+import proguard.classfile.attribute.visitor.LineNumberInfoVisitor;
+import proguard.classfile.attribute.visitor.LineNumberRangeFinder;
+import proguard.classfile.visitor.ClassVisitor;
+import proguard.classfile.visitor.MemberVisitor;
 import proguard.pass.Pass;
 
-import java.util.*;
+import java.util.Stack;
 
 /**
  * This pass disambiguates line numbers, in the classes that it
@@ -53,10 +65,10 @@ implements   Pass,
     private static final int SHIFT_ROUNDING_LIMIT = 50000;
 
 
-    private Stack          enclosingLineNumbers = new Stack();
-    private LineNumberInfo previousLineNumberInfo;
-    private int            highestUsedLineNumber;
-    private int            currentLineNumberShift;
+    private final Stack<MyLineNumberBlock> enclosingLineNumbers = new Stack<>();
+    private       LineNumberInfo           previousLineNumberInfo;
+    private       int                      highestUsedLineNumber;
+    private       int                      currentLineNumberShift;
 
 
     /**
@@ -155,7 +167,7 @@ implements   Pass,
 
             // Are we entering or exiting a new inlined block?
             if (previousLineNumberInfo == null ||
-                previousLineNumberInfo.getSource() != source)
+                !source.equals(previousLineNumberInfo.getSource()))
             {
                 // Are we entering a new inlined block?
                 if (lineNumber != MethodInliner.INLINED_METHOD_END_LINE_NUMBER)
@@ -206,8 +218,7 @@ implements   Pass,
                 else
                 {
                     // Pop information about the enclosing line number.
-                    MyLineNumberBlock lineNumberBlock =
-                        (MyLineNumberBlock)enclosingLineNumbers.pop();
+                    MyLineNumberBlock lineNumberBlock = enclosingLineNumbers.pop();
 
                     // Set this end of the block to the line at which it was
                     // inlined.
