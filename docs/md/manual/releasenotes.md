@@ -3,6 +3,7 @@
 ### Improved
 
 - Conservative optimization is now the default. Previously, it could be enabled by setting the `optimize.conservatively` system property. This has been replaced with the `-optimizeaggressively` option, which sets optimization to aggressive.
+- Improve optimization performance in edge cases with generated code. (#283)
 
 ### Bugfixes
 
@@ -12,6 +13,7 @@
 - Fix potential `NullPointerException` while processing enum classes with invalid Kotlin metadata.
 - Fix potential `Instruction has invalid constant index size` error during GSON optimization.
 - Fix member specialization & generalization optimizations.
+- Fix potential "Сan't find referenced class ClassName$DefaultImpls" warnings. (#290)
 
 ## Version 7.3.0
 

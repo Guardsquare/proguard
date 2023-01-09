@@ -23,13 +23,12 @@ package proguard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.backport.Backporter;
-import proguard.classfile.editor.*;
+import proguard.classfile.editor.ClassElementSorter;
 import proguard.classfile.pass.PrimitiveArrayConstantIntroducer;
-import proguard.classfile.util.*;
+import proguard.classfile.util.PrimitiveArrayConstantReplacer;
 import proguard.configuration.ConfigurationLoggingAdder;
-import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
-import proguard.io.ExtraDataEntryNameMap;
+import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
@@ -41,14 +40,21 @@ import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.pass.PassRunner;
-import proguard.preverify.*;
+import proguard.preverify.PreverificationClearer;
+import proguard.preverify.Preverifier;
+import proguard.preverify.SubroutineInliner;
 import proguard.shrink.Shrinker;
 import proguard.strip.KotlinAnnotationStripper;
-import proguard.util.*;
+import proguard.util.ConstantMatcher;
+import proguard.util.ListParser;
+import proguard.util.NameParser;
+import proguard.util.PrintWriterUtil;
+import proguard.util.StringMatcher;
 import proguard.util.kotlin.KotlinUnsupportedVersionChecker;
-import proguard.util.kotlin.asserter.KotlinMetadataAsserter;
+import proguard.util.kotlin.asserter.KotlinMetadataVerifier;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Tool for shrinking, optimizing, obfuscating, and preverifying Java classes.
@@ -352,7 +358,7 @@ public class ProGuard
         if (configuration.keepKotlinMetadata &&
             configuration.enableKotlinAsserter)
         {
-            passRunner.run(new KotlinMetadataAsserter(configuration), appView);
+            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
         }
     }
 
@@ -442,7 +448,7 @@ public class ProGuard
         if (configuration.keepKotlinMetadata &&
             configuration.enableKotlinAsserter)
         {
-            passRunner.run(new KotlinMetadataAsserter(configuration), appView);
+            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
         }
     }
 
@@ -510,7 +516,7 @@ public class ProGuard
         if (configuration.keepKotlinMetadata &&
             configuration.enableKotlinAsserter)
         {
-            passRunner.run(new KotlinMetadataAsserter(configuration), appView);
+            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
         }
     }
 
