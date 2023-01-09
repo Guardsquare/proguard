@@ -29,7 +29,6 @@ import proguard.classfile.util.*;
 import proguard.configuration.ConfigurationLoggingAdder;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.configuration.InitialStateInfo;
-import proguard.io.ExtraDataEntryNameMap;
 import proguard.logging.Logging;
 import proguard.mark.Marker;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
@@ -291,9 +290,7 @@ public class ProGuard
      */
     private void printConfiguration() throws IOException
     {
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printConfiguration);
-
-        try (ConfigurationWriter configurationWriter = new ConfigurationWriter(pw))
+        try (ConfigurationWriter configurationWriter = new ConfigurationWriter(configuration.printConfiguration))
         {
             configurationWriter.write(configuration);
         }

@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
-import proguard.optimize.Optimizer;
 import proguard.util.*;
 
 import java.io.*;
@@ -51,6 +50,7 @@ public class ConfigurationWriter implements AutoCloseable
 
     private final PrintWriter writer;
     private       File        baseDir;
+    private       File        file;
 
 
     /**
@@ -60,6 +60,7 @@ public class ConfigurationWriter implements AutoCloseable
     {
         this(PrintWriterUtil.createPrintWriterOut(configurationFile));
 
+        file = configurationFile;
         baseDir = configurationFile.getParentFile();
     }
 
@@ -79,7 +80,7 @@ public class ConfigurationWriter implements AutoCloseable
     @Override
     public void close() throws IOException
     {
-        PrintWriterUtil.closePrintWriter(baseDir, writer);
+        PrintWriterUtil.closePrintWriter(file, writer);
     }
 
 
