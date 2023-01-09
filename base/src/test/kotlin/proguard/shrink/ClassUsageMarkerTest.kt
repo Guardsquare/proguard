@@ -21,7 +21,7 @@ import proguard.testutils.KotlinSource
 import proguard.util.Processable
 import proguard.util.ProcessingFlagSetter
 import proguard.util.ProcessingFlags.DONT_SHRINK
-import proguard.util.kotlin.asserter.KotlinMetadataAsserter
+import proguard.util.kotlin.asserter.KotlinMetadataVerifier
 
 private fun beMarkedWith(simpleUsageMarker: SimpleUsageMarker) = object : Matcher<Processable> {
     override fun test(value: Processable) =
@@ -205,7 +205,7 @@ class ClassUsageMarkerTest : StringSpec({
         )
 
         // Run the asserter to ensure any metadata that isn't initialized correctly is thrown away
-        KotlinMetadataAsserter(Configuration()).execute(AppView(programClassPool, libraryClassPool))
+        KotlinMetadataVerifier(Configuration()).execute(AppView(programClassPool, libraryClassPool))
 
         programClassPool.classAccept("Test", AllMethodVisitor(ProcessingFlagSetter(DONT_SHRINK)))
         val classUsageMarker = ClassUsageMarker(SimpleUsageMarker())

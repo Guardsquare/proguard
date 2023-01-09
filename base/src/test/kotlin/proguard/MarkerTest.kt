@@ -19,7 +19,7 @@ import proguard.testutils.KotlinSource
 import proguard.util.ProcessingFlags.DONT_OBFUSCATE
 import proguard.util.ProcessingFlags.DONT_OPTIMIZE
 import proguard.util.ProcessingFlags.DONT_SHRINK
-import proguard.util.kotlin.asserter.KotlinMetadataAsserter
+import proguard.util.kotlin.asserter.KotlinMetadataVerifier
 import testutils.asConfiguration
 import testutils.shouldHaveFlag
 import testutils.shouldNotHaveFlag
@@ -107,7 +107,7 @@ class MarkerTest : FreeSpec({
         )
 
         // Run the asserter to ensure any metadata that isn't initialized correctly is thrown away
-        KotlinMetadataAsserter(Configuration()).execute(AppView(programClassPool, libraryClassPool))
+        KotlinMetadataVerifier(Configuration()).execute(AppView(programClassPool, libraryClassPool))
 
         "Then when marking" - {
             val config = """
@@ -149,7 +149,7 @@ class MarkerTest : FreeSpec({
         )
 
         // Run the asserter to ensure any metadata that isn't initialized correctly is thrown away
-        KotlinMetadataAsserter(Configuration()).execute(AppView(programClassPool, libraryClassPool))
+        KotlinMetadataVerifier(Configuration()).execute(AppView(programClassPool, libraryClassPool))
 
         "Then when marking" - {
             val config = """
