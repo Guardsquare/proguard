@@ -32,17 +32,17 @@ import java.io.*;
  *
  * @author Eric Lafortune
  */
-public class ConfigurationChecker
+public class ConfigurationVerifier
 {
-    private static final Logger logger = LogManager.getLogger(ConfigurationChecker.class);
+    private static final Logger logger = LogManager.getLogger(ConfigurationVerifier.class);
 
     private final Configuration configuration;
 
 
     /**
-     * Creates a new ConfigurationChecker with the given configuration.
+     * Creates a new ConfigurationVerifier with the given configuration.
      */
-    public ConfigurationChecker(Configuration configuration)
+    public ConfigurationVerifier(Configuration configuration)
     {
         this.configuration = configuration;
     }
@@ -62,14 +62,39 @@ public class ConfigurationChecker
             throw new IOException("The input is empty. You have to specify one or more '-injars' options.");
         }
 
+        checkInputJarFirst(programJars);
+
+        checkOutputJarFilter(programJars);
+
+        // Check for conflicts between input/output entries of the class paths.
+        checkConflicts(programJars, programJars);
+        checkConflicts(programJars, libraryJars);
+        checkConflicts(libraryJars, libraryJars);
+
+        printNotes(configuration, programJars, logger);
+    }
+
+
+    /**
+     * Checks that the input application is specified before any input libraries.
+     */
+    private void checkInputJarFirst(ClassPath programJars) throws IOException
+    {
         // Check that the first jar is an input jar.
         ClassPathEntry firstEntry = programJars.get(0);
         if (firstEntry.isOutput())
         {
             throw new IOException("The output jar [" + firstEntry.getName() +
-                                  "] must be specified after an input jar, or it will be empty.");
+                                    "] must be specified after an input jar, or it will be empty.");
         }
+    }
 
+
+     /**
+     * Checks that the first of two subsequent output jars has a filter.
+     */
+    private void checkOutputJarFilter(ClassPath programJars) throws IOException
+    {
         // Check that the first of two subsequent the output jars has a filter.
         for (int index = 0; index < programJars.size() - 1; index++)
         {
@@ -82,12 +107,70 @@ public class ConfigurationChecker
                                       "] must have a filter, or all subsequent output jars will be empty.");
             }
         }
+    }
 
-        // Check for conflicts between input/output entries of the class paths.
-        checkConflicts(programJars, programJars);
-        checkConflicts(programJars, libraryJars);
-        checkConflicts(libraryJars, libraryJars);
 
+    /**
+     * Performs some sanity checks on the class paths.
+     */
+    private void checkConflicts(ClassPath classPath1,
+                                ClassPath classPath2)
+    throws IOException
+    {
+        if (classPath1 == null ||
+            classPath2 == null)
+        {
+            return;
+        }
+
+        for (int index1 = 0; index1 < classPath1.size(); index1++)
+        {
+            ClassPathEntry entry1 = classPath1.get(index1);
+
+            for (int index2 = 0; index2 < classPath2.size(); index2++)
+            {
+                if (classPath1 != classPath2 || index1 != index2)
+                {
+                    ClassPathEntry entry2 = classPath2.get(index2);
+
+                    if (entry2.getName().equals(entry1.getName()))
+                    {
+                        if (entry1.isOutput())
+                        {
+                            if (entry2.isOutput())
+                            {
+                                // Output / output.
+                                throw new IOException("The same output jar ["+entry1.getName()+"] is specified twice.");
+                            }
+                            else
+                            {
+                                // Output / input.
+                                throw new IOException("Input jars and output jars must be different ["+entry1.getName()+"].");
+                            }
+                        }
+                        else
+                        {
+                            if (entry2.isOutput())
+                            {
+                                // Input / output.
+                                throw new IOException("Input jars and output jars must be different ["+entry1.getName()+"].");
+                            }
+                            else if (!entry1.isFiltered() ||
+                                     !entry2.isFiltered())
+                            {
+                                // Input / input.
+                                throw new IOException("The same input jar ["+entry1.getName()+"] is specified twice.");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void printNotes(Configuration configuration, ClassPath programJars, Logger logger) throws IOException
+    {
         // Print out some general notes if necessary.
         if ((configuration.note == null ||
              !configuration.note.isEmpty()))
@@ -163,65 +246,6 @@ public class ConfigurationChecker
                 logger.info("      methods with wildcards. This will likely cause problems with methods like");
                 logger.info("      'wait()' and 'notify()'. You should specify the methods more precisely.");
                 logger.info("      (https://www.guardsquare.com/proguard/manual/troubleshooting#nosideeffects)");
-            }
-        }
-    }
-
-
-    /**
-     * Performs some sanity checks on the class paths.
-     */
-    private void checkConflicts(ClassPath classPath1,
-                                ClassPath classPath2)
-    throws IOException
-    {
-        if (classPath1 == null ||
-            classPath2 == null)
-        {
-            return;
-        }
-
-        for (int index1 = 0; index1 < classPath1.size(); index1++)
-        {
-            ClassPathEntry entry1 = classPath1.get(index1);
-
-            for (int index2 = 0; index2 < classPath2.size(); index2++)
-            {
-                if (classPath1 != classPath2 || index1 != index2)
-                {
-                    ClassPathEntry entry2 = classPath2.get(index2);
-
-                    if (entry2.getName().equals(entry1.getName()))
-                    {
-                        if (entry1.isOutput())
-                        {
-                            if (entry2.isOutput())
-                            {
-                                // Output / output.
-                                throw new IOException("The same output jar ["+entry1.getName()+"] is specified twice.");
-                            }
-                            else
-                            {
-                                // Output / input.
-                                throw new IOException("Input jars and output jars must be different ["+entry1.getName()+"].");
-                            }
-                        }
-                        else
-                        {
-                            if (entry2.isOutput())
-                            {
-                                // Input / output.
-                                throw new IOException("Input jars and output jars must be different ["+entry1.getName()+"].");
-                            }
-                            else if (!entry1.isFiltered() ||
-                                     !entry2.isFiltered())
-                            {
-                                // Input / input.
-                                throw new IOException("The same input jar ["+entry1.getName()+"] is specified twice.");
-                            }
-                        }
-                    }
-                }
             }
         }
     }

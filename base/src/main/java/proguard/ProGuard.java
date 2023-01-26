@@ -311,7 +311,7 @@ public class ProGuard
      */
     private void checkConfiguration() throws IOException
     {
-        new ConfigurationChecker(configuration).check();
+        new ConfigurationVerifier(configuration).check();
     }
 
 
@@ -386,7 +386,7 @@ public class ProGuard
      */
     private void checkConfigurationAfterInitialization() throws Exception
     {
-        passRunner.run(new AfterInitConfigurationChecker(configuration), appView);
+        passRunner.run(new AfterInitConfigurationVerifier(configuration), appView);
     }
 
     /**

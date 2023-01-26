@@ -18,13 +18,13 @@ import proguard.pass.Pass;
  * This pass performs configuration checks for which class pools or resource information
  * should already have been initialized.
  */
-public class AfterInitConfigurationChecker implements Pass
+public class AfterInitConfigurationVerifier implements Pass
 {
     private final Configuration configuration;
 
-    private static final Logger logger = LogManager.getLogger(AfterInitConfigurationChecker.class);
+    private static final Logger logger = LogManager.getLogger(AfterInitConfigurationVerifier.class);
 
-    public AfterInitConfigurationChecker(Configuration configuration)
+    public AfterInitConfigurationVerifier(Configuration configuration)
     {
         this.configuration = configuration;
     }

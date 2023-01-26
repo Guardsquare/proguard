@@ -24,7 +24,7 @@ import java.util.UUID
 /**
  * Test the after init checks.
  */
-class AfterInitConfigurationCheckerTest : FreeSpec({
+class AfterInitConfigurationVerifierTest : FreeSpec({
 
     // Mock a program class with the given class file version.
     class FakeClass(version: Int) : ProgramClass(version, 1, emptyArray(), 1, -1, -1) {
@@ -45,7 +45,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_12))
 
             val exception = shouldThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
             exception.message shouldContain "-target can only be used with class file versions <= 55 (Java 11)."
             exception.message shouldContain "The input classes contain version 56 class files which cannot be backported to target version (50)."
@@ -56,7 +56,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_11))
 
             shouldNotThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
         }
 
@@ -65,7 +65,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_1_6))
 
             shouldNotThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
         }
     }
@@ -83,7 +83,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
                 addClass(FakeClass(CLASS_VERSION_17))
             }
 
-            shouldNotThrow<RuntimeException> { AfterInitConfigurationChecker(configuration).execute(view) }
+            shouldNotThrow<RuntimeException> { AfterInitConfigurationVerifier(configuration).execute(view) }
         }
 
         "It should print a warning" {
@@ -94,7 +94,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             }
 
             val output = getLogOutputOf {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
             output shouldContain "-target is deprecated when using class file above"
         }
@@ -107,7 +107,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             }
 
             val exception = shouldThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
 
             exception.message shouldContain "-target can only be used with class file versions <= 55 (Java 11)."
@@ -126,7 +126,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_12))
 
             shouldNotThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
         }
 
@@ -135,7 +135,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_11))
 
             shouldNotThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
         }
 
@@ -144,7 +144,7 @@ class AfterInitConfigurationCheckerTest : FreeSpec({
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_1_6))
 
             shouldNotThrow<RuntimeException> {
-                AfterInitConfigurationChecker(configuration).execute(view)
+                AfterInitConfigurationVerifier(configuration).execute(view)
             }
         }
     }
