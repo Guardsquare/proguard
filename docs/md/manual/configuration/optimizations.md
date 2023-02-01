@@ -177,7 +177,7 @@ that such an instruction can have a side effect. If this instruction is removed
 during optimization, the code will thus behave differently under specific
 circumstances. By default, such instructions are always preserved. Setting this
 option will lead to these instructions being candidates for removal during
-optimization.
+optimization. Additionally, class merging is only enabled when this option is set.
 
 ## Gson optimization {: #gson}
 

@@ -342,7 +342,7 @@ This page lists all available options for ProGuard, grouped logically.
   during optimization, the code will thus behave differently under specific
   circumstances. By default, such instructions are always preserved. Setting this
   option will lead to these instructions being candidates for removal during
-  optimization.
+  optimization. Additionally, class merging is only enabled when this option is set.
 
 ## Obfuscation Options {: #obfuscationoptions}
 

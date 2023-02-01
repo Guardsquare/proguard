@@ -358,9 +358,9 @@ public class Optimizer implements Pass
         libraryGson                       = filter.matches(LIBRARY_GSON);
         classMarkingFinal                 = filter.matches(CLASS_MARKING_FINAL);
         classUnboxingEnum                 = filter.matches(CLASS_UNBOXING_ENUM);
-        classMergingVertical              = filter.matches(CLASS_MERGING_VERTICAL);
-        classMergingHorizontal            = filter.matches(CLASS_MERGING_HORIZONTAL);
-        classMergingWrapper               = filter.matches(CLASS_MERGING_WRAPPER);
+        classMergingVertical              = !configuration.optimizeConservatively && filter.matches(CLASS_MERGING_VERTICAL);
+        classMergingHorizontal            = !configuration.optimizeConservatively && filter.matches(CLASS_MERGING_HORIZONTAL);
+        classMergingWrapper               = !configuration.optimizeConservatively && filter.matches(CLASS_MERGING_WRAPPER);
         fieldRemovalWriteonly             = filter.matches(FIELD_REMOVAL_WRITEONLY);
         fieldMarkingPrivate               = filter.matches(FIELD_MARKING_PRIVATE);
         fieldGeneralizationClass          = filter.matches(FIELD_GENERALIZATION_CLASS);

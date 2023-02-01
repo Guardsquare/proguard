@@ -1,3 +1,9 @@
+## Version 7.3.2
+
+### Improved
+
+- Merge classes only when `-optimizeaggressively` is set.
+
 ## Version 7.3.1
 
 ### Kotlin support
