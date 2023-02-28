@@ -4,6 +4,10 @@
 
 - Merge classes only when `-optimizeaggressively` is set.
 
+### Bugfixes
+
+- Fix potential `ArrayIndexOutOfBoundsException` when processing Kotlin metadata. (#297)
+
 ## Version 7.3.1
 
 ### Kotlin support

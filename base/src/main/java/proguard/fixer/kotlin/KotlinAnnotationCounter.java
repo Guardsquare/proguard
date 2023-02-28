@@ -72,7 +72,7 @@ implements   MemberVisitor,
     public int getParameterAnnotationCount(int index)
     {
         return parameterAnnotationCount != null &&
-               parameterAnnotationCount.length > 0 && index <= parameterAnnotationCount.length
+               parameterAnnotationCount.length > 0 && index < parameterAnnotationCount.length
             ? parameterAnnotationCount[index]
             : -1;
     }
