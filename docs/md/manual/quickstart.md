@@ -36,15 +36,6 @@ For more detailed information see [standalone mode](setup/standalone.md).
 
 The ProGuard artifacts are hosted at [Maven Central](https://search.maven.org/search?q=g:com.guardsquare).
 
-### Android Gradle project
-
-When working on your Android application (apk, aab) or library (aar), you can include ProGuard in your Gradle build by:
-
-- Using ProGuard's Gradle plugin, which you can apply in your `build.gradle` file.
-- Using the integrated ProGuard by disabling R8 in your `gradle.properties` (only applicable for AGP < 7).
-
-For more detailed information see [Android Gradle](setup/gradleplugin.md).
-
 ### Java or Kotlin Gradle project
 
 Your non-mobile Java or Kotlin applications can execute ProGuard's Gradle task:
@@ -55,6 +46,15 @@ task myProguardTask(type: proguard.gradle.ProGuardTask) {
 ```
 
 For more detailed information see [Java/Kotlin Gradle](setup/gradle.md).
+
+### Android Gradle project
+
+The default Android shrinker R8 is fully compatible with ProGuard keep rules. 
+You can refer to the [configuration](usage.md) guide for help with keep rules or use
+the [ProGuard Playground](https://playground.proguard.com/) to visualise keep rules.
+
+For setup and integration, please [follow the instructions to enable R8](https://developer.android.com/studio/build/shrink-code).
+
 
 ### Ant project
 

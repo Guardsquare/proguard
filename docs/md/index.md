@@ -7,7 +7,7 @@ hardened against reverse engineering.
 
 Typical applications:
 
-- Reducing the size of Android apps for faster downloads, shorter startup
+- Reducing the size of apps for faster downloads, shorter startup
   times, and smaller memory footprints.
 - Optimizing code for better performance on mobile devices.
 

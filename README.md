@@ -57,9 +57,7 @@ bytecode:
 * It renames the remaining classes, fields, and methods using short
   meaningless names.
 
-The resulting applications and libraries are smaller, faster, and a bit better
-hardened against reverse engineering. ProGuard is very popular for Android
-development, but it also works for Java code in general.
+The resulting applications and libraries are smaller and faster.
 
 ## ❓ Getting Help
 If you have **usage or general questions** please ask them in the <a href="https://community.guardsquare.com/?utm_source=github&utm_medium=site-link&utm_campaign=github-community">**Guardsquare Community**.</a>  
@@ -69,129 +67,79 @@ Please use <a href="https://github.com/guardsquare/proguard/issues">**the issue 
 
 ## 🚀 Quick Start
 
-ProGuard has its own Gradle plugin, allowing you to shrink, optimize and obfuscate Android projects. 
+### Command line
 
-### ProGuard Gradle Plugin
+First, download the latest release from [GitHub releases](https://github.com/Guardsquare/proguard/releases).
 
-You can apply the ProGuard Gradle plugin in AGP 4+ projects by following these steps:
+To run ProGuard, on Linux/MacOS, just type:
 
-1. Add a `classpath` dependency in your root level `build.gradle` file:
+```bash
+bin/proguard.sh <options...>
+```
+
+or on Windows:
+
+```
+bin\proguard <options...>
+```
+
+Typically, you'll put most options in a configuration file (say,
+`myconfig.pro`), and just call
+
+```bash
+bin/proguard.sh @myconfig.pro
+```
+or on Windows:
+
+```
+bin\proguard @myconfig.pro
+```
+
+All available options are described in the [Configuration section](../configuration/usage.md).
+
+### Gradle Task
+
+ProGuard can be run as a task in Gradle. Before you can use the proguard task, you have to make sure Gradle can
+find it in its class path at build time. One way is to add the following
+line to your **`build.gradle`** file which will download ProGuard from Maven Central:
 
 ```Groovy
 buildscript {
     repositories {
-        google()       // For the Android Gradle plugin.
-        mavenCentral() // For the ProGuard Gradle Plugin and anything else.
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:x.y.z'    // The Android Gradle plugin.
-        classpath 'com.guardsquare:proguard-gradle:7.3.0'  // The ProGuard Gradle plugin.
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
     }
 }
 ```
 
-2. Apply the `proguard` plugin after applying the Android Gradle plugin as shown below:
+You can then define a task with configuration:
 
 ```Groovy
- apply plugin: 'com.android.application'
- apply plugin: 'com.guardsquare.proguard'
-```
+tasks.register('proguard', ProGuardTask) {
+    configuration file('proguard.pro')
 
-3. ProGuard expects unobfuscated class files as input. Therefore, other obfuscators such as R8 have to be disabled.
+    injars(tasks.named('jar', Jar).flatMap { it.archiveFile })
 
-```Groovy
-android {
-    ...
-    buildTypes {
-       release {
-          // Deactivate R8.
-          minifyEnabled false
-       }
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        //libraryjars "${System.getProperty('java.home')}/jmods/....."
     }
+
+    verbose
+
+    outjars(layout.buildDirectory.file("libs/${baseCoordinates}-minified.jar"))
 }
 ```
 
-4. Configure variants to be processed with ProGuard using the `proguard` block:
-
-```Groovy
-android {
-    ...
-}
-
-proguard {
-   configurations {
-      release {
-         defaultConfiguration 'proguard-android-optimize.txt'
-         configuration 'proguard-project.txt'
-      }
-   }
-}
-```
-
-You can then build your application as usual:
-
-```shell
-gradle assembleRelease
-```
-
-The repository contains some sample configurations in the [examples](examples)
-directory. Notably, [examples/android](examples/android-plugin) has a small working
-Android project that applies the ProGuard Gradle plugin.
-
-### Integrated ProGuard (AGP < 7.0)
-
-If you have an older Android Gradle project you can enable ProGuard instead of the default R8 compiler:
-
-1. Disable R8 in your `gradle.properties`:
-
-```gradle
-android.enableR8=false
-android.enableR8.libraries=false
-```
-
-2. Override the default version of ProGuard with the most recent one in your
-   main `build.gradle`:
-
-```gradle
-buildscript {
-    //...
-    configurations.all {
-        resolutionStrategy {
-            dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.3.0')
-            }
-        }
-    }
-}
-```
-
-3. Enable minification as usual in your `build.gradle`:
-
-```gradle
-android {
-    //...
-    buildTypes {
-        release {
-            minifyEnabled   true
-            shrinkResources true
-            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
-            proguardFile 'proguard-project.txt'
-        }
-    }
-}
-```
-
-4. Add any necessary configuration to your `proguard-project.txt`.
-
-You can then build your application as usual:
-
-```shell
-gradle assembleRelease
-```
-
-The repository contains some sample configurations in the [examples](examples)
-directory. Notably, [examples/android-agp3-agp4](examples/android-agp3-agp4) has a small working
-Android project that uses the old integration.
+The embedded configuration is much like a standard ProGuard
+configuration. You can find more details on the [Gradle setup page](setup/gradle.md#proguard).
 
 ## ✨ Features
 
@@ -205,8 +153,7 @@ inlining methods, propagating constants, removing unused parameters, etc.
 
 * The optimizations may also improve the performance of the application, by up
   to 20%. For Java virtual machines on servers and desktops, the difference
-  generally isn't noticeable. For the Dalvik virtual machine and ART on
-  Android devices, the difference can be worth it.
+  generally isn't noticeable.
 
 * ProGuard can also remove logging code, from applications and their
   libraries, without needing to change the source code &mdash; in fact,

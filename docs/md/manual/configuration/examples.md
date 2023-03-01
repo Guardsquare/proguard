@@ -169,183 +169,6 @@ These options shrink, optimize, and obfuscate the xlet `com.example.MyXlet`:
 The configuration is very similar to the configuration for midlets, except
 that it now targets the CDC run-time environment with the Java TV API.
 
-### A simple Android activity {: #simpleandroid}
-
-These options shrink, optimize, and obfuscate the single Android activity
-`com.example.MyActivity`:
-```proguard
--injars      bin/classes
--outjars     bin/classes-processed.jar
--libraryjars /usr/local/java/android-sdk/platforms/android-9/android.jar
-
--android
--dontpreverify
--repackageclasses ''
--allowaccessmodification
--optimizations !code/simplification/arithmetic
-
--keep public class com.example.MyActivity
-```
-
-We're targeting the Android run-time and keeping the activity as an entry
-point.
-
-Preverification is irrelevant for the dex compiler and the Dalvik VM, so we
-can switch it off with the [`-dontpreverify`](usage.md#dontpreverify) option.
-
-The [`-optimizations`](usage.md#optimizations) option disables some arithmetic
-simplifications that Dalvik 1.0 and 1.5 can't handle. Note that the Dalvik VM
-also can't handle [aggressive overloading](usage.md#overloadaggressively) (of
-static fields).
-
-If applicable, you should add options for processing [native
-methods](#native), [callback methods](#callback),
-[enumerations](#enumerations), [annotations](#annotations), and [resource
-files](#resourcefiles).
-
-### A complete Android application {: #android}
-
-!!! android "Android"
-    The standard build processes of the
-    Android SDK (with Ant, Gradle, Android Studio, and Eclipse) already
-    integrate ProGuard with all the proper settings. You only need to enable
-    ProGuard by uncommenting the line "`proguard.config=.....`" in the file
-    `project.properties` of your Ant project, or by adapting the
-    `build.gradle` file of your Gradle project. You then *don't* need any of
-    the configuration below.
-
-Notes:
-
-- In case of problems, you may want to check if the configuration files that
-  are listed on this line (`proguard-project.txt`,...) contain the necessary
-  settings for your application.
-- Android SDK revision 20 and higher have a different configuration file for
-  enabling optimization:
-  `${sdk.dir}/tools/proguard/proguard-android-optimize.txt` instead of the
-  default `${sdk.dir}/tools/proguard/proguard-android.txt`.
-- The build processes are already setting the necessary program jars, library
-  jars, and output jars for you — don't specify them again.
-- If you get warnings about missing referenced classes: it's all too common
-  that libraries refer to missing classes. See ["Warning: can't find
-  referenced class"](../troubleshooting/troubleshooting.md#unresolvedclass) in the
-  Troubleshooting section.
-
-For more information, you can consult the official [Developer
-Guide](http://developer.android.com/guide/developing/tools/proguard.html) in
-the Android SDK.
-
-If you're constructing a build process *from scratch*: these options
-shrink, optimize, and obfuscate all public activities, services,
-broadcast receivers, and content providers from the compiled classes and
-external libraries:
-```proguard
--injars      bin/classes
--injars      bin/resources.ap_
--injars      libs
--outjars     bin/application.apk
--libraryjars /usr/local/android-sdk/platforms/android-28/android.jar
-
--android
--dontpreverify
--repackageclasses ''
--allowaccessmodification
--optimizations !code/simplification/arithmetic
--keepattributes *Annotation*
-
--keep public class * extends android.app.Activity
--keep public class * extends android.app.Application
--keep public class * extends android.app.Service
--keep public class * extends android.content.BroadcastReceiver
--keep public class * extends android.content.ContentProvider
-
--keep public class * extends android.view.View {
-    public <init>(android.content.Context);
-    public <init>(android.content.Context, android.util.AttributeSet);
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-    public void set*(...);
-}
-
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet);
-}
-
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}
-
--keepclassmembers class * extends android.content.Context {
-    public void *(android.view.View);
-    public void *(android.view.MenuItem);
-}
-
--keepclassmembers class * implements android.os.Parcelable {
-    static ** CREATOR;
-}
-
--keepclassmembers class **.R$* {
-    public static <fields>;
-}
-
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
-}
-```
-
-Most importantly, we're keeping all fundamental classes that may be referenced
-by the `AndroidManifest.xml` file of the application. If your manifest file
-contains other classes and methods, you may have to specify those as well.
-
-We're keeping annotations, since they might be used by custom `RemoteViews`
-and by various frameworks.
-
-We're keeping any custom `View` extensions and other classes with typical
-constructors, since they might be referenced from XML layout files.
-
-We're also keeping possible `onClick` handlers in custom `Context` extensions,
-since they might be referenced from XML layout files.
-
-We're also keeping the required static fields in `Parcelable` implementations,
-since they are accessed by introspection.
-
-We're keeping the static fields of referenced inner classes of auto-generated
-`R` classes, just in case your code is accessing those fields by
-introspection. Note that the compiler already inlines primitive fields, so
-ProGuard can generally remove all these classes entirely anyway (because the
-classes are not referenced and therefore not required).
-
-Finally, we're keeping annotated Javascript interface methods, so they can be
-exported and accessed by their original names. Javascript interface methods
-that are not annotated (in code targeted at Android versions older than 4.2)
-still need to be preserved manually.
-
-If you're using additional Google APIs, you'll have to specify those as
-well, for instance:
-```proguard
--libraryjars /usr/local/java/android-sdk/extras/android/support/v4/android-support-v4.jar
--libraryjars /usr/local/java/android-sdk/add-ons/addon-google_apis-google-21/libs/maps.jar
-```
-
-If you're using Google's optional License Verification Library, you can
-obfuscate its code along with your own code. You do have to preserve its
-`ILicensingService` interface for the library to work:
-```proguard
--keep public interface com.android.vending.licensing.ILicensingService
-```
-
-If you're using the Android Compatibility library, you should add the
-following line, to let ProGuard know it's ok that the library references some
-classes that are not available in all versions of the API:
-```proguard
--dontwarn android.support.**
-```
-
-If applicable, you should add options for processing [native
-methods](#native), [callback methods](#callback),
-[enumerations](#enumerations), and [resource files](#resourcefiles). You may
-also want to add options for producing [useful stack traces](#stacktrace) and
-to [remove logging](#logging). You can find a complete sample configuration in
-`examples/standalone/android.pro` in the ProGuard distribution.
-
 ### A typical library {: #library}
 
 These options shrink, optimize, and obfuscate an entire library, keeping
@@ -999,92 +822,6 @@ The Spring framework has another similar annotation `@Autowired`:
 }
 ```
 
-### Processing Dagger code {: #dagger}
-
-Your Android application may be using the Dagger library for its dependency
-injection.
-
-**Dagger 1** relies heavily on reflection, so you may need some additional
-configuration to make sure it continues to work. DexGuard's default
-configuration already keeps some required classes:
-```proguard
--keepclassmembers,allowobfuscation class * {
-    @dagger.** *;
-}
-
--keep class **$$ModuleAdapter
--keep class **$$InjectAdapter
--keep class **$$StaticInjection
-
--if   class **$$ModuleAdapter
--keep class <1>
-
--if   class **$$InjectAdapter
--keep class <1>
-
--if   class **$$StaticInjection
--keep class <1>
-
--keepnames class dagger.Lazy
-```
-
-That way, Dagger can combine the corresponding pairs of classes, based on
-their names.
-
-Furthermore, if your code injects dependencies into some given classes with an
-annotation like `@Module(injects = { SomeClass.class }, ...)`, you need to
-preserve the specified names as well:
-```proguard
--keep class com.example.SomeClass
-```
-**Dagger 2** no longer relies on reflection. You don't need to preserve any
-classes there.
-
-### Processing Butterknife code {: #butterknife}
-
-If your Android application includes Butterknife to inject views, you also
-need a few lines of configuration, since Butterknife relies on reflection to
-tie together the code at runtime:
-```proguard
--keep @interface butterknife.*
-
--keepclasseswithmembers class * {
-    @butterknife.* <fields>;
-}
-
--keepclasseswithmembers class * {
-    @butterknife.* <methods>;
-}
-
--keepclasseswithmembers class * {
-    @butterknife.On* <methods>;
-}
-
--keep class **$$ViewInjector {
-    public static void inject(...);
-    public static void reset(...);
-}
-
--keep class **$$ViewBinder {
-    public static void bind(...);
-    public static void unbind(...);
-}
-
--if   class **$$ViewBinder
--keep class <1>
-
--keep class **_ViewBinding {
-    <init>(<1>, android.view.View);
-}
-
--if   class **_ViewBinding
--keep class <1>
-```
-
-These settings preserve the Butterknife annotations, the annotated fields and
-methods, and the generated classes and methods that Butterknife accesses by
-reflection.
-
 ## Further processing possibilities {: #furtherpossibilities}
 
 ### Processing resource files {: #resourcefiles}
@@ -1272,10 +1009,10 @@ they write to the console or to a log file. ProGuard will take your word for
 it and remove the invocations (in the optimization step) and if possible the
 logging classes and methods themselves (in the shrinking step).
 
-For example, this configuration removes invocations of the Android
+For example, this configuration removes invocations of some 
 logging methods:
 ```proguard
--assumenosideeffects class android.util.Log {
+-assumenosideeffects class com.example.MyLogger {
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
     public static int i(...);
@@ -1336,26 +1073,6 @@ providing additional hints:
 
 Be careful specifying your own assumptions, since they can easily break
 your code.
-
-### Optimizing for Android SDK versions {: #androidsdk}
-
-You can let ProGuard optimize the code for the range of Android versions that
-you intend to support — the range between the minimum SDK version and the
-maximum SDK version in your Android manifest. It then removes all code for SDK
-versions that are not relevant, for example in the various Android support
-libraries.
-
-For example, if the minimum SDK version in your Android manifest is 19, you
-can optimize the code accordingly:
-```proguard
--assumevalues class android.os.Build$VERSION {
-    int SDK_INT = 19..2147483647;
-}
-```
-
-You can also specify return values for methods. The "`=`" keyword and the
-"`return`" keyword are equivalent. Be careful specifying assumptions, since
-they can easily break your code.
 
 ### Restructuring the output archives {: #restructuring}
 
