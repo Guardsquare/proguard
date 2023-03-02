@@ -1,5 +1,5 @@
 **ProGuard** successfully processes any Java bytecode, ranging from small
-Android applications to entire run-time libraries. It primarily reduces the
+ applications to entire run-time libraries. It primarily reduces the
 size of the processed code, with some potential increase in efficiency as an
 added bonus. The improvements obviously depend on the original code. The table
 below presents some typical results:

@@ -7,16 +7,15 @@ Shrinking programs such as **ProGuard** can analyze bytecode and remove unused
 classes, fields, and methods. The program remains functionally equivalent,
 including the information given in exception stack traces.
 
-## What is obfuscation? {: #obfuscation}
+## What is name obfuscation? {: #obfuscation}
 
 By default, compiled bytecode still contains a lot of debugging information:
 source file names, line numbers, field names, method names, argument names,
 variable names, etc. This information makes it straightforward to decompile
 the bytecode and reverse-engineer entire programs. Sometimes, this is not
-desirable. Obfuscators such as **ProGuard** can remove the debugging
+desirable. Shrinkers such as **ProGuard** can remove the debugging
 information and replace all names by meaningless character sequences, making
-it much harder to reverse-engineer the code. It further compacts the code as a
-bonus. The program remains functionally equivalent, except for the class
+apps smaller. The program remains functionally equivalent, except for the class
 names, method names, and line numbers given in exception stack traces.
 
 ## What is preverification? {: #preverification}
@@ -71,7 +70,7 @@ license can remain the same.
 
 ## Does ProGuard work with Java 2, 5,..., 15? {: #jdk1.4}
 
-Yes, **ProGuard** supports all JDKs from 1.1 up to and including 15. Java 2
+Yes, **ProGuard** supports all JDKs from 1.1 up to and including 19. Java 2
 introduced some small differences in the class file format. Java 5 added
 attributes for generics and for annotations. Java 6 introduced optional
 preverification attributes. Java 7 made preverification obligatory and
@@ -89,18 +88,21 @@ including Java Micro Edition. **ProGuard** then also performs the required
 preverification, producing more compact results than the traditional external
 preverifier.
 
-**ProGuard** also comes with an obfuscator plug-in for the JME Wireless
-Toolkit.
+## Does ProGuard Support Android Apps?
 
-## Does ProGuard work for Android apps?
+ProGuard no longer supports Android apps, and for shrinking & optimization
+we recommend using the default shrinker R8.
+R8 is distributed as part of the Android SDK, it's fast, and can shrink & optimize apps well.
 
-Yes. Google's dx and D8 compilers convert Java bytecode into the Dalvik
-bytecode that runs on Android devices. By preprocessing the original bytecode,
-**ProGuard** can significantly reduce the file sizes and boost the run-time
-performance of the code. It is distributed as part of the Android SDK.
+However, R8 is only a shrinker & optimizer and does not provide any security features.
+To protect your app we recommend using
 [**DexGuard**](http://www.guardsquare.com/dexguard), **ProGuard**'s
-closed-source sibling for Android, offers additional optimizations and more
-application protection.
+closed-source sibling for Android, which offers
+multiple levels of code hardening and RASP (runtime application self-protection) for mobile apps and SDKs.
+
+The **ProGuard** [keep rules configuration format](configuration/usage.md) is supported by R8,
+so you can use your R8, ProGuard and DexGuard keep rules interchangeably. 
+You can also make use of the [ProGuard Playground](https://playground.proguard.com) to visualize R8 rules.
 
 ## Does ProGuard have support for Ant? {: #ant}
 
@@ -109,21 +111,26 @@ your Ant build process. You can still use configurations in **ProGuard**'s own
 readable format. Alternatively, if you prefer XML, you can specify the
 equivalent XML configuration.
 
+See [Ant setup](manual/setup/ant.md) page for more information.
+
 ## Does ProGuard have support for Gradle? {: #gradle}
 
 Yes. **ProGuard** also provides a Gradle task, so that it integrates into your
 Gradle build process. You can specify configurations in **ProGuard**'s own
 format or embedded in the Groovy configuration.
 
+See [Gradle setup](manual/setup/gradle.md) page for more information.
+
 ## Does ProGuard have support for Maven? {: #maven}
 
-**ProGuard**'s jar files are also distributed as artefacts from the [Maven
-Central](http://search.maven.org/#search%7Cga%7C1%7Cg:%22com.guardsquare%22)
-repository. There are some third-party plugins that support **ProGuard**, such
-as the [android-maven-plugin](http://code.google.com/p/maven-android-plugin/)
-and the [IDFC Maven ProGuard Plug-in](http://mavenproguard.sourceforge.net/).
-[**DexGuard**](http://www.guardsquare.com/dexguard) also comes with a Maven
-plugin.
+While we don't officially provide a Maven integration and
+we cannot provide support there are solutions available,
+their offered functionality is not guaranteed by Guardsquare.
+
+Some open-source implementations:
+
+- [https://github.com/wvengen/proguard-maven-plugin](https://github.com/wvengen/proguard-maven-plugin)
+- [https://github.com/dingxin/proguard-maven-plugin](https://github.com/dingxin/proguard-maven-plugin)
 
 ## Does ProGuard come with a GUI? {: #gui}
 
@@ -194,9 +201,6 @@ If line numbers have been obfuscated away, a list of alternative method names
 is presented for each obfuscated method name that has an ambiguous reverse
 mapping. Please refer to the [ProGuard User Manual](manual/index.md) for more
 details.
-
-Erik André at Badoo has written a [tool to de-obfuscate HPROF memory
-dumps](https://techblog.badoo.com/blog/2014/10/08/deobfuscating-hprof-memory-dumps/).
 
 ## How is DexGuard different from ProGuard?
 
