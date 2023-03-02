@@ -531,9 +531,7 @@ there might be several reasons:
   it's because these emulators don't like packageless classes and/or
   overloaded fields and methods. You can work around it by not using the
   options `-repackageclasses ''` and
-  [`-overloadaggressively`](../configuration/usage.md#overloadaggressively). If you're using
-  the JME WTK plugin, you can adapt the configuration
-  `proguard/wtk/default.pro` that's inside the `proguard.jar`.
+  [`-overloadaggressively`](../configuration/usage.md#overloadaggressively).
 
 **Failing midlets** (on a Java Micro Edition device)
 : If your midlet runs in an emulator and on some devices, but not on some
