@@ -2,9 +2,7 @@
 (version 2.1 or higher).
 
 !!! android "Android projects"
-    If you have an Android project, please refer to the instructions for integrating the 
-    [default shrinker R8](https://developer.android.com/studio/build/shrink-code) which is
-    compatible with ProGuard keep rule configuration.
+    If you have an Android project, you can find instructions [here](gradleplugin.md).
 
 
 Before you can use the **`proguard`** task, you have to make sure Gradle can

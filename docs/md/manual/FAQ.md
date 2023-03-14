@@ -68,7 +68,7 @@ Yes, you can. **ProGuard** itself is distributed under the GPL, but this
 doesn't affect the programs that you process. Your code remains yours, and its
 license can remain the same.
 
-## Does ProGuard work with Java 2, 5,..., 15? {: #jdk1.4}
+## Does ProGuard work with Java 2, 5,..., 19? {: #jdk1.4}
 
 Yes, **ProGuard** supports all JDKs from 1.1 up to and including 19. Java 2
 introduced some small differences in the class file format. Java 5 added
@@ -90,19 +90,12 @@ preverifier.
 
 ## Does ProGuard Support Android Apps?
 
-ProGuard no longer supports Android apps, and for shrinking & optimization
-we recommend using the default shrinker R8.
-R8 is distributed as part of the Android SDK, it's fast, and can shrink & optimize apps well.
+The **ProGuard Gradle Plugin** is compatible with Android Gradle Plugin (AGP) versions 4.x - 7.x.
 
-However, R8 is only a shrinker & optimizer and does not provide any security features.
-To protect your app we recommend using
-[**DexGuard**](http://www.guardsquare.com/dexguard), **ProGuard**'s
-closed-source sibling for Android, which offers
-multiple levels of code hardening and RASP (runtime application self-protection) for mobile apps and SDKs.
-
-The **ProGuard** [keep rules configuration format](configuration/usage.md) is supported by R8,
+The **ProGuard** [keep rules configuration format](configuration/usage.md) is also supported by R8 (the default Android shrinker),
 so you can use your R8, ProGuard and DexGuard keep rules interchangeably. 
-You can also make use of the [ProGuard Playground](https://playground.proguard.com) to visualize R8 rules.
+
+See [Gradle Plugin setup](setup/gradleplugin.md) page for more information.
 
 ## Does ProGuard have support for Ant? {: #ant}
 
@@ -111,15 +104,15 @@ your Ant build process. You can still use configurations in **ProGuard**'s own
 readable format. Alternatively, if you prefer XML, you can specify the
 equivalent XML configuration.
 
-See [Ant setup](manual/setup/ant.md) page for more information.
+See [Ant setup](setup/ant.md) page for more information.
 
-## Does ProGuard have support for Gradle? {: #gradle}
+## Does ProGuard have support for Java/Kotlin Gradle projects? {: #gradle}
 
 Yes. **ProGuard** also provides a Gradle task, so that it integrates into your
 Gradle build process. You can specify configurations in **ProGuard**'s own
 format or embedded in the Groovy configuration.
 
-See [Gradle setup](manual/setup/gradle.md) page for more information.
+See [Gradle setup](setup/gradle.md) page for more information.
 
 ## Does ProGuard have support for Maven? {: #maven}
 

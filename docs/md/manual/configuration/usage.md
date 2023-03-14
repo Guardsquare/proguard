@@ -583,6 +583,11 @@ This page lists all available options for ProGuard, grouped logically.
   Standard Edition. For example, you will need this option if you are
   [processing midlets](examples.md#midlets).
 
+`-android`{: #android}
+: Specifies that the processed class files are targeted at the Android
+  platform. ProGuard then makes sure some features are compatible with
+  Android.
+
 ## General Options {: #generaloptions}
 
 `-verbose`{: #verbose}
