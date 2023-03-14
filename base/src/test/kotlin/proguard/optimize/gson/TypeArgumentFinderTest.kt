@@ -24,14 +24,6 @@ class TypeArgumentFinderTest : FreeSpec({
     "Given an aload instruction with TypeToken" - {
         val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
             JavaSource(
-                "Type.java",
-                """
-                    package java.lang.reflect;
-
-                    public class Type {}
-                """.trimIndent()
-            ),
-            JavaSource(
                 "TypeToken.java",
                 """
                     package com.google.gson.reflect;
@@ -109,14 +101,6 @@ class TypeArgumentFinderTest : FreeSpec({
 
     "Given an invokevirtual instruction with TypeToken" - {
         val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Type.java",
-                """
-                    package java.lang.reflect;
-    
-                    public class Type {}
-                """.trimIndent()
-            ),
             JavaSource(
                 "TypeToken.java",
                 """

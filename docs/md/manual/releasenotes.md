@@ -1,5 +1,9 @@
 ## Version 7.3.2
 
+### Java support
+
+- Add support for Java 20. (#294)
+
 ### Improved
 
 - Merge classes only when `-optimizeaggressively` is set.

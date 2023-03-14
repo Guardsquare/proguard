@@ -28,13 +28,13 @@ dependencies {
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.9'
+    testImplementation 'dev.zacsweers.kctfork:core:0.2.1'
     testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.5.4' // for kotest framework
     testImplementation 'io.kotest:kotest-assertions-core-jvm:5.5.4' // for kotest core jvm assertions
     testImplementation 'io.kotest:kotest-property-jvm:5.5.4' // for kotest property test
     testImplementation 'io.mockk:mockk:1.13.2' // for mocking
 
-    testImplementation(testFixtures("com.guardsquare:proguard-core:9.0.5")) {
+    testImplementation(testFixtures("com.guardsquare:proguard-core:9.0.8")) {
         exclude group: 'com.guardsquare', module: 'proguard-core'
     }
 }
@@ -50,7 +50,7 @@ jar {
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814
 // But it will work if e.g. Java N-ea is pre-installed
-def javaVersionsForTest = 9..18
+def javaVersionsForTest = 9..20
 
 test {
     useJUnitPlatform()
@@ -64,8 +64,8 @@ task testAllJavaVersions() { testAllTask ->
             useJUnitPlatform()
             ignoreFailures = true
 
-            // The version of bytebuddy used by mockk only supports Java 19 experimentally so far
-            if (version == 19) systemProperty 'net.bytebuddy.experimental', true
+            // The version of bytebuddy used by mockk only supports Java 20 experimentally so far
+            if (version == 20) systemProperty 'net.bytebuddy.experimental', true
 
             testAllTask.dependsOn(it)
 
