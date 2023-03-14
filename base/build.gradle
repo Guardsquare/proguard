@@ -50,7 +50,7 @@ jar {
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814
 // But it will work if e.g. Java N-ea is pre-installed
-def javaVersionsForTest = 9..20
+def javaVersionsForTest = 9..19
 
 test {
     useJUnitPlatform()
