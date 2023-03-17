@@ -129,7 +129,6 @@ class ClassUsageMarkerTest : StringSpec({
         applicationClazz.accept(classUsageMarker)
         applicationInit.accept(applicationClazz, classUsageMarker)
 
-        classPool.classesAccept(proguard.classfile.visitor.ClassPrinter())
         val otherClazz = classPool.getClass("Other")
         val otherInit = otherClazz.findMethod("<init>", null)
         val otherFoo = otherClazz.findMethod("foo", null)
