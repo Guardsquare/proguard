@@ -1,6 +1,5 @@
 package proguard.optimize.info
 
-import io.kotest.core.annotation.Tags
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
