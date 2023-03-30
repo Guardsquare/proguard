@@ -1,3 +1,9 @@
+## Version 7.3.3
+
+### Bugfixes
+
+- Fix "NoClassDefFoundError: Failed resolution of: Lorg/apache/logging/log4j/LogManager" when using GSON optimization or `-addconfigurationdebugging`. (#326)
+
 ## Version 7.3.2
 
 ### Java support

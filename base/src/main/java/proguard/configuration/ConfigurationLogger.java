@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2021 Guardsquare NV
+ * Copyright (c) 2002-2023 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,9 +20,6 @@
  */
 package proguard.configuration;
 
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -44,8 +41,6 @@ import java.util.Set;
  */
 public class ConfigurationLogger implements Runnable
 {
-    private static final Logger logger = LogManager.getLogger(ConfigurationLogger.class);
-
     // Logging constants.
     private static final boolean LOG_ONCE         = false;
     private static final String  ANDROID_UTIL_LOG = "android.util.Log";
@@ -1135,12 +1130,12 @@ public class ConfigurationLogger implements Runnable
             }
             catch (Exception e)
             {
-                logger.error(message);
+                System.err.println(message);
             }
         }
         else
         {
-            logger.error(message);
+            System.err.println(message);
         }
     }
 
