@@ -95,7 +95,7 @@ or on Windows:
 bin\proguard.bat @myconfig.pro
 ```
 
-All available options are described in the [Configuration section](../configuration/usage.md).
+All available options are described in the [Configuration section](docs/md/manual/configuration/usage.md).
 
 ### Gradle Task
 
