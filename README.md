@@ -80,7 +80,7 @@ bin/proguard.sh <options...>
 or on Windows:
 
 ```
-bin\proguard <options...>
+bin\proguard.bat <options...>
 ```
 
 Typically, you'll put most options in a configuration file (say,
@@ -92,10 +92,10 @@ bin/proguard.sh @myconfig.pro
 or on Windows:
 
 ```
-bin\proguard @myconfig.pro
+bin\proguard.bat @myconfig.pro
 ```
 
-All available options are described in the [Configuration section](../configuration/usage.md).
+All available options are described in the [configuration section of the manual](https://www.guardsquare.com/manual/configuration/usage).
 
 ### Gradle Task
 
@@ -193,7 +193,7 @@ guide](CONTRIBUTING.md) if you would like to contribute.
 
 ## 📝 License
 
-Copyright (c) 2002-2022 [Guardsquare NV](https://www.guardsquare.com/).
+Copyright (c) 2002-2023 [Guardsquare NV](https://www.guardsquare.com/).
 ProGuard is released under the [GNU General Public License, version
 2](LICENSE), with [exceptions granted to a number of
 projects](docs/md/manual/license/gplexception.md).
