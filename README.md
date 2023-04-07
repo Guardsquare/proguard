@@ -139,7 +139,7 @@ tasks.register('proguard', ProGuardTask) {
 ```
 
 The embedded configuration is much like a standard ProGuard
-configuration. You can find more details on the [Gradle setup page](setup/gradle.md#proguard).
+configuration. You can find more details on the [Gradle setup page](https://www.guardsquare.com/manual/setup/gradle).
 
 ## ✨ Features
 
