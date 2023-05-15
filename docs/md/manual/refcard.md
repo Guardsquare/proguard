@@ -1,16 +1,16 @@
 ## Usage
 
 | OS         | Command
-|------------|-----------------------------
+|------------|------------------------------------------------------------------
 | Windows:   | `proguard` *options* ...
 | Linux/Mac: | `proguard.sh` *options* ...
 
 Typically:
 
 | OS         | Command
-|------------|-----------------------------
-| Windows:   | `proguard @myconfig.pro`
-| Linux/Mac: | `proguard.sh @myconfig.pro`
+|------------|------------------------------------------------------------------
+| Windows:   | `proguard @myconfig.pro`    <br> `proguard @myconfig.proguard`
+| Linux/Mac: | `proguard.sh @myconfig.pro` <br> `proguard.sh @myconfig.proguard`
 
 ## Options
 

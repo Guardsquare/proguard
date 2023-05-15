@@ -13,6 +13,7 @@ sourceSets.main {
         include '**/*.gif'
         include '**/*.png'
         include '**/*.pro'
+        include '**/*.proguard'
     }
 }
 

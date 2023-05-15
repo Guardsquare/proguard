@@ -84,7 +84,7 @@ bin\proguard.bat <options...>
 ```
 
 Typically, you'll put most options in a configuration file (say,
-`myconfig.pro`), and just call
+`myconfig.pro` or `myconfig.proguard`), and just call
 
 ```bash
 bin/proguard.sh @myconfig.pro
