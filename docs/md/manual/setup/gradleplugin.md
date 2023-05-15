@@ -124,7 +124,7 @@ You can then build your application as usual:
     ./gradlew assembleRelease
     ```
 === "Windows"
-    ```
+    ```batch
     gradlew assembleRelease
     ```
 
@@ -237,7 +237,7 @@ You can then build your application as usual:
     ./gradlew assembleRelease
     ```
 === "Windows"
-    ```
+    ```batch
     gradlew assembleRelease
     ```
 

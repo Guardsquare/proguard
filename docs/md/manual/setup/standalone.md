@@ -19,7 +19,7 @@ Typically, you'll put most options in a configuration file (say,
     ```
 
 === "Windows"
-    ```bash
+    ```batch
     bin\proguard @myconfig.pro
     ```
 
@@ -32,7 +32,7 @@ files. For instance:
     ```
 
 === "Windows"
-    ```
+    ```batch
     bin\proguard @myconfig.pro -verbose
     ```
 

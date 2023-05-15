@@ -17,7 +17,7 @@ You can then execute a composite build with the following Gradle command:
     ```
 
 === "Windows"
-    ```bash
+    ```batch
     gradlew assemble
     ```
 
@@ -33,8 +33,8 @@ scripts in `bin`, for example:
 
 === "Windows"
 
-    ```bash
-    bin\proguard.bat
+    ```batch
+    bin\proguard
     ```
 
 ## Publish to Maven local
@@ -48,7 +48,7 @@ You can publish the artifacts to your local Maven cache (something like `~/.m2/`
     ```
 
 === "Windows"
-    ```bash
+    ```batch
     gradlew publishToMavenLocal
     ```
 
@@ -65,7 +65,7 @@ You can build tar and zip archives with the binaries and documentation:
 
 === "Windows"
 
-    ```bash
+    ```batch
     gradlew distTar distZip
     ```
 

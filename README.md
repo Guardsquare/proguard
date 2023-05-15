@@ -79,8 +79,8 @@ bin/proguard.sh <options...>
 
 or on Windows:
 
-```
-bin\proguard.bat <options...>
+```batch
+bin\proguard <options...>
 ```
 
 Typically, you'll put most options in a configuration file (say,
@@ -89,10 +89,11 @@ Typically, you'll put most options in a configuration file (say,
 ```bash
 bin/proguard.sh @myconfig.pro
 ```
+
 or on Windows:
 
-```
-bin\proguard.bat @myconfig.pro
+```batch
+bin\proguard @myconfig.pro
 ```
 
 All available options are described in the [configuration section of the manual](https://www.guardsquare.com/manual/configuration/usage).
