@@ -153,3 +153,8 @@
   public void onDeviceStateChanged(androidx.window.sidecar.SidecarDeviceState);
   public void onWindowLayoutChanged(android.os.IBinder, androidx.window.sidecar.SidecarWindowLayoutInfo);
 }
+
+# Java 7 ClassValue workaround when building vs an older android.jar
+-keepclassmembers class ** {
+    java.lang.Object computeValue(java.lang.Class);
+}
