@@ -2,7 +2,7 @@
  * ProGuard -- shrinking, optimization, obfuscation, and preverification
  *             of Java bytecode.
  *
- * Copyright (c) 2002-2020 Guardsquare NV
+ * Copyright (c) 2002-2023 Guardsquare NV
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,13 +22,17 @@
 package proguard.obfuscate.kotlin;
 
 import proguard.classfile.Clazz;
-import proguard.classfile.kotlin.*;
+import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.KotlinMultiFileFacadeKindMetadata;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
-import proguard.util.*;
+import proguard.util.Processable;
+import proguard.util.ProcessingFlags;
 
 import static proguard.classfile.util.ClassUtil.internalPackagePrefix;
-import static proguard.classfile.util.ClassUtil.internalSimpleClassName;
-import static proguard.obfuscate.ClassObfuscator.*;
+import static proguard.classfile.util.ClassUtil.internalShortClassName;
+import static proguard.obfuscate.ClassObfuscator.hasOriginalClassName;
+import static proguard.obfuscate.ClassObfuscator.newClassName;
+import static proguard.obfuscate.ClassObfuscator.setNewClassName;
 
 /**
  * Ensure that multi-file class parts and multi-file facades are kept in the same package.
@@ -61,7 +65,7 @@ implements   KotlinMetadataVisitor
         for (Clazz ref : kotlinMultiFileFacadeKindMetadata.referencedPartClasses)
         {
             setNewClassName(ref, packagePrefix +
-                                 (internalSimpleClassName(hasOriginalClassName(ref) ? ref.getName() : newClassName(ref))));
+                                 (internalShortClassName(hasOriginalClassName(ref) ? ref.getName() : newClassName(ref))));
         }
 
         String className = newClassName(clazz);
@@ -70,7 +74,7 @@ implements   KotlinMetadataVisitor
             className = clazz.getName();
         }
 
-        setNewClassName(clazz, packagePrefix + internalSimpleClassName(className));
+        setNewClassName(clazz, packagePrefix + internalShortClassName(className));
     }
 
     // Small helper methods.
