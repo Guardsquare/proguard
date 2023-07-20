@@ -1,14 +1,18 @@
-## Version 7.3.3
+## Version 7.4
+
+### Java support
+
+- Add support for Java 20. (#294)
+
+### Kotlin support
+
+- Add support for Kotlin 1.9.
 
 ### Bugfixes
 
 - Fix "NoClassDefFoundError: Failed resolution of: Lorg/apache/logging/log4j/LogManager" when using GSON optimization or `-addconfigurationdebugging`. (#326)
 
 ## Version 7.3.2
-
-### Java support
-
-- Add support for Java 20. (#294)
 
 ### Improved
 
