@@ -2,7 +2,7 @@
 
 ### Java support
 
-- Add support for Java 20. (#294)
+- Add support for Java 21. (#331)
 
 ### Kotlin support
 
