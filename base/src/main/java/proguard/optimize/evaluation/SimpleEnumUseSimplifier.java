@@ -36,6 +36,8 @@ import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.value.*;
 import proguard.optimize.info.SimpleEnumMarker;
 
+import static proguard.classfile.ClassConstants.NAME_JAVA_LANG_OBJECT;
+
 /**
  * This AttributeVisitor simplifies the use of enums in the code attributes that
  * it visits.
@@ -276,6 +278,13 @@ implements   AttributeVisitor,
                                            constantInstruction,
                                            invokedMethodName,
                                            invokedMethodType);
+                }
+                else if (isObjectCloneCallPoppingSimpleEnumArray(
+                        offset,
+                        stackEntryIndex,
+                        clazz.getRefClassName(constantInstruction.constantIndex)))
+                {
+                    replaceObjectCloneCall(clazz, offset, constantInstruction, invokedMethodName, invokedMethodType);
                 }
 
                 // Fall through to check the parameters.
@@ -567,6 +576,24 @@ implements   AttributeVisitor,
                ClassUtil.internalArrayTypeDimensionCount(referenceValue.getType()) == 1;
     }
 
+    /**
+     * Returns whether the instruction at the given offset is popping a simple enum array
+     * and the class reference is java.lang.Object.
+     * <p>
+     * This accounts for the Kotlin compiler generating the following call in the `values()` method:
+     * <code>
+     *     invokevirtual [Ljava/lang/Object;->clone();
+     * </code>
+     * where the Java compiler would generate:
+     * <code>
+     *     invokevirtual [LMyEnum;->clone();
+     * </code>
+     */
+    private boolean isObjectCloneCallPoppingSimpleEnumArray(int offset, int stackEntryIndex, String classRef)
+    {
+        return ClassUtil.internalClassNameFromClassType(classRef).equals(NAME_JAVA_LANG_OBJECT) &&
+               isPoppingSimpleEnumArray(offset, stackEntryIndex);
+    }
 
     /**
      * Returns whether the given class is not null and a simple enum class.
@@ -600,6 +627,29 @@ implements   AttributeVisitor,
                                 offset,
                                 instruction,
                                 replacementInstructions);
+        }
+    }
+
+    /**
+     * Replaces a Kotlin generated clone() invocation with the correct integer array invocation.
+     */
+    private void replaceObjectCloneCall(Clazz       clazz,
+                                        int         offset,
+                                        Instruction instruction,
+                                        String      name,
+                                        String      type)
+    {
+        if (name.equals("clone") && type.equals("()Ljava/lang/Object;"))
+        {
+            ConstantPoolEditor cpe = new ConstantPoolEditor((ProgramClass) clazz);
+            Instruction[] replacementInstructions = new Instruction[] {
+                new ConstantInstruction(
+                    Instruction.OP_INVOKEVIRTUAL,
+                    cpe.addMethodrefConstant("[I", "clone", "()Ljava/lang/Object;", null, null)
+                )
+            };
+
+            replaceInstructions(clazz, offset, instruction, replacementInstructions);
         }
     }
 

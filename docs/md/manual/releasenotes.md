@@ -3,6 +3,7 @@
 ### Bugfixes
 
 - Fix "NoClassDefFoundError: Failed resolution of: Lorg/apache/logging/log4j/LogManager" when using GSON optimization or `-addconfigurationdebugging`. (#326)
+- Fix "VerifyError" when optimizing Kotlin simple enums. (#349)
 
 ## Version 7.3.2
 
