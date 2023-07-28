@@ -282,6 +282,8 @@ implements   AttributeVisitor,
                 else if (isObjectCloneCallPoppingSimpleEnumArray(
                         offset,
                         stackEntryIndex,
+                        invokedMethodName,
+                        invokedMethodType,
                         clazz.getRefClassName(constantInstruction.constantIndex)))
                 {
                     replaceObjectCloneCall(clazz, offset, constantInstruction, invokedMethodName, invokedMethodType);
@@ -589,9 +591,11 @@ implements   AttributeVisitor,
      *     invokevirtual [LMyEnum;->clone();
      * </code>
      */
-    private boolean isObjectCloneCallPoppingSimpleEnumArray(int offset, int stackEntryIndex, String classRef)
+    private boolean isObjectCloneCallPoppingSimpleEnumArray(int offset, int stackEntryIndex, String invokedMethodName, String invokedMethodType, String classRef)
     {
-        return ClassUtil.internalClassNameFromClassType(classRef).equals(NAME_JAVA_LANG_OBJECT) &&
+        return invokedMethodName.equals("clone") &&
+               invokedMethodType.equals("()Ljava/lang/Object;") &&
+               ClassUtil.internalClassNameFromClassType(classRef).equals(NAME_JAVA_LANG_OBJECT) &&
                isPoppingSimpleEnumArray(offset, stackEntryIndex);
     }
 
