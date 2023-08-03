@@ -38,6 +38,7 @@ import proguard.obfuscate.ResourceFileNameAdapter;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
+import proguard.optimize.inline.LambdaInliner;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.pass.PassRunner;
 import proguard.preverify.PreverificationClearer;
@@ -194,6 +195,11 @@ public class ProGuard
             StringMatcher filter = configuration.optimizations != null ?
                 new ListParser(new NameParser()).parse(configuration.optimizations) :
                 new ConstantMatcher(true);
+
+            if (configuration.lambdaInlining)
+            {
+                inlineLambdas();
+            }
 
             if (configuration.optimize &&
                 filter.matches(Optimizer.LIBRARY_GSON))
@@ -462,6 +468,11 @@ public class ProGuard
         passRunner.run(new GsonOptimizer(configuration), appView);
     }
 
+    private void inlineLambdas() throws Exception
+    {
+        LambdaInliner lambdaInliner = new LambdaInliner();
+        passRunner.run(lambdaInliner, appView);
+    }
 
     /**
      * Performs the optimization step.
