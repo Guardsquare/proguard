@@ -3,6 +3,9 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import proguard.optimize.inline.LambdaInliner
 import proguard.AppView
+import proguard.Configuration
+import proguard.ConfigurationParser
+import proguard.ProGuard
 import proguard.classfile.ClassPool
 import proguard.classfile.Clazz
 import proguard.classfile.Method
@@ -26,9 +29,11 @@ import proguard.optimize.info.ProgramClassOptimizationInfoSetter
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter
 import proguard.optimize.peephole.LineNumberLinearizer
 import proguard.preverify.CodePreverifier
+import proguard.retrace.ReTrace
 import proguard.testutils.ClassPoolBuilder
 import proguard.testutils.PartialEvaluatorUtil
 import proguard.testutils.TestSource
+import java.io.*
 import java.util.regex.Pattern
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -416,4 +421,45 @@ fun stdev(numArray: MutableList<Long>): Double {
     }
 
     return sqrt(standardDeviation / numArray.size)
+}
+
+fun getUnobfuscatedStackTrace(lambdaInlining: Boolean, configPath: String): String {
+    val file = File(configPath)
+    val parser = ConfigurationParser(file, System.getProperties())
+    val configuration = Configuration()
+    parser.parse(configuration)
+    configuration.lambdaInlining = lambdaInlining
+    configuration.optimize = false
+    val a = ProGuard(configuration)
+    a.execute()
+    val mappingFile = File("/home/timothy/Documents/proguard/base/test-files/mapping.txt")
+    val retrace = ReTrace(mappingFile)
+
+    val procResult = ProcessBuilder("java", "-jar", "/home/timothy/Documents/proguard/base/test-files/result.jar")
+        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+        .redirectError(ProcessBuilder.Redirect.PIPE)
+        .start()
+    procResult.waitFor()
+
+    val reader = LineNumberReader(procResult.errorStream.bufferedReader())
+
+    val outputStream = ByteArrayOutputStream()
+
+    val writer = PrintWriter(OutputStreamWriter(outputStream, "UTF-8"))
+
+    retrace.retrace(reader, writer)
+
+    //clean up
+    ProcessBuilder("rm", "-f", "/home/timothy/Documents/proguard/base/test-files/mapping.txt")
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
+        .waitFor()
+    ProcessBuilder("rm", "-f", "/home/timothy/Documents/proguard/base/test-files/result.jar")
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
+        .waitFor()
+
+    return outputStream.toString()
 }

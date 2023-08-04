@@ -196,6 +196,8 @@ public class ProGuard
                 new ListParser(new NameParser()).parse(configuration.optimizations) :
                 new ConstantMatcher(true);
 
+            // Inline kotlin lambdas passed as arguments to methods as long as they are
+            // created in the arguments or created in a local variable and passed as an argument
             if (configuration.lambdaInlining)
             {
                 inlineLambdas();
