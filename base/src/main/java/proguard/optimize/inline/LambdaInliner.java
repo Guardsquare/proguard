@@ -45,14 +45,15 @@ public class LambdaInliner implements Pass {
                 // We didn't inline anything so no need to change any call instructions.
                 if (inlinedLambamethod == null) {
                     inlinedAllUsages = false;
-                    return;
+                    return false;
                 }
 
                 if (possibleLambdas.size() > 1) {
                     // This lambda is part of a collection of lambdas that might potentially be used, but we do not know which one is actually used. Because of that we cannot inline it.
                     inlinedAllUsages = false;
-                    return;
+                    return false;
                 }
+                InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
 
                 CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
                 codeAttributeEditor.reset(consumingCallCodeAttribute.u4codeLength);
@@ -83,6 +84,7 @@ public class LambdaInliner implements Pass {
                 }
 
                 codeAttributeEditor.visitCodeAttribute(consumingCallClazz, consumingCallmethod, consumingCallCodeAttribute);
+                return true;
             }));
 
             /*

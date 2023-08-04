@@ -279,5 +279,130 @@ class AdvancedTest: FreeSpec ({
         compareOutputAndMainInstructions(code, listOf("iconst_5", "getstatic", "checkcast", "invokestatic", "invokestatic", "return"), false)
     }
 
+    "Using a kotlin lambda within a invokedynamic lambda" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(a: (Int) -> Int) {
+                a(7)
+            
+                useInterfaceLambda(Lambda {
+                    a(5)
+                })
+            }
+            
+            fun interface Lambda {
+                fun run()
+            }
+            
+            fun useInterfaceLambda(lambda: Lambda) {
+                lambda.run()
+            }
+            
+            fun main() {
+                test { a: Int -> (a * a) + 1 }
+            }
+            """
+        )
 
+        compareOutputAndMainInstructions(code, listOf("getstatic", "checkcast", "invokestatic", "return"), false)
+    }
+
+    "Lambda used by invokeinterface" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(a: (Int) -> Int) {
+                a(7)
+
+                val x = Lambda {
+                    it(5)
+                }
+
+                x.run(a)
+            }
+            
+            fun interface Lambda {
+                fun run(a: (Int) -> Int)
+            }
+            
+            fun main() {
+                test { a: Int -> (a * a) + 1 }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("getstatic", "checkcast", "invokestatic", "return"), false)
+    }
+
+    "Chain test" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            class MainKtTest2 {
+                fun test(f: (Int) -> Int): MainKtTest2 {
+                    f(7)
+                    return this
+                }
+            }
+            
+            fun main() {
+                MainKtTest2().test { it * 3 }.test { it * 5 }.test { it * 7 }.test { it * 26 }.test { it * 12 }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("new", "dup", "invokespecial", "invokevirtual", "invokevirtual", "invokevirtual","invokevirtual","invokevirtual","pop","return"), false)
+    }
+
+    "Null check ?.let test" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(f: ((Int) -> Unit)?) {
+                f?.let { println(it(5)) }
+                
+                if (f != null) {
+                    println(f(5))
+                }
+                val x = f
+                if (x != null) {
+                    println(x(5))
+                }
+            }
+            
+            fun main() {
+                test { it * 3 }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
+    }
+
+    "Null check ?.let on non-nullable thing" {
+        // The kotlin compiler should remove null checks on non-nullable things if they exist so this should still work.
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(f: (Int) -> Unit) {
+                f?.let { println(it(5)) }
+            
+                if (f != null) {
+                    println(f(5))
+                }
+                val x = f
+                if (x != null) {
+                    println(x(5))
+                }
+            }
+            
+            fun main() {
+                test { it * 3 }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
+    }
 })

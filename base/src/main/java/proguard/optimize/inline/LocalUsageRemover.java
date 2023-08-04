@@ -17,10 +17,16 @@ import proguard.classfile.visitor.MemberVisitor;
 public class LocalUsageRemover implements MemberVisitor {
     private final CodeAttributeEditor codeAttributeEditor;
     private final int argumentIndex;
+    private final Instruction replacementInstruction;
 
-    public LocalUsageRemover(CodeAttributeEditor codeAttributeEditor, int argumentIndex) {
+    public LocalUsageRemover(CodeAttributeEditor codeAttributeEditor, int argumentIndex, Instruction replacementInstruction) {
         this.codeAttributeEditor = codeAttributeEditor;
         this.argumentIndex = argumentIndex;
+        this.replacementInstruction = replacementInstruction;
+    }
+
+    public LocalUsageRemover(CodeAttributeEditor codeAttributeEditor, int argumentIndex) {
+        this(codeAttributeEditor, argumentIndex, new VariableInstruction(Instruction.OP_ACONST_NULL));
     }
 
     @Override
@@ -42,7 +48,7 @@ public class LocalUsageRemover implements MemberVisitor {
                             if (variableInstruction.isStore()) {
                                 codeAttributeEditor.replaceInstruction(offset, new VariableInstruction(Instruction.OP_POP));
                             } else {
-                                codeAttributeEditor.replaceInstruction(offset, new VariableInstruction(Instruction.OP_ACONST_NULL));
+                                codeAttributeEditor.replaceInstruction(offset, replacementInstruction);
                             }
                         } else if (variableInstruction.variableIndex > argumentIndex){
                             codeAttributeEditor.replaceInstruction(offset, new VariableInstruction(variableInstruction.canonicalOpcode(), variableInstruction.variableIndex - 1, variableInstruction.constant));
