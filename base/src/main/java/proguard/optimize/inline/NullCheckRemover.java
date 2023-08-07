@@ -43,10 +43,8 @@ class NullCheckRemover implements InstructionVisitor {
     }
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {
-        //System.out.println(instruction.toString(clazz, offset));
         instruction.accept(clazz, method, codeAttribute, offset, insSeqMatcher);
         if (insSeqMatcher.isMatching() && insSeqMatcher.matchedConstantIndex(X) == argumentIndex) {
-            //System.out.println("  -> matching sequence starting at [" + insSeqMatcher.matchedInstructionOffset(0) + "]");
 
             insSeqMatcher.matchedConstantIndex(Y);
             clazz.constantPoolEntryAccept(insSeqMatcher.matchedArgument(Y), new ConstantVisitor() {

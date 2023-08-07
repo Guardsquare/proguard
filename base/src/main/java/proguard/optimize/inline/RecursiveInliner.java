@@ -1,22 +1,21 @@
 package proguard.optimize.inline;
 
-import proguard.optimize.inline.lambda_locator.LambdaLocator;
 import proguard.AppView;
-import proguard.classfile.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.MethodrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.ClassEditor;
-import proguard.classfile.editor.CodeAttributeEditor;
-import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;

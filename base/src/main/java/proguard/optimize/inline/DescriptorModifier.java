@@ -1,6 +1,8 @@
 package proguard.optimize.inline;
 
-import proguard.classfile.*;
+import proguard.classfile.Clazz;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
 import proguard.classfile.editor.AttributeAdder;
 import proguard.classfile.editor.ClassBuilder;
 import proguard.classfile.editor.ClassEditor;

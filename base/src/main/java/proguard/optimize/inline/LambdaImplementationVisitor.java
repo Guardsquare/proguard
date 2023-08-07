@@ -4,7 +4,6 @@ import proguard.classfile.AccessConstants;
 import proguard.classfile.Clazz;
 import proguard.classfile.LibraryClass;
 import proguard.classfile.LibraryMethod;
-import proguard.classfile.Method;
 import proguard.classfile.ProgramClass;
 import proguard.classfile.ProgramMethod;
 import proguard.classfile.constant.ClassConstant;

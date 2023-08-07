@@ -1,7 +1,13 @@
 package proguard.optimize.inline;
 
 import proguard.AppView;
-import proguard.classfile.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.Clazz;
+import proguard.classfile.LibraryMethod;
+import proguard.classfile.Member;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;

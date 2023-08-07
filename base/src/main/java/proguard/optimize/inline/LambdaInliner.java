@@ -1,6 +1,5 @@
 package proguard.optimize.inline;
 
-//import com.guardsquare.gui.Gui;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.optimize.inline.lambda_locator.LambdaLocator;

@@ -2,10 +2,9 @@ package proguard.optimize.inline.lambda_locator;
 
 import proguard.backport.LambdaExpression;
 import proguard.backport.LambdaExpressionCollector;
-//import proguard.classfile.*;
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
-import proguard.classfile.ClassPool;
 import proguard.classfile.ProgramClass;
 import proguard.classfile.ProgramMethod;
 import proguard.classfile.attribute.CodeAttribute;
@@ -20,10 +19,14 @@ import proguard.classfile.instruction.visitor.AllInstructionVisitor;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class LambdaLocator implements InstructionVisitor, ConstantVisitor, MemberVisitor {
-    private final Map<Clazz, Map<Method, Set<Lambda>>> classLambdas = new HashMap<>();
     private final List<Lambda> staticLambdas = new ArrayList<>();
     private final Map<Integer, Lambda> staticLambdaMap = new HashMap<>();
     private final Set<Clazz> lambdaClasses = new HashSet<>();
@@ -75,10 +78,6 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
         }
     }
 
-    public Map<Clazz, Map<Method, Set<Lambda>>> getLambdasByClass() {
-        return classLambdas;
-    }
-
     public List<Lambda> getStaticLambdas() {
         return staticLambdas;
     }
@@ -115,10 +114,6 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
             classPool.classAccept(utf8Constant.getString(), referencedClazz -> {
                 if (lambdaClasses.contains(referencedClazz)) {
                     System.out.println("Found a lambda invocation " + constantInstruction);
-
-                    classLambdas.putIfAbsent(clazz, new HashMap<>());
-                    classLambdas.get(clazz).putIfAbsent(method, new HashSet<>());
-                    classLambdas.get(clazz).get(method).add(new Lambda(clazz, method, codeAttribute, offset, constantInstruction));
 
                     Lambda lambda = new Lambda(clazz, method, codeAttribute, offset, constantInstruction);
                     staticLambdas.add(lambda);
