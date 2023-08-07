@@ -1,5 +1,7 @@
 package proguard.optimize.inline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.classfile.attribute.CodeAttribute;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Util {
+    private static final Logger logger = LogManager.getLogger(Util.class);
+
     /**
      * Given an offset of an instruction, trace the source producer value.
      */
@@ -49,9 +53,9 @@ public class Util {
                         currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
                         currentInstruction.opcode != Instruction.OP_GETFIELD
         ) {
-            System.out.println(currentInstruction.toString(currentOffset));
+            logger.debug(currentInstruction.toString(currentOffset));
             currentTracedStack = partialEvaluator.getStackBefore(currentOffset);
-            System.out.println(currentTracedStack);
+            logger.debug(currentTracedStack);
 
             // There is no stack value, it's coming from the variables
             if (isLoad(currentInstruction)) {
@@ -94,9 +98,9 @@ public class Util {
                         currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
                         currentInstruction.opcode != Instruction.OP_GETFIELD
         ) {
-            System.out.println(currentInstruction.toString(offset));
+            logger.debug(currentInstruction.toString(offset));
             currentTracedStack = partialEvaluator.getStackBefore(offset);
-            System.out.println(currentTracedStack);
+            logger.debug(currentTracedStack);
 
             // There is no stack value, it's coming from the variables
             InstructionOffsetValue offsetValue;

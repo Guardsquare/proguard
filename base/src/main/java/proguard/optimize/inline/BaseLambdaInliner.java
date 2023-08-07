@@ -178,7 +178,6 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         lambda.clazz().constantPoolEntryAccept(lambda.constantInstruction().constantIndex, new ConstantVisitor() {
             @Override
             public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
-                System.out.println(fieldrefConstant);
                 ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);
                 int lambdaInstanceFieldIndex = constantPoolEditor.addFieldrefConstant(fieldrefConstant.referencedClass, fieldrefConstant.referencedField);
 

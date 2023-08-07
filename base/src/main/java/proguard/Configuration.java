@@ -203,7 +203,7 @@ public class Configuration
     /**
      * Specifies whether lambdas should be inlined.
      */
-    public boolean                      lambdaInlining                   = false;
+    public boolean                      lambdaInlining                   = true;
 
     ///////////////////////////////////////////////////////////////////////////
     // Obfuscation options.

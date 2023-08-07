@@ -1,5 +1,7 @@
 package proguard.optimize.inline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.classfile.attribute.CodeAttribute;
@@ -13,7 +15,6 @@ import proguard.classfile.instruction.SimpleInstruction;
 import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
-import proguard.classfile.visitor.ClassPrinter;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 import proguard.optimize.inline.lambda_locator.Lambda;
@@ -32,6 +33,8 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     public MethodrefConstant methodrefConstant;
     public FieldrefConstant referencedFieldConstant;
     private final IterativeInstructionVisitor iterativeInstructionVisitor;
+    private static final Logger logger = LogManager.getLogger(LambdaUsageFinder.class);
+
 
     public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
         this.targetLambda = targetLambda;
@@ -84,17 +87,17 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
             return;
 
         if (methodrefConstant.referencedMethod == null)
-            System.out.println(methodrefConstant.getClassName(clazz) + "#" + methodrefConstant.getName(clazz));
+            logger.debug(methodrefConstant.getClassName(clazz) + "#" + methodrefConstant.getName(clazz));
 
-        System.out.println(methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass));
+        logger.debug(methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass));
 
-        System.out.println("--------Start----------");
-        System.out.println(consumingMethodCallInstruction);
+        logger.debug("--------Start----------");
+        logger.debug(consumingMethodCallInstruction);
 
         partialEvaluator = new PartialEvaluator();
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
         TracedStack tracedStack = partialEvaluator.getStackBefore(offset);
-        System.out.println(tracedStack);
+        logger.debug(tracedStack);
 
         for (int argIndex = 0; argIndex < argCount; argIndex++) {
             int sizeAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argIndex);
@@ -105,10 +108,9 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
             Util.traceParameterTree(partialEvaluator, codeAttribute, traceOffset, leafNodes);
             boolean match = false;
             for (InstructionAtOffset tracedInstructionAtOffset : leafNodes) {
-                System.out.println("Argument " + argIndex + " source " + tracedInstructionAtOffset);
+                logger.debug("Argument " + argIndex + " source " + tracedInstructionAtOffset);
                 if (condition.apply(tracedInstructionAtOffset)) {
-                    codeAttribute.accept(clazz, method, new ClassPrinter());
-                    System.out.println("Lambda " + targetLambda + " consumed by " + methodrefConstant.referencedMethod.getName(methodrefConstant.referencedClass));
+                    logger.debug("Lambda " + targetLambda + " consumed by " + methodrefConstant.referencedMethod.getName(methodrefConstant.referencedClass));
                     match = true;
                     break;
                 }
@@ -133,7 +135,7 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
                 );
             }
         }
-        System.out.println("---------End-----------");
+        logger.debug("---------End-----------");
     }
 
     private boolean isTargetLambda(InstructionAtOffset instructionAtOffset) {
