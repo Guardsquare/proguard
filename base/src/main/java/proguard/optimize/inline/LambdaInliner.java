@@ -39,7 +39,11 @@ public class LambdaInliner implements Pass {
             Set<InstructionAtOffset> remainder = new HashSet<>();
             inlinedAllUsages = true;
             InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
-            lambda.codeAttribute().accept(lambda.clazz(), lambda.method(), new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(), appView, new LambdaUsageHandler(appView, remainder)));
+            lambda.codeAttribute().accept(lambda.clazz(), lambda.method(),
+                    new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(),
+                            new LambdaUsageHandler(appView, remainder)
+                    )
+            );
 
             /*
              * Only remove the code needed to obtain a reference to the lambda if we were able to inline everything, if we
@@ -68,7 +72,7 @@ public class LambdaInliner implements Pass {
             this.remainder = remainder;
         }
 
-        void handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
+        boolean handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
             // Try inlining the lambda in consumingMethod
             BaseLambdaInliner baseLambdaInliner = new BaseLambdaInliner(appView, consumingClazz, consumingMethod, lambda);
             Method inlinedLambamethod = baseLambdaInliner.inline();
@@ -76,13 +80,13 @@ public class LambdaInliner implements Pass {
             // We didn't inline anything so no need to change any call instructions.
             if (inlinedLambamethod == null) {
                 inlinedAllUsages = false;
-                return;
+                return false;
             }
 
             if (possibleLambdas.size() > 1) {
                 // This lambda is part of a collection of lambdas that might potentially be used, but we do not know which one is actually used. Because of that we cannot inline it.
                 inlinedAllUsages = false;
-                return;
+                return false;
             }
 
             CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
@@ -114,6 +118,7 @@ public class LambdaInliner implements Pass {
             }
 
             codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
+            return true;
         }
     }
 }

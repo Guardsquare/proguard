@@ -22,6 +22,8 @@ public class Util {
      */
     public static Instruction traceParameter(PartialEvaluator partialEvaluator, CodeAttribute codeAttribute, int offset) {
         List<InstructionAtOffset> trace = traceParameterOffset(partialEvaluator, codeAttribute, offset);
+        if (trace == null)
+            return null;
         return trace.get(trace.size() - 1).instruction();
     }
 
