@@ -33,6 +33,7 @@ dependencies {
     testImplementation 'io.kotest:kotest-assertions-core-jvm:5.5.4' // for kotest core jvm assertions
     testImplementation 'io.kotest:kotest-property-jvm:5.5.4' // for kotest property test
     testImplementation 'io.mockk:mockk:1.13.2' // for mocking
+    testImplementation 'com.guardsquare:proguard-retrace:7.3.2'
 
     testImplementation(testFixtures("com.guardsquare:proguard-core:9.0.8")) {
         exclude group: 'com.guardsquare', module: 'proguard-core'

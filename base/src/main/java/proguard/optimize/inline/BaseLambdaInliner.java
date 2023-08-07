@@ -31,7 +31,7 @@ import java.util.List;
 
 import static java.lang.Math.max;
 
-public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
+public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor, AttributeVisitor {
     private final Clazz consumingClass;
     private final Method consumingMethod;
     private final AppView appView;
@@ -91,23 +91,24 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
     @Override
     public void visitAnyMember(Clazz clazz, Member member) {
         ProgramMethod method = (ProgramMethod) member;
-        method.u2accessFlags = (method.getAccessFlags() & ~AccessConstants.BRIDGE & ~AccessConstants.SYNTHETIC & ~AccessConstants.PRIVATE) | AccessConstants.STATIC;
+        method.u2accessFlags = (method.getAccessFlags() & ~AccessConstants.BRIDGE & ~AccessConstants.SYNTHETIC & ~AccessConstants.PRIVATE)
+                | AccessConstants.STATIC;
 
         // Copy the invoke method
         String invokeMethodDescriptor = method.getDescriptor(consumingClass);
         DescriptorModifier descriptorModifier = new DescriptorModifier(consumingClass);
         staticInvokeMethod = descriptorModifier.modify(method,
-            desc -> {
+            originalDescriptor -> {
                 // The method becomes static
-                String d = desc.replace("(", "(Ljava/lang/Object;");
+                String modifiedDescriptor = originalDescriptor.replace("(", "(Ljava/lang/Object;");
                 // Change return type if it has an effect on the stack size
-                d = d.replace(")Ljava/lang/Double;", ")D");
-                d = d.replace(")Ljava/lang/Float;", ")F");
-                return d.replace(")Ljava/lang/Long;", ")J");
+                modifiedDescriptor = modifiedDescriptor.replace(")Ljava/lang/Double;", ")D");
+                modifiedDescriptor = modifiedDescriptor.replace(")Ljava/lang/Float;", ")F");
+                return modifiedDescriptor.replace(")Ljava/lang/Long;", ")J");
             }
         , true);
 
-        ProgramMethod copiedConsumingMethod = descriptorModifier.modify((ProgramMethod) consumingMethod, desc -> desc);
+        ProgramMethod copiedConsumingMethod = descriptorModifier.modify((ProgramMethod) consumingMethod, descriptor -> descriptor);
 
         // Don't inline if the lamdba is passed to another method
         try {
@@ -130,43 +131,12 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                 new InstructionOpCodeFilter(new int[] { Instruction.OP_INVOKEINTERFACE }, this))));
 
         //  Remove return value's casting from staticInvokeMethod
-        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new AllInstructionVisitor(new CastPatternRemover())));
+        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(this));
 
         if (referencedInterfaceConstant != null) {
-            InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(invokeMethodDescriptor);
-            int i = 0;
-            List<Integer> keepList = new ArrayList<>();
-            while(internalTypeEnumeration.hasMoreTypes()) {
-                if (internalTypeEnumeration.nextType().equals("Ljava/lang/Object;")) {
-                    // Argument i is object, we should keep the cast for this argument
-                    keepList.add(i);
-                }
-                i++;
-            }
-            int nbrArgs = ClassUtil.internalMethodParameterCount(invokeMethodDescriptor);
-
             // Remove casting before and after invoke method call
             // Uses same codeAttributeEditor as LambdaInvokeReplacer
-            copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new AttributeVisitor() {
-                @Override
-                public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-                    for (int invokeMethodCallOffset : invokeMethodCallOffsets) {
-                        int startOffset = max((invokeMethodCallOffset -(6 * nbrArgs)), 0);
-                        int endOffset = invokeMethodCallOffset + 8 + 1;
-                        if (InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset + InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset).length(invokeMethodCallOffset)).opcode == Instruction.OP_POP) {
-                            endOffset = invokeMethodCallOffset;
-                        }
-
-                        codeAttribute.instructionsAccept(consumingClass, method, startOffset, endOffset,
-                                new CastRemover(codeAttributeEditor, keepList)
-                        );
-                    }
-                    codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
-                }
-
-                @Override
-                public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
-            }));
+            copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PrePostCastRemover(invokeMethodDescriptor)));
         }
 
         // Important for inlining, we need this so that method invocations have non-null referenced methods.
@@ -283,6 +253,57 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                 }
             }
         }
+    }
+
+    @Override
+    public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
+
+    @Override
+    public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
+        int len = codeAttribute.u4codeLength;
+        CodeAttributeEditor codeAttributeEditorStaticInvoke = new CodeAttributeEditor();
+        codeAttributeEditorStaticInvoke.reset(codeAttribute.u4codeLength);
+        codeAttribute.instructionsAccept(clazz, method, len - 4, len, new CastRemover(codeAttributeEditorStaticInvoke));
+        codeAttributeEditorStaticInvoke.visitCodeAttribute(clazz, method, codeAttribute);
+    }
+
+    private class PrePostCastRemover implements AttributeVisitor{
+        private final int nbrArgs;
+        private final List<Integer> keepList;
+
+        private PrePostCastRemover(String invokeMethodDescriptor) {
+            this.nbrArgs = ClassUtil.internalMethodParameterCount(invokeMethodDescriptor);
+            this.keepList = new ArrayList<>();
+
+            InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(invokeMethodDescriptor);
+            int i = 0;
+            while(internalTypeEnumeration.hasMoreTypes()) {
+                if (internalTypeEnumeration.nextType().equals("Ljava/lang/Object;")) {
+                    // Argument i is object, we should keep the cast for this argument
+                    keepList.add(i);
+                }
+                i++;
+            }
+        }
+
+        @Override
+        public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
+            for (int invokeMethodCallOffset : invokeMethodCallOffsets) {
+                int startOffset = max((invokeMethodCallOffset -(6 * nbrArgs)), 0);
+                int endOffset = invokeMethodCallOffset + 8 + 1;
+                if (InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset + InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset).length(invokeMethodCallOffset)).opcode == Instruction.OP_POP) {
+                    endOffset = invokeMethodCallOffset;
+                }
+
+                codeAttribute.instructionsAccept(consumingClass, method, startOffset, endOffset,
+                        new CastRemover(codeAttributeEditor, keepList)
+                );
+            }
+            codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
+        }
+
+        @Override
+        public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
     }
 
     /**
