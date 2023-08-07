@@ -40,7 +40,7 @@ public class LambdaInliner implements Pass {
             inlinedAllUsages = true;
             InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
             lambda.codeAttribute().accept(lambda.clazz(), lambda.method(),
-                    new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(), appView,
+                    new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(),
                             new LambdaUsageHandler(appView, remainder)
                     )
             );

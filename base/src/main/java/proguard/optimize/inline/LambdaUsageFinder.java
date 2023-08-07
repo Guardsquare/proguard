@@ -1,6 +1,5 @@
 package proguard.optimize.inline;
 
-import proguard.AppView;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.classfile.attribute.CodeAttribute;
@@ -10,8 +9,8 @@ import proguard.classfile.constant.MethodrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.SimpleInstruction;
+import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.ClassPrinter;
@@ -20,8 +19,6 @@ import proguard.evaluation.TracedStack;
 import proguard.optimize.inline.lambda_locator.Lambda;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,76 +28,34 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     private final Lambda targetLambda;
     private PartialEvaluator partialEvaluator;
     private final Map<Integer, Lambda> lambdaMap;
-    private final AppView appView;
     private final LambdaInliner.LambdaUsageHandler lambdaUsageHandler;
     public MethodrefConstant methodrefConstant;
     public FieldrefConstant referencedFieldConstant;
-    private final boolean inlineFromFields;
-    private final boolean inlineFromMethods;
-    private boolean changed = false;
-    private final int[] typedReturnInstructions = new int[] {
-        Instruction.OP_IRETURN,
-        Instruction.OP_LRETURN,
-        Instruction.OP_FRETURN,
-        Instruction.OP_DRETURN,
-        Instruction.OP_ARETURN
-    };
+    private final IterativeInstructionVisitor iterativeInstructionVisitor;
 
-    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, boolean inlineFromFields, boolean inlineFromMethods, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
+    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
         this.targetLambda = targetLambda;
         this.partialEvaluator = new PartialEvaluator();
         this.lambdaMap = lambdaMap;
-        this.appView = appView;
         this.lambdaUsageHandler = lambdaUsageHandler;
-        this.inlineFromFields = inlineFromFields;
-        this.inlineFromMethods = inlineFromMethods;
-    }
-
-    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
-        this(targetLambda, lambdaMap, appView, false, false, lambdaUsageHandler);
+        this.iterativeInstructionVisitor = new IterativeInstructionVisitor();
     }
 
     @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
-        /*codeAttribute.instructionsAccept(clazz, method,
-                new InstructionOpCodeFilter(
-                        new int[] {
-                            Instruction.OP_INVOKESTATIC,
-                            Instruction.OP_INVOKEVIRTUAL,
-                            Instruction.OP_IRETURN,
-                            Instruction.OP_LRETURN,
-                            Instruction.OP_FRETURN,
-                            Instruction.OP_DRETURN,
-                            Instruction.OP_ARETURN
-                        },
-                        this
-                )
-        );*/
-        long lastTime = System.currentTimeMillis();
-        int offset = 0;
-        while (offset < codeAttribute.u4codeLength)
-        {
-            // Note that the instruction is only volatile.
-            Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
-            int instructionLength = instruction.length(offset);
-            HashSet<Byte> opcodes = new HashSet<>(Arrays.asList(Instruction.OP_INVOKESTATIC, Instruction.OP_INVOKEVIRTUAL));
-            if (opcodes.contains(instruction.opcode)) {
-                changed = false;
-                instruction.accept(clazz, method, codeAttribute, offset, this);
-                if (changed) {
-                    System.out.println("Start another iteration");
-                    //visitCodeAttribute(clazz, method, codeAttribute);
-                    codeAttribute.accept(clazz, method, this);
-                    break;
-                }
-            }
-            if (System.currentTimeMillis() > lastTime + 2000) {
-                System.out.printf("Progress %s/%s\n", offset, codeAttribute.u4codeLength);
-                lastTime = System.currentTimeMillis();
-            }
-            offset += instructionLength;
-        }
+        iterativeInstructionVisitor.instructionsAccept(
+            clazz,
+            method,
+            codeAttribute,
+            new InstructionOpCodeFilter(
+                new int[] {
+                    Instruction.OP_INVOKESTATIC,
+                    Instruction.OP_INVOKEVIRTUAL
+                },
+                this
+            )
+        );
     }
 
     @Override
@@ -160,19 +115,21 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
             }
 
             if (match) {
-                changed = lambdaUsageHandler.handle(
-                    targetLambda,
-                    methodrefConstant.referencedClass,
-                    methodrefConstant.referencedMethod,
-                    offset,
-                    clazz,
-                    method,
-                    codeAttribute,
-                    trace,
-                    leafNodes.stream().filter(it -> it.instruction().opcode == Instruction.OP_GETSTATIC).map(it -> {
-                        ConstantInstruction getStaticInstruction = (ConstantInstruction) it.instruction();
-                        return lambdaMap.get(getStaticInstruction.constantIndex);
-                    }).collect(Collectors.toList())
+                iterativeInstructionVisitor.setChanged(
+                    lambdaUsageHandler.handle(
+                        targetLambda,
+                        methodrefConstant.referencedClass,
+                        methodrefConstant.referencedMethod,
+                        offset,
+                        clazz,
+                        method,
+                        codeAttribute,
+                        trace,
+                        leafNodes.stream().filter(it -> it.instruction().opcode == Instruction.OP_GETSTATIC).map(it -> {
+                            ConstantInstruction getStaticInstruction = (ConstantInstruction) it.instruction();
+                            return lambdaMap.get(getStaticInstruction.constantIndex);
+                        }).collect(Collectors.toList())
+                    )
                 );
             }
         }
