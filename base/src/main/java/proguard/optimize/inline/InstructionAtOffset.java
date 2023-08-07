@@ -20,26 +20,4 @@ public final class InstructionAtOffset {
     public int offset() {
         return offset;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        InstructionAtOffset that = (InstructionAtOffset) obj;
-        return Objects.equals(this.instruction, that.instruction) &&
-                this.offset == that.offset;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(instruction, offset);
-    }
-
-    @Override
-    public String toString() {
-        return "InstructionAtOffset[" +
-                "instruction=" + instruction + ", " +
-                "offset=" + offset + ']';
-    }
-
 }
