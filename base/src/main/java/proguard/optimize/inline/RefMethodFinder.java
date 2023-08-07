@@ -18,7 +18,11 @@ public class RefMethodFinder {
     }
 
     public Method findReferencedMethod(ConstantInstruction constantInstruction) {
-        clazz.constantPoolEntryAccept(constantInstruction.constantIndex, new ReferencedMemberVisitor(new MemberVisitor() {
+        return findReferencedMethod(constantInstruction.constantIndex);
+    }
+
+    public Method findReferencedMethod(int constantIndex) {
+        clazz.constantPoolEntryAccept(constantIndex, new ReferencedMemberVisitor(new MemberVisitor() {
             @Override
             public void visitAnyMember(Clazz clazz, Member member) {}
 

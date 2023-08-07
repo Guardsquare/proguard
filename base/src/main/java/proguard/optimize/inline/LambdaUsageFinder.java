@@ -1,6 +1,5 @@
 package proguard.optimize.inline;
 
-import proguard.AppView;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.classfile.attribute.CodeAttribute;
@@ -29,50 +28,33 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     private final Lambda targetLambda;
     private PartialEvaluator partialEvaluator;
     private final Map<Integer, Lambda> lambdaMap;
-    private final AppView appView;
     private final LambdaInliner.LambdaUsageHandler lambdaUsageHandler;
     public MethodrefConstant methodrefConstant;
     public FieldrefConstant referencedFieldConstant;
-    private final boolean inlineFromFields;
-    private final boolean inlineFromMethods;
-    private final int[] typedReturnInstructions = new int[] {
-        Instruction.OP_IRETURN,
-        Instruction.OP_LRETURN,
-        Instruction.OP_FRETURN,
-        Instruction.OP_DRETURN,
-        Instruction.OP_ARETURN
-    };
+    private final IterativeInstructionVisitor iterativeInstructionVisitor;
 
-    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, boolean inlineFromFields, boolean inlineFromMethods, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
+    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
         this.targetLambda = targetLambda;
         this.partialEvaluator = new PartialEvaluator();
         this.lambdaMap = lambdaMap;
-        this.appView = appView;
         this.lambdaUsageHandler = lambdaUsageHandler;
-        this.inlineFromFields = inlineFromFields;
-        this.inlineFromMethods = inlineFromMethods;
-    }
-
-    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
-        this(targetLambda, lambdaMap, appView, false, false, lambdaUsageHandler);
+        this.iterativeInstructionVisitor = new IterativeInstructionVisitor();
     }
 
     @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
-        codeAttribute.instructionsAccept(clazz, method,
-                new InstructionOpCodeFilter(
-                        new int[] {
-                            Instruction.OP_INVOKESTATIC,
-                            Instruction.OP_INVOKEVIRTUAL,
-                            Instruction.OP_IRETURN,
-                            Instruction.OP_LRETURN,
-                            Instruction.OP_FRETURN,
-                            Instruction.OP_DRETURN,
-                            Instruction.OP_ARETURN
-                        },
-                        this
-                )
+        iterativeInstructionVisitor.instructionsAccept(
+            clazz,
+            method,
+            codeAttribute,
+            new InstructionOpCodeFilter(
+                new int[] {
+                    Instruction.OP_INVOKESTATIC,
+                    Instruction.OP_INVOKEVIRTUAL
+                },
+                this
+            )
         );
     }
 
@@ -92,22 +74,32 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     public void visitSimpleInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, SimpleInstruction simpleInstruction) {}
 
     private void findUsage(Clazz clazz, Method method, CodeAttribute codeAttribute, ConstantInstruction consumingMethodCallInstruction, int offset, Function<InstructionAtOffset, Boolean> condition) {
+        clazz.constantPoolEntryAccept(consumingMethodCallInstruction.constantIndex, this);
+
+        //String methodDescriptor = methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass);
+        String methodDescriptor = methodrefConstant.getType(clazz);
+
+        int argCount = ClassUtil.internalMethodParameterCount(methodDescriptor);
+        if (!methodDescriptor.contains("Lkotlin/jvm/functions/Function") && !methodDescriptor.contains("Ljava/lang/Object"))
+            return;
+
+        if (methodrefConstant.referencedMethod == null)
+            System.out.println(methodrefConstant.getClassName(clazz) + "#" + methodrefConstant.getName(clazz));
+
+        System.out.println(methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass));
+
         System.out.println("--------Start----------");
         System.out.println(consumingMethodCallInstruction);
-
-        clazz.constantPoolEntryAccept(consumingMethodCallInstruction.constantIndex, this);
 
         partialEvaluator = new PartialEvaluator();
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
         TracedStack tracedStack = partialEvaluator.getStackBefore(offset);
         System.out.println(tracedStack);
 
-        System.out.println(methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass));
-        String methodDescriptor = methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass);
-        int argCount = ClassUtil.internalMethodParameterCount(methodDescriptor);
         for (int argIndex = 0; argIndex < argCount; argIndex++) {
-            int stackAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argIndex);
-            int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
+            int sizeAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argIndex);
+            int stackEntryIndex = tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argCount) + sizeAdjustedIndex;
+            int traceOffset = tracedStack.getBottomActualProducerValue(stackEntryIndex).instructionOffsetValue().instructionOffset(0);
             List<InstructionAtOffset> trace = Util.traceParameterOffset(partialEvaluator, codeAttribute, traceOffset);
             List<InstructionAtOffset> leafNodes = new ArrayList<>();
             Util.traceParameterTree(partialEvaluator, codeAttribute, traceOffset, leafNodes);
@@ -123,19 +115,21 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
             }
 
             if (match) {
-                lambdaUsageHandler.handle(
-                    targetLambda,
-                    methodrefConstant.referencedClass,
-                    methodrefConstant.referencedMethod,
-                    offset,
-                    clazz,
-                    method,
-                    codeAttribute,
-                    trace,
-                    leafNodes.stream().filter(it -> it.instruction().opcode == Instruction.OP_GETSTATIC).map(it -> {
-                        ConstantInstruction getStaticInstruction = (ConstantInstruction) it.instruction();
-                        return lambdaMap.get(getStaticInstruction.constantIndex);
-                    }).collect(Collectors.toList())
+                iterativeInstructionVisitor.setChanged(
+                    lambdaUsageHandler.handle(
+                        targetLambda,
+                        methodrefConstant.referencedClass,
+                        methodrefConstant.referencedMethod,
+                        offset,
+                        clazz,
+                        method,
+                        codeAttribute,
+                        trace,
+                        leafNodes.stream().filter(it -> it.instruction().opcode == Instruction.OP_GETSTATIC).map(it -> {
+                            ConstantInstruction getStaticInstruction = (ConstantInstruction) it.instruction();
+                            return lambdaMap.get(getStaticInstruction.constantIndex);
+                        }).collect(Collectors.toList())
+                    )
                 );
             }
         }

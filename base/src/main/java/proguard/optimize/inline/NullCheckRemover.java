@@ -22,8 +22,9 @@ class NullCheckRemover implements InstructionVisitor {
     Constant[] constants;
     private final int argumentIndex;
     private final InstructionVisitor extraInstructionVisitor;
+    private final CodeAttributeEditor codeAttributeEditor;
 
-    public NullCheckRemover(int argumentIndex, InstructionVisitor extraInstructionVisitor) {
+    public NullCheckRemover(int argumentIndex, CodeAttributeEditor codeAttributeEditor, InstructionVisitor extraInstructionVisitor) {
         InstructionSequenceBuilder ____ =
                 new InstructionSequenceBuilder();
 
@@ -36,10 +37,11 @@ class NullCheckRemover implements InstructionVisitor {
         this.insSeqMatcher = new InstructionSequenceMatcher(constants, pattern);
         this.argumentIndex = argumentIndex;
         this.extraInstructionVisitor = extraInstructionVisitor;
+        this.codeAttributeEditor = codeAttributeEditor;
     }
 
-    public NullCheckRemover(int argumentIndex) {
-        this(argumentIndex, null);
+    public NullCheckRemover(int argumentIndex, CodeAttributeEditor codeAttributeEditor) {
+        this(argumentIndex, codeAttributeEditor, null);
     }
 
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {
@@ -56,15 +58,12 @@ class NullCheckRemover implements InstructionVisitor {
                         methodrefConstant.getName(clazz).equals("checkNotNullParameter") &&
                         methodrefConstant.getType(clazz).equals("(Ljava/lang/Object;Ljava/lang/String;)V")
                     ) {
-                        CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
-                        codeAttributeEditor.reset(codeAttribute.u4codeLength);
                         for (int insIndex = 0; insIndex < pattern.length; insIndex++) {
                             int insOffset = insSeqMatcher.matchedInstructionOffset(insIndex);
                             if (extraInstructionVisitor != null)
                                 extraInstructionVisitor.visitAnyInstruction(clazz, method, codeAttribute, insSeqMatcher.matchedInstructionOffset(insIndex), InstructionFactory.create(codeAttribute.code, insOffset));
                             codeAttributeEditor.deleteInstruction(insOffset);
                         }
-                        codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
                     }
                 }
             });
