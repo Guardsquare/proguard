@@ -160,8 +160,9 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
             // We will now check if any of the arguments has a value that comes from the lambda parameters
             for (int argIndex = 0; argIndex < argCount; argIndex++) {
                 System.out.println("Stack before offset: " + partialEvaluator.getStackBefore(callOffset));
-                int stackAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
-                int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
+                int sizeAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
+                int stackEntryIndex = tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + sizeAdjustedIndex;
+                int traceOffset = tracedStack.getBottomActualProducerValue(stackEntryIndex).instructionOffsetValue().instructionOffset(0);
                 codeAttribute.instructionAccept(clazz, method, traceOffset, sourceInstructionVisitor);
             }
         }
