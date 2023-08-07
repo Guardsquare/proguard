@@ -26,6 +26,8 @@ import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 
+import java.util.List;
+
 /**
  * Recursively inline functions that make use of the lambda parameter in the arguments of the current function.
  * The first step, is finding out who actually uses our lambda parameter, we do this using the partial evaluator.
@@ -82,25 +84,23 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
         if (variableInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
             System.out.println("Value from " + variableInstruction + " " + variableInstruction.variableIndex);
 
-            Instruction sourceInstruction = Util.traceParameter(partialEvaluator, codeAttribute, offset);
-            if (sourceInstruction == null) {
-                throw new CannotInlineException("Argument has multiple source locations, cannot inline lambda!");
-            }
+            List<Instruction> sourceInstructions = Util.traceParameterSources(partialEvaluator, codeAttribute, offset);
+            for (Instruction sourceInstruction : sourceInstructions) {
+                System.out.println(variableInstruction + " gets it's value from " + sourceInstruction);
+                if (sourceInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
+                    VariableInstruction variableSourceInstruction = (VariableInstruction) sourceInstruction;
+                    /*
+                     * If the source instruction was an aload_x instruction we will compare the x with the index of the
+                     * lambda that we are currently inlining. Because arguments can sometimes take up 2 slots on the stack
+                     * we have to adjust this index accordingly.
+                     */
+                    String consumingMethodDescriptor = copiedConsumingMethod.getDescriptor(consumingClazz);
+                    int calledLambdaRealIndex = Util.findFirstLambdaParameter(consumingMethodDescriptor);
+                    int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, isStatic, calledLambdaRealIndex);
 
-            System.out.println(variableInstruction + " gets it's value from " + sourceInstruction);
-            if (sourceInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
-                VariableInstruction variableSourceInstruction = (VariableInstruction) sourceInstruction;
-                /*
-                 * If the source instruction was an aload_x instruction we will compare the x with the index of the
-                 * lambda that we are currently inlining. Because arguments can sometimes take up 2 slots on the stack
-                 * we have to adjust this index accordingly.
-                 */
-                String consumingMethodDescriptor = copiedConsumingMethod.getDescriptor(consumingClazz);
-                int calledLambdaRealIndex = Util.findFirstLambdaParameter(consumingMethodDescriptor);
-                int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, isStatic, calledLambdaRealIndex);
-
-                if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {
-                    throw new CannotInlineException("Cannot inline lambdas into functions that call other functions that consume this lambda!");
+                    if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {
+                        throw new CannotInlineException("Cannot inline lambdas into functions that call other functions that consume this lambda!");
+                    }
                 }
             }
         }

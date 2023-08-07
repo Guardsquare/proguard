@@ -15,6 +15,7 @@ import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Util {
     /**
@@ -25,6 +26,15 @@ public class Util {
         if (trace == null)
             return null;
         return trace.get(trace.size() - 1).instruction();
+    }
+
+    /**
+     * Given an offset of an instruction, trace the source producer values.
+     */
+    public static List<Instruction> traceParameterSources(PartialEvaluator partialEvaluator, CodeAttribute codeAttribute, int offset) {
+        ArrayList<InstructionAtOffset> leafNodes = new ArrayList<>();
+        traceParameterTree(partialEvaluator, codeAttribute, offset, leafNodes);
+        return leafNodes.stream().map(InstructionAtOffset::instruction).collect(Collectors.toList());
     }
 
     public static List<InstructionAtOffset> traceParameterOffset(PartialEvaluator partialEvaluator, CodeAttribute codeAttribute, int offset) {
@@ -107,7 +117,8 @@ public class Util {
                 offsetValue = currentTracedStack.getTopActualProducerValue(0).instructionOffsetValue();
             }
             for (int i = 0; i < offsetValue.instructionOffsetCount(); i++) {
-                root.children.add(traceParameterTree(partialEvaluator, codeAttribute, offsetValue.instructionOffset(i), leafNodes));
+                if (!isLoad(currentInstruction) || !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(i))
+                    root.children.add(traceParameterTree(partialEvaluator, codeAttribute, offsetValue.instructionOffset(i), leafNodes));
             }
         }
         else {

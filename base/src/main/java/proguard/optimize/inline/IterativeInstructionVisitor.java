@@ -29,7 +29,7 @@ public class IterativeInstructionVisitor {
         }
     }
 
-    public boolean isChanged() {
+    public boolean codeHasChanged() {
         return changed;
     }
 
