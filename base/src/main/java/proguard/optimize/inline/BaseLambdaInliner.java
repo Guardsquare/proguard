@@ -31,7 +31,7 @@ import java.util.List;
 
 import static java.lang.Math.max;
 
-public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor, AttributeVisitor {
+public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
     private final Clazz consumingClass;
     private final Method consumingMethod;
     private final AppView appView;
@@ -131,7 +131,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                 new InstructionOpCodeFilter(new int[] { Instruction.OP_INVOKEINTERFACE }, this))));
 
         //  Remove return value's casting from staticInvokeMethod
-        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(this));
+        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new AllInstructionVisitor(new CastPatternRemover())));
 
         if (referencedInterfaceConstant != null) {
             // Remove casting before and after invoke method call
@@ -253,18 +253,6 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                 }
             }
         }
-    }
-
-    @Override
-    public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
-
-    @Override
-    public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-        int len = codeAttribute.u4codeLength;
-        CodeAttributeEditor codeAttributeEditorStaticInvoke = new CodeAttributeEditor();
-        codeAttributeEditorStaticInvoke.reset(codeAttribute.u4codeLength);
-        codeAttribute.instructionsAccept(clazz, method, len - 4, len, new CastRemover(codeAttributeEditorStaticInvoke));
-        codeAttributeEditorStaticInvoke.visitCodeAttribute(clazz, method, codeAttribute);
     }
 
     private class PrePostCastRemover implements AttributeVisitor{
