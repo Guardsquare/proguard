@@ -1,7 +1,5 @@
 package proguard.optimize.inline;
 
-import proguard.optimize.inline.lambda_locator.LambdaLocator;
-import proguard.AppView;
 import proguard.classfile.*;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.BootstrapMethodsAttribute;
@@ -10,60 +8,36 @@ import proguard.classfile.attribute.visitor.AttributeNameFilter;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.*;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.ClassEditor;
-import proguard.classfile.editor.CodeAttributeEditor;
-import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-import proguard.optimize.inline.lambda_locator.Lambda;
 
 /**
  * Recursively inline functions that make use of the lambda parameter in the arguments of the current function.
  * The first step, is finding out who actually uses our lambda parameter, we do this using the partial evaluator.
  */
 public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, MemberVisitor, ConstantVisitor {
-    private final AppView appView;
     private Clazz consumingClazz;
     private Method copiedConsumingMethod;
-    private final Method originalConsumingMethod;
     private final boolean isStatic;
-    private final Lambda lambda;
-    private final boolean enableRecursiveMerging;
-    private PartialEvaluator partialEvaluator;
-    private final CodeAttributeEditor codeAttributeEditor;
-    private Clazz referencedClass;
-    private Method referencedMethod;
-    private int callOffset;
-    private boolean changed = false;
+    private final PartialEvaluator partialEvaluator;
 
     /**
      * @param originalConsumingMethod The original consuming method reference, this is used to detect recursion.
      */
-    public RecursiveInliner(AppView appView, Method originalConsumingMethod, Lambda lambda, boolean enableRecursiveMerging) {
-        this.appView = appView;
+    public RecursiveInliner(Method originalConsumingMethod) {
         this.consumingClazz = null;
         this.copiedConsumingMethod = null;
-        this.originalConsumingMethod = originalConsumingMethod;
         this.isStatic = (originalConsumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
-        this.lambda = lambda;
-        this.enableRecursiveMerging = enableRecursiveMerging;
         this.partialEvaluator = new PartialEvaluator();
-        this.codeAttributeEditor = new CodeAttributeEditor();
-        this.referencedMethod = null;
-    }
-
-    public RecursiveInliner(AppView appView, Method originalConsumingMethod, Lambda lambda) {
-        this(appView, originalConsumingMethod, lambda, false);
     }
 
     @Override
@@ -120,7 +94,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
             // Note that the instruction is only volatile.
             Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
             int instructionLength = instruction.length(offset);
-            changed = false;
             instruction.accept(clazz, method, codeAttribute, offset, new InstructionOpCodeFilter(
                 new int[] {
                     Instruction.OP_INVOKESTATIC,
@@ -132,8 +105,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                 new InstructionVisitor() {
                     @Override
                     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction) {
-                        if (changed)
-                            return;
                         System.out.println("At " + constantInstruction);
                         TracedStack tracedStack = partialEvaluator.getStackBefore(offset);
 
@@ -168,12 +139,8 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                                             if (bootstrapMethodHandle.getClassName(clazz).equals("java/lang/invoke/LambdaMetafactory"))
                                             {
                                                 MethodHandleConstant methodHandleConstant = (MethodHandleConstant) ((ProgramClass) clazz).getConstant(bootstrapMethodInfo.u2methodArguments[1]);
-                                                referencedMethod = new RefMethodFinder(clazz).findReferencedMethod(methodHandleConstant.u2referenceIndex);
-                                                referencedClass = clazz;
+                                                Method referencedMethod = new RefMethodFinder(clazz).findReferencedMethod(methodHandleConstant.u2referenceIndex);
                                                 System.out.println(referencedMethod);
-
-                                                if (changed)
-                                                    return;
 
                                                 String methodDescriptor = referencedMethod.getDescriptor(clazz);
                                                 int argCount = ClassUtil.internalMethodParameterCount(methodDescriptor);
@@ -186,11 +153,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                                                     codeAttribute.accept(clazz, method, new ClassPrinter());
                                                     int stackAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
                                                     int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
-                                                    callOffset = offset;
                                                     codeAttribute.instructionAccept(clazz, method, traceOffset, RecursiveInliner.this);
-                                                    if (changed) {
-                                                        break;
-                                                    }
                                                 }
                                             }
                                         });
@@ -204,9 +167,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                             }
 
                             public void handle(AnyMethodrefConstant methodrefConstant) {
-                                if (changed)
-                                    return;
-
                                 if (methodrefConstant.getClassName(clazz).equals("kotlin/jvm/internal/Intrinsics") &&
                                         methodrefConstant.getName(clazz).equals("checkNotNullParameter") &&
                                         methodrefConstant.getType(clazz).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
@@ -223,23 +183,13 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                                     codeAttribute.accept(clazz, method, new ClassPrinter());
                                     int stackAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
                                     int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
-                                    referencedMethod = methodrefConstant.referencedMethod;
-                                    referencedClass = methodrefConstant.referencedClass;
-                                    callOffset = offset;
                                     codeAttribute.instructionAccept(clazz, method, traceOffset, RecursiveInliner.this);
-                                    if (changed) {
-                                        break;
-                                    }
                                 }
                             }
                         });
                     }
                 }
             ));
-            if (changed) {
-                offset = 0;
-                continue;
-            }
             offset += instructionLength;
         }
     }
