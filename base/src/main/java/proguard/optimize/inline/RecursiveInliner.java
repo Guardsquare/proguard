@@ -26,16 +26,12 @@ import proguard.evaluation.TracedStack;
 public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, MemberVisitor, ConstantVisitor {
     private Clazz consumingClazz;
     private Method copiedConsumingMethod;
-    private final boolean isStatic;
+    private boolean isStatic;
     private final PartialEvaluator partialEvaluator;
 
-    /**
-     * @param originalConsumingMethod The original consuming method reference, this is used to detect recursion.
-     */
-    public RecursiveInliner(Method originalConsumingMethod) {
+    public RecursiveInliner() {
         this.consumingClazz = null;
         this.copiedConsumingMethod = null;
-        this.isStatic = (originalConsumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
         this.partialEvaluator = new PartialEvaluator();
     }
 
@@ -96,6 +92,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
         this.consumingClazz = programClass;
         this.copiedConsumingMethod = programMethod;
+        this.isStatic = (copiedConsumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
         programMethod.attributesAccept(programClass, this);
     }
 

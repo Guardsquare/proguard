@@ -112,7 +112,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
 
         // Don't inline if the lamdba is passed to another method
         try {
-            copiedConsumingMethod.accept(consumingClass, new RecursiveInliner(consumingMethod));
+            copiedConsumingMethod.accept(consumingClass, new RecursiveInliner());
         } catch(CannotInlineException cie) {
             ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
             classEditor.removeMethod(copiedConsumingMethod);
