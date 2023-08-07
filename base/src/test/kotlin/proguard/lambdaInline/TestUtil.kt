@@ -1,7 +1,5 @@
-import proguard.optimize.inline.lambda_locator.Util
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
-import proguard.optimize.inline.LambdaInliner
 import proguard.AppView
 import proguard.Configuration
 import proguard.ConfigurationParser
@@ -24,9 +22,11 @@ import proguard.classfile.visitor.MultiClassVisitor
 import proguard.evaluation.BasicInvocationUnit
 import proguard.evaluation.PartialEvaluator
 import proguard.evaluation.value.TypedReferenceValueFactory
+import proguard.io.*
 import proguard.io.util.IOUtil
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter
+import proguard.optimize.inline.LambdaInliner
 import proguard.optimize.peephole.LineNumberLinearizer
 import proguard.preverify.CodePreverifier
 import proguard.retrace.ReTrace
@@ -44,7 +44,7 @@ fun compareOutputAndMainInstructions(code: TestSource, correctInstructions: List
     val pattern = Pattern.compile(System.getProperty("user.home") + "/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/(.*?).jar")
     val matcher = pattern.matcher(mydata)
     matcher.find()
-    val libraryClassPool = Util.loadJar(matcher.group(0))
+    val libraryClassPool = loadJar(matcher.group(0))
     val (classPool, _) = ClassPoolBuilder.fromSource(code)
 
     libraryClassPool.classesAccept(ClassPoolFiller(classPool))
@@ -211,7 +211,7 @@ fun onlyTestRunning(code: TestSource) {
     val pattern = Pattern.compile(System.getProperty("user.home") + "/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/(.*?).jar")
     val matcher = pattern.matcher(mydata)
     matcher.find()
-    val libraryClassPool = Util.loadJar(matcher.group(0))
+    val libraryClassPool = loadJar(matcher.group(0))
     val (classPool, _) = ClassPoolBuilder.fromSource(code)
 
     libraryClassPool.classesAccept(ClassPoolFiller(classPool))
@@ -296,7 +296,7 @@ fun testPerf(code: TestSource, inlineCode: TestSource, cleanUp: Boolean): Triple
     val pattern = Pattern.compile(System.getProperty("user.home") + "/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/(.*?).jar")
     val matcher = pattern.matcher(mydata)
     matcher.find()
-    val libraryClassPool = Util.loadJar(matcher.group(0))
+    val libraryClassPool = loadJar(matcher.group(0))
     val (classPool, _) = ClassPoolBuilder.fromSource(code)
     val (inlinedClassPool, _) = ClassPoolBuilder.fromSource(inlineCode)
 
@@ -423,43 +423,22 @@ fun stdev(numArray: MutableList<Long>): Double {
     return sqrt(standardDeviation / numArray.size)
 }
 
-fun getUnobfuscatedStackTrace(lambdaInlining: Boolean, configPath: String): String {
-    val file = File(configPath)
-    val parser = ConfigurationParser(file, System.getProperties())
-    val configuration = Configuration()
-    parser.parse(configuration)
-    configuration.lambdaInlining = lambdaInlining
-    configuration.optimize = false
-    val a = ProGuard(configuration)
-    a.execute()
-    val mappingFile = File("/home/timothy/Documents/proguard/base/test-files/mapping.txt")
-    val retrace = ReTrace(mappingFile)
-
-    val procResult = ProcessBuilder("java", "-jar", "/home/timothy/Documents/proguard/base/test-files/result.jar")
-        .redirectOutput(ProcessBuilder.Redirect.PIPE)
-        .redirectError(ProcessBuilder.Redirect.PIPE)
-        .start()
-    procResult.waitFor()
-
-    val reader = LineNumberReader(procResult.errorStream.bufferedReader())
-
-    val outputStream = ByteArrayOutputStream()
-
-    val writer = PrintWriter(OutputStreamWriter(outputStream, "UTF-8"))
-
-    retrace.retrace(reader, writer)
-
-    //clean up
-    ProcessBuilder("rm", "-f", "/home/timothy/Documents/proguard/base/test-files/mapping.txt")
-        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-        .redirectError(ProcessBuilder.Redirect.INHERIT)
-        .start()
-        .waitFor()
-    ProcessBuilder("rm", "-f", "/home/timothy/Documents/proguard/base/test-files/result.jar")
-        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-        .redirectError(ProcessBuilder.Redirect.INHERIT)
-        .start()
-        .waitFor()
-
-    return outputStream.toString()
+@Throws(IOException::class)
+fun loadJar(filename: String?): ClassPool {
+    val classPool = ClassPool()
+    val source: DataEntrySource = FileSource(
+        File(filename)
+    )
+    source.pumpDataEntries(
+        JarReader(
+            false,
+            ClassFilter(
+                ClassReader(
+                    false, false, false, false, null,
+                    ClassPoolFiller(classPool)
+                )
+            )
+        )
+    )
+    return classPool
 }

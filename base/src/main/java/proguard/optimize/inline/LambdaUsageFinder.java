@@ -1,12 +1,9 @@
 package proguard.optimize.inline;
 
-import proguard.optimize.inline.lambda_locator.LambdaLocator;
 import proguard.AppView;
-import proguard.classfile.AccessConstants;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.FieldrefConstant;
 import proguard.classfile.constant.MethodrefConstant;
@@ -15,17 +12,18 @@ import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.SimpleInstruction;
-import proguard.classfile.instruction.visitor.AllInstructionVisitor;
-import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
-import proguard.classfile.util.InitializationUtil;
 import proguard.classfile.visitor.ClassPrinter;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 import proguard.optimize.inline.lambda_locator.Lambda;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,7 +32,7 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     private PartialEvaluator partialEvaluator;
     private final Map<Integer, Lambda> lambdaMap;
     private final AppView appView;
-    private final LambdaUsageHandler lambdaUsageHandler;
+    private final LambdaInliner.LambdaUsageHandler lambdaUsageHandler;
     public MethodrefConstant methodrefConstant;
     public FieldrefConstant referencedFieldConstant;
     private final boolean inlineFromFields;
@@ -48,7 +46,7 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
         Instruction.OP_ARETURN
     };
 
-    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, boolean inlineFromFields, boolean inlineFromMethods, LambdaUsageHandler lambdaUsageHandler) {
+    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, boolean inlineFromFields, boolean inlineFromMethods, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
         this.targetLambda = targetLambda;
         this.partialEvaluator = new PartialEvaluator();
         this.lambdaMap = lambdaMap;
@@ -58,7 +56,7 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
         this.inlineFromMethods = inlineFromMethods;
     }
 
-    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, LambdaUsageHandler lambdaUsageHandler) {
+    public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, AppView appView, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
         this(targetLambda, lambdaMap, appView, false, false, lambdaUsageHandler);
     }
 
@@ -198,9 +196,5 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     @Override
     public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
         this.referencedFieldConstant = fieldrefConstant;
-    }
-
-    public interface LambdaUsageHandler {
-        boolean handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas);
     }
 }

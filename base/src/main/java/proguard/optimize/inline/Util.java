@@ -149,21 +149,4 @@ public class Util {
             }
         }));
     }
-
-    public static void printMethodWithRange(Clazz clazz, Method method, int startOffset, int endOffset, int specialOffset) {
-        method.accept(clazz, new AllAttributeVisitor(new AllInstructionVisitor(new InstructionVisitor() {
-            @Override
-            public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {
-                String str = "   ";
-                if (offset == specialOffset) str = " * ";
-                else if (offset >= startOffset && offset < endOffset) str = " | ";
-                System.out.print(str);
-                instruction.accept(clazz, method, codeAttribute, offset, new ClassPrinter());
-            }
-        })));
-    }
-
-    public static void printMethodWithRange(Clazz clazz, Method method, int startOffset, int endOffset) {
-        printMethodWithRange(clazz, method, startOffset, endOffset, -1);
-    }
 }

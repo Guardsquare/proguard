@@ -9,21 +9,22 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.instruction.InstructionFactory;
-import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.visitor.ClassPrinter;
 
 import java.util.*;
 
 public class CastRemover implements InstructionVisitor {
     private final CodeAttributeEditor codeAttributeEditor;
-    private List<Integer> keepList;
-    private int currentIndex;
+    private final List<Integer> keepList;
+    private int argIndex;
+
+    // The names of all method taking a boxed type variable and returning the variable with the unboxed type
+    private final Set<String> castingMethodNames = new HashSet<>(Arrays.asList("intValue", "booleanValue", "byteValue", "shortValue", "longValue", "floatValue", "doubleValue", "charValue"));
+
 
     public CastRemover(CodeAttributeEditor codeAttributeEditor, List<Integer> keepList) {
         this.codeAttributeEditor = codeAttributeEditor;
-        this.currentIndex = 0;
+        this.argIndex = 0;
         this.keepList = keepList;
     }
 
@@ -33,21 +34,27 @@ public class CastRemover implements InstructionVisitor {
 
     @Override
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction) {
-        Set<String> castingMethodNames = new HashSet<>(Arrays.asList("intValue", "booleanValue", "byteValue", "shortValue", "longValue", "floatValue", "doubleValue", "charValue"));
+        /* Casting on a lambda invoke call looks like this :
+         * iload
+         * invokestatic valueOf
+         * invokeinterface invoke   //lambda call
+         * checkast
+         * invokevirtual intValue
+         * istore
+         *
+         * We remove valueOf, checkast and intValue
+         */
         if (constantInstruction.opcode == Instruction.OP_CHECKCAST) {
-            System.out.println("Removing " + InstructionFactory.create(codeAttribute.code, offset).toString(offset));
             codeAttributeEditor.deleteInstruction(offset);
         } else if (constantInstruction.opcode == Instruction.OP_INVOKESTATIC) {
             if (getInvokedMethodName(clazz, constantInstruction).equals("valueOf")) {
-                if (!keepList.contains(currentIndex)) {
-                    System.out.print("Removing "); InstructionFactory.create(codeAttribute.code, offset).accept(clazz, method, codeAttribute, offset, new ClassPrinter());
+                // Don't remove valueOf call when the lambda takes an object as argument
+                if (!keepList.contains(argIndex)) {
                     codeAttributeEditor.deleteInstruction(offset);
                 }
-
-                currentIndex++;
+                argIndex++;
             }
         } else if (constantInstruction.opcode == Instruction.OP_INVOKEVIRTUAL) {
-            System.out.println("Removing " + InstructionFactory.create(codeAttribute.code, offset).toString(offset));
             if (castingMethodNames.contains(getInvokedMethodName(clazz, constantInstruction))) {
                 codeAttributeEditor.deleteInstruction(offset);
             }
