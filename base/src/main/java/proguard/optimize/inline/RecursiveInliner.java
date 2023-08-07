@@ -99,7 +99,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
         programMethod.attributesAccept(programClass, this);
     }
 
-    private class CalledMethodHandler implements InstructionVisitor, ConstantVisitor {
+    private class CalledMethodHandler implements InstructionVisitor, ConstantVisitor, AttributeVisitor {
         private final InstructionVisitor sourceInstructionVisitor;
         private TracedStack tracedStack;
         private Clazz clazz;
@@ -133,25 +133,15 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
 
         @Override
         public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant) {
-            // MethodRefTraveler
-
-            clazz.attributesAccept(new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS, new AttributeVisitor() {
-                @Override
-                public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute) {
-                    bootstrapMethodsAttribute.bootstrapMethodEntryAccept(clazz, invokeDynamicConstant.u2bootstrapMethodAttributeIndex, (bootstrapClazz, bootstrapMethodInfo) -> {
-                        ProgramClass programClass = (ProgramClass) bootstrapClazz;
-                        MethodHandleConstant bootstrapMethodHandle =
-                                (MethodHandleConstant) programClass.getConstant(bootstrapMethodInfo.u2methodHandleIndex);
-
-                        if (bootstrapMethodHandle.getClassName(bootstrapClazz).equals("java/lang/invoke/LambdaMetafactory")) {
-                            MethodHandleConstant methodHandleConstant = (MethodHandleConstant) ((ProgramClass) bootstrapClazz).getConstant(bootstrapMethodInfo.u2methodArguments[1]);
-                            Method referencedMethod = new RefMethodFinder(bootstrapClazz).findReferencedMethod(methodHandleConstant.u2referenceIndex);
-
-                            handleCalledMethod(bootstrapClazz, referencedMethod);
-                        }
-                    });
-                }
-            }));
+            clazz.attributesAccept(
+                new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS,
+                new IndyLambdaImplVisitor(invokeDynamicConstant, new MemberVisitor() {
+                    @Override
+                    public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
+                        handleCalledMethod(programClass, programMethod);
+                    }
+                }))
+            );
         }
 
         @Override
@@ -177,6 +167,36 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                 int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
                 codeAttribute.instructionAccept(clazz, method, traceOffset, sourceInstructionVisitor);
             }
+        }
+    }
+
+    /**
+     * A simple class that visits the static invocation method that implements an invokedynamic lambda. The
+     * implementation method is visited by the implMethodVisitor.
+     */
+    private static class IndyLambdaImplVisitor implements AttributeVisitor {
+        private final InvokeDynamicConstant invokeDynamicConstant;
+        private final MemberVisitor implMethodVisitor;
+
+        public IndyLambdaImplVisitor(InvokeDynamicConstant invokeDynamicConstant, MemberVisitor implMethodVisitor) {
+            this.invokeDynamicConstant = invokeDynamicConstant;
+            this.implMethodVisitor = implMethodVisitor;
+        }
+
+        @Override
+        public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute) {
+            bootstrapMethodsAttribute.bootstrapMethodEntryAccept(clazz, invokeDynamicConstant.u2bootstrapMethodAttributeIndex, (bootstrapClazz, bootstrapMethodInfo) -> {
+                ProgramClass programClass = (ProgramClass) bootstrapClazz;
+                MethodHandleConstant bootstrapMethodHandle =
+                        (MethodHandleConstant) programClass.getConstant(bootstrapMethodInfo.u2methodHandleIndex);
+
+                if (bootstrapMethodHandle.getClassName(bootstrapClazz).equals("java/lang/invoke/LambdaMetafactory")) {
+                    MethodHandleConstant methodHandleConstant = (MethodHandleConstant) ((ProgramClass) bootstrapClazz).getConstant(bootstrapMethodInfo.u2methodArguments[1]);
+                    Method referencedMethod = new RefMethodFinder(bootstrapClazz).findReferencedMethod(methodHandleConstant.u2referenceIndex);
+
+                    referencedMethod.accept(bootstrapClazz, implMethodVisitor);
+                }
+            });
         }
     }
 }
