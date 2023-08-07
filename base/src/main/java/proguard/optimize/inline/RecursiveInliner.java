@@ -6,11 +6,13 @@ import proguard.classfile.attribute.BootstrapMethodsAttribute;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AttributeNameFilter;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.*;
+import proguard.classfile.constant.InterfaceMethodrefConstant;
+import proguard.classfile.constant.InvokeDynamicConstant;
+import proguard.classfile.constant.MethodHandleConstant;
+import proguard.classfile.constant.MethodrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
@@ -47,54 +49,8 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
         codeAttribute.accept(clazz, method, new ClassPrinter());
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
-        /*codeAttribute.instructionsAccept(clazz, method,
-            new InstructionOpCodeFilter(new int[] {Instruction.OP_INVOKESTATIC, Instruction.OP_INVOKEVIRTUAL, Instruction.OP_INVOKESPECIAL},
-            new InstructionVisitor() {
-                @Override
-                public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction) {
-                    System.out.println("At " + constantInstruction);
-                    TracedStack tracedStack = partialEvaluator.getStackBefore(offset);
-
-                    if (tracedStack == null)
-                        return;
-
-                    System.out.println("Stack size " + tracedStack.size());
-                    if (tracedStack.size() <= 0)
-                        return;
-
-                    clazz.constantPoolEntryAccept(constantInstruction.constantIndex, new ConstantVisitor() {
-                        @Override
-                        public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant) {
-                            if (methodrefConstant.getClassName(clazz).equals("kotlin/jvm/internal/Intrinsics") &&
-                                    methodrefConstant.getName(clazz).equals("checkNotNullParameter") &&
-                                    methodrefConstant.getType(clazz).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
-                                return;
-
-                            String methodDescriptor = methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass);
-                            int argCount = ClassUtil.internalMethodParameterCount(methodDescriptor);
-                            boolean referencedMethodStatic = (methodrefConstant.referencedMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
-                            // We will now check if any of the arguments has a value that comes from the lambda parameters
-                            for (int argIndex = 0; argIndex < argCount; argIndex++) {
-                                int stackAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
-                                int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
-                                referencedMethod = methodrefConstant.referencedMethod;
-                                referencedClass = methodrefConstant.referencedClass;
-                                callOffset = offset;
-                                codeAttribute.instructionAccept(clazz, method, traceOffset, RecursiveInliner.this);
-                            }
-                        }
-                    });
-                }
-        }));*/
-
-        int offset = 0;
-
-        while (offset < codeAttribute.u4codeLength)
-        {
-            // Note that the instruction is only volatile.
-            Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
-            int instructionLength = instruction.length(offset);
-            instruction.accept(clazz, method, codeAttribute, offset, new InstructionOpCodeFilter(
+        codeAttribute.instructionsAccept(clazz, method,
+            new InstructionOpCodeFilter(
                 new int[] {
                     Instruction.OP_INVOKESTATIC,
                     Instruction.OP_INVOKEVIRTUAL,
@@ -108,9 +64,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                         System.out.println("At " + constantInstruction);
                         TracedStack tracedStack = partialEvaluator.getStackBefore(offset);
 
-                        if (tracedStack == null)
-                            return;
-
                         System.out.println("Stack size " + tracedStack.size());
                         if (tracedStack.size() <= 0)
                             return;
@@ -118,43 +71,27 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                         clazz.constantPoolEntryAccept(constantInstruction.constantIndex, new ConstantVisitor() {
                             @Override
                             public void visitMethodrefConstant(Clazz clazz, MethodrefConstant methodrefConstant) {
-                                handle(methodrefConstant);
+                                handleCalledMethod(methodrefConstant.referencedClass, methodrefConstant.referencedMethod);
                             }
 
                             @Override
                             public void visitInvokeDynamicConstant(Clazz clazz, InvokeDynamicConstant invokeDynamicConstant) {
-                                System.out.println(invokeDynamicConstant);
                                 // MethodRefTraveler
 
                                 clazz.attributesAccept(new AttributeNameFilter(Attribute.BOOTSTRAP_METHODS, new AttributeVisitor() {
                                     @Override
                                     public void visitBootstrapMethodsAttribute(Clazz clazz, BootstrapMethodsAttribute bootstrapMethodsAttribute) {
-                                        bootstrapMethodsAttribute.bootstrapMethodEntryAccept(clazz, invokeDynamicConstant.u2bootstrapMethodAttributeIndex, (clazz1, bootstrapMethodInfo) -> {
-                                            System.out.println(bootstrapMethodInfo);
-
-                                            ProgramClass programClass = (ProgramClass) clazz;
+                                        bootstrapMethodsAttribute.bootstrapMethodEntryAccept(clazz, invokeDynamicConstant.u2bootstrapMethodAttributeIndex, (bootstrapClazz, bootstrapMethodInfo) -> {
+                                            ProgramClass programClass = (ProgramClass) bootstrapClazz;
                                             MethodHandleConstant bootstrapMethodHandle =
                                                     (MethodHandleConstant) programClass.getConstant(bootstrapMethodInfo.u2methodHandleIndex);
 
-                                            if (bootstrapMethodHandle.getClassName(clazz).equals("java/lang/invoke/LambdaMetafactory"))
+                                            if (bootstrapMethodHandle.getClassName(bootstrapClazz).equals("java/lang/invoke/LambdaMetafactory"))
                                             {
-                                                MethodHandleConstant methodHandleConstant = (MethodHandleConstant) ((ProgramClass) clazz).getConstant(bootstrapMethodInfo.u2methodArguments[1]);
-                                                Method referencedMethod = new RefMethodFinder(clazz).findReferencedMethod(methodHandleConstant.u2referenceIndex);
-                                                System.out.println(referencedMethod);
+                                                MethodHandleConstant methodHandleConstant = (MethodHandleConstant) ((ProgramClass) bootstrapClazz).getConstant(bootstrapMethodInfo.u2methodArguments[1]);
+                                                Method referencedMethod = new RefMethodFinder(bootstrapClazz).findReferencedMethod(methodHandleConstant.u2referenceIndex);
 
-                                                String methodDescriptor = referencedMethod.getDescriptor(clazz);
-                                                int argCount = ClassUtil.internalMethodParameterCount(methodDescriptor);
-                                                boolean referencedMethodStatic = (referencedMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
-                                                // We will now check if any of the arguments has a value that comes from the lambda parameters
-                                                for (int argIndex = 0; argIndex < argCount; argIndex++) {
-                                                    System.out.println("123Descriptor " + referencedMethod.getDescriptor(clazz) + " " + argIndex + " " + argCount);
-                                                    System.out.println("Stack before offset: " + partialEvaluator.getStackBefore(offset));
-                                                    constantInstruction.accept(clazz, method, codeAttribute, offset, new ClassPrinter());
-                                                    codeAttribute.accept(clazz, method, new ClassPrinter());
-                                                    int stackAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
-                                                    int traceOffset = tracedStack.getBottomActualProducerValue(tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + stackAdjustedIndex).instructionOffsetValue().instructionOffset(0);
-                                                    codeAttribute.instructionAccept(clazz, method, traceOffset, RecursiveInliner.this);
-                                                }
+                                                handleCalledMethod(bootstrapClazz, referencedMethod);
                                             }
                                         });
                                     }
@@ -163,21 +100,20 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
 
                             @Override
                             public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant) {
-                                handle(interfaceMethodrefConstant);
+                                handleCalledMethod(interfaceMethodrefConstant.referencedClass, interfaceMethodrefConstant.referencedMethod);
                             }
 
-                            public void handle(AnyMethodrefConstant methodrefConstant) {
-                                if (methodrefConstant.getClassName(clazz).equals("kotlin/jvm/internal/Intrinsics") &&
-                                        methodrefConstant.getName(clazz).equals("checkNotNullParameter") &&
-                                        methodrefConstant.getType(clazz).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
+                            public void handleCalledMethod(Clazz referencedClass, Method referencedMethod) {
+                                if (referencedClass.getName().equals("kotlin/jvm/internal/Intrinsics") &&
+                                        referencedMethod.getName(referencedClass).equals("checkNotNullParameter") &&
+                                        referencedMethod.getDescriptor(referencedClass).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
                                     return;
 
-                                String methodDescriptor = methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass);
+                                String methodDescriptor = referencedMethod.getDescriptor(referencedClass);
                                 int argCount = ClassUtil.internalMethodParameterCount(methodDescriptor);
-                                boolean referencedMethodStatic = (methodrefConstant.referencedMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
+                                boolean referencedMethodStatic = (referencedMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
                                 // We will now check if any of the arguments has a value that comes from the lambda parameters
                                 for (int argIndex = 0; argIndex < argCount; argIndex++) {
-                                    System.out.println("123Descriptor " + methodrefConstant.referencedMethod.getDescriptor(methodrefConstant.referencedClass) + " " + argIndex + " " + argCount);
                                     System.out.println("Stack before offset: " + partialEvaluator.getStackBefore(offset));
                                     constantInstruction.accept(clazz, method, codeAttribute, offset, new ClassPrinter());
                                     codeAttribute.accept(clazz, method, new ClassPrinter());
@@ -189,9 +125,8 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                         });
                     }
                 }
-            ));
-            offset += instructionLength;
-        }
+            )
+        );
     }
 
     @Override
