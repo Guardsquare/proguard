@@ -1,6 +1,8 @@
 package proguard.optimize.inline;
 
 //import com.guardsquare.gui.Gui;
+import proguard.classfile.Clazz;
+import proguard.classfile.attribute.CodeAttribute;
 import proguard.optimize.inline.lambda_locator.LambdaLocator;
 import proguard.AppView;
 import proguard.classfile.AccessConstants;
@@ -15,6 +17,7 @@ import proguard.optimize.inline.lambda_locator.Lambda;
 import proguard.pass.Pass;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class LambdaInliner implements Pass {
@@ -37,53 +40,7 @@ public class LambdaInliner implements Pass {
             Set<InstructionAtOffset> remainder = new HashSet<>();
             inlinedAllUsages = true;
             InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
-            lambda.codeAttribute().accept(lambda.clazz(), lambda.method(), new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(), appView, (foundLambda, consumingClass, consumingMethod, consumingCallOffset, consumingCallClazz, consumingCallmethod, consumingCallCodeAttribute, sourceTrace, possibleLambdas) -> {
-                // Try inlining the lambda in consumingMethod
-                BaseLambdaInliner baseLambdaInliner = new BaseLambdaInliner(appView, consumingClass, consumingMethod, lambda);
-                Method inlinedLambamethod = baseLambdaInliner.inline();
-
-                // We didn't inline anything so no need to change any call instructions.
-                if (inlinedLambamethod == null) {
-                    inlinedAllUsages = false;
-                    return;
-                }
-
-                if (possibleLambdas.size() > 1) {
-                    // This lambda is part of a collection of lambdas that might potentially be used, but we do not know which one is actually used. Because of that we cannot inline it.
-                    inlinedAllUsages = false;
-                    return;
-                }
-
-                CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
-                codeAttributeEditor.reset(consumingCallCodeAttribute.u4codeLength);
-
-                /*
-                 * Remove usages that bring the variable on the stack so all the way up until a load
-                 * The store operations before the load might also be used by other functions calls that consume the
-                 * lambda, that's why we need to keep them.
-                 */
-                for (int i = 0; i < sourceTrace.size(); i++) {
-                    InstructionAtOffset instrAtOffset = sourceTrace.get(i);
-                    codeAttributeEditor.deleteInstruction(instrAtOffset.offset());
-                    if (instrAtOffset.instruction().canonicalOpcode() == Instruction.OP_ALOAD || instrAtOffset.instruction().canonicalOpcode() == Instruction.OP_INVOKESTATIC) {
-                        remainder.addAll(sourceTrace.subList(i + 1, sourceTrace.size()));
-                        break;
-                    }
-                }
-
-                // Replace invokestatic call to a call with the new function
-                ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingCallClazz);
-                int methodWithoutLambdaParameterIndex = constantPoolEditor.addMethodrefConstant(consumingClass, inlinedLambamethod);
-
-                // Replacing at consumingCallOffset
-                if ((consumingMethod.getAccessFlags() & AccessConstants.STATIC) == 0) {
-                    codeAttributeEditor.replaceInstruction(consumingCallOffset, new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, methodWithoutLambdaParameterIndex));
-                } else {
-                    codeAttributeEditor.replaceInstruction(consumingCallOffset, new ConstantInstruction(Instruction.OP_INVOKESTATIC, methodWithoutLambdaParameterIndex));
-                }
-
-                codeAttributeEditor.visitCodeAttribute(consumingCallClazz, consumingCallmethod, consumingCallCodeAttribute);
-            }));
+            lambda.codeAttribute().accept(lambda.clazz(), lambda.method(), new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(), appView, new LambdaUsageHandler(appView, remainder)));
 
             /*
              * Only remove the code needed to obtain a reference to the lambda if we were able to inline everything, if we
@@ -98,6 +55,66 @@ public class LambdaInliner implements Pass {
                 }
                 codeAttributeEditor.visitCodeAttribute(lambda.clazz(), lambda.method(), lambda.codeAttribute());
             }
+        }
+    }
+
+
+    public class LambdaUsageHandler {
+
+        private final AppView appView;
+        private final Set<InstructionAtOffset> remainder;
+
+        public LambdaUsageHandler(AppView appView, Set<InstructionAtOffset> remainder) {
+            this.appView = appView;
+            this.remainder = remainder;
+        }
+
+        void handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
+            // Try inlining the lambda in consumingMethod
+            BaseLambdaInliner baseLambdaInliner = new BaseLambdaInliner(appView, consumingClazz, consumingMethod, lambda);
+            Method inlinedLambamethod = baseLambdaInliner.inline();
+
+            // We didn't inline anything so no need to change any call instructions.
+            if (inlinedLambamethod == null) {
+                inlinedAllUsages = false;
+                return;
+            }
+
+            if (possibleLambdas.size() > 1) {
+                // This lambda is part of a collection of lambdas that might potentially be used, but we do not know which one is actually used. Because of that we cannot inline it.
+                inlinedAllUsages = false;
+                return;
+            }
+
+            CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
+            codeAttributeEditor.reset(consumingCallCodeAttribute.u4codeLength);
+
+            /*
+             * Remove usages that bring the variable on the stack so all the way up until a load
+             * The store operations before the load might also be used by other functions calls that consume the
+             * lambda, that's why we need to keep them.
+             */
+            for (int i = 0; i < sourceTrace.size(); i++) {
+                InstructionAtOffset instrAtOffset = sourceTrace.get(i);
+                codeAttributeEditor.deleteInstruction(instrAtOffset.offset());
+                if (instrAtOffset.instruction().canonicalOpcode() == Instruction.OP_ALOAD || instrAtOffset.instruction().canonicalOpcode() == Instruction.OP_INVOKESTATIC) {
+                    remainder.addAll(sourceTrace.subList(i + 1, sourceTrace.size()));
+                    break;
+                }
+            }
+
+            // Replace invokestatic call to a call with the new function
+            ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingCallClass);
+            int methodWithoutLambdaParameterIndex = constantPoolEditor.addMethodrefConstant(consumingClazz, inlinedLambamethod);
+
+            // Replacing at consumingCallOffset
+            if ((consumingMethod.getAccessFlags() & AccessConstants.STATIC) == 0) {
+                codeAttributeEditor.replaceInstruction(consumingCallOffset, new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, methodWithoutLambdaParameterIndex));
+            } else {
+                codeAttributeEditor.replaceInstruction(consumingCallOffset, new ConstantInstruction(Instruction.OP_INVOKESTATIC, methodWithoutLambdaParameterIndex));
+            }
+
+            codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
         }
     }
 }

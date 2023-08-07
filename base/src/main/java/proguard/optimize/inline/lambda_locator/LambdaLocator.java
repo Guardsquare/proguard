@@ -2,17 +2,22 @@ package proguard.optimize.inline.lambda_locator;
 
 import proguard.backport.LambdaExpression;
 import proguard.backport.LambdaExpressionCollector;
-import proguard.classfile.*;
-import proguard.classfile.attribute.*;
+//import proguard.classfile.*;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ClassPool;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
+import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
-import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.*;
+import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.FieldrefConstant;
+import proguard.classfile.constant.Utf8Constant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.AllInstructionVisitor;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
-import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.visitor.MemberVisitor;
 
 import java.util.*;
