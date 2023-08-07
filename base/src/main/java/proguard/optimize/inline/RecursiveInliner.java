@@ -1,12 +1,19 @@
 package proguard.optimize.inline;
 
-import proguard.classfile.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.Clazz;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMethod;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.BootstrapMethodsAttribute;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.attribute.visitor.AttributeNameFilter;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.constant.*;
+import proguard.classfile.constant.InterfaceMethodrefConstant;
+import proguard.classfile.constant.InvokeDynamicConstant;
+import proguard.classfile.constant.MethodHandleConstant;
+import proguard.classfile.constant.MethodrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
