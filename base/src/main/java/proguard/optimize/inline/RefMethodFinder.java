@@ -1,3 +1,4 @@
+
 package proguard.optimize.inline;
 
 import proguard.classfile.Clazz;
@@ -15,10 +16,6 @@ public class RefMethodFinder {
     public RefMethodFinder(Clazz clazz) {
         this.clazz = clazz;
         this.foundMethod = null;
-    }
-
-    public Method findReferencedMethod(ConstantInstruction constantInstruction) {
-        return findReferencedMethod(constantInstruction.constantIndex);
     }
 
     public Method findReferencedMethod(int constantIndex) {

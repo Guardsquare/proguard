@@ -1,22 +1,22 @@
 package proguard.optimize.inline;
 
-import proguard.classfile.Clazz;
-import proguard.classfile.Method;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.VariableInstruction;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 import proguard.evaluation.value.InstructionOffsetValue;
-import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Util {
+public class SourceTracer {
+    private static final Logger logger = LogManager.getLogger(SourceTracer.class);
+
     /**
      * Given an offset of an instruction, trace the source producer value.
      */
@@ -43,12 +43,15 @@ public class Util {
         Instruction currentInstruction = InstructionFactory.create(codeAttribute.code, currentOffset);
         trace.add(new InstructionAtOffset(currentInstruction, currentOffset));
 
-        // Maybe make use of stackPopCount, if an instruction doesn't pop anything from the stack then it is the producer?
+        // We stop when we found the source instruction
         while (
                 (!isLoad(currentInstruction) ||
                         !partialEvaluator.getVariablesBefore(currentOffset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&
                         currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
                         currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
+                        currentInstruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
+                        currentInstruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
+                        currentInstruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
                         currentInstruction.opcode != Instruction.OP_LDC &&
                         currentInstruction.opcode != Instruction.OP_LDC_W &&
                         currentInstruction.opcode != Instruction.OP_LDC2_W &&
@@ -58,14 +61,14 @@ public class Util {
                         currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
                         currentInstruction.opcode != Instruction.OP_GETFIELD
         ) {
-            System.out.println(currentInstruction.toString(currentOffset));
+            logger.debug(currentInstruction.toString(currentOffset));
             currentTracedStack = partialEvaluator.getStackBefore(currentOffset);
-            System.out.println(currentTracedStack);
+            logger.debug(currentTracedStack);
 
             // There is no stack value, it's coming from the variables
             if (isLoad(currentInstruction)) {
                 InstructionOffsetValue offsetValue = partialEvaluator.getVariablesBefore(currentOffset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue();
-                // There are multiple sources, we don't know which one! We could in the future return a tree instead of just null if  that would be useful.
+                // There are multiple sources, we don't know which one!
                 if (offsetValue.instructionOffsetCount() > 1) {
                     return null;
                 }
@@ -88,24 +91,26 @@ public class Util {
         Instruction currentInstruction = InstructionFactory.create(codeAttribute.code, offset);
         Node root = new Node(new InstructionAtOffset(currentInstruction, offset), new ArrayList<>());
 
-        // Maybe make use of stackPopCount, if an instruction doesn't pop anything from the stack then it is the producer?
+        // We stop when we found the source instruction
         if (
                 /*(!isLoad(currentInstruction) ||
                         !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&*/
-            currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
-            currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
-            currentInstruction.opcode != Instruction.OP_LDC &&
-            currentInstruction.opcode != Instruction.OP_LDC_W &&
-            currentInstruction.opcode != Instruction.OP_LDC2_W &&
-            currentInstruction.opcode != Instruction.OP_NEW &&
-            currentInstruction.opcode != Instruction.OP_GETSTATIC &&
-            currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
-            currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
-            currentInstruction.opcode != Instruction.OP_GETFIELD
-        ) {
-            System.out.println(currentInstruction.toString(offset));
+                currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
+                currentInstruction.opcode != Instruction.OP_LDC &&
+                currentInstruction.opcode != Instruction.OP_LDC_W &&
+                currentInstruction.opcode != Instruction.OP_LDC2_W &&
+                currentInstruction.opcode != Instruction.OP_NEW &&
+                currentInstruction.opcode != Instruction.OP_GETSTATIC &&
+                currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
+                currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
+                currentInstruction.opcode != Instruction.OP_GETFIELD) {
+            logger.debug(currentInstruction.toString(offset));
             currentTracedStack = partialEvaluator.getStackBefore(offset);
-            System.out.println(currentTracedStack);
+            logger.debug(currentTracedStack);
 
             // There is no stack value, it's coming from the variables
             InstructionOffsetValue offsetValue;
@@ -127,19 +132,5 @@ public class Util {
             leafNodes.add(root.value);
         }
         return root;
-    }
-
-    /**
-     * Inline a specified method in the locations it is called in the current clazz.
-     * @param clazz The clazz in which we want to inline the targetMethod
-     * @param targetMethod The method we want to inline.
-     */
-    public static void inlineMethodInClass(Clazz clazz, Method targetMethod) {
-        clazz.methodsAccept(new AllAttributeVisitor(new MethodInliner(false, false, 20000, true, false, null) {
-            @Override
-            protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-                return method.equals(targetMethod);
-            }
-        }));
     }
 }

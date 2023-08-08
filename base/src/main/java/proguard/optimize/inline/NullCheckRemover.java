@@ -40,10 +40,6 @@ class NullCheckRemover implements InstructionVisitor {
         this.codeAttributeEditor = codeAttributeEditor;
     }
 
-    public NullCheckRemover(int argumentIndex, CodeAttributeEditor codeAttributeEditor) {
-        this(argumentIndex, codeAttributeEditor, null);
-    }
-
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {
         instruction.accept(clazz, method, codeAttribute, offset, insSeqMatcher);
         if (insSeqMatcher.isMatching() && insSeqMatcher.matchedConstantIndex(X) == argumentIndex) {

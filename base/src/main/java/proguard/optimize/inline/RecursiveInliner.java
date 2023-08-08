@@ -1,5 +1,7 @@
 package proguard.optimize.inline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
@@ -21,11 +23,9 @@ import proguard.classfile.instruction.VariableInstruction;
 import proguard.classfile.instruction.visitor.InstructionOpCodeFilter;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
-import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-
 import java.util.List;
 
 /**
@@ -38,9 +38,9 @@ import java.util.List;
 public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, MemberVisitor, ConstantVisitor {
     private Clazz consumingClazz;
     private Method copiedConsumingMethod;
-    private boolean isStatic;
     private final PartialEvaluator partialEvaluator;
     private final int lambdaConsumingMethodArgIndex;
+    private static final Logger logger = LogManager.getLogger(RecursiveInliner.class);
 
     public RecursiveInliner(int lambdaConsumingMethodArgIndex) {
         this.consumingClazz = null;
@@ -58,7 +58,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
      */
     @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-        codeAttribute.accept(clazz, method, new ClassPrinter());
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
         codeAttribute.instructionsAccept(clazz, method,
             new InstructionOpCodeFilter(
@@ -84,11 +83,11 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     @Override
     public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction) {
         if (variableInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
-            System.out.println("Value from " + variableInstruction + " " + variableInstruction.variableIndex);
+            logger.debug("Value from " + variableInstruction + " " + variableInstruction.variableIndex);
 
-            List<Instruction> sourceInstructions = Util.traceParameterSources(partialEvaluator, codeAttribute, offset);
+            List<Instruction> sourceInstructions = SourceTracer.traceParameterSources(partialEvaluator, codeAttribute, offset);
             for (Instruction sourceInstruction : sourceInstructions) {
-                System.out.println(variableInstruction + " gets it's value from " + sourceInstruction);
+                logger.debug(variableInstruction + " gets it's value from " + sourceInstruction);
                 if (sourceInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
                     VariableInstruction variableSourceInstruction = (VariableInstruction) sourceInstruction;
                     /*
@@ -112,7 +111,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
         this.consumingClazz = programClass;
         this.copiedConsumingMethod = programMethod;
-        this.isStatic = (copiedConsumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
         programMethod.attributesAccept(programClass, this);
     }
 
@@ -127,7 +125,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
         private Clazz clazz;
         private Method method;
         private CodeAttribute codeAttribute;
-        private int callOffset;
 
         /**
          * @param sourceInstructionVisitor This is the visitor that will visit the source instructions for the arguments
@@ -152,10 +149,8 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
             this.clazz = clazz;
             this.method = method;
             this.codeAttribute = codeAttribute;
-            this.callOffset = callOffset;
             this.tracedStack = partialEvaluator.getStackBefore(callOffset);
 
-            System.out.println("Stack size " + tracedStack.size());
             if (tracedStack.size() <= 0)
                 return;
 
@@ -206,7 +201,6 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
             boolean referencedMethodStatic = (referencedMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
             // We will now check if any of the arguments has a value that comes from the lambda parameters
             for (int argIndex = 0; argIndex < argCount; argIndex++) {
-                System.out.println("Stack before offset: " + partialEvaluator.getStackBefore(callOffset));
                 int sizeAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argIndex);
                 int stackEntryIndex = tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, referencedMethodStatic, argCount) + sizeAdjustedIndex;
                 int traceOffset = tracedStack.getBottomActualProducerValue(stackEntryIndex).instructionOffsetValue().instructionOffset(0);

@@ -25,10 +25,6 @@ public class LocalUsageRemover implements MemberVisitor, InstructionVisitor, Att
         this.replacementInstruction = replacementInstruction;
     }
 
-    public LocalUsageRemover(CodeAttributeEditor codeAttributeEditor, int argumentIndex) {
-        this(codeAttributeEditor, argumentIndex, new VariableInstruction(Instruction.OP_ACONST_NULL));
-    }
-
     @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
         programMethod.accept(programClass, new AllAttributeVisitor(this));
