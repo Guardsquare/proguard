@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 public class LambdaInliner implements Pass {
-    private int count = 0;
     private final String classNameFilter;
     private boolean inlinedAllUsages;
     public LambdaInliner(String classNameFilter) {
@@ -119,7 +118,6 @@ public class LambdaInliner implements Pass {
             }
 
             codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
-            System.out.println("Inlined a lambda " + ++count);
             return true;
         }
     }

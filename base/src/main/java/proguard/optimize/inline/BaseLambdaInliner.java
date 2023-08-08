@@ -107,7 +107,6 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
 
         // Copy the invoke method
         String invokeMethodDescriptor = method.getDescriptor(consumingClass);
-        System.out.println("Method descriptor " + invokeMethodDescriptor);
         DescriptorModifier descriptorModifier = new DescriptorModifier(consumingClass);
         staticInvokeMethod = descriptorModifier.modify(method,
             originalDescriptor -> {

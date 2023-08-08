@@ -30,7 +30,7 @@ import java.util.*;
  */
 public class ClassPath
 {
-    private final List<ClassPathEntry> classPathEntries = new ArrayList();
+    private final List classPathEntries = new ArrayList();
 
 
     /**
@@ -40,7 +40,7 @@ public class ClassPath
     {
         for (int index = 0; index < classPathEntries.size(); index++)
         {
-            if (classPathEntries.get(index).isOutput())
+            if (((ClassPathEntry)classPathEntries.get(index)).isOutput())
             {
                 return true;
             }
@@ -74,12 +74,12 @@ public class ClassPath
 
     public ClassPathEntry get(int index)
     {
-        return classPathEntries.get(index);
+        return (ClassPathEntry)classPathEntries.get(index);
     }
 
     public ClassPathEntry remove(int index)
     {
-        return classPathEntries.remove(index);
+        return (ClassPathEntry)classPathEntries.remove(index);
     }
 
     public boolean isEmpty()
