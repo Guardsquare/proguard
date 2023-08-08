@@ -7,7 +7,6 @@ import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.VariableInstruction;
-import proguard.classfile.util.InternalTypeEnumeration;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 import proguard.evaluation.value.InstructionOffsetValue;
@@ -128,29 +127,6 @@ public class Util {
             leafNodes.add(root.value);
         }
         return root;
-    }
-
-    /**
-     * Given a descriptor, find the index of  the first argument that has a lambda type.
-     * @param descriptor The descriptor of the method.
-     * @param isStatic A boolean describing if the method is static or not, if not static we need to shift the arguments
-     *                 by one because the first argument would be "this".
-     * @return The index of the lambda argument.
-     */
-    public static int findFirstLambdaParameter(String descriptor, boolean isStatic) {
-        InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(descriptor);
-        int index = 0;
-        while (internalTypeEnumeration.hasMoreTypes()) {
-            if (internalTypeEnumeration.nextType().startsWith("Lkotlin/jvm/functions/Function")) {
-                break;
-            }
-            index ++;
-        }
-        return index + (isStatic ? 0 : 1);
-    }
-
-    public static int findFirstLambdaParameter(String descriptor) {
-        return findFirstLambdaParameter(descriptor, true);
     }
 
     /**
