@@ -405,4 +405,21 @@ class AdvancedTest: FreeSpec ({
 
         compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
     }
+
+    "Inline in a method that doesn't use the lambda type in it's descriptor" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(f: Any) {
+                println((f as (Int) -> Int).invoke(8))
+            }
+            
+            fun main() {
+                test { it: Int -> it * 3 }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
+    }
 })

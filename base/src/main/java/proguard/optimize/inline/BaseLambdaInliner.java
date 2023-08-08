@@ -291,6 +291,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         @Override
         public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
             for (int invokeMethodCallOffset : invokeMethodCallOffsets) {
+                System.out.println("Removing casts from " + invokeMethodCallOffset);
                 int startOffset = max((invokeMethodCallOffset -(6 * nbrArgs)), 0);
                 int endOffset = invokeMethodCallOffset + 8 + 1;
                 // If  the next instruction is pop then we are not using the return value so we don't need to remove
@@ -299,11 +300,37 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                     endOffset = invokeMethodCallOffset;
                 }
 
+                /*LimitedInstructionCollector collector = new LimitedInstructionCollector(invokeMethodCallOffset, nbrArgs * 2 + 1);
+                codeAttribute.accept(clazz, method, collector);
+
+                System.out.println(collector.getLastNInstructions());
+
+                System.out.println("startOffset " + startOffset);
+                startOffset = collector.getLastNInstructions().get(0).offset();*/
                 codeAttribute.instructionsAccept(consumingClass, method, startOffset, endOffset,
-                        new CastRemover(codeAttributeEditor, keepList)
+                    new CastRemover(codeAttributeEditor, keepList)
                 );
+
+                /*int offset = startOffset;
+                try {
+                    while (offset < endOffset)
+                    {
+                        // Note that the instruction is only volatile.
+                        Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
+                        int instructionLength = instruction.length(offset);
+                        instruction.accept(clazz, method, codeAttribute, offset, new CastRemover(codeAttributeEditor, keepList));
+                        offset += instructionLength;
+                    }
+                } catch(IllegalArgumentException iae) {
+                    codeAttribute.accept(clazz, method, new ClassPrinter());
+                    System.out.println(offset);
+                    throw iae;
+                }*/
             }
+
             codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
+            System.out.println("After removing casts");
+            codeAttribute.accept(clazz, method, new ClassPrinter());
         }
 
         @Override
