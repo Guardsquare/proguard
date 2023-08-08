@@ -333,7 +333,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
      * @param targetMethod The method we want to inline.
      */
     private void inlineMethodInClass(Clazz clazz, Method targetMethod) {
-        clazz.methodsAccept(new AllAttributeVisitor(new MethodInliner(false, false, 20000, true, false, null) {
+        clazz.methodsAccept(new AllAttributeVisitor(new MethodInliner(false, false, true, false, null) {
             @Override
             protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute) {
                 return method.equals(targetMethod);
