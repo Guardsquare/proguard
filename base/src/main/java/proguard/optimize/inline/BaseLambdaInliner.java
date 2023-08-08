@@ -15,7 +15,12 @@ import proguard.classfile.attribute.visitor.AttributeVisitor;
 import proguard.classfile.constant.FieldrefConstant;
 import proguard.classfile.constant.InterfaceMethodrefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.*;
+import proguard.classfile.editor.AccessFixer;
+import proguard.classfile.editor.ClassEditor;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.editor.MethodCopier;
+import proguard.classfile.editor.PeepholeEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.InstructionFactory;
@@ -27,6 +32,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.util.InternalTypeEnumeration;
+import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
@@ -56,15 +62,15 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
 
-    public BaseLambdaInliner(AppView appView, Clazz consumingClass, Method consumingMethod, Lambda lambda) {
+    public BaseLambdaInliner(AppView appView, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
         this.consumingClass = consumingClass;
         this.consumingMethod = consumingMethod;
         this.appView = appView;
         this.lambda = lambda;
         this.codeAttributeEditor = new CodeAttributeEditor();
         this.isStatic = (consumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
-        this.calledLambdaIndex = Util.findFirstLambdaParameter(consumingMethod.getDescriptor(consumingClass), isStatic);
-        this.sizeAdjustedLamdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethod.getDescriptor(consumingClass), true, calledLambdaIndex);
+        this.calledLambdaIndex = calledLambdaIndex + (isStatic ? 0 : 1);
+        this.sizeAdjustedLamdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethod.getDescriptor(consumingClass), true, this.calledLambdaIndex);
         this.partialEvaluator = new PartialEvaluator();
         this.invokeMethodCallOffsets = new ArrayList<>();
     }
@@ -136,14 +142,14 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                 new AllInstructionVisitor(
                 new InstructionOpCodeFilter(new int[] { Instruction.OP_INVOKEINTERFACE }, this))));
 
-        //  Remove return value's casting from staticInvokeMethod
-        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new AllInstructionVisitor(new CastPatternRemover())));
-
         if (referencedInterfaceConstant != null) {
             // Remove casting before and after invoke method call
             // Uses same codeAttributeEditor as LambdaInvokeReplacer
             copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PrePostCastRemover(invokeMethodDescriptor)));
         }
+
+        // Remove return value's casting from staticInvokeMethod
+        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new CastPatternRemover(codeAttributeEditor))));
 
         // Important for inlining, we need this so that method invocations have non-null referenced methods.
         appView.programClassPool.classesAccept(
@@ -168,6 +174,8 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
             while(internalTypeEnumeration.hasMoreTypes()) {
                 list.add(internalTypeEnumeration.nextType());
             }
+            // We adjust the index to not take the this parameter into account because this is not visible in the
+            // method descriptor.
             list.remove(calledLambdaIndex - (isStatic ? 0 : 1));
 
             return ClassUtil.internalMethodDescriptorFromInternalTypes(internalTypeEnumeration.returnType(), list);
@@ -285,6 +293,8 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
             for (int invokeMethodCallOffset : invokeMethodCallOffsets) {
                 int startOffset = max((invokeMethodCallOffset -(6 * nbrArgs)), 0);
                 int endOffset = invokeMethodCallOffset + 8 + 1;
+                // If  the next instruction is pop then we are not using the return value so we don't need to remove
+                // casts on the return value.
                 if (InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset + InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset).length(invokeMethodCallOffset)).opcode == Instruction.OP_POP) {
                     endOffset = invokeMethodCallOffset;
                 }

@@ -21,20 +21,20 @@ import java.io.StringWriter;
 public class CastPatternRemover implements InstructionVisitor {
     private final Logger logger = LogManager.getLogger(this.getClass());
     private final InstructionSequenceMatcher insSeqMatcher;
+    private final CodeAttributeEditor codeAttributeEditor;
 
-    public CastPatternRemover() {
+    public CastPatternRemover(CodeAttributeEditor codeAttributeEditor) {
         InstructionSequenceBuilder ____ = new InstructionSequenceBuilder();
         Constant[] constants = ____.constants();
         Instruction[] pattern = ____.invokestatic(InstructionSequenceMatcher.X).areturn().__();
         this.insSeqMatcher = new InstructionSequenceMatcher(constants, pattern);
+        this.codeAttributeEditor = codeAttributeEditor;
     }
 
     @Override
     public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {
         instruction.accept(clazz, method, codeAttribute, offset, insSeqMatcher);
         if (insSeqMatcher.isMatching()) {
-            CodeAttributeEditor codeAttributeEditor = new CodeAttributeEditor();
-            codeAttributeEditor.reset(codeAttribute.u4codeLength);
             int constantIndex = insSeqMatcher.matchedConstantIndex(InstructionSequenceMatcher.X);
             clazz.constantPoolEntryAccept(constantIndex, new ConstantVisitor() {
                 @Override
@@ -50,7 +50,6 @@ public class CastPatternRemover implements InstructionVisitor {
                     }
                 }
             });
-            codeAttribute.accept(clazz, method, codeAttributeEditor);
         }
     }
 }

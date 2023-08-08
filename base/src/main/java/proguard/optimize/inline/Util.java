@@ -91,18 +91,18 @@ public class Util {
 
         // Maybe make use of stackPopCount, if an instruction doesn't pop anything from the stack then it is the producer?
         if (
-                (!isLoad(currentInstruction) ||
-                        !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&
-                        currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
-                        currentInstruction.opcode != Instruction.OP_LDC &&
-                        currentInstruction.opcode != Instruction.OP_LDC_W &&
-                        currentInstruction.opcode != Instruction.OP_LDC2_W &&
-                        currentInstruction.opcode != Instruction.OP_NEW &&
-                        currentInstruction.opcode != Instruction.OP_GETSTATIC &&
-                        currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
-                        currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
-                        currentInstruction.opcode != Instruction.OP_GETFIELD
+                /*(!isLoad(currentInstruction) ||
+                        !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&*/
+            currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
+            currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
+            currentInstruction.opcode != Instruction.OP_LDC &&
+            currentInstruction.opcode != Instruction.OP_LDC_W &&
+            currentInstruction.opcode != Instruction.OP_LDC2_W &&
+            currentInstruction.opcode != Instruction.OP_NEW &&
+            currentInstruction.opcode != Instruction.OP_GETSTATIC &&
+            currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
+            currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
+            currentInstruction.opcode != Instruction.OP_GETFIELD
         ) {
             System.out.println(currentInstruction.toString(offset));
             currentTracedStack = partialEvaluator.getStackBefore(offset);
@@ -119,6 +119,8 @@ public class Util {
             for (int i = 0; i < offsetValue.instructionOffsetCount(); i++) {
                 if (!isLoad(currentInstruction) || !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(i))
                     root.children.add(traceParameterTree(partialEvaluator, codeAttribute, offsetValue.instructionOffset(i), leafNodes));
+                else
+                    leafNodes.add(root.value);
             }
         }
         else {
@@ -128,10 +130,13 @@ public class Util {
         return root;
     }
 
-    public static int findFirstLambdaParameter(String descriptor) {
-        return findFirstLambdaParameter(descriptor, true);
-    }
-
+    /**
+     * Given a descriptor, find the index of  the first argument that has a lambda type.
+     * @param descriptor The descriptor of the method.
+     * @param isStatic A boolean describing if the method is static or not, if not static we need to shift the arguments
+     *                 by one because the first argument would be "this".
+     * @return The index of the lambda argument.
+     */
     public static int findFirstLambdaParameter(String descriptor, boolean isStatic) {
         InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(descriptor);
         int index = 0;
@@ -142,6 +147,10 @@ public class Util {
             index ++;
         }
         return index + (isStatic ? 0 : 1);
+    }
+
+    public static int findFirstLambdaParameter(String descriptor) {
+        return findFirstLambdaParameter(descriptor, true);
     }
 
     /**

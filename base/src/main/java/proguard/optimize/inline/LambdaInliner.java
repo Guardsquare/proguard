@@ -72,9 +72,9 @@ public class LambdaInliner implements Pass {
             this.remainder = remainder;
         }
 
-        boolean handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
+        boolean handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int lambdaArgumentIndex, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
             // Try inlining the lambda in consumingMethod
-            BaseLambdaInliner baseLambdaInliner = new BaseLambdaInliner(appView, consumingClazz, consumingMethod, lambda);
+            BaseLambdaInliner baseLambdaInliner = new BaseLambdaInliner(appView, consumingClazz, consumingMethod, lambdaArgumentIndex, lambda);
             Method inlinedLambamethod = baseLambdaInliner.inline();
 
             // We didn't inline anything so no need to change any call instructions.
