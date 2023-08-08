@@ -32,6 +32,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.util.InternalTypeEnumeration;
+import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
@@ -40,8 +41,6 @@ import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.lang.Math.max;
 
 public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
     private final Clazz consumingClass;
@@ -290,17 +289,22 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         @Override
         public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
             for (int invokeMethodCallOffset : invokeMethodCallOffsets) {
-                int startOffset = max((invokeMethodCallOffset -(6 * nbrArgs)), 0);
-                int endOffset = invokeMethodCallOffset + 8 + 1;
                 // If  the next instruction is pop then we are not using the return value so we don't need to remove
                 // casts on the return value.
-                if (InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset + InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset).length(invokeMethodCallOffset)).opcode == Instruction.OP_POP) {
-                    endOffset = invokeMethodCallOffset;
+                if (InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset + InstructionFactory.create(codeAttribute.code, invokeMethodCallOffset).length(invokeMethodCallOffset)).opcode != Instruction.OP_POP) {
+                    int endOffset = invokeMethodCallOffset + 8 + 1;
+                    codeAttribute.instructionsAccept(consumingClass, method, invokeMethodCallOffset, endOffset,
+                            new CastRemover(codeAttributeEditor)
+                    );
                 }
 
-                codeAttribute.instructionsAccept(consumingClass, method, startOffset, endOffset,
-                        new CastRemover(codeAttributeEditor, keepList)
-                );
+                // Remove casts on the arguments, because arguments can have things like calculations in them, we use
+                // the partial evaluator, but because we already ran it on this code attribute in a previous operation
+                // it doesn't really cost us much at all.
+                for (int i = 0; i < nbrArgs; i++) {
+                    int offset = partialEvaluator.getStackBefore(invokeMethodCallOffset).getTopActualProducerValue(nbrArgs - i - 1).instructionOffsetValue().instructionOffset(0);
+                    codeAttribute.instructionAccept(clazz, method, offset, new CastRemover(codeAttributeEditor, keepList, i));
+                }
             }
             codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
         }
