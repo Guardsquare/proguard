@@ -406,16 +406,63 @@ class AdvancedTest: FreeSpec ({
         compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
     }
 
-    "Inline in a method that doesn't use the lambda type in it's descriptor" {
+    "Test the cast remover on a harder case" {
         val code = KotlinSource(
             "Main.kt",
             """
-            fun test(f: Any) {
-                println((f as (Int) -> Int).invoke(8))
+            fun test(f: (Any) -> Any) {
+                // The following sequence of code was created with the idea of breaking the inliner if it is guessing 
+                // instruction offsets, if offsets are guessed it might potentially see -20 as the opcode which is
+                // invalid.
+                val x = -20 shl 8
+                println(f("Hello world!"))
             }
             
             fun main() {
-                test { it: Int -> it * 3 }
+                test { it }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
+    }
+
+    "Test the cast remover on an even harder case" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(f: (String, String, String, Int) -> String) {
+                val x: Any = 5
+                println(f("Test", "Hello world!", "Something else", 3))
+                other(x)
+            }
+            
+            fun other(x: Any) {}
+            
+            fun main() {
+                test { a, _, _, _ -> a }
+            }
+            """
+        )
+
+        compareOutputAndMainInstructions(code, listOf("invokestatic", "return"), true)
+    }
+
+    "Test the cast remover on an even harder case with a calculation directly in the arguments" {
+        val code = KotlinSource(
+            "Main.kt",
+            """
+            fun test(f: (String, String, String, Int, Int) -> String) {
+                val y = 7
+                val x: Any = 5
+                println(f("Test", "Hello world!", "Something else", 7, 3 + y + 5 + 7 + 26))
+                other(x)
+            }
+            
+            fun other(x: Any) {}
+            
+            fun main() {
+                test { a, _, _, _, _ -> a }
             }
             """
         )

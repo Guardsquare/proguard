@@ -32,6 +32,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.util.InternalTypeEnumeration;
+import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
@@ -40,8 +41,6 @@ import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.lang.Math.max;
 
 public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
     private final Clazz consumingClass;
@@ -108,6 +107,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
 
         // Copy the invoke method
         String invokeMethodDescriptor = method.getDescriptor(consumingClass);
+        System.out.println("Method descriptor " + invokeMethodDescriptor);
         DescriptorModifier descriptorModifier = new DescriptorModifier(consumingClass);
         staticInvokeMethod = descriptorModifier.modify(method,
             originalDescriptor -> {
@@ -290,8 +290,6 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         @Override
         public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
             for (int invokeMethodCallOffset : invokeMethodCallOffsets) {
-                System.out.println("Removing casts from " + invokeMethodCallOffset);
-                int startOffset = max((invokeMethodCallOffset -(6 * nbrArgs)), 0);
                 int endOffset = invokeMethodCallOffset + 8 + 1;
                 // If  the next instruction is pop then we are not using the return value so we don't need to remove
                 // casts on the return value.
@@ -299,37 +297,16 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
                     endOffset = invokeMethodCallOffset;
                 }
 
-                /*LimitedInstructionCollector collector = new LimitedInstructionCollector(invokeMethodCallOffset, nbrArgs * 2 + 1);
-                codeAttribute.accept(clazz, method, collector);
+                for (int i = 0; i < nbrArgs; i++) {
+                    int offset = partialEvaluator.getStackBefore(invokeMethodCallOffset).getTopActualProducerValue(nbrArgs - i - 1).instructionOffsetValue().instructionOffset(0);
+                    codeAttribute.instructionAccept(clazz, method, offset, new CastRemover(codeAttributeEditor, keepList, i));
+                }
 
-                System.out.println(collector.getLastNInstructions());
-
-                System.out.println("startOffset " + startOffset);
-                startOffset = collector.getLastNInstructions().get(0).offset();*/
-                codeAttribute.instructionsAccept(consumingClass, method, startOffset, endOffset,
-                    new CastRemover(codeAttributeEditor, keepList)
+                codeAttribute.instructionsAccept(consumingClass, method, invokeMethodCallOffset, endOffset,
+                    new CastRemover(codeAttributeEditor)
                 );
-
-                /*int offset = startOffset;
-                try {
-                    while (offset < endOffset)
-                    {
-                        // Note that the instruction is only volatile.
-                        Instruction instruction = InstructionFactory.create(codeAttribute.code, offset);
-                        int instructionLength = instruction.length(offset);
-                        instruction.accept(clazz, method, codeAttribute, offset, new CastRemover(codeAttributeEditor, keepList));
-                        offset += instructionLength;
-                    }
-                } catch(IllegalArgumentException iae) {
-                    codeAttribute.accept(clazz, method, new ClassPrinter());
-                    System.out.println(offset);
-                    throw iae;
-                }*/
             }
-
             codeAttributeEditor.visitCodeAttribute(clazz, method, codeAttribute);
-            System.out.println("After removing casts");
-            codeAttribute.accept(clazz, method, new ClassPrinter());
         }
 
         @Override

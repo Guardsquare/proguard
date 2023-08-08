@@ -20,20 +20,19 @@ import java.util.Set;
 public class CastRemover implements InstructionVisitor {
     private final CodeAttributeEditor codeAttributeEditor;
     private final List<Integer> keepList;
-    private int argIndex;
+    private final int argIndex;
 
     // The names of all method taking a boxed type variable and returning the variable with the unboxed type
     private final Set<String> castingMethodNames = new HashSet<>(Arrays.asList("intValue", "booleanValue", "byteValue", "shortValue", "longValue", "floatValue", "doubleValue", "charValue"));
 
-
-    public CastRemover(CodeAttributeEditor codeAttributeEditor, List<Integer> keepList) {
+    public CastRemover(CodeAttributeEditor codeAttributeEditor, List<Integer> keepList, int argIndex) {
         this.codeAttributeEditor = codeAttributeEditor;
-        this.argIndex = 0;
+        this.argIndex = argIndex;
         this.keepList = keepList;
     }
 
     public CastRemover(CodeAttributeEditor codeAttributeEditor) {
-        this(codeAttributeEditor, new ArrayList<>());
+        this(codeAttributeEditor, new ArrayList<>(), -1);
     }
 
     @Override
@@ -56,7 +55,6 @@ public class CastRemover implements InstructionVisitor {
                 if (!keepList.contains(argIndex)) {
                     codeAttributeEditor.deleteInstruction(offset);
                 }
-                argIndex++;
             }
         } else if (constantInstruction.opcode == Instruction.OP_INVOKEVIRTUAL) {
             if (castingMethodNames.contains(getInvokedMethodName(clazz, constantInstruction))) {
@@ -66,8 +64,7 @@ public class CastRemover implements InstructionVisitor {
     }
 
     @Override
-    public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {
-    }
+    public void visitAnyInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, Instruction instruction) {}
 
     private String getInvokedMethodName(Clazz clazz, ConstantInstruction constantInstruction) {
         final String[] invokedMethodName = new String[1];
