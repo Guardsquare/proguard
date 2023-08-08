@@ -12,6 +12,7 @@ import proguard.evaluation.value.InstructionOffsetValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SourceTracer {
     private static final Logger logger = LogManager.getLogger(SourceTracer.class);
@@ -27,8 +28,14 @@ public class SourceTracer {
     }
 
     /**
-     * Given an offset of an instruction, trace the source producer value.
+     * Given an offset of an instruction, trace the source producer values.
      */
+    public static List<Instruction> traceParameterSources(PartialEvaluator partialEvaluator, CodeAttribute codeAttribute, int offset) {
+        ArrayList<InstructionAtOffset> leafNodes = new ArrayList<>();
+        traceParameterTree(partialEvaluator, codeAttribute, offset, leafNodes);
+        return leafNodes.stream().map(InstructionAtOffset::instruction).collect(Collectors.toList());
+    }
+
     public static List<InstructionAtOffset> traceParameterOffset(PartialEvaluator partialEvaluator, CodeAttribute codeAttribute, int offset) {
         List<InstructionAtOffset> trace = new ArrayList<>();
         TracedStack currentTracedStack;
@@ -86,22 +93,21 @@ public class SourceTracer {
 
         // We stop when we found the source instruction
         if (
-                (!isLoad(currentInstruction) ||
-                        !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&
-                        currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
-                        currentInstruction.opcode != Instruction.OP_LDC &&
-                        currentInstruction.opcode != Instruction.OP_LDC_W &&
-                        currentInstruction.opcode != Instruction.OP_LDC2_W &&
-                        currentInstruction.opcode != Instruction.OP_NEW &&
-                        currentInstruction.opcode != Instruction.OP_GETSTATIC &&
-                        currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
-                        currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
-                        currentInstruction.opcode != Instruction.OP_GETFIELD
-        ) {
+                /*(!isLoad(currentInstruction) ||
+                        !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&*/
+                currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
+                currentInstruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
+                currentInstruction.opcode != Instruction.OP_LDC &&
+                currentInstruction.opcode != Instruction.OP_LDC_W &&
+                currentInstruction.opcode != Instruction.OP_LDC2_W &&
+                currentInstruction.opcode != Instruction.OP_NEW &&
+                currentInstruction.opcode != Instruction.OP_GETSTATIC &&
+                currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
+                currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
+                currentInstruction.opcode != Instruction.OP_GETFIELD) {
             logger.debug(currentInstruction.toString(offset));
             currentTracedStack = partialEvaluator.getStackBefore(offset);
             logger.debug(currentTracedStack);
@@ -115,7 +121,10 @@ public class SourceTracer {
                 offsetValue = currentTracedStack.getTopActualProducerValue(0).instructionOffsetValue();
             }
             for (int i = 0; i < offsetValue.instructionOffsetCount(); i++) {
-                root.children.add(traceParameterTree(partialEvaluator, codeAttribute, offsetValue.instructionOffset(i), leafNodes));
+                if (!isLoad(currentInstruction) || !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(i))
+                    root.children.add(traceParameterTree(partialEvaluator, codeAttribute, offsetValue.instructionOffset(i), leafNodes));
+                else
+                    leafNodes.add(root.value);
             }
         }
         else {

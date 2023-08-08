@@ -122,6 +122,7 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
                         targetLambda,
                         methodrefConstant.referencedClass,
                         methodrefConstant.referencedMethod,
+                        argIndex,
                         offset,
                         clazz,
                         method,
@@ -133,6 +134,12 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
                         }).collect(Collectors.toList())
                     )
                 );
+
+                // We can't continue the loop because we already changed the code, the offset of the instruction we
+                // are currently operating on might have changed resulting in strange behaviour.
+                if (iterativeInstructionVisitor.codeHasChanged()) {
+                    break;
+                }
             }
         }
         logger.debug("---------End-----------");

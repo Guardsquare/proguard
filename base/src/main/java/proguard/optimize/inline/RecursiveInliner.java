@@ -26,30 +26,36 @@ import proguard.classfile.util.ClassUtil;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-
-import static proguard.optimize.inline.FirstLambdaParameterFinder.findFirstLambdaParameter;
+import java.util.List;
 
 /**
  * Recursively inline functions that make use of the lambda parameter in the arguments of the current function.
  * The first step, is finding out who actually uses our lambda parameter, we do this using the partial evaluator.
+ * <p>
+ * If we s ee a lambda is used by a method being called from within the consuming method we will currently abort the
+ * inlining process.
  */
 public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, MemberVisitor, ConstantVisitor {
     private Clazz consumingClazz;
     private Method copiedConsumingMethod;
-    private boolean isStatic;
     private final PartialEvaluator partialEvaluator;
+    private final int lambdaConsumingMethodArgIndex;
     private static final Logger logger = LogManager.getLogger(RecursiveInliner.class);
 
-
-    public RecursiveInliner() {
+    public RecursiveInliner(int lambdaConsumingMethodArgIndex) {
         this.consumingClazz = null;
         this.copiedConsumingMethod = null;
         this.partialEvaluator = new PartialEvaluator();
+        this.lambdaConsumingMethodArgIndex = lambdaConsumingMethodArgIndex;
     }
 
     @Override
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
+    /**
+     * Given a code attribute, look at all the call instructions and see if they call a method that uses the lambda we
+     * are currently attempting to inline.
+     */
     @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
@@ -78,21 +84,24 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction) {
         if (variableInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
             logger.debug("Value from " + variableInstruction + " " + variableInstruction.variableIndex);
-            Instruction sourceInstruction = SourceTracer.traceParameter(partialEvaluator, codeAttribute, offset);
-            if (sourceInstruction == null) {
-                throw new CannotInlineException("Argument has multiple source locations, cannot inline lambda!");
-            }
 
-            logger.debug(variableInstruction + " gets it's value from " + sourceInstruction);
-            if (sourceInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
-                VariableInstruction variableSourceInstruction = (VariableInstruction) sourceInstruction;
+            List<Instruction> sourceInstructions = SourceTracer.traceParameterSources(partialEvaluator, codeAttribute, offset);
+            for (Instruction sourceInstruction : sourceInstructions) {
+                logger.debug(variableInstruction + " gets it's value from " + sourceInstruction);
+                if (sourceInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
+                    VariableInstruction variableSourceInstruction = (VariableInstruction) sourceInstruction;
+                    /*
+                     * If the source instruction was an aload_x instruction we will compare the x with the index of the
+                     * lambda that we are currently inlining. Because arguments can sometimes take up 2 slots on the stack
+                     * we have to adjust this index accordingly.
+                     */
+                    String consumingMethodDescriptor = copiedConsumingMethod.getDescriptor(consumingClazz);
+                    // We use true for isStatic here because lambdaConsumingMethodArgIndex already keeps in mind if the method was static or not
+                    int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, true, lambdaConsumingMethodArgIndex);
 
-                String consumingMethodDescriptor = copiedConsumingMethod.getDescriptor(consumingClazz);
-                int calledLambdaRealIndex = findFirstLambdaParameter(consumingMethodDescriptor);
-                int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, isStatic, calledLambdaRealIndex);
-
-                if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {
-                    throw new CannotInlineException("Cannot inline lambdas into functions that call other functions that consume this lambda!");
+                    if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {
+                        throw new CannotInlineException("Cannot inline lambdas into functions that call other functions that consume this lambda!");
+                    }
                 }
             }
         }
@@ -102,10 +111,14 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod) {
         this.consumingClazz = programClass;
         this.copiedConsumingMethod = programMethod;
-        this.isStatic = (copiedConsumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
         programMethod.attributesAccept(programClass, this);
     }
 
+    /**
+     * This class visits call instructions and visits the source instructions of each argument of each call using the
+     * sourceInstructionVisitor. The sourceInstructionVisitor can then check if the argument is in fact the lambda we
+     * are currently inlining.
+     */
     private class CalledMethodHandler implements InstructionVisitor, ConstantVisitor, AttributeVisitor {
         private final InstructionVisitor sourceInstructionVisitor;
         private TracedStack tracedStack;
@@ -113,10 +126,24 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
         private Method method;
         private CodeAttribute codeAttribute;
 
+        /**
+         * @param sourceInstructionVisitor This is the visitor that will visit the source instructions for the arguments
+         *                                 of method calls. The source instructions are the instructions that originally
+         *                                 produced the value used in the argument. In the context of recursive inlining
+         *                                 this could be something like aload_1 which loads the first argument in a
+         *                                 virtual function, we also know which index  the lambda argument is at and
+         *                                 that allows us to see if this method makes use of the lambda argument of the
+         *                                 consuming method or not.
+         */
         public CalledMethodHandler(InstructionVisitor sourceInstructionVisitor) {
             this.sourceInstructionVisitor = sourceInstructionVisitor;
         }
 
+        /**
+         * This method will visit all the call instructions, it will visit the constantIndex using a constant visitor
+         * to see which method is referenced depending on if it's an invokeinterface/invokedynamic/invokestatic/...
+         * call.
+         */
         @Override
         public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int callOffset, ConstantInstruction constantInstruction) {
             this.clazz = clazz;
@@ -127,6 +154,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
             if (tracedStack.size() <= 0)
                 return;
 
+            // Handle the referenced method for all call instructions by visiting the constantIndex.
             clazz.constantPoolEntryAccept(constantInstruction.constantIndex, this);
         }
 
@@ -153,9 +181,16 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
             handleCalledMethod(interfaceMethodrefConstant.referencedClass, interfaceMethodrefConstant.referencedMethod);
         }
 
-        public void handleCalledMethod(Clazz referencedClass, Method referencedMethod) {
-            // There can be null checks on the lambda parameter, this doesn't stop us from inlining because we will
-            // remove these later.
+        /**
+         * This is a helper method that handles the case where a referencedMethod is called from the consuming method.
+         * @param referencedClass The class in which the method that is called from within the consuming method resides.
+         * @param referencedMethod The method that is called from within the consuming method.
+         */
+        private void handleCalledMethod(Clazz referencedClass, Method referencedMethod) {
+            /*
+             * Null checks can be on the lambda parameter, these are also function calls but they shouldn't stop us from
+             * inlining because we will remove these later.
+             */
             if (referencedClass.getName().equals("kotlin/jvm/internal/Intrinsics") &&
                     referencedMethod.getName(referencedClass).equals("checkNotNullParameter") &&
                     referencedMethod.getDescriptor(referencedClass).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
