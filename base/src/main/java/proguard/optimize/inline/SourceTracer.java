@@ -46,20 +46,8 @@ public class SourceTracer {
         // We stop when we found the source instruction
         while (
                 (!isLoad(currentInstruction) ||
-                        !partialEvaluator.getVariablesBefore(currentOffset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&
-                        currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
-                        currentInstruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
-                        currentInstruction.opcode != Instruction.OP_LDC &&
-                        currentInstruction.opcode != Instruction.OP_LDC_W &&
-                        currentInstruction.opcode != Instruction.OP_LDC2_W &&
-                        currentInstruction.opcode != Instruction.OP_NEW &&
-                        currentInstruction.opcode != Instruction.OP_GETSTATIC &&
-                        currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
-                        currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
-                        currentInstruction.opcode != Instruction.OP_GETFIELD
+                !partialEvaluator.getVariablesBefore(currentOffset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&
+                isSourceInstruction(currentInstruction)
         ) {
             logger.debug(currentInstruction.toString(currentOffset));
             currentTracedStack = partialEvaluator.getStackBefore(currentOffset);
@@ -92,22 +80,7 @@ public class SourceTracer {
         Node root = new Node(new InstructionAtOffset(currentInstruction, offset), new ArrayList<>());
 
         // We stop when we found the source instruction
-        if (
-                /*(!isLoad(currentInstruction) ||
-                        !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&*/
-                currentInstruction.opcode != Instruction.OP_ACONST_NULL &&
-                currentInstruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
-                currentInstruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
-                currentInstruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
-                currentInstruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
-                currentInstruction.opcode != Instruction.OP_LDC &&
-                currentInstruction.opcode != Instruction.OP_LDC_W &&
-                currentInstruction.opcode != Instruction.OP_LDC2_W &&
-                currentInstruction.opcode != Instruction.OP_NEW &&
-                currentInstruction.opcode != Instruction.OP_GETSTATIC &&
-                currentInstruction.opcode != Instruction.OP_INVOKESTATIC &&
-                currentInstruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
-                currentInstruction.opcode != Instruction.OP_GETFIELD) {
+        if (isSourceInstruction(currentInstruction)) {
             logger.debug(currentInstruction.toString(offset));
             currentTracedStack = partialEvaluator.getStackBefore(offset);
             logger.debug(currentTracedStack);
@@ -132,5 +105,26 @@ public class SourceTracer {
             leafNodes.add(root.value);
         }
         return root;
+    }
+
+    /**
+     * Checks if an instruction is considered a source instruction, this is an instruction that produces a value by
+     * itself, without having to look further up the chain of instructions. We use this as a stopping condition when we
+     * are tracing the source of an instruction.
+     */
+    private static boolean isSourceInstruction(Instruction instruction) {
+        return instruction.opcode != Instruction.OP_ACONST_NULL &&
+                instruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
+                instruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
+                instruction.canonicalOpcode() != Instruction.OP_FCONST_0 &&
+                instruction.canonicalOpcode() != Instruction.OP_LCONST_0 &&
+                instruction.opcode != Instruction.OP_LDC &&
+                instruction.opcode != Instruction.OP_LDC_W &&
+                instruction.opcode != Instruction.OP_LDC2_W &&
+                instruction.opcode != Instruction.OP_NEW &&
+                instruction.opcode != Instruction.OP_GETSTATIC &&
+                instruction.opcode != Instruction.OP_INVOKESTATIC &&
+                instruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
+                instruction.opcode != Instruction.OP_GETFIELD;
     }
 }
