@@ -1,4 +1,4 @@
-package proguard.lambdaInline
+package proguard.lambdaInline.correctness
 
 import io.kotest.core.spec.style.FreeSpec
 import onlyTestRunning

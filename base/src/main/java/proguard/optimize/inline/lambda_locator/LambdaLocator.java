@@ -1,5 +1,7 @@
 package proguard.optimize.inline.lambda_locator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.backport.LambdaExpression;
 import proguard.backport.LambdaExpressionCollector;
 import proguard.classfile.ClassPool;
@@ -31,7 +33,7 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
     private final Map<Integer, Lambda> staticLambdaMap = new HashMap<>();
     private final Set<Clazz> lambdaClasses = new HashSet<>();
     private final ClassPool classPool;
-
+    private static final Logger logger = LogManager.getLogger(LambdaLocator.class);
     public LambdaLocator(ClassPool classPool, String classNameFilter) {
         this.classPool = classPool;
 
@@ -49,6 +51,8 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
 
             clazz.methodsAccept(this);
         });
+
+        logger.info("Number of lambdas found :                " + staticLambdas.size());
     }
 
     @Override
@@ -113,7 +117,7 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
         public void visitUtf8Constant(Clazz clazz, Utf8Constant utf8Constant) {
             classPool.classAccept(utf8Constant.getString(), referencedClazz -> {
                 if (lambdaClasses.contains(referencedClazz)) {
-                    System.out.println("Found a lambda invocation " + constantInstruction);
+                    logger.debug("Found a lambda invocation " + constantInstruction);
 
                     Lambda lambda = new Lambda(clazz, method, codeAttribute, offset, constantInstruction);
                     staticLambdas.add(lambda);

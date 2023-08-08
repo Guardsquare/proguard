@@ -32,11 +32,11 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.util.InternalTypeEnumeration;
-import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 import proguard.optimize.inline.lambda_locator.Lambda;
+import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,7 +157,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         );
 
         // Inlining phase 2, inline that static invoke method into the actual function that uses the lambda.
-        Util.inlineMethodInClass(consumingClass, staticInvokeMethod);
+        inlineMethodInClass(consumingClass, staticInvokeMethod);
 
         // Remove the static invoke method once it has been inlined
         ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
@@ -186,7 +186,6 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         lambda.clazz().constantPoolEntryAccept(lambda.constantInstruction().constantIndex, new ConstantVisitor() {
             @Override
             public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
-                System.out.println(fieldrefConstant);
                 ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);
                 int lambdaInstanceFieldIndex = constantPoolEditor.addFieldrefConstant(fieldrefConstant.referencedClass, fieldrefConstant.referencedField);
 
@@ -247,7 +246,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         @Override
         public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction) {
             // Uses same codeAttributeEditor as the casting remover
-            Instruction tracedInstruction = Util.traceParameter(partialEvaluator, codeAttribute, offset);
+            Instruction tracedInstruction = SourceTracer.traceParameter(partialEvaluator, codeAttribute, offset);
             if (tracedInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
                 variableInstruction = (VariableInstruction) tracedInstruction;
 
@@ -353,5 +352,19 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
             }
         }));
         return length[0];
+    }
+
+    /**
+     * Inline a specified method in the locations it is called in the current clazz.
+     * @param clazz The clazz in which we want to inline the targetMethod
+     * @param targetMethod The method we want to inline.
+     */
+    private void inlineMethodInClass(Clazz clazz, Method targetMethod) {
+        clazz.methodsAccept(new AllAttributeVisitor(new MethodInliner(false, false, true, false, null) {
+            @Override
+            protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute) {
+                return method.equals(targetMethod);
+            }
+        }));
     }
 }

@@ -161,6 +161,35 @@ implements            AttributeVisitor,
              extraInlinedInvocationVisitor);
     }
 
+    /**
+     * Creates a new MethodInliner.
+     *
+     * @param microEdition                  Indicates whether the resulting code is
+     *                                      targeted at Java Micro Edition.
+     * @param android                       Indicates whether the resulting code is
+     *                                      targeted at the Dalvik VM.
+     * @param allowAccessModification       Indicates whether the access modifiers of
+     *                                      classes and class members can be changed
+     *                                      in order to inline methods.
+     * @param usesOptimizationInfo          Indicates whether this inliner needs to perform checks
+     *                                      that require optimization info.
+     * @param extraInlinedInvocationVisitor An optional extra visitor for all
+     *                                      inlined invocation instructions.
+     */
+    public MethodInliner(boolean            microEdition,
+                         boolean            android,
+                         boolean            allowAccessModification,
+                         boolean            usesOptimizationInfo,
+                         InstructionVisitor extraInlinedInvocationVisitor)
+    {
+        this.microEdition                  = microEdition;
+        this.android                       = android;
+        this.maxResultingCodeLength        = defaultMaxResultingCodeLength(microEdition);
+        this.allowAccessModification       = allowAccessModification;
+        this.usesOptimizationInfo          = usesOptimizationInfo;
+        this.extraInlinedInvocationVisitor = extraInlinedInvocationVisitor;
+    }
+
 
     /**
      * Creates a new MethodInliner.

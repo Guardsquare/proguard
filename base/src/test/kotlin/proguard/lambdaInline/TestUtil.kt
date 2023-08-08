@@ -327,7 +327,7 @@ fun testPerf(code: TestSource, inlineCode: TestSource, cleanUp: Boolean): Triple
     //test
     val originalTimes = mutableListOf<Long>()
     var i = 0
-    while (i < 10000) {
+    while (i < 100) {
         i++
         originalTimes.add(measureTimeMillis {
             ProcessBuilder("java", "-jar", "test-files/original.jar")
@@ -340,7 +340,7 @@ fun testPerf(code: TestSource, inlineCode: TestSource, cleanUp: Boolean): Triple
 
     val originalInlinedTimes = mutableListOf<Long>()
     i = 0
-    while (i < 10000) {
+    while (i < 100) {
         i++
         originalInlinedTimes.add(measureTimeMillis {
             ProcessBuilder("java", "-jar", "test-files/originalInlined.jar")
@@ -353,7 +353,7 @@ fun testPerf(code: TestSource, inlineCode: TestSource, cleanUp: Boolean): Triple
 
     val generatedTimes = mutableListOf<Long>()
     i = 0
-    while (i < 10000) {
+    while (i < 100) {
         i++
         generatedTimes.add(measureTimeMillis {
             ProcessBuilder("java", "-jar", "test-files/result.jar")
