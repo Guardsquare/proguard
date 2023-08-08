@@ -40,11 +40,13 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     private Method copiedConsumingMethod;
     private boolean isStatic;
     private final PartialEvaluator partialEvaluator;
+    private final int lambdaConsumingMethodArgIndex;
 
-    public RecursiveInliner() {
+    public RecursiveInliner(int lambdaConsumingMethodArgIndex) {
         this.consumingClazz = null;
         this.copiedConsumingMethod = null;
         this.partialEvaluator = new PartialEvaluator();
+        this.lambdaConsumingMethodArgIndex = lambdaConsumingMethodArgIndex;
     }
 
     @Override
@@ -95,8 +97,8 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                      * we have to adjust this index accordingly.
                      */
                     String consumingMethodDescriptor = copiedConsumingMethod.getDescriptor(consumingClazz);
-                    int calledLambdaRealIndex = Util.findFirstLambdaParameter(consumingMethodDescriptor);
-                    int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, isStatic, calledLambdaRealIndex);
+                    // We use true for isStatic here because lambdaConsumingMethodArgIndex already keeps in mind if the method was static or not
+                    int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, true, lambdaConsumingMethodArgIndex);
 
                     if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {
                         throw new CannotInlineException("Cannot inline lambdas into functions that call other functions that consume this lambda!");
