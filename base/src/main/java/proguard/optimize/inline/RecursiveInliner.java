@@ -27,6 +27,8 @@ import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
 
+import static proguard.optimize.inline.FirstLambdaParameterFinder.findFirstLambdaParameter;
+
 /**
  * Recursively inline functions that make use of the lambda parameter in the arguments of the current function.
  * The first step, is finding out who actually uses our lambda parameter, we do this using the partial evaluator.
@@ -76,7 +78,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
     public void visitVariableInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, VariableInstruction variableInstruction) {
         if (variableInstruction.canonicalOpcode() == Instruction.OP_ALOAD) {
             logger.debug("Value from " + variableInstruction + " " + variableInstruction.variableIndex);
-            Instruction sourceInstruction = Util.traceParameter(partialEvaluator, codeAttribute, offset);
+            Instruction sourceInstruction = SourceTracer.traceParameter(partialEvaluator, codeAttribute, offset);
             if (sourceInstruction == null) {
                 throw new CannotInlineException("Argument has multiple source locations, cannot inline lambda!");
             }
@@ -86,7 +88,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                 VariableInstruction variableSourceInstruction = (VariableInstruction) sourceInstruction;
 
                 String consumingMethodDescriptor = copiedConsumingMethod.getDescriptor(consumingClazz);
-                int calledLambdaRealIndex = Util.findFirstLambdaParameter(consumingMethodDescriptor);
+                int calledLambdaRealIndex = findFirstLambdaParameter(consumingMethodDescriptor);
                 int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, isStatic, calledLambdaRealIndex);
 
                 if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {

@@ -103,9 +103,9 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
             int sizeAdjustedIndex = ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argIndex);
             int stackEntryIndex = tracedStack.size() - ClassUtil.internalMethodVariableIndex(methodDescriptor, true, argCount) + sizeAdjustedIndex;
             int traceOffset = tracedStack.getBottomActualProducerValue(stackEntryIndex).instructionOffsetValue().instructionOffset(0);
-            List<InstructionAtOffset> trace = Util.traceParameterOffset(partialEvaluator, codeAttribute, traceOffset);
+            List<InstructionAtOffset> trace = SourceTracer.traceParameterOffset(partialEvaluator, codeAttribute, traceOffset);
             List<InstructionAtOffset> leafNodes = new ArrayList<>();
-            Util.traceParameterTree(partialEvaluator, codeAttribute, traceOffset, leafNodes);
+            SourceTracer.traceParameterTree(partialEvaluator, codeAttribute, traceOffset, leafNodes);
             boolean match = false;
             for (InstructionAtOffset tracedInstructionAtOffset : leafNodes) {
                 logger.debug("Argument " + argIndex + " source " + tracedInstructionAtOffset);
