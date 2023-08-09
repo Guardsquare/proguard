@@ -149,7 +149,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         // Don't inline if the lamdba is passed to another method
         try {
             copiedConsumingMethod.accept(consumingClass, new RecursiveInliner(calledLambdaIndex));
-        } catch(CannotInlineException cie) {
+        } catch (CannotInlineException cie) {
             ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
             classEditor.removeMethod(copiedConsumingMethod);
             classEditor.removeMethod(staticInvokeMethod);
@@ -174,7 +174,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
             copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PrePostCastRemover(invokeMethodDescriptor)));
         }
 
-        // Remove return value's casting from staticInvokeMethod
+        // Remove return value's casting from staticInvokeMethod.
         staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new CastPatternRemover(codeAttributeEditor))));
 
         // Important for inlining, we need this so that method invocations have non-null referenced methods.
@@ -185,19 +185,19 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         // Inlining phase 2, inline that static invoke method into the actual function that uses the lambda.
         inlineMethodInClass(consumingClass, staticInvokeMethod);
 
-        // Remove the static invoke method once it has been inlined
+        // Remove the static invoke method once it has been inlined.
         ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
         classEditor.removeMethod(staticInvokeMethod);
 
-        // Remove checkNotNullParameter() call because arguments that are lambdas will be removed
+        // Remove checkNotNullParameter() call because arguments that are lambdas will be removed.
         InstructionCounter removedNullCheckInstrCounter = new InstructionCounter();
         copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new NullCheckRemover(sizeAdjustedLambdaIndex, codeAttributeEditor, removedNullCheckInstrCounter))));
 
-        //remove inlined lambda from arguments through the descriptor
+        // Remove inlined lambda from arguments through the descriptor.
         Method methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
             List<String> list = new ArrayList<>();
             InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(desc);
-            while(internalTypeEnumeration.hasMoreTypes()) {
+            while (internalTypeEnumeration.hasMoreTypes()) {
                 list.add(internalTypeEnumeration.nextType());
             }
             // We adjust the index to not take the this parameter into account because this is not visible in the
@@ -308,7 +308,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
 
             InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(invokeMethodDescriptor);
             int i = 0;
-            while(internalTypeEnumeration.hasMoreTypes()) {
+            while (internalTypeEnumeration.hasMoreTypes()) {
                 if (internalTypeEnumeration.nextType().equals("Ljava/lang/Object;")) {
                     // Argument i is object, we should keep the cast for this argument
                     keepList.add(i);
