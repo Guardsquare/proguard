@@ -25,6 +25,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * This class will try to find method calls that consume the lambda, these are then passed to a lambdaUsageHandler which
+ * can then decide to inline the lambda into the method that was found to be using the lambda as an argument.
+ */
 public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, ConstantVisitor {
     private final Lambda targetLambda;
     private PartialEvaluator partialEvaluator;

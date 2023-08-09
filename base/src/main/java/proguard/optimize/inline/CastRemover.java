@@ -17,6 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A general cast remover class used for removing the casts before and after a bridge method invoke call. It has a
+ * keepList which is a list of argument indexes for which it should keep the cast. The argIndex indicates the current
+ * argument it is processing.
+ */
 public class CastRemover implements InstructionVisitor {
     private final CodeAttributeEditor codeAttributeEditor;
     private final List<Integer> keepList;

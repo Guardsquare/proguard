@@ -12,6 +12,10 @@ import proguard.classfile.constant.visitor.ConstantVisitor;
 import proguard.classfile.visitor.AllMethodVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 
+/**
+ * A visitor that can given a field reference used in <code>getstatic</code> for example to obtain a lambda instance
+ * find the referenced class and invoke method that contains the lambda implementation.
+ */
 public class LambdaImplementationVisitor implements ConstantVisitor, MemberVisitor {
     private final InvokeMethodVisitor invokeMethodVisitor;
     private Clazz lambdaImplementationClass;

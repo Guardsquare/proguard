@@ -13,6 +13,11 @@ import proguard.optimize.info.ProgramMemberOptimizationInfoSetter;
 
 import java.util.function.Function;
 
+/**
+ * A class that takes a method and creates a new method with a different name that has an updated descriptor. The
+ * descriptor is made using a lambda that takes in the old descriptor and then returns the new descriptor. Optionally
+ * the original method can be deleted.
+ */
 public class DescriptorModifier {
     private final ClassBuilder classBuilder;
     private final NameFactory nameFactory;

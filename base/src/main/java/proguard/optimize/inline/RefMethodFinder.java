@@ -1,4 +1,3 @@
-
 package proguard.optimize.inline;
 
 import proguard.classfile.Clazz;
@@ -6,10 +5,12 @@ import proguard.classfile.Member;
 import proguard.classfile.Method;
 import proguard.classfile.ProgramClass;
 import proguard.classfile.ProgramMethod;
-import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.classfile.visitor.ReferencedMemberVisitor;
 
+/**
+ * A utility class that can be used to easily obtain the referenced method when given a constant index.
+ */
 public class RefMethodFinder {
     private final Clazz clazz;
     private Method foundMethod;

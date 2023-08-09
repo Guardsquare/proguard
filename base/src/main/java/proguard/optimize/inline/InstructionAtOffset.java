@@ -2,8 +2,10 @@ package proguard.optimize.inline;
 
 import proguard.classfile.instruction.Instruction;
 
-import java.util.Objects;
-
+/**
+ * A class that holds an instruction and offset at which it was found, this is useful in some cases where we need to
+ * return both of them form somewhere.
+ */
 public final class InstructionAtOffset {
     private final Instruction instruction;
     private final int offset;

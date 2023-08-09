@@ -8,8 +8,7 @@ import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
 
 /**
- * A simple utility class that gets the length of a method, if the method has no code attribute it will return -1 as the
- * length.
+ * A simple utility class that can be used to easily obtain the length of a method.
  */
 public class MethodLengthFinder {
     private static int codeLength;
@@ -17,7 +16,7 @@ public class MethodLengthFinder {
     /**
      * @param method     A Method object from which we'll get the length.
      * @param clazz      The class in which the method is.
-     * @return           The length of the method.
+     * @return           The length of the method, if the method has no code attribute it will return -1.
      */
     public static int getMethodCodeLength(Clazz clazz, Method method) {
         codeLength = -1; // If a method has no codeAttribute we don't want to return the previous method length value.

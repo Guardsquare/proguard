@@ -13,7 +13,19 @@ import proguard.classfile.instruction.InstructionFactory;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.InstructionSequenceMatcher;
 
-class NullCheckRemover implements InstructionVisitor {
+/**
+ * This class removes Kotlin null checks that make use of the <code>checkNotNullParameter</code> this is useful for
+ * when removing an argument of a method, in that case you also want to remove the null check for that argument.
+ * <p>
+ * Example bytecode:
+ * <pre>{@code
+ * [0] aload_0 v0
+ * [1] ldc #10 = String("argumentName")
+ * [3] invokestatic #16 = Methodref(kotlin/jvm/internal/Intrinsics.checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V)
+ * }</pre>
+ * If the argumentIndex is set to 0 then these 3 instructions will be removed.
+ */
+public class NullCheckRemover implements InstructionVisitor {
     private final InstructionSequenceMatcher insSeqMatcher;
     private final int X = InstructionSequenceMatcher.X;
     private final int Y = InstructionSequenceMatcher.Y;
@@ -28,9 +40,10 @@ class NullCheckRemover implements InstructionVisitor {
         InstructionSequenceBuilder ____ =
                 new InstructionSequenceBuilder();
 
-        pattern = ____.aload(X)
-            .ldc_(C)
-            .invokestatic(Y).__();
+        pattern =
+            ____.aload(X)
+                .ldc_(C)
+                .invokestatic(Y).__();
 
         constants = ____.constants();
 

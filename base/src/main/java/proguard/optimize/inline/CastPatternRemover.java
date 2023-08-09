@@ -18,6 +18,10 @@ import proguard.classfile.visitor.ClassPrinter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * This class removes the casting at the end of a lambda invoke method, it does this through pattern matching. It
+ * replaces the pattern invokestatic valueOf, return with just return.
+ */
 public class CastPatternRemover implements InstructionVisitor {
     private final Logger logger = LogManager.getLogger(this.getClass());
     private final InstructionSequenceMatcher insSeqMatcher;

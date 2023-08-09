@@ -21,6 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class implements the lambda inlining pass that operates on the entire program.
+ */
 public class LambdaInliner implements Pass {
     private final Logger logger = LogManager.getLogger();
     private final String classNameFilter;
