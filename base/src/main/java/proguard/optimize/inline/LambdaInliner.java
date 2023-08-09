@@ -41,12 +41,12 @@ public class LambdaInliner implements Pass {
     public void execute(AppView appView) {
         LambdaLocator lambdaLocator = new LambdaLocator(appView.programClassPool, classNameFilter);
 
-        for (Lambda lambda : lambdaLocator.getStaticLambdas()) {
+        for (Lambda lambda : lambdaLocator.getKotlinLambdas()) {
             Set<InstructionAtOffset> remainder = new HashSet<>();
             inlinedAllUsages = true;
             InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
             lambda.codeAttribute().accept(lambda.clazz(), lambda.method(),
-                    new LambdaUsageFinder(lambda, lambdaLocator.getStaticLambdaMap(),
+                    new LambdaUsageFinder(lambda, lambdaLocator.getKotlinLambdaMap(),
                             new LambdaUsageHandler(appView, remainder)
                     )
             );
