@@ -32,7 +32,6 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassReferenceInitializer;
 import proguard.classfile.util.ClassUtil;
 import proguard.classfile.util.InternalTypeEnumeration;
-import proguard.classfile.visitor.ClassPrinter;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
@@ -42,7 +41,7 @@ import proguard.optimize.peephole.MethodInliner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
+public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
     private final Clazz consumingClass;
     private final Method consumingMethod;
     private final AppView appView;
@@ -91,6 +90,10 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
             this.lambdaInvokeMethod = programMethod;
             this.bridgeDescriptor = bridgeDescriptor;
 
+            if (!shouldInline(consumingClass, consumingMethod, programClass, lambdaInvokeMethod)) {
+                return;
+            }
+
             // First we copy the method from the anonymous lambda class into the class where it is used.
             MethodCopier copier = new MethodCopier(programClass, programMethod, BaseLambdaInliner.this);
             consumingClass.accept(copier);
@@ -98,6 +101,8 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
 
         return inlinedLambdaMethod;
     }
+
+    protected abstract boolean shouldInline(Clazz consumingClass, Method consumingMethod, Clazz lambdaClass, Method lambdaImplMethod);
 
     @Override
     public void visitAnyMember(Clazz clazz, Member member) {
@@ -135,7 +140,7 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
         invokeMethodCallOffsets.clear();
 
         // Replace invokeinterface call to invoke method with invokestatic to staticInvokeMethod
-        codeAttributeEditor.reset(getMethodLength(copiedConsumingMethod, consumingClass));
+        codeAttributeEditor.reset(MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod));
         copiedConsumingMethod.accept(consumingClass,
                 new AllAttributeVisitor(
                 new AllInstructionVisitor(
@@ -311,24 +316,6 @@ public class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, Con
 
         @Override
         public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
-    }
-
-    /**
-     * @param method     A Method object from which we'll get the length.
-     * @param clazz      The class in which the method is.
-     * @return           The length of the method.
-     */
-    private int getMethodLength(Method method, Clazz clazz) {
-        final int[] length = new int[1];
-        method.accept(clazz, new AllAttributeVisitor(new AttributeVisitor() {
-            @Override
-            public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
-            @Override
-            public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-                length[0] = codeAttribute.u4codeLength;
-            }
-        }));
-        return length[0];
     }
 
     /**
