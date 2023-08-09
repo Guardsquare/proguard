@@ -32,7 +32,7 @@ import java.util.List;
  * Recursively inline functions that make use of the lambda parameter in the arguments of the current function.
  * The first step, is finding out who actually uses our lambda parameter, we do this using the partial evaluator.
  * <p>
- * If we s ee a lambda is used by a method being called from within the consuming method we will currently abort the
+ * If we see a lambda is used by a method being called from within the consuming method we will currently abort the
  * inlining process.
  */
 public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, MemberVisitor, ConstantVisitor {
