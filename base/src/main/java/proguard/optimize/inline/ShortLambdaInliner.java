@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
-import proguard.optimize.inline.lambda_locator.Lambda;
+import proguard.optimize.inline.lambdalocator.Lambda;
 
 /**
  * This class is an implementation of the {@link proguard.optimize.inline.BaseLambdaInliner BaseLambdaInliner } that

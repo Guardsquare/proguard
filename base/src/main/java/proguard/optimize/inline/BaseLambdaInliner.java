@@ -35,7 +35,7 @@ import proguard.classfile.util.InternalTypeEnumeration;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-import proguard.optimize.inline.lambda_locator.Lambda;
+import proguard.optimize.inline.lambdalocator.Lambda;
 import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;

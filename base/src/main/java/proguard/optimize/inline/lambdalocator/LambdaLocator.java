@@ -1,4 +1,4 @@
-package proguard.optimize.inline.lambda_locator;
+package proguard.optimize.inline.lambdalocator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
