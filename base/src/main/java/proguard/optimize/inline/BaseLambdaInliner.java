@@ -40,6 +40,7 @@ import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A class that given a method that consumes a lambda is able to create a new method which has this lambda inlined. The
@@ -159,7 +160,9 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         invokeMethodCallOffsets.clear();
 
         // Replace invokeinterface call to invoke method with invokestatic to staticInvokeMethod
-        codeAttributeEditor.reset(MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod));
+        Optional<Integer> consumingMethodLength = MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod);
+        assert consumingMethodLength.isPresent();
+        codeAttributeEditor.reset(consumingMethodLength.get());
         copiedConsumingMethod.accept(consumingClass,
                 new AllAttributeVisitor(
                 new AllInstructionVisitor(
