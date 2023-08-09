@@ -30,6 +30,8 @@ public class ShortLambdaInliner extends BaseLambdaInliner {
         boolean inline = lambdaImplMethodLength < MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH && consumingMethodLength < MAXIMUM_CONSUMING_METHOD_LENGTH;
         if (!inline) {
             logger.info("Will not attempt inlining lambda because methods are too long, maximum consuming method length = {}, maximum lambda implementation method length = {}", MAXIMUM_CONSUMING_METHOD_LENGTH, MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH);
+            logger.info("Consuming method = {}#{}{}", consumingClass.getName(), consumingMethod.getName(consumingClass), consumingMethod.getDescriptor(consumingClass));
+            logger.info("Lambda implementation method = {}#{}{}", lambdaClass.getName(), lambdaImplMethod.getName(lambdaClass), lambdaImplMethod.getDescriptor(lambdaClass));
             logger.info("Consuming method length = {}, lambda implementation method length = {}", consumingMethodLength, lambdaImplMethodLength);
         }
         return inline;
