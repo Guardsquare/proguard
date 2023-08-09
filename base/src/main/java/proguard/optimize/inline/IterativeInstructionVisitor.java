@@ -33,7 +33,7 @@ public class IterativeInstructionVisitor {
         return changed;
     }
 
-    public void setChanged(boolean changed) {
+    public void setCodeChanged(boolean changed) {
         this.changed = changed;
     }
 }
