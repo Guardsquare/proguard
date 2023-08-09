@@ -8,7 +8,7 @@ class PerformanceTest: FreeSpec ({
     "basic case" - {
         "10" {
             //setup
-            val code = KotlinSource( //create java file
+            val code = KotlinSource(
                 "Main.kt",
                 """
             fun test(a: (Int) -> Int) {
@@ -46,7 +46,7 @@ class PerformanceTest: FreeSpec ({
         }
         "1000" {
             //setup
-            val code = KotlinSource( //create java file
+            val code = KotlinSource(
                 "Main.kt",
                 """
             fun test(a: (Int) -> Int) {
@@ -84,7 +84,7 @@ class PerformanceTest: FreeSpec ({
         }
         "100000" {
             //setup
-            val code = KotlinSource( //create java file
+            val code = KotlinSource(
                 "Main.kt",
                 """
             fun test(a: (Int) -> Int) {
@@ -125,7 +125,7 @@ class PerformanceTest: FreeSpec ({
     "hard case" - {
         "1" {
             //setup
-            val code = KotlinSource( //create java file
+            val code = KotlinSource(
                 "Main.kt",
                 """
             fun test(a: (Int) -> Int) {
@@ -205,7 +205,7 @@ class PerformanceTest: FreeSpec ({
         }
         "10" {
             //setup
-            val code = KotlinSource( //create java file
+            val code = KotlinSource(
                 "Main.kt",
                 """
             fun test(a: (Int) -> Int) {
@@ -284,7 +284,7 @@ class PerformanceTest: FreeSpec ({
         }
         "100" {
             //setup
-            val code = KotlinSource( //create java file
+            val code = KotlinSource(
                 "Main.kt",
                 """
             fun test(a: (Int) -> Int) {

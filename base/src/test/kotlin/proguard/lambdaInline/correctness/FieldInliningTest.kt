@@ -6,8 +6,7 @@ import proguard.testutils.KotlinSource
 
 class FieldInliningTest: FreeSpec ({
     "call lambda from field in method" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         class MainKtWithAField {
@@ -29,8 +28,7 @@ class FieldInliningTest: FreeSpec ({
     }
 
     "call lambda from a non-final field in method" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         class MainKtWithAField {

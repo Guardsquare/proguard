@@ -6,7 +6,7 @@ import proguard.testutils.KotlinSource
 
 class TypeTest: FreeSpec ({
     "Byte" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Byte) -> Byte) {
@@ -22,7 +22,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Short" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Short) ->Short) {
@@ -38,7 +38,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Int" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Int) -> Int) {
@@ -55,7 +55,7 @@ class TypeTest: FreeSpec ({
 
 
     "Long" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Long) -> Long) {
@@ -71,7 +71,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Long in consumingMethod args" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(c:Long, a: (Long) -> Long, b: Long) {
@@ -89,7 +89,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Float" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Float) -> Float) {
@@ -105,7 +105,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Double" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Double) -> Double) {
@@ -121,7 +121,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Boolean" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Boolean) -> Boolean) {
@@ -137,7 +137,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Char" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Char) -> Char) {
@@ -153,7 +153,7 @@ class TypeTest: FreeSpec ({
     }
 
     "String" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (String) -> String) {
@@ -169,7 +169,7 @@ class TypeTest: FreeSpec ({
     }
 
     "ByteArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (ByteArray) -> ByteArray) {
@@ -185,7 +185,7 @@ class TypeTest: FreeSpec ({
     }
 
     "ShortArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (ShortArray) -> ShortArray) {
@@ -201,7 +201,7 @@ class TypeTest: FreeSpec ({
     }
 
     "IntArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (IntArray) -> IntArray) {
@@ -217,7 +217,7 @@ class TypeTest: FreeSpec ({
     }
 
     "LongArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (LongArray) -> LongArray) {
@@ -233,7 +233,7 @@ class TypeTest: FreeSpec ({
     }
 
     "FloatArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (FloatArray) -> FloatArray) {
@@ -249,7 +249,7 @@ class TypeTest: FreeSpec ({
     }
 
     "DoubleArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (DoubleArray) -> DoubleArray) {
@@ -265,7 +265,7 @@ class TypeTest: FreeSpec ({
     }
 
     "CharArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (CharArray) -> CharArray) {
@@ -281,7 +281,7 @@ class TypeTest: FreeSpec ({
     }
 
     "StringArray" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Array<String>) -> Array<String>) {
@@ -297,7 +297,7 @@ class TypeTest: FreeSpec ({
     }
 
     "Any" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Any) -> Any) {

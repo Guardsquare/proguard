@@ -7,8 +7,7 @@ import proguard.testutils.KotlinSource
 
 class TwoLambdasInArgsTest: FreeSpec({
     "Two lambda in args, basic case" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int, Int) -> Int) {
@@ -26,8 +25,7 @@ class TwoLambdasInArgsTest: FreeSpec({
     }
 
     "Two lambdas in args and instruction before lambda function calls in main" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int, Int) -> Int) {
@@ -50,8 +48,7 @@ class TwoLambdasInArgsTest: FreeSpec({
     }
 
     "Twice the same lambda types in args" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int) -> Int) {
@@ -70,8 +67,7 @@ class TwoLambdasInArgsTest: FreeSpec({
     }
 
     "Twice the same lambda types in args + one lambda with one arg" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int) -> Int) {
@@ -96,7 +92,7 @@ class TwoLambdasInArgsTest: FreeSpec({
     }
 
     "Two lambdas but multiple other arguments before and after lambda arg" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -124,8 +120,7 @@ class TwoLambdasInArgsTest: FreeSpec({
 
 
     "Twice the same lambda types in args multiple levels" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(a: (Int) -> Int, b: (Int) -> Int) {
@@ -147,8 +142,7 @@ class TwoLambdasInArgsTest: FreeSpec({
     }
 
     "Twice the same lambda types in args multiple levels with one non lambda before the lambdas" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(i1: Int, a: (Int) -> Int, b: (Int) -> Int) {

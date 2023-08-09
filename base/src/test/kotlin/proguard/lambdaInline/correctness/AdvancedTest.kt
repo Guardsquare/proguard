@@ -6,8 +6,7 @@ import proguard.testutils.KotlinSource
 
 class AdvancedTest: FreeSpec ({
     "three lambda functions with two of same size and one different" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -64,7 +63,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "switch case, unit lambda, multiple call to the same lambda" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Unit) {
@@ -89,7 +88,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "Casting basic types after the lambda call" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -110,7 +109,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "Casting types before the lambda call" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -144,7 +143,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "Casting types after the lambda call" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -178,7 +177,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "Casting types between lambda calls" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -214,7 +213,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "Casting types inside lambda call" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Any) -> Int) {
@@ -235,7 +234,7 @@ class AdvancedTest: FreeSpec ({
     }
 
     "Casting types inside lambda call + other arg" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Any, Int) -> Int) {

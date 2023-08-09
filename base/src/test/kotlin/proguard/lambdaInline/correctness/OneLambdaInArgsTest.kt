@@ -7,8 +7,7 @@ import proguard.testutils.KotlinSource
 
 class OneLambdaInArgsTest: FreeSpec({
     "One lambda in args, basic case with int" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -25,8 +24,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in args, basic case with boolean" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Boolean) -> Boolean) {
@@ -43,8 +41,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in args, basic case with char" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Char) -> Char) {
@@ -61,8 +58,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in args and instruction before lambda function calls in main" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int) {
@@ -84,8 +80,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in args with if" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Boolean) {
@@ -102,8 +97,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but in a class companion object" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -127,8 +121,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but in a different class" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -153,8 +146,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in a class + other arguments" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun main() {
@@ -183,8 +175,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in a class + other arguments + nested + private" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun main() {
@@ -215,8 +206,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in a class with a call to a function in another class" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun main() {
@@ -244,8 +234,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda in a class with a call to a function in another class that calls a function in yet another class" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun main() {
@@ -284,7 +273,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but one other argument after lambda arg" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -305,7 +294,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but one other argument before lambda arg" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -326,7 +315,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but one other argument before and after lambda arg" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -347,7 +336,7 @@ class OneLambdaInArgsTest: FreeSpec({
         compareOutputAndMainInstructions(code, listOf("iconst_1", "bipush", "invokestatic", "return"))
     }
     "One lambda but multiple other arguments before and after lambda arg" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         
@@ -374,7 +363,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but the lambda is consumed by a function called from the consuming method" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(f: (Int) -> Int) {
@@ -395,7 +384,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but the lambda is consumed by a function called from the consuming method LONG" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(b: Long, f: (Int) -> Int, a: Long) {
@@ -417,7 +406,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but the lambda is consumed by multiple other methods from the original consuming method" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(f: (Int) -> Int) {
@@ -443,7 +432,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but the lambda at even more levels" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(f: (Int) -> Int) {
@@ -473,7 +462,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "One lambda but the lambda at even more levels + private" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun level1(f: (Int) -> Int) {
@@ -674,7 +663,7 @@ class OneLambdaInArgsTest: FreeSpec({
     }
 
     "Not using lambda return value" {
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
             fun test(a: (Int) -> Int) {

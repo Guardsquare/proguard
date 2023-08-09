@@ -6,8 +6,7 @@ import proguard.testutils.KotlinSource
 
 class ThreeLambdasInArgsTest: FreeSpec({
     "Three lambda in args, basic case" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int, Int) -> Int, c: (String, Boolean, Int) -> Boolean) {
@@ -25,8 +24,7 @@ class ThreeLambdasInArgsTest: FreeSpec({
     }
 
     "Three lambdas in args and instruction before lambda function calls in main" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int, Int) -> Int, c: (String, Boolean, Int) -> Boolean) {
@@ -64,8 +62,7 @@ class ThreeLambdasInArgsTest: FreeSpec({
         )
     }
     "Three lambdas in args and two are the same types" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (Int) -> Int, c: (String, Boolean, Int) -> Boolean) {
@@ -84,8 +81,7 @@ class ThreeLambdasInArgsTest: FreeSpec({
     }
 
     "Three lambdas in args and two are the same types shuffled" {
-        //setup
-        val code = KotlinSource( //create java file
+        val code = KotlinSource(
             "Main.kt",
             """
         fun test(a: (Int) -> Int, b: (String, Boolean, Int) -> Boolean, c: (Int) -> Int) {
