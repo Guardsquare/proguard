@@ -17,7 +17,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-import proguard.optimize.inline.lambda_locator.Lambda;
+import proguard.optimize.inline.lambdalocator.Lambda;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,30 +116,25 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
                 }
             }
 
-            if (match) {
-                iterativeInstructionVisitor.setChanged(
-                    lambdaUsageHandler.handle(
-                        targetLambda,
-                        methodrefConstant.referencedClass,
-                        methodrefConstant.referencedMethod,
-                        argIndex,
-                        offset,
-                        clazz,
-                        method,
-                        codeAttribute,
-                        trace,
-                        leafNodes.stream().filter(it -> it.instruction().opcode == Instruction.OP_GETSTATIC).map(it -> {
-                            ConstantInstruction getStaticInstruction = (ConstantInstruction) it.instruction();
-                            return lambdaMap.get(getStaticInstruction.constantIndex);
-                        }).collect(Collectors.toList())
-                    )
-                );
-
+            if (match && lambdaUsageHandler.handle(
+                targetLambda,
+                methodrefConstant.referencedClass,
+                methodrefConstant.referencedMethod,
+                argIndex,
+                offset,
+                clazz,
+                method,
+                codeAttribute,
+                trace,
+                leafNodes.stream().filter(it -> it.instruction().opcode == Instruction.OP_GETSTATIC).map(it -> {
+                    ConstantInstruction getStaticInstruction = (ConstantInstruction) it.instruction();
+                    return lambdaMap.get(getStaticInstruction.constantIndex);
+                }).collect(Collectors.toList())
+            )) {
                 // We can't continue the loop because we already changed the code, the offset of the instruction we
                 // are currently operating on might have changed resulting in strange behaviour.
-                if (iterativeInstructionVisitor.codeHasChanged()) {
-                    break;
-                }
+                iterativeInstructionVisitor.setCodeChanged(true);
+                break;
             }
         }
         logger.debug("---------End-----------");

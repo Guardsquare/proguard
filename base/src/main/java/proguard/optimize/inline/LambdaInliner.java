@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.optimize.inline.lambda_locator.LambdaLocator;
+import proguard.optimize.inline.lambdalocator.LambdaLocator;
 import proguard.AppView;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.Method;
@@ -14,7 +14,7 @@ import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.util.InitializationUtil;
-import proguard.optimize.inline.lambda_locator.Lambda;
+import proguard.optimize.inline.lambdalocator.Lambda;
 import proguard.pass.Pass;
 
 import java.util.HashSet;
