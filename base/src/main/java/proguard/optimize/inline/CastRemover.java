@@ -22,7 +22,7 @@ public class CastRemover implements InstructionVisitor {
     private final List<Integer> keepList;
     private final int argIndex;
 
-    // The names of all method taking a boxed type variable and returning the variable with the unboxed type
+    // The names of all methods taking a boxed type variable and returning the variable with the unboxed type
     private final Set<String> castingMethodNames = new HashSet<>(Arrays.asList("intValue", "booleanValue", "byteValue", "shortValue", "longValue", "floatValue", "doubleValue", "charValue"));
 
     public CastRemover(CodeAttributeEditor codeAttributeEditor, List<Integer> keepList, int argIndex) {
