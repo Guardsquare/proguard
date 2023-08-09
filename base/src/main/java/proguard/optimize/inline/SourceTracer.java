@@ -47,7 +47,7 @@ public class SourceTracer {
         while (
                 (!isLoad(currentInstruction) ||
                 !partialEvaluator.getVariablesBefore(currentOffset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(0)) &&
-                isSourceInstruction(currentInstruction)
+                isNotSourceInstruction(currentInstruction)
         ) {
             logger.debug(currentInstruction.toString(currentOffset));
             currentTracedStack = partialEvaluator.getStackBefore(currentOffset);
@@ -62,7 +62,11 @@ public class SourceTracer {
                 }
                 currentOffset = offsetValue.instructionOffset(0);
             } else {
-                currentOffset = currentTracedStack.getTopActualProducerValue(0).instructionOffsetValue().instructionOffset(0);
+                int newOffset = currentTracedStack.getTopActualProducerValue(0).instructionOffsetValue().instructionOffset(0);
+                if (newOffset == currentOffset) {
+                    return null;
+                }
+                currentOffset = newOffset;
             }
             currentInstruction = InstructionFactory.create(codeAttribute.code, currentOffset);
             trace.add(new InstructionAtOffset(currentInstruction, currentOffset));
@@ -80,7 +84,7 @@ public class SourceTracer {
         Node root = new Node(new InstructionAtOffset(currentInstruction, offset), new ArrayList<>());
 
         // We stop when we found the source instruction
-        if (isSourceInstruction(currentInstruction)) {
+        if (isNotSourceInstruction(currentInstruction)) {
             logger.debug(currentInstruction.toString(offset));
             currentTracedStack = partialEvaluator.getStackBefore(offset);
             logger.debug(currentTracedStack);
@@ -94,10 +98,16 @@ public class SourceTracer {
                 offsetValue = currentTracedStack.getTopActualProducerValue(0).instructionOffsetValue();
             }
             for (int i = 0; i < offsetValue.instructionOffsetCount(); i++) {
-                if (!isLoad(currentInstruction) || !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(i))
-                    root.children.add(traceParameterTree(partialEvaluator, codeAttribute, offsetValue.instructionOffset(i), leafNodes));
-                else
+                if (!isLoad(currentInstruction) || !partialEvaluator.getVariablesBefore(offset).getProducerValue(((VariableInstruction) currentInstruction).variableIndex).instructionOffsetValue().isMethodParameter(i)) {
+                    int newOffset = offsetValue.instructionOffset(i);
+                    if (newOffset == offset) {
+                        return root;
+                    }
+                    root.children.add(traceParameterTree(partialEvaluator, codeAttribute, newOffset, leafNodes));
+                }
+                else {
                     leafNodes.add(root.value);
+                }
             }
         }
         else {
@@ -112,7 +122,7 @@ public class SourceTracer {
      * itself, without having to look further up the chain of instructions. We use this as a stopping condition when we
      * are tracing the source of an instruction.
      */
-    private static boolean isSourceInstruction(Instruction instruction) {
+    private static boolean isNotSourceInstruction(Instruction instruction) {
         return instruction.opcode != Instruction.OP_ACONST_NULL &&
                 instruction.canonicalOpcode() != Instruction.OP_ICONST_0 &&
                 instruction.canonicalOpcode() != Instruction.OP_DCONST_0 &&
