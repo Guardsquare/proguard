@@ -61,7 +61,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
     private Clazz lambdaClass;
     private Method lambdaInvokeMethod;
     private String bridgeDescriptor;
-    private Method inlinedLambdaMethod;
+    private ProgramMethod inlinedLambdaMethod;
     private Method staticInvokeMethod;
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
@@ -89,7 +89,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
      * @return Returns a new method which has the lambda inlined in it, the lambda argument is also removed. If this
      *         class was unable to inline the lambda into the method it will return null.
      */
-    public Method inline() {
+    public ProgramMethod inline() {
         if (consumingMethod instanceof LibraryMethod)
             return null;
 
@@ -194,13 +194,13 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new NullCheckRemover(sizeAdjustedLambdaIndex, codeAttributeEditor, removedNullCheckInstrCounter))));
 
         // Remove inlined lambda from arguments through the descriptor.
-        Method methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
+        ProgramMethod methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
             List<String> list = new ArrayList<>();
             InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(desc);
             while (internalTypeEnumeration.hasMoreTypes()) {
                 list.add(internalTypeEnumeration.nextType());
             }
-            // We adjust the index to not take the this parameter into account because this is not visible in the
+            // We adjust the index to not take the "this" parameter into account because this is not visible in the
             // method descriptor.
             list.remove(calledLambdaIndex - (isStatic ? 0 : 1));
 
