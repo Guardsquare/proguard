@@ -1,5 +1,7 @@
 package proguard.optimize.inline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.optimize.inline.lambda_locator.LambdaLocator;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 public class LambdaInliner implements Pass {
+    private final Logger logger = LogManager.getLogger();
     private final String classNameFilter;
     private boolean inlinedAllUsages;
     public LambdaInliner(String classNameFilter) {
@@ -118,6 +121,7 @@ public class LambdaInliner implements Pass {
             }
 
             codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
+            logger.info("Inlined a lambda into {}#{}{}", consumingClazz.getName(), consumingMethod.getName(consumingClazz), consumingMethod.getDescriptor(consumingClazz));
             return true;
         }
     }

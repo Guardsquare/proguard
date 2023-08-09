@@ -14,7 +14,7 @@ import proguard.optimize.inline.lambda_locator.Lambda;
  * this lambda because one method can take multiple different lambdas as an input.
  */
 public class ShortLambdaInliner extends BaseLambdaInliner {
-    private final Logger logger = LogManager.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger();
     private static final int MAXIMUM_CONSUMING_METHOD_LENGTH = 2000;
     private static final int MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH = 64;
 
@@ -28,9 +28,9 @@ public class ShortLambdaInliner extends BaseLambdaInliner {
         int lambdaImplMethodLength = MethodLengthFinder.getMethodCodeLength(lambdaClass, lambdaImplMethod);
 
         boolean inline = lambdaImplMethodLength < MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH && consumingMethodLength < MAXIMUM_CONSUMING_METHOD_LENGTH;
-        logger.info("Consuming method length = " + consumingMethodLength + ", lambda implementation method length = " + lambdaImplMethodLength);
         if (!inline) {
-            logger.info("Will not attempt inlining because methods are too long, maximum consuming method length = {}, maximum lambda implementation method length = {}", MAXIMUM_CONSUMING_METHOD_LENGTH, MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH);
+            logger.info("Will not attempt inlining lambda because methods are too long, maximum consuming method length = {}, maximum lambda implementation method length = {}", MAXIMUM_CONSUMING_METHOD_LENGTH, MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH);
+            logger.info("Consuming method length = {}, lambda implementation method length = {}", consumingMethodLength, lambdaImplMethodLength);
         }
         return inline;
     }
