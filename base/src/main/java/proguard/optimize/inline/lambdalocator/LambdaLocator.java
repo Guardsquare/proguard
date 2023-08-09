@@ -126,7 +126,7 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
 
                     Lambda lambda = new Lambda(clazz, method, codeAttribute, offset, constantInstruction);
                     kotlinLambdas.add(lambda);
-                    kotlinLambdaMap.put(lambda.constantInstruction().constantIndex, lambda);
+                    kotlinLambdaMap.put(lambda.getstaticInstruction().constantIndex, lambda);
                 }
             });
         }

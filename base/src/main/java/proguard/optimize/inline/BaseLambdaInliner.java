@@ -93,7 +93,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         if (consumingMethod instanceof LibraryMethod)
             return null;
 
-        ConstantInstruction c = lambda.constantInstruction();
+        ConstantInstruction c = lambda.getstaticInstruction();
         lambda.clazz().constantPoolEntryAccept(c.constantIndex, new LambdaImplementationVisitor((programClass, programMethod, interfaceClass, bridgeDescriptor) -> {
             this.interfaceClass = interfaceClass;
             this.lambdaClass = programClass;
@@ -209,7 +209,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
 
 
         // Remove one of the arguments
-        lambda.clazz().constantPoolEntryAccept(lambda.constantInstruction().constantIndex, new ConstantVisitor() {
+        lambda.clazz().constantPoolEntryAccept(lambda.getstaticInstruction().constantIndex, new ConstantVisitor() {
             @Override
             public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
                 ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);
