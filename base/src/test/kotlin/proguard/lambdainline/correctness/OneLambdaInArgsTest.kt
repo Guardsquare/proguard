@@ -1,4 +1,4 @@
-package proguard.lambdaInline.correctness
+package proguard.lambdainline.correctness
 
 import compareOutputAndMainInstructions
 import io.kotest.core.spec.style.FreeSpec

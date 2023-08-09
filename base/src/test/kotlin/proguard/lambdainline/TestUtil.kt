@@ -1,9 +1,6 @@
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import proguard.AppView
-import proguard.Configuration
-import proguard.ConfigurationParser
-import proguard.ProGuard
 import proguard.classfile.ClassPool
 import proguard.classfile.Clazz
 import proguard.classfile.Method
@@ -29,7 +26,6 @@ import proguard.optimize.info.ProgramMemberOptimizationInfoSetter
 import proguard.optimize.inline.LambdaInliner
 import proguard.optimize.peephole.LineNumberLinearizer
 import proguard.preverify.CodePreverifier
-import proguard.retrace.ReTrace
 import proguard.testutils.ClassPoolBuilder
 import proguard.testutils.PartialEvaluatorUtil
 import proguard.testutils.TestSource
