@@ -5,6 +5,9 @@ import proguard.classfile.Method;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.ConstantInstruction;
 
+/**
+ * A simple class containing information about a lambda.
+ */
 public final class Lambda {
     private final Clazz clazz;
     private final Method method;

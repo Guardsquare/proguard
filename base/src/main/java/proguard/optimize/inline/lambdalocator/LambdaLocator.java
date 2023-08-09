@@ -28,6 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A class that in a program locates the starting point of a potential Kotlin lambda (sometimes called static lambdas
+ * in the code) usage. The starting point means that it looks for <code>getstatic</code> instructions that get a
+ * reference to an INSTANCE field of a lambda class. A lambda class is a class that implements the
+ * kotlin/jvm/internal/Lambda interface.
+ */
 public class LambdaLocator implements InstructionVisitor, ConstantVisitor, MemberVisitor {
     private final List<Lambda> staticLambdas = new ArrayList<>();
     private final Map<Integer, Lambda> staticLambdaMap = new HashMap<>();
