@@ -1,5 +1,7 @@
 package proguard.optimize.inline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
@@ -66,6 +68,8 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
     private Method staticInvokeMethod;
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
+    private static final Logger logger = LogManager.getLogger(BaseLambdaInliner.class);
+
 
     public BaseLambdaInliner(ClassPool programClassPool, ClassPool libraryClassPool, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
         this.consumingClass = consumingClass;
