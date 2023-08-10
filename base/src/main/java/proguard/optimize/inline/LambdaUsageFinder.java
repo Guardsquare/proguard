@@ -36,33 +36,29 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
     private final LambdaInliner.LambdaUsageHandler lambdaUsageHandler;
     public MethodrefConstant methodrefConstant;
     public FieldrefConstant referencedFieldConstant;
-    private final IterativeInstructionVisitor iterativeInstructionVisitor;
+    private final FixedPointCodeAttributeVisitor fixedPointCodeAttributeVisitor;
     private static final Logger logger = LogManager.getLogger(LambdaUsageFinder.class);
-
 
     public LambdaUsageFinder(Lambda targetLambda, Map<Integer, Lambda> lambdaMap, LambdaInliner.LambdaUsageHandler lambdaUsageHandler) {
         this.targetLambda = targetLambda;
         this.partialEvaluator = new PartialEvaluator();
         this.lambdaMap = lambdaMap;
         this.lambdaUsageHandler = lambdaUsageHandler;
-        this.iterativeInstructionVisitor = new IterativeInstructionVisitor();
+        this.fixedPointCodeAttributeVisitor = new FixedPointCodeAttributeVisitor(
+            new InstructionOpCodeFilter(
+                new int[] {
+                        Instruction.OP_INVOKESTATIC,
+                        Instruction.OP_INVOKEVIRTUAL
+                },
+                this
+            )
+        );
     }
 
     @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute) {
         partialEvaluator.visitCodeAttribute(clazz, method, codeAttribute);
-        iterativeInstructionVisitor.instructionsAccept(
-            clazz,
-            method,
-            codeAttribute,
-            new InstructionOpCodeFilter(
-                new int[] {
-                    Instruction.OP_INVOKESTATIC,
-                    Instruction.OP_INVOKEVIRTUAL
-                },
-                this
-            )
-        );
+        codeAttribute.accept(clazz, method, fixedPointCodeAttributeVisitor);
     }
 
     @Override
@@ -137,7 +133,7 @@ public class LambdaUsageFinder implements InstructionVisitor, AttributeVisitor, 
             )) {
                 // We can't continue the loop because we already changed the code, the offset of the instruction we
                 // are currently operating on might have changed resulting in strange behaviour.
-                iterativeInstructionVisitor.setCodeChanged(true);
+                fixedPointCodeAttributeVisitor.setCodeChanged(true);
                 break;
             }
         }
