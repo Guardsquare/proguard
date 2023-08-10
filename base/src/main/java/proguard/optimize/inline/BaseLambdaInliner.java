@@ -1,7 +1,7 @@
 package proguard.optimize.inline;
 
-import proguard.AppView;
 import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.LibraryMethod;
 import proguard.classfile.Member;
@@ -50,7 +50,8 @@ import java.util.Optional;
 public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
     private final Clazz consumingClass;
     private final Method consumingMethod;
-    private final AppView appView;
+    private final ClassPool programClassPool;
+    private final ClassPool libraryClassPool;
     private final Lambda lambda;
     private final CodeAttributeEditor codeAttributeEditor;
     private final boolean isStatic;
@@ -66,10 +67,11 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
 
-    public BaseLambdaInliner(AppView appView, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
+    public BaseLambdaInliner(ClassPool programClassPool, ClassPool libraryClassPool, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
         this.consumingClass = consumingClass;
         this.consumingMethod = consumingMethod;
-        this.appView = appView;
+        this.programClassPool = programClassPool;
+        this.libraryClassPool = libraryClassPool;
         this.lambda = lambda;
         this.codeAttributeEditor = new CodeAttributeEditor();
         this.isStatic = (consumingMethod.getAccessFlags() & AccessConstants.STATIC) != 0;
@@ -178,8 +180,8 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new CastPatternRemover(codeAttributeEditor))));
 
         // Important for inlining, we need this so that method invocations have non-null referenced methods.
-        appView.programClassPool.classesAccept(
-                new ClassReferenceInitializer(appView.programClassPool, appView.libraryClassPool)
+        programClassPool.classesAccept(
+                new ClassReferenceInitializer(programClassPool, libraryClassPool)
         );
 
         // Inlining phase 2, inline that static invoke method into the actual function that uses the lambda.
@@ -224,7 +226,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
                 methodWithoutLambdaParameter.accept(consumingClass, new LocalUsageRemover(codeAttributeEditor, sizeAdjustedLambdaIndex, replacementInstruction));
             }
         });
-        appView.programClassPool.classesAccept(new AccessFixer());
+        programClassPool.classesAccept(new AccessFixer());
 
         // The resulting new method is: methodWithoutLambdaParameter, the user of the BaseLambdaInliner can then replace
         // calls to the old function to calls to this new function.

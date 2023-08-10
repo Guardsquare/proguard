@@ -2,6 +2,7 @@ package proguard.optimize.inline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.attribute.CodeAttribute;
 import proguard.optimize.inline.lambdalocator.LambdaLocator;
@@ -47,7 +48,7 @@ public class LambdaInliner implements Pass {
             InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
             lambda.codeAttribute().accept(lambda.clazz(), lambda.method(),
                     new LambdaUsageFinder(lambda, lambdaLocator.getKotlinLambdaMap(),
-                            new LambdaUsageHandler(appView, remainder)
+                            new LambdaUsageHandler(appView.programClassPool, appView.libraryClassPool, remainder)
                     )
             );
 
@@ -70,17 +71,19 @@ public class LambdaInliner implements Pass {
 
     public class LambdaUsageHandler {
 
-        private final AppView appView;
+        private final ClassPool programClassPool;
+        private final ClassPool libraryClassPool;
         private final Set<InstructionAtOffset> remainder;
 
-        public LambdaUsageHandler(AppView appView, Set<InstructionAtOffset> remainder) {
-            this.appView = appView;
+        public LambdaUsageHandler(ClassPool programClassPool, ClassPool libraryClassPool, Set<InstructionAtOffset> remainder) {
+            this.programClassPool = programClassPool;
+            this.libraryClassPool = libraryClassPool;
             this.remainder = remainder;
         }
 
         boolean handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int lambdaArgumentIndex, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
             // Try inlining the lambda in consumingMethod
-            BaseLambdaInliner baseLambdaInliner = new ShortLambdaInliner(appView, consumingClazz, consumingMethod, lambdaArgumentIndex, lambda);
+            BaseLambdaInliner baseLambdaInliner = new ShortLambdaInliner(programClassPool, libraryClassPool, consumingClazz, consumingMethod, lambdaArgumentIndex, lambda);
             Method inlinedLambamethod = baseLambdaInliner.inline();
 
             // We didn't inline anything so no need to change any call instructions.

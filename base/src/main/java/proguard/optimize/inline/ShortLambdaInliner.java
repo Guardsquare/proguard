@@ -3,6 +3,7 @@ package proguard.optimize.inline;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import proguard.AppView;
+import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.optimize.inline.lambdalocator.Lambda;
@@ -20,8 +21,8 @@ public class ShortLambdaInliner extends BaseLambdaInliner {
     private static final int MAXIMUM_CONSUMING_METHOD_LENGTH = 2000;
     private static final int MAXIMUM_LAMBDA_IMPL_METHOD_LENGTH = 64;
 
-    public ShortLambdaInliner(AppView appView, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
-        super(appView, consumingClass, consumingMethod, calledLambdaIndex, lambda);
+    public ShortLambdaInliner(ClassPool programClassPool, ClassPool libraryClassPool, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
+        super(programClassPool, libraryClassPool, consumingClass, consumingMethod, calledLambdaIndex, lambda);
     }
 
     @Override
