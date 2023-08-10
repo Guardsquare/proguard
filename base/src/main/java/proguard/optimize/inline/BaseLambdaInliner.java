@@ -163,7 +163,7 @@ public abstract class BaseLambdaInliner {
 
     /**
      * A private inner class that hides all the visitors form the main BaseLambdaInliner API. It takes the copied invoke
-     * method in the visitAnyMember method and it inlines that invoke method into the consuming method.
+     * method in the visitProgramMethod method and it inlines that invoke method into the consuming method.
      */
     private class InvokeMethodInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
         @Override
