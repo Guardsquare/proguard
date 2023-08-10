@@ -131,7 +131,7 @@ public class LambdaInliner implements Pass {
             }
 
             codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
-            logger.debug("Inlined a lambda into {}#{}{}", consumingClazz.getName(), consumingMethod.getName(consumingClazz), consumingMethod.getDescriptor(consumingClazz));
+            logger.info("Inlined a lambda into {}#{}{}", consumingClazz.getName(), consumingMethod.getName(consumingClazz), consumingMethod.getDescriptor(consumingClazz));
             return true;
         }
     }
