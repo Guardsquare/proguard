@@ -6,7 +6,11 @@ import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.instruction.ConstantInstruction;
 
 /**
- * A simple class containing information about a lambda.
+ * A simple class containing information about a Kotlin lambda. These are lambdas implemented using a singleton pattern
+ * the singleton is stored in the "INSTANCE" field. A reference to these lambdas is obtained by using the getstatic
+ * instruction which obtains a reference to this field. This invokestatic field is what we store in the
+ * getstaticInstruction field alongside it's offset getStaticOffset. The clazz, method and code attribute in which this
+ * instruction appears is also stored in this class.
  */
 public final class Lambda {
     private final Clazz clazz;
