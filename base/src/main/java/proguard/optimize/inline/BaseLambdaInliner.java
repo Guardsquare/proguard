@@ -42,6 +42,7 @@ import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A class that given a method that consumes a lambda is able to create a new method which has this lambda inlined. The
@@ -62,7 +63,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
     private Clazz lambdaClass;
     private Method lambdaInvokeMethod;
     private String bridgeDescriptor;
-    private Method inlinedLambdaMethod;
+    private ProgramMethod inlinedLambdaMethod;
     private Method staticInvokeMethod;
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
@@ -92,12 +93,11 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
      * @return Returns a new method which has the lambda inlined in it, the lambda argument is also removed. If this
      *         class was unable to inline the lambda into the method it will return null.
      */
-    public Method inline() {
-        logger.debug("Entered inline");
+    public ProgramMethod inline() {
         if (consumingMethod instanceof LibraryMethod)
             return null;
 
-        ConstantInstruction c = lambda.constantInstruction();
+        ConstantInstruction c = lambda.getstaticInstruction();
         lambda.clazz().constantPoolEntryAccept(c.constantIndex, new LambdaImplementationVisitor((programClass, programMethod, interfaceClass, bridgeDescriptor) -> {
             this.interfaceClass = interfaceClass;
             this.lambdaClass = programClass;
@@ -164,7 +164,9 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         invokeMethodCallOffsets.clear();
 
         // Replace invokeinterface call to invoke method with invokestatic to staticInvokeMethod
-        codeAttributeEditor.reset(MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod));
+        Optional<Integer> consumingMethodLength = MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod);
+        assert consumingMethodLength.isPresent();
+        codeAttributeEditor.reset(consumingMethodLength.get());
         copiedConsumingMethod.accept(consumingClass,
                 new AllAttributeVisitor(
                 new AllInstructionVisitor(
@@ -196,13 +198,13 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
         copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new NullCheckRemover(sizeAdjustedLambdaIndex, codeAttributeEditor, removedNullCheckInstrCounter))));
 
         // Remove inlined lambda from arguments through the descriptor.
-        Method methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
+        ProgramMethod methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
             List<String> list = new ArrayList<>();
             InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(desc);
             while (internalTypeEnumeration.hasMoreTypes()) {
                 list.add(internalTypeEnumeration.nextType());
             }
-            // We adjust the index to not take the this parameter into account because this is not visible in the
+            // We adjust the index to not take the "this" parameter into account because this is not visible in the
             // method descriptor.
             list.remove(calledLambdaIndex - (isStatic ? 0 : 1));
 
@@ -211,7 +213,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
 
 
         // Remove one of the arguments
-        lambda.clazz().constantPoolEntryAccept(lambda.constantInstruction().constantIndex, new ConstantVisitor() {
+        lambda.clazz().constantPoolEntryAccept(lambda.getstaticInstruction().constantIndex, new ConstantVisitor() {
             @Override
             public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
                 ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);

@@ -29,14 +29,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A class that in a program locates the starting point of a potential Kotlin lambda (sometimes called static lambdas
- * in the code) usage. The starting point means that it looks for <code>getstatic</code> instructions that get a
- * reference to an INSTANCE field of a lambda class. A lambda class is a class that implements the
- * kotlin/jvm/internal/Lambda interface.
+ * A class that in a program locates the starting point of a potential Kotlin lambda usage. The starting point means
+ * that it looks for <code>getstatic</code> instructions that get a reference to an INSTANCE field of a lambda class. A
+ * lambda class is a class that implements the kotlin/jvm/internal/Lambda interface.
  */
 public class LambdaLocator implements InstructionVisitor, ConstantVisitor, MemberVisitor {
-    private final List<Lambda> staticLambdas = new ArrayList<>();
-    private final Map<Integer, Lambda> staticLambdaMap = new HashMap<>();
+    private final List<Lambda> kotlinLambdas = new ArrayList<>();
+    private final Map<Integer, Lambda> kotlinLambdaMap = new HashMap<>();
     private final Set<Clazz> lambdaClasses = new HashSet<>();
     private final ClassPool classPool;
     private static final Logger logger = LogManager.getLogger(LambdaLocator.class);
@@ -48,7 +47,7 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
             clazz.superClassConstantAccept(this);
         });
 
-        // Find static lambdas
+        // Find Kotlin lambdas
         classPool.classesAccept(classNameFilter, clazz -> {
 
             HashMap<Integer, LambdaExpression> h = new HashMap<>();
@@ -58,7 +57,7 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
             clazz.methodsAccept(this);
         });
 
-        logger.info("Number of lambdas found :                " + staticLambdas.size());
+        logger.info("Number of lambdas found :                " + kotlinLambdas.size());
     }
 
     @Override
@@ -72,7 +71,7 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
     @Override
     public void visitConstantInstruction(Clazz clazz, Method method, CodeAttribute codeAttribute, int offset, ConstantInstruction constantInstruction) {
         if (constantInstruction.opcode == Instruction.OP_GETSTATIC) {
-            clazz.constantPoolEntryAccept(constantInstruction.constantIndex, new StaticLambdaFinder(method, codeAttribute, constantInstruction, offset));
+            clazz.constantPoolEntryAccept(constantInstruction.constantIndex, new KotlinLambdaFinder(method, codeAttribute, constantInstruction, offset));
         }
     }
 
@@ -88,21 +87,21 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
         }
     }
 
-    public List<Lambda> getStaticLambdas() {
-        return staticLambdas;
+    public List<Lambda> getKotlinLambdas() {
+        return kotlinLambdas;
     }
 
-    public Map<Integer, Lambda> getStaticLambdaMap() {
-        return staticLambdaMap;
+    public Map<Integer, Lambda> getKotlinLambdaMap() {
+        return kotlinLambdaMap;
     }
 
-    private class StaticLambdaFinder implements ConstantVisitor {
+    private class KotlinLambdaFinder implements ConstantVisitor {
         private final ConstantInstruction constantInstruction;
         private final Method method;
         private final int offset;
         private final CodeAttribute codeAttribute;
 
-        public StaticLambdaFinder(Method method, CodeAttribute codeAttribute, ConstantInstruction constantInstruction, int offset) {
+        public KotlinLambdaFinder(Method method, CodeAttribute codeAttribute, ConstantInstruction constantInstruction, int offset) {
             this.method = method;
             this.codeAttribute = codeAttribute;
             this.constantInstruction = constantInstruction;
@@ -126,8 +125,8 @@ public class LambdaLocator implements InstructionVisitor, ConstantVisitor, Membe
                     logger.debug("Found a lambda invocation " + constantInstruction);
 
                     Lambda lambda = new Lambda(clazz, method, codeAttribute, offset, constantInstruction);
-                    staticLambdas.add(lambda);
-                    staticLambdaMap.put(lambda.constantInstruction().constantIndex, lambda);
+                    kotlinLambdas.add(lambda);
+                    kotlinLambdaMap.put(lambda.getstaticInstruction().constantIndex, lambda);
                 }
             });
         }
