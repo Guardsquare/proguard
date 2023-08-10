@@ -179,6 +179,8 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
                 // The method becomes static
                 String modifiedDescriptor = originalDescriptor.replace("(", "(Ljava/lang/Object;");
                 // Change return type if it has an effect on the stack size
+                // We will later remove the cast at the end of the invoke method that boxes primitive types, so we
+                // change the descriptor here accordingly.
                 modifiedDescriptor = modifiedDescriptor.replace(")Ljava/lang/Double;", ")D");
                 modifiedDescriptor = modifiedDescriptor.replace(")Ljava/lang/Float;", ")F");
                 return modifiedDescriptor.replace(")Ljava/lang/Long;", ")J");
