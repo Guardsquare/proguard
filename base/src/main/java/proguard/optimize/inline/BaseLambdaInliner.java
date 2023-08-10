@@ -1,12 +1,9 @@
 package proguard.optimize.inline;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.LibraryMethod;
-import proguard.classfile.Member;
 import proguard.classfile.Method;
 import proguard.classfile.ProgramClass;
 import proguard.classfile.ProgramMethod;
@@ -49,7 +46,7 @@ import java.util.Optional;
  * caller will still need to replace the call instruction and handle removing arguments provided to the original call
  * instruction if this class manages to inline the lambda.
  */
-public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
+public abstract class BaseLambdaInliner {
     private final Clazz consumingClass;
     private final Method consumingMethod;
     private final ClassPool programClassPool;
@@ -68,8 +65,6 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
     private Method staticInvokeMethod;
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
-    private static final Logger logger = LogManager.getLogger(BaseLambdaInliner.class);
-
 
     public BaseLambdaInliner(ClassPool programClassPool, ClassPool libraryClassPool, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
         this.consumingClass = consumingClass;
@@ -145,8 +140,9 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
                 return;
             }
 
-            // First we copy the method from the anonymous lambda class into the class where it is used.
-            MethodCopier copier = new MethodCopier(programClass, programMethod, BaseLambdaInliner.this);
+            // First we copy the method from the anonymous lambda class into the class where it is used. We will then
+            // call the inner class InvokeMethodInliner to inline this copied invoke method.
+            MethodCopier copier = new MethodCopier(programClass, programMethod, new InvokeMethodInliner());
             consumingClass.accept(copier);
         }));
 
@@ -165,17 +161,20 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
      */
     protected abstract boolean shouldInline(Clazz consumingClass, Method consumingMethod, Clazz lambdaClass, Method lambdaImplMethod);
 
-    @Override
-    public void visitAnyMember(Clazz clazz, Member member) {
-        ProgramMethod method = (ProgramMethod) member;
-        method.u2accessFlags = (method.getAccessFlags() & ~AccessConstants.BRIDGE & ~AccessConstants.SYNTHETIC & ~AccessConstants.PRIVATE)
-                | AccessConstants.STATIC;
+    /**
+     * A private inner class that hides all the visitors form the main BaseLambdaInliner API. It takes the copied invoke
+     * method in the visitAnyMember method and it inlines that invoke method into the consuming method.
+     */
+    private class InvokeMethodInliner implements MemberVisitor, InstructionVisitor, ConstantVisitor {
+        @Override
+        public void visitProgramMethod(ProgramClass programClass, ProgramMethod method) {
+            method.u2accessFlags = (method.getAccessFlags() & ~AccessConstants.BRIDGE & ~AccessConstants.SYNTHETIC & ~AccessConstants.PRIVATE)
+                    | AccessConstants.STATIC;
 
-        // Copy the invoke method
-        String invokeMethodDescriptor = method.getDescriptor(consumingClass);
-        DescriptorModifier descriptorModifier = new DescriptorModifier(consumingClass);
-        staticInvokeMethod = descriptorModifier.modify(method,
-            originalDescriptor -> {
+            // Copy the invoke method
+            String invokeMethodDescriptor = method.getDescriptor(consumingClass);
+            DescriptorModifier descriptorModifier = new DescriptorModifier(consumingClass);
+            staticInvokeMethod = descriptorModifier.modify(method, originalDescriptor -> {
                 // The method becomes static
                 String modifiedDescriptor = originalDescriptor.replace("(", "(Ljava/lang/Object;");
                 // Change return type if it has an effect on the stack size
@@ -184,125 +183,140 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
                 modifiedDescriptor = modifiedDescriptor.replace(")Ljava/lang/Double;", ")D");
                 modifiedDescriptor = modifiedDescriptor.replace(")Ljava/lang/Float;", ")F");
                 return modifiedDescriptor.replace(")Ljava/lang/Long;", ")J");
+            }, true);
+
+            ProgramMethod copiedConsumingMethod = descriptorModifier.modify((ProgramMethod) consumingMethod, descriptor -> descriptor);
+
+            // Don't inline if the lamdba is passed to another method
+            try {
+                copiedConsumingMethod.accept(consumingClass, new RecursiveInliner(calledLambdaIndex));
+            } catch (CannotInlineException cie) {
+                ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
+                classEditor.removeMethod(copiedConsumingMethod);
+                classEditor.removeMethod(staticInvokeMethod);
+                return;
             }
-        , true);
 
-        ProgramMethod copiedConsumingMethod = descriptorModifier.modify((ProgramMethod) consumingMethod, descriptor -> descriptor);
+            referencedInterfaceConstant = null;
+            invokeMethodCallOffsets.clear();
 
-        // Don't inline if the lamdba is passed to another method
-        try {
-            copiedConsumingMethod.accept(consumingClass, new RecursiveInliner(calledLambdaIndex));
-        } catch (CannotInlineException cie) {
-            ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
-            classEditor.removeMethod(copiedConsumingMethod);
-            classEditor.removeMethod(staticInvokeMethod);
-            return;
-        }
-
-        referencedInterfaceConstant = null;
-        invokeMethodCallOffsets.clear();
-
-        // Replace invokeinterface call to invoke method with invokestatic to staticInvokeMethod
-        Optional<Integer> consumingMethodLength = MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod);
-        assert consumingMethodLength.isPresent();
-        codeAttributeEditor.reset(consumingMethodLength.get());
-        copiedConsumingMethod.accept(consumingClass,
+            // Replace invokeinterface call to invoke method with invokestatic to staticInvokeMethod
+            Optional<Integer> consumingMethodLength = MethodLengthFinder.getMethodCodeLength(consumingClass, copiedConsumingMethod);
+            assert consumingMethodLength.isPresent();
+            codeAttributeEditor.reset(consumingMethodLength.get());
+            copiedConsumingMethod.accept(consumingClass,
                 new AllAttributeVisitor(
                 new AllInstructionVisitor(
-                new InstructionOpCodeFilter(new int[] { Instruction.OP_INVOKEINTERFACE }, this))));
+                new InstructionOpCodeFilter(new int[] { Instruction.OP_INVOKEINTERFACE }, this)
+            )));
 
-        if (referencedInterfaceConstant != null) {
-            // Remove casting before and after invoke method call
-            // Uses same codeAttributeEditor as LambdaInvokeReplacer
-            copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PrePostCastRemover(invokeMethodDescriptor)));
-        }
-
-        // Remove return value's casting from staticInvokeMethod.
-        staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new CastPatternRemover(codeAttributeEditor))));
-
-        // Important for inlining, we need this so that method invocations have non-null referenced methods.
-        programClassPool.classesAccept(
-                new ClassReferenceInitializer(programClassPool, libraryClassPool)
-        );
-
-        // Inlining phase 2, inline that static invoke method into the actual function that uses the lambda.
-        inlineMethodInClass(consumingClass, staticInvokeMethod);
-
-        // Remove the static invoke method once it has been inlined.
-        ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
-        classEditor.removeMethod(staticInvokeMethod);
-
-        // Remove checkNotNullParameter() call because arguments that are lambdas will be removed.
-        InstructionCounter removedNullCheckInstrCounter = new InstructionCounter();
-        copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new NullCheckRemover(sizeAdjustedLambdaIndex, codeAttributeEditor, removedNullCheckInstrCounter))));
-
-        // Remove inlined lambda from arguments through the descriptor.
-        ProgramMethod methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
-            List<String> list = new ArrayList<>();
-            InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(desc);
-            while (internalTypeEnumeration.hasMoreTypes()) {
-                list.add(internalTypeEnumeration.nextType());
+            if (referencedInterfaceConstant != null) {
+                // Remove casting before and after invoke method call
+                // Uses same codeAttributeEditor as LambdaInvokeReplacer
+                copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PrePostCastRemover(invokeMethodDescriptor)));
             }
-            // We adjust the index to not take the "this" parameter into account because this is not visible in the
-            // method descriptor.
-            list.remove(calledLambdaIndex - (isStatic ? 0 : 1));
 
-            return ClassUtil.internalMethodDescriptorFromInternalTypes(internalTypeEnumeration.returnType(), list);
-        }, true);
+            // Remove return value's casting from staticInvokeMethod.
+            staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new CastPatternRemover(codeAttributeEditor))));
 
-
-        // Remove one of the arguments
-        lambda.clazz().constantPoolEntryAccept(lambda.getstaticInstruction().constantIndex, new ConstantVisitor() {
-            @Override
-            public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
-                ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);
-                int lambdaInstanceFieldIndex = constantPoolEditor.addFieldrefConstant(fieldrefConstant.referencedClass, fieldrefConstant.referencedField);
-
-                // If the argument had a null check removed then it was non-nullable, so we can replace usages with null
-                // just fine because no one will ever null check on it. Even if the programmer did do a null check on it
-                // the kotlin compiler will remove it.
-                Instruction replacementInstruction = removedNullCheckInstrCounter.getCount() != 0 ?
-                        new VariableInstruction(Instruction.OP_ACONST_NULL) :
-                        new ConstantInstruction(Instruction.OP_GETSTATIC, lambdaInstanceFieldIndex);
-                methodWithoutLambdaParameter.accept(consumingClass, new LocalUsageRemover(codeAttributeEditor, sizeAdjustedLambdaIndex, replacementInstruction));
-            }
-        });
-        programClassPool.classesAccept(new AccessFixer());
-
-        // The resulting new method is: methodWithoutLambdaParameter, the user of the BaseLambdaInliner can then replace
-        // calls to the old function to calls to this new function.
-        inlinedLambdaMethod = methodWithoutLambdaParameter;
-    }
-
-    @Override
-    public void visitConstantInstruction(Clazz consumingClass, Method consumingMethod, CodeAttribute consumingMethodCodeAttribute, int consumingMethodCallOffset, ConstantInstruction constantInstruction) {
-        consumingClass.constantPoolEntryAccept(constantInstruction.constantIndex, this);
-        Method invokeInterfaceMethod = referencedInterfaceConstant.referencedMethod;
-        Clazz invokeInterfaceClass = referencedInterfaceConstant.referencedClass;
-
-        // Check if this is an invokeinterface call to the lambda class invoke method
-        if (invokeInterfaceClass.getName().equals(interfaceClass.getName()) &&
-                invokeInterfaceMethod.getName(invokeInterfaceClass).equals(lambdaInvokeMethod.getName(lambdaClass)) &&
-                invokeInterfaceMethod.getDescriptor(invokeInterfaceClass).equals(bridgeDescriptor)
-        ) {
-            partialEvaluator.visitCodeAttribute(consumingClass, consumingMethod, consumingMethodCodeAttribute);
-            TracedStack tracedStack = partialEvaluator.getStackBefore(consumingMethodCallOffset);
-
-            // If we have a lambda with n arguments we have to skip those n arguments and then get the instance of the lambda used for calling invokeinterface.
-            int lambdaInstanceStackIndex = ClassUtil.internalMethodParameterCount(invokeInterfaceMethod.getDescriptor(invokeInterfaceClass));
-
-            consumingMethodCodeAttribute.instructionAccept(
-                consumingClass,
-                consumingMethod,
-                tracedStack.getTopActualProducerValue(lambdaInstanceStackIndex).instructionOffsetValue().instructionOffset(0),
-                new LambdaInvokeUsageReplacer(consumingMethodCallOffset)
+            // Important for inlining, we need this so that method invocations have non-null referenced methods.
+            programClassPool.classesAccept(
+                    new ClassReferenceInitializer(programClassPool, libraryClassPool)
             );
-        }
-    }
 
-    @Override
-    public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant) {
-        referencedInterfaceConstant = interfaceMethodrefConstant;
+            // Inlining phase 2, inline that static invoke method into the actual function that uses the lambda.
+            inlineMethodInClass(consumingClass, staticInvokeMethod);
+
+            // Remove the static invoke method once it has been inlined.
+            ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
+            classEditor.removeMethod(staticInvokeMethod);
+
+            // Remove checkNotNullParameter() call because arguments that are lambdas will be removed.
+            InstructionCounter removedNullCheckInstrCounter = new InstructionCounter();
+            copiedConsumingMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new NullCheckRemover(sizeAdjustedLambdaIndex, codeAttributeEditor, removedNullCheckInstrCounter))));
+
+            // Remove inlined lambda from arguments through the descriptor.
+            ProgramMethod methodWithoutLambdaParameter = descriptorModifier.modify(copiedConsumingMethod, desc -> {
+                List<String> list = new ArrayList<>();
+                InternalTypeEnumeration internalTypeEnumeration = new InternalTypeEnumeration(desc);
+                while (internalTypeEnumeration.hasMoreTypes()) {
+                    list.add(internalTypeEnumeration.nextType());
+                }
+                // We adjust the index to not take the "this" parameter into account because this is not visible in the
+                // method descriptor.
+                list.remove(calledLambdaIndex - (isStatic ? 0 : 1));
+
+                return ClassUtil.internalMethodDescriptorFromInternalTypes(internalTypeEnumeration.returnType(), list);
+            }, true);
+
+
+            // Remove one of the arguments
+            lambda.clazz().constantPoolEntryAccept(lambda.getstaticInstruction().constantIndex, new ConstantVisitor() {
+                @Override
+                public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
+                    ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);
+                    int lambdaInstanceFieldIndex = constantPoolEditor.addFieldrefConstant(fieldrefConstant.referencedClass, fieldrefConstant.referencedField);
+
+                    // If the argument had a null check removed then it was non-nullable, so we can replace usages with null
+                    // just fine because no one will ever null check on it. Even if the programmer did do a null check on it
+                    // the kotlin compiler will remove it.
+                    Instruction replacementInstruction = removedNullCheckInstrCounter.getCount() != 0 ?
+                            new VariableInstruction(Instruction.OP_ACONST_NULL) :
+                            new ConstantInstruction(Instruction.OP_GETSTATIC, lambdaInstanceFieldIndex);
+                    methodWithoutLambdaParameter.accept(consumingClass, new LocalUsageRemover(codeAttributeEditor, sizeAdjustedLambdaIndex, replacementInstruction));
+                }
+            });
+            programClassPool.classesAccept(new AccessFixer());
+
+            // The resulting new method is: methodWithoutLambdaParameter, the user of the BaseLambdaInliner can then replace
+            // calls to the old function to calls to this new function.
+            inlinedLambdaMethod = methodWithoutLambdaParameter;
+        }
+
+        @Override
+        public void visitConstantInstruction(Clazz consumingClass, Method consumingMethod, CodeAttribute consumingMethodCodeAttribute, int consumingMethodCallOffset, ConstantInstruction constantInstruction) {
+            consumingClass.constantPoolEntryAccept(constantInstruction.constantIndex, this);
+            Method invokeInterfaceMethod = referencedInterfaceConstant.referencedMethod;
+            Clazz invokeInterfaceClass = referencedInterfaceConstant.referencedClass;
+
+            // Check if this is an invokeinterface call to the lambda class invoke method
+            if (invokeInterfaceClass.getName().equals(interfaceClass.getName()) &&
+                    invokeInterfaceMethod.getName(invokeInterfaceClass).equals(lambdaInvokeMethod.getName(lambdaClass)) &&
+                    invokeInterfaceMethod.getDescriptor(invokeInterfaceClass).equals(bridgeDescriptor)
+            ) {
+                partialEvaluator.visitCodeAttribute(consumingClass, consumingMethod, consumingMethodCodeAttribute);
+                TracedStack tracedStack = partialEvaluator.getStackBefore(consumingMethodCallOffset);
+
+                // If we have a lambda with n arguments we have to skip those n arguments and then get the instance of the lambda used for calling invokeinterface.
+                int lambdaInstanceStackIndex = ClassUtil.internalMethodParameterCount(invokeInterfaceMethod.getDescriptor(invokeInterfaceClass));
+
+                consumingMethodCodeAttribute.instructionAccept(
+                        consumingClass,
+                        consumingMethod,
+                        tracedStack.getTopActualProducerValue(lambdaInstanceStackIndex).instructionOffsetValue().instructionOffset(0),
+                        new LambdaInvokeUsageReplacer(consumingMethodCallOffset)
+                );
+            }
+        }
+
+        @Override
+        public void visitInterfaceMethodrefConstant(Clazz clazz, InterfaceMethodrefConstant interfaceMethodrefConstant) {
+            referencedInterfaceConstant = interfaceMethodrefConstant;
+        }
+
+        /**
+         * Inline a specified method in the locations it is called in the current clazz.
+         * @param clazz The clazz in which we want to inline the targetMethod
+         * @param targetMethod The method we want to inline.
+         */
+        private void inlineMethodInClass(Clazz clazz, Method targetMethod) {
+            clazz.methodsAccept(new AllAttributeVisitor(new MethodInliner(false, false, true, false, null) {
+                @Override
+                protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute) {
+                    return method.equals(targetMethod);
+                }
+            }));
+        }
     }
 
     private class LambdaInvokeUsageReplacer implements InstructionVisitor {
@@ -385,19 +399,5 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
 
         @Override
         public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
-    }
-
-    /**
-     * Inline a specified method in the locations it is called in the current clazz.
-     * @param clazz The clazz in which we want to inline the targetMethod
-     * @param targetMethod The method we want to inline.
-     */
-    private void inlineMethodInClass(Clazz clazz, Method targetMethod) {
-        clazz.methodsAccept(new AllAttributeVisitor(new MethodInliner(false, false, true, false, null) {
-            @Override
-            protected boolean shouldInline(Clazz clazz, Method method, CodeAttribute codeAttribute) {
-                return method.equals(targetMethod);
-            }
-        }));
     }
 }
