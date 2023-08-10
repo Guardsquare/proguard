@@ -38,7 +38,7 @@ import proguard.obfuscate.ResourceFileNameAdapter;
 import proguard.optimize.LineNumberTrimmer;
 import proguard.optimize.Optimizer;
 import proguard.optimize.gson.GsonOptimizer;
-import proguard.optimize.inline.LambdaInliner;
+import proguard.optimize.lambdainline.LambdaInliner;
 import proguard.optimize.peephole.LineNumberLinearizer;
 import proguard.pass.PassRunner;
 import proguard.preverify.PreverificationClearer;

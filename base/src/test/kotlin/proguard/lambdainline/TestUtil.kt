@@ -23,7 +23,7 @@ import proguard.io.*
 import proguard.io.util.IOUtil
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter
-import proguard.optimize.inline.LambdaInliner
+import proguard.optimize.lambdainline.LambdaInliner
 import proguard.optimize.peephole.LineNumberLinearizer
 import proguard.preverify.CodePreverifier
 import proguard.testutils.ClassPoolBuilder

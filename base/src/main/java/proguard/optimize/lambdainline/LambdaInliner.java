@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,8 +14,8 @@ import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.util.InitializationUtil;
-import proguard.optimize.inline.lambdalocator.Lambda;
-import proguard.optimize.inline.lambdalocator.LambdaLocator;
+import proguard.optimize.lambdainline.lambdalocator.Lambda;
+import proguard.optimize.lambdainline.lambdalocator.LambdaLocator;
 import proguard.pass.Pass;
 
 import java.util.HashSet;

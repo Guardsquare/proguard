@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +17,7 @@ import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.util.ClassUtil;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-import proguard.optimize.inline.lambdalocator.Lambda;
+import proguard.optimize.lambdainline.lambdalocator.Lambda;
 
 import java.util.ArrayList;
 import java.util.List;

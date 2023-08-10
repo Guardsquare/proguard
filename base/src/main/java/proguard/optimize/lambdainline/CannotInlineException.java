@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 /**
  * An exception thrown by the RecursiveInliner that is caught by the BaseLambdaInliner, this allows it to jump out of

@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import proguard.classfile.AccessConstants;
 import proguard.classfile.ClassPool;
@@ -34,7 +34,7 @@ import proguard.classfile.util.InternalTypeEnumeration;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.evaluation.PartialEvaluator;
 import proguard.evaluation.TracedStack;
-import proguard.optimize.inline.lambdalocator.Lambda;
+import proguard.optimize.lambdainline.lambdalocator.Lambda;
 import proguard.optimize.peephole.MethodInliner;
 
 import java.util.ArrayList;

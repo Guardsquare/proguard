@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

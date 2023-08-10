@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -100,6 +100,7 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
                     int sizeAdjustedLambdaIndex = ClassUtil.internalMethodVariableIndex(consumingMethodDescriptor, true, lambdaConsumingMethodArgIndex);
 
                     if (variableSourceInstruction.variableIndex == sizeAdjustedLambdaIndex) {
+                        logger.debug("Cannot inline lambdas into functions that call other functions that consume this lambda!");
                         throw new CannotInlineException("Cannot inline lambdas into functions that call other functions that consume this lambda!");
                     }
                 }

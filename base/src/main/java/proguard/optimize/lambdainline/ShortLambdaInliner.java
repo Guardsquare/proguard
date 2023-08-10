@@ -1,17 +1,16 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.AppView;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
-import proguard.optimize.inline.lambdalocator.Lambda;
+import proguard.optimize.lambdainline.lambdalocator.Lambda;
 
 import java.util.Optional;
 
 /**
- * This class is an implementation of the {@link proguard.optimize.inline.BaseLambdaInliner BaseLambdaInliner } that
+ * This class is an implementation of the {@link proguard.optimize.lambdainline.BaseLambdaInliner BaseLambdaInliner } that
  * inlines lambdas depending on the length of the lambda implementation method and the length of the consuming method.
  * The length of the consuming method is taken into account because the consuming method will be copied when inlining
  * this lambda because one method can take multiple different lambdas as an input.

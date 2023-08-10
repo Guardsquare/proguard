@@ -1,4 +1,4 @@
-package proguard.optimize.inline;
+package proguard.optimize.lambdainline;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.Member;

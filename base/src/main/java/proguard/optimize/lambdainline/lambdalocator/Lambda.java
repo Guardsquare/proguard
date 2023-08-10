@@ -1,4 +1,4 @@
-package proguard.optimize.inline.lambdalocator;
+package proguard.optimize.lambdainline.lambdalocator;
 
 import proguard.classfile.Clazz;
 import proguard.classfile.Method;
