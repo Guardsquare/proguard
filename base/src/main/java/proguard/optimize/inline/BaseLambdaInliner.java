@@ -1,5 +1,7 @@
 package proguard.optimize.inline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.AppView;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.Clazz;
@@ -64,6 +66,8 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
     private Method staticInvokeMethod;
     private InterfaceMethodrefConstant referencedInterfaceConstant;
     private final List<Integer> invokeMethodCallOffsets;
+    private static final Logger logger = LogManager.getLogger(BaseLambdaInliner.class);
+
 
     public BaseLambdaInliner(AppView appView, Clazz consumingClass, Method consumingMethod, int calledLambdaIndex, Lambda lambda) {
         this.consumingClass = consumingClass;
@@ -89,6 +93,7 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
      *         class was unable to inline the lambda into the method it will return null.
      */
     public Method inline() {
+        logger.debug("Entered inline");
         if (consumingMethod instanceof LibraryMethod)
             return null;
 

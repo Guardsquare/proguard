@@ -2,19 +2,19 @@ package proguard.optimize.inline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.Clazz;
-import proguard.classfile.attribute.CodeAttribute;
-import proguard.optimize.inline.lambdalocator.LambdaLocator;
 import proguard.AppView;
 import proguard.classfile.AccessConstants;
+import proguard.classfile.Clazz;
 import proguard.classfile.Method;
 import proguard.classfile.ProgramClass;
+import proguard.classfile.attribute.CodeAttribute;
 import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
 import proguard.classfile.util.InitializationUtil;
 import proguard.optimize.inline.lambdalocator.Lambda;
+import proguard.optimize.inline.lambdalocator.LambdaLocator;
 import proguard.pass.Pass;
 
 import java.util.HashSet;
@@ -42,6 +42,10 @@ public class LambdaInliner implements Pass {
         LambdaLocator lambdaLocator = new LambdaLocator(appView.programClassPool, classNameFilter);
 
         for (Lambda lambda : lambdaLocator.getStaticLambdas()) {
+            logger.debug("Inlining : " + lambda);
+            logger.debug("Class : " + lambda.clazz().getName());
+            logger.debug("Method : " + lambda.method().getName(lambda.clazz()));
+            logger.debug("Descriptor : " + lambda.method().getDescriptor(lambda.clazz()));
             Set<InstructionAtOffset> remainder = new HashSet<>();
             inlinedAllUsages = true;
             InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
@@ -124,7 +128,7 @@ public class LambdaInliner implements Pass {
             }
 
             codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
-            logger.info("Inlined a lambda into {}#{}{}", consumingClazz.getName(), consumingMethod.getName(consumingClazz), consumingMethod.getDescriptor(consumingClazz));
+            logger.debug("Inlined a lambda into {}#{}{}", consumingClazz.getName(), consumingMethod.getName(consumingClazz), consumingMethod.getDescriptor(consumingClazz));
             return true;
         }
     }

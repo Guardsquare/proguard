@@ -176,6 +176,8 @@ public class SourceTracer {
                 instruction.opcode != Instruction.OP_GETSTATIC &&
                 instruction.opcode != Instruction.OP_INVOKESTATIC &&
                 instruction.opcode != Instruction.OP_INVOKEVIRTUAL &&
+                instruction.opcode != Instruction.OP_INVOKESPECIAL &&
+                instruction.opcode != Instruction.OP_INVOKEINTERFACE &&
                 instruction.opcode != Instruction.OP_GETFIELD;
     }
 }
