@@ -1,5 +1,7 @@
 package proguard.optimize.lambdainline;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.ClassPool;
 import proguard.classfile.Clazz;
@@ -47,6 +49,7 @@ import java.util.Optional;
  * instruction if this class manages to inline the lambda.
  */
 public abstract class BaseLambdaInliner {
+    private static final Logger logger = LogManager.getLogger();
     private final Clazz consumingClass;
     private final Method consumingMethod;
     private final ClassPool programClassPool;
@@ -192,6 +195,8 @@ public abstract class BaseLambdaInliner {
             try {
                 copiedConsumingMethod.accept(consumingClass, new RecursiveInliner(calledLambdaIndex));
             } catch (CannotInlineException cie) {
+                logger.debug("Aborting inlining this lambda into this method. Reason:");
+                logger.debug(cie.getMessage());
                 ClassEditor classEditor = new ClassEditor((ProgramClass) consumingClass);
                 classEditor.removeMethod(copiedConsumingMethod);
                 classEditor.removeMethod(staticInvokeMethod);
