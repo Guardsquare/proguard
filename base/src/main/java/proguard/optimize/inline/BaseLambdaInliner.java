@@ -91,6 +91,41 @@ public abstract class BaseLambdaInliner implements MemberVisitor, InstructionVis
      * replace the call instruction with a call to this newly created function. This way we don't need to think about
      * how it is called exactly, it can be used as a higher abstraction in other places such as in the recursive
      * inliner.
+     * <p>
+     * The inlining uses the following steps:
+     * <ul>
+     * <li> First we will try to find the invoke method that implements this Kotlin lambda.
+     * <li> We check if we should try inline this based on the condition defined in shouldInline. This could be for
+     * example, only inline lambdas of a certain length.
+     * <li> We will copy this invoke method into the consuming class.
+     * <li> Then we will make it static and change the descriptor to have a fake <code>this</code> parameter, we need
+     * this parameter because otherwise <code>aload_0</code> would load the wrong thing, it would load the first actual
+     * argument instead of <code>this</code> because it is now static.
+     * <li> We will then make a copy of the consuming method because we will modify it to have this lambda inlined and
+     * the argument removed.
+     * <li> Then we check if the consuming method uses the lambda to call another method that also consumes the lambda
+     * in this slimmed down implementation we just abort the inlining process in that case.
+     * <li> Then we will try find all calls to the previously mentioned invoke method and replace them with calls to our
+     * new static invoke method.
+     * <li> Then we do cast removal, we remove the casts before and after the invoke call, these were previously needed
+     * because a bridge method was used, and now we use the non type-erased invoke method. We also remove a cast at the
+     * end of this invoke method if it is present. This cast boxes primitive types.
+     * <li> After doing that we can use the <code>MethodInliner</code> to actually inline the implementation itself.
+     * <li> We will then delete this static invoke method, we no longer need it.
+     * <li> The consuming method has the lambda inlined now but still has the lambda in its arguments, we will remove
+     * this argument now.
+     * <li> We first remove the null check that was present for this argument, we no longer need it. Then we will edit
+     * the descriptor of the consuming method to get rid of the lambda argument.
+     * <li> With the argument gone the load and store instructions use the wrong indices, we will shift the indices that
+     * are higher than the lambda index down so that it is correct again. The <code>aload_x</code> instructions with
+     * x = the lambda
+     * index will be replaced with <code>aconst_null</code> or if this lambda was nullable, with a <code>getstatic</code>
+     * to the lambda class instance. The latter is not ideal but nullable lambdas are uncommon. Future optimisation is
+     * possible here. The usage of the <code>getstatic</code> to obtain a reference to this field might not be allowed
+     * here, so we use the <code>AccessFixer</code> to make it possible.
+     * <li> The lambda is now fully inlined into this copy of the consuming method and is returned to the caller.
+     * </ul>
+     *
      *
      * @return Returns a new method which has the lambda inlined in it, the lambda argument is also removed. If this
      *         class was unable to inline the lambda into the method it will return null.
