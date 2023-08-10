@@ -116,9 +116,10 @@ public abstract class BaseLambdaInliner {
      * x = the lambda
      * index will be replaced with <code>aconst_null</code> or if this lambda was nullable, with a <code>getstatic</code>
      * to the lambda class instance. The latter is not ideal but nullable lambdas are uncommon. Future optimisation is
-     * possible here. The usage of the <code>getstatic</code> to obtain a reference to this field might not be allowed
-     * here, so we use the <code>AccessFixer</code> to make it possible.
-     * <li> The lambda is now fully inlined into this copy of the consuming method and is returned to the caller.
+     * possible here. Because of safety concerns replacing with <code>aconst_null</code> has been disabled currently.
+     * The usage of the <code>getstatic</code> to obtain a reference to this field might not be allowed here, so we use
+     * the <code>AccessFixer</code> to make it possible. <li> The lambda is now fully inlined into this copy of the
+     * consuming method and is returned to the caller.
      * </ul>
      *
      *
@@ -256,13 +257,7 @@ public abstract class BaseLambdaInliner {
                 public void visitFieldrefConstant(Clazz clazz, FieldrefConstant fieldrefConstant) {
                     ConstantPoolEditor constantPoolEditor = new ConstantPoolEditor((ProgramClass) consumingClass);
                     int lambdaInstanceFieldIndex = constantPoolEditor.addFieldrefConstant(fieldrefConstant.referencedClass, fieldrefConstant.referencedField);
-
-                    // If the argument had a null check removed then it was non-nullable, so we can replace usages with null
-                    // just fine because no one will ever null check on it. Even if the programmer did do a null check on it
-                    // the kotlin compiler will remove it.
-                    Instruction replacementInstruction = removedNullCheckInstrCounter.getCount() != 0 ?
-                            new VariableInstruction(Instruction.OP_ACONST_NULL) :
-                            new ConstantInstruction(Instruction.OP_GETSTATIC, lambdaInstanceFieldIndex);
+                    Instruction replacementInstruction = new ConstantInstruction(Instruction.OP_GETSTATIC, lambdaInstanceFieldIndex);
                     methodWithoutLambdaParameter.accept(consumingClass, new LocalUsageRemover(codeAttributeEditor, sizeAdjustedLambdaIndex, replacementInstruction));
                 }
             });
