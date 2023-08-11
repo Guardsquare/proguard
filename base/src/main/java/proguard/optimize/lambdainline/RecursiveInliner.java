@@ -212,8 +212,8 @@ public class RecursiveInliner implements AttributeVisitor, InstructionVisitor, M
              * inlining because we will remove these later.
              */
             if (referencedClass.getName().equals("kotlin/jvm/internal/Intrinsics") &&
-                    referencedMethod.getName(referencedClass).equals("checkNotNullParameter") &&
-                    referencedMethod.getDescriptor(referencedClass).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
+                (referencedMethod.getName(referencedClass).equals("checkNotNullParameter") || referencedMethod.getName(referencedClass).equals("checkParameterIsNotNull")) &&
+                referencedMethod.getDescriptor(referencedClass).equals("(Ljava/lang/Object;Ljava/lang/String;)V"))
                 return;
 
             String methodDescriptor = referencedMethod.getDescriptor(referencedClass);

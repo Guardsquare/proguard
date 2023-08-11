@@ -84,7 +84,7 @@ public class NullCheckRemover implements InstructionVisitor {
                     // Check if the called function matches kotlin.jvm.internal.Intrinsics#void checkNotNullParameter(java.lang.Object,java.lang.String)
                     if (
                         methodrefConstant.getClassName(clazz).equals("kotlin/jvm/internal/Intrinsics") &&
-                        methodrefConstant.getName(clazz).equals("checkNotNullParameter") &&
+                        (methodrefConstant.getName(clazz).equals("checkNotNullParameter") || methodrefConstant.getName(clazz).equals("checkParameterIsNotNull")) &&
                         methodrefConstant.getType(clazz).equals("(Ljava/lang/Object;Ljava/lang/String;)V")
                     ) {
                         for (int insIndex = 0; insIndex < pattern.length; insIndex++) {
