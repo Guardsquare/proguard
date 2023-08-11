@@ -31,7 +31,13 @@ We copy the consuming method because we will modify it to be specific to a parti
 
 Consuming method = `b(Lkotlin/jvm/functions/Function1;)V`
 ### Removing casts and replacing call instruction
-There are 2 invoke methods in the lambda class, a bridge method and a method that is called by the bridge method. This method that is called by the bridge method can have unboxed types as parameters. The bridge method has boxed parameter types because everything is erased to `Object` because we inline the non-bridge invoke method we will remove these casts. By removing the unneeded casts we are also able to improve performance.
+There are 2 invoke methods in the lambda class, a bridge method and a method that is called by the bridge method. This
+method that is called by the bridge method can have unboxed types as parameters. The bridge method has boxed parameter
+types for primitives because everything is erased to `Object` but primitives are not reference types so you can just put
+them in something of type Object without boxing them. Because we inline the non-bridge invoke method we will remove
+these casts. This means that operations on primitive types can stay unboxed. By removing the unneeded casts we are also
+able to improve performance. For reference types there will be no boxing code so in that case we won't have to
+remove anything.
 
 Consuming method = `b(Lkotlin/jvm/functions/Function1;)V`
 ```
@@ -91,25 +97,27 @@ Consuming method = `b(Lkotlin/jvm/functions/Function1;)V`
 [18] return
 ```
 ### After changing the signature and removing the usage of the argument
-Removing the usage of the argument shifts all load and store instruction that have a higher index than the index of the local that stores the lambda down by 1. Attempts to store the lambda in a local will result in a `pop` instruction. Any time the lambda local is loaded the instruction will be replaced with a direct reference to the lambda so this is a form of constant propagation.
+Removing the usage of the argument shifts all load and store instruction that have a higher index than the index of the
+local that stores the lambda down by 1. Attempts to store the lambda in a local will result in a `pop` instruction. Any
+time the lambda local is loaded the instruction will be replaced with a direct reference to the lambda so this is a form
+of constant propagation.
 
 Consuming method = `c()V`
 ```
-[0] aconst_null
-[1] nop
-[2] bipush 12
-[4] istore_2 v2
-[5] astore_1 v1
-[6] iload_2 v2
+[0] getstatic #55 = Fieldref(MainKt$main$1.INSTANCE LMainKt$main$1;)
+[3] bipush 12
+[5] istore_2 v2
+[6] astore_1 v1
 [7] iload_2 v2
-[8] imul
-[9] iconst_1
-[10] iadd
-[11] istore_0 v0
-[12] getstatic #40 = Fieldref(java/lang/System.out Ljava/io/PrintStream;)
-[15] iload_0 v0
-[16] invokevirtual #46 = Methodref(java/io/PrintStream.println(I)V)
-[19] return
+[8] iload_2 v2
+[9] imul
+[10] iconst_1
+[11] iadd
+[12] istore_0 v0
+[13] getstatic #40 = Fieldref(java/lang/System.out Ljava/io/PrintStream;)
+[16] iload_0 v0
+[17] invokevirtual #46 = Methodref(java/io/PrintStream.println(I)V)
+[20] return
 ```
 ## Changes to the method that calls the consuming method
 ### Starting point
@@ -153,7 +161,12 @@ invoke method = `a(Ljava/lang/Object;I)Ljava/lang/Integer;`
 
 The code is the same.
 ### After removing the cast
-The cast at the end is not really needed, after calling invoke in the consuming method we will cast it back into a primitive type. So we can remove the cast at the end here and we also do the same thing in the consuming method.
+If this lambda returns a primitive type, the type will be boxed again, so we remove this boxing at end just before the
+return using the `CastPatternRemover` class. If it returns a reference type there will be nothing to remove, the pattern
+won't match so it won't do anything. The unboxing that was placed in the consuming method right after the call to the
+invoke method is also removed. Boxing and then directly afterward unboxing it is unnecessary and degrades performance.
+Originally the invoke bridge method was inlined, but then you would see a performance difference between using the
+kotlin inline keyword and the ProGuard lambda inliner.
 
 invoke method = `a(Ljava/lang/Object;I)Ljava/lang/Integer;`
 ```
