@@ -286,7 +286,7 @@ public abstract class BaseLambdaInliner {
                     methodWithoutLambdaParameter.accept(consumingClass, new LocalUsageRemover(codeAttributeEditor, sizeAdjustedLambdaIndex, replacementInstruction));
                 }
             });
-            programClassPool.classesAccept(new AccessFixer());
+            consumingClass.accept(new AccessFixer());
 
             // The resulting new method is: methodWithoutLambdaParameter, the user of the BaseLambdaInliner can then replace
             // calls to the old function to calls to this new function.
