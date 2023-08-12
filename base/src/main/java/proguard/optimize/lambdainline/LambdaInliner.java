@@ -33,7 +33,8 @@ import proguard.classfile.editor.CodeAttributeEditor;
 import proguard.classfile.editor.ConstantPoolEditor;
 import proguard.classfile.instruction.ConstantInstruction;
 import proguard.classfile.instruction.Instruction;
-import proguard.classfile.util.InitializationUtil;
+import proguard.classfile.util.ClassReferenceInitializer;
+import proguard.classfile.util.ClassSuperHierarchyInitializer;
 import proguard.optimize.lambdainline.lambdalocator.Lambda;
 import proguard.optimize.lambdainline.lambdalocator.LambdaLocator;
 import proguard.pass.Pass;
@@ -69,7 +70,6 @@ public class LambdaInliner implements Pass {
             logger.debug("Descriptor : " + lambda.method().getDescriptor(lambda.clazz()));
             Set<InstructionAtOffset> remainder = new HashSet<>();
             inlinedAllUsages = true;
-            InitializationUtil.initialize(appView.programClassPool, appView.libraryClassPool);
             lambda.codeAttribute().accept(lambda.clazz(), lambda.method(),
                     new LambdaUsageFinder(lambda, lambdaLocator.getKotlinLambdaMap(),
                             new LambdaUsageHandler(appView.programClassPool, appView.libraryClassPool, remainder)
@@ -151,6 +151,19 @@ public class LambdaInliner implements Pass {
             }
 
             codeAttributeEditor.visitCodeAttribute(consumingCallClass, consumingCallMethod, consumingCallCodeAttribute);
+
+            // Update references of classes involved after inlining. We need to do this because we made new methods, and
+            // we also replaced certain call instructions to point to those methods.
+            libraryClassPool.classesAccept(
+                    new ClassSuperHierarchyInitializer(programClassPool,
+                            libraryClassPool,
+                            null,
+                            null));
+            programClassPool.classesAccept(new ClassSuperHierarchyInitializer(programClassPool, libraryClassPool));
+            lambda.clazz().accept(new ClassReferenceInitializer(programClassPool, libraryClassPool));
+            consumingCallClass.accept(new ClassReferenceInitializer(programClassPool, libraryClassPool));
+            consumingClazz.accept(new ClassReferenceInitializer(programClassPool, libraryClassPool));
+
             logger.info("Inlined a lambda into {}#{}{}", consumingClazz.getName(), consumingMethod.getName(consumingClazz), consumingMethod.getDescriptor(consumingClazz));
             return true;
         }
