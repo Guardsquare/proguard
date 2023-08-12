@@ -245,10 +245,10 @@ public abstract class BaseLambdaInliner {
             // Remove return value's casting from staticInvokeMethod.
             staticInvokeMethod.accept(consumingClass, new AllAttributeVisitor(new PeepholeEditor(codeAttributeEditor, new CastPatternRemover(codeAttributeEditor))));
 
-            // Important for inlining, we need this so that method invocations have non-null referenced methods.
-            programClassPool.classesAccept(
-                    new ClassReferenceInitializer(programClassPool, libraryClassPool)
-            );
+            // Because we replaced the call instruction with a call to a different method, the current references of the
+            // consuming class are no longer correct. This is important because the MethodInliner uses those references
+            // to see where it should inline.
+            consumingClass.accept(new ClassReferenceInitializer(programClassPool, libraryClassPool));
 
             // Inlining phase 2, inline that static invoke method into the actual function that uses the lambda.
             inlineMethodInClass(consumingClass, staticInvokeMethod);
