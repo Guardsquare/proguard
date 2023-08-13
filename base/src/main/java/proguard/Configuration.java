@@ -200,6 +200,11 @@ public class Configuration
      */
     public boolean                      mergeInterfacesAggressively      = false;
 
+    /**
+     * Specifies whether lambdas should be inlined.
+     */
+    public boolean                      lambdaInlining                   = false;
+
     ///////////////////////////////////////////////////////////////////////////
     // Obfuscation options.
     ///////////////////////////////////////////////////////////////////////////

@@ -212,6 +212,7 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.ADAPT_RESOURCE_FILE_CONTENTS_OPTION              .startsWith(nextWord)) configuration.adaptResourceFileContents             = parseCommaSeparatedList("resource file name", true, true, false, true, false, true, false, false, false, configuration.adaptResourceFileContents);
             else if (ConfigurationConstants.DONT_PROCESS_KOTLIN_METADATA                     .startsWith(nextWord)) configuration.dontProcessKotlinMetadata             = parseNoArgument(true);
             else if (ConfigurationConstants.KEEP_KOTLIN_METADATA                             .startsWith(nextWord)) configuration.keepKotlinMetadata                    = parseKeepKotlinMetadata();
+            else if (ConfigurationConstants.INLINE_KOTLIN_LAMBDAS                            .startsWith(nextWord)) configuration.lambdaInlining                        = parseNoArgument(true);
 
             else if (ConfigurationConstants.DONT_PREVERIFY_OPTION                            .startsWith(nextWord)) configuration.preverify                             = parseNoArgument(false);
             else if (ConfigurationConstants.MICRO_EDITION_OPTION                             .startsWith(nextWord)) configuration.microEdition                          = parseNoArgument(true);
