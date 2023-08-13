@@ -107,7 +107,7 @@ public class LambdaInliner implements Pass {
 
         boolean handle(Lambda lambda, Clazz consumingClazz, Method consumingMethod, int lambdaArgumentIndex, int consumingCallOffset, Clazz consumingCallClass, Method consumingCallMethod, CodeAttribute consumingCallCodeAttribute, List<InstructionAtOffset> sourceTrace, List<Lambda> possibleLambdas) {
             // Try inlining the lambda in consumingMethod
-            BaseLambdaInliner baseLambdaInliner = new ShortLambdaInliner(programClassPool, libraryClassPool, consumingClazz, consumingMethod, lambdaArgumentIndex, lambda);
+            BaseLambdaInliner baseLambdaInliner = new LimitedLengthLambdaInliner(programClassPool, libraryClassPool, consumingClazz, consumingMethod, lambdaArgumentIndex, lambda);
             Method inlinedLambamethod = baseLambdaInliner.inline();
 
             // We didn't inline anything so no need to change any call instructions.
