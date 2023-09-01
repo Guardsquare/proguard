@@ -1,8 +1,18 @@
-## Version 7.3.3
+## Version 7.4-beta02
+
+### Java support
+
+- Add support for Java 21. (#331)
+
+### Kotlin support
+
+- Add support for Kotlin 1.9.
 
 ### Bugfixes
 
 - Fix "NoClassDefFoundError: Failed resolution of: Lorg/apache/logging/log4j/LogManager" when using GSON optimization or `-addconfigurationdebugging`. (#326)
+- Don't drop Record attribute for records with no components. (proguard-core#118)
+- Fix potential duplication class when name obfuscating Kotlin multi-file facades.
 
 ## Version 7.3.2
 
