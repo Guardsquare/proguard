@@ -282,6 +282,60 @@ class MethodInlinerTest : FreeSpec({
             }
         }
     }
+
+    "Given a method calling another method in an interface" - {
+        val (programClassPool, _) = ClassPoolBuilder.fromSource(
+                JavaSource(
+                        "Foo.java",
+                        """interface Foo {
+                default void f1() {
+                    f2();
+                }
+
+                static void f2() {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(System.currentTimeMillis());
+                    System.out.println(sb.toString());
+               }
+            }"""
+            )
+        )
+
+        val clazz = programClassPool.getClass("Foo") as ProgramClass
+        val method = clazz.findMethod("f1", "()V") as ProgramMethod
+        val codeAttr = method.attributes.filterIsInstance<CodeAttribute>()[0]
+
+        val lengthBefore = codeAttr.u4codeLength
+
+        // Initialize optimization info (used when inlining).
+        val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
+                ProgramClassOptimizationInfoSetter(),
+                AllMethodVisitor(
+                        ProgramMemberOptimizationInfoSetter()
+                )
+        )
+
+        programClassPool.classesAccept(optimizationInfoInitializer)
+
+        // Create a mock method inliner which always returns true.
+        val methodInliner = object : MethodInliner(false, true, true) {
+            override fun shouldInline(clazz: Clazz?, method: Method?, codeAttribute: CodeAttribute?): Boolean = true
+        }
+
+        "Then the interface method is not inlined" {
+            programClassPool.classesAccept(
+                    AllMethodVisitor(
+                            AllAttributeVisitor(
+                                    methodInliner
+                            )
+                    )
+            )
+
+            val lengthAfter = codeAttr.u4codeLength
+
+            lengthAfter shouldBeExactly lengthBefore
+        }
+    }
 })
 
 private fun printProgramMethodInstructions(

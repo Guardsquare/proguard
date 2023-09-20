@@ -652,6 +652,14 @@ implements            AttributeVisitor,
                             AccessConstants.STATIC  |
                             AccessConstants.FINAL)) != 0                                       &&
 
+            DEBUG("Interface?")                                                                   &&
+
+            // Methods in interfaces should not be inlined since this can potentially
+            // lead to other methods in the interface needing broadened visibility,
+            // which can lead to either compilation errors during output writing
+            // or various issues at runtime.
+            (programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0                   &&
+
             DEBUG("Synchronized?")                                                                &&
 
             // Only inline the method if it is not synchronized, etc.
