@@ -283,7 +283,7 @@ class MethodInlinerTest : FreeSpec({
         }
     }
 
-    "Given a method calling another method in an interface" - {
+    "Given a method calling another non-private method in an interface" - {
         val (programClassPool, _) = ClassPoolBuilder.fromSource(
                 JavaSource(
                         "Foo.java",

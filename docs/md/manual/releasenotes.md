@@ -13,7 +13,7 @@
 - Fix "NoClassDefFoundError: Failed resolution of: Lorg/apache/logging/log4j/LogManager" when using GSON optimization or `-addconfigurationdebugging`. (#326)
 - Don't drop Record attribute for records with no components. (proguard-core#118)
 - Fix potential duplication class when name obfuscating Kotlin multi-file facades.
-- Do not inline interface methods to avoid compilation errors during output writing due to an interface method being made package visible.
+- Do not inline interface methods during optimization to avoid compilation errors during output writing due to an interface method being made package visible.
 
 ## Version 7.3.2
 

@@ -654,11 +654,12 @@ implements            AttributeVisitor,
 
             DEBUG("Interface?")                                                                   &&
 
-            // Methods in interfaces should not be inlined since this can potentially
-            // lead to other methods in the interface needing broadened visibility,
-            // which can lead to either compilation errors during output writing
-            // or various issues at runtime.
-            (programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0                   &&
+            // Methods in interfaces should only very rarely be inlined
+            // since this can potentially lead to other methods in the interface
+            // needing broadened visibility, which can lead to either compilation errors
+            // during output writing or various issues at runtime.
+            ((programClass.getAccessFlags() & AccessConstants.INTERFACE) == 0 ||
+              canInlineMethodFromInterface(programClass, programMethod))                       &&
 
             DEBUG("Synchronized?")                                                                &&
 
@@ -897,6 +898,17 @@ implements            AttributeVisitor,
                returnChar == TypeConstants.SHORT;
     }
 
+    /**
+     * We only inline methods from interfaces if both of these conditions hold:
+     * - The class that references the method is the interface itself.
+     * - The method is private.
+     */
+    private boolean canInlineMethodFromInterface(ProgramClass sourceClass, ProgramMethod sourceMethod)
+    {
+        return
+            sourceClass.equals(targetClass) &&
+            (sourceMethod.getAccessFlags() & AccessConstants.PRIVATE) != 0;
+    }
 
     /**
      * Indicates whether this method should be inlined. Subclasses can overwrite
