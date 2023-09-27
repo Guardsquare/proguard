@@ -188,7 +188,7 @@ You can publish the artifacts to your local Maven repository using:
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome in both projects.
-Feel free to check the [issues](issues) page and the [contributing
+Feel free to check the [issues](https://github.com/Guardsquare/proguard/issues) page and the [contributing
 guide](CONTRIBUTING.md) if you would like to contribute.
 
 ## 📝 License
