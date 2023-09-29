@@ -50,6 +50,7 @@ public class ConfigurationWriter implements AutoCloseable
 
 
     private final PrintWriter writer;
+    private       File        configurationFile;
     private       File        baseDir;
 
 
@@ -60,6 +61,7 @@ public class ConfigurationWriter implements AutoCloseable
     {
         this(PrintWriterUtil.createPrintWriterOut(configurationFile));
 
+        this.configurationFile = configurationFile;
         baseDir = configurationFile.getParentFile();
     }
 
@@ -79,7 +81,7 @@ public class ConfigurationWriter implements AutoCloseable
     @Override
     public void close() throws IOException
     {
-        PrintWriterUtil.closePrintWriter(baseDir, writer);
+        PrintWriterUtil.closePrintWriter(configurationFile, writer);
     }
 
 
