@@ -9,6 +9,10 @@ package proguard
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import proguard.classfile.AccessConstants.PUBLIC
+import testutils.asConfiguration
 
 /**
  * Some simple testcases to catch special cases when parsing the Configuration.
@@ -75,6 +79,186 @@ class ConfigurationParserTest : FreeSpec({
 
         "Keep rule with <methods> wildcard and explicit argument list should throw ParseException" {
             shouldThrow<ParseException> { parseConfiguration("-keep class * { <methods>(); }") }
+        }
+    }
+
+    "Wildcard type tests" - {
+        class TestConfig(
+            val configOption: String,
+            classSpecificationConfig: String,
+            private val classSpecificationGetter: Configuration.() -> List<ClassSpecification>?
+        ) {
+            private val configuration: Configuration by lazy {
+                "$configOption $classSpecificationConfig".asConfiguration()
+            }
+            val classSpecifications: List<ClassSpecification>? get() = classSpecificationGetter.invoke(configuration)
+        }
+
+        fun generateTestCases(clSpec: String): List<TestConfig> = listOf(
+            TestConfig("-keep", clSpec) { keep },
+            TestConfig("-assumenosideeffects", clSpec) { assumeNoSideEffects },
+            TestConfig("-assumenoexternalsideeffects", clSpec) { assumeNoExternalSideEffects },
+            TestConfig("-assumenoescapingparameters", clSpec) { assumeNoEscapingParameters },
+            TestConfig("-assumenoexternalreturnvalues", clSpec) { assumeNoExternalReturnValues },
+            TestConfig("-assumevalues", clSpec) { assumeValues },
+        )
+
+        "Test wildcard matches all methods and fields" {
+            val testConfigurations = generateTestCases("class Foo { *; }") + generateTestCases("class Foo { <fields>; <methods>; }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications?.single()
+                methodSpecification shouldNotBe null
+                methodSpecification?.requiredSetAccessFlags shouldBe 0
+                methodSpecification?.name shouldBe null
+                methodSpecification?.descriptor shouldBe null
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications?.single()
+                fieldSpecification shouldNotBe null
+                fieldSpecification?.requiredSetAccessFlags shouldBe 0
+                fieldSpecification?.name shouldBe null
+                fieldSpecification?.descriptor shouldBe null
+            }
+        }
+
+        "Test wildcard method return type" {
+            val testConfigurations = generateTestCases("class Foo { * bar(); }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications?.single()
+                methodSpecification?.requiredSetAccessFlags shouldBe 0
+                methodSpecification?.name shouldBe "bar"
+                methodSpecification?.descriptor shouldBe "()L*;"
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications
+                fieldSpecification shouldBe null
+            }
+        }
+
+        "Test wildcard method return type with access modifier" {
+            val testConfigurations = generateTestCases("class Foo { public * bar(); }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications?.single()
+                methodSpecification?.requiredSetAccessFlags shouldBe PUBLIC
+                methodSpecification?.name shouldBe "bar"
+                methodSpecification?.descriptor shouldBe "()L*;"
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications
+                fieldSpecification shouldBe null
+            }
+        }
+
+        "Test wildcard field type" {
+            val testConfigurations = generateTestCases("class Foo { * bar; }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications
+                methodSpecification shouldBe null
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications?.single()
+                fieldSpecification?.requiredSetAccessFlags shouldBe 0
+                fieldSpecification?.name shouldBe "bar"
+                fieldSpecification?.descriptor shouldBe "L*;"
+            }
+        }
+
+        "Test wildcard field type with access modifier" {
+            val testConfigurations = generateTestCases("class Foo { public * bar; }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications
+                methodSpecification shouldBe null
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications?.single()
+                fieldSpecification?.requiredSetAccessFlags shouldBe PUBLIC
+                fieldSpecification?.name shouldBe "bar"
+                fieldSpecification?.descriptor shouldBe "L*;"
+            }
+        }
+
+        "Test all type wildcard field" {
+            val testConfigurations = generateTestCases("class Foo { *** bar; }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications
+                methodSpecification shouldBe null
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications?.single()
+                fieldSpecification?.requiredSetAccessFlags shouldBe 0
+                fieldSpecification?.name shouldBe "bar"
+                fieldSpecification?.descriptor shouldBe "L***;"
+            }
+        }
+
+        "Test all type wildcard field type with access modifier" {
+            val testConfigurations = generateTestCases("class Foo { public *** bar; }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications
+                methodSpecification shouldBe null
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications?.single()
+                fieldSpecification?.requiredSetAccessFlags shouldBe PUBLIC
+                fieldSpecification?.name shouldBe "bar"
+                fieldSpecification?.descriptor shouldBe "L***;"
+            }
+        }
+
+        "Test all type wildcard method return type" {
+            val testConfigurations = generateTestCases("class Foo { *** bar(); }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications?.single()
+                methodSpecification?.requiredSetAccessFlags shouldBe 0
+                methodSpecification?.name shouldBe "bar"
+                methodSpecification?.descriptor shouldBe "()L***;"
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications
+                fieldSpecification shouldBe null
+            }
+        }
+
+        "Test all type wildcard method return type with access modifier" {
+            val testConfigurations = generateTestCases("class Foo { public *** bar(); }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications?.single()
+                methodSpecification?.requiredSetAccessFlags shouldBe PUBLIC
+                methodSpecification?.name shouldBe "bar"
+                methodSpecification?.descriptor shouldBe "()L***;"
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications
+                fieldSpecification shouldBe null
+            }
+        }
+
+        "Test concrete wildcard field type" {
+            val testConfigurations = generateTestCases("class Foo { java.lang.String bar; }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications
+                methodSpecification shouldBe null
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications?.single()
+                fieldSpecification?.requiredSetAccessFlags shouldBe 0
+                fieldSpecification?.name shouldBe "bar"
+                fieldSpecification?.descriptor shouldBe "Ljava/lang/String;"
+            }
+        }
+
+        "Test concrete wildcard method return type" {
+            val testConfigurations = generateTestCases("class Foo { java.lang.String bar(); }")
+
+            for (testConfig in testConfigurations) {
+                val classSpecifications = testConfig.classSpecifications
+                val methodSpecification = classSpecifications?.single()?.methodSpecifications?.single()
+                methodSpecification?.requiredSetAccessFlags shouldBe 0
+                methodSpecification?.name shouldBe "bar"
+                methodSpecification?.descriptor shouldBe "()Ljava/lang/String;"
+                val fieldSpecification = classSpecifications?.single()?.fieldSpecifications
+                fieldSpecification shouldBe null
+            }
         }
     }
 })

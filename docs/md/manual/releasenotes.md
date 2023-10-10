@@ -15,6 +15,10 @@
 - Fix potential duplication class when name obfuscating Kotlin multi-file facades.
 - Do not inline interface methods during optimization to avoid compilation errors during output writing due to an interface method being made package visible.
 
+### Added
+
+- Support parsing of wildcard `*` when used as a field type or method return type in class specifications.
+
 ## Version 7.3.2
 
 ### Java support

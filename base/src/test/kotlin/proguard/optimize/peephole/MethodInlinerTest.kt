@@ -285,9 +285,9 @@ class MethodInlinerTest : FreeSpec({
 
     "Given a method calling another non-private method in an interface" - {
         val (programClassPool, _) = ClassPoolBuilder.fromSource(
-                JavaSource(
-                        "Foo.java",
-                        """interface Foo {
+            JavaSource(
+                "Foo.java",
+                """interface Foo {
                 default void f1() {
                     f2();
                 }
@@ -309,10 +309,10 @@ class MethodInlinerTest : FreeSpec({
 
         // Initialize optimization info (used when inlining).
         val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                        ProgramMemberOptimizationInfoSetter()
-                )
+            ProgramClassOptimizationInfoSetter(),
+            AllMethodVisitor(
+                ProgramMemberOptimizationInfoSetter()
+            )
         )
 
         programClassPool.classesAccept(optimizationInfoInitializer)
@@ -324,11 +324,11 @@ class MethodInlinerTest : FreeSpec({
 
         "Then the interface method is not inlined" {
             programClassPool.classesAccept(
-                    AllMethodVisitor(
-                            AllAttributeVisitor(
-                                    methodInliner
-                            )
+                AllMethodVisitor(
+                    AllAttributeVisitor(
+                        methodInliner
                     )
+                )
             )
 
             val lengthAfter = codeAttr.u4codeLength

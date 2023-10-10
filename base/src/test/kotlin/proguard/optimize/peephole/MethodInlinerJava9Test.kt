@@ -48,10 +48,10 @@ class MethodInlinerJava9Test : FreeSpec({
 
         // Initialize optimization info (used when inlining).
         val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                        ProgramMemberOptimizationInfoSetter()
-                )
+            ProgramClassOptimizationInfoSetter(),
+            AllMethodVisitor(
+                ProgramMemberOptimizationInfoSetter()
+            )
         )
 
         programClassPool.classesAccept(optimizationInfoInitializer)
@@ -63,11 +63,11 @@ class MethodInlinerJava9Test : FreeSpec({
 
         "Then the interface method is inlined" {
             programClassPool.classesAccept(
-                    AllMethodVisitor(
-                            AllAttributeVisitor(
-                                    methodInliner
-                            )
+                AllMethodVisitor(
+                    AllAttributeVisitor(
+                        methodInliner
                     )
+                )
             )
 
             val lengthAfter = codeAttr.u4codeLength

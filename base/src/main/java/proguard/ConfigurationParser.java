@@ -1104,12 +1104,25 @@ public class ConfigurationParser implements AutoCloseable
         // Parse the class member type and name part.
 
         // Did we get a special wildcard?
-        if (ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD.equals(nextWord) ||
-            ConfigurationConstants.ANY_FIELD_KEYWORD       .equals(nextWord) ||
-            ConfigurationConstants.ANY_METHOD_KEYWORD      .equals(nextWord))
+        boolean isStar = ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD.equals(nextWord);
+        boolean isFields = ConfigurationConstants.ANY_FIELD_KEYWORD.equals(nextWord);
+        boolean isMethods = ConfigurationConstants.ANY_METHOD_KEYWORD.equals(nextWord);
+        boolean isFieldsOrMethods = isFields || isMethods;
+
+        String type = nextWord;
+        String typeLocation = reader.locationDescription();
+
+        // Try to read the class member name; we need to do this now so that we can check the nextWord
+        // to see if we're parsing a wildcard type.
+        readNextWord("class member name", false, false, false);
+
+        // Is it a wildcard star (short for all members) or is a type wildcard?
+        boolean isReallyStar = isStar && ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord);
+
+        if (isFieldsOrMethods || isReallyStar)
         {
             // Act according to the type of wildcard.
-            if (ConfigurationConstants.ANY_CLASS_MEMBER_KEYWORD.equals(nextWord))
+            if (isStar)
             {
                 checkFieldAccessFlags(requiredSetMemberAccessFlags,
                                       requiredUnsetMemberAccessFlags);
@@ -1129,10 +1142,10 @@ public class ConfigurationParser implements AutoCloseable
                                             null,
                                             null));
             }
-            else if (ConfigurationConstants.ANY_FIELD_KEYWORD.equals(nextWord))
+            else if (isFields)
             {
                 checkFieldAccessFlags(requiredSetMemberAccessFlags,
-                                      requiredUnsetMemberAccessFlags);
+                        requiredUnsetMemberAccessFlags);
 
                 classSpecification.addField(
                     new MemberSpecification(requiredSetMemberAccessFlags,
@@ -1141,7 +1154,7 @@ public class ConfigurationParser implements AutoCloseable
                                             null,
                                             null));
             }
-            else if (ConfigurationConstants.ANY_METHOD_KEYWORD.equals(nextWord))
+            else if (isMethods)
             {
                 checkMethodAccessFlags(requiredSetMemberAccessFlags,
                                        requiredUnsetMemberAccessFlags);
@@ -1153,9 +1166,6 @@ public class ConfigurationParser implements AutoCloseable
                                             null,
                                             null));
             }
-
-            // We still have to read the closing separator.
-            readNextWord("separator '" + ConfigurationConstants.SEPARATOR_KEYWORD + "'");
 
             if (!ConfigurationConstants.SEPARATOR_KEYWORD.equals(nextWord))
             {
@@ -1165,13 +1175,8 @@ public class ConfigurationParser implements AutoCloseable
         }
         else
         {
-            // Make sure we have a proper type.
-            checkJavaIdentifier("java type");
-            String type         = nextWord;
-            String typeLocation = reader.locationDescription();
-
-            readNextWord("class member name");
             String name = nextWord;
+            checkJavaIdentifier("java type", type, true);
 
             // Did we get just one word before the opening parenthesis?
             if (ConfigurationConstants.OPEN_ARGUMENTS_KEYWORD.equals(name))
@@ -1195,7 +1200,7 @@ public class ConfigurationParser implements AutoCloseable
             {
                 // It's not a constructor.
                 // Make sure we have a proper name.
-                checkJavaIdentifier("class member name");
+                checkNextWordIsJavaIdentifier("class member name");
 
                 // Read the opening parenthesis or the separating
                 // semi-colon.
@@ -1613,7 +1618,7 @@ public class ConfigurationParser implements AutoCloseable
         {
             if (checkJavaIdentifiers)
             {
-                checkJavaIdentifier("java type", allowGenerics);
+                checkNextWordIsJavaIdentifier("java type", allowGenerics);
             }
 
             if (replaceSystemProperties)
@@ -1880,30 +1885,34 @@ public class ConfigurationParser implements AutoCloseable
      * Checks whether the given word is a valid Java identifier and throws
      * a ParseException if it isn't. Wildcard characters are accepted.
      */
-    private void checkJavaIdentifier(String expectedDescription)
+    private void checkNextWordIsJavaIdentifier(String expectedDescription)
         throws ParseException
     {
-        checkJavaIdentifier(expectedDescription, true);
+        checkNextWordIsJavaIdentifier(expectedDescription, true);
     }
 
+    private void checkNextWordIsJavaIdentifier(String expectedDescription, boolean allowGenerics) throws ParseException
+    {
+        checkJavaIdentifier(expectedDescription, nextWord, allowGenerics);
+    }
 
     /**
      * Checks whether the given word is a valid Java identifier and throws
      * a ParseException if it isn't. Wildcard characters are accepted.
      */
-    private void checkJavaIdentifier(String expectedDescription, boolean allowGenerics)
-    throws ParseException
+    private void checkJavaIdentifier(String expectedDescription, String identifier, boolean allowGenerics)
+            throws ParseException
     {
-        if (!isJavaIdentifier(nextWord))
+        if (!isJavaIdentifier(identifier))
         {
             throw new ParseException("Expecting " + expectedDescription +
-                                     " before " + reader.locationDescription());
+                    " before " + reader.locationDescription());
         }
 
-        if (!allowGenerics && containsGenerics(nextWord))
+        if (!allowGenerics && containsGenerics(identifier))
         {
             throw new ParseException("Generics are not allowed (erased) in " + expectedDescription +
-                                     " " + reader.locationDescription());
+                    " " + reader.locationDescription());
         }
     }
 
