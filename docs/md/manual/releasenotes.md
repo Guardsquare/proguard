@@ -1,4 +1,4 @@
-## Version 7.4-beta02
+## Version 7.4
 
 ### Java support
 
