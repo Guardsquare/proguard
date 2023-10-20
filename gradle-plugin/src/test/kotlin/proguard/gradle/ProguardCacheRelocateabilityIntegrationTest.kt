@@ -32,7 +32,7 @@ import testutils.TestPluginClasspath
 
 class ProguardCacheRelocateabilityIntegrationTest : FreeSpec({
 
-    "proguard task can be relocated" - {
+    "proguard task can be relocated" {
         val cacheDir = tempdir()
         val fixture = File(ProguardCacheRelocateabilityIntegrationTest::class.java.classLoader.getResource("spring-boot").path)
 

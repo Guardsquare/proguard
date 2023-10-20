@@ -82,7 +82,7 @@ class GradlePluginIntegrationTest : FreeSpec({
         }
     }
 
-    "gradle plugin can be configured via #configOption" - {
+    "gradle plugin can be configured via #configOption" {
         include(testConfigOption("proguard"))
         include(testConfigOption("proguardWithConfigFile"))
         include(testConfigOption("proguardWithGeneratedConfigFile"))
