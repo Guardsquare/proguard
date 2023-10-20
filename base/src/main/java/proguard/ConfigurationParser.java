@@ -850,7 +850,7 @@ public class ConfigurationParser implements AutoCloseable
         int requiredUnsetClassAccessFlags = 0;
 
         // Parse the class annotations and access modifiers until the class keyword.
-        while (!ConfigurationConstants.CLASS_KEYWORD.equals(nextWord))
+        while (!ConfigurationConstants.CLASS_KEYWORD.equals(nextWord) && !configurationEnd(true))
         {
             // Strip the negating sign, if any.
             boolean negated =

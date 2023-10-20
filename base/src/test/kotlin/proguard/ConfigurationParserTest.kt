@@ -82,6 +82,17 @@ class ConfigurationParserTest : FreeSpec({
         }
     }
 
+    "A ParseException should be thrown with invalid annotation config at the end of the file" - {
+        // This is a parse error without any further config after it.
+        val configStr = ("-keep @MyAnnotation @ThisShouldBeInterfaceKeyword")
+
+        "Then the option should throw a ParseException" {
+            shouldThrow<ParseException> {
+                configStr.asConfiguration()
+            }
+        }
+    }
+
     "Wildcard type tests" - {
         class TestConfig(
             val configOption: String,
