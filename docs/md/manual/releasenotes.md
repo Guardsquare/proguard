@@ -14,7 +14,7 @@
 - Don't drop Record attribute for records with no components. (proguard-core#118)
 - Fix potential duplication class when name obfuscating Kotlin multi-file facades.
 - Do not inline interface methods during optimization to avoid compilation errors during output writing due to an interface method being made package visible.
-- Fix inadvertent closing of System.out when printing configuration. (#366)
+- Fix inadvertent closing of System.out when printing configuration. (#365)
 
 ## Version 7.3.2
 
