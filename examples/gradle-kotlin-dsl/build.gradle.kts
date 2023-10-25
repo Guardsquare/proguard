@@ -1,10 +1,11 @@
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
         google()
     }
     dependencies {
-        classpath("com.guardsquare:proguard-gradle:7.3.0")
+        classpath("com.guardsquare:proguard-gradle:7.4.0")
     }
 }
 

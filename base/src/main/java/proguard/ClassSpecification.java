@@ -41,9 +41,9 @@ public class ClassSpecification implements Cloneable
     public final String extendsAnnotationType;
     public final String extendsClassName;
 
-    public final List   attributeNames = null;
-    public       List   fieldSpecifications;
-    public       List   methodSpecifications;
+    public final List<String>              attributeNames = null;
+    public       List<MemberSpecification> fieldSpecifications;
+    public       List<MemberSpecification> methodSpecifications;
 
 
     /**
