@@ -48,7 +48,6 @@ import proguard.strip.KotlinAnnotationStripper;
 import proguard.util.ConstantMatcher;
 import proguard.util.ListParser;
 import proguard.util.NameParser;
-import proguard.util.PrintWriterUtil;
 import proguard.util.StringMatcher;
 import proguard.util.kotlin.KotlinUnsupportedVersionChecker;
 import proguard.util.kotlin.asserter.KotlinMetadataVerifier;
@@ -297,9 +296,7 @@ public class ProGuard
      */
     private void printConfiguration() throws IOException
     {
-        PrintWriter pw = PrintWriterUtil.createPrintWriterOut(configuration.printConfiguration);
-
-        try (ConfigurationWriter configurationWriter = new ConfigurationWriter(pw))
+        try (ConfigurationWriter configurationWriter = new ConfigurationWriter(configuration.printConfiguration))
         {
             configurationWriter.write(configuration);
         }

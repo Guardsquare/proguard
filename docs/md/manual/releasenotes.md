@@ -1,3 +1,9 @@
+## Version 7.4.1
+
+### Bugfixes
+
+- Fix inadvertent closing of System.out when printing configuration. (#365)
+
 ## Version 7.4
 
 ### Java support
