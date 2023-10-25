@@ -26,6 +26,10 @@ class ConfigurationWriterTest : FreeSpec({
     }
 
     "Hash character handling tests" - {
+        "Option parameters with hash characters should be quoted" {
+            printConfiguration("-keystorepassword '#tester'") shouldBe "-keystorepassword '#tester'"
+        }
+
         "Comments should not be quoted" {
             printConfiguration("# comment\n-keep class **") shouldBe "# comment\n-keep class **"
         }

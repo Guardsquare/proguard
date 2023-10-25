@@ -821,6 +821,7 @@ public class ConfigurationWriter implements AutoCloseable
     {
         return string.length()     == 0 ||
                string.indexOf(' ') >= 0 ||
+               string.indexOf('#') >= 0 ||
                string.indexOf('@') >= 0 ||
                string.indexOf('{') >= 0 ||
                string.indexOf('}') >= 0 ||
@@ -829,7 +830,7 @@ public class ConfigurationWriter implements AutoCloseable
                string.indexOf(':') >= 0 ||
                string.indexOf(';') >= 0 ||
                string.indexOf(',') >= 0  ? ("'" + string + "'") :
-                                           (      string      );
+            (      string      );
     }
 
 
