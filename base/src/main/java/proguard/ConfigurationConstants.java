@@ -116,6 +116,9 @@ public class ConfigurationConstants
     public static final String DONT_PROCESS_KOTLIN_METADATA                      = "-dontprocesskotlinmetadata";
     public static final String OPTIMIZE_AGGRESSIVELY                             = "-optimizeaggressively";
 
+    public static final String ALWAYS_INLINE                                     = "-alwaysinline";
+    public static final String IDENTIFIER_NAME_STRING                            = "-identifiernamestring";
+
     public static final String ANY_FILE_KEYWORD            = "**";
 
     public static final String ANY_ATTRIBUTE_KEYWORD       = "*";

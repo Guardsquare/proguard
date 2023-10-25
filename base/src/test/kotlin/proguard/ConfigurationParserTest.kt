@@ -11,8 +11,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import proguard.classfile.AccessConstants.PUBLIC
 import testutils.asConfiguration
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 /**
  * Some simple testcases to catch special cases when parsing the Configuration.
@@ -89,6 +92,86 @@ class ConfigurationParserTest : FreeSpec({
         "Then the option should throw a ParseException" {
             shouldThrow<ParseException> {
                 configStr.asConfiguration()
+            }
+        }
+    }
+
+    "Testing -alwaysinline parsing" - {
+        "Given an empty configuration" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration("")
+
+            "The option does not print anything" {
+                customOutputStream.toString() shouldContain ""
+                System.setOut(savedPrintStream)
+            }
+        }
+
+        "Given a configuration with -alwaysinline" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration(
+                """-alwaysinline class * {
+                        @org.chromium.build.annotations.AlwaysInline *;
+                    }
+                    """
+            )
+
+            "The option prints out a warning" {
+                customOutputStream.toString() shouldContain "Warning: The R8 option -alwaysinline is currently not supported by ProGuard.\n" +
+                    "This option will have no effect on the optimized artifact."
+                System.setOut(savedPrintStream)
+            }
+        }
+
+        "Given a configuration with -alwaysinline with no class specification" - {
+            "The parsing should throw an exception" {
+                shouldThrow<ParseException> { parseConfiguration("-alwaysinline") }
+            }
+        }
+    }
+
+    "Testing -identifiernamestring parsing" - {
+        "Given an empty configuration" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration("")
+
+            "The option does not print anything" {
+                customOutputStream.toString() shouldContain ""
+                System.setOut(savedPrintStream)
+            }
+        }
+
+        "Given a configuration with -identifiernamestring" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration(
+                """-identifiernamestring class * {
+                        @org.chromium.build.annotations.IdentifierNameString *;
+                    }
+                    """
+            )
+
+            "The option prints out a warning" {
+                customOutputStream.toString() shouldContain "Warning: The R8 option -identifiernamestring is currently not supported by ProGuard.\n" +
+                    "This option will have no effect on the optimized artifact."
+                System.setOut(savedPrintStream)
+            }
+        }
+
+        "Given a configuration with -identifiernamestring with no class specification" - {
+            "The parsing should throw an exception" {
+                shouldThrow<ParseException> { parseConfiguration("-identifiernamestring") }
             }
         }
     }

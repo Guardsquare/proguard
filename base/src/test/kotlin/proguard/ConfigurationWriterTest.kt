@@ -86,4 +86,44 @@ class ConfigurationWriterTest : FreeSpec({
             }
         }
     }
+
+    "Given a -alwaysinline rule" - {
+        val rules = "-alwaysinline class ** {*;}"
+
+        "When the rule is parsed and printed out again" - {
+            val out = printConfiguration(rules)
+
+            "Then the rule should be not be present in the output" {
+                out shouldBe ""
+            }
+        }
+
+        "When the rule does not exist it shouldn't be printed out" - {
+            val out = printConfiguration("")
+
+            "Then the rule should not be present in the output" {
+                out shouldBe ""
+            }
+        }
+    }
+
+    "Given a -identifiernamestring rule" - {
+        val rules = "-identifiernamestring class ** {*;}"
+
+        "When the rule is parsed and printed out again" - {
+            val out = printConfiguration(rules)
+
+            "Then the rule should be not be present in the output" {
+                out shouldBe ""
+            }
+        }
+
+        "When the rule does not exist it shouldn't be printed out" - {
+            val out = printConfiguration("")
+
+            "Then the rule should not be present in the output" {
+                out shouldBe ""
+            }
+        }
+    }
 })
