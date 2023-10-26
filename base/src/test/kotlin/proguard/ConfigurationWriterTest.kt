@@ -10,6 +10,7 @@ import java.io.StringWriter
  * Test printing of the configuration (-printconfiguration option).
  */
 class ConfigurationWriterTest : FreeSpec({
+    val EOL = System.lineSeparator()
     fun printConfiguration(rules: String): String {
         val out = StringWriter()
         val configuration = Configuration()
@@ -31,11 +32,11 @@ class ConfigurationWriterTest : FreeSpec({
         }
 
         "Comments should not be quoted" {
-            printConfiguration("# comment\n-keep class **") shouldBe "# comment\n-keep class **"
+            printConfiguration("# comment$EOL-keep class **") shouldBe "# comment$EOL-keep class **"
         }
 
         "Hash characters in comments should not be quoted" {
-            printConfiguration("# #comment\n-keep class **") shouldBe "# #comment\n-keep class **"
+            printConfiguration("# #comment$EOL-keep class **") shouldBe "# #comment$EOL-keep class **"
         }
     }
 
