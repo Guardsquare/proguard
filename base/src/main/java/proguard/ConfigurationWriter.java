@@ -51,7 +51,7 @@ public class ConfigurationWriter implements AutoCloseable
 
     private final PrintWriter writer;
     private       File        configurationFile;
-    private       File        baseDir;
+    private       String      baseDirName;
 
 
     /**
@@ -62,7 +62,10 @@ public class ConfigurationWriter implements AutoCloseable
         this(PrintWriterUtil.createPrintWriterOut(configurationFile));
 
         this.configurationFile = configurationFile;
-        baseDir = configurationFile.getParentFile();
+        if (configurationFile.getParentFile() != null)
+        {
+            baseDirName = configurationFile.getParentFile().getAbsolutePath() + File.separator;
+        }
     }
 
 
@@ -801,13 +804,9 @@ public class ConfigurationWriter implements AutoCloseable
         String fileName = file.getAbsolutePath();
 
         // See if we can convert the file name into a relative file name.
-        if (baseDir != null)
+        if (baseDirName != null && fileName.startsWith(baseDirName))
         {
-            String baseDirName = baseDir.getAbsolutePath() + File.separator;
-            if (fileName.startsWith(baseDirName))
-            {
-                fileName = fileName.substring(baseDirName.length());
-            }
+            fileName = fileName.substring(baseDirName.length());
         }
 
         return quotedString(fileName);
