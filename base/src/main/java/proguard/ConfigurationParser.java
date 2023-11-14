@@ -1183,24 +1183,29 @@ public class ConfigurationParser implements AutoCloseable
             // Did we get just one word before the opening parenthesis?
             if (ConfigurationConstants.OPEN_ARGUMENTS_KEYWORD.equals(name))
             {
-                // This must be a constructor then.
-                // Make sure the type is a proper constructor name.
-                if (!(type.equals(ClassConstants.METHOD_NAME_INIT) ||
-                      type.equals(externalClassName) ||
-                      type.equals(ClassUtil.externalShortClassName(externalClassName))))
+                // This must be an initializer then.
+                // Make sure the type is a proper initializer name.
+                if (ClassUtil.isInitializer(type))
+                {
+                    name = type; // This is either `<init>` or `<clinit>`.
+                    type = JavaTypeConstants.VOID;
+                }
+                else if (type.equals(externalClassName) ||
+                         type.equals(ClassUtil.externalShortClassName(externalClassName)))
+                {
+                    name = ClassConstants.METHOD_NAME_INIT;
+                    type = JavaTypeConstants.VOID;
+                }
+                else
                 {
                     throw new ParseException("Expecting type and name " +
                                              "instead of just '" + type +
                                              "' before " + reader.locationDescription());
                 }
-
-                // Assign the fixed constructor type and name.
-                type = JavaTypeConstants.VOID;
-                name = ClassConstants.METHOD_NAME_INIT;
             }
             else
             {
-                // It's not a constructor.
+                // It's not an initializer.
                 // Make sure we have a proper name.
                 checkNextWordIsJavaIdentifier("class member name");
 
@@ -1211,7 +1216,7 @@ public class ConfigurationParser implements AutoCloseable
             }
 
             // Check if the type actually contains the use of generics.
-            // Can not do it right away as we also support "<init>" as a type (see case above).
+            // Can not do it right away as we also support "<init>" and "<clinit>" as a type (see case above).
             if (containsGenerics(type))
             {
                 throw new ParseException("Generics are not allowed (erased) for java type" + typeLocation);
@@ -1289,6 +1294,14 @@ public class ConfigurationParser implements AutoCloseable
                 {
                     throw new ParseException("Expecting separating '" + ConfigurationConstants.ARGUMENT_SEPARATOR_KEYWORD +
                                              "' or closing '" + ConfigurationConstants.CLOSE_ARGUMENTS_KEYWORD +
+                                             "' before " + reader.locationDescription());
+                }
+
+                // Class initializers are not supposed to have any parameters.
+                if (ClassConstants.METHOD_NAME_CLINIT.equals(name) &&
+                    ClassUtil.internalMethodParameterCount(descriptor) > 0)
+                {
+                    throw new ParseException("Not expecting method parameters with initializer '" + ClassConstants.METHOD_NAME_CLINIT +
                                              "' before " + reader.locationDescription());
                 }
 

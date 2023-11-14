@@ -64,6 +64,31 @@ class ConfigurationParserTest : FreeSpec({
             parseConfiguration("-keep class * { public protected <methods>; }")
         }
 
+        "Keep rule with ClassName should be valid" {
+            val configuration = parseConfiguration("-keep class ClassName { ClassName(); }")
+            val keep = configuration.keep.single().methodSpecifications.single()
+            keep.name shouldBe "<init>"
+            keep.descriptor shouldBe "()V"
+        }
+
+        "Keep rule with ClassName and external class com.example.ClassName should be valid" {
+            val configuration = parseConfiguration("-keep class com.example.ClassName { ClassName(); }")
+            val keep = configuration.keep.single().methodSpecifications.single()
+            keep.name shouldBe "<init>"
+            keep.descriptor shouldBe "()V"
+        }
+
+        "Keep rule with <clinit> should be valid" {
+            val configuration = parseConfiguration("-keep class ** { <clinit>(); }")
+            val keep = configuration.keep.single().methodSpecifications.single()
+            keep.name shouldBe "<clinit>"
+            keep.descriptor shouldBe "()V"
+        }
+
+        "Keep rule with <clinit> and non-empty argument list should throw ParseException" {
+            shouldThrow<ParseException> { parseConfiguration("-keep class * { void <clinit>(int) }") }
+        }
+
         "Keep rule with * member wildcard and return type should be valid" {
             parseConfiguration("-keep class * { java.lang.String *; }")
         }

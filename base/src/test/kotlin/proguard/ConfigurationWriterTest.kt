@@ -26,6 +26,48 @@ class ConfigurationWriterTest : FreeSpec({
         return out.toString().trim()
     }
 
+    "Keep rules tests" - {
+        "Keep class constructor should be kept" {
+            val rules = """
+                -keep class * {
+                    <init>();
+                }
+            """.trimIndent()
+            val out = printConfiguration(rules)
+            out shouldBe rules
+        }
+
+        "Keep class initializer should be kept" {
+            val rules = """
+                -keep class * {
+                    <clinit>();
+                }
+            """.trimIndent()
+            val out = printConfiguration(rules)
+            val expected = """
+                -keep class * {
+                    void <clinit>();
+                }
+            """.trimIndent()
+            out shouldBe expected
+        }
+
+        "Keep class initializer should respect allowobfuscation flag" {
+            val rules = """
+                -keep,allowobfuscation class ** extends com.example.A {
+                    <clinit>();
+                }
+            """.trimIndent()
+            val out = printConfiguration(rules)
+            val expected = """
+                -keep,allowobfuscation class ** extends com.example.A {
+                    void <clinit>();
+                }
+            """.trimIndent()
+            out shouldBe expected
+        }
+    }
+
     "Hash character handling tests" - {
         "Option parameters with hash characters should be quoted" {
             printConfiguration("-keystorepassword '#tester'") shouldBe "-keystorepassword '#tester'"

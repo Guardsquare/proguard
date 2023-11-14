@@ -4,6 +4,10 @@
 
 - Fix inadvertent closing of System.out when printing configuration. (#365)
 
+### Added
+
+- Support for parsing of `<clinit>` methods without specifying the return type in class specifications.
+
 ## Version 7.4
 
 ### Java support
