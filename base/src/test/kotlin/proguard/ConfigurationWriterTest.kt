@@ -28,42 +28,22 @@ class ConfigurationWriterTest : FreeSpec({
 
     "Keep rules tests" - {
         "Keep class constructor should be kept" {
-            val rules = """
-                -keep class * {
-                    <init>();
-                }
-            """.trimIndent()
+            val rules = "-keep class * {$EOL    <init>();$EOL}"
             val out = printConfiguration(rules)
             out shouldBe rules
         }
 
         "Keep class initializer should be kept" {
-            val rules = """
-                -keep class * {
-                    <clinit>();
-                }
-            """.trimIndent()
+            val rules = "-keep class * {$EOL    <clinit>();$EOL}"
             val out = printConfiguration(rules)
-            val expected = """
-                -keep class * {
-                    void <clinit>();
-                }
-            """.trimIndent()
+            val expected = "-keep class * {$EOL    void <clinit>();$EOL}"
             out shouldBe expected
         }
 
         "Keep class initializer should respect allowobfuscation flag" {
-            val rules = """
-                -keep,allowobfuscation class ** extends com.example.A {
-                    <clinit>();
-                }
-            """.trimIndent()
+            val rules = "-keep,allowobfuscation class ** extends com.example.A {$EOL    <clinit>();$EOL}"
             val out = printConfiguration(rules)
-            val expected = """
-                -keep,allowobfuscation class ** extends com.example.A {
-                    void <clinit>();
-                }
-            """.trimIndent()
+            val expected = "-keep,allowobfuscation class ** extends com.example.A {$EOL    void <clinit>();$EOL}"
             out shouldBe expected
         }
     }
