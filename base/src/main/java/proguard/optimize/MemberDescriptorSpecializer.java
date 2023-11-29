@@ -141,7 +141,7 @@ implements   MemberVisitor
 
                 if (valueClass != null &&
                     valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(fieldType)) &&
-                    (programField.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+                    (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                 {
                     logger.debug("MemberDescriptorSpecializer [{}.{} {}] -> {}",
                                  programClass.getName(),
@@ -210,7 +210,7 @@ implements   MemberVisitor
 
                         if (valueClass != null &&
                             valueClass.extendsOrImplements(ClassUtil.internalClassNameFromClassType(parameterType)) &&
-                            (programMethod.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+                            (valueClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                         {
                             logger.debug("MemberDescriptorSpecializer [{}.{}{}]: parameter #{}: {} -> {}",
                                     programClass.getName(),

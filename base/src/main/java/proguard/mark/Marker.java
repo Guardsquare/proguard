@@ -234,8 +234,7 @@ public class Marker implements Pass
     {
         // Program classes are always available and safe to generalize/specialize from/to.
         ClassVisitor isClassAvailableMarker =
-                new AllMemberVisitor(
-                new ProcessingFlagSetter(ProcessingFlags.IS_CLASS_AVAILABLE));
+                new ProcessingFlagSetter(ProcessingFlags.IS_CLASS_AVAILABLE);
 
         programClassPool.classesAccept(isClassAvailableMarker);
 

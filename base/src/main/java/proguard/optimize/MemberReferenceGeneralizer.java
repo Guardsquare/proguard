@@ -22,12 +22,22 @@ package proguard.optimize;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import proguard.classfile.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.Clazz;
+import proguard.classfile.Field;
+import proguard.classfile.Member;
+import proguard.classfile.Method;
+import proguard.classfile.ProgramClass;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.constant.*;
+import proguard.classfile.constant.AnyMethodrefConstant;
+import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.constant.FieldrefConstant;
+import proguard.classfile.constant.RefConstant;
 import proguard.classfile.constant.visitor.ConstantVisitor;
-import proguard.classfile.editor.*;
-import proguard.classfile.instruction.*;
+import proguard.classfile.editor.CodeAttributeEditor;
+import proguard.classfile.editor.ConstantPoolEditor;
+import proguard.classfile.instruction.ConstantInstruction;
+import proguard.classfile.instruction.Instruction;
 import proguard.classfile.instruction.visitor.InstructionVisitor;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.util.ProcessingFlags;
@@ -200,7 +210,7 @@ implements   InstructionVisitor,
         // DGD-486: Only generalize members which are always available. Partial replacement of a class that is not
         // available on all platforms may result in a VerifyError at runtime.
         if (referencedMember != null &&
-            (referencedMember.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+            (clazz.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
         {
             clazz.constantPoolEntryAccept(refConstant.u2classIndex, this);
 
@@ -287,13 +297,14 @@ implements   InstructionVisitor,
                 // Otherwise, look in the super class itself.
                 // Only consider public classes and methods, to avoid any
                 // access problems.
+                // Only consider classes that are marked as available.
                 if (generalizedClass == null &&
-                    (superClass.getAccessFlags() & AccessConstants.PUBLIC) != 0)
+                    (superClass.getAccessFlags() & AccessConstants.PUBLIC) != 0 &&
+                     (superClass.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
                 {
                     Method method = superClass.findMethod(memberName, memberType);
                     if (method != null &&
-                        (method.getAccessFlags() & AccessConstants.PUBLIC) != 0 &&
-                        (method.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+                        (method.getAccessFlags() & AccessConstants.PUBLIC) != 0)
                     {
                         // Remember the generalized class and class member.
                         generalizedClass = superClass;
@@ -308,7 +319,7 @@ implements   InstructionVisitor,
             Field field = clazz.findField(memberName, memberType);
 
             if (field != null &&
-                (field.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
+                (clazz.getProcessingFlags() & ProcessingFlags.IS_CLASS_AVAILABLE) != 0)
             {
                 // Remember the generalized class and class member.
                 generalizedClass = clazz;

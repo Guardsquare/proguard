@@ -3,6 +3,7 @@
 ### Bugfixes
 
 - Fix potential access issues when backporting.
+- Fix potential NoClassDefFoundError when using type specialization optimization. (#373)
 
 ## Version 7.4.1
 
