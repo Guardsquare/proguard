@@ -314,6 +314,12 @@ public class Backporter implements Pass
             appView.programClassPool.classesAccept(new ClassVersionSetter(targetClassVersion));
         }
 
+        // Backporting may introduce access issues, for example related to nest members/host.
+        if (configuration.allowAccessModification)
+        {
+            appView.programClassPool.classesAccept(new AccessFixer());
+        }
+
         logger.info("  Number of converted string concatenations:     {}", replacedStringConcatCounter.getCount());
         logger.info("  Number of converted lambda expressions:        {}", lambdaExpressionCounter.getCount());
         logger.info("  Number of converted static interface methods:  {}", staticInterfaceMethodCounter.getCount());

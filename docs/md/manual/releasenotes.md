@@ -1,3 +1,9 @@
+## Version 7.4.2
+
+### Bugfixes
+
+- Fix potential access issues when backporting.
+
 ## Version 7.4.1
 
 ### Bugfixes
