@@ -202,8 +202,6 @@ implements   KotlinMetadataVisitor,
         kotlinTypeMetadata.typeArgumentsAccept(clazz, this);
         kotlinTypeMetadata.upperBoundsAccept(  clazz, this);
         kotlinTypeMetadata.abbreviationAccept( clazz, this);
-
-        kotlinTypeMetadata.flags.common.hasAnnotations = !kotlinTypeMetadata.annotations.isEmpty();
     }
 
     @Override
@@ -213,7 +211,6 @@ implements   KotlinMetadataVisitor,
                                           KotlinTypeMetadata kotlinTypeMetadata)
     {
         kotlinFunctionMetadata.referencedMethodAccept(this.annotationCounter.reset());
-        kotlinTypeMetadata.flags.common.hasAnnotations = annotationCounter.getParameterAnnotationCount(0) > 0;
     }
 
     // Implementations for KotlinTypeParameterVisitor.
@@ -225,8 +222,6 @@ implements   KotlinMetadataVisitor,
     public void visitAnyTypeParameter(Clazz clazz, KotlinTypeParameterMetadata kotlinTypeParameterMetadata)
     {
         kotlinTypeParameterMetadata.upperBoundsAccept(clazz, this);
-
-        kotlinTypeParameterMetadata.flags.common.hasAnnotations = !kotlinTypeParameterMetadata.annotations.isEmpty();
     }
 
     // Implementations for KotlinValueParameterVisitor.

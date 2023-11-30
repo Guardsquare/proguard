@@ -4,6 +4,7 @@
 
 - Fix potential access issues when backporting.
 - Fix potential NoClassDefFoundError when using type specialization optimization. (#373)
+- Improve processing of Kotlin metadata flags to prevent unnecessary null checks for consumers of protected library artifacts.
 
 ## Version 7.4.1
 
