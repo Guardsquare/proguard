@@ -55,8 +55,6 @@ class GradlePluginIntegrationTest : FreeSpec({
         }
     }
 
-    // ProguardTask is still incompatible, but will not fail the build. Once the issue is resolved, this test will fail
-    // and should be updated to demonstrate compatibility.
     "ProguardTask will not fail when configuration cache is used" - {
         val projectRoot = tempdir()
         val fixture = File(GradlePluginIntegrationTest::class.java.classLoader.getResource("application").path)
@@ -76,8 +74,7 @@ class GradlePluginIntegrationTest : FreeSpec({
 
             "Then the build was successful with configuration cache" {
                 result.output shouldContain "SUCCESSFUL"
-                // E.g., "Configuration cache entry discarded with 4 problems."
-                result.output shouldContain "Configuration cache entry discarded with"
+                result.output shouldContain "Configuration cache entry stored."
             }
         }
     }
