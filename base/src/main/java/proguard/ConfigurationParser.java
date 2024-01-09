@@ -20,13 +20,26 @@
  */
 package proguard;
 
-import proguard.classfile.*;
+import proguard.classfile.AccessConstants;
+import proguard.classfile.ClassConstants;
+import proguard.classfile.JavaAccessConstants;
+import proguard.classfile.JavaTypeConstants;
+import proguard.classfile.TypeConstants;
 import proguard.classfile.util.ClassUtil;
-import proguard.util.*;
+import proguard.util.ListUtil;
+import proguard.util.StringUtil;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 
 /**
@@ -139,9 +152,24 @@ public class ConfigurationParser implements AutoCloseable
      * @throws IOException if an IO error occurs while reading a configuration.
      */
     public void parse(Configuration configuration)
+    throws ParseException, IOException {
+        parse(configuration, null);
+    }
+
+    /**
+     * Parses and returns the configuration.
+     *
+     * @param configuration  the configuration that is updated as a side-effect.
+     * @param unknownOptionHandler optional handler for unknown options; if null then a {@link ParseException}
+     *                             is thrown when encountering an unknown option.
+     * @throws ParseException if the any of the configuration settings contains
+     *                        a syntax error.
+     * @throws IOException    if an IO error occurs while reading a configuration.
+     */
+    public void parse(Configuration configuration, BiConsumer<String, String> unknownOptionHandler)
     throws ParseException, IOException
     {
-        while (nextWord != null)
+        parseWord: while (nextWord != null)
         {
             lastComments = reader.lastComments();
 
@@ -234,7 +262,15 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.IDENTIFIER_NAME_STRING                           .startsWith(nextWord))                                                       parseUnsupportedR8Rules(ConfigurationConstants.IDENTIFIER_NAME_STRING, true);
             else
             {
-                throw new ParseException("Unknown option " + reader.locationDescription());
+                if (unknownOptionHandler != null) {
+                    unknownOptionHandler.accept(nextWord, reader.lineLocationDescription());
+                    while (nextWord != null) {
+                        readNextWord();
+                        if (nextWord != null && nextWord.startsWith("-")) {
+                            continue parseWord;
+                        }
+                    }
+                } else throw new ParseException("Unknown option " + reader.locationDescription());
             }
         }
     }
