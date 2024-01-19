@@ -24,6 +24,7 @@ import groovy.lang.Closure;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.logging.*;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.Optional;
 import org.gradle.util.GradleVersion;
@@ -32,6 +33,7 @@ import proguard.classfile.*;
 import proguard.classfile.util.ClassUtil;
 import proguard.util.ListUtil;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -44,6 +46,11 @@ import java.util.*;
 @CacheableTask
 public abstract class ProGuardTask extends DefaultTask
 {
+    @Inject
+    protected abstract ObjectFactory getObjectFactory();
+    @Inject
+    protected abstract ProjectLayout getProjectLayout();
+
     // Accumulated input and output, for the sake of Gradle's lazy file
     // resolution and lazy task execution.
     private final List          inJarFiles         = new ArrayList();
@@ -63,16 +70,12 @@ public abstract class ProGuardTask extends DefaultTask
     private ClassSpecification classSpecification;
 
     public static final String DEFAULT_CONFIG_RESOURCE_PREFIX = "/lib";
-    private       final String resolvedConfigurationFileNamePrefix = getProject().file(DEFAULT_CONFIG_RESOURCE_PREFIX).toString();
+    private       final String resolvedConfigurationFileNamePrefix = getProjectLayout().files(DEFAULT_CONFIG_RESOURCE_PREFIX).getSingleFile().toString();
 
     // INTERNAL USE ONLY - write extra data entries to this jar
     private File extraJar;
 
     public ProGuardTask() {
-        if (GradleVersion.current().compareTo(GradleVersion.version("7.4")) >= 0) {
-            // This method was added in Gradle 7.4
-            notCompatibleWithConfigurationCache("https://github.com/Guardsquare/proguard/issues/254");
-        }
     }
 
     // Gradle task inputs and outputs, because annotations on the List fields
@@ -82,26 +85,26 @@ public abstract class ProGuardTask extends DefaultTask
     @Classpath
     public FileCollection getInJarFileCollection()
     {
-        return getProject().files(inJarFiles);
+        return getProjectLayout().files(inJarFiles);
     }
 
     @OutputFiles
     public FileCollection getOutJarFileCollection()
     {
-        return getProject().files(outJarFiles);
+        return getProjectLayout().files(outJarFiles);
     }
 
     @Classpath
     public FileCollection getLibraryJarFileCollection()
     {
-        return getProject().files(libraryJarFiles);
+        return getProjectLayout().files(libraryJarFiles);
     }
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public FileCollection getConfigurationFileCollection()
     {
-        return getProject().files(configurationFiles);
+        return getProjectLayout().files(configurationFiles);
     }
 
     // Convenience methods to retrieve settings from outside the task.
@@ -672,7 +675,7 @@ public abstract class ProGuardTask extends DefaultTask
     public void printseeds(Object printSeeds)
     throws ParseException
     {
-        configuration.printSeeds = getProject().file(printSeeds);
+        configuration.printSeeds = getProjectLayout().files(printSeeds).getSingleFile();
     }
 
     @Optional
@@ -710,7 +713,7 @@ public abstract class ProGuardTask extends DefaultTask
     public void printusage(Object printUsage)
     throws ParseException
     {
-        configuration.printUsage = getProject().file(printUsage);
+        configuration.printUsage = getProjectLayout().files(printUsage).getSingleFile();
     }
 
     @Optional
@@ -925,7 +928,7 @@ public abstract class ProGuardTask extends DefaultTask
     public void printmapping(Object printMapping)
     throws ParseException
     {
-        configuration.printMapping = getProject().file(printMapping);
+        configuration.printMapping = getProjectLayout().files(printMapping).getSingleFile();
     }
 
     @Optional
@@ -937,7 +940,7 @@ public abstract class ProGuardTask extends DefaultTask
     public void applymapping(Object applyMapping)
     throws ParseException
     {
-        configuration.applyMapping = getProject().file(applyMapping);
+        configuration.applyMapping = getProjectLayout().files(applyMapping).getSingleFile();
     }
 
     public void obfuscationdictionary(Object obfuscationDictionary)
@@ -1219,7 +1222,7 @@ public abstract class ProGuardTask extends DefaultTask
     public void keystore(Object keyStore)
     {
         configuration.keyStores =
-            extendList(configuration.keyStores, getProject().file(keyStore));
+            extendList(configuration.keyStores, getProjectLayout().files(keyStore).getSingleFile());
     }
 
     public void keystorepassword(String keyStorePassword)
@@ -1321,7 +1324,7 @@ public abstract class ProGuardTask extends DefaultTask
     throws ParseException
     {
         configuration.printConfiguration =
-            getProject().file(printConfiguration);
+                getProjectLayout().files(printConfiguration).getSingleFile();
     }
 
     @Optional
@@ -1346,7 +1349,7 @@ public abstract class ProGuardTask extends DefaultTask
     public void dump(Object dump)
     throws ParseException
     {
-        configuration.dump = getProject().file(dump);
+        configuration.dump = getProjectLayout().files(dump).getSingleFile();
     }
 
     @Optional
@@ -1490,7 +1493,7 @@ public abstract class ProGuardTask extends DefaultTask
             Object fileObject = configurationFiles.get(index);
 
             ConfigurableFileCollection fileCollection =
-                getProject().files(fileObject);
+                    getObjectFactory().fileCollection().from(fileObject);
 
             // Parse the configuration as a collection of files.
             Iterator<File> files = fileCollection.iterator();
@@ -1595,7 +1598,7 @@ public abstract class ProGuardTask extends DefaultTask
                                       Map       filterArgs,
                                       boolean   output)
     {
-        ConfigurableFileCollection fileCollection = getProject().files(files);
+        ConfigurableFileCollection fileCollection = getObjectFactory().fileCollection().from(files);
 
         if (classPath == null)
         {
@@ -2299,7 +2302,7 @@ public abstract class ProGuardTask extends DefaultTask
      */
     private URL url(Object fileObject) throws MalformedURLException
     {
-        File file = getProject().file(fileObject);
+        File file = getProjectLayout().files(fileObject).getSingleFile();
         return
             fileObject instanceof URL ? (URL)fileObject :
             fileObject instanceof String &&
