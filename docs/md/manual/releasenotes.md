@@ -7,6 +7,10 @@
 - Improve processing of Kotlin metadata flags to prevent unnecessary null checks for consumers of protected library artifacts.
 - Prevent potential `StackGeneralizationException` during optimization when processing methods with many arguments.
 
+### Added
+
+- `ProGuardTask` support for Gradle configuration cache. (#254)
+
 ## Version 7.4.1
 
 ### Bugfixes
