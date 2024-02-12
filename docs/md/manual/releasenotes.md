@@ -1,3 +1,9 @@
+## Version 7.4.3
+
+### Bugfixes
+
+- Prevent unwanted name collision leading to missing methods in Kotlin DefaultImpls classes.
+
 ## Version 7.4.2
 
 ### Bugfixes

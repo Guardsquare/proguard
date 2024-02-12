@@ -1971,23 +1971,28 @@ implements   ClassVisitor,
         {
             visitAnyFunction(clazz, kotlinDeclarationContainerMetadata, kotlinFunctionMetadata);
 
-            // Non-abstract functions in interfaces should have default implementations, so keep it if the
-            // user kept the original function.
-            if (isUsed(kotlinFunctionMetadata))
-            {
-                if (kotlinDeclarationContainerMetadata.k == KotlinConstants.METADATA_KIND_CLASS &&
-                    ((KotlinClassKindMetadata)kotlinDeclarationContainerMetadata).flags.isInterface &&
-                    !kotlinFunctionMetadata.flags.modality.isAbstract &&
-                    (kotlinFunctionMetadata.referencedMethod.getProcessingFlags() & ProcessingFlags.DONT_SHRINK) != 0)
-                {
-                    kotlinFunctionMetadata.referencedDefaultImplementationMethodAccept(
-                        new MultiMemberVisitor(
-                            ClassUsageMarker.this,
-                            new MemberToClassVisitor(ClassUsageMarker.this)
-                        )
-                    );
-                }
+            boolean isInterface =
+                kotlinDeclarationContainerMetadata.k == KotlinConstants.METADATA_KIND_CLASS
+                    && ((KotlinClassKindMetadata) kotlinDeclarationContainerMetadata).flags.isInterface
+                    && !kotlinFunctionMetadata.flags.modality.isAbstract;
+
+            if (isUsed(kotlinFunctionMetadata)
+                && isInterface
+                && (kotlinFunctionMetadata.referencedMethod.getProcessingFlags()
+                        & ProcessingFlags.DONT_SHRINK)
+                    != 0) {
+                kotlinFunctionMetadata.referencedDefaultImplementationMethodAccept(
+                   new MultiMemberVisitor(
+                       ClassUsageMarker.this, new MemberToClassVisitor(ClassUsageMarker.this)));
             }
+
+            // If a default implementation is called directly,
+            // the interface should be marked as used as well.
+            if (kotlinFunctionMetadata.referencedDefaultImplementationMethod != null
+                && isInterface
+                && isUsed(kotlinFunctionMetadata.referencedDefaultImplementationMethod)) {
+                kotlinFunctionMetadata.referencedMethodAccept(ClassUsageMarker.this);
+            } 
         }
 
         // Implementations for KotlinTypeAliasVisitor.

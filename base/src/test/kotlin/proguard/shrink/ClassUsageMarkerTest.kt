@@ -10,11 +10,17 @@ import io.kotest.matchers.shouldNot
 import io.kotest.matchers.shouldNotBe
 import proguard.AppView
 import proguard.Configuration
+import proguard.classfile.Clazz
+import proguard.classfile.Member
 import proguard.classfile.attribute.annotation.visitor.AllElementValueVisitor
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
+import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor
 import proguard.classfile.util.EnumFieldReferenceInitializer
 import proguard.classfile.visitor.AllMethodVisitor
+import proguard.classfile.visitor.MemberVisitor
 import proguard.classfile.visitor.MultiClassVisitor
+import proguard.classfile.visitor.NamedClassVisitor
+import proguard.classfile.visitor.NamedMethodVisitor
 import proguard.testutils.ClassPoolBuilder
 import proguard.testutils.JavaSource
 import proguard.testutils.KotlinSource
@@ -211,5 +217,42 @@ class ClassUsageMarkerTest : StringSpec({
         shouldNotThrowAny {
             programClassPool.classAccept("Test", MultiClassVisitor(classUsageMarker, AllMethodVisitor(classUsageMarker)))
         }
+    }
+    "Given a Kotlin interface with default method implementation" {
+        val (programClassPool, _) = ClassPoolBuilder.fromSource(
+            KotlinSource(
+                "Interface.kt",
+                """
+        package test;
+        interface Interface {
+            fun foo() : Int {
+                return 42;
+            }
+        }
+                """.trimIndent(),
+            ),
+        )
+
+        // Necessary to force marking methods that are not actually used and have not been processed by the Marker.
+        class CustomMarker(var marker: SimpleUsageMarker) : MemberVisitor {
+            override fun visitAnyMember(clazz: Clazz, member: Member) {
+                marker.markAsUsed(member)
+            }
+        }
+
+        val usageMarker = SimpleUsageMarker()
+        val classUsageMarker = ClassUsageMarker(usageMarker)
+
+        // Mark the classes as used.
+        programClassPool.classesAccept(classUsageMarker)
+
+        // Mark the default implementation as used.
+        programClassPool.accept(NamedClassVisitor(NamedMethodVisitor("foo", null, CustomMarker(usageMarker)), "test/Interface\$DefaultImpls"))
+
+        // Process Kotlin metadata: this should cause the interface method to be kept as well.
+        programClassPool.classesAccept(ReferencedKotlinMetadataVisitor(classUsageMarker))
+
+        val fooInterface = programClassPool.getClass("test/Interface").findMethod("foo", null)
+        fooInterface should beMarkedWith(usageMarker)
     }
 })
