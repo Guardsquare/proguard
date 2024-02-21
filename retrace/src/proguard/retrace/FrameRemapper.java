@@ -116,7 +116,7 @@ public class FrameRemapper implements MappingProcessor
                     if (fieldInfo.matches(originalType))
                     {
                         originalFieldFrames.add(new FrameInfo(fieldInfo.originalClassName,
-                                                              obfuscatedFrame.getSourceFile().equals("Unknown Source") ?
+                                                              "Unknown Source".equals(obfuscatedFrame.getSourceFile()) ?
                                                                       "Unknown Source" :
                                                                       sourceFileName(fieldInfo.originalClassName),
                                                               obfuscatedFrame.getLineNumber(),
@@ -186,7 +186,7 @@ public class FrameRemapper implements MappingProcessor
                         }
 
                         originalMethodFrames.add(new FrameInfo(methodInfo.originalClassName,
-                                                               obfuscatedFrame.getSourceFile().equals("Unknown Source") ?
+                                                               "Unknown Source".equals(obfuscatedFrame.getSourceFile()) ?
                                                                        "Unknown Source" :
                                                                        sourceFileName(methodInfo.originalClassName),
                                                                lineNumber,
