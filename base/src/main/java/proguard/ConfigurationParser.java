@@ -260,6 +260,7 @@ public class ConfigurationParser implements AutoCloseable
             else if (ConfigurationConstants.OPTIMIZE_AGGRESSIVELY                            .startsWith(nextWord)) configuration.optimizeConservatively                = parseNoArgument(false);
             else if (ConfigurationConstants.ALWAYS_INLINE                                    .startsWith(nextWord))                                                       parseUnsupportedR8Rules(ConfigurationConstants.ALWAYS_INLINE, true);
             else if (ConfigurationConstants.IDENTIFIER_NAME_STRING                           .startsWith(nextWord))                                                       parseUnsupportedR8Rules(ConfigurationConstants.IDENTIFIER_NAME_STRING, true);
+            else if (ConfigurationConstants.MAXIMUM_REMOVED_ANDROID_LOG_LEVEL                .equals(nextWord))                                                           parseMaximumRemovedAndroidLogLevel();
             else
             {
                 if (unknownOptionHandler != null) {
@@ -2087,9 +2088,22 @@ public class ConfigurationParser implements AutoCloseable
             parseClassSpecificationArguments();
         }
 
-        System.out.println("Warning: The R8 option " + option + " is currently not supported by ProGuard.\n" +
-                           "This option will have no effect on the optimized artifact.");
 
+        warnUnsupportedR8Option(option);
+    }
+
+    private void parseMaximumRemovedAndroidLogLevel() throws IOException, ParseException {
+        parseIntegerArgument();
+        if (!configurationEnd(true)) {
+            parseClassSpecificationArguments();
+        }
+
+        warnUnsupportedR8Option(ConfigurationConstants.MAXIMUM_REMOVED_ANDROID_LOG_LEVEL);
+    }
+
+    private static void warnUnsupportedR8Option(String option) {
+        System.out.println("Warning: The R8 option " + option + " is currently not supported by ProGuard.\n" +
+                "This option will have no effect on the optimized artifact.");
     }
 
 

@@ -200,6 +200,55 @@ class ConfigurationParserTest : FreeSpec({
             }
         }
     }
+    "Testing -maximumremovedandroidloglevel parsing" - {
+        "Given an empty configuration" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration("")
+
+            "The option does not print anything" {
+                customOutputStream.toString() shouldContain ""
+                System.setOut(savedPrintStream)
+            }
+        }
+
+        "Given a configuration with -maximumremovedandroidloglevel without a class specification" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration("-maximumremovedandroidloglevel 1")
+
+            "The option prints out a warning" {
+                customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is currently not supported by ProGuard.\n" +
+                        "This option will have no effect on the optimized artifact."
+                System.setOut(savedPrintStream)
+            }
+        }
+
+        "Given a configuration with -maximumremovedandroidloglevel with a class specification" - {
+            val savedPrintStream = System.out
+            val customOutputStream = ByteArrayOutputStream()
+            System.setOut(PrintStream(customOutputStream))
+
+            parseConfiguration(
+                """
+                    -maximumremovedandroidloglevel 1 @org.chromium.build.annotations.DoNotStripLogs class ** {
+                       <methods>;
+                    }
+                """.trimIndent(),
+            )
+
+            "The option prints out a warning" {
+                customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is currently not supported by ProGuard.\n" +
+                        "This option will have no effect on the optimized artifact."
+                System.setOut(savedPrintStream)
+            }
+        }
+    }
+
 
     "Wildcard type tests" - {
         class TestConfig(

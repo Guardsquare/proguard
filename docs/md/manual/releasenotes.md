@@ -3,6 +3,7 @@
 ### Bugfixes
 
 - Prevent unwanted name collision leading to missing methods in Kotlin DefaultImpls classes.
+- Prevent `ParseException` when consumer rules contain `-maximumremovedandroidloglevel` rules.
 
 ## Version 7.4.2
 

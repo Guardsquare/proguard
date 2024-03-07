@@ -118,6 +118,8 @@ public class ConfigurationConstants
 
     public static final String ALWAYS_INLINE                                     = "-alwaysinline";
     public static final String IDENTIFIER_NAME_STRING                            = "-identifiernamestring";
+    public static final String MAXIMUM_REMOVED_ANDROID_LOG_LEVEL                 = "-maximumremovedandroidloglevel";
+
 
     public static final String ANY_FILE_KEYWORD            = "**";
 
