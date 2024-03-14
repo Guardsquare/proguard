@@ -21,26 +21,33 @@
 package proguard.obfuscate.kotlin;
 
 import proguard.classfile.Clazz;
+import proguard.classfile.LibraryClass;
+import proguard.classfile.LibraryMember;
+import proguard.classfile.ProgramClass;
+import proguard.classfile.ProgramMember;
 import proguard.classfile.kotlin.KotlinClassKindMetadata;
 import proguard.classfile.kotlin.KotlinMetadata;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
+import proguard.classfile.visitor.AllFieldVisitor;
+import proguard.classfile.visitor.MemberVisitor;
 
 import static proguard.classfile.util.ClassUtil.internalSimpleClassName;
 import static proguard.obfuscate.ClassObfuscator.newClassName;
+import static proguard.obfuscate.ClassObfuscator.setNewClassName;
+import static proguard.obfuscate.MemberObfuscator.newMemberName;
 import static proguard.obfuscate.MemberObfuscator.setFixedNewMemberName;
+import static proguard.util.ProcessingFlags.DONT_OBFUSCATE;
 
 public class KotlinCompanionEqualizer
-implements   KotlinMetadataVisitor
-{
+implements   KotlinMetadataVisitor {
 
     @Override
-    public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {}
+    public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {
+    }
 
     @Override
-    public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
-    {
-        if (kotlinClassKindMetadata.companionObjectName != null)
-        {
+    public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata) {
+        if (kotlinClassKindMetadata.companionObjectName != null) {
             String newCompanionClassName = newClassName(kotlinClassKindMetadata.referencedCompanionClass);
 
             if (newCompanionClassName == null) return;
@@ -50,13 +57,51 @@ implements   KotlinMetadataVisitor
             // The Kotlin asserter will check the field name, so will throw the metadata away if
             // it wasn't named correctly.
 
-            if (newCompanionClassName.contains("$"))
-            {
-                // Set a fixed member name to make sure it gets priority when resolving naming conflicts and collecting
-                // already used member names.
-                setFixedNewMemberName(kotlinClassKindMetadata.referencedCompanionField,
-                                      internalSimpleClassName(newCompanionClassName));
+            if (newCompanionClassName.contains("$")) {
+                if ((kotlinClassKindMetadata.referencedCompanionField.getProcessingFlags() & DONT_OBFUSCATE) != 0) {
+                    // The field is to be kept, so the class name should be kept as well.
+                    setNewClassName(kotlinClassKindMetadata.referencedCompanionClass,
+                            newClassName(kotlinClassKindMetadata.referencedClass) + "$" + kotlinClassKindMetadata.companionObjectName);
+                } else {
+                    final String newCompanionSimpleClassName = internalSimpleClassName(newCompanionClassName);
+
+                    // Check whether there is already a field with the same fixed new name in the hierarchy.
+                    ConflictingFieldChecker conflictingFieldChecker =
+                            new ConflictingFieldChecker(newCompanionSimpleClassName);
+                    clazz.hierarchyAccept(
+                            false, true, true, false, new AllFieldVisitor(conflictingFieldChecker));
+
+                    // There is a field in the hierarchy with the same fixed name. Rename the companion
+                    // class and associated field to avoid the class being renamed inconsistently during
+                    // conflict resolution and causing runtime crashes.
+                    if (conflictingFieldChecker.isConflicting) {
+                        newCompanionClassName = newCompanionClassName + "_";
+                        setNewClassName(
+                                kotlinClassKindMetadata.referencedCompanionClass, newCompanionClassName);
+                    }
+                    // Set a fixed member name to make sure it gets priority when resolving naming conflicts and collecting
+                    // already used member names.
+                    setFixedNewMemberName(kotlinClassKindMetadata.referencedCompanionField,
+                            internalSimpleClassName(newCompanionClassName));
+                }
             }
+        }
+    }
+    private static class ConflictingFieldChecker implements MemberVisitor {
+
+        public boolean isConflicting = false;
+        private String newCompanionSimpleClassName;
+
+        public ConflictingFieldChecker(String newCompanionSimpleClassName) {
+            this.newCompanionSimpleClassName = newCompanionSimpleClassName;
+        }
+
+        @Override
+        public void visitLibraryMember(LibraryClass libraryClass, LibraryMember libraryMember) {}
+
+        @Override
+        public void visitProgramMember(ProgramClass programClass, ProgramMember programMember) {
+            isConflicting |= newCompanionSimpleClassName.equals(newMemberName(programMember));
         }
     }
 }
