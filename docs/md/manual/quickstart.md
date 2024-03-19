@@ -24,10 +24,10 @@ ProGuard can then be executed directly from the command line by calling a script
     ```
 
 === "Windows"
-    ```bat
-    bin\proguard.bat -injars path/to/my-application.jar ^
-                     -outjars path/to/obfuscated-application.jar ^
-                     -libraryjars path/to/java/home/lib/rt.jar
+    ```batch
+    bin\proguard -injars path/to/my-application.jar ^
+                 -outjars path/to/obfuscated-application.jar ^
+                 -libraryjars path/to/java/home/lib/rt.jar
     ```
  
 For more detailed information see [standalone mode](setup/standalone.md).

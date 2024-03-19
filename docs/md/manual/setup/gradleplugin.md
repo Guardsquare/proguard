@@ -4,7 +4,7 @@ This page will guide you through to the basic steps of processing your Android a
 !!! tip "Java / Kotlin desktop or server projects"
     If you have a Java / Kotlin desktop or server project, you can find instructions [here](gradle.md).
 
-## ProGuard Gradle Plugin (AGP version 4.x - AGP 7.x)
+## ProGuard Gradle Plugin (AGP version 4.x - AGP 7.x) {: #proguard-gradle-plugin}
 
 You can add the ProGuard plugin to your project by
 including the following in your root level `build.gradle(.kts)` file:
@@ -124,7 +124,7 @@ You can then build your application as usual:
     ./gradlew assembleRelease
     ```
 === "Windows"
-    ```
+    ```batch
     gradlew assembleRelease
     ```
 
@@ -179,7 +179,7 @@ version part.
 The example [`android-plugin`](https://github.com/Guardsquare/proguard/tree/master/examples/android-plugin)
 has a small working Android project using the ProGuard Gradle Plugin.
 
-## AGP Integrated ProGuard (AGP version <7)
+## AGP Integrated ProGuard (AGP version <7) {: #agp-integrated-proguard}
 
 ProGuard is integrated with older versions of the Android Gradle plugin. 
 If you have an Android Gradle project that uses such an AGP version, 
@@ -237,7 +237,7 @@ You can then build your application as usual:
     ./gradlew assembleRelease
     ```
 === "Windows"
-    ```
+    ```batch
     gradlew assembleRelease
     ```
 

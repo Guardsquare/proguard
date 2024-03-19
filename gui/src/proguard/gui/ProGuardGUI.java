@@ -271,7 +271,7 @@ public class ProGuardGUI extends JFrame
         GridBagLayout layout = new GridBagLayout();
 
         configurationChooser.addChoosableFileFilter(
-            new ExtensionFileFilter(msg("proExtension"), new String[] { ".pro" }));
+            new ExtensionFileFilter(msg("proExtensions"), new String[] { ".pro", ".proguard" }));
 
         // Create the opening panel.
         Sprite splash =

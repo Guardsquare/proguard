@@ -311,7 +311,7 @@ the following attributes (only for **`<proguard>`**) and nested elements:
   **`fileset`** element and supports all of its attributes and nested
   elements, including multiple files.
 
-## Class Path Attributes and Nested Elements {: #classpath}
+### Class Path Attributes and Nested Elements {: #classpath}
 
 The jar elements are **`path`** elements, so they can have any of the
 standard **`path`** attributes and nested elements. The most common
@@ -359,7 +359,7 @@ In addition, the jar elements can have ProGuard-style filter attributes:
 `zipfilter` = "[*file\_filter*](../configuration/usage.md#filefilters)"
 : An optional filter for all zip names that are encountered.
 
-## Keep Modifier Attributes {: #keepmodifier}
+### Keep Modifier Attributes {: #keepmodifier}
 
 The keep tags can have the following *modifier* attributes:
 
@@ -379,7 +379,7 @@ The keep tags can have the following *modifier* attributes:
 : Specifies whether the entry points specified in the keep tag may be
   obfuscated.
 
-## Class Specification Attributes and Nested Elements {: #classspecification}
+### Class Specification Attributes and Nested Elements {: #classspecification}
 
 The keep tags can have the following *class\_specification* attributes
 and *class\_member\_specifications* nested elements:
@@ -420,7 +420,7 @@ and *class\_member\_specifications* nested elements:
 `<constructor` [*class\_member\_specification*](#classmemberspecification) `/>`
 : Specifies a constructor.
 
-## Class Member Specification Attributes {: #classmemberspecification}
+### Class Member Specification Attributes {: #classmemberspecification}
 
 The class member tags can have the following
 *class\_member\_specification* attributes:

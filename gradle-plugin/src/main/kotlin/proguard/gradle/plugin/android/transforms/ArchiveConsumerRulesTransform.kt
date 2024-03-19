@@ -36,7 +36,7 @@ abstract class ArchiveConsumerRulesTransform : TransformAction<TransformParamete
                 FileSystems.getDefault().getPathMatcher("glob:proguard.txt"),
 
                 // Locations for consumer rules in jars.
-                FileSystems.getDefault().getPathMatcher("glob:META-INF/proguard/*.pro")
+                FileSystems.getDefault().getPathMatcher("glob:META-INF/proguard/*.{pro,proguard}")
         )
 
         ZipFile(inputFile).use { zip ->

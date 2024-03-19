@@ -6,12 +6,12 @@ To run ProGuard, just type:
     ```
 
 === "Windows"
-    ```
+    ```batch
     bin\proguard <options...>
     ```
 
 Typically, you'll put most options in a configuration file (say,
-`myconfig.pro`), and just call:
+`myconfig.pro` or `myconfig.proguard`), and just call:
 
 === "Linux/macOS"
     ```bash
@@ -19,7 +19,7 @@ Typically, you'll put most options in a configuration file (say,
     ```
 
 === "Windows"
-    ```bash
+    ```batch
     bin\proguard @myconfig.pro
     ```
 
@@ -32,7 +32,7 @@ files. For instance:
     ```
 
 === "Windows"
-    ```
+    ```batch
     bin\proguard @myconfig.pro -verbose
     ```
 
