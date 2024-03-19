@@ -90,9 +90,9 @@ implements ClassVisitor,
     private final ExtraDataEntryNameMap          extraDataEntryNameMap;
     private final ClassVisitor                   extraClassVisitor;
 
-    private final Map<Integer, LambdaExpression> lambdaExpressionMap;
-    private final CodeAttributeEditor            codeAttributeEditor;
-    private final MemberRemover                  memberRemover;
+    private final Map<InvokeDynamicConstant, LambdaExpression> lambdaExpressionMap;
+    private final CodeAttributeEditor                          codeAttributeEditor;
+    private final MemberRemover                                memberRemover;
 
 
     public LambdaExpressionConverter(ClassPool             programClassPool,
@@ -202,10 +202,9 @@ implements ClassVisitor,
             InvokeDynamicConstant invokeDynamicConstant =
                 (InvokeDynamicConstant) programClass.getConstant(constantInstruction.constantIndex);
 
-            int bootstrapMethodIndex = invokeDynamicConstant.getBootstrapMethodAttributeIndex();
-            if (lambdaExpressionMap.containsKey(bootstrapMethodIndex))
+            if (lambdaExpressionMap.containsKey(invokeDynamicConstant))
             {
-                LambdaExpression lambdaExpression = lambdaExpressionMap.get(bootstrapMethodIndex);
+                LambdaExpression lambdaExpression = lambdaExpressionMap.get(invokeDynamicConstant);
                 String lambdaClassName = lambdaExpression.getLambdaClassName();
 
                 InstructionSequenceBuilder builder =
