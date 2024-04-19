@@ -1,5 +1,9 @@
 ## Version 7.4.3
 
+### Java support
+
+- Add support for Java 22. (#387)
+
 ### Bugfixes
 
 - Prevent unwanted name collision leading to missing methods in Kotlin DefaultImpls classes.
