@@ -30,7 +30,7 @@ import proguard.classfile.util.kotlin.KotlinMetadataInitializer;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.pass.Pass;
 
-import static proguard.classfile.util.kotlin.KotlinMetadataInitializer.MAX_SUPPORTED_VERSION;
+import static proguard.classfile.io.kotlin.KotlinMetadataWriter.LATEST_STABLE_SUPPORTED;
 import static proguard.classfile.util.kotlin.KotlinMetadataInitializer.isSupportedMetadataVersion;
 
 /**
@@ -72,7 +72,7 @@ public class KotlinUnsupportedVersionChecker implements Pass
                 throw new RuntimeException(
                     "Unsupported Kotlin metadata version found on class '" + clazz.getName() + "'." +
                     System.lineSeparator() +
-                    "Kotlin versions up to " + MAX_SUPPORTED_VERSION.major + "." + MAX_SUPPORTED_VERSION.minor + " are supported.");
+                    "Kotlin versions up to " + LATEST_STABLE_SUPPORTED + " are supported.");
             }
             else
             {

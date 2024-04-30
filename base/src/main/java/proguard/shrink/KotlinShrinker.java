@@ -184,7 +184,6 @@ implements   KotlinMetadataVisitor,
         {
             kotlinPropertyMetadata.getterSignature        = null;
             kotlinPropertyMetadata.referencedGetterMethod = null;
-            kotlinPropertyMetadata.flags.hasGetter        = false;
         }
 
         if (shouldShrinkMetadata(kotlinPropertyMetadata.setterSignature,
@@ -192,7 +191,7 @@ implements   KotlinMetadataVisitor,
         {
             kotlinPropertyMetadata.setterSignature        = null;
             kotlinPropertyMetadata.referencedSetterMethod = null;
-            kotlinPropertyMetadata.flags.hasSetter        = false;
+            kotlinPropertyMetadata.flags.isVar            = false;
             kotlinPropertyMetadata.setterParameters.clear();
         }
 
@@ -206,7 +205,7 @@ implements   KotlinMetadataVisitor,
             kotlinPropertyMetadata.syntheticMethodForAnnotations           = null;
             kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations = null;
             kotlinPropertyMetadata.referencedSyntheticMethodClass          = null;
-            kotlinPropertyMetadata.flags.common.hasAnnotations             = false;
+            kotlinPropertyMetadata.flags.hasAnnotations                    = false;
         }
 
         if (kotlinPropertyMetadata.syntheticMethodForDelegate != null &&
