@@ -1883,16 +1883,6 @@ implements   ClassVisitor,
 
             if (isUsed(kotlinPropertyMetadata))
             {
-                if (kotlinPropertyMetadata.referencedBackingField != null) {
-                    kotlinPropertyMetadata.referencedBackingField.accept(clazz, ClassUsageMarker.this);
-                }
-                if (kotlinPropertyMetadata.referencedGetterMethod != null) {
-                    kotlinPropertyMetadata.referencedGetterMethod.accept(clazz, ClassUsageMarker.this);
-                }
-                if (kotlinPropertyMetadata.referencedSetterMethod != null) {
-                    kotlinPropertyMetadata.referencedSetterMethod.accept(clazz, ClassUsageMarker.this);
-                }
-
                 markAsUsed(kotlinPropertyMetadata.receiverType);
                 markAsUsed(kotlinPropertyMetadata.typeParameters);
                 markAsUsed(kotlinPropertyMetadata.setterParameters);

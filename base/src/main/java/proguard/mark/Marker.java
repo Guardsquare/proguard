@@ -39,12 +39,16 @@ import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.kotlin.KotlinDeclarationContainerMetadata;
 import proguard.classfile.kotlin.KotlinFunctionMetadata;
 import proguard.classfile.kotlin.KotlinMetadata;
+import proguard.classfile.kotlin.KotlinPropertyMetadata;
 import proguard.classfile.kotlin.KotlinSyntheticClassKindMetadata;
 import proguard.classfile.kotlin.visitor.KotlinFunctionToDefaultMethodVisitor;
 import proguard.classfile.kotlin.visitor.KotlinFunctionToMethodVisitor;
 import proguard.classfile.kotlin.visitor.KotlinFunctionVisitor;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.KotlinPropertyVisitor;
+import proguard.classfile.kotlin.visitor.MemberToKotlinPropertyVisitor;
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.filter.KotlinClassFilter;
 import proguard.classfile.util.AllParameterVisitor;
 import proguard.classfile.visitor.AllMemberVisitor;
 import proguard.classfile.visitor.ClassAccessFilter;
@@ -63,14 +67,20 @@ import proguard.classfile.visitor.MultiClassVisitor;
 import proguard.classfile.visitor.MultiMemberVisitor;
 import proguard.classfile.visitor.NamedMethodVisitor;
 import proguard.pass.Pass;
+import proguard.util.Processable;
 import proguard.util.ProcessingFlagSetter;
 import proguard.util.ProcessingFlags;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static proguard.util.ProcessingFlags.DONT_OBFUSCATE;
 import static proguard.util.ProcessingFlags.DONT_OPTIMIZE;
 import static proguard.util.ProcessingFlags.DONT_SHRINK;
+import static proguard.util.ProcessingFlags.DONT_SHRINK_OR_OPTIMIZE_OR_OBFUSCATE;
 import static proguard.util.ProcessingFlags.INJECTED;
 
 /**
@@ -124,6 +134,34 @@ public class Marker implements Pass
                         new ProcessingFlagSetter(ProcessingFlags.DONT_SHRINK | ProcessingFlags.DONT_OPTIMIZE | ProcessingFlags.DONT_OBFUSCATE))));
             appView.programClassPool.classesAccept(classVisitor);
             appView.libraryClassPool.classesAccept(classVisitor);
+
+            // When a property is kept, make sure the getter, setter and backing field all have the same
+            // keep flags.
+            ClassVisitor propertyVisitor =
+                new KotlinClassFilter(
+                new AllMemberVisitor(
+                new MemberToKotlinPropertyVisitor(
+                new KotlinPropertyVisitor() {
+                    public void visitAnyProperty(Clazz clazz,
+                                                 KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+                                                 KotlinPropertyMetadata kotlinPropertyMetadata) {
+                        List<Processable> processables = Stream.of(kotlinPropertyMetadata.referencedBackingField,
+                                                                   kotlinPropertyMetadata.referencedGetterMethod,
+                                                                   kotlinPropertyMetadata.referencedSetterMethod)
+                                                                .filter(Objects::nonNull)
+                                                                .collect(Collectors.toList());
+                        int flags = 0;
+                        for (Processable processable : processables) {
+                            flags |= processable.getProcessingFlags();
+                        }
+                        // Only copy the keep flags.
+                        int copiedFlags = flags & DONT_SHRINK_OR_OPTIMIZE_OR_OBFUSCATE;
+                        processables.forEach(p -> p.setProcessingFlags(p.getProcessingFlags() | copiedFlags));
+                    }
+                })));
+            appView.programClassPool.classesAccept(propertyVisitor);
+            appView.libraryClassPool.classesAccept(propertyVisitor);
+
         }
 
         // Mark members that can be safely used for generalization,
