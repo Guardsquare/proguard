@@ -223,7 +223,7 @@ class ConfigurationParserTest : FreeSpec({
 
             "The option prints out a warning" {
                 customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is currently not supported by ProGuard.\n" +
-                        "This option will have no effect on the optimized artifact."
+                    "This option will have no effect on the optimized artifact."
                 System.setOut(savedPrintStream)
             }
         }
@@ -243,12 +243,11 @@ class ConfigurationParserTest : FreeSpec({
 
             "The option prints out a warning" {
                 customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is currently not supported by ProGuard.\n" +
-                        "This option will have no effect on the optimized artifact."
+                    "This option will have no effect on the optimized artifact."
                 System.setOut(savedPrintStream)
             }
         }
     }
-
 
     "Wildcard type tests" - {
         class TestConfig(
