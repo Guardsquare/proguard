@@ -46,6 +46,7 @@ class GradlePluginIntegrationTest : FreeSpec({
                 .forwardOutput()
                 .withArguments("proguard")
                 .withPluginClasspath()
+                .withGradleVersion("7.4")
                 .withProjectDir(projectRoot)
                 .build()
 
@@ -91,6 +92,7 @@ fun testConfigOption(task: String) = funSpec {
             GradleRunner.create()
                     .forwardOutput()
                     .withArguments(tasks.asList())
+                    .withGradleVersion("7.4")
                     .withPluginClasspath()
                     .withProjectDir(projectRoot)
                     .build()

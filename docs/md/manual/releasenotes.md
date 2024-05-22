@@ -1,4 +1,4 @@
-## Version 7.5.0-beta01
+## Version 7.5.0
 
 ### Kotlin support
 
