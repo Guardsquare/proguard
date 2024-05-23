@@ -2,13 +2,17 @@ pluginManagement {
     resolutionStrategy {
         eachPlugin {
             if (requested.id.id == 'com.github.johnrengelman.shadow') {
-                useVersion '5.2.0'
+                useVersion '8.1.1'
             }
             if (requested.id.id == 'io.github.gradle-nexus.publish-plugin') {
                 useVersion '1.1.0'
             }
         }
     }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.4.0'
 }
 
 rootProject.name = 'proguard'

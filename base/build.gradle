@@ -4,7 +4,6 @@ plugins {
     id 'maven-publish'
     id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
     id 'com.adarshr.test-logger' version '3.0.0'
-    id 'de.jansauer.printcoverage' version '2.0.0'
     id 'jacoco'
     id "org.jlleitschuh.gradle.ktlint" version '10.2.1'
 }
@@ -24,15 +23,15 @@ dependencies {
     implementation "com.google.code.gson:gson:${gsonVersion}"
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
-    implementation 'org.json:json:20220924'
+    implementation 'org.json:json:20231013'
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    testImplementation 'dev.zacsweers.kctfork:core:0.2.1'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.5.4' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.5.4' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.5.4' // for kotest property test
-    testImplementation 'io.mockk:mockk:1.13.2' // for mocking
+    testImplementation 'dev.zacsweers.kctfork:core:0.5.0-alpha07'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.9.0' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.9.0' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:5.9.0' // for kotest property test
+    testImplementation 'io.mockk:mockk:1.13.11' // for mocking
 
     testImplementation(testFixtures("com.guardsquare:proguard-core:${proguardCoreVersion}")) {
         exclude group: 'com.guardsquare', module: 'proguard-core'
@@ -50,7 +49,7 @@ jar {
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814
 // But it will work if e.g. Java N-ea is pre-installed
-def javaVersionsForTest = 9..21
+def javaVersionsForTest = 9..22
 
 test {
     useJUnitPlatform()
@@ -64,8 +63,8 @@ task testAllJavaVersions() { testAllTask ->
             useJUnitPlatform()
             ignoreFailures = true
 
-            // The version of bytebuddy used by mockk only supports Java 20 experimentally so far
-            if (version >= 20) systemProperty 'net.bytebuddy.experimental', true
+            // The version of bytebuddy used by mockk only supports Java 22 experimentally so far
+            if (version >= 22) systemProperty 'net.bytebuddy.experimental', true
 
             testAllTask.dependsOn(it)
 
@@ -86,9 +85,11 @@ jacocoTestReport {
     classDirectories.setFrom(classes)
     executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/*.exec')
     reports {
-        xml.enabled true
-        csv.enabled false
-        html.destination file("${buildDir}/reports/coverage")
+        xml.required = true
+        csv.required = false
+    }
+    javaVersionsForTest.each { version ->
+        mustRunAfter "testJava$version"
     }
 }
 

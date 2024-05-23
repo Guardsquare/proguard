@@ -7,7 +7,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.4.2'
+        classpath 'com.guardsquare:proguard-gradle:7.5.0'
     }
 }
 
@@ -32,6 +32,12 @@ dependencies {
 }
 
 ext.baseCoordinates = "${project.name}-${project.version}"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(22)
+    }
+}
 
 tasks.register('proguard', ProGuardTask) {
     configuration file('proguard.pro')

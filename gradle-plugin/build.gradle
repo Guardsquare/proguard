@@ -48,11 +48,12 @@ dependencies {
         exclude module: 'proguard-gradle'
         exclude module: 'proguard-base'
     }
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:4.6.0'   // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.6.0' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:4.6.0'        // for kotest property test
 
-    testImplementation "io.mockk:mockk:1.12.0"
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.9.0' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.9.0' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:5.9.0' // for kotest property test
+    testImplementation 'io.mockk:mockk:1.13.11' // for mocking
+
     testImplementation "commons-io:commons-io:2.8.0"
 
     fatJar project(":base")
