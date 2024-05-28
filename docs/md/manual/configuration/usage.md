@@ -1,7 +1,9 @@
 This page lists all available options for ProGuard, grouped logically.
 
 !!! android R8
-    R8, the default Android shrinker, is compatible with ProGuard keep rules.
+    R8, the default Android shrinker, is compatible with ProGuard keep rules. Both ProGuard and R8 were designed for app optimization, and although they employ minimal obfuscation techniques, they are not security tools and do not harden applications effectively against reverse engineering and tampering.
+    
+    [DexGuard](https://hubs.la/Q02yCV0F0) is a protection tool for Android apps that is backward compatible with R8, making it easy to upgrade your R8 configuration with multi-layered security protections to your unprotected mobile application. Learn more in our blog: [Android Security and Obfuscation Realities of R8](https://hubs.la/Q02yCTlt0).
 
 ## Input/Output Options {: #iooptions}
 
