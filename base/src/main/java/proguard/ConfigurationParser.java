@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-
 
 /**
  * This class parses ProGuard configurations. Configurations can be read from an
@@ -51,6 +49,8 @@ import java.util.function.BiFunction;
  */
 public class ConfigurationParser implements AutoCloseable
 {
+    private final boolean useDalvikVerification = System.getProperty("proguard.use.dalvik.identifier.verification") != null;
+
     private final WordReader reader;
     private final Properties properties;
 
@@ -1955,7 +1955,7 @@ public class ConfigurationParser implements AutoCloseable
     private void checkJavaIdentifier(String expectedDescription, String identifier, boolean allowGenerics)
             throws ParseException
     {
-        if (!isJavaIdentifier(identifier))
+        if (!isValidIdentifier(identifier))
         {
             throw new ParseException("Expecting " + expectedDescription +
                     " before " + reader.locationDescription());
@@ -1968,6 +1968,10 @@ public class ConfigurationParser implements AutoCloseable
         }
     }
 
+    private boolean isValidIdentifier(String word)
+    {
+        return useDalvikVerification ? isDexIdentifier(word) : isJavaIdentifier(word);
+    }
 
     /**
      * Returns whether the given word is a valid Java identifier.
@@ -2002,6 +2006,43 @@ public class ConfigurationParser implements AutoCloseable
         return true;
     }
 
+    /**
+     * Returns whether the given word is a valid DEX identifier. Special wildcard characters for
+     * ProGuard class specifiction syntaxs are accepted. The list of valid identifier can be
+     * found at https://source.android.com/docs/core/runtime/dex-format#simplename
+     */
+    private boolean isDexIdentifier(String word) {
+        if (word.isEmpty()) {
+            return false;
+        }
+
+        int[] codePoints = word.codePoints().toArray();
+
+        for (int index = 0; index < codePoints.length; index++) {
+            int c = codePoints[index];
+
+            boolean isLetterOrNumber = Character.isLetterOrDigit(c);
+            boolean isValidSymbol = c == '$' || c == '-' || c == '_';
+            boolean isWithinSupportedUnicodeRanges =
+                    (c >= 0x00a1 && c <= 0x1fff)
+                            || (c >= 0x2010 && c <= 0x2027)
+                            || (c >= 0x2030 && c <= 0xd7ff)
+                            || (c >= 0xe000 && c <= 0xffef)
+                            || (c >= 0x10000 && c <= 0x10ffff);
+            boolean isProGuardSymbols =
+                    c == '.' || c == '[' || c == ']' || c == '<' || c == '>' || c == '-' || c == '!'
+                            || c == '*' || c == '?' || c == '%';
+
+            if (!(isLetterOrNumber
+                    || isValidSymbol
+                    || isWithinSupportedUnicodeRanges
+                    || isProGuardSymbols)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /**
      * Returns whether the given word contains angle brackets around

@@ -9,9 +9,13 @@ package proguard
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.extensions.system.withSystemProperty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.mockkObject
 import proguard.classfile.AccessConstants.PUBLIC
 import testutils.asConfiguration
 import java.io.ByteArrayOutputStream
@@ -38,6 +42,9 @@ class ConfigurationParserTest : FreeSpec({
         }
         return configuration
     }
+
+    fun parseRulesAsArguments(rules: String) =
+        rules.split(' ', '\n').toTypedArray()
 
     "Keep rule tests" - {
         "Keep rule with <fields> wildcard should be valid" {
@@ -425,6 +432,75 @@ class ConfigurationParserTest : FreeSpec({
                 methodSpecification?.descriptor shouldBe "()Ljava/lang/String;"
                 val fieldSpecification = classSpecifications?.single()?.fieldSpecifications
                 fieldSpecification shouldBe null
+            }
+        }
+    }
+
+    "Class specification with unicode identifiers" - {
+        "Given some -keep rules with class specifications containing supported characters for DEX file" - {
+            val rules = """
+                -keep class uu.☱ { *; }
+                -keep class uu.o { ** ☱; }
+                -keep class uu.o { *** ☱(); }
+                -keep class uu.o1
+                -keep class uu.o${"$"}o
+                -keep class uu.o-o
+                -keep class uu.o_o
+                -keep class ‐ { <methods>; }
+                -keep class ‧ { <fields>; }
+                -keep class ‰
+                -keep class * { ** ퟿(...); }
+                -keep class { *; }
+                -keep class ￯ { int[] foo; }
+                -if class **𐀀 { ** 𐀀*(); } 
+                -keep class <1> { ** 𐀀*(); }
+                -keep class * extends 􏿿
+                -keep class ** implements ☱
+            """.trimIndent()
+
+            val reader = ArgumentWordReader(parseRulesAsArguments(rules), null)
+            mockkObject(reader)
+            every { reader.locationDescription() } returns "dummyOrigin"
+
+            "When the given rules are parsed" - {
+                withSystemProperty("proguard.use.dalvik.identifier.verification", "true") {
+                    val configuration = parseConfiguration(reader)
+                    "Then 'keep' should contain 16 keep class specifications" {
+                        configuration.keep shouldHaveSize 16
+                    }
+                }
+            }
+        }
+
+        "Given some -keep rules with class specifications containing unsupported identifier for DEX file" - {
+            val rules = """
+                -keep class uu.${String(Character.toChars(0x00a1 - 1))} { *; }
+                -keep class uu.o { ** ${String(Character.toChars(0x1fff + 1))}; }
+                -keep class uu.o { *** ${String(Character.toChars(0x2010 - 1))}(); }
+                -keep class ${String(Character.toChars(0x2027 + 1))} { <methods>; }
+                -keep class ${String(Character.toChars(0x2030 - 1))} { <fields>; }
+                -keep class ${String(Character.toChars(0xd7ff + 1))}
+                -keep class * { ** ${String(Character.toChars(0xe000 - 1))}(...); }
+                -keep class ${String(Character.toChars(0xffef + 1))} { *; }
+                -keep class ${String(Character.toChars(0x10000 - 1))} { int[] foo; }
+                -keep class * extends !
+                -keep class ** implements @
+                -keep class #
+                -keep class %
+                -keep class ^
+                -keep class &
+                -keep class ;
+                -keep class ,
+            """.trimIndent()
+
+            val reader = ArgumentWordReader(parseRulesAsArguments(rules), null)
+            mockkObject(reader)
+            every { reader.locationDescription() } returns "dummyOrigin"
+
+            "When the given rule is parsed, then a ParseException should be thrown" - {
+                withSystemProperty("proguard.use.dalvik.identifier.verification", "true") {
+                    shouldThrow<ParseException> { parseConfiguration(reader) }
+                }
             }
         }
     }
