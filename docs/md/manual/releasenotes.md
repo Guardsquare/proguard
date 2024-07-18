@@ -1,3 +1,9 @@
+## Version 7.5.1
+
+### Bugfixes
+
+- Prevent unknown enum value for `KmVersionRequirementVersionKind` exception when processing code compiled with an outdated Kotlin version. 
+
 ## Version 7.5.0
 
 ### Kotlin support
