@@ -226,6 +226,9 @@ public class ReTrace
                     }
 
                     result.append(trimmedLine);
+                    if (retracedFrames.hasNext()) {
+                        result.append(System.lineSeparator());
+                    }
                 }
 
                 previousLine = retracedLine;
