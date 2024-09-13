@@ -23,71 +23,56 @@ package proguard.obfuscate;
 import proguard.classfile.Clazz;
 
 /**
- * NameFactory which only generates names that don't exist yet as members
- * on the class for which it is created.
+ * NameFactory which only generates names that don't exist yet as members on the class for which it
+ * is created.
  *
  * @author Johan Leys
  */
-public class UniqueMemberNameFactory implements NameFactory
-{
-    private static final String INJECTED_MEMBER_PREFIX = "$$";
+public class UniqueMemberNameFactory implements NameFactory {
+  private static final String INJECTED_MEMBER_PREFIX = "$$";
 
-    private final NameFactory delegateNameFactory;
-    private final Clazz       clazz;
+  private final NameFactory delegateNameFactory;
+  private final Clazz clazz;
 
+  /**
+   * Utility for creating a new NameFactory that can generate names for injected members: the
+   * generated names are unique within the given class, and don't clash with non-injected members of
+   * its super classes.
+   *
+   * @param clazz The class for which to generate a NameFactory.
+   * @return The new NameFactory instance.
+   */
+  public static UniqueMemberNameFactory newInjectedMemberNameFactory(Clazz clazz) {
+    return new UniqueMemberNameFactory(
+        new PrefixingNameFactory(new SimpleNameFactory(), INJECTED_MEMBER_PREFIX), clazz);
+  }
 
-    /**
-     * Utility for creating a new NameFactory that can generate names for injected
-     * members: the generated names are unique within the given class, and don't
-     * clash with non-injected members of its super classes.
-     *
-     * @param clazz the class for which to generate a NameFactory.
-     * @return the new NameFactory instance.
-     */
-    public static UniqueMemberNameFactory newInjectedMemberNameFactory(Clazz clazz)
-    {
-        return new UniqueMemberNameFactory(
-               new PrefixingNameFactory(
-               new SimpleNameFactory(), INJECTED_MEMBER_PREFIX), clazz);
-    }
+  /**
+   * Creates a new UniqueMemberNameFactory.
+   *
+   * @param delegateNameFactory The delegate NameFactory, used for generating new candidate names.
+   * @param clazz The class in which to check for existing member names.
+   */
+  public UniqueMemberNameFactory(NameFactory delegateNameFactory, Clazz clazz) {
+    this.delegateNameFactory = delegateNameFactory;
+    this.clazz = clazz;
+  }
 
+  // Implementations for NameFactory.
 
-    /**
-     * Creates a new UniqueMemberNameFactory.
-     * @param delegateNameFactory the delegate NameFactory, used for generating
-     *                            new candidate names.
-     * @param clazz               the class in which to check for existing
-     *                            member names.
-     */
-    public UniqueMemberNameFactory(NameFactory delegateNameFactory,
-                                   Clazz       clazz)
-    {
-        this.delegateNameFactory = delegateNameFactory;
-        this.clazz               = clazz;
-    }
+  public String nextName() {
+    String name;
 
+    // Check if the name doesn't exist yet. We don't have additional
+    // descriptor information, so we can only search on the name.
+    do {
+      name = delegateNameFactory.nextName();
+    } while (clazz.findField(name, null) != null || clazz.findMethod(name, null) != null);
 
-    // Implementations for NameFactory.
+    return name;
+  }
 
-    public String nextName()
-    {
-        String name;
-
-        // Check if the name doesn't exist yet. We don't have additional
-        // descriptor information, so we can only search on the name.
-        do
-        {
-            name = delegateNameFactory.nextName();
-        }
-        while (clazz.findField(name, null) != null ||
-               clazz.findMethod(name, null) != null);
-
-        return name;
-    }
-
-
-    public void reset()
-    {
-        delegateNameFactory.reset();
-    }
+  public void reset() {
+    delegateNameFactory.reset();
+  }
 }

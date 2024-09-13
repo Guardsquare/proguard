@@ -21,14 +21,13 @@
 package proguard.obfuscate;
 
 /**
- * This interfaces provides methods to generate unique sequences of names.
- * The names must be valid Java identifiers.
+ * This interfaces provides methods to generate unique sequences of names. The names must be valid
+ * Java identifiers.
  *
  * @author Eric Lafortune
  */
-public interface NameFactory
-{
-    public void reset();
+public interface NameFactory {
+  void reset();
 
-    public String nextName();
+  String nextName();
 }

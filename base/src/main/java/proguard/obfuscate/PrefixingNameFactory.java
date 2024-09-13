@@ -20,41 +20,33 @@
  */
 package proguard.obfuscate;
 
-
 /**
- * NameFactory that prepends the names of the wrapped NameFactory with
- * a fixed prefix.
+ * NameFactory that prepends the names of the wrapped NameFactory with a fixed prefix.
  *
  * @author Johan Leys
  */
-public class PrefixingNameFactory implements NameFactory
-{
-    private final NameFactory delegateNameFactory;
-    private final String      prefix;
+public class PrefixingNameFactory implements NameFactory {
+  private final NameFactory delegateNameFactory;
+  private final String prefix;
 
+  /**
+   * Creates a new PrefixingNameFactory.
+   *
+   * @param delegateNameFactory The wrapped NameFactory.
+   * @param prefix The prefix to add to all generated names.
+   */
+  public PrefixingNameFactory(NameFactory delegateNameFactory, String prefix) {
+    this.delegateNameFactory = delegateNameFactory;
+    this.prefix = prefix;
+  }
 
-    /**
-     * Creates a new PrefixingNameFactory.
-     * @param delegateNameFactory the wrapped NameFactory.
-     * @param prefix              the prefix to add to all generated names.
-     */
-    public PrefixingNameFactory(NameFactory delegateNameFactory,
-                                String      prefix)
-    {
-        this.delegateNameFactory = delegateNameFactory;
-        this.prefix              = prefix;
-    }
+  // Implementations for NameFactory.
 
+  public String nextName() {
+    return prefix + delegateNameFactory.nextName();
+  }
 
-    // Implementations for NameFactory.
-
-    public String nextName()
-    {
-        return prefix + delegateNameFactory.nextName();
-    }
-
-    public void reset()
-    {
-        delegateNameFactory.reset();
-    }
+  public void reset() {
+    delegateNameFactory.reset();
+  }
 }

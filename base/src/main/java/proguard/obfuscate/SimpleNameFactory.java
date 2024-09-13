@@ -23,126 +23,94 @@ package proguard.obfuscate;
 import java.util.Arrays;
 
 /**
- * This <code>NameFactory</code> generates unique short names, using mixed-case
- * characters or lower-case characters only.
+ * This <code>NameFactory</code> generates unique short names, using mixed-case characters or
+ * lower-case characters only.
  *
  * @author Eric Lafortune
  */
-public class SimpleNameFactory implements NameFactory
-{
-    private static final int CHARACTER_COUNT = 26;
+public class SimpleNameFactory implements NameFactory {
+  private static final int CHARACTER_COUNT = 26;
 
-    /**
-     +     * Array of windows reserved names.
-     +     * This array does not include COM{digit} or LPT{digit} as {@link SimpleNameFactory} does not generate digits.
-     +     * This array must be sorted in ascending order as we're using {@link Arrays#binarySearch(Object[], Object)} on it.
-     +     */
-    private static final String[] reservedNames    = new String[] {"AUX", "CON", "NUL", "PRN"};
+  /**
+   * + * Array of windows reserved names. + * This array does not include COM{digit} or LPT{digit}
+   * as {@link SimpleNameFactory} does not generate digits. + * This array must be sorted in
+   * ascending order as we're using {@link Arrays#binarySearch(Object[], Object)} on it. +
+   */
+  private static final String[] reservedNames = new String[] {"AUX", "CON", "NUL", "PRN"};
 
-    private final boolean generateMixedCaseNames;
-    private int     index = 0;
+  private final boolean generateMixedCaseNames;
+  private int index = 0;
 
-    /**
-     * Creates a new <code>SimpleNameFactory</code> that generates mixed-case names.
-     */
-    public SimpleNameFactory()
-    {
-        this(true);
+  /** Creates a new <code>SimpleNameFactory</code> that generates mixed-case names. */
+  public SimpleNameFactory() {
+    this(true);
+  }
+
+  /**
+   * Creates a new <code>SimpleNameFactory</code>.
+   *
+   * @param generateMixedCaseNames A flag to indicate whether the generated names will be
+   *     mixed-case, or lower-case only.
+   */
+  public SimpleNameFactory(boolean generateMixedCaseNames) {
+    this.generateMixedCaseNames = generateMixedCaseNames;
+  }
+
+  // Implementations for NameFactory.
+
+  public void reset() {
+    index = 0;
+  }
+
+  public String nextName() {
+    return name(index++);
+  }
+
+  /** Returns the name at the given index. */
+  private String name(int index) {
+    // Create a new name for this index
+    return newName(index);
+  }
+
+  /** Creates and returns the name at the given index. */
+  private String newName(int index) {
+    // If we're allowed to generate mixed-case names, we can use twice as many characters.
+    int totalCharacterCount = generateMixedCaseNames ? 2 * CHARACTER_COUNT : CHARACTER_COUNT;
+
+    int baseIndex = index / totalCharacterCount;
+    int offset = index % totalCharacterCount;
+
+    char newChar = charAt(offset);
+
+    String newName = baseIndex == 0 ? String.valueOf(newChar) : (name(baseIndex - 1) + newChar);
+
+    if (Arrays.binarySearch(reservedNames, newName.toUpperCase()) >= 0) {
+      newName += newChar;
     }
+    return newName;
+  }
 
+  /**
+   * Returns the character with the given index, between 0 and the number of acceptable characters.
+   */
+  private char charAt(int index) {
+    return (char) ((index < CHARACTER_COUNT ? 'a' : 'A' - CHARACTER_COUNT) + index);
+  }
 
-    /**
-     * Creates a new <code>SimpleNameFactory</code>.
-     * @param generateMixedCaseNames a flag to indicate whether the generated
-     *                               names will be mixed-case, or lower-case only.
-     */
-    public SimpleNameFactory(boolean generateMixedCaseNames)
-    {
-        this.generateMixedCaseNames = generateMixedCaseNames;
+  public static void main(String[] args) {
+    System.out.println("Some mixed-case names:");
+    printNameSamples(new SimpleNameFactory(true), 60);
+    System.out.println("Some lower-case names:");
+    printNameSamples(new SimpleNameFactory(false), 60);
+    System.out.println("Some more mixed-case names:");
+    printNameSamples(new SimpleNameFactory(true), 80);
+    System.out.println("Some more lower-case names:");
+    printNameSamples(new SimpleNameFactory(false), 80);
+  }
+
+  private static void printNameSamples(SimpleNameFactory factory, int count) {
+    for (int counter = 0; counter < count; counter++) {
+      System.out.println("  [" + factory.nextName() + "]");
     }
-
-
-    // Implementations for NameFactory.
-
-    public void reset()
-    {
-        index = 0;
-    }
-
-
-    public String nextName()
-    {
-        return name(index++);
-    }
-
-
-    /**
-     * Returns the name at the given index.
-     */
-    private String name(int index)
-    {
-        // Create a new name for this index
-        return newName(index);
-    }
-
-
-    /**
-     * Creates and returns the name at the given index.
-     */
-    private String newName(int index)
-    {
-        // If we're allowed to generate mixed-case names, we can use twice as
-        // many characters.
-        int totalCharacterCount = generateMixedCaseNames ?
-            2 * CHARACTER_COUNT :
-            CHARACTER_COUNT;
-
-        int baseIndex = index / totalCharacterCount;
-        int offset    = index % totalCharacterCount;
-
-        char newChar = charAt(offset);
-
-        String newName = baseIndex == 0 ?
-            new String(new char[] { newChar }) :
-            (name(baseIndex-1) + newChar);
-
-        if (Arrays.binarySearch(reservedNames, newName.toUpperCase()) >= 0)
-        {
-            newName += newChar;
-        }
-        return newName;
-    }
-
-
-    /**
-     * Returns the character with the given index, between 0 and the number of
-     * acceptable characters.
-     */
-    private char charAt(int index)
-    {
-        return (char)((index < CHARACTER_COUNT ? 'a' - 0               :
-                                                 'A' - CHARACTER_COUNT) + index);
-    }
-
-
-    public static void main(String[] args)
-    {
-        System.out.println("Some mixed-case names:");
-        printNameSamples(new SimpleNameFactory(true), 60);
-        System.out.println("Some lower-case names:");
-        printNameSamples(new SimpleNameFactory(false), 60);
-        System.out.println("Some more mixed-case names:");
-        printNameSamples(new SimpleNameFactory(true), 80);
-        System.out.println("Some more lower-case names:");
-        printNameSamples(new SimpleNameFactory(false), 80);
-    }
-
-
-    private static void printNameSamples(SimpleNameFactory factory, int count)
-    {
-        for (int counter = 0; counter < count; counter++)
-        {
-            System.out.println("  ["+factory.nextName()+"]");
-        }
-    }
+  }
 }
