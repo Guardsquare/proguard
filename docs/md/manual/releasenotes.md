@@ -1,8 +1,17 @@
-## Version 7.5.1
+## Version 7.6
+
+### Java support
+
+- Add support for Java 23. (#387)
+
+### Improved
+
+- Improve obfuscation dictionary name performance with large dictionaries. (#413)
 
 ### Bugfixes
 
 - Prevent unknown enum value for `KmVersionRequirementVersionKind` exception when processing code compiled with an outdated Kotlin version. 
+- ReTrace: Fix separation of multiple frames with a newline. (#432)
 
 ## Version 7.5.0
 
