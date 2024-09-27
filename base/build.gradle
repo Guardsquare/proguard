@@ -49,7 +49,7 @@ jar {
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814
 // But it will work if e.g. Java N-ea is pre-installed
-def javaVersionsForTest = 9..22
+def javaVersionsForTest = 9..23
 
 test {
     useJUnitPlatform()
@@ -64,7 +64,7 @@ task testAllJavaVersions() { testAllTask ->
             ignoreFailures = true
 
             // The version of bytebuddy used by mockk only supports Java 22 experimentally so far
-            if (version >= 22) systemProperty 'net.bytebuddy.experimental', true
+            // if (version >= 22) systemProperty 'net.bytebuddy.experimental', true
 
             testAllTask.dependsOn(it)
 
