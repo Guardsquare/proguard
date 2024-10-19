@@ -91,7 +91,7 @@ implements   AttributeVisitor
      */
     public InstructionUsageMarker(boolean markExternalSideEffects)
     {
-        this(new PartialEvaluator(), true, true, markExternalSideEffects);
+        this(PartialEvaluator.Builder.create().build(), true, true, markExternalSideEffects);
     }
 
     /**
@@ -129,9 +129,10 @@ implements   AttributeVisitor
         this.ensureSafetyForVerifier      = ensureSafetyForVerifier;
         this.markExternalSideEffects      = markExternalSideEffects;
         this.sideEffectInstructionChecker = new SideEffectInstructionChecker(true, true, markExternalSideEffects);
-        if (ensureSafetyForVerifier)
-        {
-            this.simplePartialEvaluator = new PartialEvaluator(new TypedReferenceValueFactory());
+        if (ensureSafetyForVerifier) {
+            this.simplePartialEvaluator = PartialEvaluator.Builder.create()
+                    .setValueFactory(new TypedReferenceValueFactory())
+                    .build();
         }
         else
         {

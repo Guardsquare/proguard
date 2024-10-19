@@ -56,13 +56,14 @@ implements   ClassPoolVisitor,
     private final ClassVisitor                 parameterEscapedMarker =
         new AllMethodVisitor(
         new AllAttributeVisitor(this));
-    private final ValueFactory                 valueFactory                = new BasicValueFactory();
-    private final ReferenceTracingValueFactory tracingValueFactory         = new ReferenceTracingValueFactory(valueFactory);
+    private final ReferenceTracingValueFactory tracingValueFactory         = new ReferenceTracingValueFactory(new BasicValueFactory());
     private final PartialEvaluator             partialEvaluator            =
-        new PartialEvaluator(tracingValueFactory,
-                             new ParameterTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)),
-                             true,
-                             tracingValueFactory);
+            PartialEvaluator.Builder.create()
+                    .setValueFactory(tracingValueFactory)
+                    .setInvocationUnit(new ParameterTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)))
+                    .setEvaluateAllCode(true)
+                    .setExtraInstructionVisitor(tracingValueFactory)
+                    .build();
     private final ReferenceEscapeChecker       referenceEscapeChecker = new ReferenceEscapeChecker(partialEvaluator, false);
 
     // Parameters and values for visitor methods.

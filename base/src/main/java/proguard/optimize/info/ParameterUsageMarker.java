@@ -50,7 +50,7 @@ implements   MemberVisitor,
     private final boolean          markThisParameter;
     private final boolean          markAllParameters;
     private final boolean          analyzeCode;
-    private final PartialEvaluator partialEvaluator = new PartialEvaluator();
+    private final PartialEvaluator partialEvaluator = PartialEvaluator.Builder.create().build();
 
 
     /**

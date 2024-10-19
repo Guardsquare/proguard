@@ -52,10 +52,12 @@ implements InfluenceFixpointVisitor.MemberVisitorFactory
         ReferenceTracingValueFactory referenceTracingValueFactory1 =
             new ReferenceTracingValueFactory(new TypedReferenceValueFactory());
         PartialEvaluator partialEvaluator =
-            new PartialEvaluator(referenceTracingValueFactory1,
-                                 new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory1)),
-                                 false,
-                                 referenceTracingValueFactory1);
+            PartialEvaluator.Builder.create()
+                    .setValueFactory(referenceTracingValueFactory1)
+                    .setInvocationUnit(new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory1)))
+                    .setEvaluateAllCode(false)
+                    .setExtraInstructionVisitor(referenceTracingValueFactory1)
+                    .build();
         InstructionUsageMarker instructionUsageMarker =
             new InstructionUsageMarker(partialEvaluator, false, false);
 

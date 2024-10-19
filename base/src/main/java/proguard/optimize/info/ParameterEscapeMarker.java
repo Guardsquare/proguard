@@ -103,7 +103,7 @@ implements   MemberVisitor,
      */
     public ParameterEscapeMarker(ValueFactory valueFactory, MemberVisitor extraMemberVisitor)
     {
-        this(valueFactory, new ReferenceTracingValueFactory(valueFactory), extraMemberVisitor
+        this(new ReferenceTracingValueFactory(valueFactory), extraMemberVisitor
         );
     }
 
@@ -111,14 +111,15 @@ implements   MemberVisitor,
     /**
      * Creates a new ParameterEscapeMarker.
      */
-    public ParameterEscapeMarker(ValueFactory                 valueFactory,
-                                 ReferenceTracingValueFactory tracingValueFactory,
+    public ParameterEscapeMarker(ReferenceTracingValueFactory tracingValueFactory,
                                  MemberVisitor                extraMemberVisitor)
     {
-        this(new PartialEvaluator(tracingValueFactory,
-                             new ParameterTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)),
-                             true,
-                             tracingValueFactory), true, extraMemberVisitor
+        this(PartialEvaluator.Builder.create()
+                .setValueFactory(tracingValueFactory)
+                .setInvocationUnit(new ParameterTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)))
+                .setEvaluateAllCode(true)
+                .setExtraInstructionVisitor(tracingValueFactory)
+                .build(), true, extraMemberVisitor
         );
     }
 

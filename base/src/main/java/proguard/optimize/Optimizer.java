@@ -936,7 +936,11 @@ public class Optimizer implements Pass
                 new AllMethodVisitor(
                 new AllAttributeVisitor(
                 new DebugAttributeVisitor("Filling out fields, method parameters, and return values in synthetic classes",
-                new PartialEvaluator(detailedValueFactory, storingInvocationUnit, false))))));
+                PartialEvaluator.Builder.create()
+                        .setValueFactory(detailedValueFactory)
+                        .setInvocationUnit(storingInvocationUnit)
+                        .setEvaluateAllCode(false)
+                        .build())))));
 
             // Evaluate non-synthetic classes. We may need to evaluate all
             // casts, to account for downcasts when specializing descriptors.
@@ -959,10 +963,14 @@ public class Optimizer implements Pass
                             new AllMethodVisitor(
                             new AllAttributeVisitor(
                             new DebugAttributeVisitor("Filling out fields, method parameters, and return values",
-                            new PartialEvaluator(valueFactory, storingInvocationUnit,
-                                                 fieldSpecializationType           ||
-                                                 methodSpecializationParametertype ||
-                                                 methodSpecializationReturntype)))));
+                            PartialEvaluator.Builder.create()
+                                    .setValueFactory(valueFactory)
+                                    .setInvocationUnit(storingInvocationUnit)
+                                    .setEvaluateAllCode(
+                                            fieldSpecializationType ||
+                                            methodSpecializationParametertype ||
+                                            methodSpecializationReturntype)
+                                    .build()))));
                     }
                 };
 
@@ -1056,7 +1064,11 @@ public class Optimizer implements Pass
                     new ClassAccessFilter(AccessConstants.SYNTHETIC, 0,
                     new AllMethodVisitor(
                     new AllAttributeVisitor(
-                    new PartialEvaluator(valueFactory, loadingInvocationUnit, false)))));
+                    PartialEvaluator.Builder.create()
+                            .setValueFactory(valueFactory)
+                            .setInvocationUnit(loadingInvocationUnit)
+                            .setEvaluateAllCode(false)
+                            .build()))));
             }
         }
 
@@ -1083,7 +1095,11 @@ public class Optimizer implements Pass
                             new DebugAttributeVisitor("Simplifying code",
                             new OptimizationCodeAttributeFilter(
                             new EvaluationSimplifier(
-                            new PartialEvaluator(valueFactory, loadingInvocationUnit, false),
+                            PartialEvaluator.Builder.create()
+                                    .setValueFactory(valueFactory)
+                                    .setInvocationUnit(loadingInvocationUnit)
+                                    .setEvaluateAllCode(false)
+                                    .build(),
                             codeSimplificationAdvancedCounter,
                             configuration.optimizeConservatively)))));
                     }
@@ -1125,11 +1141,14 @@ public class Optimizer implements Pass
                             new OptimizationCodeAttributeFilter(
                             new EvaluationShrinker(
                             new InstructionUsageMarker(
-                            new PartialEvaluator(referenceTracingValueFactory,
-                                                 new ParameterTracingInvocationUnit(loadingInvocationUnit),
-                                                 !codeSimplificationAdvanced,
-                                                 referenceTracingValueFactory),
+                            PartialEvaluator.Builder.create()
+                                    .setValueFactory(referenceTracingValueFactory)
+                                    .setInvocationUnit(new ParameterTracingInvocationUnit(loadingInvocationUnit))
+                                    .setEvaluateAllCode(!codeSimplificationAdvanced)
+                                    .setExtraInstructionVisitor(referenceTracingValueFactory)
+                                    .build(),
                             true, configuration.optimizeConservatively), true, deletedCounter, addedCounter)))));
+                        
                     }
                 };
 

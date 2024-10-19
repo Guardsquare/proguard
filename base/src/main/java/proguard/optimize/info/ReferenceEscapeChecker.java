@@ -86,10 +86,13 @@ implements   AttributeVisitor,
      */
     private ReferenceEscapeChecker(ReferenceTracingValueFactory referenceTracingValueFactory)
     {
-        this(new PartialEvaluator(referenceTracingValueFactory,
-                                  new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory)),
-                                  true,
-                                  referenceTracingValueFactory),
+        this(
+                PartialEvaluator.Builder.create()
+                        .setValueFactory(referenceTracingValueFactory)
+                        .setInvocationUnit(new ParameterTracingInvocationUnit(new BasicInvocationUnit(referenceTracingValueFactory)))
+                        .setEvaluateAllCode(true)
+                        .setExtraInstructionVisitor(referenceTracingValueFactory)
+                        .build(),
              true);
     }
 

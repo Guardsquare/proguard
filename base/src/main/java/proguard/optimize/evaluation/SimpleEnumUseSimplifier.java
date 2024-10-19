@@ -72,7 +72,7 @@ implements   AttributeVisitor,
      */
     public SimpleEnumUseSimplifier()
     {
-        this(new PartialEvaluator(new TypedReferenceValueFactory()), null);
+        this(PartialEvaluator.Builder.create().setValueFactory(new TypedReferenceValueFactory()).build(), null);
     }
 
 

@@ -69,7 +69,7 @@ implements   AttributeVisitor,
      */
     public EvaluationSimplifier(boolean predictNullPointerExceptions)
     {
-        this(new PartialEvaluator(), null, predictNullPointerExceptions);
+        this(PartialEvaluator.Builder.create().build(), null, predictNullPointerExceptions);
     }
 
 

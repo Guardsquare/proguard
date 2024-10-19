@@ -53,11 +53,13 @@ implements   InstructionVisitor
     private final WarningPrinter             warningPrinter;
     private final ToJsonInvocationMatcher[]  toJsonInvocationMatchers;
     private final TypedReferenceValueFactory valueFactory         =
-        new TypedReferenceValueFactory();
+            new TypedReferenceValueFactory();
     private final PartialEvaluator           partialEvaluator     =
-        new PartialEvaluator(valueFactory,
-                             new BasicInvocationUnit(new TypedReferenceValueFactory()),
-                             true);
+            PartialEvaluator.Builder.create()
+                    .setValueFactory(valueFactory)
+                    .setInvocationUnit(new BasicInvocationUnit(valueFactory))
+                    .setEvaluateAllCode(true)
+                    .build();
     private final AttributeVisitor           lazyPartialEvaluator =
         new AttributeNameFilter(Attribute.CODE,
                                 new SingleTimeAttributeVisitor(partialEvaluator));

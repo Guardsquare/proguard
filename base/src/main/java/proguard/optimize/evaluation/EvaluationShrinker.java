@@ -114,7 +114,7 @@ implements   AttributeVisitor,
      */
     public EvaluationShrinker()
     {
-        this(new PartialEvaluator(), true, false, null, null);
+        this(PartialEvaluator.Builder.create().build(), true, false, null, null);
     }
 
 

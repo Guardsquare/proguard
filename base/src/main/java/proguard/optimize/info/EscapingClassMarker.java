@@ -77,10 +77,12 @@ implements   AttributeVisitor,
      */
     public EscapingClassMarker(ReferenceTracingValueFactory tracingValueFactory)
     {
-        this(new PartialEvaluator(tracingValueFactory,
-                                  new ReferenceTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)),
-                                  true,
-                                  tracingValueFactory),
+        this(PartialEvaluator.Builder.create()
+                .setValueFactory(tracingValueFactory)
+                .setInvocationUnit(new ReferenceTracingInvocationUnit(new BasicInvocationUnit(tracingValueFactory)))
+                .setEvaluateAllCode(true)
+                .setExtraInstructionVisitor(tracingValueFactory)
+                .build(),
              true);
     }
 

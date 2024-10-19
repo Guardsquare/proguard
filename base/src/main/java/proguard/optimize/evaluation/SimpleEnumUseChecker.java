@@ -71,7 +71,7 @@ implements   ClassVisitor,
      */
     public SimpleEnumUseChecker()
     {
-        this(new PartialEvaluator(new TypedReferenceValueFactory()));
+        this(PartialEvaluator.Builder.create().setValueFactory(new TypedReferenceValueFactory()).build());
     }
 
 
