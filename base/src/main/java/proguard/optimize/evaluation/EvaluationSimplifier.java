@@ -48,8 +48,9 @@ public class EvaluationSimplifier
 implements   AttributeVisitor,
              InstructionVisitor
 {
-    private static final int  POS_ZERO_FLOAT_BITS  = Float.floatToIntBits(0.0f);
-    private static final long POS_ZERO_DOUBLE_BITS = Double.doubleToLongBits(0.0);
+    private static final boolean ENABLE_LOWER_SLOT_REPLACEMENT = System.getProperty("optimization.enable.slot.replacement") != null;
+    private static final int     POS_ZERO_FLOAT_BITS = Float.floatToIntBits(0.0f);
+    private static final long    POS_ZERO_DOUBLE_BITS = Double.doubleToLongBits(0.0);
 
     private static final Logger logger = LogManager.getLogger(EvaluationSimplifier.class);
 
@@ -58,7 +59,7 @@ implements   AttributeVisitor,
 
     private final PartialEvaluator             partialEvaluator;
     private final SideEffectInstructionChecker sideEffectInstructionChecker;
-    private final CodeAttributeEditor          codeAttributeEditor          = new CodeAttributeEditor(true, true);
+    private final CodeAttributeEditor          codeAttributeEditor = new CodeAttributeEditor(true, true);
 
 
     /**
@@ -692,7 +693,7 @@ implements   AttributeVisitor,
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
             }
         }
-        else if (pushedValue.isSpecific())
+        else if (ENABLE_LOWER_SLOT_REPLACEMENT && pushedValue.isSpecific())
         {
             // Load an equivalent lower-numbered variable instead, if any.
             TracedVariables variables = partialEvaluator.getVariablesBefore(offset);
@@ -762,7 +763,7 @@ implements   AttributeVisitor,
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
             }
         }
-        else if (pushedValue.isSpecific())
+        else if (ENABLE_LOWER_SLOT_REPLACEMENT && pushedValue.isSpecific())
         {
             // Load an equivalent lower-numbered variable instead, if any.
             TracedVariables variables = partialEvaluator.getVariablesBefore(offset);
@@ -836,7 +837,7 @@ implements   AttributeVisitor,
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
             }
         }
-        else if (pushedValue.isSpecific())
+        else if (ENABLE_LOWER_SLOT_REPLACEMENT && pushedValue.isSpecific())
         {
             // Load an equivalent lower-numbered variable instead, if any.
             TracedVariables variables = partialEvaluator.getVariablesBefore(offset);
@@ -906,7 +907,7 @@ implements   AttributeVisitor,
                 replaceInstruction(clazz, offset, instruction, replacementInstruction);
             }
         }
-        else if (pushedValue.isSpecific())
+        else if (ENABLE_LOWER_SLOT_REPLACEMENT && pushedValue.isSpecific())
         {
             // Load an equivalent lower-numbered variable instead, if any.
             TracedVariables variables = partialEvaluator.getVariablesBefore(offset);
