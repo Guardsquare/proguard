@@ -53,7 +53,6 @@ import proguard.util.kotlin.KotlinUnsupportedVersionChecker;
 import proguard.util.kotlin.asserter.KotlinMetadataVerifier;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * Tool for shrinking, optimizing, obfuscating, and preverifying Java classes.
@@ -352,11 +351,7 @@ public class ProGuard
         }
         passRunner.run(new Initializer(configuration), appView);
 
-        if (configuration.keepKotlinMetadata &&
-            configuration.enableKotlinAsserter)
-        {
-            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
-        }
+        verifyKotlinMetadata();
     }
 
 
@@ -442,11 +437,7 @@ public class ProGuard
         // Perform the actual shrinking.
         passRunner.run(new Shrinker(configuration, afterOptimizer), appView);
 
-        if (configuration.keepKotlinMetadata &&
-            configuration.enableKotlinAsserter)
-        {
-            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
-        }
+        verifyKotlinMetadata();
     }
 
 
@@ -510,11 +501,7 @@ public class ProGuard
         // Fix the Kotlin modules so the filename matches and the class names match.
         passRunner.run(new NameObfuscationReferenceFixer(configuration), appView);
 
-        if (configuration.keepKotlinMetadata &&
-            configuration.enableKotlinAsserter)
-        {
-            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
-        }
+        verifyKotlinMetadata();
     }
 
 
@@ -526,6 +513,13 @@ public class ProGuard
         passRunner.run(new KotlinMetadataAdapter(), appView);
     }
 
+    private void verifyKotlinMetadata() throws Exception {
+        if (configuration.keepKotlinMetadata &&
+            configuration.enableKotlinAsserter)
+        {
+            passRunner.run(new KotlinMetadataVerifier(configuration), appView);
+        }
+    }
 
     /**
      * Expands primitive array constants back to traditional primitive array
