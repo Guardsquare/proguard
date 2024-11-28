@@ -9,14 +9,15 @@ import proguard.testutils.JavaSource
 
 class SimpleEnumClassCheckerTest : FreeSpec({
     "Given a enum class without instance methods" - {
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Enum.java",
-                """
-                public enum Enum { FOO, BAR }
-                """.trimIndent()
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Enum.java",
+                    """
+                    public enum Enum { FOO, BAR }
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "Then when checked with SimpleEnumClassChecker" - {
             val enumClass = programClassPool.getClass("Enum")
@@ -30,19 +31,20 @@ class SimpleEnumClassCheckerTest : FreeSpec({
     }
 
     "Given a enum class with a public instance method" - {
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Enum.java",
-                """
-                public enum Enum { 
-                    FOO, BAR;
-                    public void foo() {
-                    
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Enum.java",
+                    """
+                    public enum Enum { 
+                        FOO, BAR;
+                        public void foo() {
+                        
+                        }
                     }
-                }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "Then when checked with SimpleEnumClassChecker" - {
             val enumClass = programClassPool.getClass("Enum")
@@ -56,19 +58,20 @@ class SimpleEnumClassCheckerTest : FreeSpec({
     }
 
     "Given a enum class with a private instance method" - {
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Enum.java",
-                """
-                public enum Enum { 
-                    FOO, BAR;
-                    private void foo() {
-                    
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Enum.java",
+                    """
+                    public enum Enum { 
+                        FOO, BAR;
+                        private void foo() {
+                        
+                        }
                     }
-                }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "Then when checked with SimpleEnumClassChecker" - {
             val enumClass = programClassPool.getClass("Enum")

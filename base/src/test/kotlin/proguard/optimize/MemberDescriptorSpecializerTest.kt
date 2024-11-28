@@ -44,29 +44,33 @@ class MemberDescriptorSpecializerTest : FreeSpec({
         programClassPool.classesAccept(AllMemberVisitor(ProgramMemberOptimizationInfoSetter()))
 
         // Create the optimization as in Optimizer
-        val fillingOutValuesClassVisitor = ClassVisitorFactory {
-            val valueFactory: ValueFactory = ParticularValueFactory()
-            val storingInvocationUnit: InvocationUnit = StoringInvocationUnit(
-                valueFactory,
-                true,
-                true,
-                true
-            )
-            ClassAccessFilter(
-                0, AccessConstants.SYNTHETIC,
-                AllMethodVisitor(
-                    AllAttributeVisitor(
-                        DebugAttributeVisitor(
-                            "Filling out fields, method parameters, and return values",
-                            PartialEvaluator(
-                                valueFactory, storingInvocationUnit,
-                                true
-                            )
-                        )
+        val fillingOutValuesClassVisitor =
+            ClassVisitorFactory {
+                val valueFactory: ValueFactory = ParticularValueFactory()
+                val storingInvocationUnit: InvocationUnit =
+                    StoringInvocationUnit(
+                        valueFactory,
+                        true,
+                        true,
+                        true,
                     )
+                ClassAccessFilter(
+                    0,
+                    AccessConstants.SYNTHETIC,
+                    AllMethodVisitor(
+                        AllAttributeVisitor(
+                            DebugAttributeVisitor(
+                                "Filling out fields, method parameters, and return values",
+                                PartialEvaluator(
+                                    valueFactory,
+                                    storingInvocationUnit,
+                                    true,
+                                ),
+                            ),
+                        ),
+                    ),
                 )
-            )
-        }
+            }
 
         programClassPool.classesAccept(fillingOutValuesClassVisitor.createClassVisitor())
 
@@ -80,33 +84,34 @@ class MemberDescriptorSpecializerTest : FreeSpec({
                         true,
                         null,
                         null,
-                        null
-                    )
-                )
-            )
+                        null,
+                    ),
+                ),
+            ),
         )
     }
 
     "Given a method with a more general program class pool parameter type than its use" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Test.java",
-                """
-                public class Test {
-                    public static void main(String[] args) {
-                        foo(new Foo());
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Test.java",
+                    """
+                    public class Test {
+                        public static void main(String[] args) {
+                            foo(new Foo());
+                        }
+                        public static void foo(Bar foo) {
+                            System.out.println(foo);
+                        }
                     }
-                    public static void foo(Bar foo) {
-                        System.out.println(foo);
-                    }
-                }
-                
-                class Bar { }
-                
-                class Foo extends Bar { }
-                """.trimIndent()
+                    
+                    class Bar { }
+                    
+                    class Foo extends Bar { }
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When specializing the member descriptors" - {
             specializeMemberDescriptors(programClassPool, libraryClassPool)
@@ -119,12 +124,15 @@ class MemberDescriptorSpecializerTest : FreeSpec({
                         MemberNameFilter(
                             "foo*",
                             object : MemberVisitor {
-                                override fun visitAnyMember(clazz: Clazz, member: Member) {
+                                override fun visitAnyMember(
+                                    clazz: Clazz,
+                                    member: Member,
+                                ) {
                                     memberDescriptor = member.getDescriptor(clazz)
                                 }
-                            }
-                        )
-                    )
+                            },
+                        ),
+                    ),
                 )
                 memberDescriptor shouldBe "(LFoo;)V"
             }
@@ -132,24 +140,25 @@ class MemberDescriptorSpecializerTest : FreeSpec({
     }
 
     "Given a field with a more general program class pool parameter type than its use" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Test.java",
-                """
-                public class Test {
-                    static Bar myField = null;
-                
-                    public static void main(String[] args) {
-                        myField = new Foo();
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Test.java",
+                    """
+                    public class Test {
+                        static Bar myField = null;
+                    
+                        public static void main(String[] args) {
+                            myField = new Foo();
+                        }
                     }
-                }
-                
-                class Bar { }
-                
-                class Foo extends Bar { }
-                """.trimIndent()
+                    
+                    class Bar { }
+                    
+                    class Foo extends Bar { }
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When specializing the member descriptors" - {
             specializeMemberDescriptors(programClassPool, libraryClassPool)
@@ -162,12 +171,15 @@ class MemberDescriptorSpecializerTest : FreeSpec({
                         MemberNameFilter(
                             "myField*",
                             object : MemberVisitor {
-                                override fun visitAnyMember(clazz: Clazz, member: Member) {
+                                override fun visitAnyMember(
+                                    clazz: Clazz,
+                                    member: Member,
+                                ) {
                                     memberDescriptor = member.getDescriptor(clazz)
                                 }
-                            }
-                        )
-                    )
+                            },
+                        ),
+                    ),
                 )
                 memberDescriptor shouldBe "LFoo;"
             }
@@ -175,20 +187,21 @@ class MemberDescriptorSpecializerTest : FreeSpec({
     }
 
     "Given a field with a more general library class pool parameter type than its use" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Test.java",
-                """
-                public class Test {
-                    static java.lang.Object myField = null;
-                
-                    public static void main(String[] args) {
-                        myField = new java.lang.StringBuffer();
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Test.java",
+                    """
+                    public class Test {
+                        static java.lang.Object myField = null;
+                    
+                        public static void main(String[] args) {
+                            myField = new java.lang.StringBuffer();
+                        }
                     }
-                }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When specializing the member descriptors" - {
             specializeMemberDescriptors(programClassPool, libraryClassPool)
@@ -201,12 +214,15 @@ class MemberDescriptorSpecializerTest : FreeSpec({
                         MemberNameFilter(
                             "myField*",
                             object : MemberVisitor {
-                                override fun visitAnyMember(clazz: Clazz, member: Member) {
+                                override fun visitAnyMember(
+                                    clazz: Clazz,
+                                    member: Member,
+                                ) {
                                     memberDescriptor = member.getDescriptor(clazz)
                                 }
-                            }
-                        )
-                    )
+                            },
+                        ),
+                    ),
                 )
                 // Library classes are not marked as available by default. Therefore, they are not specialized.
                 memberDescriptor shouldBe "Ljava/lang/Object;"

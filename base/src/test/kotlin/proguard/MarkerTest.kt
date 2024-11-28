@@ -27,22 +27,23 @@ import testutils.shouldNotHaveFlag
 class MarkerTest : FreeSpec({
 
     "Given a Kotlin inline class" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                @JvmInline
-                value class Password(val s: String)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    @JvmInline
+                    value class Password(val s: String)
 
-                // The underlying JVM method descriptor will reference the
-                // underlying property of `Password`, rather than `Password` itself.
+                    // The underlying JVM method descriptor will reference the
+                    // underlying property of `Password`, rather than `Password` itself.
 
-                fun login(password: Password) {
-                    println(password)
-                }
-                """.trimIndent()
+                    fun login(password: Password) {
+                        println(password)
+                    }
+                    """.trimIndent(),
+                ),
             )
-        )
 
         beforeEach {
             programClassPool.classesAccept {
@@ -51,7 +52,8 @@ class MarkerTest : FreeSpec({
         }
 
         "Then when using includedescriptorclasses modifier" - {
-            val config = """
+            val config =
+                """
             -keep,includedescriptorclasses class TestKt {
                 <methods>;
             }
@@ -71,7 +73,8 @@ class MarkerTest : FreeSpec({
         }
 
         "Then when not using includedescriptorclasses modifier" - {
-            val config = """
+            val config =
+                """
             -keep class TestKt {
                 <methods>;
             }
@@ -92,25 +95,27 @@ class MarkerTest : FreeSpec({
     }
 
     "Given a Kotlin interface with default method implementation in the interface itself" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                interface Test {
-                    fun foo() {
-                        TODO()
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    interface Test {
+                        fun foo() {
+                            TODO()
+                        }
                     }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf("-Xjvm-default=all")
-        )
+                    """.trimIndent(),
+                ),
+                kotlincArguments = listOf("-Xjvm-default=all"),
+            )
 
         // Run the asserter to ensure any metadata that isn't initialized correctly is thrown away
         KotlinMetadataVerifier(Configuration()).execute(AppView(programClassPool, libraryClassPool))
 
         "Then when marking" - {
-            val config = """
+            val config =
+                """
             -keep class Test {
                 <methods>;
             }
@@ -134,25 +139,27 @@ class MarkerTest : FreeSpec({
     }
 
     "Given a Kotlin interface with default method implementation in compatibility mode" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                interface Test {
-                    fun foo() {
-                        TODO()
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    interface Test {
+                        fun foo() {
+                            TODO()
+                        }
                     }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf("-Xjvm-default=all-compatibility")
-        )
+                    """.trimIndent(),
+                ),
+                kotlincArguments = listOf("-Xjvm-default=all-compatibility"),
+            )
 
         // Run the asserter to ensure any metadata that isn't initialized correctly is thrown away
         KotlinMetadataVerifier(Configuration()).execute(AppView(programClassPool, libraryClassPool))
 
         "Then when marking" - {
-            val config = """
+            val config =
+                """
             -keep class Test {
                 <methods>;
             }

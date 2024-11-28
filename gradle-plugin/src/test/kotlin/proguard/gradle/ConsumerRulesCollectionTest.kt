@@ -13,44 +13,53 @@ import io.kotest.matchers.file.shouldNotExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import java.io.File
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.AndroidProject
 import testutils.applicationModule
 import testutils.createGradleRunner
 import testutils.createTestKitDir
+import java.io.File
 
 class ConsumerRulesCollectionTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given an Android project with one configured variant" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
 
-            android {
-                compileSdkVersion 30
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                    debug {
-                        minifyEnabled false
-                    }
-                }
-            }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                        debug {
+                                            minifyEnabled false
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    release {}
-                }
-            }
-            """.trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        release {}
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the tasks 'clean' and 'assembleDebug' are executed in a dry run" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "--dry-run", "clean", "assembleDebug").build()

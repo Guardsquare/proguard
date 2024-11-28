@@ -21,57 +21,70 @@ class ProGuardPluginLegacyAGPIntegrationTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given a project with the legacy integration" - {
-        val project = autoClose(AndroidProject(
-                gradleDotProperties = """
+        val project =
+            autoClose(
+                AndroidProject(
+                    gradleDotProperties =
+                        """
                     |android.enableR8=false
                     |android.enableR8.libraries=false
-                """.trimMargin(), buildDotGradle = """
-            buildscript {
-                repositories {
-                    mavenCentral() // For anything else.
-                    google()       // For the Android plugin.
-                    flatDir {
-                        dirs "${System.getProperty("local.repo")}"
-                    }
-                }
-                dependencies {
-                    classpath "com.android.tools.build:gradle:4.2.0"
-                    classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
-                }
-
-                configurations.all {
-                    resolutionStrategy {
-                        dependencySubstitution {
-                            substitute module('net.sf.proguard:proguard-gradle') with module("com.guardsquare:proguard-gradle:${System.getProperty("proguard.version")}")
-                        }
-                    }
-                }
-            }
-            allprojects {
-                repositories {
-                    google()
-                    mavenCentral()
-                }
-            }
-            """.trimIndent()).apply {
-                addModule(applicationModule("app", buildDotGradle = """
-                            plugins {
-                                id 'com.android.application'
-                            }
-
-                            android {
-                                compileSdkVersion 30
-
-                                buildTypes {
-                                    release {
-                                        minifyEnabled true
-                                        proguardFile getDefaultProguardFile('proguard-android.txt')
-                                    }
-                                    debug   {}
+                        """.trimMargin(),
+                    buildDotGradle =
+                        """
+                        buildscript {
+                            repositories {
+                                mavenCentral() // For anything else.
+                                google()       // For the Android plugin.
+                                flatDir {
+                                    dirs "${System.getProperty("local.repo")}"
                                 }
                             }
-                            """.trimIndent()))
-            }.create())
+                            dependencies {
+                                classpath "com.android.tools.build:gradle:4.2.0"
+                                classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
+                            }
+
+                            configurations.all {
+                                resolutionStrategy {
+                                    dependencySubstitution {
+                                        substitute module('net.sf.proguard:proguard-gradle') with module("com.guardsquare:proguard-gradle:${System.getProperty("proguard.version")}")
+                                    }
+                                }
+                            }
+                        }
+                        allprojects {
+                            repositories {
+                                google()
+                                mavenCentral()
+                            }
+                        }
+                        """.trimIndent(),
+                ).apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                }
+
+                                android {
+                                    compileSdkVersion 30
+
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled true
+                                            proguardFile getDefaultProguardFile('proguard-android.txt')
+                                        }
+                                        debug   {}
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "clean", "assembleRelease", "--info").build()
@@ -84,43 +97,50 @@ class ProGuardPluginLegacyAGPIntegrationTest : FreeSpec({
     }
 
     "Given a library project with the legacy integration" - {
-        val project = autoClose(AndroidProject(
-                gradleDotProperties = """
+        val project =
+            autoClose(
+                AndroidProject(
+                    gradleDotProperties =
+                        """
                     |android.enableR8=false
                     |android.enableR8.libraries=false
                     |android.useAndroidX=true
-                """.trimMargin(), buildDotGradle = """
-            buildscript {
-                repositories {
-                    mavenCentral() // For anything else.
-                    google()       // For the Android plugin.
-                    flatDir {
-                        dirs "${System.getProperty("local.repo")}"
-                    }
-                }
-                dependencies {
-                    classpath "com.android.tools.build:gradle:4.2.0"
-                    classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
-                }
+                        """.trimMargin(),
+                    buildDotGradle =
+                        """
+                        buildscript {
+                            repositories {
+                                mavenCentral() // For anything else.
+                                google()       // For the Android plugin.
+                                flatDir {
+                                    dirs "${System.getProperty("local.repo")}"
+                                }
+                            }
+                            dependencies {
+                                classpath "com.android.tools.build:gradle:4.2.0"
+                                classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
+                            }
 
-                configurations.all {
-                    resolutionStrategy {
-                        dependencySubstitution {
-                            substitute module('net.sf.proguard:proguard-gradle') with module("com.guardsquare:proguard-gradle:${System.getProperty("proguard.version")}")
+                            configurations.all {
+                                resolutionStrategy {
+                                    dependencySubstitution {
+                                        substitute module('net.sf.proguard:proguard-gradle') with module("com.guardsquare:proguard-gradle:${System.getProperty("proguard.version")}")
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
-            allprojects {
-                repositories {
-                    google()
-                    mavenCentral()
-                }
-            }
-            """.trimIndent()).apply {
-                addModule(libraryModule(
-                        "library",
-                        buildDotGradle = """
+                        allprojects {
+                            repositories {
+                                google()
+                                mavenCentral()
+                            }
+                        }
+                        """.trimIndent(),
+                ).apply {
+                    addModule(
+                        libraryModule(
+                            "library",
+                            buildDotGradle = """
                             plugins {
                                 id 'com.android.library'
                             }
@@ -143,8 +163,11 @@ class ProGuardPluginLegacyAGPIntegrationTest : FreeSpec({
                                     debug {}
                                 }
                             }
-                        """))
-            }.create())
+                        """,
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "clean", "assembleRelease", "--info").build()

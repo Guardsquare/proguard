@@ -12,43 +12,51 @@ import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import java.io.File
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.AndroidProject
 import testutils.applicationModule
 import testutils.createGradleRunner
 import testutils.createTestKitDir
+import java.io.File
 
 class ConsumerRulesFilterTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given a project with a configuration block for a specific variant" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(
-                applicationModule(
-                    "app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                }
-            }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    release {
-                        consumerRuleFilter 'filter1', 'filter2'
-                    }
-                }
-            }""".trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        release {
+                                            consumerRuleFilter 'filter1', 'filter2'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "-si").build()
@@ -60,46 +68,54 @@ class ConsumerRulesFilterTest : FreeSpec({
     }
 
     "Given an application project with a consumer rule filter" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(
-                applicationModule(
-                    "app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            
-            repositories {
-                google()
-                mavenCentral()
-            }
-            
-            dependencies {
-                implementation 'com.android.support:appcompat-v7:28.0.0'
-            }
-            
-            android {
-                compileSdkVersion 29
-                defaultConfig {
-                    targetSdkVersion 30
-                    minSdkVersion 14
-                    versionCode 1
-                }
-                buildTypes {
-                    release {}
-                    debug {}
-                }
-            }
-            
-            proguard {
-                configurations {
-                    release {
-                        defaultConfiguration 'proguard-android.txt'
-                        consumerRuleFilter 'com.android.support:appcompat-v7'
-                    }
-                }
-            } """.trimIndent()))
-        }.create())
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                
+                                repositories {
+                                    google()
+                                    mavenCentral()
+                                }
+                                
+                                dependencies {
+                                    implementation 'com.android.support:appcompat-v7:28.0.0'
+                                }
+                                
+                                android {
+                                    compileSdkVersion 29
+                                    defaultConfig {
+                                        targetSdkVersion 30
+                                        minSdkVersion 14
+                                        versionCode 1
+                                    }
+                                    buildTypes {
+                                        release {}
+                                        debug {}
+                                    }
+                                }
+                                
+                                proguard {
+                                    configurations {
+                                        release {
+                                            defaultConfiguration 'proguard-android.txt'
+                                            consumerRuleFilter 'com.android.support:appcompat-v7'
+                                        }
+                                    }
+                                } 
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the 'clean' and 'assemble' tasks are run" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "clean", "assemble").build()

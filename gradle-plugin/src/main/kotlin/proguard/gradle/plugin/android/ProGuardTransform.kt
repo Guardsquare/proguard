@@ -40,7 +40,6 @@ import com.android.build.api.transform.TransformInvocation
 import com.android.build.api.transform.TransformOutputProvider
 import com.android.build.api.variant.VariantInfo
 import com.android.build.gradle.BaseExtension
-import java.io.File
 import org.gradle.api.Project
 import proguard.gradle.ProGuardTask
 import proguard.gradle.plugin.android.AndroidPlugin.Companion.COLLECT_CONSUMER_RULES_TASK_NAME
@@ -48,17 +47,18 @@ import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_APPLICATION
 import proguard.gradle.plugin.android.AndroidProjectType.ANDROID_LIBRARY
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
 import proguard.gradle.plugin.android.dsl.UserProGuardConfiguration
+import java.io.File
 
 class ProGuardTransform(
     private val project: Project,
     private val proguardBlock: ProGuardAndroidExtension,
     private val projectType: AndroidProjectType,
-    private val androidExtension: BaseExtension
+    private val androidExtension: BaseExtension,
 ) : Transform() {
-
     override fun transform(transformInvocation: TransformInvocation) {
         val variantName: String = transformInvocation.context.variantName
-        val variantBlock = proguardBlock.configurations.findVariantConfiguration(variantName)
+        val variantBlock =
+            proguardBlock.configurations.findVariantConfiguration(variantName)
                 ?: throw RuntimeException("Invalid configuration: $variantName")
 
         val proguardTask = project.tasks.create("proguardTask${variantName.capitalize()}", ProGuardTask::class.java)
@@ -67,9 +67,11 @@ class ProGuardTransform(
             proguardTask.outjars(it.second)
         }
 
-        proguardTask.extraJar(transformInvocation
+        proguardTask.extraJar(
+            transformInvocation
                 .outputProvider
-                .getContentLocation("extra.jar", setOf(CLASSES, RESOURCES), mutableSetOf(PROJECT), JAR))
+                .getContentLocation("extra.jar", setOf(CLASSES, RESOURCES), mutableSetOf(PROJECT), JAR),
+        )
 
         proguardTask.libraryjars(createLibraryJars(transformInvocation.referencedInputs))
 
@@ -80,7 +82,10 @@ class ProGuardTransform(
         if (aaptRulesFile != null && File(aaptRulesFile).exists()) {
             proguardTask.configuration(aaptRulesFile)
         } else {
-            project.logger.warn("AAPT rules file not found: you may need to apply some extra keep rules for classes referenced from resources in your own ProGuard configuration.")
+            project.logger.warn(
+                "AAPT rules file not found: you may need to apply some extra keep rules for classes referenced from " +
+                    "resources in your own ProGuard configuration.",
+            )
         }
 
         val mappingDir = project.buildDir.resolve("outputs/proguard/$variantName/mapping")
@@ -98,10 +103,10 @@ class ProGuardTransform(
     override fun getInputTypes(): Set<DefaultContentType> = setOf(CLASSES, RESOURCES)
 
     override fun getScopes(): MutableSet<in Scope> =
-            when (projectType) {
-                ANDROID_APPLICATION -> mutableSetOf(PROJECT, SUB_PROJECTS, EXTERNAL_LIBRARIES)
-                ANDROID_LIBRARY -> mutableSetOf(PROJECT)
-            }
+        when (projectType) {
+            ANDROID_APPLICATION -> mutableSetOf(PROJECT, SUB_PROJECTS, EXTERNAL_LIBRARIES)
+            ANDROID_LIBRARY -> mutableSetOf(PROJECT)
+        }
 
     override fun getReferencedScopes(): MutableSet<in Scope> =
         when (projectType) {
@@ -112,10 +117,10 @@ class ProGuardTransform(
     override fun isIncremental(): Boolean = false
 
     override fun applyToVariant(variant: VariantInfo?): Boolean =
-            variant?.let { proguardBlock.configurations.findVariantConfiguration(it) } != null
+        variant?.let { proguardBlock.configurations.findVariantConfiguration(it) } != null
 
     override fun getSecondaryFiles(): MutableCollection<SecondaryFile> =
-            proguardBlock
+        proguardBlock
             .configurations
             .flatMap { it.configurations }
             .filterIsInstance<UserProGuardConfiguration>()
@@ -126,13 +131,16 @@ class ProGuardTransform(
 
     private fun createIOEntries(
         inputs: Collection<TransformInput>,
-        outputProvider: TransformOutputProvider
+        outputProvider: TransformOutputProvider,
     ): List<ProGuardIOEntry> {
-
-        fun createEntry(input: QualifiedContent, format: Format): ProGuardIOEntry {
+        fun createEntry(
+            input: QualifiedContent,
+            format: Format,
+        ): ProGuardIOEntry {
             return ProGuardIOEntry(
-                    input.file,
-                    outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, format).canonicalFile)
+                input.file,
+                outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, format).canonicalFile,
+            )
         }
 
         return inputs.flatMap { input ->
@@ -143,13 +151,14 @@ class ProGuardTransform(
     private fun createLibraryJars(inputs: Collection<TransformInput>): List<File> =
         inputs.flatMap { input -> input.directoryInputs.map { it.file } + input.jarInputs.map { it.file } } +
 
-                listOf(androidExtension.sdkDirectory.resolve("platforms/${androidExtension.compileSdkVersion}/android.jar")) +
+            listOf(androidExtension.sdkDirectory.resolve("platforms/${androidExtension.compileSdkVersion}/android.jar")) +
 
-                androidExtension.libraryRequests.map {
-                    androidExtension.sdkDirectory.resolve("platforms/${androidExtension.compileSdkVersion}/optional/${it.name}.jar")
-                }
+            androidExtension.libraryRequests.map {
+                androidExtension.sdkDirectory.resolve("platforms/${androidExtension.compileSdkVersion}/optional/${it.name}.jar")
+            }
 
-    private fun getAaptRulesFile() = androidExtension.aaptAdditionalParameters
+    private fun getAaptRulesFile() =
+        androidExtension.aaptAdditionalParameters
             .zipWithNext { cmd, param -> if (cmd == "--proguard") param else null }
             .filterNotNull()
             .firstOrNull { File(it).exists() }

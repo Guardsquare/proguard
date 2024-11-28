@@ -29,37 +29,39 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     //               with existing optimizations.
 
     "Given a Kotlin function with ContextReceivers" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Unused {
-                    fun info(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Unused {
+                        fun info(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun used(message: String) { }
-                }
+                    
+                    class Used {
+                        fun used(message: String) { }
+                    }
 
-                context(Used, Unused)
-                fun String.foo() {
-                    used(this) 
-                } 
-                
-                fun main() {
-                  with (Unused()) { with (Used()) { "test".foo() } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    context(Used, Unused)
+                    fun String.foo() {
+                        used(this) 
+                    } 
+                    
+                    fun main() {
+                      with (Unused()) { with (Used()) { "test".foo() } }
+                    }
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -72,38 +74,40 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 
     "Given a Kotlin function with default parameters with ContextReceivers" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Unused {
-                    fun info(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Unused {
+                        fun info(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun bar(message: String) { }
-                }
+                    
+                    class Used {
+                        fun bar(message: String) { }
+                    }
 
-                context(Used, Unused)
-                fun String.foo(message: String = "test") {
-                    println(this) // use the String receiver
-                    bar(message) 
-                } 
+                    context(Used, Unused)
+                    fun String.foo(message: String = "test") {
+                        println(this) // use the String receiver
+                        bar(message) 
+                    } 
 
-                fun main() {
-                  with (Unused()) { with (Used()) { "test".foo() } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    fun main() {
+                      with (Unused()) { with (Used()) { "test".foo() } }
+                    }
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -117,40 +121,42 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 
     "Given a Kotlin property with ContextReceivers used in the getter" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Unused {
-                    fun info(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Unused {
+                        fun info(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun barfo(message: String) { }
-                }
+                    
+                    class Used {
+                        fun barfo(message: String) { }
+                    }
 
-                context(Used, Unused)
-                val String.property: String
-                    get() {
-                        println(this)
-                        barfo("bar") 
-                        return "test"
-                    } 
-                
-                fun main() {
-                  with (Unused()) { with (Used()) { "test".property } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    context(Used, Unused)
+                    val String.property: String
+                        get() {
+                            println(this)
+                            barfo("bar") 
+                            return "test"
+                        } 
+                    
+                    fun main() {
+                      with (Unused()) { with (Used()) { "test".property } }
+                    }
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -163,44 +169,46 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 
     "Given a Kotlin property with a single ContextReceivers used both in the getter and setter" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Used2 {
-                    fun used2(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Used2 {
+                        fun used2(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun used(message: String) { }
-                }
+                    
+                    class Used {
+                        fun used(message: String) { }
+                    }
 
-                context(Used, Used2)
-                var String.property: String
-                    set(value) {
-                        used(value)
-                        used2(value)
+                    context(Used, Used2)
+                    var String.property: String
+                        set(value) {
+                            used(value)
+                            used2(value)
+                        }
+                        get() {
+                            used("bar") 
+                            used2(this)
+                            return "test"
+                        } 
+                    
+                    fun main() {
+                      with (Used2()) { with (Used()) { "test".property } }
                     }
-                    get() {
-                        used("bar") 
-                        used2(this)
-                        return "test"
-                    } 
-                
-                fun main() {
-                  with (Used2()) { with (Used()) { "test".property } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -213,41 +221,43 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 
     "Given a Kotlin property with a single ContextReceivers used in only the setter" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Used2 {
-                    fun used2(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Used2 {
+                        fun used2(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun used(message: String) { }
-                }
+                    
+                    class Used {
+                        fun used(message: String) { }
+                    }
 
-                context(Used, Used2)
-                var String.property: String
-                    set(value) {
-                        used2(value)
+                    context(Used, Used2)
+                    var String.property: String
+                        set(value) {
+                            used2(value)
+                        }
+                        get() {
+                            return "test"
+                        } 
+                    
+                    fun main() {
+                      with (Used2()) { with (Used()) { "test".property } }
                     }
-                    get() {
-                        return "test"
-                    } 
-                
-                fun main() {
-                  with (Used2()) { with (Used()) { "test".property } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -258,40 +268,42 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
         verifyParameters(testKt, "get*,set*", p1 = "LUsed;", p2 = "LUsed2;")
     }
     "Given a Kotlin property with ContextReceivers used in only the getter but also containing a setter" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Unused {
-                    fun info(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Unused {
+                        fun info(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun used(message: String) { }
-                }
+                    
+                    class Used {
+                        fun used(message: String) { }
+                    }
 
-                context(Used, Unused)
-                var String.property: String
-                    set(value) { }
-                    get() {
-                        used(this) 
-                        return "test"
-                    } 
-                
-                fun main() {
-                  with (Unused()) { with (Used()) { "test".property } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    context(Used, Unused)
+                    var String.property: String
+                        set(value) { }
+                        get() {
+                            used(this) 
+                            return "test"
+                        } 
+                    
+                    fun main() {
+                      with (Unused()) { with (Used()) { "test".property } }
+                    }
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -303,30 +315,32 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 
     "Given a Kotlin property with ContextReceivers with no getter or setter" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Unused1
-                class Unused2
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Unused1
+                    class Unused2
 
-                class ClassWithProperty {
-                    context(Unused1, Unused2)
-                    val property: String by lazy { "foo" }
-                }
-                
-                fun main() {
-                  with (Unused2()) { with (Unused1()) { ClassWithProperty().property } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    class ClassWithProperty {
+                        context(Unused1, Unused2)
+                        val property: String by lazy { "foo" }
+                    }
+                    
+                    fun main() {
+                      with (Unused2()) { with (Unused1()) { ClassWithProperty().property } }
+                    }
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         val classWithProperty = programClassPool.getClass("ClassWithProperty")
 
@@ -339,39 +353,41 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 
     "Given a Kotlin class with ContextReceivers" {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Unused {
-                    fun info(message: String) {
-                      println(message)
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Unused {
+                        fun info(message: String) {
+                          println(message)
+                        }
                     }
-                }
-                
-                class Used {
-                    fun barfo(message: String) { }
-                }
+                    
+                    class Used {
+                        fun barfo(message: String) { }
+                    }
 
-                context(Used, Unused)
-                class MyClass {
-                    fun foo() {
-                        barfo("test")
+                    context(Used, Unused)
+                    class MyClass {
+                        fun foo() {
+                            barfo("test")
+                        } 
                     } 
-                } 
-                
-                fun main() {
-                  with (Unused()) { with (Used()) { MyClass().foo() } }
-                }
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf(
-                "-Xcontext-receivers",
-                // Disable generation of instrinsics null checks
-                // In real world use-cases, -assumenosideeffects might be used
-                "-Xno-param-assertions"
+                    
+                    fun main() {
+                      with (Unused()) { with (Used()) { MyClass().foo() } }
+                    }
+                    """.trimIndent(),
+                ),
+                kotlincArguments =
+                    listOf(
+                        "-Xcontext-receivers",
+                        // Disable generation of instrinsics null checks
+                        // In real world use-cases, -assumenosideeffects might be used
+                        "-Xno-param-assertions",
+                    ),
             )
-        )
 
         optimize(programClassPool, libraryClassPool)
 
@@ -384,7 +400,12 @@ class KotlinContextReceiverParameterShrinkingTest : StringSpec({
     }
 })
 
-private fun verifyParameters(testKt: Clazz, s: String, p1: String = "LUsed;", p2: String = "LUnused;") {
+private fun verifyParameters(
+    testKt: Clazz,
+    s: String,
+    p1: String = "LUsed;",
+    p2: String = "LUnused;",
+) {
     val parameterVisitor = spyk<ParameterVisitor>()
     testKt.methodsAccept(MemberNameFilter(s, AllParameterVisitor(false, parameterVisitor)))
     verify {
@@ -398,7 +419,7 @@ private fun verifyParameters(testKt: Clazz, s: String, p1: String = "LUsed;", p2
             withArg {
                 it shouldBe p1
             },
-            ofType<Clazz>()
+            ofType<Clazz>(),
         )
 
         parameterVisitor.visitParameter(
@@ -411,13 +432,17 @@ private fun verifyParameters(testKt: Clazz, s: String, p1: String = "LUsed;", p2
             withArg {
                 it shouldBe p2
             },
-            ofType<Clazz>()
+            ofType<Clazz>(),
         )
     }
 }
 
-private fun optimize(programClassPool: ClassPool, libraryClassPool: ClassPool) {
-    val config = """
+private fun optimize(
+    programClassPool: ClassPool,
+    libraryClassPool: ClassPool,
+) {
+    val config =
+        """
         -keep,allowoptimization,allowshrinking class TestKt,ClassWithProperty,MyClass { *; }
         -optimizations **
     """.asConfiguration()

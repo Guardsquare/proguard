@@ -3,9 +3,9 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id 'com.github.johnrengelman.shadow'
     id 'java-gradle-plugin'
-    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+    id 'org.jetbrains.kotlin.jvm'
     id 'maven-publish'
-    id 'org.jlleitschuh.gradle.ktlint' version '9.2.1'
+    id 'org.jlleitschuh.gradle.ktlint' version '12.1.2'
 }
 
 repositories {
@@ -43,22 +43,22 @@ dependencies {
         exclude module: 'proguard-gradle'
         exclude module: 'proguard-base'
     }
-    implementation 'com.github.zafarkhaja:java-semver:0.9.0'
+    implementation 'com.github.zafarkhaja:java-semver:0.10.2'
     testCompileOnly ("com.android.tools.build:gradle:$agpVersion") {
         exclude module: 'proguard-gradle'
         exclude module: 'proguard-base'
     }
 
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.9.0' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.9.0' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.9.0' // for kotest property test
-    testImplementation 'io.mockk:mockk:1.13.11' // for mocking
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.9.1' // for kotest framework
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.9.1' // for kotest core jvm assertions
+    testImplementation 'io.kotest:kotest-property-jvm:5.9.1' // for kotest property test
+    testImplementation 'io.mockk:mockk:1.13.13' // for mocking
 
-    testImplementation "commons-io:commons-io:2.8.0"
+    testImplementation "commons-io:commons-io:2.18.0"
 
     fatJar project(":base")
     // This library is used to parse the android gradle plugin version at runtime.
-    fatJar 'com.github.zafarkhaja:java-semver:0.9.0'
+    fatJar 'com.github.zafarkhaja:java-semver:0.10.2'
 }
 
 test {

@@ -11,9 +11,11 @@ class TestPluginClasspath {
          */
         fun applyToRootGradle(projectDir: File) {
             val buildGradle = File(projectDir, "build.gradle")
-            buildGradle.writeText(buildGradle.readText()
-                .replace(Regex("(?ms)buildscript\\s+\\{.*?^}"), "")
-                .replace("id 'java'", "id 'java'\n    id 'com.guardsquare.proguard' apply false"))
+            buildGradle.writeText(
+                buildGradle.readText()
+                    .replace(Regex("(?ms)buildscript\\s+\\{.*?^}"), "")
+                    .replace("id 'java'", "id 'java'\n    id 'com.guardsquare.proguard' apply false"),
+            )
         }
 
         /**
@@ -23,9 +25,11 @@ class TestPluginClasspath {
          */
         fun applyToRootGradleKts(projectDir: File) {
             val buildGradle = File(projectDir, "build.gradle.kts")
-            buildGradle.writeText(buildGradle.readText()
-                .replace(Regex("(?ms)buildscript\\s+\\{.*?^}"), "")
-                .replaceFirst("java", "java\n    id(\"com.guardsquare.proguard\").apply(false)"))
+            buildGradle.writeText(
+                buildGradle.readText()
+                    .replace(Regex("(?ms)buildscript\\s+\\{.*?^}"), "")
+                    .replaceFirst("java", "java\n    id(\"com.guardsquare.proguard\").apply(false)"),
+            )
         }
     }
 }

@@ -7,9 +7,9 @@
 
 package testutils
 
+import org.intellij.lang.annotations.Language
 import java.io.File
 import java.nio.file.Files.createTempDirectory
-import org.intellij.lang.annotations.Language
 
 interface ProjectFile {
     val path: String
@@ -44,20 +44,25 @@ fun androidModule(
     buildDotGradle: String,
     androidManifest: String,
     javaSources: Map<String, String>,
-    additionalFiles: List<ProjectFile>
-) = Module(name, additionalFiles + listOf(
-        SourceFile("build.gradle", buildDotGradle),
-        SourceFile("src/main/AndroidManifest.xml", androidManifest)) +
+    additionalFiles: List<ProjectFile>,
+) = Module(
+    name,
+    additionalFiles +
+        listOf(
+            SourceFile("build.gradle", buildDotGradle),
+            SourceFile("src/main/AndroidManifest.xml", androidManifest),
+        ) +
         javaSources.map { (k, v) ->
             SourceFile("src/main/java/$k", v)
-        })
+        },
+)
 
 fun libraryModule(
     name: String,
     @Language("Groovy") buildDotGradle: String = defaultBuildDotGradle(ProjectType.LIBRARY),
     @Language("xml") androidManifest: String = defaultAndroidLibraryManifest,
     javaSources: Map<String, String> = defaultLibrarySources,
-    additionalFiles: List<ProjectFile> = emptyList()
+    additionalFiles: List<ProjectFile> = emptyList(),
 ) = androidModule(name, buildDotGradle, androidManifest, javaSources, additionalFiles)
 
 fun applicationModule(
@@ -65,7 +70,7 @@ fun applicationModule(
     @Language("Groovy") buildDotGradle: String = defaultBuildDotGradle(ProjectType.APPLICATION),
     @Language("xml") androidManifest: String = defaultAndroidApplicationManifest,
     javaSources: Map<String, String> = defaultApplicationSources,
-    additionalFiles: List<ProjectFile> = emptyList()
+    additionalFiles: List<ProjectFile> = emptyList(),
 ) = androidModule(name, buildDotGradle, androidManifest, javaSources, additionalFiles)
 
 fun baseFeatureModule(
@@ -73,7 +78,7 @@ fun baseFeatureModule(
     @Language("Groovy") buildDotGradle: String = defaultBaseFeatureBuildDotGradle,
     @Language("xml") androidManifest: String = defaultAndroidApplicationManifest,
     javaSources: Map<String, String> = defaultApplicationSources,
-    additionalFiles: List<ProjectFile> = defaultBaseFeatureAdditionalFiles
+    additionalFiles: List<ProjectFile> = defaultBaseFeatureAdditionalFiles,
 ) = androidModule(name, buildDotGradle, androidManifest, javaSources, additionalFiles)
 
 fun dynamicFeatureModule(
@@ -81,22 +86,27 @@ fun dynamicFeatureModule(
     @Language("Groovy") buildDotGradle: String = defaultDynamicFeatureBuildDotGradle,
     @Language("xml") androidManifest: String = defaultDynamicFeatureManifest,
     javaSources: Map<String, String> = defaultDynamicFeatureSources,
-    additionalFiles: List<ProjectFile> = emptyList()
+    additionalFiles: List<ProjectFile> = emptyList(),
 ) = androidModule(name, buildDotGradle, androidManifest, javaSources, additionalFiles)
 
 fun jarModule(
     name: String,
     @Language("Groovy") buildDotGradle: String = defaultJarBuildDotGradle,
     javaSources: Map<String, String> = defaultJarSources,
-    additionalFiles: List<ProjectFile> = emptyList()
-) = Module(name, additionalFiles + listOf(
-        SourceFile("build.gradle", buildDotGradle)) +
-        javaSources.map { (k, v) -> SourceFile("src/main/java/$k", v) })
+    additionalFiles: List<ProjectFile> = emptyList(),
+) = Module(
+    name,
+    additionalFiles +
+        listOf(
+            SourceFile("build.gradle", buildDotGradle),
+        ) +
+        javaSources.map { (k, v) -> SourceFile("src/main/java/$k", v) },
+)
 
 class AndroidProject(
     @Language("Groovy") val buildDotGradle: String = defaultRootBuildDotGradle,
     @Language("Groovy") private val overrideSettingsDotGradle: String? = null,
-    private val gradleDotProperties: String? = null
+    private val gradleDotProperties: String? = null,
 ) : AutoCloseable {
     val rootDir: File = createTempDirectory("proguard-gradle").toFile()
     private val modules = mutableListOf<Module>()
@@ -110,9 +120,10 @@ class AndroidProject(
 
     fun module(name: String): Module? = modules.find { it.name == name }
 
-    fun moduleBuildDir(name: String): File? = with(module(name)) {
-        if (this != null) File(rootDir, "${this.name}/build") else null
-    }
+    fun moduleBuildDir(name: String): File? =
+        with(module(name)) {
+            if (this != null) File(rootDir, "${this.name}/build") else null
+        }
 
     fun create(): AndroidProject {
         rootDir.mkdirs()
@@ -139,10 +150,10 @@ class AndroidProject(
     }
 }
 
-fun defaultSettingsDotGradle(modules: List<Module>) =
-        modules.joinToString(prefix = "include ") { "'${it.projectPath}'" }
+fun defaultSettingsDotGradle(modules: List<Module>) = modules.joinToString(prefix = "include ") { "'${it.projectPath}'" }
 
-private val defaultRootBuildDotGradle = """
+private val defaultRootBuildDotGradle =
+    """
     buildscript {
         repositories {
             mavenCentral() // For anything else.
@@ -162,15 +173,16 @@ private val defaultRootBuildDotGradle = """
             mavenCentral()
         }
     }
-""".trimIndent()
+    """.trimIndent()
 
 enum class ProjectType(val plugin: String) {
     APPLICATION("com.android.application"),
     DYNAMIC_FEATURE("com.android.dynamic-feature"),
-    LIBRARY("com.android.library")
+    LIBRARY("com.android.library"),
 }
 
-private fun defaultBuildDotGradle(type: ProjectType) = """
+private fun defaultBuildDotGradle(type: ProjectType) =
+    """
     plugins {
         id '${type.plugin}'
         id 'com.guardsquare.proguard'
@@ -187,9 +199,10 @@ private fun defaultBuildDotGradle(type: ProjectType) = """
             debug {}
         }
     }
-""".trimIndent()
+    """.trimIndent()
 
-private val defaultBaseFeatureBuildDotGradle = """
+private val defaultBaseFeatureBuildDotGradle =
+    """
     plugins {
         id 'com.android.application'
         id 'com.guardsquare.proguard'
@@ -207,9 +220,10 @@ private val defaultBaseFeatureBuildDotGradle = """
         }
         dynamicFeatures = [':feature']
     }
-""".trimIndent()
+    """.trimIndent()
 
-private val defaultDynamicFeatureBuildDotGradle = """
+private val defaultDynamicFeatureBuildDotGradle =
+    """
     plugins {
         id 'com.android.dynamic-feature'
         id 'com.guardsquare.proguard'
@@ -228,31 +242,34 @@ private val defaultDynamicFeatureBuildDotGradle = """
     dependencies {
         implementation project(':app')
     }
-""".trimIndent()
+    """.trimIndent()
 
-private val defaultJarBuildDotGradle = """
+private val defaultJarBuildDotGradle =
+    """
     plugins {
         id 'java-library'
     }
-""".trimIndent()
-
-private val defaultAndroidApplicationManifest = """
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                  package="com.example.app">
-            <application android:label="Sample">
-                <activity android:name="MainActivity"
-                          android:label="Sample">
-                    <intent-filter>
-                        <action   android:name="android.intent.action.MAIN"       />
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>
     """.trimIndent()
 
-private val defaultDynamicFeatureManifest = """
+private val defaultAndroidApplicationManifest =
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="com.example.app">
+        <application android:label="Sample">
+            <activity android:name="MainActivity"
+                      android:label="Sample">
+                <intent-filter>
+                    <action   android:name="android.intent.action.MAIN"       />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+            </activity>
+        </application>
+    </manifest>
+    """.trimIndent()
+
+private val defaultDynamicFeatureManifest =
+    """
     <?xml version="1.0" encoding="utf-8"?>
     <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:dist="http://schemas.android.com/apk/distribution"
@@ -269,65 +286,74 @@ private val defaultDynamicFeatureManifest = """
             </activity>
         </application>
     </manifest>
-""".trimIndent()
-
-private val defaultAndroidLibraryManifest = """
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                  package="com.example.lib">
-        </manifest>
     """.trimIndent()
 
-private val defaultApplicationSources = mutableMapOf(
-        "com/example/app/MainActivity.java" to """
-        package com.example.app;
+private val defaultAndroidLibraryManifest =
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="com.example.lib">
+    </manifest>
+    """.trimIndent()
 
-        import android.app.Activity;
-        import android.os.Bundle;
-        import android.view.Gravity;
-        import android.widget.*;
+private val defaultApplicationSources =
+    mutableMapOf(
+        "com/example/app/MainActivity.java" to
+            """
+            package com.example.app;
 
-        public class MainActivity extends Activity
-        {
-            @Override
-            public void onCreate(Bundle savedInstanceState)
-            {
-                super.onCreate(savedInstanceState);
-
-                TextView view = new TextView(this);
-                view.setText("Hello World!");
-                view.setGravity(Gravity.CENTER);
-                setContentView(view);
-            }
-        }
-    """.trimIndent())
-
-private val defaultDynamicFeatureSources = mutableMapOf(
-        "com/example/feature/FeatureActivity.java" to """
-            package com.example.feature;
-            
             import android.app.Activity;
             import android.os.Bundle;
             import android.view.Gravity;
             import android.widget.*;
-    
-            public class FeatureActivity extends Activity
+
+            public class MainActivity extends Activity
             {
                 @Override
                 public void onCreate(Bundle savedInstanceState)
                 {
                     super.onCreate(savedInstanceState);
-    
+
                     TextView view = new TextView(this);
                     view.setText("Hello World!");
                     view.setGravity(Gravity.CENTER);
                     setContentView(view);
                 }
             }
-        """.trimIndent())
+            """.trimIndent(),
+    )
 
-private val defaultLibrarySources = mutableMapOf(
-        "com/example/lib/LibraryClass.java" to """
+private val defaultDynamicFeatureSources =
+    mutableMapOf(
+        "com/example/feature/FeatureActivity.java" to
+            """
+            package com.example.feature;
+            
+            import android.app.Activity;
+            import android.os.Bundle;
+            import android.view.Gravity;
+            import android.widget.*;
+            
+            public class FeatureActivity extends Activity
+            {
+                @Override
+                public void onCreate(Bundle savedInstanceState)
+                {
+                    super.onCreate(savedInstanceState);
+            
+                    TextView view = new TextView(this);
+                    view.setText("Hello World!");
+                    view.setGravity(Gravity.CENTER);
+                    setContentView(view);
+                }
+            }
+            """.trimIndent(),
+    )
+
+private val defaultLibrarySources =
+    mutableMapOf(
+        "com/example/lib/LibraryClass.java" to
+            """
             package com.example.lib;
 
             public class LibraryClass
@@ -337,11 +363,13 @@ private val defaultLibrarySources = mutableMapOf(
                     return "Hello World!";
                 }
             }
-        """.trimIndent()
-)
+            """.trimIndent(),
+    )
 
-private val defaultJarSources = mutableMapOf(
-        "com/example/jar/JarClass.java" to """
+private val defaultJarSources =
+    mutableMapOf(
+        "com/example/jar/JarClass.java" to
+            """
             package com.example.jar;
 
             public class JarClass
@@ -351,24 +379,32 @@ private val defaultJarSources = mutableMapOf(
                     return "Hello World!";
                 }
             }
-        """.trimIndent()
-)
+            """.trimIndent(),
+    )
 
-val defaultBaseFeatureAdditionalFiles = listOf(
-        SourceFile("src/main/res/values/module_names.xml", """
+val defaultBaseFeatureAdditionalFiles =
+    listOf(
+        SourceFile(
+            "src/main/res/values/module_names.xml",
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
                 <string name="feature_name">dynamic-feature</string>
             </resources>
-        """.trimIndent())
-)
+            """.trimIndent(),
+        ),
+    )
 
-val defaultGoogleServicesResourceFiles = listOf(
-        SourceFile("src/main/res/values/strings.xml", """
+val defaultGoogleServicesResourceFiles =
+    listOf(
+        SourceFile(
+            "src/main/res/values/strings.xml",
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
                 <!-- This API key matches the com.example package --> 
                 <string name="google_app_id">1:260040693598:android:2009aac2b4e342544221cf</string>
             </resources>
-        """.trimIndent())
-)
+            """.trimIndent(),
+        ),
+    )

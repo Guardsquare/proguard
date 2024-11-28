@@ -29,7 +29,6 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.github.zafarkhaja.semver.Version
-import java.io.File
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -48,45 +47,50 @@ import proguard.gradle.plugin.android.tasks.ConsumerRuleFilterEntry
 import proguard.gradle.plugin.android.tasks.PrepareProguardConfigDirectoryTask
 import proguard.gradle.plugin.android.transforms.AndroidConsumerRulesTransform
 import proguard.gradle.plugin.android.transforms.ArchiveConsumerRulesTransform
+import java.io.File
 
 class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Project> {
-
     override fun apply(project: Project) {
         val collectConsumerRulesTask = project.tasks.register(COLLECT_CONSUMER_RULES_TASK_NAME)
         registerDependencyTransforms(project)
         val proguardBlock = project.extensions.create<ProGuardAndroidExtension>("proguard", ProGuardAndroidExtension::class.java, project)
 
-        val projectType = when (androidExtension) {
-            is AppExtension -> ANDROID_APPLICATION
-            is LibraryExtension -> ANDROID_LIBRARY
-            else -> throw GradleException("The ProGuard Gradle plugin can only be used on Android application and library projects")
-        }
+        val projectType =
+            when (androidExtension) {
+                is AppExtension -> ANDROID_APPLICATION
+                is LibraryExtension -> ANDROID_LIBRARY
+                else -> throw GradleException("The ProGuard Gradle plugin can only be used on Android application and library projects")
+            }
 
         configureAapt(project)
 
         warnOldProguardVersion(project)
 
         androidExtension.registerTransform(
-                ProGuardTransform(project, proguardBlock, projectType, androidExtension),
-                collectConsumerRulesTask)
+            ProGuardTransform(project, proguardBlock, projectType, androidExtension),
+            collectConsumerRulesTask,
+        )
 
         project.afterEvaluate {
-            if (proguardBlock.configurations.isEmpty())
+            if (proguardBlock.configurations.isEmpty()) {
                 throw GradleException("There are no configured variants in the 'proguard' block")
+            }
 
             val matchedConfigurations = mutableListOf<VariantConfiguration>()
 
             when (androidExtension) {
-                is AppExtension -> androidExtension.applicationVariants.all { applicationVariant ->
-                    setupVariant(proguardBlock, applicationVariant, collectConsumerRulesTask, project)?.let {
-                        matchedConfigurations.add(it)
+                is AppExtension ->
+                    androidExtension.applicationVariants.all { applicationVariant ->
+                        setupVariant(proguardBlock, applicationVariant, collectConsumerRulesTask, project)?.let {
+                            matchedConfigurations.add(it)
+                        }
                     }
-                }
-                is LibraryExtension -> androidExtension.libraryVariants.all { libraryVariant ->
-                    setupVariant(proguardBlock, libraryVariant, collectConsumerRulesTask, project)?.let {
-                        matchedConfigurations.add(it)
+                is LibraryExtension ->
+                    androidExtension.libraryVariants.all { libraryVariant ->
+                        setupVariant(proguardBlock, libraryVariant, collectConsumerRulesTask, project)?.let {
+                            matchedConfigurations.add(it)
+                        }
                     }
-                }
             }
 
             proguardBlock.configurations.forEach {
@@ -94,9 +98,17 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             }
 
             (proguardBlock.configurations - matchedConfigurations).apply {
-                if (isNotEmpty()) when (size) {
-                    1 -> throw GradleException("The configured variant '${first().name}' does not exist")
-                    else -> throw GradleException("The configured variants ${joinToString(separator = "', '", prefix = "'", postfix = "'") { it.name }} do not exist")
+                if (isNotEmpty()) {
+                    when (size) {
+                        1 -> throw GradleException("The configured variant '${first().name}' does not exist")
+                        else -> throw GradleException(
+                            "The configured variants ${joinToString(
+                                separator = "', '",
+                                prefix = "'",
+                                postfix = "'",
+                            ) { it.name }} do not exist",
+                        )
+                    }
                 }
             }
         }
@@ -108,9 +120,11 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             it.dependsOn(createDirectoryTask)
         }
         if (!androidExtension.aaptAdditionalParameters.contains("--proguard")) {
-            androidExtension.aaptAdditionalParameters.addAll(listOf(
+            androidExtension.aaptAdditionalParameters.addAll(
+                listOf(
                     "--proguard",
-                    project.buildDir.resolve("intermediates/proguard/configs/aapt_rules.pro").absolutePath)
+                    project.buildDir.resolve("intermediates/proguard/configs/aapt_rules.pro").absolutePath,
+                ),
             )
         }
 
@@ -119,18 +133,26 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         }
     }
 
-    private fun setupVariant(proguardBlock: ProGuardAndroidExtension, variant: BaseVariant, collectConsumerRulesTask: TaskProvider<Task>, project: Project): VariantConfiguration? {
+    private fun setupVariant(
+        proguardBlock: ProGuardAndroidExtension,
+        variant: BaseVariant,
+        collectConsumerRulesTask: TaskProvider<Task>,
+        project: Project,
+    ): VariantConfiguration? {
         val matchingConfiguration = proguardBlock.configurations.findVariantConfiguration(variant.name)
         if (matchingConfiguration != null) {
             verifyNotMinified(variant)
             disableAaptOutputCaching(project, variant)
 
-            collectConsumerRulesTask.dependsOn(createCollectConsumerRulesTask(
+            collectConsumerRulesTask.dependsOn(
+                createCollectConsumerRulesTask(
                     project,
                     variant,
                     createConsumerRulesConfiguration(project, variant),
                     matchingConfiguration.consumerRuleFilter,
-                    project.buildDir.resolve("intermediates/proguard/configs")))
+                    project.buildDir.resolve("intermediates/proguard/configs"),
+                ),
+            )
         }
         return matchingConfiguration
     }
@@ -140,9 +162,8 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         variant: BaseVariant,
         inputConfiguration: Configuration,
         consumerRuleFilter: MutableList<String>,
-        outputDir: File
+        outputDir: File,
     ): TaskProvider<CollectConsumerRulesTask> {
-
         fun parseConsumerRuleFilter(consumerRuleFilter: List<String>) =
             consumerRuleFilter.map { filter ->
                 val splits = filter.split(':')
@@ -160,7 +181,10 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
         }
     }
 
-    private fun createConsumerRulesConfiguration(project: Project, variant: BaseVariant): Configuration =
+    private fun createConsumerRulesConfiguration(
+        project: Project,
+        variant: BaseVariant,
+    ): Configuration =
         project.configurations.create("${variant.name}ProGuardConsumerRulesArtifacts") {
             it.isCanBeResolved = true
             it.isCanBeConsumed = false
@@ -172,7 +196,10 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
             it.attributes.attribute(ATTRIBUTE_ARTIFACT_TYPE, ARTIFACT_TYPE_CONSUMER_RULES)
         }
 
-    private fun checkConfigurationFile(project: Project, files: List<ProGuardConfiguration>) {
+    private fun checkConfigurationFile(
+        project: Project,
+        files: List<ProGuardConfiguration>,
+    ) {
         files.filterIsInstance<UserProGuardConfiguration>().forEach {
             val file = project.file(it.path)
             if (!file.exists()) throw GradleException("ProGuard configuration file ${file.absolutePath} was set but does not exist.")
@@ -182,11 +209,16 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
     private fun verifyNotMinified(variant: BaseVariant) {
         if (variant.buildType.isMinifyEnabled) {
             throw GradleException(
-                    "The option 'minifyEnabled' is set to 'true' for variant '${variant.name}', but should be 'false' for variants processed by ProGuard")
+                "The option 'minifyEnabled' is set to 'true' for variant '${variant.name}', but should be 'false' " +
+                    "for variants processed by ProGuard",
+            )
         }
     }
 
-    private fun copyConfigurationAttributes(destConfiguration: Configuration, srcConfiguration: Configuration) {
+    private fun copyConfigurationAttributes(
+        destConfiguration: Configuration,
+        srcConfiguration: Configuration,
+    ) {
         srcConfiguration.attributes.keySet().forEach { attribute ->
             val attributeValue = srcConfiguration.attributes.getAttribute(attribute)
             destConfiguration.attributes.attribute(attribute as Attribute<Any>, attributeValue)
@@ -209,8 +241,12 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
     }
 
     // TODO: improve loading AAPT rules so that we don't rely on this
-    private fun disableAaptOutputCaching(project: Project, variant: BaseVariant) {
-        val cachingEnabled = project.hasProperty("org.gradle.caching") &&
+    private fun disableAaptOutputCaching(
+        project: Project,
+        variant: BaseVariant,
+    ) {
+        val cachingEnabled =
+            project.hasProperty("org.gradle.caching") &&
                 (project.findProperty("org.gradle.caching") as String).toBoolean()
 
         if (cachingEnabled) {
@@ -271,7 +307,7 @@ buildscript {
 
 enum class AndroidProjectType {
     ANDROID_APPLICATION,
-    ANDROID_LIBRARY;
+    ANDROID_LIBRARY,
 }
 
 fun Iterable<VariantConfiguration>.findVariantConfiguration(variant: VariantInfo) =
@@ -280,8 +316,7 @@ fun Iterable<VariantConfiguration>.findVariantConfiguration(variant: VariantInfo
 fun Iterable<VariantConfiguration>.findVariantConfiguration(variantName: String) =
     find { it.name == variantName } ?: find { variantName.endsWith(it.name.capitalize()) }
 
-fun Iterable<VariantConfiguration>.hasVariantConfiguration(variantName: String) =
-        this.findVariantConfiguration(variantName) != null
+fun Iterable<VariantConfiguration>.hasVariantConfiguration(variantName: String) = this.findVariantConfiguration(variantName) != null
 
 val agpVersion: Version = Version.valueOf(com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION)
 

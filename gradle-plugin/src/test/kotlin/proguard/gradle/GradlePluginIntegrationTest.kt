@@ -26,13 +26,13 @@ import io.kotest.core.spec.style.funSpec
 import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import java.io.File
-import java.lang.management.ManagementFactory
 import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.TestPluginClasspath
+import java.io.File
+import java.lang.management.ManagementFactory
 
 class GradlePluginIntegrationTest : FreeSpec({
     "Gradle plugin can be applied to spring-boot sample" - {
@@ -42,13 +42,14 @@ class GradlePluginIntegrationTest : FreeSpec({
         TestPluginClasspath.applyToRootGradle(projectRoot)
 
         "When the build is executed" - {
-            val result = GradleRunner.create()
-                .forwardOutput()
-                .withArguments("proguard")
-                .withPluginClasspath()
-                .withGradleVersion("7.4")
-                .withProjectDir(projectRoot)
-                .build()
+            val result =
+                GradleRunner.create()
+                    .forwardOutput()
+                    .withArguments("proguard")
+                    .withPluginClasspath()
+                    .withGradleVersion("7.4")
+                    .withProjectDir(projectRoot)
+                    .build()
 
             "Then the build was successful" {
                 result.output shouldContain "SUCCESSFUL"
@@ -63,15 +64,16 @@ class GradlePluginIntegrationTest : FreeSpec({
         TestPluginClasspath.applyToRootGradle(projectRoot)
 
         "When the build is executed" - {
-            val result = GradleRunner.create()
-                .forwardOutput()
-                .withArguments("proguard", "--configuration-cache")
-                .withPluginClasspath()
-                .withGradleVersion("7.4")
-                .withProjectDir(projectRoot)
-                // Ensure this value is true when `--debug-jvm` is passed to Gradle, and false otherwise
-                .withDebug(ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0)
-                .build()
+            val result =
+                GradleRunner.create()
+                    .forwardOutput()
+                    .withArguments("proguard", "--configuration-cache")
+                    .withPluginClasspath()
+                    .withGradleVersion("7.4")
+                    .withProjectDir(projectRoot)
+                    // Ensure this value is true when `--debug-jvm` is passed to Gradle, and false otherwise
+                    .withDebug(ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0)
+                    .build()
 
             "Then the build was successful with configuration cache" {
                 result.output shouldContain "SUCCESSFUL"
@@ -87,43 +89,51 @@ class GradlePluginIntegrationTest : FreeSpec({
     }
 })
 
-fun testConfigOption(task: String) = funSpec {
-    fun runBuild(projectRoot: File, vararg tasks: String): BuildResult? =
+fun testConfigOption(task: String) =
+    funSpec {
+        fun runBuild(
+            projectRoot: File,
+            vararg tasks: String,
+        ): BuildResult? =
             GradleRunner.create()
-                    .forwardOutput()
-                    .withArguments(tasks.asList())
-                    .withGradleVersion("7.4")
-                    .withPluginClasspath()
-                    .withProjectDir(projectRoot)
-                    .build()
+                .forwardOutput()
+                .withArguments(tasks.asList())
+                .withPluginClasspath()
+                .withProjectDir(projectRoot)
+                .build()
 
-    fun succeeds(buildResult: BuildResult?, projectRoot: File, task: String, outcome: TaskOutcome = TaskOutcome.SUCCESS) {
-        buildResult?.output shouldContain "SUCCESSFUL"
-        buildResult?.task(":$task")?.outcome shouldBe outcome
-        File(projectRoot, "build/$task-obfuscated.jar").isFile shouldBe true
-        File(projectRoot, "build/$task-mapping.txt").isFile shouldBe true
+        fun succeeds(
+            buildResult: BuildResult?,
+            projectRoot: File,
+            task: String,
+            outcome: TaskOutcome = TaskOutcome.SUCCESS,
+        ) {
+            buildResult?.output shouldContain "SUCCESSFUL"
+            buildResult?.task(":$task")?.outcome shouldBe outcome
+            File(projectRoot, "build/$task-obfuscated.jar").isFile shouldBe true
+            File(projectRoot, "build/$task-mapping.txt").isFile shouldBe true
+        }
+
+        val projectRoot = tempdir()
+        val fixture = File(GradlePluginIntegrationTest::class.java.classLoader.getResource("gradle-kotlin-dsl").path)
+        FileUtils.copyDirectory(fixture, projectRoot)
+        TestPluginClasspath.applyToRootGradleKts(projectRoot)
+        addConfigFileTasks(projectRoot)
+
+        succeeds(runBuild(projectRoot, task), projectRoot, task)
+
+        // When no inputs or outputs are modified, task should be UP-TO-DATE
+        succeeds(runBuild(projectRoot, task), projectRoot, task, TaskOutcome.UP_TO_DATE)
+
+        // When proguard outputs are subsequently deleted, task should re-execute
+        runBuild(projectRoot, "clean")
+        succeeds(runBuild(projectRoot, task), projectRoot, task)
+
+        // When proguard input sources are modified, task should re-execute
+        val srcFile = File(projectRoot, "src/main/java/gradlekotlindsl/App.java")
+        srcFile.writeText(srcFile.readText().replace("Hello world.", "Howdy Earth."))
+        succeeds(runBuild(projectRoot, task), projectRoot, task)
     }
-
-    val projectRoot = tempdir()
-    val fixture = File(GradlePluginIntegrationTest::class.java.classLoader.getResource("gradle-kotlin-dsl").path)
-    FileUtils.copyDirectory(fixture, projectRoot)
-    TestPluginClasspath.applyToRootGradleKts(projectRoot)
-    addConfigFileTasks(projectRoot)
-
-    succeeds(runBuild(projectRoot, task), projectRoot, task)
-
-    // When no inputs or outputs are modified, task should be UP-TO-DATE
-    succeeds(runBuild(projectRoot, task), projectRoot, task, TaskOutcome.UP_TO_DATE)
-
-    // When proguard outputs are subsequently deleted, task should re-execute
-    runBuild(projectRoot, "clean")
-    succeeds(runBuild(projectRoot, task), projectRoot, task)
-
-    // When proguard input sources are modified, task should re-execute
-    val srcFile = File(projectRoot, "src/main/java/gradlekotlindsl/App.java")
-    srcFile.writeText(srcFile.readText().replace("Hello world.", "Howdy Earth."))
-    succeeds(runBuild(projectRoot, task), projectRoot, task)
-}
 
 /**
  * Add extra tasks that load from a separate configuration file, including one that is generated by another task.
@@ -131,58 +141,66 @@ fun testConfigOption(task: String) = funSpec {
  */
 fun addConfigFileTasks(projectRoot: File) {
     val buildFile = File(projectRoot, "build.gradle.kts")
-    buildFile.writeText(buildFile.readText() + """
-        tasks.register<proguard.gradle.ProGuardTask>("proguardWithConfigFile") {
-            dependsOn("jar")
+    buildFile.writeText(
+        buildFile.readText() +
+            """
+            tasks.register<proguard.gradle.ProGuardTask>("proguardWithConfigFile") {
+                dependsOn("jar")
 
-            // Inputs and outputs declared in external config file are not automatically tracked
-            inputs.file("build/libs/gradle-kotlin-dsl.jar")
-            outputs.file("build/proguardWithConfigFile-obfuscated.jar")
-            outputs.file("build/proguardWithConfigFile-mapping.txt")
+                // Inputs and outputs declared in external config file are not automatically tracked
+                inputs.file("build/libs/gradle-kotlin-dsl.jar")
+                outputs.file("build/proguardWithConfigFile-obfuscated.jar")
+                outputs.file("build/proguardWithConfigFile-mapping.txt")
 
-            configuration("config.pro")
-        }
-
-        tasks.register("generateConfigFile") {
-            val outputFile = file("build/proguard/config.pro")
-            outputs.file(outputFile)
-
-            doLast {
-                file("build/proguard").mkdirs()
-                outputFile.writeText("-basedirectory ../.. \n")
-                outputFile.appendText(file("config.pro").readText().replace("proguardWithConfigFile", "proguardWithGeneratedConfigFile"))
+                configuration("config.pro")
             }
-        }
 
-        tasks.register<proguard.gradle.ProGuardTask>("proguardWithGeneratedConfigFile") {
-            dependsOn("jar")
+            tasks.register("generateConfigFile") {
+                val outputFile = file("build/proguard/config.pro")
+                outputs.file(outputFile)
 
-            // Inputs and outputs declared in external config file are not automatically tracked
-            inputs.file("build/libs/gradle-kotlin-dsl.jar")
-            outputs.file("build/proguardWithGeneratedConfigFile-obfuscated.jar")
-            outputs.file("build/proguardWithGeneratedConfigFile-mapping.txt")
+                doLast {
+                    file("build/proguard").mkdirs()
+                    outputFile.writeText("-basedirectory ../.. \n")
+                    outputFile.appendText(file("config.pro").readText().replace("proguardWithConfigFile", "proguardWithGeneratedConfigFile"))
+                }
+            }
 
-            // Consume the "generateConfigFile" output. This will automatically add the task dependency.
-            configuration(tasks.named("generateConfigFile"))
-        }
-        """.trimIndent())
+            tasks.register<proguard.gradle.ProGuardTask>("proguardWithGeneratedConfigFile") {
+                dependsOn("jar")
 
-        val libraryJars = if (System.getProperty("java.version").startsWith("1."))
-            "<java.home>/lib/rt.jar" else
+                // Inputs and outputs declared in external config file are not automatically tracked
+                inputs.file("build/libs/gradle-kotlin-dsl.jar")
+                outputs.file("build/proguardWithGeneratedConfigFile-obfuscated.jar")
+                outputs.file("build/proguardWithGeneratedConfigFile-mapping.txt")
+
+                // Consume the "generateConfigFile" output. This will automatically add the task dependency.
+                configuration(tasks.named("generateConfigFile"))
+            }
+            """.trimIndent(),
+    )
+
+    val libraryJars =
+        if (System.getProperty("java.version").startsWith("1.")) {
+            "<java.home>/lib/rt.jar"
+        } else {
             "<java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)"
+        }
 
-        val configFile = File(projectRoot, "config.pro")
-        configFile.createNewFile()
-        configFile.writeText("""
-            -injars build/libs/gradle-kotlin-dsl.jar
-            -outjars build/proguardWithConfigFile-obfuscated.jar
-            -libraryjars $libraryJars
-            -allowaccessmodification
-            -repackageclasses
-            -printmapping build/proguardWithConfigFile-mapping.txt
+    val configFile = File(projectRoot, "config.pro")
+    configFile.createNewFile()
+    configFile.writeText(
+        """
+        -injars build/libs/gradle-kotlin-dsl.jar
+        -outjars build/proguardWithConfigFile-obfuscated.jar
+        -libraryjars $libraryJars
+        -allowaccessmodification
+        -repackageclasses
+        -printmapping build/proguardWithConfigFile-mapping.txt
 
-            -keep class gradlekotlindsl.App {
-              public static void main(java.lang.String[]);
-            }
-            """.trimIndent())
+        -keep class gradlekotlindsl.App {
+          public static void main(java.lang.String[]);
+        }
+        """.trimIndent(),
+    )
 }

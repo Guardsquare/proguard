@@ -25,7 +25,11 @@ import io.kotest.matchers.collections.shouldNotBeIn
 
 class SimpleNameFactoryTest : StringSpec({
 
-    val reservedNames = listOf("AUX", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "NUL", "PRN")
+    val reservedNames =
+        listOf(
+            "AUX", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "LPT1", "LPT2",
+            "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "NUL", "PRN",
+        )
 
     "Should not generate WINDOWS reserved names with mixed case enabled" {
 

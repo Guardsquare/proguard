@@ -53,15 +53,16 @@ import proguard.testutils.KotlinSource
 class KotlinCallableReferenceFixerTest : FreeSpec({
 
     "Given a function callable reference" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                fun original() = "bar"
-                fun ref() = ::original
-                """.trimIndent()
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    fun original() = "bar"
+                    fun ref() = ::original
+                    """.trimIndent(),
+                ),
             )
-        )
 
         programClassPool.classesAccept(
             MultiClassVisitor(
@@ -69,15 +70,15 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     "TestKt",
                     ClassRenamer(
                         { "Obfuscated" },
-                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) }
-                    )
+                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) },
+                    ),
                 ),
-                createFixer(programClassPool, libraryClassPool)
-            )
+                createFixer(programClassPool, libraryClassPool),
+            ),
         )
 
         val callableRefInfoVisitor = spyk<CallableReferenceInfoVisitor>()
-        val ownerVisitor = spyk< KotlinMetadataVisitor>()
+        val ownerVisitor = spyk<KotlinMetadataVisitor>()
         val testVisitor = createVisitor(callableRefInfoVisitor, ownerVisitor)
 
         programClassPool.classesAccept("TestKt\$ref\$1", testVisitor)
@@ -89,7 +90,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                         it.name shouldBe "obfuscated"
                         it.signature shouldBe "obfuscated()Ljava/lang/String;"
                         it.owner shouldNotBe null
-                    }
+                    },
                 )
             }
 
@@ -98,7 +99,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     withArg {
                         it.name shouldBe "Obfuscated"
                     },
-                    ofType(KotlinFileFacadeKindMetadata::class)
+                    ofType(KotlinFileFacadeKindMetadata::class),
                 )
             }
         }
@@ -108,26 +109,30 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                 "TestKt\$ref\$1",
                 AllConstantVisitor(
                     object : ConstantVisitor {
-                        override fun visitAnyConstant(clazz: Clazz, constant: Constant) {
+                        override fun visitAnyConstant(
+                            clazz: Clazz,
+                            constant: Constant,
+                        ) {
                             constant.toString() shouldNotContainIgnoringCase "original"
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
     "Given a non-optimized function callable reference" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                fun original() = "bar"
-                fun ref() = ::original
-                """.trimIndent()
-            ),
-            kotlincArguments = listOf("-Xno-optimized-callable-references")
-        )
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    fun original() = "bar"
+                    fun ref() = ::original
+                    """.trimIndent(),
+                ),
+                kotlincArguments = listOf("-Xno-optimized-callable-references"),
+            )
 
         programClassPool.classesAccept(
             MultiClassVisitor(
@@ -135,15 +140,15 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     "TestKt",
                     ClassRenamer(
                         { "Obfuscated" },
-                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) }
-                    )
+                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) },
+                    ),
                 ),
-                createFixer(programClassPool, libraryClassPool)
-            )
+                createFixer(programClassPool, libraryClassPool),
+            ),
         )
 
         val callableRefInfoVisitor = spyk<CallableReferenceInfoVisitor>()
-        val ownerVisitor = spyk< KotlinMetadataVisitor>()
+        val ownerVisitor = spyk<KotlinMetadataVisitor>()
         val testVisitor = createVisitor(callableRefInfoVisitor, ownerVisitor)
 
         programClassPool.classesAccept("TestKt\$ref\$1", testVisitor)
@@ -155,7 +160,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                         it.name shouldBe "obfuscated"
                         it.signature shouldBe "obfuscated()Ljava/lang/String;"
                         it.owner shouldNotBe null
-                    }
+                    },
                 )
             }
 
@@ -164,7 +169,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     withArg {
                         it.name shouldBe "Obfuscated"
                     },
-                    ofType(KotlinFileFacadeKindMetadata::class)
+                    ofType(KotlinFileFacadeKindMetadata::class),
                 )
             }
         }
@@ -174,28 +179,32 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                 "TestKt\$ref\$1",
                 AllConstantVisitor(
                     object : ConstantVisitor {
-                        override fun visitAnyConstant(clazz: Clazz, constant: Constant) {
+                        override fun visitAnyConstant(
+                            clazz: Clazz,
+                            constant: Constant,
+                        ) {
                             constant.toString() shouldNotContainIgnoringCase "original"
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
     "Given a property callable reference" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                class Foo {
-                    var original = "bar"
-                }
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    class Foo {
+                        var original = "bar"
+                    }
 
-                fun ref() = Foo()::original
-                """.trimIndent()
+                    fun ref() = Foo()::original
+                    """.trimIndent(),
+                ),
             )
-        )
 
         programClassPool.classesAccept(
             MultiClassVisitor(
@@ -211,22 +220,22 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                                     member.getName(clazz) == "setOriginal" -> "setObfuscated"
                                     else -> member.getName(clazz)
                                 }
-                            }
+                            },
                         ),
                         ReferencedKotlinMetadataVisitor(
                             AllPropertyVisitor
-                            { _, _, property ->
-                                if (property.name == "original") property.name = "obfuscated"
-                            }
-                        )
-                    )
+                                { _, _, property ->
+                                    if (property.name == "original") property.name = "obfuscated"
+                                },
+                        ),
+                    ),
                 ),
-                createFixer(programClassPool, libraryClassPool)
-            )
+                createFixer(programClassPool, libraryClassPool),
+            ),
         )
 
         val callableRefInfoVisitor = spyk<CallableReferenceInfoVisitor>()
-        val ownerVisitor = spyk< KotlinMetadataVisitor>()
+        val ownerVisitor = spyk<KotlinMetadataVisitor>()
         val testVisitor = createVisitor(callableRefInfoVisitor, ownerVisitor)
 
         programClassPool.classesAccept("TestKt\$ref\$1", testVisitor)
@@ -238,7 +247,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                         it.name shouldBe "obfuscated"
                         it.signature shouldBe "getObfuscated()Ljava/lang/String;"
                         it.owner shouldNotBe null
-                    }
+                    },
                 )
             }
 
@@ -247,7 +256,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     withArg {
                         it.name shouldBe "Obfuscated"
                     },
-                    ofType(KotlinClassKindMetadata::class)
+                    ofType(KotlinClassKindMetadata::class),
                 )
             }
         }
@@ -257,33 +266,37 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                 "TestKt\$ref\$1",
                 AllConstantVisitor(
                     object : ConstantVisitor {
-                        override fun visitAnyConstant(clazz: Clazz, constant: Constant) {
+                        override fun visitAnyConstant(
+                            clazz: Clazz,
+                            constant: Constant,
+                        ) {
                             constant.toString() shouldNotContainIgnoringCase "original"
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
     "Given a Java method callable reference" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                val javaClassInstance = Original()
-                fun ref() = javaClassInstance::original
-                """.trimIndent()
-            ),
-            JavaSource(
-                "Original.java",
-                """
-                public class Original {
-                    public String original() { return "bar"; }
-                }
-                """.trimIndent()
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    val javaClassInstance = Original()
+                    fun ref() = javaClassInstance::original
+                    """.trimIndent(),
+                ),
+                JavaSource(
+                    "Original.java",
+                    """
+                    public class Original {
+                        public String original() { return "bar"; }
+                    }
+                    """.trimIndent(),
+                ),
             )
-        )
 
         programClassPool.classesAccept(
             MultiClassVisitor(
@@ -291,15 +304,15 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     "Original",
                     ClassRenamer(
                         { "Obfuscated" },
-                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) }
-                    )
+                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) },
+                    ),
                 ),
-                createFixer(programClassPool, libraryClassPool)
-            )
+                createFixer(programClassPool, libraryClassPool),
+            ),
         )
 
         val callableRefInfoVisitor = spyk<CallableReferenceInfoVisitor>()
-        val ownerVisitor = spyk< KotlinMetadataVisitor>()
+        val ownerVisitor = spyk<KotlinMetadataVisitor>()
         val testVisitor = createVisitor(callableRefInfoVisitor, ownerVisitor)
 
         programClassPool.classesAccept("TestKt\$ref\$1", testVisitor)
@@ -311,7 +324,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                         it.name shouldBe "obfuscated"
                         it.signature shouldBe "obfuscated()Ljava/lang/String;"
                         it.owner shouldBe null
-                    }
+                    },
                 )
             }
 
@@ -320,7 +333,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     withArg {
                         it.name shouldBe "Obfuscated"
                     },
-                    ofType(KotlinMetadata::class)
+                    ofType(KotlinMetadata::class),
                 )
             }
         }
@@ -330,33 +343,37 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                 "TestKt\$ref\$1",
                 AllConstantVisitor(
                     object : ConstantVisitor {
-                        override fun visitAnyConstant(clazz: Clazz, constant: Constant) {
+                        override fun visitAnyConstant(
+                            clazz: Clazz,
+                            constant: Constant,
+                        ) {
                             constant.toString() shouldNotContainIgnoringCase "original"
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
     "Given a Java field callable reference" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            KotlinSource(
-                "Test.kt",
-                """
-                val javaClassInstance = Original()
-                fun ref() = javaClassInstance::original
-                """.trimIndent()
-            ),
-            JavaSource(
-                "Original.java",
-                """
-                public class Original {
-                    public String original = "bar";
-                }
-                """.trimIndent()
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "Test.kt",
+                    """
+                    val javaClassInstance = Original()
+                    fun ref() = javaClassInstance::original
+                    """.trimIndent(),
+                ),
+                JavaSource(
+                    "Original.java",
+                    """
+                    public class Original {
+                        public String original = "bar";
+                    }
+                    """.trimIndent(),
+                ),
             )
-        )
 
         programClassPool.classesAccept(
             MultiClassVisitor(
@@ -364,15 +381,15 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     "Original",
                     ClassRenamer(
                         { "Obfuscated" },
-                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) }
-                    )
+                        { clazz, member -> if (member.getName(clazz) == "original") "obfuscated" else member.getName(clazz) },
+                    ),
                 ),
-                createFixer(programClassPool, libraryClassPool)
-            )
+                createFixer(programClassPool, libraryClassPool),
+            ),
         )
 
         val callableRefInfoVisitor = spyk<CallableReferenceInfoVisitor>()
-        val ownerVisitor = spyk< KotlinMetadataVisitor>()
+        val ownerVisitor = spyk<KotlinMetadataVisitor>()
         val testVisitor = createVisitor(callableRefInfoVisitor, ownerVisitor)
 
         programClassPool.classesAccept("TestKt\$ref\$1", testVisitor)
@@ -384,7 +401,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                         it.name shouldBe "obfuscated"
                         it.signature shouldBe "getObfuscated()Ljava/lang/String;"
                         it.owner shouldBe null
-                    }
+                    },
                 )
             }
 
@@ -393,7 +410,7 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                     withArg {
                         it.name shouldBe "Obfuscated"
                     },
-                    ofType(KotlinMetadata::class)
+                    ofType(KotlinMetadata::class),
                 )
             }
         }
@@ -403,29 +420,45 @@ class KotlinCallableReferenceFixerTest : FreeSpec({
                 "TestKt\$ref\$1",
                 AllConstantVisitor(
                     object : ConstantVisitor {
-                        override fun visitAnyConstant(clazz: Clazz, constant: Constant) {
+                        override fun visitAnyConstant(
+                            clazz: Clazz,
+                            constant: Constant,
+                        ) {
                             constant.toString() shouldNotContainIgnoringCase "original"
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 })
 
-private fun createVisitor(callableRefInfoVisitor: CallableReferenceInfoVisitor, ownerVisitor: KotlinMetadataVisitor) = ReferencedKotlinMetadataVisitor(
+private fun createVisitor(
+    callableRefInfoVisitor: CallableReferenceInfoVisitor,
+    ownerVisitor: KotlinMetadataVisitor,
+) = ReferencedKotlinMetadataVisitor(
     object : KotlinMetadataVisitor {
-        override fun visitAnyKotlinMetadata(clazz: Clazz, kotlinMetadata: KotlinMetadata) {}
-        override fun visitKotlinSyntheticClassMetadata(clazz: Clazz, classMetadata: KotlinSyntheticClassKindMetadata) {
+        override fun visitAnyKotlinMetadata(
+            clazz: Clazz,
+            kotlinMetadata: KotlinMetadata,
+        ) {}
+
+        override fun visitKotlinSyntheticClassMetadata(
+            clazz: Clazz,
+            classMetadata: KotlinSyntheticClassKindMetadata,
+        ) {
             classMetadata.callableReferenceInfoAccept(callableRefInfoVisitor)
             classMetadata.callableReferenceInfoAccept { it.ownerAccept(ownerVisitor) }
         }
-    }
+    },
 )
 
-private fun createFixer(programClassPool: ClassPool, libraryClassPool: ClassPool) = MultiClassVisitor(
+private fun createFixer(
+    programClassPool: ClassPool,
+    libraryClassPool: ClassPool,
+) = MultiClassVisitor(
     MemberReferenceFixer(false),
     ClassReferenceFixer(true),
     ReferencedKotlinMetadataVisitor(KotlinCallableReferenceFixer(programClassPool, libraryClassPool)),
-    ConstantPoolShrinker()
+    ConstantPoolShrinker(),
 )

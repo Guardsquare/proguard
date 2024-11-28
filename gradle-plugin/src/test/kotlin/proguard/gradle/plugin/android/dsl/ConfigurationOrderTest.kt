@@ -19,42 +19,53 @@ class ConfigurationOrderTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given a project with multiple configuration files" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                }
-            }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    release {
-                        configuration 'proguard-project1.txt'
-                        defaultConfiguration 'proguard-android.txt'
-                        configuration 'proguard-project2.txt'
-                    }
-                }
-            }""".trimIndent(),
-            additionalFiles = listOf(SourceFile("proguard-project1.txt"), SourceFile("proguard-project2.txt"))))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        release {
+                                            configuration 'proguard-project1.txt'
+                                            defaultConfiguration 'proguard-android.txt'
+                                            configuration 'proguard-project2.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                            additionalFiles = listOf(SourceFile("proguard-project1.txt"), SourceFile("proguard-project2.txt")),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is built" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "assembleRelease", "--info").build()
 
             "The configurations should be included in order" {
                 result.output.lines().shouldExistInOrder(
-                        { it.contains("proguard-project1.txt") },
-                        { it.contains("proguard-android.txt") },
-                        { it.contains("proguard-project2.txt") })
+                    { it.contains("proguard-project1.txt") },
+                    { it.contains("proguard-android.txt") },
+                    { it.contains("proguard-project2.txt") },
+                )
             }
         }
     }

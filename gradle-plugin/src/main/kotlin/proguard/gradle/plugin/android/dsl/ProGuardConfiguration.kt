@@ -25,13 +25,13 @@ import proguard.gradle.ProGuardTask.DEFAULT_CONFIG_RESOURCE_PREFIX
 
 sealed class ProGuardConfiguration(val filename: String) {
     open val path: String = filename
+
     override fun toString(): String = filename
 }
 
 class UserProGuardConfiguration(filename: String) : ProGuardConfiguration(filename)
 
 class DefaultProGuardConfiguration private constructor(filename: String) : ProGuardConfiguration(filename) {
-
     override val path: String
         get() = "$DEFAULT_CONFIG_RESOURCE_PREFIX/$filename"
 
@@ -45,12 +45,14 @@ class DefaultProGuardConfiguration private constructor(filename: String) : ProGu
                 ANDROID_DEBUG.filename -> ANDROID_DEBUG
                 ANDROID_RELEASE.filename -> ANDROID_RELEASE
                 ANDROID_RELEASE_OPTIMIZE.filename -> ANDROID_RELEASE_OPTIMIZE
-                else -> throw IllegalArgumentException("""
-                        The default ProGuard configuration '$filename' is invalid.
+                else -> throw IllegalArgumentException(
+                    """
+                    The default ProGuard configuration '$filename' is invalid.
 
-                        Choose from:
-                           $ANDROID_DEBUG, $ANDROID_RELEASE, $ANDROID_RELEASE_OPTIMIZE
-                        """.trimIndent())
+                    Choose from:
+                       $ANDROID_DEBUG, $ANDROID_RELEASE, $ANDROID_RELEASE_OPTIMIZE
+                    """.trimIndent(),
+                )
             }
         }
     }

@@ -22,13 +22,22 @@ class ProGuardPluginTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given a project without the Android Gradle plugin" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(applicationModule("app", buildDotGradle = """
-                    plugins {
-                        id 'com.guardsquare.proguard'
-                    }
-                    """.trimIndent()))
-        }.create())
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.guardsquare.proguard'
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
@@ -40,49 +49,60 @@ class ProGuardPluginTest : FreeSpec({
     }
 
     "Given a project with an old Android Gradle plugin" - {
-        val project = autoClose(AndroidProject("""
-            buildscript {
-                repositories {
-                    mavenCentral() // For anything else.
-                    google()       // For the Android plugin.
-                    flatDir {
-                        dirs "${System.getProperty("local.repo")}"
+        val project =
+            autoClose(
+                AndroidProject(
+                    """
+                    buildscript {
+                        repositories {
+                            mavenCentral() // For anything else.
+                            google()       // For the Android plugin.
+                            flatDir {
+                                dirs "${System.getProperty("local.repo")}"
+                            }
+                        }
+                        dependencies {
+                            classpath "com.android.tools.build:gradle:3.6.3"
+                            classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
+                        }
                     }
-                }
-                dependencies {
-                    classpath "com.android.tools.build:gradle:3.6.3"
-                    classpath ":proguard-gradle:${System.getProperty("proguard.version")}"
-                }
-            }
-            allprojects {
-                repositories {
-                    google()
-                    mavenCentral()
-                }
-            }
-            """.trimIndent()).apply {
-                addModule(applicationModule("app", buildDotGradle = """
-                            plugins {
-                                id 'com.android.application'
-                                id 'com.guardsquare.proguard'
-                            }
-
-                            android {
-                                compileSdkVersion 30
-
-                                buildTypes {
-                                    release {}
-                                    debug   {}
+                    allprojects {
+                        repositories {
+                            google()
+                            mavenCentral()
+                        }
+                    }
+                    """.trimIndent(),
+                ).apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
                                 }
-                            }
 
-                            proguard {
-                                configurations {
-                                    release {}
+                                android {
+                                    compileSdkVersion 30
+
+                                    buildTypes {
+                                        release {}
+                                        debug   {}
+                                    }
                                 }
-                            }
-                            """.trimIndent()))
-            }.create())
+
+                                proguard {
+                                    configurations {
+                                        release {}
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir).buildAndFail()
@@ -94,35 +114,44 @@ class ProGuardPluginTest : FreeSpec({
     }
 
     "Given a library project" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(libraryModule("lib", buildDotGradle = """
-            plugins {
-                id 'com.android.library'
-                id 'com.guardsquare.proguard'
-            }
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        libraryModule(
+                            "lib",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.library'
+                                    id 'com.guardsquare.proguard'
+                                }
 
-            android {
-                compileSdkVersion 30
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                    debug   {}
-                }
-            }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                        debug   {}
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    release {
-                        defaultConfiguration 'proguard-android.txt'
-                        configuration 'proguard-project.txt'
-                    }
-                }
-            }
-            """.trimIndent(),
-            additionalFiles = listOf(SourceFile("proguard-project.txt", "-keep class **"))))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        release {
+                                            defaultConfiguration 'proguard-android.txt'
+                                            configuration 'proguard-project.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                            additionalFiles = listOf(SourceFile("proguard-project.txt", "-keep class **")),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is assembled" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "assembleRelease").build()

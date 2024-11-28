@@ -43,8 +43,7 @@ class ConfigurationParserTest : FreeSpec({
         return configuration
     }
 
-    fun parseRulesAsArguments(rules: String) =
-        rules.split(' ', '\n').toTypedArray()
+    fun parseRulesAsArguments(rules: String) = rules.split(' ', '\n').toTypedArray()
 
     "Keep rule tests" - {
         "Keep rule with <fields> wildcard should be valid" {
@@ -151,12 +150,12 @@ class ConfigurationParserTest : FreeSpec({
                 """-alwaysinline class * {
                         @org.chromium.build.annotations.AlwaysInline *;
                     }
-                    """
+                    """,
             )
 
             "The option prints out a warning" {
-                customOutputStream.toString() shouldContain "Warning: The R8 option -alwaysinline is currently not supported by ProGuard.\n" +
-                    "This option will have no effect on the optimized artifact."
+                customOutputStream.toString() shouldContain "Warning: The R8 option -alwaysinline is currently not " +
+                    "supported by ProGuard.\nThis option will have no effect on the optimized artifact."
                 System.setOut(savedPrintStream)
             }
         }
@@ -191,12 +190,12 @@ class ConfigurationParserTest : FreeSpec({
                 """-identifiernamestring class * {
                         @org.chromium.build.annotations.IdentifierNameString *;
                     }
-                    """
+                    """,
             )
 
             "The option prints out a warning" {
-                customOutputStream.toString() shouldContain "Warning: The R8 option -identifiernamestring is currently not supported by ProGuard.\n" +
-                    "This option will have no effect on the optimized artifact."
+                customOutputStream.toString() shouldContain "Warning: The R8 option -identifiernamestring is currently " +
+                    "not supported by ProGuard.\nThis option will have no effect on the optimized artifact."
                 System.setOut(savedPrintStream)
             }
         }
@@ -229,8 +228,8 @@ class ConfigurationParserTest : FreeSpec({
             parseConfiguration("-maximumremovedandroidloglevel 1")
 
             "The option prints out a warning" {
-                customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is currently not supported by ProGuard.\n" +
-                    "This option will have no effect on the optimized artifact."
+                customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is " +
+                    "currently not supported by ProGuard.\nThis option will have no effect on the optimized artifact."
                 System.setOut(savedPrintStream)
             }
         }
@@ -242,15 +241,15 @@ class ConfigurationParserTest : FreeSpec({
 
             parseConfiguration(
                 """
-                    -maximumremovedandroidloglevel 1 @org.chromium.build.annotations.DoNotStripLogs class ** {
-                       <methods>;
-                    }
+                -maximumremovedandroidloglevel 1 @org.chromium.build.annotations.DoNotStripLogs class ** {
+                   <methods>;
+                }
                 """.trimIndent(),
             )
 
             "The option prints out a warning" {
-                customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is currently not supported by ProGuard.\n" +
-                    "This option will have no effect on the optimized artifact."
+                customOutputStream.toString() shouldContain "Warning: The R8 option -maximumremovedandroidloglevel is " +
+                    "currently not supported by ProGuard.\nThis option will have no effect on the optimized artifact."
                 System.setOut(savedPrintStream)
             }
         }
@@ -260,7 +259,7 @@ class ConfigurationParserTest : FreeSpec({
         class TestConfig(
             val configOption: String,
             classSpecificationConfig: String,
-            private val classSpecificationGetter: Configuration.() -> List<ClassSpecification>?
+            private val classSpecificationGetter: Configuration.() -> List<ClassSpecification>?,
         ) {
             private val configuration: Configuration by lazy {
                 "$configOption $classSpecificationConfig".asConfiguration()
@@ -268,14 +267,15 @@ class ConfigurationParserTest : FreeSpec({
             val classSpecifications: List<ClassSpecification>? get() = classSpecificationGetter.invoke(configuration)
         }
 
-        fun generateTestCases(clSpec: String): List<TestConfig> = listOf(
-            TestConfig("-keep", clSpec) { keep },
-            TestConfig("-assumenosideeffects", clSpec) { assumeNoSideEffects },
-            TestConfig("-assumenoexternalsideeffects", clSpec) { assumeNoExternalSideEffects },
-            TestConfig("-assumenoescapingparameters", clSpec) { assumeNoEscapingParameters },
-            TestConfig("-assumenoexternalreturnvalues", clSpec) { assumeNoExternalReturnValues },
-            TestConfig("-assumevalues", clSpec) { assumeValues },
-        )
+        fun generateTestCases(clSpec: String): List<TestConfig> =
+            listOf(
+                TestConfig("-keep", clSpec) { keep },
+                TestConfig("-assumenosideeffects", clSpec) { assumeNoSideEffects },
+                TestConfig("-assumenoexternalsideeffects", clSpec) { assumeNoExternalSideEffects },
+                TestConfig("-assumenoescapingparameters", clSpec) { assumeNoEscapingParameters },
+                TestConfig("-assumenoexternalreturnvalues", clSpec) { assumeNoExternalReturnValues },
+                TestConfig("-assumevalues", clSpec) { assumeValues },
+            )
 
         "Test wildcard matches all methods and fields" {
             val testConfigurations = generateTestCases("class Foo { *; }") + generateTestCases("class Foo { <fields>; <methods>; }")
@@ -438,7 +438,8 @@ class ConfigurationParserTest : FreeSpec({
 
     "Class specification with unicode identifiers" - {
         "Given some -keep rules with class specifications containing supported characters for DEX file" - {
-            val rules = """
+            val rules =
+                """
                 -keep class uu.☱ { *; }
                 -keep class uu.o { ** ☱; }
                 -keep class uu.o { *** ☱(); }
@@ -456,7 +457,7 @@ class ConfigurationParserTest : FreeSpec({
                 -keep class <1> { ** 𐀀*(); }
                 -keep class * extends 􏿿
                 -keep class ** implements ☱
-            """.trimIndent()
+                """.trimIndent()
 
             val reader = ArgumentWordReader(parseRulesAsArguments(rules), null)
             mockkObject(reader)
@@ -473,7 +474,8 @@ class ConfigurationParserTest : FreeSpec({
         }
 
         "Given some -keep rules with class specifications containing unsupported identifier for DEX file" - {
-            val rules = """
+            val rules =
+                """
                 -keep class uu.${String(Character.toChars(0x00a1 - 1))} { *; }
                 -keep class uu.o { ** ${String(Character.toChars(0x1fff + 1))}; }
                 -keep class uu.o { *** ${String(Character.toChars(0x2010 - 1))}(); }
@@ -491,7 +493,7 @@ class ConfigurationParserTest : FreeSpec({
                 -keep class &
                 -keep class ;
                 -keep class ,
-            """.trimIndent()
+                """.trimIndent()
 
             val reader = ArgumentWordReader(parseRulesAsArguments(rules), null)
             mockkObject(reader)

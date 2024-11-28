@@ -10,7 +10,8 @@ import java.io.StringWriter
  * Test printing of the configuration (-printconfiguration option).
  */
 class ConfigurationWriterTest : FreeSpec({
-    val EOL = System.lineSeparator()
+    val eol = System.lineSeparator()
+
     fun printConfiguration(rules: String): String {
         val out = StringWriter()
         val configuration = Configuration()
@@ -28,22 +29,22 @@ class ConfigurationWriterTest : FreeSpec({
 
     "Keep rules tests" - {
         "Keep class constructor should be kept" {
-            val rules = "-keep class * {$EOL    <init>();$EOL}"
+            val rules = "-keep class * {$eol    <init>();$eol}"
             val out = printConfiguration(rules)
             out shouldBe rules
         }
 
         "Keep class initializer should be kept" {
-            val rules = "-keep class * {$EOL    <clinit>();$EOL}"
+            val rules = "-keep class * {$eol    <clinit>();$eol}"
             val out = printConfiguration(rules)
-            val expected = "-keep class * {$EOL    void <clinit>();$EOL}"
+            val expected = "-keep class * {$eol    void <clinit>();$eol}"
             out shouldBe expected
         }
 
         "Keep class initializer should respect allowobfuscation flag" {
-            val rules = "-keep,allowobfuscation class ** extends com.example.A {$EOL    <clinit>();$EOL}"
+            val rules = "-keep,allowobfuscation class ** extends com.example.A {$eol    <clinit>();$eol}"
             val out = printConfiguration(rules)
-            val expected = "-keep,allowobfuscation class ** extends com.example.A {$EOL    void <clinit>();$EOL}"
+            val expected = "-keep,allowobfuscation class ** extends com.example.A {$eol    void <clinit>();$eol}"
             out shouldBe expected
         }
     }
@@ -54,11 +55,11 @@ class ConfigurationWriterTest : FreeSpec({
         }
 
         "Comments should not be quoted" {
-            printConfiguration("# comment$EOL-keep class **") shouldBe "# comment$EOL-keep class **"
+            printConfiguration("# comment$eol-keep class **") shouldBe "# comment$eol-keep class **"
         }
 
         "Hash characters in comments should not be quoted" {
-            printConfiguration("# #comment$EOL-keep class **") shouldBe "# #comment$EOL-keep class **"
+            printConfiguration("# #comment$eol-keep class **") shouldBe "# #comment$eol-keep class **"
         }
     }
 

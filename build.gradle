@@ -2,6 +2,7 @@ plugins {
     id 'distribution'
     id 'io.github.gradle-nexus.publish-plugin'
     id 'signing'
+    id "org.jetbrains.kotlin.jvm" version "$kotlinVersion" apply false
 }
 
 allprojects {

@@ -7,7 +7,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.6.0'
+        classpath 'com.guardsquare:proguard-gradle:7.6.1'
     }
 }
 
@@ -40,7 +40,7 @@ compileTestKotlin {
 }
 
 application {
-    mainClassName = 'AppKt'
+    mainClass = 'AppKt'
 }
 
 ext.baseCoordinates = "${project.name}-${project.version}"

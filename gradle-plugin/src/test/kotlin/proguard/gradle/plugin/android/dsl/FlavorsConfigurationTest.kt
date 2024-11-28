@@ -11,68 +11,77 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import java.io.File
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import testutils.AndroidProject
 import testutils.applicationModule
 import testutils.createGradleRunner
 import testutils.createTestKitDir
+import java.io.File
 
 class FlavorsConfigurationTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given a project with a configuration specifying flavours" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
-                    compileOptions {
-                    sourceCompatibility JavaVersion.VERSION_1_8
-                    targetCompatibility JavaVersion.VERSION_1_8
-                }
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
+                                        compileOptions {
+                                        sourceCompatibility JavaVersion.VERSION_1_8
+                                        targetCompatibility JavaVersion.VERSION_1_8
+                                    }
 
-                buildTypes {
-                    debug {
-                        // Disable the built-in minification
-                        minifyEnabled false
-                    }
-                    release {
-                        // Disable the built-in minification
-                        minifyEnabled false
-                    }
-                }
+                                    buildTypes {
+                                        debug {
+                                            // Disable the built-in minification
+                                            minifyEnabled false
+                                        }
+                                        release {
+                                            // Disable the built-in minification
+                                            minifyEnabled false
+                                        }
+                                    }
 
-                flavorDimensions "version"
-                productFlavors {
-                    demo {
-                        dimension "version"
-                        applicationIdSuffix ".demo"
-                        versionNameSuffix "-demo"
-                    }
-                    full {
-                        dimension "version"
-                        applicationIdSuffix ".full"
-                        versionNameSuffix "-full"
-                    }
-                }
-            }
+                                    flavorDimensions "version"
+                                    productFlavors {
+                                        demo {
+                                            dimension "version"
+                                            applicationIdSuffix ".demo"
+                                            versionNameSuffix "-demo"
+                                        }
+                                        full {
+                                            dimension "version"
+                                            applicationIdSuffix ".full"
+                                            versionNameSuffix "-full"
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    release {
-                        defaultConfiguration 'proguard-android-optimize.txt'
-                    }
-                    demoDebug {
-                        defaultConfiguration 'proguard-android-debug.txt'
-                    }
-                }
-            }
-            """.trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        release {
+                                            defaultConfiguration 'proguard-android-optimize.txt'
+                                        }
+                                        demoDebug {
+                                            defaultConfiguration 'proguard-android-debug.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the build is executed" - {
             val buildResult = createGradleRunner(project.rootDir, testKitDir, "assemble").build()

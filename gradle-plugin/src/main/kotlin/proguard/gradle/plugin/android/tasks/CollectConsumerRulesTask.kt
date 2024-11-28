@@ -1,8 +1,5 @@
 package proguard.gradle.plugin.android.tasks
 
-import java.io.File
-import java.io.FileOutputStream
-import java.io.Serializable
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -12,6 +9,9 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import java.io.File
+import java.io.FileOutputStream
+import java.io.Serializable
 
 open class CollectConsumerRulesTask : DefaultTask() {
     @get:InputFiles
@@ -24,11 +24,12 @@ open class CollectConsumerRulesTask : DefaultTask() {
     var consumerRuleFilter: List<ConsumerRuleFilterEntry> = emptyList()
 
     @Internal
-    val consumerRuleIgnoreFilter: List<ConsumerRuleFilterEntry> = listOf(
-        // T13715: androidx.window contains an invalid -keep rule, the corrected rule
-        //         has been copied to the `proguard-android-common.txt` default configuration.
-        ConsumerRuleFilterEntry("androidx.window", "window")
-    )
+    val consumerRuleIgnoreFilter: List<ConsumerRuleFilterEntry> =
+        listOf(
+            // T13715: androidx.window contains an invalid -keep rule, the corrected rule
+            //         has been copied to the `proguard-android-common.txt` default configuration.
+            ConsumerRuleFilterEntry("androidx.window", "window"),
+        )
 
     @TaskAction
     fun extractConsumerRules() {
@@ -92,7 +93,11 @@ open class CollectConsumerRulesTask : DefaultTask() {
 
         if (matchedConsumerRuleFilterEntries.size < consumerRuleFilter.size) {
             val notMatchedConsumerRuleFIlterEntries = consumerRuleFilter - matchedConsumerRuleFilterEntries
-            throw GradleException("Consumer rule filter entr${if (notMatchedConsumerRuleFIlterEntries.size > 1) "ies" else "y"} '${notMatchedConsumerRuleFIlterEntries.joinToString { "${it.group}:${it.module}" }}' did not match any dependency")
+            throw GradleException(
+                "Consumer rule filter entr${if (notMatchedConsumerRuleFIlterEntries.size > 1) "ies" else "y"} " +
+                    "'${notMatchedConsumerRuleFIlterEntries.joinToString { "${it.group}:${it.module}" }}' did not " +
+                    "match any dependency",
+            )
         }
     }
 }

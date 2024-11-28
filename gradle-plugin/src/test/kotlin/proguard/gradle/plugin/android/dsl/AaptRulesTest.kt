@@ -12,41 +12,51 @@ import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.file.shouldNotExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import java.io.File
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.AndroidProject
 import testutils.applicationModule
 import testutils.createGradleRunner
 import testutils.createTestKitDir
+import java.io.File
 
 class AaptRulesTest : FreeSpec({
     val testKitDir = createTestKitDir()
 
     "Given a project with a configuration for a variant" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                }
-            }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    debug {
-                        defaultConfiguration 'proguard-android-debug.txt'
-                    }
-                }
-            }""".trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        debug {
+                                            defaultConfiguration 'proguard-android-debug.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "assembleDebug", "--info").build()
@@ -68,32 +78,42 @@ class AaptRulesTest : FreeSpec({
     }
 
     "Given a project with a configuration for a variant and existing aaptOptions" - {
-        val project = autoClose(AndroidProject().apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
+        val project =
+            autoClose(
+                AndroidProject().apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                    }
 
-                aaptOptions.additionalParameters = ["--proguard", (new File(rootDir, "test.pro")).absolutePath]
-            }
+                                    aaptOptions.additionalParameters = ["--proguard", (new File(rootDir, "test.pro")).absolutePath]
+                                }
 
-            proguard {
-                configurations {
-                    debug {
-                        defaultConfiguration 'proguard-android-debug.txt'
-                    }
-                }
-            }""".trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        debug {
+                                            defaultConfiguration 'proguard-android-debug.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val result = createGradleRunner(project.rootDir, testKitDir, "assembleDebug", "--info").build()
@@ -120,34 +140,44 @@ class AaptRulesTest : FreeSpec({
     }
 
     "Given a project with a configuration for a variant in a project that has caching enabled" - {
-        val project = autoClose(AndroidProject(gradleDotProperties = "org.gradle.caching=true").apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
+        val project =
+            autoClose(
+                AndroidProject(gradleDotProperties = "org.gradle.caching=true").apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
 
-                defaultConfig {
-                    versionCode 1
-                }
+                                    defaultConfig {
+                                        versionCode 1
+                                    }
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                }
-            }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    debug {
-                        defaultConfiguration 'proguard-android-debug.txt'
-                    }
-                }
-            }""".trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        debug {
+                                            defaultConfiguration 'proguard-android-debug.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When assembleDebug is executed" - {
             val aaptRules = File("${project.moduleBuildDir("app")}/intermediates/proguard/configs/aapt_rules.pro")
@@ -197,44 +227,54 @@ class AaptRulesTest : FreeSpec({
     }
 
     "Given a project with a flavor configuration for a variant in a project that has caching enabled" - {
-        val project = autoClose(AndroidProject(gradleDotProperties = "org.gradle.caching=true").apply {
-            addModule(applicationModule("app", buildDotGradle = """
-            plugins {
-                id 'com.android.application'
-                id 'com.guardsquare.proguard'
-            }
-            android {
-                compileSdkVersion 30
+        val project =
+            autoClose(
+                AndroidProject(gradleDotProperties = "org.gradle.caching=true").apply {
+                    addModule(
+                        applicationModule(
+                            "app",
+                            buildDotGradle =
+                                """
+                                plugins {
+                                    id 'com.android.application'
+                                    id 'com.guardsquare.proguard'
+                                }
+                                android {
+                                    compileSdkVersion 30
 
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                    }
-                }
+                                    buildTypes {
+                                        release {
+                                            minifyEnabled false
+                                        }
+                                    }
 
-                flavorDimensions "version"
-                productFlavors {
-                    demo {
-                        dimension "version"
-                        applicationIdSuffix ".demo"
-                        versionNameSuffix "-demo"
-                    }
-                    full {
-                        dimension "version"
-                        applicationIdSuffix ".full"
-                        versionNameSuffix "-full"
-                    }
-                }
-            }
+                                    flavorDimensions "version"
+                                    productFlavors {
+                                        demo {
+                                            dimension "version"
+                                            applicationIdSuffix ".demo"
+                                            versionNameSuffix "-demo"
+                                        }
+                                        full {
+                                            dimension "version"
+                                            applicationIdSuffix ".full"
+                                            versionNameSuffix "-full"
+                                        }
+                                    }
+                                }
 
-            proguard {
-                configurations {
-                    demoDebug {
-                        defaultConfiguration 'proguard-android-debug.txt'
-                    }
-                }
-            }""".trimIndent()))
-        }.create())
+                                proguard {
+                                    configurations {
+                                        demoDebug {
+                                            defaultConfiguration 'proguard-android-debug.txt'
+                                        }
+                                    }
+                                }
+                                """.trimIndent(),
+                        ),
+                    )
+                }.create(),
+            )
 
         "When the project is evaluated" - {
             val aaptRules = File("${project.moduleBuildDir("app")}/intermediates/proguard/configs/aapt_rules.pro")

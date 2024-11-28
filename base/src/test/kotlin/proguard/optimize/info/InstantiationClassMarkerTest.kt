@@ -13,19 +13,20 @@ import proguard.testutils.JavaSource
 class InstantiationClassMarkerTest : FreeSpec({
     "A class should be marked as instantiated" - {
         "when it is instantiated with a `new` instruction" {
-            val (classPool, _) = ClassPoolBuilder.fromSource(
-                JavaSource(
-                    "Main.java",
-                    """
-                class A { }
-                public class Main {
-                    public static void main(String[] args) {
-                        System.out.println(new A());
-                    }
-                }
-                    """.trimIndent()
+            val (classPool, _) =
+                ClassPoolBuilder.fromSource(
+                    JavaSource(
+                        "Main.java",
+                        """
+                        class A { }
+                        public class Main {
+                            public static void main(String[] args) {
+                                System.out.println(new A());
+                            }
+                        }
+                        """.trimIndent(),
+                    ),
                 )
-            )
 
             val classA = classPool.getClass("A")
 
@@ -36,30 +37,31 @@ class InstantiationClassMarkerTest : FreeSpec({
                 AllMemberVisitor(
                     AllAttributeVisitor(
                         AllInstructionVisitor(
-                            InstantiationClassMarker()
-                        )
-                    )
-                )
+                            InstantiationClassMarker(),
+                        ),
+                    ),
+                ),
             )
 
             getProgramClassOptimizationInfo(classA).isInstantiated shouldBe true
         }
 
         "when one of its subclasses is instantiated with a `new` instruction" {
-            val (classPool, _) = ClassPoolBuilder.fromSource(
-                JavaSource(
-                    "Main.java",
-                    """
-                class A { }
-                class B extends A { }
-                public class Main {
-                    public static void main(String[] args) {
-                        System.out.println(new B());
-                    }
-                }
-                    """.trimIndent()
+            val (classPool, _) =
+                ClassPoolBuilder.fromSource(
+                    JavaSource(
+                        "Main.java",
+                        """
+                        class A { }
+                        class B extends A { }
+                        public class Main {
+                            public static void main(String[] args) {
+                                System.out.println(new B());
+                            }
+                        }
+                        """.trimIndent(),
+                    ),
                 )
-            )
 
             val classA = classPool.getClass("A")
             val classB = classPool.getClass("B")
@@ -71,10 +73,10 @@ class InstantiationClassMarkerTest : FreeSpec({
                 AllMemberVisitor(
                     AllAttributeVisitor(
                         AllInstructionVisitor(
-                            InstantiationClassMarker()
-                        )
-                    )
-                )
+                            InstantiationClassMarker(),
+                        ),
+                    ),
+                ),
             )
 
             getProgramClassOptimizationInfo(classA).isInstantiated shouldBe true

@@ -35,20 +35,23 @@ class AfterInitConfigurationVerifierTest : FreeSpec({
 
     "Given a configuration with target specified" - {
 
-        val configuration = """
+        val configuration =
+            """
             -verbose
             -target 6
-        """.trimIndent().asConfiguration()
+            """.trimIndent().asConfiguration()
 
         "It should throw an exception if program class pool contains a class with class file version > jdk 11" {
             val view = AppView()
             view.programClassPool.addClass(FakeClass(CLASS_VERSION_12))
 
-            val exception = shouldThrow<RuntimeException> {
-                AfterInitConfigurationVerifier(configuration).execute(view)
-            }
+            val exception =
+                shouldThrow<RuntimeException> {
+                    AfterInitConfigurationVerifier(configuration).execute(view)
+                }
             exception.message shouldContain "-target can only be used with class file versions <= 55 (Java 11)."
-            exception.message shouldContain "The input classes contain version 56 class files which cannot be backported to target version (50)."
+            exception.message shouldContain "The input classes contain version 56 class files which cannot be backported " +
+                "to target version (50)."
         }
 
         "It should not throw an exception if program class pool contains classes with class file version = jdk 11" {
@@ -72,9 +75,10 @@ class AfterInitConfigurationVerifierTest : FreeSpec({
 
     "Given a configuration with a target specified and classes above Java 11" - {
 
-        val configuration = """
+        val configuration =
+            """
             -target 17
-        """.trimIndent().asConfiguration()
+            """.trimIndent().asConfiguration()
 
         "It should not throw an exception if -target is set but all the classes are already at the targeted version (no backport needed)" {
             val view = AppView()
@@ -93,33 +97,38 @@ class AfterInitConfigurationVerifierTest : FreeSpec({
                 addClass(FakeClass(CLASS_VERSION_17))
             }
 
-            val output = getLogOutputOf {
-                AfterInitConfigurationVerifier(configuration).execute(view)
-            }
+            val output =
+                getLogOutputOf {
+                    AfterInitConfigurationVerifier(configuration).execute(view)
+                }
             output shouldContain "-target is deprecated when using class file above"
         }
 
-        "It should throw an exception if -target is set and the version of one of the classes version is different from the target version" {
-            val view = AppView()
-            with(view.programClassPool) {
-                addClass(FakeClass(CLASS_VERSION_18))
-                addClass(FakeClass(CLASS_VERSION_17))
-            }
+        "It should throw an exception if -target is set and the version of one of the classes version is different from" +
+            "the target version" {
+                val view = AppView()
+                with(view.programClassPool) {
+                    addClass(FakeClass(CLASS_VERSION_18))
+                    addClass(FakeClass(CLASS_VERSION_17))
+                }
 
-            val exception = shouldThrow<RuntimeException> {
-                AfterInitConfigurationVerifier(configuration).execute(view)
-            }
+                val exception =
+                    shouldThrow<RuntimeException> {
+                        AfterInitConfigurationVerifier(configuration).execute(view)
+                    }
 
-            exception.message shouldContain "-target can only be used with class file versions <= 55 (Java 11)."
-            exception.message shouldContain "The input classes contain version 62 class files which cannot be backported to target version (61)."
-        }
+                exception.message shouldContain "-target can only be used with class file versions <= 55 (Java 11)."
+                exception.message shouldContain "The input classes contain version 62 class files which cannot be backported " +
+                    "to target version (61)."
+            }
     }
 
     "Given a configuration with no target specified" - {
 
-        val configuration = """
+        val configuration =
+            """
             -verbose
-        """.trimIndent().asConfiguration()
+            """.trimIndent().asConfiguration()
 
         "It should not throw an exception if program class pool contains classes with class file version > jdk 11" {
             val view = AppView()

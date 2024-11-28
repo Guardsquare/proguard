@@ -24,11 +24,11 @@ package proguard.gradle
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
-import java.io.File
 import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import testutils.TestPluginClasspath
+import java.io.File
 
 class ProguardCacheRelocateabilityIntegrationTest : FreeSpec({
 
@@ -54,25 +54,31 @@ class ProguardCacheRelocateabilityIntegrationTest : FreeSpec({
             .withProjectDir(originalDir)
             .build()
 
-        val result2 = GradleRunner.create()
-            .forwardOutput()
-            .withArguments("proguard", "--build-cache")
-            .withGradleVersion("7.4")
-            .withPluginClasspath()
-            .withProjectDir(relocatedDir)
-            .build()
+        val result2 =
+            GradleRunner.create()
+                .forwardOutput()
+                .withArguments("proguard", "--build-cache")
+                .withGradleVersion("7.4")
+                .withPluginClasspath()
+                .withProjectDir(relocatedDir)
+                .build()
 
         result2.task(":proguard")?.outcome shouldBe TaskOutcome.FROM_CACHE
     }
 })
 
-fun writeSettingsGradle(projectDir: File, cacheDir: File) {
-    File(projectDir, "settings.gradle").writeText("""
+fun writeSettingsGradle(
+    projectDir: File,
+    cacheDir: File,
+) {
+    File(projectDir, "settings.gradle").writeText(
+        """
         rootProject.name = 'demo'
         buildCache {
             local {
                 directory = "${cacheDir.absolutePath.replace(File.separatorChar, '/')}"           
             }
         }
-        """.trimIndent())
+        """.trimIndent(),
+    )
 }

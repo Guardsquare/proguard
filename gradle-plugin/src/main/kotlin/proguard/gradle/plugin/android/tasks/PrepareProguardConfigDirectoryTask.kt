@@ -5,7 +5,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 abstract class PrepareProguardConfigDirectoryTask : DefaultTask() {
-
     @OutputDirectory
     val file = project.buildDir.resolve("intermediates/proguard/configs")
 

@@ -22,14 +22,15 @@ import proguard.testutils.JavaSource
 
 class TypeArgumentFinderTest : FreeSpec({
     "Given an aload instruction with TypeToken" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "TypeToken.java",
-                """
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "TypeToken.java",
+                    """
                     package com.google.gson.reflect;
                     
                     import java.lang.reflect.Type;
-    
+                    
                     public class TypeToken<T> {
                         Type type;
                     
@@ -37,11 +38,11 @@ class TypeArgumentFinderTest : FreeSpec({
                             return type;
                         }
                     }
-                """.trimIndent()
-            ),
-            JavaSource(
-                "A.java",
-                """
+                    """.trimIndent(),
+                ),
+                JavaSource(
+                    "A.java",
+                    """
                     import com.google.gson.reflect.TypeToken;
                     import java.lang.reflect.Type;
                     
@@ -51,9 +52,9 @@ class TypeArgumentFinderTest : FreeSpec({
                             System.out.println(x);
                         }
                     }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When retrieving the return type with TypeArgumentFinder" - {
             val partialEvaluator = PartialEvaluator()
@@ -63,9 +64,9 @@ class TypeArgumentFinderTest : FreeSpec({
                 AllMethodVisitor(
                     MemberNameFilter(
                         "a",
-                        AllAttributeVisitor(partialEvaluator)
-                    )
-                )
+                        AllAttributeVisitor(partialEvaluator),
+                    ),
+                ),
             )
 
             val typeArgumentFinder = TypeArgumentFinder(programClassPool, libraryClassPool, partialEvaluator)
@@ -83,14 +84,14 @@ class TypeArgumentFinderTest : FreeSpec({
                                         Instruction.OP_ALOAD_0.toInt(),
                                         Instruction.OP_ALOAD_1.toInt(),
                                         Instruction.OP_ALOAD_2.toInt(),
-                                        Instruction.OP_ALOAD_3.toInt()
+                                        Instruction.OP_ALOAD_3.toInt(),
                                     ),
-                                    typeArgumentFinder
-                                )
-                            )
-                        )
-                    )
-                )
+                                    typeArgumentFinder,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             "Then we obtain the return type java.lang.String" {
@@ -100,14 +101,15 @@ class TypeArgumentFinderTest : FreeSpec({
     }
 
     "Given an invokevirtual instruction with TypeToken" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "TypeToken.java",
-                """
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "TypeToken.java",
+                    """
                     package com.google.gson.reflect;
                     
                     import java.lang.reflect.Type;
-    
+                    
                     public class TypeToken<T> {
                         Type type;
                     
@@ -115,11 +117,11 @@ class TypeArgumentFinderTest : FreeSpec({
                             return type;
                         }
                     }
-                """.trimIndent()
-            ),
-            JavaSource(
-                "A.java",
-                """
+                    """.trimIndent(),
+                ),
+                JavaSource(
+                    "A.java",
+                    """
                     import com.google.gson.reflect.TypeToken;
                     import java.lang.reflect.Type;
                     
@@ -128,9 +130,9 @@ class TypeArgumentFinderTest : FreeSpec({
                             new TypeToken<String>() {}.getType();
                         }
                     }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When retrieving the return type with TypeArgumentFinder" - {
             val typeArgumentFinder = TypeArgumentFinder(programClassPool, libraryClassPool, null)
@@ -144,12 +146,12 @@ class TypeArgumentFinderTest : FreeSpec({
                             AllInstructionVisitor(
                                 InstructionOpCodeFilter(
                                     intArrayOf(Instruction.OP_INVOKEVIRTUAL.toInt()),
-                                    typeArgumentFinder
-                                )
-                            )
-                        )
-                    )
-                )
+                                    typeArgumentFinder,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             "Then we obtain null (Note: this case is not implemented like for aload instructions)" {
@@ -159,10 +161,11 @@ class TypeArgumentFinderTest : FreeSpec({
     }
 
     "Given an ldc instruction" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Z.java",
-                """
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Z.java",
+                    """
                     package a.b;
                     
                     public class Z {
@@ -172,9 +175,9 @@ class TypeArgumentFinderTest : FreeSpec({
                         
                         public void x(Class<?> c) {}
                     }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When retrieving the return type with TypeArgumentFinder" - {
             val typeArgumentFinder = TypeArgumentFinder(programClassPool, libraryClassPool, null)
@@ -188,12 +191,12 @@ class TypeArgumentFinderTest : FreeSpec({
                             AllInstructionVisitor(
                                 InstructionOpCodeFilter(
                                     intArrayOf(Instruction.OP_LDC.toInt()),
-                                    typeArgumentFinder
-                                )
-                            )
-                        )
-                    )
-                )
+                                    typeArgumentFinder,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             "Then we obtain the return type a.b.Z" {
@@ -203,19 +206,20 @@ class TypeArgumentFinderTest : FreeSpec({
     }
 
     "Given an aload instruction" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "A.java",
-                """
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "A.java",
+                    """
                     public class A {
                         public void a() {
                             String x = "text";
                             System.out.println(x);
                         }
                     }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When retrieving the return type with TypeArgumentFinder" - {
             val partialEvaluator = PartialEvaluator()
@@ -225,9 +229,9 @@ class TypeArgumentFinderTest : FreeSpec({
                 AllMethodVisitor(
                     MemberNameFilter(
                         "a",
-                        AllAttributeVisitor(partialEvaluator)
-                    )
-                )
+                        AllAttributeVisitor(partialEvaluator),
+                    ),
+                ),
             )
 
             val typeArgumentFinder = TypeArgumentFinder(programClassPool, libraryClassPool, partialEvaluator)
@@ -245,14 +249,14 @@ class TypeArgumentFinderTest : FreeSpec({
                                         Instruction.OP_ALOAD_0.toInt(),
                                         Instruction.OP_ALOAD_1.toInt(),
                                         Instruction.OP_ALOAD_2.toInt(),
-                                        Instruction.OP_ALOAD_3.toInt()
+                                        Instruction.OP_ALOAD_3.toInt(),
                                     ),
-                                    typeArgumentFinder
-                                )
-                            )
-                        )
-                    )
-                )
+                                    typeArgumentFinder,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             // This is not an intended use case of the TypeArgumentFinder
@@ -264,10 +268,11 @@ class TypeArgumentFinderTest : FreeSpec({
     }
 
     "Given a new instruction" - {
-        val (programClassPool, libraryClassPool) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Z.java",
-                """
+        val (programClassPool, libraryClassPool) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Z.java",
+                    """
                     package a.b;
                     
                     public class Z {
@@ -275,9 +280,9 @@ class TypeArgumentFinderTest : FreeSpec({
                             new Z();
                         }
                     }
-                """.trimIndent()
+                    """.trimIndent(),
+                ),
             )
-        )
 
         "When retrieving the return type with TypeArgumentFinder" - {
             val typeArgumentFinder = TypeArgumentFinder(programClassPool, libraryClassPool, null)
@@ -291,12 +296,12 @@ class TypeArgumentFinderTest : FreeSpec({
                             AllInstructionVisitor(
                                 InstructionOpCodeFilter(
                                     intArrayOf(Instruction.OP_NEW.toInt()),
-                                    typeArgumentFinder
-                                )
-                            )
-                        )
-                    )
-                )
+                                    typeArgumentFinder,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             "Then we obtain the return type a.b.Z" {

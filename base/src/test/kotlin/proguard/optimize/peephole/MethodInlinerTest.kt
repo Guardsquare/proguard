@@ -33,10 +33,11 @@ class MethodInlinerTest : FreeSpec({
     isolationMode = IsolationMode.InstancePerTest
 
     "Given two simple functions, one calling the other" - {
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Foo.java",
-                """class Foo { 
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Foo.java",
+                    """class Foo { 
                 static int f1() {
                     return f2() + 1;
                 }
@@ -44,9 +45,9 @@ class MethodInlinerTest : FreeSpec({
                 static int f2() {
                     return 1;
                 }
-            }"""
+            }""",
+                ),
             )
-        )
 
         // Sanity check how the instructions look before.
         val instructionsBefore = printProgramMethodInstructions(programClassPool, "Foo", "f1", "()I")
@@ -59,26 +60,32 @@ class MethodInlinerTest : FreeSpec({
 
         "When calling the method inliner, specifying that we should always inline" - {
             // Initialize optimization info (used when inlining).
-            val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                    ProgramMemberOptimizationInfoSetter()
+            val optimizationInfoInitializer: ClassVisitor =
+                MultiClassVisitor(
+                    ProgramClassOptimizationInfoSetter(),
+                    AllMethodVisitor(
+                        ProgramMemberOptimizationInfoSetter(),
+                    ),
                 )
-            )
 
             programClassPool.classesAccept(optimizationInfoInitializer)
 
             // Create a mock method inliner which always returns true.
-            val methodInliner = object : MethodInliner(false, true, true) {
-                override fun shouldInline(clazz: Clazz, method: Method?, codeAttribute: CodeAttribute?): Boolean = true
-            }
+            val methodInliner =
+                object : MethodInliner(false, true, true) {
+                    override fun shouldInline(
+                        clazz: Clazz,
+                        method: Method?,
+                        codeAttribute: CodeAttribute?,
+                    ): Boolean = true
+                }
 
             programClassPool.classesAccept(
                 AllMethodVisitor(
                     AllAttributeVisitor(
-                        methodInliner
-                    )
-                )
+                        methodInliner,
+                    ),
+                ),
             )
 
             "Then the called function is inlined as expected" {
@@ -94,26 +101,32 @@ class MethodInlinerTest : FreeSpec({
 
         "When calling the method inliner, specifying that we should never inline" - {
             // Initialize optimization info (used when inlining).
-            val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                    ProgramMemberOptimizationInfoSetter()
+            val optimizationInfoInitializer: ClassVisitor =
+                MultiClassVisitor(
+                    ProgramClassOptimizationInfoSetter(),
+                    AllMethodVisitor(
+                        ProgramMemberOptimizationInfoSetter(),
+                    ),
                 )
-            )
 
             programClassPool.classesAccept(optimizationInfoInitializer)
 
             // Create a mock method inliner which always returns true.
-            val methodInliner = object : MethodInliner(false, true, true) {
-                override fun shouldInline(clazz: Clazz?, method: Method?, codeAttribute: CodeAttribute?): Boolean = false
-            }
+            val methodInliner =
+                object : MethodInliner(false, true, true) {
+                    override fun shouldInline(
+                        clazz: Clazz?,
+                        method: Method?,
+                        codeAttribute: CodeAttribute?,
+                    ): Boolean = false
+                }
 
             programClassPool.classesAccept(
                 AllMethodVisitor(
                     AllAttributeVisitor(
-                        methodInliner
-                    )
-                )
+                        methodInliner,
+                    ),
+                ),
             )
 
             "Then the called function is not inlined" {
@@ -131,22 +144,23 @@ class MethodInlinerTest : FreeSpec({
     "Given a function calling a big function" - {
         val lotsOfPrints = (1..3000).joinToString("\n") { "System.out.println(\"${it}\");" }
 
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Foo.java",
-                """class Foo { 
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Foo.java",
+                    """class Foo { 
                 static void f1() {
                     f2();
                 }
                 
                 static void f2() {
                 """ +
-                    lotsOfPrints +
-                    """
+                        lotsOfPrints +
+                        """
                 }
-            }"""
+            }""",
+                ),
             )
-        )
 
         val clazz = programClassPool.getClass("Foo") as ProgramClass
         val method = clazz.findMethod("f1", "()V") as ProgramMethod
@@ -156,27 +170,33 @@ class MethodInlinerTest : FreeSpec({
 
         "When using the default maximum resulting code length parameter" - {
             // Initialize optimization info (used when inlining).
-            val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                    ProgramMemberOptimizationInfoSetter()
+            val optimizationInfoInitializer: ClassVisitor =
+                MultiClassVisitor(
+                    ProgramClassOptimizationInfoSetter(),
+                    AllMethodVisitor(
+                        ProgramMemberOptimizationInfoSetter(),
+                    ),
                 )
-            )
 
             programClassPool.classesAccept(optimizationInfoInitializer)
 
             // Create a mock method inliner which always returns true.
-            val methodInliner = object : MethodInliner(false, true, true) {
-                override fun shouldInline(clazz: Clazz?, method: Method?, codeAttribute: CodeAttribute?): Boolean = true
-            }
+            val methodInliner =
+                object : MethodInliner(false, true, true) {
+                    override fun shouldInline(
+                        clazz: Clazz?,
+                        method: Method?,
+                        codeAttribute: CodeAttribute?,
+                    ): Boolean = true
+                }
 
             "Then the large method is not inlined" {
                 programClassPool.classesAccept(
                     AllMethodVisitor(
                         AllAttributeVisitor(
-                            methodInliner
-                        )
-                    )
+                            methodInliner,
+                        ),
+                    ),
                 )
 
                 val lengthAfter = codeAttr.u4codeLength
@@ -187,26 +207,32 @@ class MethodInlinerTest : FreeSpec({
 
         "When using the maximum resulting code length parameter" - {
             // Initialize optimization info (used when inlining).
-            val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                    ProgramMemberOptimizationInfoSetter()
+            val optimizationInfoInitializer: ClassVisitor =
+                MultiClassVisitor(
+                    ProgramClassOptimizationInfoSetter(),
+                    AllMethodVisitor(
+                        ProgramMemberOptimizationInfoSetter(),
+                    ),
                 )
-            )
 
             programClassPool.classesAccept(optimizationInfoInitializer)
 
             // Create a mock method inliner with the maximum limit
-            val methodInliner = object : MethodInliner(false, true, MAXIMUM_RESULTING_CODE_LENGTH_JVM, true, true, null) {
-                override fun shouldInline(clazz: Clazz?, method: Method?, codeAttribute: CodeAttribute?): Boolean = true
-            }
+            val methodInliner =
+                object : MethodInliner(false, true, MAXIMUM_RESULTING_CODE_LENGTH_JVM, true, true, null) {
+                    override fun shouldInline(
+                        clazz: Clazz?,
+                        method: Method?,
+                        codeAttribute: CodeAttribute?,
+                    ): Boolean = true
+                }
 
             programClassPool.classesAccept(
                 AllMethodVisitor(
                     AllAttributeVisitor(
-                        methodInliner
-                    )
-                )
+                        methodInliner,
+                    ),
+                ),
             )
 
             "Then the large method is inlined" {
@@ -218,10 +244,11 @@ class MethodInlinerTest : FreeSpec({
     }
 
     "Given a method initializing a library class and calling a method with backwards branching " - {
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Foo.java",
-                """class Foo { 
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Foo.java",
+                    """class Foo { 
                 static void f1() {
                     StringBuilder sb = new StringBuilder();
                     sb.append(System.currentTimeMillis());
@@ -235,9 +262,9 @@ class MethodInlinerTest : FreeSpec({
                         System.out.println(i);
                     }
                 }
-            }"""
+            }""",
+                ),
             )
-        )
 
         val clazz = programClassPool.getClass("Foo") as ProgramClass
         val method = clazz.findMethod("f1", "()V") as ProgramMethod
@@ -248,32 +275,38 @@ class MethodInlinerTest : FreeSpec({
         "When inlining the method call" - {
             // Initialize optimization info (used when inlining).
             // Make sure the backwards branching info is set correctly.
-            val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-                ProgramClassOptimizationInfoSetter(),
-                AllMethodVisitor(
-                    MultiMemberVisitor(
-                        ProgramMemberOptimizationInfoSetter(),
-                        AllAttributeVisitor(
-                            AllInstructionVisitor(
-                                BackwardBranchMarker()
-                            )
-                        )
-                    )
+            val optimizationInfoInitializer: ClassVisitor =
+                MultiClassVisitor(
+                    ProgramClassOptimizationInfoSetter(),
+                    AllMethodVisitor(
+                        MultiMemberVisitor(
+                            ProgramMemberOptimizationInfoSetter(),
+                            AllAttributeVisitor(
+                                AllInstructionVisitor(
+                                    BackwardBranchMarker(),
+                                ),
+                            ),
+                        ),
+                    ),
                 )
-            )
 
             programClassPool.classesAccept(optimizationInfoInitializer)
 
             // Create a mock method inliner which always returns true.
-            val methodInliner = object : MethodInliner(false, true, true) {
-                override fun shouldInline(clazz: Clazz?, method: Method?, codeAttribute: CodeAttribute?): Boolean = true
-            }
+            val methodInliner =
+                object : MethodInliner(false, true, true) {
+                    override fun shouldInline(
+                        clazz: Clazz?,
+                        method: Method?,
+                        codeAttribute: CodeAttribute?,
+                    ): Boolean = true
+                }
 
             "Then the method is inlined" {
                 programClassPool.classesAccept(
                     AllMethodVisitor(
-                        AllAttributeVisitor(methodInliner)
-                    )
+                        AllAttributeVisitor(methodInliner),
+                    ),
                 )
 
                 val lengthAfter = codeAttr.u4codeLength
@@ -284,10 +317,11 @@ class MethodInlinerTest : FreeSpec({
     }
 
     "Given a method calling another non-private method in an interface" - {
-        val (programClassPool, _) = ClassPoolBuilder.fromSource(
-            JavaSource(
-                "Foo.java",
-                """interface Foo {
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                JavaSource(
+                    "Foo.java",
+                    """interface Foo {
                 default void f1() {
                     f2();
                 }
@@ -297,9 +331,9 @@ class MethodInlinerTest : FreeSpec({
                     sb.append(System.currentTimeMillis());
                     System.out.println(sb.toString());
                }
-            }"""
+            }""",
+                ),
             )
-        )
 
         val clazz = programClassPool.getClass("Foo") as ProgramClass
         val method = clazz.findMethod("f1", "()V") as ProgramMethod
@@ -308,27 +342,33 @@ class MethodInlinerTest : FreeSpec({
         val lengthBefore = codeAttr.u4codeLength
 
         // Initialize optimization info (used when inlining).
-        val optimizationInfoInitializer: ClassVisitor = MultiClassVisitor(
-            ProgramClassOptimizationInfoSetter(),
-            AllMethodVisitor(
-                ProgramMemberOptimizationInfoSetter()
+        val optimizationInfoInitializer: ClassVisitor =
+            MultiClassVisitor(
+                ProgramClassOptimizationInfoSetter(),
+                AllMethodVisitor(
+                    ProgramMemberOptimizationInfoSetter(),
+                ),
             )
-        )
 
         programClassPool.classesAccept(optimizationInfoInitializer)
 
         // Create a mock method inliner which always returns true.
-        val methodInliner = object : MethodInliner(false, true, true) {
-            override fun shouldInline(clazz: Clazz?, method: Method?, codeAttribute: CodeAttribute?): Boolean = true
-        }
+        val methodInliner =
+            object : MethodInliner(false, true, true) {
+                override fun shouldInline(
+                    clazz: Clazz?,
+                    method: Method?,
+                    codeAttribute: CodeAttribute?,
+                ): Boolean = true
+            }
 
         "Then the interface method is not inlined" {
             programClassPool.classesAccept(
                 AllMethodVisitor(
                     AllAttributeVisitor(
-                        methodInliner
-                    )
-                )
+                        methodInliner,
+                    ),
+                ),
             )
 
             val lengthAfter = codeAttr.u4codeLength
@@ -342,7 +382,7 @@ private fun printProgramMethodInstructions(
     classPool: ClassPool,
     className: String,
     methodName: String,
-    methodDescriptor: String
+    methodDescriptor: String,
 ): List<String> {
     val output = ByteArrayOutputStream()
     val pw = PrintWriter(output)
@@ -352,10 +392,13 @@ private fun printProgramMethodInstructions(
             methodName,
             methodDescriptor,
             object : MemberVisitor {
-                override fun visitProgramMethod(programClass: ProgramClass?, programMethod: ProgramMethod?) {
+                override fun visitProgramMethod(
+                    programClass: ProgramClass?,
+                    programMethod: ProgramMethod?,
+                ) {
                     programMethod?.accept(programClass, AllAttributeVisitor(AllInstructionVisitor(ClassPrinter(pw))))
                 }
-            }
+            },
         )
     }
 

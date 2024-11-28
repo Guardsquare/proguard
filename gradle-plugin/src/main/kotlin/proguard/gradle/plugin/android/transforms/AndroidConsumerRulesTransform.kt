@@ -7,13 +7,13 @@
 
 package proguard.gradle.plugin.android.transforms
 
-import java.io.File
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
+import java.io.File
 
 /**
  * Class that defines the transformation from 'android-consumer-proguard-rules'

@@ -48,19 +48,20 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
     // InstancePerTest so the names are reset before every test
     isolationMode = IsolationMode.InstancePerTest
 
-    val (programClassPool, _) = ClassPoolBuilder.fromSource(
-        KotlinSource(
-            "Test.kt",
-            """
-            @Suppress("UNUSED_PARAMETER")
-            class Foo(param1: String, param2: String, param3: String) {
-                var property: String = "foo"
-                    set(param1) { }
-                fun foo(param1: String, param2: String, param3: String) {}
-            }
-            """.trimIndent()
+    val (programClassPool, _) =
+        ClassPoolBuilder.fromSource(
+            KotlinSource(
+                "Test.kt",
+                """
+                @Suppress("UNUSED_PARAMETER")
+                class Foo(param1: String, param2: String, param3: String) {
+                    var property: String = "foo"
+                        set(param1) { }
+                    fun foo(param1: String, param2: String, param3: String) {}
+                }
+                """.trimIndent(),
+            ),
         )
-    )
 
     "Given a class with value parameters" - {
         val clazz = programClassPool.getClass("Foo")
@@ -77,9 +78,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllConstructorVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 val valueParameters = mutableListOf<ValueParameter>()
@@ -89,15 +90,16 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinConstructorMetadata::class),
-                        capture(valueParameters)
+                        capture(valueParameters),
                     )
                 }
 
-                valueParameters shouldExistInOrder listOf<(ValueParameter) -> Boolean>(
-                    { it.parameterName == "param1" },
-                    { it.parameterName == "param2" },
-                    { it.parameterName == "param3" }
-                )
+                valueParameters shouldExistInOrder
+                    listOf<(ValueParameter) -> Boolean>(
+                        { it.parameterName == "param1" },
+                        { it.parameterName == "param2" },
+                        { it.parameterName == "param3" },
+                    )
             }
         }
 
@@ -113,9 +115,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllConstructorVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 val valueParameters = mutableListOf<ValueParameter>()
@@ -125,15 +127,16 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinConstructorMetadata::class),
-                        capture(valueParameters)
+                        capture(valueParameters),
                     )
                 }
 
-                valueParameters shouldExistInOrder listOf<(ValueParameter) -> Boolean>(
-                    { it.parameterName == "p0" },
-                    { it.parameterName == "p1" },
-                    { it.parameterName == "p2" }
-                )
+                valueParameters shouldExistInOrder
+                    listOf<(ValueParameter) -> Boolean>(
+                        { it.parameterName == "p0" },
+                        { it.parameterName == "p1" },
+                        { it.parameterName == "p2" },
+                    )
             }
         }
 
@@ -152,9 +155,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllConstructorVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 verify(exactly = 3) {
@@ -162,15 +165,16 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinConstructorMetadata::class),
-                        capture(valueParameters)
+                        capture(valueParameters),
                     )
                 }
 
-                valueParameters shouldExistInOrder listOf<(ValueParameter) -> Boolean>(
-                    { it.parameterName == "p0" },
-                    { it.parameterName == "param2" },
-                    { it.parameterName == "p1" }
-                )
+                valueParameters shouldExistInOrder
+                    listOf<(ValueParameter) -> Boolean>(
+                        { it.parameterName == "p0" },
+                        { it.parameterName == "param2" },
+                        { it.parameterName == "p1" },
+                    )
             }
         }
     }
@@ -190,9 +194,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllFunctionVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 val valueParameters = mutableListOf<ValueParameter>()
@@ -202,15 +206,16 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinFunctionMetadata::class),
-                        capture(valueParameters)
+                        capture(valueParameters),
                     )
                 }
 
-                valueParameters shouldExistInOrder listOf<(ValueParameter) -> Boolean>(
-                    { it.parameterName == "param1" },
-                    { it.parameterName == "param2" },
-                    { it.parameterName == "param3" }
-                )
+                valueParameters shouldExistInOrder
+                    listOf<(ValueParameter) -> Boolean>(
+                        { it.parameterName == "param1" },
+                        { it.parameterName == "param2" },
+                        { it.parameterName == "param3" },
+                    )
             }
         }
 
@@ -226,9 +231,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllFunctionVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 val valueParameters = mutableListOf<ValueParameter>()
@@ -238,15 +243,16 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinFunctionMetadata::class),
-                        capture(valueParameters)
+                        capture(valueParameters),
                     )
                 }
 
-                valueParameters shouldExistInOrder listOf<(ValueParameter) -> Boolean>(
-                    { it.parameterName == "p0" },
-                    { it.parameterName == "p1" },
-                    { it.parameterName == "p2" }
-                )
+                valueParameters shouldExistInOrder
+                    listOf<(ValueParameter) -> Boolean>(
+                        { it.parameterName == "p0" },
+                        { it.parameterName == "p1" },
+                        { it.parameterName == "p2" },
+                    )
             }
         }
 
@@ -265,9 +271,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllFunctionVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 verify(exactly = 3) {
@@ -275,15 +281,16 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinFunctionMetadata::class),
-                        capture(valueParameters)
+                        capture(valueParameters),
                     )
                 }
 
-                valueParameters shouldExistInOrder listOf<(ValueParameter) -> Boolean>(
-                    { it.parameterName == "p0" },
-                    { it.parameterName == "param2" },
-                    { it.parameterName == "p1" }
-                )
+                valueParameters shouldExistInOrder
+                    listOf<(ValueParameter) -> Boolean>(
+                        { it.parameterName == "p0" },
+                        { it.parameterName == "param2" },
+                        { it.parameterName == "p1" },
+                    )
             }
         }
     }
@@ -303,9 +310,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllPropertyVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 verify {
@@ -313,7 +320,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinPropertyMetadata::class),
-                        withArg { it.parameterName shouldBe "param1" }
+                        withArg { it.parameterName shouldBe "param1" },
                     )
                 }
             }
@@ -331,9 +338,9 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                 clazz.kotlinMetadataAccept(
                     AllPropertyVisitor(
                         AllValueParameterVisitor(
-                            valueParameterVisitor
-                        )
-                    )
+                            valueParameterVisitor,
+                        ),
+                    ),
                 )
 
                 verify {
@@ -341,7 +348,7 @@ class KotlinValueParameterNameShrinkerTest : FreeSpec({
                         clazz,
                         ofType(KotlinClassKindMetadata::class),
                         ofType(KotlinPropertyMetadata::class),
-                        withArg { it.parameterName shouldBe "p0" }
+                        withArg { it.parameterName shouldBe "p0" },
                     )
                 }
             }

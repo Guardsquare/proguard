@@ -7,15 +7,15 @@
 
 package proguard.gradle.plugin.android.transforms
 
-import java.io.File
-import java.nio.file.FileSystems
-import java.util.zip.ZipFile
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
+import java.io.File
+import java.nio.file.FileSystems
+import java.util.zip.ZipFile
 
 /**
  * Class that defines the transformation from 'aar' and 'jar' artifacts to
@@ -30,14 +30,14 @@ abstract class ArchiveConsumerRulesTransform : TransformAction<TransformParamete
         val inputFile = inputArtifact.get().asFile
         val outputDir = outputs.dir(inputFile.name)
 
-        val matchers = setOf(
+        val matchers =
+            setOf(
                 // Default location for consumer rules in aars injected by the
                 // AGP and/or DexGuard.
                 FileSystems.getDefault().getPathMatcher("glob:proguard.txt"),
-
                 // Locations for consumer rules in jars.
-                FileSystems.getDefault().getPathMatcher("glob:META-INF/proguard/*.pro")
-        )
+                FileSystems.getDefault().getPathMatcher("glob:META-INF/proguard/*.pro"),
+            )
 
         ZipFile(inputFile).use { zip ->
             zip.entries().asSequence().filter { entry ->
