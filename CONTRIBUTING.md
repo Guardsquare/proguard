@@ -81,8 +81,7 @@ number of facade classes that construct and run these chains. Notably:
 - `Initializer` initializes links between the code and resources, to traverse
   the data structures more easily.
 
-- `Marker` marks code and resources to be kept, encrypted, etc., based on the
-  configuration.
+- `Marker` marks code and resources to be kept etc. based on the configuration.
 
 - `Backporter` backports code to older versions of Java.
 
@@ -103,8 +102,8 @@ At a high level, the flow of data inside ProGuard is as follows:
 
 - Traverse the input data, to parse any useful data structures.
 
-- Process the data structures in a number of steps (mainly shrinking, string
-  encryption, optimization, obfuscation, class encryption).
+- Process the data structures in a number of steps (mainly shrinking, optimization,
+  obfuscation).
 
 - Traverse the input data again, this time to write to the output, by copying,
   transforming, replacing, or removing data entries. The transformations can

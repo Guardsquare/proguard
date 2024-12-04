@@ -93,7 +93,7 @@ implements   DataEntryReader
 
             if (clazz == null)
             {
-                // The class is no longer in the classpool or encrypted class pool so it must have been shrunk.
+                // The class is no longer in the classpool, so it must have been shrunk.
                 // obfuscated name (original name, because it was removed from class pool so not obfuscated)
                 dataOutputStream.writeUTF(ClassUtil.externalClassName(className));
                 dataOutputStream.writeUTF(ClassUtil.externalClassName(initialStateInfo.getSuperClassName(className)));
