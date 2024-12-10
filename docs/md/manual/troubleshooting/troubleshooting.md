@@ -2,9 +2,6 @@ While preparing a configuration for processing your code, you may bump
 into a few problems. The following sections discuss some common issues
 and solutions:
 
-!!! tip
-    Whenever you don't find the solution for your issue on this page, the [***Guardsquare Community***](https://community.guardsquare.com/) might be the place to check for an answer or post a question.
-
 
 
 ## Problems while processing {: #processing}
