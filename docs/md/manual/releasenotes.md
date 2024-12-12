@@ -1,3 +1,10 @@
+## Version 7.6.1
+
+### Bugfixes
+
+- Fix backporting default interface method parameter annotations. (#451)
+- Prevent `Value in slot <n> is empty` exception during processing time by no longer applying lower slot replacement by default. It can be enabled again with the `optimization.enable.slot.replacement` system property.
+
 ## Version 7.6
 
 ### Java support
