@@ -1,3 +1,10 @@
+
+## Version 7.6.2
+
+### Bugfixes
+
+- Prevent `IllegalArgumentException` when strings longer than 65535 bytes are present in the application (#267).
+
 ## Version 7.6.1
 
 ### Bugfixes

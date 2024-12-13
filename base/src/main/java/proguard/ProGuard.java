@@ -31,6 +31,7 @@ import proguard.configuration.InitialStateInfo;
 import proguard.evaluation.IncompleteClassHierarchyException;
 import proguard.logging.Logging;
 import proguard.mark.Marker;
+import proguard.normalize.StringNormalizer;
 import proguard.obfuscate.NameObfuscationReferenceFixer;
 import proguard.obfuscate.ObfuscationPreparation;
 import proguard.obfuscate.Obfuscator;
@@ -219,6 +220,7 @@ public class ProGuard
                 configuration.obfuscate)
             {
                 expandPrimitiveArrayConstants();
+                normalizeStrings();
             }
 
             if (configuration.targetClassVersion != 0)
@@ -267,6 +269,11 @@ public class ProGuard
                 "https://www.guardsquare.com/en/products/proguard/manual/troubleshooting#superclass" + System.lineSeparator()
             );
         }
+    }
+
+    private void normalizeStrings() throws Exception {
+        passRunner.run(new StringNormalizer(),appView);
+
     }
 
 
