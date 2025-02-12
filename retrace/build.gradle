@@ -10,19 +10,6 @@ repositories {
     mavenCentral()
 }
 
-sourceSets.main {
-    java {
-        srcDirs = ['src']
-    }
-    resources {
-        srcDirs = ['src']
-        include '**/*.properties'
-        include '**/*.gif'
-        include '**/*.png'
-        include '**/*.pro'
-    }
-}
-
 dependencies {
     implementation project(':base')
 }

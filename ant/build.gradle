@@ -10,20 +10,6 @@ repositories {
     mavenCentral()
 }
 
-sourceSets.main {
-    java {
-        srcDirs = ['src']
-        include '**/*.java'
-    }
-    resources {
-        srcDirs = ['src']
-        include '**/*.properties'
-        include '**/*.gif'
-        include '**/*.png'
-        include '**/*.pro'
-    }
-}
-
 dependencies {
     implementation project(':base')
     implementation 'org.apache.ant:ant:1.10.15'
