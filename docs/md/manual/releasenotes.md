@@ -1,5 +1,8 @@
+## Version 7.7
 
-## Version 7.6.2
+### Java support
+
+- Add support for Java 24. (#458)
 
 ### Bugfixes
 
