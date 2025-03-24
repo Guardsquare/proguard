@@ -108,7 +108,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.6.1'
+        classpath 'com.guardsquare:proguard-gradle:7.7.0'
     }
 }
 ```
@@ -192,7 +192,7 @@ guide](CONTRIBUTING.md) if you would like to contribute.
 
 ## 📝 License
 
-Copyright (c) 2002-2023 [Guardsquare NV](https://www.guardsquare.com/).
+Copyright (c) 2002-2025 [Guardsquare NV](https://www.guardsquare.com/).
 ProGuard is released under the [GNU General Public License, version
 2](LICENSE), with [exceptions granted to a number of
 projects](docs/md/manual/license/gplexception.md).
