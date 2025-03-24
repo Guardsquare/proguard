@@ -8,6 +8,10 @@
 
 - Prevent `IllegalArgumentException` when strings longer than 65535 bytes are present in the application (#267).
 
+### Improved
+
+- Improve processing time in apps where a large number of linked methods are present.
+
 ## Version 7.6.1
 
 ### Bugfixes
