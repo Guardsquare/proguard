@@ -7,6 +7,7 @@
 ### Bugfixes
 
 - Prevent `IllegalArgumentException` when strings longer than 65535 bytes are present in the application (#267).
+- Prevent `StackOverflowException` when processing a pattern match switch (#444).
 
 ### Improved
 
