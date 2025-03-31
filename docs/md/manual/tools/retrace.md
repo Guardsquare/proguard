@@ -9,7 +9,7 @@ have been replaced by short meaningless strings. Source file names and
 line numbers are missing altogether. While this may be intentional, it
 can also be inconvenient when debugging problems.
 
-<img src="PG_ReTrace.png" alt="ReTrace deobfuscation workflow" style="display: block; margin-left: auto; margin-right: auto;" />
+<img src="./PG_ReTrace.png" alt="ReTrace deobfuscation workflow" style="display: block; margin-left: auto; margin-right: auto;" />
 
 ReTrace can read an obfuscated stack trace and restore it to what it
 would look like without obfuscation. The restoration is based on the
@@ -18,9 +18,10 @@ file links the original class names and class member names to their
 obfuscated names.
 
 ## Usage {: #usage }
+[The Retrace jar is published individually in Maven](https://mvnrepository.com/artifact/com.guardsquare/proguard-retrace/latest), you can also find it in the `lib` directory of the [ProGuard
+distribution](https://github.com/Guardsquare/proguard/releases/latest). 
 
-You can find the ReTrace jar in the `lib` directory of the ProGuard
-distribution. To run ReTrace, just type:
+To run ReTrace, just type:
 
 `java -jar retrace.jar `\[*options...*\] *mapping\_file*
 \[*stacktrace\_file*\]
