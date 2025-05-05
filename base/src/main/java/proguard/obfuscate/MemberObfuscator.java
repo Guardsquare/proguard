@@ -81,7 +81,7 @@ implements   MemberVisitor
         String descriptor = member.getDescriptor(clazz);
 
         // Check whether we're allowed to overload aggressively.
-        if (!allowAggressiveOverloading)
+        if (!allowAggressiveOverloading || clazz.extendsOrImplements("java/lang/annotation/Annotation"))
         {
             // Trim the return argument from the descriptor if not.
             // Works for fields and methods alike.
