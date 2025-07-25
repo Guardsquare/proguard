@@ -51,7 +51,7 @@ The following options are supported:
   de-obfuscate more general types of input than just stack traces. A relatively
   simple expression like this works for basic stack trace formats:
 
-        (?:.*? at %c\.%m\(%s(?::%l)?\))|(?:(?:.*?[:"] +)?%c(?::.*)?)
+        (?:.*? at %c\.%m\(%s(?::%l)?\))|(?:(?:.*?[:\"] +)?%c(?::.*)?)
 
   It for instance matches the following lines:
 
