@@ -8,9 +8,13 @@ on:
     branches:
       - master
       - beta
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
