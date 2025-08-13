@@ -18,26 +18,30 @@ class AnnotationTest : FreeSpec({
                     boolean testBoolean2() default true;
                     String testString1() default "";
                 }
-                """.trimIndent()
+                """.trimIndent(),
             ),
         )
     val testClass = programClassPool.getClass("Test") as ProgramClass
-    
+
     "Annotation members should be excluded from aggressive overloading" {
         val descriptorMap = HashMap<String, Map<String, String>>()
-        
-        testClass.methodsAccept(MemberObfuscator(
-            true,
-            SimpleNameFactory(),
-            descriptorMap
-        ))
-        
-        descriptorMap shouldBeEqual mapOf(
-            "()" to mapOf(
-                "a" to "testBoolean1",
-                "b" to "testBoolean2",
-                "c" to "testString1",
+
+        testClass.methodsAccept(
+            MemberObfuscator(
+                true,
+                SimpleNameFactory(),
+                descriptorMap,
             ),
         )
+
+        descriptorMap shouldBeEqual
+            mapOf(
+                "()" to
+                    mapOf(
+                        "a" to "testBoolean1",
+                        "b" to "testBoolean2",
+                        "c" to "testString1",
+                    ),
+            )
     }
 })
