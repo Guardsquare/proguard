@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.Matcher
 import io.kotest.matchers.MatcherResult
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNot
@@ -12,8 +13,11 @@ import proguard.AppView
 import proguard.Configuration
 import proguard.classfile.Clazz
 import proguard.classfile.Member
+import proguard.classfile.ProgramClass
 import proguard.classfile.attribute.annotation.visitor.AllElementValueVisitor
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
+import proguard.classfile.kotlin.KotlinFileFacadeKindMetadata
+import proguard.classfile.kotlin.KotlinTypeAliasMetadata
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor
 import proguard.classfile.util.EnumFieldReferenceInitializer
 import proguard.classfile.visitor.AllMethodVisitor
@@ -265,5 +269,40 @@ class ClassUsageMarkerTest : StringSpec({
 
         val fooInterface = programClassPool.getClass("test/Interface").findMethod("foo", null)
         fooInterface should beMarkedWith(usageMarker)
+    }
+
+    "Given a Kotlin class with typealias of typealias" {
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "KotlinTypeAlias.kt",
+                    """
+                    typealias P = () -> Unit
+                    typealias A = P
+                    """.trimIndent(),
+                ),
+                kotlincArguments = listOf("-language-version=1.9")
+            )
+
+        val usageMarker = SimpleUsageMarker()
+        val classUsageMarker = ClassUsageMarker(usageMarker)
+
+        val aliasList = mutableListOf<KotlinTypeAliasMetadata>()
+        programClassPool.classes().forEach { clazz ->
+            if (clazz is ProgramClass) {
+                val kotlinMetadata = clazz.kotlinMetadata
+                if (kotlinMetadata is KotlinFileFacadeKindMetadata) {
+                    kotlinMetadata.typeAliases.forEach {
+                        aliasList.add(it)
+                    }
+                }
+            }
+        }
+
+        aliasList.shouldHaveSize(2)
+        programClassPool.classesAccept(classUsageMarker)
+        aliasList.forEach {
+            it should beMarkedWith(usageMarker)
+        }
     }
 })
