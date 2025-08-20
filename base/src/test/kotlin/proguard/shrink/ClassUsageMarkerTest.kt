@@ -14,6 +14,8 @@ import proguard.classfile.Clazz
 import proguard.classfile.Member
 import proguard.classfile.attribute.annotation.visitor.AllElementValueVisitor
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
+import proguard.classfile.kotlin.KotlinTypeAliasMetadata
+import proguard.classfile.kotlin.visitor.AllTypeAliasVisitor
 import proguard.classfile.kotlin.visitor.ReferencedKotlinMetadataVisitor
 import proguard.classfile.util.EnumFieldReferenceInitializer
 import proguard.classfile.visitor.AllMethodVisitor
@@ -265,5 +267,40 @@ class ClassUsageMarkerTest : StringSpec({
 
         val fooInterface = programClassPool.getClass("test/Interface").findMethod("foo", null)
         fooInterface should beMarkedWith(usageMarker)
+    }
+
+    "Given Kotlin `typealias` declarations where one aliases another" {
+        val (programClassPool, _) =
+            ClassPoolBuilder.fromSource(
+                KotlinSource(
+                    "KotlinTypeAlias.kt",
+                    """
+                    typealias P = () -> Unit
+                    typealias A = P
+                    """.trimIndent(),
+                ),
+                kotlincArguments = listOf("-language-version=1.9")
+            )
+
+        // Obtain the `typealias` declarations A and P
+        val typeAliasList = mutableListOf<KotlinTypeAliasMetadata>()
+        programClassPool.classesAccept(
+            ReferencedKotlinMetadataVisitor(
+                AllTypeAliasVisitor { _, _, kotlinTypeAliasMetadata ->
+                    typeAliasList.add(kotlinTypeAliasMetadata)
+                },
+            ),
+        )
+
+        // Ensure only `typealias` A and `typealias` P are present
+        typeAliasList.map { it.name }.toSet() shouldBe setOf("A", "P")
+
+        // Both `typealias` A and `typealias` P should be marked as used by usageMarker.
+        val usageMarker = SimpleUsageMarker()
+        val classUsageMarker = ClassUsageMarker(usageMarker)
+        programClassPool.classesAccept(classUsageMarker)
+        typeAliasList.forEach {
+            it should beMarkedWith(usageMarker)
+        }
     }
 })

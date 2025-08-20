@@ -2068,7 +2068,10 @@ implements   ClassVisitor,
                 else if (kotlinTypeMetadata.aliasName != null && !isUsed(kotlinTypeMetadata.referencedTypeAlias))
                 {
                     markAsUsed(kotlinTypeMetadata.referencedTypeAlias);
-                    kotlinTypeMetadata.referencedTypeAlias.accept(null, null, this);
+                    kotlinTypeMetadata.referencedTypeAlias.accept(
+                            kotlinTypeMetadata.referencedTypeAlias.referencedDeclarationContainer.ownerReferencedClass,
+                            kotlinTypeMetadata.referencedTypeAlias.referencedDeclarationContainer,
+                            this);
                 }
 
                 markAsUsed(kotlinTypeMetadata.typeArguments);
