@@ -279,7 +279,7 @@ class ClassUsageMarkerTest : StringSpec({
                     typealias A = P
                     """.trimIndent(),
                 ),
-                kotlincArguments = listOf("-language-version=1.9")
+                kotlincArguments = listOf("-language-version=1.9"),
             )
 
         // Obtain the `typealias` declarations A and P
