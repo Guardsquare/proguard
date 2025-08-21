@@ -1,3 +1,9 @@
+## Version 7.7.1
+
+### Kotlin support
+
+- Add support for Kotlin 2.2.
+
 ## Version 7.7
 
 ### Java support
