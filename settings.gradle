@@ -5,7 +5,7 @@ pluginManagement {
                 useVersion '8.1.1'
             }
             if (requested.id.id == 'io.github.gradle-nexus.publish-plugin') {
-                useVersion '1.1.0'
+                useVersion '2.0.0'
             }
         }
     }
