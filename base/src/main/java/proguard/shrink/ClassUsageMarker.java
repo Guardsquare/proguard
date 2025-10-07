@@ -1886,6 +1886,7 @@ implements   ClassVisitor,
                 markAsUsed(kotlinPropertyMetadata.receiverType);
                 markAsUsed(kotlinPropertyMetadata.typeParameters);
                 markAsUsed(kotlinPropertyMetadata.setterParameters);
+                markAsUsed(kotlinPropertyMetadata.setterParameter);
                 markAsUsed(kotlinPropertyMetadata.type);
 
                 if (kotlinPropertyMetadata.flags.hasAnnotations &&

@@ -192,6 +192,7 @@ implements   KotlinMetadataVisitor,
             kotlinPropertyMetadata.setterSignature        = null;
             kotlinPropertyMetadata.referencedSetterMethod = null;
             kotlinPropertyMetadata.flags.isVar            = false;
+            kotlinPropertyMetadata.setterParameter        = null;
             kotlinPropertyMetadata.setterParameters.clear();
         }
 
