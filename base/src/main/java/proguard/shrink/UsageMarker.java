@@ -105,7 +105,9 @@ public class UsageMarker
                 new MemberProcessingFlagFilter(ProcessingFlags.DONT_SHRINK, 0,
                 classUsageMarker))
             ));
+
         // Mark interfaces that have to be kept.
+        // THis must be before the NestUsageMarker call right after, see https://github.com/Guardsquare/proguard/issues/501
         programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
 
 

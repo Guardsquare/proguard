@@ -23,6 +23,7 @@ import proguard.util.ProcessingFlags.DONT_SHRINK
 
 @RequiresJavaVersion(15)
 class Java15UsageMarkerTest : BehaviorSpec({
+    // Regression test for https://github.com/Guardsquare/proguard/issues/501
     Given("A class pool containing a sealed interface extending another sealed interface, and final classes implementing both") {
         val (programClassPool, _) = ClassPoolBuilder.fromSource(
             JavaSource("sample/Animal.java","""
