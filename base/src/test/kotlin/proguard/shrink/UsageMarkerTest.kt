@@ -29,18 +29,15 @@ class Java15UsageMarkerTest : BehaviorSpec({
             JavaSource("sample/Animal.java","""
                 package sample;
                 public sealed interface Animal permits Fish, Mammal {
-
                 	static Animal ofType(String type) {
-
-                		if(Cat.TYPE.matches(type)){
+                		if (Cat.TYPE.matches(type)) {
                 			return new Cat();
-                		}else if(Dog.TYPE.matches(type)){
+                		} else if (Dog.TYPE.matches(type)) {
                 			return new Dog();
-                		}else if(Fish.TYPE.matches(type)){
+                		} else if (Fish.TYPE.matches(type)) {
                 			return new Fish();
                 		}
                 		throw new IllegalArgumentException("Wrong animal type: " + type);
-
                 	}
                 }
             """.trimIndent()),
@@ -75,27 +72,21 @@ class Java15UsageMarkerTest : BehaviorSpec({
             """.trimIndent()),
             JavaSource("sample/Cat.java","""
                 package sample;
-                public final class Cat implements Mammal{
-
+                public final class Cat implements Mammal {
                 	public static final AnimalType TYPE = AnimalType.CAT;
-
                 }
 
             """.trimIndent()),
             JavaSource("sample/Dog.java","""
                 package sample;
-                public final class Dog implements Mammal{
-
+                public final class Dog implements Mammal {
                 	public static final AnimalType TYPE = AnimalType.DOG;
-
                 }
             """.trimIndent()),
             JavaSource("sample/Fish.java","""
                 package sample;
-                public final class Fish implements Animal{
-
+                public final class Fish implements Animal {
                 	public static final AnimalType TYPE = AnimalType.FISH;
-
                 }
             """.trimIndent()),
             JavaSource("sample/Main.java","""

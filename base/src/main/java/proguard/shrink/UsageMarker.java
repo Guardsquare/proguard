@@ -106,10 +106,9 @@ public class UsageMarker
                 classUsageMarker))
             ));
 
-        // Mark interfaces that have to be kept.
-        // THis must be before the NestUsageMarker call right after, see https://github.com/Guardsquare/proguard/issues/501
+        // Mark interfaces that have to be kept. This must be before the NestUsageMarker call right after,
+        // see https://github.com/Guardsquare/proguard/issues/501.
         programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
-
 
         // Mark the elements of Kotlin metadata that need to be kept.
         if (configuration.keepKotlinMetadata)
