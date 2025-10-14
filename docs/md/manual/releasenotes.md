@@ -1,3 +1,9 @@
+## Version 7.8.1 
+
+### Bugfixes 
+
+- Prevent `java.lang.IncompatibleClassChangeError` when shrinking is enabled and sealed interfaces are used (#501).
+
 ## Version 7.8
 
 ### Kotlin support
