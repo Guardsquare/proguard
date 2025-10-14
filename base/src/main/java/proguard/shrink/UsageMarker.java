@@ -105,6 +105,9 @@ public class UsageMarker
                 new MemberProcessingFlagFilter(ProcessingFlags.DONT_SHRINK, 0,
                 classUsageMarker))
             ));
+        // Mark interfaces that have to be kept.
+        programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
+
 
         // Mark the elements of Kotlin metadata that need to be kept.
         if (configuration.keepKotlinMetadata)
@@ -114,7 +117,6 @@ public class UsageMarker
                 new ReferencedKotlinMetadataVisitor(
                 classUsageMarker));
         }
-
         // Mark the inner class and annotation information that has to be kept.
         programClassPool.classesAccept(
             new UsedClassFilter(simpleUsageMarker,
@@ -126,8 +128,6 @@ public class UsageMarker
                 new LocalVariableTypeUsageMarker(classUsageMarker)
             ))));
 
-        // Mark interfaces that have to be kept.
-        programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
 
         if (configuration.keepKotlinMetadata)
         {
