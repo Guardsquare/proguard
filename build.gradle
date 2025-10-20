@@ -3,6 +3,7 @@ plugins {
     id 'io.github.gradle-nexus.publish-plugin'
     id 'signing'
     id "org.jetbrains.kotlin.jvm" version "$kotlinVersion" apply false
+    id "com.gradleup.shadow" version "9.2.1" apply false
 }
 
 allprojects {
@@ -150,10 +151,10 @@ distributions {
         distributionBaseName.set('proguard')
         contents {
             into('lib') {
-                from tasks.getByPath(':proguard-app:fatJar').outputs
-                from tasks.getByPath(':gui:fatJar').outputs
-                from tasks.getByPath(':retrace:fatJar').outputs
-                from tasks.getByPath(':ant:fatJar').outputs
+                from tasks.getByPath(':proguard-app:shadowJar').outputs
+                from tasks.getByPath(':gui:shadowJar').outputs
+                from tasks.getByPath(':retrace:shadowJar').outputs
+                from tasks.getByPath(':ant:shadowJar').outputs
             }
             into('docs') {
                 from('docs/md') {
