@@ -29,18 +29,19 @@ import proguard.classfile.ProgramClass;
 import proguard.classfile.ProgramMethod;
 import proguard.classfile.attribute.Attribute;
 import proguard.classfile.attribute.CodeAttribute;
-import proguard.classfile.attribute.ExtendedLineNumberInfo;
 import proguard.classfile.attribute.LineNumberInfo;
+import proguard.classfile.attribute.LineNumberInfoBlock;
 import proguard.classfile.attribute.LineNumberTableAttribute;
+import proguard.classfile.attribute.StructuredLineNumberInfo;
 import proguard.classfile.attribute.visitor.AllAttributeVisitor;
 import proguard.classfile.attribute.visitor.AllLineNumberInfoVisitor;
 import proguard.classfile.attribute.visitor.AttributeVisitor;
-import proguard.classfile.attribute.visitor.LineNumberInfoVisitor;
 import proguard.classfile.attribute.visitor.LineNumberRangeFinder;
 import proguard.classfile.visitor.ClassVisitor;
 import proguard.classfile.visitor.MemberVisitor;
 import proguard.pass.Pass;
 
+import java.util.Arrays;
 import java.util.Stack;
 
 /**
@@ -56,8 +57,7 @@ public class LineNumberLinearizer
 implements   Pass,
              ClassVisitor,
              MemberVisitor,
-             AttributeVisitor,
-             LineNumberInfoVisitor
+             AttributeVisitor
 {
     private static final Logger logger = LogManager.getLogger(LineNumberLinearizer.class);
 
@@ -76,16 +76,15 @@ implements   Pass,
      * optimizations like method inlining and class merging.
      */
     @Override
-    public void execute(AppView appView)
-    {
+    public void execute(AppView appView) {
         appView.programClassPool.classesAccept(this);
     }
 
     // Implementations for ClassVisitor.
 
     @Override
-    public void visitAnyClass(Clazz clazz) { }
-
+    public void visitAnyClass(Clazz clazz) {
+    }
 
     @Override
     public void visitProgramClass(ProgramClass programClass)
@@ -109,26 +108,26 @@ implements   Pass,
         }
     }
 
-
     // Implementations for MemberVisitor.
 
+    @Override
     public void visitProgramMethod(ProgramClass programClass, ProgramMethod programMethod)
     {
         programMethod.attributesAccept(programClass, this);
     }
 
-
     // Implementations for AttributeVisitor.
 
+    @Override
     public void visitAnyAttribute(Clazz clazz, Attribute attribute) {}
 
-
+    @Override
     public void visitCodeAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute)
     {
         codeAttribute.attributesAccept(clazz, method, this);
     }
 
-
+    @Override
     public void visitLineNumberTableAttribute(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberTableAttribute lineNumberTableAttribute)
     {
         logger.debug("LineNumberLinearizer [{}.{}{}]:",
@@ -138,112 +137,142 @@ implements   Pass,
         );
 
         enclosingLineNumbers.clear();
-        previousLineNumberInfo = null;
 
-        // Process all line numbers.
-        lineNumberTableAttribute.lineNumbersAccept(clazz, method, codeAttribute, this);
-    }
+        // Figure out which lines need linearizing. Only freshly inlined blocks need to be linearized.
 
+        LineNumberInfo[] infos = lineNumberTableAttribute.lineNumberTable;
+        int lineNumberTableLength = lineNumberTableAttribute.u2lineNumberTableLength;
+        boolean[] inlinedBlock = new boolean[lineNumberTableLength];
 
-    // Implementations for LineNumberInfoVisitor.
-
-    public void visitLineNumberInfo(Clazz clazz, Method method, CodeAttribute codeAttribute, LineNumberInfo lineNumberInfo)
-    {
-        String source = lineNumberInfo.getSource();
-
-        String debugMessage = String.format("    [%s] line %s%s",
-                                            lineNumberInfo.u2startPC,
-                                            lineNumberInfo.u2lineNumber,
-                                            source == null ? "" : " [" + source + "]"
-        );
-
-        // Is it an inlined line number?
-        if (source != null)
+        int currentDepth = 0;
+        for (int i = 0; i < lineNumberTableLength; i++)
         {
-            ExtendedLineNumberInfo extendedLineNumberInfo =
-                (ExtendedLineNumberInfo)lineNumberInfo;
-
-            int lineNumber = extendedLineNumberInfo.u2lineNumber;
-
-            // Are we entering or exiting a new inlined block?
-            if (previousLineNumberInfo == null ||
-                !source.equals(previousLineNumberInfo.getSource()))
+            LineNumberInfo currentInfo = infos[i];
+            if (currentInfo.u2lineNumber == MethodInliner.INLINED_METHOD_START_LINE_NUMBER)
             {
+                currentDepth++;
+            }
+
+            inlinedBlock[i] = currentDepth > 0;
+
+            if (currentInfo.u2lineNumber == MethodInliner.INLINED_METHOD_END_LINE_NUMBER)
+            {
+                currentDepth--;
+            }
+        }
+
+        // Linearize the line numbers.
+
+        LineNumberInfo previousLineNumberInfo = null;
+        for (int i = 0; i < lineNumberTableLength; i++)
+        {
+            LineNumberInfo lineNumberInfo = infos[i];
+            String source = lineNumberInfo.getSource();
+
+            logger.debug("    [{}] line {}{}", lineNumberInfo.u2startPC, lineNumberInfo.u2lineNumber, source == null ? "" : " [" + source + "]");
+
+            // Is it an inlined line number?
+            if (source != null && inlinedBlock[i])
+            {
+                int lineNumber = lineNumberInfo.u2lineNumber;
+
                 // Are we entering a new inlined block?
-                if (lineNumber != MethodInliner.INLINED_METHOD_END_LINE_NUMBER)
+                if (lineNumber == MethodInliner.INLINED_METHOD_START_LINE_NUMBER)
                 {
                     // Remember information about the inlined block.
-                    enclosingLineNumbers.push(previousLineNumberInfo != null ?
-                        new MyLineNumberBlock(currentLineNumberShift,
-                                              previousLineNumberInfo.u2lineNumber,
-                                              previousLineNumberInfo.getSource()) :
-                        new MyLineNumberBlock(0, 0, null));
+                    enclosingLineNumbers.push(
+                            previousLineNumberInfo != null
+                                    ? new MyLineNumberBlock(
+                                    currentLineNumberShift,
+                                    previousLineNumberInfo.u2lineNumber,
+                                    previousLineNumberInfo.getSource() != null
+                                            ? previousLineNumberInfo.getBlock()
+                                            : null)
+                                    : new MyLineNumberBlock(0, 0, null));
 
-                    // Parse the end line number from the source string,
-                    // so we know how large a block this will be.
+                    // Parse the end line number from the source string, so we know how large a block this
+                    // will be.
                     int separatorIndex1 = source.indexOf(':');
                     int separatorIndex2 = source.indexOf(':', separatorIndex1 + 1);
 
-                    int startLineNumber = Integer.parseInt(source.substring(separatorIndex1 + 1, separatorIndex2));
-                    int endLineNumber   = Integer.parseInt(source.substring(separatorIndex2 + 1));
+                    int startLineNumber =
+                            Integer.parseInt(source.substring(separatorIndex1 + 1, separatorIndex2));
+                    int endLineNumber = Integer.parseInt(source.substring(separatorIndex2 + 1));
 
-                    // Start shifting, if necessary, so the block ends up beyond
-                    // the highest used line number. We're striving for rounded
-                    // shifts, unless we've reached a given limit, to avoid
-                    // running out of line numbers too quickly.
+                    // TODO: this matches a quirk in the old behavior where the opening line is always :0:0
+                    // this is a bug that probably causes overlapping line numbers but for now we will match
+                    // this behavior so we can directly compare old and new mappings.
+                    startLineNumber = 0;
+                    endLineNumber = 0;
+
+                    // Start shifting, if necessary, so the block ends up beyond the highest used line number.
+                    // We're striving for rounded shifts, unless we've reached a given limit, to avoid running
+                    // out of line numbers too quickly.
                     currentLineNumberShift =
-                        highestUsedLineNumber > SHIFT_ROUNDING_LIMIT ?
-                            highestUsedLineNumber - startLineNumber + 1 :
-                        startLineNumber > highestUsedLineNumber ? 0 :
-                            (highestUsedLineNumber - startLineNumber + SHIFT_ROUNDING)
-                            / SHIFT_ROUNDING * SHIFT_ROUNDING;
+                            highestUsedLineNumber > SHIFT_ROUNDING_LIMIT
+                                    ? highestUsedLineNumber - startLineNumber + 1
+                                    : startLineNumber > highestUsedLineNumber
+                                    ? 0
+                                    : (highestUsedLineNumber - startLineNumber + SHIFT_ROUNDING)
+                                    / SHIFT_ROUNDING
+                                    * SHIFT_ROUNDING;
 
                     highestUsedLineNumber = endLineNumber + currentLineNumberShift;
 
-                    debugMessage += String.format(" (enter with shift %s)", currentLineNumberShift);
+
+                    logger.debug(" (enter with shift {})", currentLineNumberShift);
+                }
+
+                // Are we exiting an inlined block?
+                else if (lineNumber == MethodInliner.INLINED_METHOD_END_LINE_NUMBER)
+                {
+                    // TODO: There appear to be cases where the stack is empty at this point, so we've added a
+                    // check.
+                    if (enclosingLineNumbers.isEmpty())
+                    {
+                        logger.debug("Problem linearizing line numbers for optimized code ({}.{})", clazz.getName(), method.getName(clazz));
+                    }
+                    else
+                    {
+                        // Pop information about the enclosing line number.
+                        MyLineNumberBlock lineNumberBlock = enclosingLineNumbers.pop();
+
+                        // Set this end of the block to the line at which it was inlined.
+                        lineNumberInfo =
+                                lineNumberBlock.enclosingSource != null
+                                        ? lineNumberBlock.enclosingSource.line(
+                                        lineNumberInfo.u2startPC, lineNumberBlock.enclosingLineNumber)
+                                        : new LineNumberInfo(
+                                        lineNumberInfo.u2startPC, lineNumberBlock.enclosingLineNumber);
+                        infos[i] = lineNumberInfo;
+
+                        // Reset the shift to the shift of the block.
+                        currentLineNumberShift = lineNumberBlock.lineNumberShift;
+
+                        logger.debug(" (exit to shift {})", currentLineNumberShift);
+                    }
+                }
+                else
+                {
+                    logger.debug(" (apply shift {})", currentLineNumberShift);
+
 
                     // Apply the shift.
                     lineNumberInfo.u2lineNumber += currentLineNumberShift;
                 }
-
-                // TODO: There appear to be cases where the stack is empty at this point, so we've added a check.
-                else if (enclosingLineNumbers.isEmpty())
-                {
-                    debugMessage += String.format("Problem linearizing line numbers for optimized code %s.%s)", clazz.getName(), method.getName(clazz));
-                    logger.debug(debugMessage);
-                    debugMessage = "";
-                }
-
-                // Are we exiting an inlined block?
-                else
-                {
-                    // Pop information about the enclosing line number.
-                    MyLineNumberBlock lineNumberBlock = enclosingLineNumbers.pop();
-
-                    // Set this end of the block to the line at which it was
-                    // inlined.
-                    extendedLineNumberInfo.u2lineNumber = lineNumberBlock.enclosingLineNumber;
-                    extendedLineNumberInfo.source       = lineNumberBlock.enclosingSource;
-
-                    // Reset the shift to the shift of the block.
-                    currentLineNumberShift = lineNumberBlock.lineNumberShift;
-
-                    debugMessage += String.format(" (exit to shift %s)", currentLineNumberShift);
-                }
             }
-            else
-            {
-                debugMessage += String.format(" (apply shift %s)", currentLineNumberShift);
 
-                // Apply the shift.
-                lineNumberInfo.u2lineNumber += currentLineNumberShift;
-            }
+            previousLineNumberInfo = lineNumberInfo;
+
+            logger.debug(" -> line {}", lineNumberInfo.u2lineNumber);
         }
 
-        previousLineNumberInfo = lineNumberInfo;
-
-        debugMessage += String.format(" -> line %s", lineNumberInfo.u2lineNumber);
-        logger.debug(debugMessage);
+        lineNumberTableAttribute.lineNumberTable =
+                Arrays.stream(infos, 0, lineNumberTableLength)
+                        .filter(info -> info.u2lineNumber != MethodInliner.INLINED_METHOD_START_LINE_NUMBER)
+                        .toArray(LineNumberInfo[]::new);
+        lineNumberTableAttribute.u2lineNumberTableLength =
+                lineNumberTableAttribute.lineNumberTable.length;
     }
 
 
@@ -253,14 +282,13 @@ implements   Pass,
      */
     private static class MyLineNumberBlock
     {
-        public final int    lineNumberShift;
-        public final int    enclosingLineNumber;
-        public final String enclosingSource;
+        public final int                 lineNumberShift;
+        public final int                 enclosingLineNumber;
+        public final LineNumberInfoBlock enclosingSource;
 
-        public MyLineNumberBlock(int    lineNumberShift,
-                                 int    enclosingLineNumber,
-                                 String enclosingSource)
-        {
+        public MyLineNumberBlock(int                 lineNumberShift,
+                                 int                 enclosingLineNumber,
+                                 LineNumberInfoBlock enclosingSource) {
             this.lineNumberShift     = lineNumberShift;
             this.enclosingLineNumber = enclosingLineNumber;
             this.enclosingSource     = enclosingSource;
