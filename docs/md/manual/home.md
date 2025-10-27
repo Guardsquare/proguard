@@ -1,4 +1,4 @@
-Welcome to the manual for **ProGuard** version 7.8.0 ([what's new?](releasenotes.md)).
+Welcome to the manual for **ProGuard** version 7.8.1 ([what's new?](releasenotes.md)).
 
 ProGuard is an open-sourced Java class file shrinker, optimizer, obfuscator, and
 preverifier. As a result, ProGuard processed applications and libraries are smaller and faster.
