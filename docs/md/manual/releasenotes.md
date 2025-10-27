@@ -3,6 +3,7 @@
 ### Bugfixes 
 
 - Prevent `java.lang.IncompatibleClassChangeError` when shrinking is enabled and sealed interfaces are used (#501).
+- Prevent `java.lang.ClassCastException` when inlining (#505).
 
 ## Version 7.8
 
