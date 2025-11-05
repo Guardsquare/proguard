@@ -14,6 +14,10 @@ dependencies {
     implementation project(':base')
 }
 
+test {
+    useJUnitPlatform()
+}
+
 task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('retrace.jar')

@@ -3,6 +3,15 @@ plugins {
     id 'maven-publish'
 }
 
+repositories {
+    mavenCentral()
+}
+
+
+test {
+    useJUnitPlatform()
+}
+
 afterEvaluate {
     publishing {
         publications.getByName(project.name) {

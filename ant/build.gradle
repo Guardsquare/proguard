@@ -15,6 +15,10 @@ dependencies {
     implementation 'org.apache.ant:ant:1.10.15'
 }
 
+test {
+    useJUnitPlatform()
+}
+
 task fatJar(type: ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard-ant.jar')
