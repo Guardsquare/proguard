@@ -13,6 +13,11 @@ repositories {
 dependencies {
     implementation project(':base')
     implementation 'org.apache.ant:ant:1.10.15'
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.1")
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")
+    compileOnly("com.diffblue.cover:cover-annotations:1.7.0")
+    testImplementation("com.diffblue.cover:cover-annotations:1.7.0")
 }
 
 test {

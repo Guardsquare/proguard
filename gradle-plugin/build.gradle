@@ -59,6 +59,11 @@ dependencies {
     fatJar project(":base")
     // This library is used to parse the android gradle plugin version at runtime.
     fatJar 'com.github.zafarkhaja:java-semver:0.10.2'
+    testImplementation("org.junit.vintage:junit-vintage-engine:5.8.2")
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")
+    compileOnly("com.diffblue.cover:cover-annotations:1.7.0")
+    testImplementation("com.diffblue.cover:cover-annotations:1.7.0")
 }
 
 test {
