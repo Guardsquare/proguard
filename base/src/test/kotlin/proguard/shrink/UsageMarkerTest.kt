@@ -21,6 +21,74 @@ import proguard.testutils.RequiresJavaVersion
 import proguard.util.ProcessingFlagSetter
 import proguard.util.ProcessingFlags.DONT_SHRINK
 
+class UsageMarkerTest : BehaviorSpec({
+    Given("A class pool with interfaces only referenced through annotations") {
+
+        val (programClassPool, _) = ClassPoolBuilder.fromSource(
+            JavaSource("MyInterface.java","""
+               interface MyInterface {} 
+            """.trimIndent()),
+            JavaSource("MyAnnotation.java","""
+                import java.lang.annotation.RetentionPolicy;
+                import java.lang.annotation.Retention;
+        
+                @Retention(RetentionPolicy.RUNTIME)
+                @interface MyAnnotation {
+                    Class<?> value();
+                } 
+            """.trimIndent()),
+            JavaSource("MyImpl.java","""
+                class MyImpl implements MyInterface {}
+            """.trimIndent()),
+            JavaSource("InterfaceTest.java", """
+               import java.lang.reflect.Field;
+               
+               class InterfaceTest {
+               
+                @MyAnnotation(MyImpl.class)
+                String s;
+
+                public static void main(String... args) throws Exception {
+                    Field f = InterfaceTest.class.getDeclaredField("s");
+                    MyAnnotation annotation = f.getAnnotation(MyAnnotation.class);
+                    Object obj = annotation.value().getDeclaredConstructor().newInstance();
+                    if (obj instanceof MyInterface) {
+                        System.out.println("success");
+                    } else {
+                        throw new Exception(obj.getClass() + " does not implement " + MyInterface.class);
+                    }
+                }
+        } 
+            """.trimIndent())
+        )
+        val implClass = programClassPool.getClass("MyImpl")
+        val main = programClassPool.getClass("InterfaceTest")
+        main.accept(
+            MultiClassVisitor(ProcessingFlagSetter(DONT_SHRINK), AllMemberVisitor(
+                ProcessingFlagSetter(DONT_SHRINK)
+            )))
+        When("marking") {
+            val simpleUsageMarker = SimpleUsageMarker()
+            UsageMarker(Configuration()).mark(programClassPool,ClassPool(), ResourceFilePool(),simpleUsageMarker)
+            Then("The interface class should be marked as used.") {
+                val used = object : ConstantVisitor {
+                    var used = false
+                    override fun visitAnyConstant(
+                        clazz: Clazz?,
+                        constant: Constant?
+                    ) {
+                        used = used or simpleUsageMarker.isUsed(constant)
+                    }
+                }
+                implClass.interfaceConstantsAccept(used)
+                used.used shouldBe true
+
+            }
+        }
+    }
+
+})
+
 @RequiresJavaVersion(15)
 class Java15UsageMarkerTest : BehaviorSpec({
     // Regression test for https://github.com/Guardsquare/proguard/issues/501

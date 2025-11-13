@@ -1,3 +1,9 @@
+## Version 7.8.2 
+
+### Bugfixes 
+
+- Fix regression in marking of interface constants (#508).
+
 ## Version 7.8.1 
 
 ### Bugfixes 
