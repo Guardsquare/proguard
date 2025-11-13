@@ -129,6 +129,9 @@ public class UsageMarker
                 new LocalVariableTypeUsageMarker(classUsageMarker)
             ))));
 
+        // Second Interface Usage marking, this is necessary for marking interface constants that are not directly referenced
+        // (e.g. interfaces only referenced through annotations). See https://github.com/Guardsquare/proguard/issues/508.
+        programClassPool.classesAccept(new InterfaceUsageMarker(classUsageMarker));
 
         if (configuration.keepKotlinMetadata)
         {
