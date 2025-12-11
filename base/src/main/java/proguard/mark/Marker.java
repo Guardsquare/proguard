@@ -146,8 +146,8 @@ public class Marker implements Pass
                                                  KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
                                                  KotlinPropertyMetadata kotlinPropertyMetadata) {
                         List<Processable> processables = Stream.of(kotlinPropertyMetadata.referencedBackingField,
-                                                                   kotlinPropertyMetadata.referencedGetterMethod,
-                                                                   kotlinPropertyMetadata.referencedSetterMethod)
+                                                                   kotlinPropertyMetadata.getterMetadata.referencedMethod,
+                                                                   kotlinPropertyMetadata.setterMetadata != null ? kotlinPropertyMetadata.setterMetadata.referencedMethod : null)
                                                                 .filter(Objects::nonNull)
                                                                 .collect(Collectors.toList());
                         int flags = 0;

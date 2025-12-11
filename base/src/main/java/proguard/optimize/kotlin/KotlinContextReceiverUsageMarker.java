@@ -108,8 +108,8 @@ public class KotlinContextReceiverUsageMarker implements
     public void visitAnyProperty(Clazz clazz, KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata, KotlinPropertyMetadata kotlinPropertyMetadata)
     {
         markContextReceiverParameters(kotlinPropertyMetadata.contextReceivers,
-            kotlinPropertyMetadata.referencedGetterMethod,
-            kotlinPropertyMetadata.referencedSetterMethod);
+            kotlinPropertyMetadata.getterMetadata.referencedMethod,
+            kotlinPropertyMetadata.setterMetadata != null ? kotlinPropertyMetadata.setterMetadata.referencedMethod : null);
     }
 
     private void markContextReceiverParameters(List<KotlinTypeMetadata> contextReceivers, Method...methods)

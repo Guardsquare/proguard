@@ -114,14 +114,14 @@ implements KotlinMetadataVisitor,
                                  KotlinPropertyMetadata             kotlinPropertyMetadata)
     {
         keepParameterInfo = false;
-        if (kotlinPropertyMetadata.referencedSetterMethod != null)
+        if (kotlinPropertyMetadata.setterMetadata != null && kotlinPropertyMetadata.setterMetadata.referencedMethod != null)
         {
-            kotlinPropertyMetadata.referencedSetterMethod.accept(clazz, this);
+            kotlinPropertyMetadata.setterMetadata.referencedMethod.accept(clazz, this);
         }
 
         if (keepParameterInfo)
         {
-            kotlinPropertyMetadata.setterParametersAccept(clazz, kotlinDeclarationContainerMetadata, this);
+            kotlinPropertyMetadata.setterParameterAccept(clazz, kotlinDeclarationContainerMetadata, this);
         }
     }
 
