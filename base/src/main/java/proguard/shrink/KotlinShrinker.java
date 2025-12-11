@@ -26,6 +26,7 @@ import proguard.classfile.kotlin.KotlinClassKindMetadata;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.kotlin.KotlinConstructorMetadata;
 import proguard.classfile.kotlin.KotlinDeclarationContainerMetadata;
+import proguard.classfile.kotlin.KotlinEnumEntryMetadata;
 import proguard.classfile.kotlin.KotlinFileFacadeKindMetadata;
 import proguard.classfile.kotlin.KotlinFunctionMetadata;
 import proguard.classfile.kotlin.KotlinMetadata;
@@ -38,6 +39,7 @@ import proguard.classfile.kotlin.KotlinTypeMetadata;
 import proguard.classfile.kotlin.KotlinTypeParameterMetadata;
 import proguard.classfile.kotlin.KotlinValueParameterMetadata;
 import proguard.classfile.kotlin.KotlinVersionRequirementMetadata;
+import proguard.classfile.kotlin.flags.KotlinPropertyAccessorMetadata;
 import proguard.classfile.kotlin.visitor.AllTypeVisitor;
 import proguard.classfile.kotlin.visitor.KotlinConstructorVisitor;
 import proguard.classfile.kotlin.visitor.KotlinFunctionVisitor;
@@ -110,8 +112,7 @@ implements   KotlinMetadataVisitor,
 
         shrinkMetadataArray(kotlinClassKindMetadata.constructors);
 
-        shrinkArray(kotlinClassKindMetadata.enumEntryNames,
-                    kotlinClassKindMetadata.referencedEnumEntries);
+        shrinkEnumEntries(kotlinClassKindMetadata.enumEntries);
 
         shrinkArray(kotlinClassKindMetadata.nestedClassNames,
                     kotlinClassKindMetadata.referencedNestedClasses);
@@ -167,7 +168,7 @@ implements   KotlinMetadataVisitor,
     {
         kotlinPropertyMetadata.versionRequirementAccept(  clazz, kotlinDeclarationContainerMetadata, this);
         kotlinPropertyMetadata.typeAccept(                clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinPropertyMetadata.setterParametersAccept(    clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinPropertyMetadata.setterParameterAccept(    clazz, kotlinDeclarationContainerMetadata, this);
         kotlinPropertyMetadata.receiverTypeAccept(        clazz, kotlinDeclarationContainerMetadata, this);
         kotlinPropertyMetadata.contextReceiverTypesAccept(clazz, kotlinDeclarationContainerMetadata, this);
         kotlinPropertyMetadata.typeParametersAccept(      clazz, kotlinDeclarationContainerMetadata, this);
@@ -179,21 +180,18 @@ implements   KotlinMetadataVisitor,
             kotlinPropertyMetadata.referencedBackingField = null;
         }
 
-        if (shouldShrinkMetadata(kotlinPropertyMetadata.getterSignature,
-                                 kotlinPropertyMetadata.referencedGetterMethod))
+        if (shouldShrinkMetadata(kotlinPropertyMetadata.getterMetadata))
         {
-            kotlinPropertyMetadata.getterSignature        = null;
-            kotlinPropertyMetadata.referencedGetterMethod = null;
+            kotlinPropertyMetadata.getterMetadata.signature        = null;
+            kotlinPropertyMetadata.getterMetadata.referencedMethod = null;
         }
 
-        if (shouldShrinkMetadata(kotlinPropertyMetadata.setterSignature,
-                                 kotlinPropertyMetadata.referencedSetterMethod))
+        if (shouldShrinkMetadata(kotlinPropertyMetadata.setterMetadata))
         {
-            kotlinPropertyMetadata.setterSignature        = null;
-            kotlinPropertyMetadata.referencedSetterMethod = null;
-            kotlinPropertyMetadata.flags.isVar            = false;
-            kotlinPropertyMetadata.setterParameter        = null;
-            kotlinPropertyMetadata.setterParameters.clear();
+            kotlinPropertyMetadata.setterMetadata.signature = null;
+            kotlinPropertyMetadata.setterMetadata.referencedMethod = null;
+            kotlinPropertyMetadata.flags.isVar  = false;
+            kotlinPropertyMetadata.setterParameter  = null;
         }
 
         kotlinPropertyMetadata.versionRequirementAccept(clazz,
@@ -206,7 +204,7 @@ implements   KotlinMetadataVisitor,
             kotlinPropertyMetadata.syntheticMethodForAnnotations           = null;
             kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations = null;
             kotlinPropertyMetadata.referencedSyntheticMethodClass          = null;
-            kotlinPropertyMetadata.flags.hasAnnotations                    = false;
+            kotlinPropertyMetadata.annotations.clear();
         }
 
         if (kotlinPropertyMetadata.syntheticMethodForDelegate != null &&
@@ -220,8 +218,10 @@ implements   KotlinMetadataVisitor,
         // Fix inconsistencies that were introduced as
         // a result of shrinking
         if (kotlinPropertyMetadata.referencedBackingField != null &&
-            kotlinPropertyMetadata.getterSignature        == null &&
-            kotlinPropertyMetadata.setterSignature        == null &&
+                (kotlinPropertyMetadata.setterMetadata == null ||
+                        kotlinPropertyMetadata.setterMetadata.signature == null) &&
+                (kotlinPropertyMetadata.getterMetadata == null ||
+                        kotlinPropertyMetadata.getterMetadata.signature == null) &&
             (kotlinPropertyMetadata.referencedBackingField.getAccessFlags() & AccessConstants.PRIVATE) != 0 &&
             !kotlinPropertyMetadata.flags.visibility.isPrivate)
         {
@@ -398,6 +398,10 @@ implements   KotlinMetadataVisitor,
         return metadataElement != null &&
                !usageMarker.isUsed(jvmElement);
     }
+    private boolean shouldShrinkMetadata(KotlinPropertyAccessorMetadata kotlinPropertyAccessorMetadata) {
+        return  kotlinPropertyAccessorMetadata != null && !usageMarker.isUsed(kotlinPropertyAccessorMetadata.referencedMethod);
+    }
+
 
 
     /**
@@ -412,10 +416,13 @@ implements   KotlinMetadataVisitor,
         shrinkArray(usageMarker, elements, referencedJavaElements);
     }
 
+    private void shrinkEnumEntries(List<KotlinEnumEntryMetadata> enumEntries) {
+        enumEntries.removeIf(usageMarker::isUsed);
+    }
+
     /**
      * Shrinks elements and their corresponding referenced element, based on
      * markings on the referenced element.
-     *
      * List is modified - must be a modifiable list!
      */
     static void shrinkArray(SimpleUsageMarker               usageMarker,

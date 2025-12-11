@@ -64,11 +64,13 @@ implements   KotlinMetadataVisitor,
         if ((kotlinPropertyMetadata.referencedBackingField != null &&
              (kotlinPropertyMetadata.referencedBackingField.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0) ||
 
-            (kotlinPropertyMetadata.referencedGetterMethod != null &&
-             (kotlinPropertyMetadata.referencedGetterMethod.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0) ||
+            (kotlinPropertyMetadata.getterMetadata != null &&
+                    kotlinPropertyMetadata.getterMetadata.referencedMethod != null &&
+                    (kotlinPropertyMetadata.getterMetadata.referencedMethod.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0) ||
 
-            (kotlinPropertyMetadata.referencedSetterMethod != null &&
-             (kotlinPropertyMetadata.referencedSetterMethod.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0))
+            (kotlinPropertyMetadata.setterMetadata != null &&
+                    kotlinPropertyMetadata.setterMetadata.referencedMethod != null &&
+                    (kotlinPropertyMetadata.setterMetadata.referencedMethod.getProcessingFlags() & ProcessingFlags.DONT_OBFUSCATE) != 0))
         {
             return;
         }

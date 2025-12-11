@@ -1869,11 +1869,13 @@ implements   ClassVisitor,
                     kotlinPropertyMetadata.referencedBackingField != null &&
                     isUsed(kotlinPropertyMetadata.referencedBackingField);
                 boolean getterUsed =
-                    kotlinPropertyMetadata.referencedGetterMethod != null &&
-                    isUsed(kotlinPropertyMetadata.referencedGetterMethod);
+                    kotlinPropertyMetadata.getterMetadata != null &&
+                    kotlinPropertyMetadata.getterMetadata.referencedMethod != null &&
+                    isUsed(kotlinPropertyMetadata.getterMetadata.referencedMethod);
                 boolean setterUsed =
-                    kotlinPropertyMetadata.referencedSetterMethod != null &&
-                    isUsed(kotlinPropertyMetadata.referencedSetterMethod);
+                        kotlinPropertyMetadata.setterMetadata != null &&
+                                kotlinPropertyMetadata.setterMetadata.referencedMethod != null &&
+                                isUsed(kotlinPropertyMetadata.setterMetadata.referencedMethod);
 
                 if (backingFieldUsed || getterUsed || setterUsed)
                 {
@@ -1914,7 +1916,7 @@ implements   ClassVisitor,
                 kotlinPropertyMetadata.receiverTypeAccept(        clazz, kotlinDeclarationContainerMetadata, this);
                 kotlinPropertyMetadata.contextReceiverTypesAccept(clazz, kotlinDeclarationContainerMetadata, this);
                 kotlinPropertyMetadata.typeParametersAccept(      clazz, kotlinDeclarationContainerMetadata, this);
-                kotlinPropertyMetadata.setterParametersAccept(    clazz, kotlinDeclarationContainerMetadata, this);
+                kotlinPropertyMetadata.setterParameterAccept(    clazz, kotlinDeclarationContainerMetadata, this);
                 kotlinPropertyMetadata.typeAccept(                clazz, kotlinDeclarationContainerMetadata, this);
                 kotlinPropertyMetadata.versionRequirementAccept(  clazz, kotlinDeclarationContainerMetadata, this);
             }

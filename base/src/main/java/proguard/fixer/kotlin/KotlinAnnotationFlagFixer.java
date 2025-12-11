@@ -131,16 +131,19 @@ implements   KotlinMetadataVisitor,
             kotlinPropertyMetadata.flags.hasAnnotations = false;
         }
 
-        if (kotlinPropertyMetadata.referencedGetterMethod != null)
+        if (kotlinPropertyMetadata.getterMetadata != null &&
+                kotlinPropertyMetadata.getterMetadata.referencedMethod != null)
         {
-            kotlinPropertyMetadata.referencedGetterMethod.accept(clazz, annotationCounter.reset());
-            kotlinPropertyMetadata.getterFlags.hasAnnotations = annotationCounter.getCount() > 0;
+            kotlinPropertyMetadata.getterMetadata.referencedMethod.accept(clazz, annotationCounter.reset());
+            kotlinPropertyMetadata.getterMetadata.hasAnnotations = annotationCounter.getCount() > 0;
         }
 
-        if (kotlinPropertyMetadata.flags.isVar && kotlinPropertyMetadata.referencedSetterMethod != null)
+        if (kotlinPropertyMetadata.flags.isVar &&
+                kotlinPropertyMetadata.setterMetadata != null &&
+                kotlinPropertyMetadata.setterMetadata.referencedMethod != null)
         {
-            kotlinPropertyMetadata.referencedSetterMethod.accept(clazz, annotationCounter.reset());
-            kotlinPropertyMetadata.setterFlags.hasAnnotations = annotationCounter.getCount() > 0;
+            kotlinPropertyMetadata.setterMetadata.referencedMethod.accept(clazz, annotationCounter.reset());
+            kotlinPropertyMetadata.setterMetadata.hasAnnotations = annotationCounter.getCount() > 0;
         }
     }
 
@@ -278,9 +281,10 @@ implements   KotlinMetadataVisitor,
                                                 kotlinPropertyMetadata,
                                                 this);
 
-        if (kotlinValueParameterMetadata.flags.hasAnnotations)
+        if (kotlinValueParameterMetadata.flags.hasAnnotations &&
+                kotlinPropertyMetadata.setterMetadata != null)
         {
-            kotlinPropertyMetadata.referencedSetterMethod.accept(clazz, annotationCounter.reset());
+            kotlinPropertyMetadata.setterMetadata.referencedMethod.accept(clazz, annotationCounter.reset());
             kotlinValueParameterMetadata.flags.hasAnnotations =
                 annotationCounter.getParameterAnnotationCount(kotlinValueParameterMetadata.index) > 0;
         }
