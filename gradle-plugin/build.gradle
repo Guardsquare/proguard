@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id 'com.github.johnrengelman.shadow'
     id 'java-gradle-plugin'
@@ -24,12 +24,10 @@ gradlePlugin {
     }
 }
 
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(project.findProperty("target")))
+    }
 }
 
 configurations {
@@ -67,7 +65,7 @@ test {
 
 def localRepo = file("$buildDir/local-repo")
 
-task fatJar(type: ShadowJar) {
+def fatJar = tasks.register("fatJar", ShadowJar) {
     destinationDirectory.set(localRepo)
     archiveFileName.set("proguard-gradle-${version}.jar")
     from sourceSets.main.output

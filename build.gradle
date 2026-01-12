@@ -13,7 +13,7 @@ allprojects {
     }
 }
 
-task buildDocumentation(type: Exec) {
+tasks.register("buildDocumentation", Exec) {
     inputs.dir 'docs/md'
     inputs.file 'docs/mkdocs.yml'
     outputs.dir 'docs/html'
@@ -60,7 +60,7 @@ allprojects { Project project ->
             configure(project) {
                 publishing {
                     publications {
-                        create(project.name, MavenPublication) {
+                        register(project.name, MavenPublication) {
                             pom {
                                 artifactId = "proguard-$project.name"
                                 name = "$group:$artifactId"
@@ -115,7 +115,7 @@ allprojects { Project project ->
                 }
                 publishing {
                     publications {
-                        getByName(project.name) {
+                        named(project.name) {
                             from components.java
                         }
                     }
@@ -146,31 +146,34 @@ allprojects { Project project ->
 }
 
 distributions {
-    main {
-        distributionBaseName.set('proguard')
-        contents {
-            into('lib') {
-                from tasks.getByPath(':proguard-app:fatJar').outputs
-                from tasks.getByPath(':gui:fatJar').outputs
-                from tasks.getByPath(':retrace:fatJar').outputs
-                from tasks.getByPath(':ant:fatJar').outputs
-            }
-            into('docs') {
-                from('docs/md') {
-                    includeEmptyDirs = false
-                    include '**/*.md'
+        main {
+            distributionBaseName.set('proguard')
+            contents {
+                into("lib") {
+                    def distProjects = [
+                            project(":proguard-app"),
+                            project(":gui"),
+                            project(":retrace"),
+                            project(":ant"),
+                    ]
+                    from(distProjects.collect { it.tasks.named { it == "fatJar" } })
+                }
+                into('docs') {
+                    from('docs/md') {
+                        includeEmptyDirs = false
+                        include '**/*.md'
+                    }
+                }
+                from(rootDir) {
+                    include 'bin/'
+                    include 'examples/'
+                    exclude 'examples/*/build'
+                    exclude 'examples/*/.gradle'
+                    include 'LICENSE'
+                    include 'LICENSE_exception.md'
                 }
             }
-            from(rootDir) {
-                include 'bin/'
-                include 'examples/'
-                exclude 'examples/*/build'
-                exclude 'examples/*/.gradle'
-                include 'LICENSE'
-                include 'LICENSE_exception.md'
-            }
         }
-    }
 }
 
 distTar {

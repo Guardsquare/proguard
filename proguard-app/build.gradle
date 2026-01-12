@@ -16,7 +16,7 @@ dependencies {
 
 jar.manifest.attributes('Implementation-Version': version)
 
-task fatJar(type: ShadowJar) {
+def fatJar = tasks.register("fatJar",ShadowJar) {
     mainClassName = 'proguard.ProGuard'
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard.jar')

@@ -5,7 +5,7 @@ plugins {
 
 afterEvaluate {
     publishing {
-        publications.getByName(project.name) {
+        publications.named(project.name) {
             pom {
                 description = 'Java annotations to configure ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
             }

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -11,10 +13,10 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-  kotlinOptions {
-    jvmTarget = "${target}"
-  }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(project.findProperty("target")))
+    }
 }
 
 dependencies {
@@ -54,22 +56,22 @@ test {
     useJUnitPlatform()
 }
 
-task testAllJavaVersions() { testAllTask ->
+def testAllJavaVersion = tasks.register("testAllJavaVersions"){ testAllTask ->
     dependsOn(test) // the usual test runs on Java 8
+}
 
-    javaVersionsForTest.each {version ->
-        task("testJava$version", type: Test) {
-            useJUnitPlatform()
-            ignoreFailures = true
+javaVersionsForTest.each {version ->
+    def testJavaVersion = tasks.register("testJava$version", Test) {
+        useJUnitPlatform()
+        ignoreFailures = true
 
-            // The version of bytebuddy used by mockk only supports Java 22 experimentally so far
-            // if (version >= 22) systemProperty 'net.bytebuddy.experimental', true
+        // The version of bytebuddy used by mockk only supports Java 22 experimentally so far
+        // if (version >= 22) systemProperty 'net.bytebuddy.experimental', true
 
-            testAllTask.dependsOn(it)
+        testAllJavaVersion.configure { it.dependsOn(it) }
 
-            javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(version)
-            }
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(version)
         }
     }
 }
@@ -94,7 +96,7 @@ jacocoTestReport {
 
 afterEvaluate {
     publishing {
-        publications.getByName(project.name) {
+        publications.named(project.name) {
             pom {
                 description = 'ProGuard is a free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
             }

@@ -15,7 +15,7 @@ dependencies {
     implementation 'org.apache.ant:ant:1.10.15'
 }
 
-task fatJar(type: ShadowJar) {
+def fatJar = tasks.register("fatJar", ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard-ant.jar')
     from sourceSets.main.output
@@ -32,7 +32,7 @@ assemble.dependsOn fatJar
 
 afterEvaluate {
     publishing {
-        publications.getByName(project.name) {
+        publications.named(project.name) {
             pom {
                 description = 'Ant plugin for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
             }

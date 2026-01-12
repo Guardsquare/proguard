@@ -17,7 +17,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.24.2'
 }
 
-task fatJar(type: ShadowJar) {
+def fatJar = tasks.register("fatJar", ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguardgui.jar')
     from sourceSets.main.output
@@ -35,7 +35,7 @@ assemble.dependsOn fatJar
 
 afterEvaluate {
     publishing {
-        publications.getByName(project.name) {
+        publications.named(project.name) {
             pom {
                 description = 'ProGuardGUI is an interface for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
             }
