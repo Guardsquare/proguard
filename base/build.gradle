@@ -95,7 +95,7 @@ jacocoTestReport {
 
 afterEvaluate {
     publishing {
-        publications.getByName(project.name) {
+        publications.named(project.name) {
             pom {
                 description = 'ProGuard is a free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
             }
