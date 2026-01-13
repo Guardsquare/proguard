@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'java-test-fixtures'
     id 'maven-publish'
     id "org.jetbrains.kotlin.jvm"
     id 'com.adarshr.test-logger' version '4.0.0'
