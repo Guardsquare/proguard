@@ -62,6 +62,8 @@ dependencies {
     testImplementation("org.junit.vintage:junit-vintage-engine:5.8.2")
     testImplementation("org.mockito:mockito-core:4.11.0")
     testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
     compileOnly("com.diffblue.cover:cover-annotations:1.7.0")
     testImplementation("com.diffblue.cover:cover-annotations:1.7.0")
 }
