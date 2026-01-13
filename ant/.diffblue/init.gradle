@@ -1,0 +1,13 @@
+import com.diffblue.cover.buildsystem.gradle.plugin.CoverPlugin
+import com.diffblue.cover.buildsystem.gradle.plugin.GradleSpy
+
+initscript {
+  dependencies {
+    classpath files(System.properties['com.diffblue.cover.buildsystem.gradle.model-jar'])
+  }
+}
+
+allprojects {
+  apply plugin: CoverPlugin
+  addListener(GradleSpy.getInstance())
+}
