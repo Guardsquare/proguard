@@ -1,0 +1,967 @@
+package proguard.optimize.info;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import proguard.classfile.*;
+import proguard.classfile.attribute.CodeAttribute;
+import proguard.classfile.constant.Constant;
+import proguard.classfile.constant.ClassConstant;
+import proguard.classfile.instruction.ConstantInstruction;
+import proguard.classfile.instruction.Instruction;
+import proguard.classfile.instruction.SimpleInstruction;
+import proguard.classfile.visitor.ClassVisitor;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Comprehensive test class for {@link InstantiationClassMarker}.
+ *
+ * Tests all methods in the InstantiationClassMarker class:
+ * - Constructor: <init>()
+ * - visitAnyInstruction(Clazz, Method, CodeAttribute, int, Instruction)
+ * - visitConstantInstruction(Clazz, Method, CodeAttribute, int, ConstantInstruction)
+ * - visitClassConstant(Clazz, ClassConstant)
+ * - visitAnyClass(Clazz)
+ * - isInstantiated(Clazz)
+ *
+ * The InstantiationClassMarker marks classes that are instantiated.
+ * When it encounters an OP_NEW instruction, it processes the class constant
+ * referenced by that instruction and marks the referenced class as "instantiated".
+ */
+public class InstantiationClassMarkerClaudeTest {
+
+    private InstantiationClassMarker marker;
+    private Clazz clazz;
+    private Method method;
+    private CodeAttribute codeAttribute;
+
+    @BeforeEach
+    public void setUp() {
+        marker = new InstantiationClassMarker();
+        clazz = mock(ProgramClass.class);
+        method = mock(ProgramMethod.class);
+        codeAttribute = mock(CodeAttribute.class);
+    }
+
+    // ========== Constructor Tests ==========
+
+    /**
+     * Tests that the constructor creates a valid InstantiationClassMarker instance.
+     */
+    @Test
+    public void testConstructor_createsValidInstance() {
+        // Act
+        InstantiationClassMarker newMarker = new InstantiationClassMarker();
+
+        // Assert
+        assertNotNull(newMarker, "Constructor should create a valid instance");
+    }
+
+    /**
+     * Tests that multiple InstantiationClassMarker instances can be created independently.
+     */
+    @Test
+    public void testConstructor_multipleInstances_areIndependent() {
+        // Act
+        InstantiationClassMarker marker1 = new InstantiationClassMarker();
+        InstantiationClassMarker marker2 = new InstantiationClassMarker();
+
+        // Assert
+        assertNotNull(marker1, "First instance should be created");
+        assertNotNull(marker2, "Second instance should be created");
+        assertNotSame(marker1, marker2, "Instances should be different objects");
+    }
+
+    /**
+     * Tests that the constructor initializes the marker to implement required interfaces.
+     */
+    @Test
+    public void testConstructor_implementsRequiredInterfaces() {
+        // Act
+        InstantiationClassMarker newMarker = new InstantiationClassMarker();
+
+        // Assert
+        assertTrue(newMarker instanceof proguard.classfile.instruction.visitor.InstructionVisitor,
+                "Should implement InstructionVisitor");
+        assertTrue(newMarker instanceof proguard.classfile.constant.visitor.ConstantVisitor,
+                "Should implement ConstantVisitor");
+        assertTrue(newMarker instanceof ClassVisitor,
+                "Should implement ClassVisitor");
+    }
+
+    // ========== visitAnyInstruction Tests ==========
+
+    /**
+     * Tests that visitAnyInstruction does nothing (it's a no-op method).
+     * This method is part of the InstructionVisitor interface but has an empty implementation.
+     */
+    @Test
+    public void testVisitAnyInstruction_doesNothing() {
+        // Arrange
+        Instruction instruction = new SimpleInstruction(Instruction.OP_NOP);
+
+        // Act & Assert - should not throw any exception
+        assertDoesNotThrow(() -> marker.visitAnyInstruction(clazz, method, codeAttribute, 0, instruction));
+
+        // Assert - should not interact with any parameters
+        verifyNoInteractions(clazz);
+        verifyNoInteractions(method);
+        verifyNoInteractions(codeAttribute);
+    }
+
+    /**
+     * Tests that visitAnyInstruction can be called multiple times without side effects.
+     */
+    @Test
+    public void testVisitAnyInstruction_calledMultipleTimes_noSideEffects() {
+        // Arrange
+        Instruction instruction = new SimpleInstruction(Instruction.OP_NOP);
+
+        // Act
+        marker.visitAnyInstruction(clazz, method, codeAttribute, 0, instruction);
+        marker.visitAnyInstruction(clazz, method, codeAttribute, 0, instruction);
+        marker.visitAnyInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert - should not interact with any parameters
+        verifyNoInteractions(clazz);
+        verifyNoInteractions(method);
+        verifyNoInteractions(codeAttribute);
+    }
+
+    /**
+     * Tests that visitAnyInstruction with null parameters doesn't throw exceptions.
+     */
+    @Test
+    public void testVisitAnyInstruction_withNullParameters_doesNotThrow() {
+        // Act & Assert
+        assertDoesNotThrow(() -> marker.visitAnyInstruction(null, null, null, 0, null));
+    }
+
+    /**
+     * Tests that visitAnyInstruction with various instruction types behaves consistently.
+     */
+    @Test
+    public void testVisitAnyInstruction_withVariousInstructions_behavesConsistently() {
+        // Arrange
+        Instruction nop = new SimpleInstruction(Instruction.OP_NOP);
+        Instruction dup = new SimpleInstruction(Instruction.OP_DUP);
+        Instruction ret = new SimpleInstruction(Instruction.OP_RETURN);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> marker.visitAnyInstruction(clazz, method, codeAttribute, 0, nop));
+        assertDoesNotThrow(() -> marker.visitAnyInstruction(clazz, method, codeAttribute, 0, dup));
+        assertDoesNotThrow(() -> marker.visitAnyInstruction(clazz, method, codeAttribute, 0, ret));
+
+        verifyNoInteractions(clazz);
+    }
+
+    // ========== visitConstantInstruction Tests ==========
+
+    /**
+     * Tests that visitConstantInstruction calls constantPoolEntryAccept for OP_NEW.
+     * This is the core behavior - new instructions are processed to mark instantiated classes.
+     */
+    @Test
+    public void testVisitConstantInstruction_withOpNew_callsConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(5), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction does NOT process OP_CHECKCAST instruction.
+     * Only OP_NEW should be processed.
+     */
+    @Test
+    public void testVisitConstantInstruction_withOpCheckcast_doesNotCallConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_CHECKCAST, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitConstantInstruction does NOT process OP_INSTANCEOF instruction.
+     */
+    @Test
+    public void testVisitConstantInstruction_withOpInstanceof_doesNotCallConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_INSTANCEOF, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitConstantInstruction does NOT process OP_ANEWARRAY instruction.
+     */
+    @Test
+    public void testVisitConstantInstruction_withOpAnewarray_doesNotCallConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_ANEWARRAY, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitConstantInstruction does NOT process field access instructions.
+     */
+    @Test
+    public void testVisitConstantInstruction_withFieldAccessOpcodes_doesNotCallConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction getStatic = new ConstantInstruction(Instruction.OP_GETSTATIC, 1);
+        ConstantInstruction putStatic = new ConstantInstruction(Instruction.OP_PUTSTATIC, 2);
+        ConstantInstruction getField = new ConstantInstruction(Instruction.OP_GETFIELD, 3);
+        ConstantInstruction putField = new ConstantInstruction(Instruction.OP_PUTFIELD, 4);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, getStatic);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, putStatic);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, getField);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, putField);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitConstantInstruction does NOT process method invocation instructions.
+     */
+    @Test
+    public void testVisitConstantInstruction_withMethodInvocationOpcodes_doesNotCallConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction invokeVirtual = new ConstantInstruction(Instruction.OP_INVOKEVIRTUAL, 1);
+        ConstantInstruction invokeSpecial = new ConstantInstruction(Instruction.OP_INVOKESPECIAL, 2);
+        ConstantInstruction invokeStatic = new ConstantInstruction(Instruction.OP_INVOKESTATIC, 3);
+        ConstantInstruction invokeInterface = new ConstantInstruction(Instruction.OP_INVOKEINTERFACE, 4, 2);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, invokeVirtual);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, invokeSpecial);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, invokeStatic);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, invokeInterface);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitConstantInstruction does NOT process LDC instructions.
+     */
+    @Test
+    public void testVisitConstantInstruction_withLdcOpcodes_doesNotCallConstantPoolEntryAccept() {
+        // Arrange
+        ConstantInstruction ldc = new ConstantInstruction(Instruction.OP_LDC, 1);
+        ConstantInstruction ldcW = new ConstantInstruction(Instruction.OP_LDC_W, 2);
+        ConstantInstruction ldc2W = new ConstantInstruction(Instruction.OP_LDC2_W, 3);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, ldc);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, ldcW);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, ldc2W);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitConstantInstruction works with different constant indices for OP_NEW.
+     */
+    @Test
+    public void testVisitConstantInstruction_withOpNewAndDifferentIndices_usesCorrectIndex() {
+        // Arrange
+        ConstantInstruction instruction1 = new ConstantInstruction(Instruction.OP_NEW, 0);
+        ConstantInstruction instruction2 = new ConstantInstruction(Instruction.OP_NEW, 1);
+        ConstantInstruction instruction3 = new ConstantInstruction(Instruction.OP_NEW, 100);
+        ConstantInstruction instruction4 = new ConstantInstruction(Instruction.OP_NEW, 65535);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction1);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction2);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction3);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction4);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(0), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(1), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(100), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(65535), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction works with various offset values.
+     * The offset parameter should not affect the behavior.
+     */
+    @Test
+    public void testVisitConstantInstruction_withVariousOffsets_behavesConsistently() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 10, instruction);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 100, instruction);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, -1, instruction);
+
+        // Assert
+        verify(clazz, times(4)).constantPoolEntryAccept(eq(5), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction can be called multiple times with OP_NEW.
+     */
+    @Test
+    public void testVisitConstantInstruction_calledMultipleTimesWithOpNew_processesEachCall() {
+        // Arrange
+        ConstantInstruction instruction1 = new ConstantInstruction(Instruction.OP_NEW, 1);
+        ConstantInstruction instruction2 = new ConstantInstruction(Instruction.OP_NEW, 2);
+        ConstantInstruction instruction3 = new ConstantInstruction(Instruction.OP_NEW, 3);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction1);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 5, instruction2);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 10, instruction3);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(1), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(2), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(3), eq(marker));
+        verify(clazz, times(3)).constantPoolEntryAccept(anyInt(), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction works with null method parameter.
+     */
+    @Test
+    public void testVisitConstantInstruction_withNullMethod_stillProcessesInstruction() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, null, codeAttribute, 0, instruction);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(5), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction works with null codeAttribute parameter.
+     */
+    @Test
+    public void testVisitConstantInstruction_withNullCodeAttribute_stillProcessesInstruction() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, null, 0, instruction);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(5), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction with null instruction throws NullPointerException.
+     */
+    @Test
+    public void testVisitConstantInstruction_withNullInstruction_throwsNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () ->
+            marker.visitConstantInstruction(clazz, method, codeAttribute, 0, null));
+    }
+
+    /**
+     * Tests that visitConstantInstruction with same instruction called twice processes both times.
+     */
+    @Test
+    public void testVisitConstantInstruction_sameInstructionCalledTwice_processesBothTimes() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 7);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 10, instruction);
+
+        // Assert
+        verify(clazz, times(2)).constantPoolEntryAccept(eq(7), eq(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction doesn't interact with method or codeAttribute parameters.
+     */
+    @Test
+    public void testVisitConstantInstruction_doesNotInteractWithMethodOrCodeAttribute() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verifyNoInteractions(method);
+        verifyNoInteractions(codeAttribute);
+    }
+
+    /**
+     * Tests that multiple InstantiationClassMarker instances work independently.
+     */
+    @Test
+    public void testVisitConstantInstruction_withMultipleMarkers_workIndependently() {
+        // Arrange
+        InstantiationClassMarker marker1 = new InstantiationClassMarker();
+        InstantiationClassMarker marker2 = new InstantiationClassMarker();
+        ConstantInstruction instruction1 = new ConstantInstruction(Instruction.OP_NEW, 1);
+        ConstantInstruction instruction2 = new ConstantInstruction(Instruction.OP_NEW, 2);
+
+        // Act
+        marker1.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction1);
+        marker2.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction2);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(1), eq(marker1));
+        verify(clazz).constantPoolEntryAccept(eq(2), eq(marker2));
+    }
+
+    /**
+     * Tests that visitConstantInstruction passes the InstantiationClassMarker itself as the visitor.
+     */
+    @Test
+    public void testVisitConstantInstruction_passesMarkerAsVisitor() {
+        // Arrange
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(5), same(marker));
+    }
+
+    /**
+     * Tests that visitConstantInstruction processes only NEW instructions in mixed sequence.
+     */
+    @Test
+    public void testVisitConstantInstruction_withMixedOpcodes_processesOnlyNewInstructions() {
+        // Arrange
+        ConstantInstruction new1 = new ConstantInstruction(Instruction.OP_NEW, 1);
+        ConstantInstruction checkcast = new ConstantInstruction(Instruction.OP_CHECKCAST, 2);
+        ConstantInstruction new2 = new ConstantInstruction(Instruction.OP_NEW, 3);
+        ConstantInstruction instanceof_ = new ConstantInstruction(Instruction.OP_INSTANCEOF, 4);
+        ConstantInstruction new3 = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, new1);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, checkcast);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, new2);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, instanceof_);
+        marker.visitConstantInstruction(clazz, method, codeAttribute, 0, new3);
+
+        // Assert
+        verify(clazz).constantPoolEntryAccept(eq(1), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(3), eq(marker));
+        verify(clazz).constantPoolEntryAccept(eq(5), eq(marker));
+        verify(clazz, times(3)).constantPoolEntryAccept(anyInt(), eq(marker));
+        verify(clazz, never()).constantPoolEntryAccept(eq(2), any());
+        verify(clazz, never()).constantPoolEntryAccept(eq(4), any());
+    }
+
+    /**
+     * Tests that visitConstantInstruction works correctly when called on different clazz instances.
+     */
+    @Test
+    public void testVisitConstantInstruction_withDifferentClazzInstances_accessesEachSeparately() {
+        // Arrange
+        Clazz clazz1 = mock(ProgramClass.class);
+        Clazz clazz2 = mock(ProgramClass.class);
+        ConstantInstruction instruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Act
+        marker.visitConstantInstruction(clazz1, method, codeAttribute, 0, instruction);
+        marker.visitConstantInstruction(clazz2, method, codeAttribute, 0, instruction);
+
+        // Assert
+        verify(clazz1).constantPoolEntryAccept(eq(5), eq(marker));
+        verify(clazz2).constantPoolEntryAccept(eq(5), eq(marker));
+    }
+
+    // ========== visitClassConstant Tests ==========
+
+    /**
+     * Tests that visitClassConstant calls referencedClassAccept on the ClassConstant.
+     * This is the core behavior - the method delegates to the class constant
+     * to visit the referenced class through the filtered marker.
+     */
+    @Test
+    public void testVisitClassConstant_callsReferencedClassAccept() {
+        // Arrange
+        ClassConstant classConstant = mock(ClassConstant.class);
+
+        // Act
+        marker.visitClassConstant(clazz, classConstant);
+
+        // Assert
+        verify(classConstant, times(1)).referencedClassAccept(any(ClassVisitor.class));
+    }
+
+    /**
+     * Tests that visitClassConstant passes a ClassVisitor to the class constant.
+     */
+    @Test
+    public void testVisitClassConstant_passesClassVisitor() {
+        // Arrange
+        ClassConstant classConstant = mock(ClassConstant.class);
+
+        // Act
+        marker.visitClassConstant(clazz, classConstant);
+
+        // Assert
+        verify(classConstant).referencedClassAccept(isA(ClassVisitor.class));
+    }
+
+    /**
+     * Tests that visitClassConstant works with valid mock objects without throwing exceptions.
+     */
+    @Test
+    public void testVisitClassConstant_withValidMocks_doesNotThrowException() {
+        // Arrange
+        ClassConstant classConstant = mock(ClassConstant.class);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> marker.visitClassConstant(clazz, classConstant));
+    }
+
+    /**
+     * Tests that visitClassConstant can be called with null Clazz parameter.
+     */
+    @Test
+    public void testVisitClassConstant_withNullClazz_doesNotThrowException() {
+        // Arrange
+        ClassConstant classConstant = mock(ClassConstant.class);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> marker.visitClassConstant(null, classConstant));
+        verify(classConstant, times(1)).referencedClassAccept(any(ClassVisitor.class));
+    }
+
+    /**
+     * Tests that visitClassConstant with null ClassConstant throws NullPointerException.
+     */
+    @Test
+    public void testVisitClassConstant_withNullClassConstant_throwsNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class,
+            () -> marker.visitClassConstant(clazz, null));
+    }
+
+    /**
+     * Tests that visitClassConstant can be called multiple times in succession.
+     */
+    @Test
+    public void testVisitClassConstant_calledMultipleTimes_invokesAcceptMethodEachTime() {
+        // Arrange
+        ClassConstant classConstant = mock(ClassConstant.class);
+
+        // Act
+        marker.visitClassConstant(clazz, classConstant);
+        marker.visitClassConstant(clazz, classConstant);
+        marker.visitClassConstant(clazz, classConstant);
+
+        // Assert
+        verify(classConstant, times(3)).referencedClassAccept(any(ClassVisitor.class));
+    }
+
+    /**
+     * Tests that visitClassConstant doesn't directly interact with the Clazz parameter.
+     */
+    @Test
+    public void testVisitClassConstant_doesNotInteractWithClazz() {
+        // Arrange
+        ClassConstant classConstant = mock(ClassConstant.class);
+
+        // Act
+        marker.visitClassConstant(clazz, classConstant);
+
+        // Assert
+        verifyNoInteractions(clazz);
+    }
+
+    /**
+     * Tests that visitClassConstant works with different ClassConstant instances.
+     */
+    @Test
+    public void testVisitClassConstant_withDifferentClassConstants_callsAcceptOnEach() {
+        // Arrange
+        ClassConstant classConstant1 = mock(ClassConstant.class);
+        ClassConstant classConstant2 = mock(ClassConstant.class);
+        ClassConstant classConstant3 = mock(ClassConstant.class);
+
+        // Act
+        marker.visitClassConstant(clazz, classConstant1);
+        marker.visitClassConstant(clazz, classConstant2);
+        marker.visitClassConstant(clazz, classConstant3);
+
+        // Assert
+        verify(classConstant1).referencedClassAccept(any(ClassVisitor.class));
+        verify(classConstant2).referencedClassAccept(any(ClassVisitor.class));
+        verify(classConstant3).referencedClassAccept(any(ClassVisitor.class));
+    }
+
+    // ========== visitAnyClass Tests ==========
+
+    /**
+     * Tests that visitAnyClass marks a ProgramClass as instantiated.
+     * This is the core marking behavior.
+     */
+    @Test
+    public void testVisitAnyClass_withProgramClass_marksAsInstantiated() {
+        // Arrange
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+
+        // Act
+        marker.visitAnyClass(programClass);
+
+        // Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(programClass),
+                "Class should be marked as instantiated");
+    }
+
+    /**
+     * Tests that visitAnyClass marks a LibraryClass as instantiated.
+     */
+    @Test
+    public void testVisitAnyClass_withLibraryClass_marksAsInstantiated() {
+        // Arrange
+        LibraryClass libraryClass = new LibraryClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(libraryClass);
+
+        // Act
+        marker.visitAnyClass(libraryClass);
+
+        // Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(libraryClass),
+                "Library class should be marked as instantiated");
+    }
+
+    /**
+     * Tests that visitAnyClass can be called multiple times on the same class.
+     */
+    @Test
+    public void testVisitAnyClass_calledMultipleTimes_remainsMarked() {
+        // Arrange
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+
+        // Act
+        marker.visitAnyClass(programClass);
+        marker.visitAnyClass(programClass);
+        marker.visitAnyClass(programClass);
+
+        // Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(programClass),
+                "Class should remain marked as instantiated");
+    }
+
+    /**
+     * Tests that visitAnyClass marks different classes independently.
+     */
+    @Test
+    public void testVisitAnyClass_withDifferentClasses_marksEachIndependently() {
+        // Arrange
+        ProgramClass class1 = new ProgramClass();
+        ProgramClass class2 = new ProgramClass();
+        ProgramClass class3 = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(class1);
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(class2);
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(class3);
+
+        // Act
+        marker.visitAnyClass(class1);
+        marker.visitAnyClass(class2);
+
+        // Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(class1), "Class1 should be marked");
+        assertTrue(InstantiationClassMarker.isInstantiated(class2), "Class2 should be marked");
+        assertFalse(InstantiationClassMarker.isInstantiated(class3), "Class3 should NOT be marked");
+    }
+
+    /**
+     * Tests that visitAnyClass works correctly when called through ClassVisitor interface.
+     */
+    @Test
+    public void testVisitAnyClass_throughClassVisitorInterface_marksClass() {
+        // Arrange
+        ClassVisitor visitor = marker;
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+
+        // Act
+        visitor.visitAnyClass(programClass);
+
+        // Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(programClass),
+                "Class should be marked when called through interface");
+    }
+
+    /**
+     * Tests that visitAnyClass can mark many classes in succession.
+     */
+    @Test
+    public void testVisitAnyClass_withManyClasses_marksAllCorrectly() {
+        // Arrange
+        ProgramClass[] classes = new ProgramClass[100];
+        for (int i = 0; i < 100; i++) {
+            classes[i] = new ProgramClass();
+            ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(classes[i]);
+        }
+
+        // Act
+        for (ProgramClass clazz : classes) {
+            marker.visitAnyClass(clazz);
+        }
+
+        // Assert
+        for (ProgramClass clazz : classes) {
+            assertTrue(InstantiationClassMarker.isInstantiated(clazz),
+                    "All classes should be marked as instantiated");
+        }
+    }
+
+    // ========== isInstantiated Tests ==========
+
+    /**
+     * Tests that isInstantiated returns true for a marked class.
+     */
+    @Test
+    public void testIsInstantiated_withMarkedClass_returnsTrue() {
+        // Arrange
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+        ProgramClassOptimizationInfo.getProgramClassOptimizationInfo(programClass).setInstantiated();
+
+        // Act
+        boolean result = InstantiationClassMarker.isInstantiated(programClass);
+
+        // Assert
+        assertTrue(result, "Should return true for marked class");
+    }
+
+    /**
+     * Tests that isInstantiated returns false for an unmarked class.
+     */
+    @Test
+    public void testIsInstantiated_withUnmarkedClass_returnsFalse() {
+        // Arrange
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+
+        // Act
+        boolean result = InstantiationClassMarker.isInstantiated(programClass);
+
+        // Assert
+        assertFalse(result, "Should return false for unmarked class");
+    }
+
+    /**
+     * Tests that isInstantiated works correctly after visitAnyClass.
+     */
+    @Test
+    public void testIsInstantiated_afterVisitAnyClass_returnsTrue() {
+        // Arrange
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+
+        // Act
+        marker.visitAnyClass(programClass);
+        boolean result = InstantiationClassMarker.isInstantiated(programClass);
+
+        // Assert
+        assertTrue(result, "Should return true after visitAnyClass");
+    }
+
+    /**
+     * Tests that isInstantiated can distinguish between marked and unmarked classes.
+     */
+    @Test
+    public void testIsInstantiated_distinguishesBetweenMarkedAndUnmarked() {
+        // Arrange
+        ProgramClass markedClass = new ProgramClass();
+        ProgramClass unmarkedClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(markedClass);
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(unmarkedClass);
+        marker.visitAnyClass(markedClass);
+
+        // Act & Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(markedClass),
+                "Marked class should return true");
+        assertFalse(InstantiationClassMarker.isInstantiated(unmarkedClass),
+                "Unmarked class should return false");
+    }
+
+    /**
+     * Tests that isInstantiated works with LibraryClass.
+     */
+    @Test
+    public void testIsInstantiated_withLibraryClass_worksCorrectly() {
+        // Arrange
+        LibraryClass markedLibraryClass = new LibraryClass();
+        LibraryClass unmarkedLibraryClass = new LibraryClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(markedLibraryClass);
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(unmarkedLibraryClass);
+        marker.visitAnyClass(markedLibraryClass);
+
+        // Act & Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(markedLibraryClass),
+                "Marked library class should return true");
+        assertFalse(InstantiationClassMarker.isInstantiated(unmarkedLibraryClass),
+                "Unmarked library class should return false");
+    }
+
+    /**
+     * Tests that isInstantiated is consistent across multiple calls.
+     */
+    @Test
+    public void testIsInstantiated_consistentAcrossMultipleCalls() {
+        // Arrange
+        ProgramClass programClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(programClass);
+        marker.visitAnyClass(programClass);
+
+        // Act
+        boolean result1 = InstantiationClassMarker.isInstantiated(programClass);
+        boolean result2 = InstantiationClassMarker.isInstantiated(programClass);
+        boolean result3 = InstantiationClassMarker.isInstantiated(programClass);
+
+        // Assert
+        assertTrue(result1, "First call should return true");
+        assertTrue(result2, "Second call should return true");
+        assertTrue(result3, "Third call should return true");
+    }
+
+    // ========== Integration Tests ==========
+
+    /**
+     * Integration test: Tests the complete flow from instruction to class marking.
+     * Tests that when a new instruction is visited, the referenced class gets marked.
+     */
+    @Test
+    public void testIntegration_newInstructionMarksReferencedClass() {
+        // Arrange
+        ProgramClass containingClass = new ProgramClass();
+        containingClass.u2constantPoolCount = 10;
+
+        ProgramClass referencedClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(referencedClass);
+
+        ClassConstant classConstant = new ClassConstant();
+        classConstant.referencedClass = referencedClass;
+
+        containingClass.constantPool = new Constant[10];
+        containingClass.constantPool[5] = classConstant;
+
+        ConstantInstruction newInstruction = new ConstantInstruction(Instruction.OP_NEW, 5);
+
+        // Initially, the referenced class should not be marked
+        assertFalse(InstantiationClassMarker.isInstantiated(referencedClass),
+                "Referenced class should not be marked initially");
+
+        // Act - visit the new instruction
+        marker.visitConstantInstruction(containingClass, method, codeAttribute, 0, newInstruction);
+
+        // Assert - the referenced class should now be marked
+        assertTrue(InstantiationClassMarker.isInstantiated(referencedClass),
+                "Referenced class should be marked after visiting new instruction");
+    }
+
+    /**
+     * Integration test: Tests that non-new instructions don't mark classes.
+     */
+    @Test
+    public void testIntegration_nonNewInstructionsDoNotMarkClasses() {
+        // Arrange
+        ProgramClass containingClass = new ProgramClass();
+        containingClass.u2constantPoolCount = 10;
+
+        ProgramClass referencedClass = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(referencedClass);
+
+        ClassConstant classConstant = new ClassConstant();
+        classConstant.referencedClass = referencedClass;
+
+        containingClass.constantPool = new Constant[10];
+        containingClass.constantPool[5] = classConstant;
+
+        ConstantInstruction checkcastInstruction = new ConstantInstruction(Instruction.OP_CHECKCAST, 5);
+        ConstantInstruction instanceofInstruction = new ConstantInstruction(Instruction.OP_INSTANCEOF, 5);
+
+        // Act - visit non-new instructions
+        marker.visitConstantInstruction(containingClass, method, codeAttribute, 0, checkcastInstruction);
+        marker.visitConstantInstruction(containingClass, method, codeAttribute, 0, instanceofInstruction);
+
+        // Assert - the referenced class should NOT be marked
+        assertFalse(InstantiationClassMarker.isInstantiated(referencedClass),
+                "Referenced class should NOT be marked by non-new instructions");
+    }
+
+    /**
+     * Integration test: Tests that multiple new instructions mark multiple classes.
+     */
+    @Test
+    public void testIntegration_multipleNewInstructionsMarkMultipleClasses() {
+        // Arrange
+        ProgramClass containingClass = new ProgramClass();
+        containingClass.u2constantPoolCount = 20;
+        containingClass.constantPool = new Constant[20];
+
+        ProgramClass referencedClass1 = new ProgramClass();
+        ProgramClass referencedClass2 = new ProgramClass();
+        ProgramClass referencedClass3 = new ProgramClass();
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(referencedClass1);
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(referencedClass2);
+        ProgramClassOptimizationInfo.setProgramClassOptimizationInfo(referencedClass3);
+
+        ClassConstant classConstant1 = new ClassConstant();
+        classConstant1.referencedClass = referencedClass1;
+        ClassConstant classConstant2 = new ClassConstant();
+        classConstant2.referencedClass = referencedClass2;
+        ClassConstant classConstant3 = new ClassConstant();
+        classConstant3.referencedClass = referencedClass3;
+
+        containingClass.constantPool[1] = classConstant1;
+        containingClass.constantPool[2] = classConstant2;
+        containingClass.constantPool[3] = classConstant3;
+
+        ConstantInstruction new1 = new ConstantInstruction(Instruction.OP_NEW, 1);
+        ConstantInstruction new2 = new ConstantInstruction(Instruction.OP_NEW, 2);
+        ConstantInstruction new3 = new ConstantInstruction(Instruction.OP_NEW, 3);
+
+        // Act
+        marker.visitConstantInstruction(containingClass, method, codeAttribute, 0, new1);
+        marker.visitConstantInstruction(containingClass, method, codeAttribute, 0, new2);
+        marker.visitConstantInstruction(containingClass, method, codeAttribute, 0, new3);
+
+        // Assert
+        assertTrue(InstantiationClassMarker.isInstantiated(referencedClass1),
+                "First referenced class should be marked");
+        assertTrue(InstantiationClassMarker.isInstantiated(referencedClass2),
+                "Second referenced class should be marked");
+        assertTrue(InstantiationClassMarker.isInstantiated(referencedClass3),
+                "Third referenced class should be marked");
+    }
+}
