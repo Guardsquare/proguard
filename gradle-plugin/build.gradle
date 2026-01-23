@@ -6,6 +6,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id 'maven-publish'
     id 'org.jlleitschuh.gradle.ktlint' version '12.1.2'
+    id 'jacoco'
 }
 
 repositories {
@@ -44,7 +45,7 @@ dependencies {
         exclude module: 'proguard-base'
     }
     implementation 'com.github.zafarkhaja:java-semver:0.10.2'
-    testCompileOnly ("com.android.tools.build:gradle:$agpVersion") {
+    testImplementation ("com.android.tools.build:gradle:$agpVersion") {
         exclude module: 'proguard-gradle'
         exclude module: 'proguard-base'
     }
