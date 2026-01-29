@@ -1,9 +1,6 @@
 pluginManagement {
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == 'com.github.johnrengelman.shadow') {
-                useVersion '8.1.1'
-            }
             if (requested.id.id == 'io.github.gradle-nexus.publish-plugin') {
                 useVersion '2.0.0'
             }
