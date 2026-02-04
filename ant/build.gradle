@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     implementation project(':base')
-    implementation 'org.apache.ant:ant:1.10.15'
+    implementation(libs.ant)
 }
 
 def fatJar = tasks.register("fatJar", ShadowJar) {

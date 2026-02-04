@@ -20,21 +20,16 @@ kotlin {
 }
 
 dependencies {
-    api "com.guardsquare:proguard-core:${proguardCoreVersion}"
-    implementation "com.google.code.gson:gson:${gsonVersion}"
-    implementation 'org.apache.logging.log4j:log4j-api:2.24.2'
-    implementation 'org.apache.logging.log4j:log4j-core:2.24.2'
-    implementation 'org.json:json:20231013'
-
-    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    testImplementation 'dev.zacsweers.kctfork:core:0.6.0'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.9.1' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.9.1' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.9.1' // for kotest property test
-    testImplementation 'io.mockk:mockk:1.13.13' // for mocking
-
-    testImplementation(testFixtures("com.guardsquare:proguard-core:${proguardCoreVersion}")) {
+    api(libs.proguard.core)
+    implementation(libs.gson)
+    implementation(libs.bundles.log4j)
+    implementation(libs.json)
+    testImplementation(libs.kotlin.reflect)
+    testImplementation(libs.kotlin.stdlib)
+    testImplementation(libs.kotlin.compile.testing)
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.mockk) // for mocking
+    testImplementation(testFixtures(libs.proguard.core)) {
         exclude group: 'com.guardsquare', module: 'proguard-core'
     }
 }

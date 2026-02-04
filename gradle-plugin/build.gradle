@@ -13,7 +13,6 @@ repositories {
     mavenCentral()
 }
 
-def agpVersion = '4.1.0'
 
 gradlePlugin {
     plugins {
@@ -37,26 +36,21 @@ configurations {
 dependencies {
     api project(':base')
     // TODO update to 4.2 or 7.0 API
-    compileOnly ("com.android.tools.build:gradle:$agpVersion") {
+    compileOnly (libs.android.gradle) {
         exclude module: 'proguard-gradle'
         exclude module: 'proguard-base'
     }
-    implementation 'com.github.zafarkhaja:java-semver:0.10.2'
-    testCompileOnly ("com.android.tools.build:gradle:$agpVersion") {
+    implementation(libs.java.semver)
+    testCompileOnly (libs.android.gradle) {
         exclude module: 'proguard-gradle'
         exclude module: 'proguard-base'
     }
-
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.9.1' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:5.9.1' // for kotest core jvm assertions
-    testImplementation 'io.kotest:kotest-property-jvm:5.9.1' // for kotest property test
-    testImplementation 'io.mockk:mockk:1.13.13' // for mocking
-
-    testImplementation "commons-io:commons-io:2.18.0"
-
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.mockk)
+    testImplementation(libs.commons.io)
     fatJar project(":base")
     // This library is used to parse the android gradle plugin version at runtime.
-    fatJar 'com.github.zafarkhaja:java-semver:0.10.2'
+    fatJar(libs.java.semver)
 }
 
 test {
@@ -81,7 +75,7 @@ tasks.withType(Test).configureEach {
     dependsOn fatJar
     systemProperty "local.repo", localRepo.toURI()
     systemProperty "proguard.version", version
-    systemProperty "agp.version", agpVersion
+    systemProperty "agp.version", libs.versions.agp.get()
 }
 
 sourceSets.test {

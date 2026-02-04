@@ -2,7 +2,7 @@ plugins {
     id 'distribution'
     id 'io.github.gradle-nexus.publish-plugin'
     id 'signing'
-    id "org.jetbrains.kotlin.jvm" version "$kotlinVersion" apply false
+    alias(libs.plugins.kotlin.jvm) apply(false)
 }
 
 allprojects {
@@ -186,3 +186,4 @@ clean {
 // TODO docker runs as root, so cannot clean the HTML yet
 //    delete buildDocumentation.outputs
 }
+
