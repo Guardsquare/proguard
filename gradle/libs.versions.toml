@@ -1,0 +1,39 @@
+[versions]
+agp = "4.1.0"
+ant = "1.10.15"
+commons = "2.18.0"
+gson = "2.11.0"
+javaSemver = "0.10.2"
+json = "20231013"
+kotest = "5.9.1"
+kotlin = "2.2.0"
+log4j = "2.25.3"
+mockk = "1.13.13"
+proguardCore = "9.3.1"
+kotlin-compile-testing = "0.8.0"
+
+[libraries]
+android-gradle = {group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+ant = {group = "org.apache.ant", name = "ant", version.ref = "ant" }
+commons-io = { group = "commons-io", name = "commons-io", version.ref = "commons" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+java-semver = { module = "com.github.zafarkhaja:java-semver", version.ref = "javaSemver" }
+json = { module = "org.json:json", version.ref = "json" }
+kotest-runner-jvm = { group = "io.kotest", name = "kotest-runner-junit5-jvm", version.ref = "kotest" }
+kotest-assertions-jvm = { group = "io.kotest", name = "kotest-assertions-core-jvm", version.ref = "kotest" }
+kotest-propery-jvm = { group = "io.kotest", name = "kotest-property-jvm", version.ref = "kotest" }
+kotlin-compile-testing = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlin-compile-testing" }
+kotest-framework-datatest = { group = "io.kotest", name = "kotest-framework-datatest", version.ref = "kotest" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+log4j-api =  { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
+log4j-core =  { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+proguard-core = { group = "com.guardsquare", name = "proguard-core", version.ref = "proguardCore" }
+
+[bundles]
+log4j = ["log4j-api","log4j-core"]
+kotest = ["kotest-assertions-jvm", "kotest-runner-jvm", "kotest-propery-jvm", "kotest-framework-datatest"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
