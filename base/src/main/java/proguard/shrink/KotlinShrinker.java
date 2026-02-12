@@ -398,6 +398,10 @@ implements   KotlinMetadataVisitor,
         return metadataElement != null &&
                !usageMarker.isUsed(jvmElement);
     }
+    private boolean shouldShrinkMetadata(KotlinPropertyAccessorMetadata kotlinPropertyAccessorMetadata) {
+        return  kotlinPropertyAccessorMetadata != null && !usageMarker.isUsed(kotlinPropertyAccessorMetadata.referencedMethod);
+    }
+
 
     private boolean shouldShrinkMetadata(KotlinPropertyAccessorMetadata kotlinPropertyAccessorMetadata) {
         return  kotlinPropertyAccessorMetadata != null && !usageMarker.isUsed(kotlinPropertyAccessorMetadata.referencedMethod);
