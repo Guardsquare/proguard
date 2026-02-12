@@ -68,12 +68,13 @@ javaVersionsForTest.each {version ->
         // The version of bytebuddy used by mockk only supports Java 22 experimentally so far
         // if (version >= 22) systemProperty 'net.bytebuddy.experimental', true
 
-        testAllJavaVersion.configure { it.dependsOn(it) }
 
         javaLauncher = javaToolchains.launcherFor {
             languageVersion = JavaLanguageVersion.of(version)
         }
     }
+    testAllJavaVersion.configure { it.dependsOn(testJavaVersion) }
+
 }
 
 jacocoTestReport {
