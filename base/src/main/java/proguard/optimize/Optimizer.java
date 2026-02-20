@@ -158,6 +158,7 @@ import proguard.optimize.info.SynchronizedBlockMethodMarker;
 import proguard.optimize.info.UnusedParameterMethodFilter;
 import proguard.optimize.info.UnusedParameterOptimizationInfoUpdater;
 import proguard.optimize.info.WrapperClassMarker;
+import proguard.optimize.kotlin.KotlinContextParameterUsageMarker;
 import proguard.optimize.kotlin.KotlinContextReceiverUsageMarker;
 import proguard.optimize.peephole.ClassFinalizer;
 import proguard.optimize.peephole.GotoCommonCodeReplacer;
@@ -907,6 +908,15 @@ public class Optimizer implements Pass
                 new AllPropertyVisitor(kotlinContextReceiverUsageMarker)
             )))
         );
+        // Mark parameter usage based on Kotlin Context Parameters
+        KotlinContextParameterUsageMarker kotlinContextParameterUsageMarker =
+                new KotlinContextParameterUsageMarker();
+        programClassPool.accept(
+                new AllClassVisitor(
+                        new ReferencedKotlinMetadataVisitor(
+                                new MultiKotlinMetadataVisitor(
+                                        new AllFunctionVisitor(kotlinContextParameterUsageMarker),
+                                        new AllPropertyVisitor(kotlinContextParameterUsageMarker)))));
 
         // Perform partial evaluation for filling out fields, method parameters,
         // and method return values, so they can be propagated.

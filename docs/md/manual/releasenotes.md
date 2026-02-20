@@ -1,3 +1,9 @@
+## Version 7.9
+
+### Kotlin support
+
+- Add support for Kotlin 2.3.
+
 ## Version 7.8.2 
 
 ### Bugfixes 
