@@ -21,6 +21,7 @@
 package proguard.obfuscate;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * This <code>NameFactory</code> generates unique short names, using mixed-case characters or
@@ -84,7 +85,7 @@ public class SimpleNameFactory implements NameFactory {
 
     String newName = baseIndex == 0 ? String.valueOf(newChar) : (name(baseIndex - 1) + newChar);
 
-    if (Arrays.binarySearch(reservedNames, newName.toUpperCase()) >= 0) {
+    if (Arrays.binarySearch(reservedNames, newName.toUpperCase(Locale.ROOT)) >= 0) {
       newName += newChar;
     }
     return newName;

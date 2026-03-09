@@ -22,6 +22,7 @@ package proguard.gui;
 
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
+import java.util.Locale;
 
 
 /**
@@ -63,7 +64,7 @@ final class ExtensionFileFilter extends FileFilter
             return true;
         }
 
-        String fileName = file.getName().toLowerCase();
+        String fileName = file.getName().toLowerCase(Locale.ROOT);
 
         for (int index = 0; index < extensions.length; index++)
         {

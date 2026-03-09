@@ -26,6 +26,7 @@ import proguard.classfile.util.WarningLogger;
 import proguard.classfile.util.WarningPrinter;
 
 import java.io.*;
+import java.util.Locale;
 
 /**
  * This class performs sanity checks on a given configurations.
@@ -181,7 +182,7 @@ public class ConfigurationVerifier
                 configuration.useMixedCaseClassNames &&
                 configuration.classObfuscationDictionary == null)
             {
-                String os = System.getProperty("os.name").toLowerCase();
+                String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
                 if (os.startsWith("windows") ||
                     os.startsWith("mac os"))
                 {

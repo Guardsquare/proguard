@@ -263,7 +263,7 @@ public class ProGuardGUI extends JFrame
         lastBottomButtonConstraints.ipady     = bottomButtonConstraints.ipady;
 
         // Leave room for a growBox on Mac OS X.
-        if (System.getProperty("os.name").toLowerCase().startsWith("mac os x"))
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("mac os x"))
         {
             lastBottomButtonConstraints.insets = new Insets(2, 2, 4, 6 + 16);
         }
