@@ -13,11 +13,6 @@ repositories {
     mavenCentral()
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.fromTarget(project.findProperty("target")))
-    }
-}
 
 dependencies {
     api(libs.proguard.core)
@@ -45,14 +40,14 @@ jar {
 // Early access automatic downloads are not yet supported:
 // https://github.com/gradle/gradle/issues/14814
 // But it will work if e.g. Java N-ea is pre-installed
-def javaVersionsForTest = 9..23
+def javaVersionsForTest = 12..25
 
 test {
     useJUnitPlatform()
 }
 
 def testAllJavaVersion = tasks.register("testAllJavaVersions"){ testAllTask ->
-    dependsOn(test) // the usual test runs on Java 8
+    dependsOn(test) // the usual test runs on Java 11
 }
 
 javaVersionsForTest.each {version ->

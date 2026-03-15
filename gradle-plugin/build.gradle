@@ -23,12 +23,6 @@ gradlePlugin {
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.fromTarget(project.findProperty("target")))
-    }
-}
-
 configurations {
     fatJar.extendsFrom(compile)
 }

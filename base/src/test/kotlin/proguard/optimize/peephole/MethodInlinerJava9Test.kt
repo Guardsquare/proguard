@@ -16,9 +16,7 @@ import proguard.optimize.info.ProgramClassOptimizationInfoSetter
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter
 import proguard.testutils.ClassPoolBuilder
 import proguard.testutils.JavaSource
-import testutils.RequiresJavaVersion
 
-@RequiresJavaVersion(9)
 class MethodInlinerJava9Test : FreeSpec({
     isolationMode = IsolationMode.InstancePerTest
 

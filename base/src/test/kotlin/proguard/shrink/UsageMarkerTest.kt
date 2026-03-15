@@ -17,9 +17,10 @@ import proguard.classfile.visitor.MultiClassVisitor
 import proguard.resources.file.ResourceFilePool
 import proguard.testutils.ClassPoolBuilder
 import proguard.testutils.JavaSource
-import proguard.testutils.RequiresJavaVersion
+import testutils.RequiresJavaExtension
 import proguard.util.ProcessingFlagSetter
 import proguard.util.ProcessingFlags.DONT_SHRINK
+import testutils.currentJavaVersion
 
 class UsageMarkerTest : BehaviorSpec({
     Given("A class pool with interfaces only referenced through annotations") {
@@ -89,8 +90,8 @@ class UsageMarkerTest : BehaviorSpec({
 
 })
 
-@RequiresJavaVersion(15)
 class Java15UsageMarkerTest : BehaviorSpec({
+    extension(RequiresJavaExtension(from = 15))
     // Regression test for https://github.com/Guardsquare/proguard/issues/501
     Given("A class pool containing a sealed interface extending another sealed interface, and final classes implementing both") {
         val (programClassPool, _) = ClassPoolBuilder.fromSource(
@@ -169,7 +170,7 @@ class Java15UsageMarkerTest : BehaviorSpec({
                 }
 
             """.trimIndent()
-            ), javacArguments = listOf("--enable-preview", "--release", "15"),
+            ), javacArguments = if (currentJavaVersion in 15..16) listOf("--enable-preview", "--release", "$currentJavaVersion") else emptyList(),
         )
         val animal = programClassPool.getClass("sample/Animal")
 
