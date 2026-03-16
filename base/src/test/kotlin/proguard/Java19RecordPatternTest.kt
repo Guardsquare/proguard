@@ -4,10 +4,10 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldNotBe
 import proguard.testutils.ClassPoolBuilder
 import proguard.testutils.JavaSource
-import testutils.RequiresJavaVersion
+import testutils.RequiresJavaExtension
 
-@RequiresJavaVersion(19, 19)
 class Java19RecordPatternTest : FreeSpec({
+    extension(RequiresJavaExtension(from = 19, to = 19))
     "Given a class with Java record pattern" - {
         val (programClassPool, _) =
             ClassPoolBuilder.fromSource(
