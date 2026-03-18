@@ -7,6 +7,7 @@ plugins {
     id 'io.github.gradle-nexus.publish-plugin'
     id 'signing'
     alias(libs.plugins.kotlin.jvm) apply(false)
+    id "com.gradleup.shadow" version "9.1.0" apply false
 }
 
 allprojects {
@@ -170,7 +171,7 @@ distributions {
                             project(":retrace"),
                             project(":ant"),
                     ]
-                    from(distProjects.collect { it.tasks.named { it == "fatJar" } })
+                    from(distProjects.collect { it.tasks.named { it == "shadowJar" } })
                 }
                 into('docs') {
                     from('docs/md') {
