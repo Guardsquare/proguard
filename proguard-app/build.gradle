@@ -10,6 +10,10 @@ repositories {
     mavenCentral()
 }
 
+application {
+    mainClass = 'proguard.ProGuard'
+}
+
 dependencies {
    implementation project(':base')
 }
@@ -17,7 +21,6 @@ dependencies {
 jar.manifest.attributes('Implementation-Version': version)
 
 tasks.named('shadowJar', ShadowJar) {
-    mainClassName = 'proguard.ProGuard'
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard.jar')
     manifest {
