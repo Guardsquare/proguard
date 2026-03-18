@@ -4,6 +4,10 @@
 
 - Add support for Kotlin 2.3.
 
+### Java support 
+
+- Add support for Java 26.
+
 ## Version 7.8.2 
 
 ### Bugfixes 

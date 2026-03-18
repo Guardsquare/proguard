@@ -9,7 +9,7 @@ kotest = "6.1.4"
 kotlin = "2.2.0"
 log4j = "2.25.3"
 mockk = "1.13.13"
-proguardCore = "9.3.1"
+proguardCore = "9.3.2"
 kotlin-compile-testing = "0.8.0"
 
 [libraries]
