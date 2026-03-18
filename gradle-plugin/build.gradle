@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
     id 'java-gradle-plugin'
     id 'org.jetbrains.kotlin.jvm'
     id 'maven-publish'
@@ -53,20 +53,20 @@ test {
 
 def localRepo = file("$buildDir/local-repo")
 
-def fatJar = tasks.register("fatJar", ShadowJar) {
+def shadowJar = tasks.named('shadowJar', ShadowJar) {
     destinationDirectory.set(localRepo)
     archiveFileName.set("proguard-gradle-${version}.jar")
-    from sourceSets.main.output
-    configurations = [project.configurations.fatJar]
+    configurations = provider { [project.configurations.fatJar] }
     manifest {
         attributes(
                 'Main-Class': 'proguard.ProGuard',
-                'Implementation-Version': archiveVersion.get())
+                'Implementation-Version': archiveVersion.get(),
+        )
     }
 }
 
 tasks.withType(Test).configureEach {
-    dependsOn fatJar
+    dependsOn shadowJar
     systemProperty "local.repo", localRepo.toURI()
     systemProperty "proguard.version", version
     systemProperty "agp.version", libs.versions.agp.get()
