@@ -1,3 +1,9 @@
+## Version 7.9.1
+
+### Bugfixes
+
+- Fix regression in Kotlin metadata shrinking (#527).
+
 ## Version 7.9
 
 ### Kotlin support

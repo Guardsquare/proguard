@@ -20,8 +20,10 @@
  */
 package proguard.shrink;
 
+import java.util.List;
 import proguard.classfile.AccessConstants;
 import proguard.classfile.Clazz;
+import proguard.classfile.kotlin.KotlinAnnotation;
 import proguard.classfile.kotlin.KotlinClassKindMetadata;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.kotlin.KotlinConstructorMetadata;
@@ -42,8 +44,10 @@ import proguard.classfile.kotlin.KotlinVersionRequirementMetadata;
 import proguard.classfile.kotlin.flags.KotlinPropertyAccessorMetadata;
 import proguard.classfile.kotlin.visitor.AllTypeVisitor;
 import proguard.classfile.kotlin.visitor.KotlinConstructorVisitor;
+import proguard.classfile.kotlin.visitor.KotlinEnumEntryVisitor;
 import proguard.classfile.kotlin.visitor.KotlinFunctionVisitor;
 import proguard.classfile.kotlin.visitor.KotlinMetadataVisitor;
+import proguard.classfile.kotlin.visitor.KotlinPropertyAccessorVisitor;
 import proguard.classfile.kotlin.visitor.KotlinPropertyVisitor;
 import proguard.classfile.kotlin.visitor.KotlinTypeAliasVisitor;
 import proguard.classfile.kotlin.visitor.KotlinTypeParameterVisitor;
@@ -55,37 +59,33 @@ import proguard.classfile.visitor.MemberAccessSetter;
 import proguard.classfile.visitor.MultiMemberVisitor;
 import proguard.util.Processable;
 
-import java.util.List;
-
 public class KotlinShrinker
-implements   KotlinMetadataVisitor,
+        implements KotlinMetadataVisitor,
 
-             // Implementation interfaces.
-             KotlinPropertyVisitor,
-             KotlinFunctionVisitor,
-             KotlinTypeAliasVisitor,
-             KotlinTypeVisitor,
-             KotlinConstructorVisitor,
-             KotlinTypeParameterVisitor,
-             KotlinValueParameterVisitor,
-             KotlinVersionRequirementVisitor
-{
+        // Implementation interfaces.
+        KotlinPropertyVisitor,
+        KotlinFunctionVisitor,
+        KotlinTypeAliasVisitor,
+        KotlinTypeVisitor,
+        KotlinConstructorVisitor,
+        KotlinEnumEntryVisitor,
+        KotlinTypeParameterVisitor,
+        KotlinValueParameterVisitor,
+        KotlinVersionRequirementVisitor,
+        KotlinPropertyAccessorVisitor {
     private final SimpleUsageMarker usageMarker;
 
-
-    KotlinShrinker(SimpleUsageMarker usageMarker)
-    {
+    public KotlinShrinker(SimpleUsageMarker usageMarker) {
         this.usageMarker = usageMarker;
     }
-
 
     @Override
     public void visitAnyKotlinMetadata(Clazz clazz, KotlinMetadata kotlinMetadata) {}
 
     // Implementations for KotlinMetadataVisitor.
     @Override
-    public void visitKotlinDeclarationContainerMetadata(Clazz clazz, KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata)
-    {
+    public void visitKotlinDeclarationContainerMetadata(
+            Clazz clazz, KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata) {
         // Compact the metadata's lists of properties and functions.
         shrinkMetadataArray(kotlinDeclarationContainerMetadata.properties);
         shrinkMetadataArray(kotlinDeclarationContainerMetadata.functions);
@@ -93,52 +93,55 @@ implements   KotlinMetadataVisitor,
         shrinkMetadataArray(kotlinDeclarationContainerMetadata.localDelegatedProperties);
 
         // Compact each remaining property and function.
-        kotlinDeclarationContainerMetadata.propertiesAccept(         clazz, this);
-        kotlinDeclarationContainerMetadata.functionsAccept(          clazz, this);
-        kotlinDeclarationContainerMetadata.typeAliasesAccept(        clazz, this);
+        kotlinDeclarationContainerMetadata.propertiesAccept(clazz, this);
+        kotlinDeclarationContainerMetadata.functionsAccept(clazz, this);
+        kotlinDeclarationContainerMetadata.typeAliasesAccept(clazz, this);
         kotlinDeclarationContainerMetadata.delegatedPropertiesAccept(clazz, this);
     }
 
     @Override
-    public void visitKotlinClassMetadata(Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata)
-    {
+    public void visitKotlinClassMetadata(
+            Clazz clazz, KotlinClassKindMetadata kotlinClassKindMetadata) {
         // Compact the metadata's own fields.
-        if (shouldShrinkMetadata(kotlinClassKindMetadata.companionObjectName,
-                                 kotlinClassKindMetadata.referencedCompanionClass))
-        {
-            kotlinClassKindMetadata.companionObjectName      = null;
+        if (shouldShrinkMetadata(
+                kotlinClassKindMetadata.companionObjectName,
+                kotlinClassKindMetadata.referencedCompanionClass)) {
+            kotlinClassKindMetadata.companionObjectName = null;
             kotlinClassKindMetadata.referencedCompanionClass = null;
         }
 
         shrinkMetadataArray(kotlinClassKindMetadata.constructors);
 
-        shrinkEnumEntries(kotlinClassKindMetadata.enumEntries);
+        kotlinClassKindMetadata.enumEntries.removeIf(
+                it -> shouldShrinkMetadata(it, it.referencedEnumEntry));
 
-        shrinkArray(kotlinClassKindMetadata.nestedClassNames,
-                    kotlinClassKindMetadata.referencedNestedClasses);
+        shrinkArray(
+                kotlinClassKindMetadata.nestedClassNames, kotlinClassKindMetadata.referencedNestedClasses);
 
-        shrinkArray(kotlinClassKindMetadata.sealedSubclassNames,
-                    kotlinClassKindMetadata.referencedSealedSubClasses);
+        shrinkArray(
+                kotlinClassKindMetadata.sealedSubclassNames,
+                kotlinClassKindMetadata.referencedSealedSubClasses);
 
         visitKotlinDeclarationContainerMetadata(clazz, kotlinClassKindMetadata);
 
-        kotlinClassKindMetadata.superTypesAccept(                       clazz, this);
-        kotlinClassKindMetadata.typeParametersAccept(                   clazz, this);
-        kotlinClassKindMetadata.versionRequirementAccept(               clazz, this);
-        kotlinClassKindMetadata.constructorsAccept(                     clazz, this);
-        kotlinClassKindMetadata.contextReceiverTypesAccept(             clazz, this);
+        kotlinClassKindMetadata.enumEntriesAccept(clazz, this);
+        kotlinClassKindMetadata.superTypesAccept(clazz, this);
+        kotlinClassKindMetadata.typeParametersAccept(clazz, this);
+        kotlinClassKindMetadata.versionRequirementAccept(clazz, this);
+        kotlinClassKindMetadata.constructorsAccept(clazz, this);
+        kotlinClassKindMetadata.contextReceiverTypesAccept(clazz, this);
         kotlinClassKindMetadata.inlineClassUnderlyingPropertyTypeAccept(clazz, this);
     }
 
     @Override
-    public void visitKotlinFileFacadeMetadata(Clazz clazz, KotlinFileFacadeKindMetadata kotlinFileFacadeKindMetadata)
-    {
+    public void visitKotlinFileFacadeMetadata(
+            Clazz clazz, KotlinFileFacadeKindMetadata kotlinFileFacadeKindMetadata) {
         visitKotlinDeclarationContainerMetadata(clazz, kotlinFileFacadeKindMetadata);
     }
 
     @Override
-    public void visitKotlinSyntheticClassMetadata(Clazz clazz, KotlinSyntheticClassKindMetadata kotlinSyntheticClassKindMetadata)
-    {
+    public void visitKotlinSyntheticClassMetadata(
+            Clazz clazz, KotlinSyntheticClassKindMetadata kotlinSyntheticClassKindMetadata) {
         // Compact the metadata's lists of functions.
         shrinkMetadataArray(kotlinSyntheticClassKindMetadata.functions);
 
@@ -147,137 +150,143 @@ implements   KotlinMetadataVisitor,
     }
 
     @Override
-    public void visitKotlinMultiFileFacadeMetadata(Clazz clazz, KotlinMultiFileFacadeKindMetadata kotlinMultiFileFacadeKindMetadata)
-    {
-        shrinkArray(kotlinMultiFileFacadeKindMetadata.partClassNames,
-                    kotlinMultiFileFacadeKindMetadata.referencedPartClasses);
+    public void visitKotlinMultiFileFacadeMetadata(
+            Clazz clazz, KotlinMultiFileFacadeKindMetadata kotlinMultiFileFacadeKindMetadata) {
+        shrinkArray(
+                kotlinMultiFileFacadeKindMetadata.partClassNames,
+                kotlinMultiFileFacadeKindMetadata.referencedPartClasses);
     }
 
     @Override
-    public void visitKotlinMultiFilePartMetadata(Clazz clazz, KotlinMultiFilePartKindMetadata kotlinMultiFilePartKindMetadata)
-    {
+    public void visitKotlinMultiFilePartMetadata(
+            Clazz clazz, KotlinMultiFilePartKindMetadata kotlinMultiFilePartKindMetadata) {
         visitKotlinDeclarationContainerMetadata(clazz, kotlinMultiFilePartKindMetadata);
     }
 
-
     // Implementations for KotlinPropertyVisitor.
     @Override
-    public void visitAnyProperty(Clazz                              clazz,
-                                 KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
-                                 KotlinPropertyMetadata             kotlinPropertyMetadata)
-    {
-        kotlinPropertyMetadata.versionRequirementAccept(  clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinPropertyMetadata.typeAccept(                clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinPropertyMetadata.setterParameterAccept(    clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinPropertyMetadata.receiverTypeAccept(        clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinPropertyMetadata.contextReceiverTypesAccept(clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinPropertyMetadata.typeParametersAccept(      clazz, kotlinDeclarationContainerMetadata, this);
+    public void visitAnyProperty(
+            Clazz clazz,
+            KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+            KotlinPropertyMetadata kotlinPropertyMetadata) {
+        kotlinPropertyMetadata.versionRequirementAccept(
+                clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinPropertyMetadata.typeAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinPropertyMetadata.setterParameterAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinPropertyMetadata.receiverTypeAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinPropertyMetadata.contextReceiverTypesAccept(
+                clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinPropertyMetadata.typeParametersAccept(clazz, kotlinDeclarationContainerMetadata, this);
 
-        if (shouldShrinkMetadata(kotlinPropertyMetadata.backingFieldSignature,
-                                 kotlinPropertyMetadata.referencedBackingField))
-        {
-            kotlinPropertyMetadata.backingFieldSignature  = null;
+        if (shouldShrinkMetadata(
+                kotlinPropertyMetadata.backingFieldSignature,
+                kotlinPropertyMetadata.referencedBackingField)) {
+            kotlinPropertyMetadata.backingFieldSignature = null;
             kotlinPropertyMetadata.referencedBackingField = null;
         }
 
-        if (shouldShrinkMetadata(kotlinPropertyMetadata.getterMetadata))
-        {
-            kotlinPropertyMetadata.getterMetadata.signature        = null;
+        kotlinPropertyMetadata.propertyAccessorsAccept(clazz, kotlinDeclarationContainerMetadata, this);
+
+        if (shouldShrinkMetadata(
+                kotlinPropertyMetadata.getterMetadata.signature,
+                kotlinPropertyMetadata.getterMetadata.referencedMethod)) {
+            kotlinPropertyMetadata.getterMetadata.signature = null;
             kotlinPropertyMetadata.getterMetadata.referencedMethod = null;
         }
 
-        if (shouldShrinkMetadata(kotlinPropertyMetadata.setterMetadata))
-        {
+        if (kotlinPropertyMetadata.setterMetadata != null
+                && shouldShrinkMetadata(
+                kotlinPropertyMetadata.setterMetadata.signature,
+                kotlinPropertyMetadata.setterMetadata.referencedMethod)) {
             kotlinPropertyMetadata.setterMetadata.signature = null;
             kotlinPropertyMetadata.setterMetadata.referencedMethod = null;
-            kotlinPropertyMetadata.flags.isVar  = false;
-            kotlinPropertyMetadata.setterParameter  = null;
+            kotlinPropertyMetadata.flags.isVar = false;
+            // TODO(deprecation): Remove the deprecated setterParameters initialisation.
+            kotlinPropertyMetadata.setterParameters.clear();
+            kotlinPropertyMetadata.setterParameter = null;
         }
 
-        kotlinPropertyMetadata.versionRequirementAccept(clazz,
-                                                        kotlinDeclarationContainerMetadata,
-                                                        this);
+        kotlinPropertyMetadata.versionRequirementAccept(
+                clazz, kotlinDeclarationContainerMetadata, this);
 
-        if (kotlinPropertyMetadata.syntheticMethodForAnnotations != null &&
-            !usageMarker.isUsed(kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations))
-        {
-            kotlinPropertyMetadata.syntheticMethodForAnnotations           = null;
+        if (kotlinPropertyMetadata.syntheticMethodForAnnotations != null
+                && !usageMarker.isUsed(kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations)) {
+            kotlinPropertyMetadata.syntheticMethodForAnnotations = null;
             kotlinPropertyMetadata.referencedSyntheticMethodForAnnotations = null;
-            kotlinPropertyMetadata.referencedSyntheticMethodClass          = null;
-            kotlinPropertyMetadata.annotations.clear();
+            kotlinPropertyMetadata.referencedSyntheticMethodClass = null;
+            kotlinPropertyMetadata.flags.hasAnnotations = false;
         }
 
-        if (kotlinPropertyMetadata.syntheticMethodForDelegate != null &&
-            !usageMarker.isUsed(kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod))
-        {
-            kotlinPropertyMetadata.syntheticMethodForDelegate                 = null;
-            kotlinPropertyMetadata.referencedSyntheticMethodForDelegateClass  = null;
+        if (kotlinPropertyMetadata.syntheticMethodForDelegate != null
+                && !usageMarker.isUsed(kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod)) {
+            kotlinPropertyMetadata.syntheticMethodForDelegate = null;
+            kotlinPropertyMetadata.referencedSyntheticMethodForDelegateClass = null;
             kotlinPropertyMetadata.referencedSyntheticMethodForDelegateMethod = null;
         }
 
         // Fix inconsistencies that were introduced as
         // a result of shrinking
-        if (kotlinPropertyMetadata.referencedBackingField != null &&
-                (kotlinPropertyMetadata.setterMetadata == null ||
-                        kotlinPropertyMetadata.setterMetadata.signature == null) &&
-                (kotlinPropertyMetadata.getterMetadata == null ||
-                        kotlinPropertyMetadata.getterMetadata.signature == null) &&
-            (kotlinPropertyMetadata.referencedBackingField.getAccessFlags() & AccessConstants.PRIVATE) != 0 &&
-            !kotlinPropertyMetadata.flags.visibility.isPrivate)
-        {
+        if (kotlinPropertyMetadata.referencedBackingField != null
+                && kotlinPropertyMetadata.getterMetadata != null
+                && kotlinPropertyMetadata.getterMetadata.signature == null
+                && kotlinPropertyMetadata.setterMetadata != null
+                && kotlinPropertyMetadata.setterMetadata.signature == null
+                && (kotlinPropertyMetadata.referencedBackingField.getAccessFlags()
+                & AccessConstants.PRIVATE)
+                != 0
+                && !kotlinPropertyMetadata.flags.visibility.isPrivate) {
             int visibility =
-                kotlinPropertyMetadata.flags.visibility.isProtected ? AccessConstants.PROTECTED :
-                                                                      AccessConstants.PUBLIC;
+                    kotlinPropertyMetadata.flags.visibility.isProtected
+                            ? AccessConstants.PROTECTED
+                            : AccessConstants.PUBLIC;
 
-            kotlinPropertyMetadata.referencedBackingField.accept(kotlinPropertyMetadata.referencedBackingFieldClass,
-                                                                 new MultiMemberVisitor(
-                                                                     new MemberAccessFlagCleaner(AccessConstants.PRIVATE),
-                                                                     new MemberAccessSetter(visibility)));
+            kotlinPropertyMetadata.referencedBackingField.accept(
+                    kotlinPropertyMetadata.referencedBackingFieldClass,
+                    new MultiMemberVisitor(
+                            new MemberAccessFlagCleaner(AccessConstants.PRIVATE),
+                            new MemberAccessSetter(visibility)));
         }
     }
 
     // Implementations for KotlinFunctionVisitor.
     @Override
-    public void visitAnyFunction(Clazz                  clazz,
-                                 KotlinMetadata         kotlinMetadata,
-                                 KotlinFunctionMetadata kotlinFunctionMetadata)
-    {
-        if (kotlinFunctionMetadata.referencedLambdaClassOrigin != null &&
-            shouldShrinkMetadata(kotlinFunctionMetadata.lambdaClassOriginName,
-                                 kotlinFunctionMetadata.referencedLambdaClassOrigin))
-        {
-            kotlinFunctionMetadata.lambdaClassOriginName       = null;
+    public void visitAnyFunction(
+            Clazz clazz, KotlinMetadata kotlinMetadata, KotlinFunctionMetadata kotlinFunctionMetadata) {
+        if (kotlinFunctionMetadata.referencedLambdaClassOrigin != null
+                && shouldShrinkMetadata(
+                kotlinFunctionMetadata.lambdaClassOriginName,
+                kotlinFunctionMetadata.referencedLambdaClassOrigin)) {
+            kotlinFunctionMetadata.lambdaClassOriginName = null;
             kotlinFunctionMetadata.referencedLambdaClassOrigin = null;
         }
 
-        kotlinFunctionMetadata.receiverTypeAccept(        clazz, kotlinMetadata, this);
+        kotlinFunctionMetadata.receiverTypeAccept(clazz, kotlinMetadata, this);
         kotlinFunctionMetadata.contextReceiverTypesAccept(clazz, kotlinMetadata, this);
-        kotlinFunctionMetadata.typeParametersAccept(      clazz, kotlinMetadata, this);
-        kotlinFunctionMetadata.valueParametersAccept(     clazz, kotlinMetadata, this);
-        kotlinFunctionMetadata.returnTypeAccept(          clazz, kotlinMetadata, this);
-        kotlinFunctionMetadata.contractsAccept(           clazz, kotlinMetadata, new AllTypeVisitor(this));
+        kotlinFunctionMetadata.typeParametersAccept(clazz, kotlinMetadata, this);
+        kotlinFunctionMetadata.valueParametersAccept(clazz, kotlinMetadata, this);
+        kotlinFunctionMetadata.returnTypeAccept(clazz, kotlinMetadata, this);
+        kotlinFunctionMetadata.contractsAccept(clazz, kotlinMetadata, new AllTypeVisitor(this));
 
-        if (kotlinFunctionMetadata.referencedDefaultMethod != null &&
-            !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultMethod))
-        {
-            kotlinFunctionMetadata.referencedDefaultMethod      = null;
+        if (kotlinFunctionMetadata.referencedDefaultMethod != null
+                && !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultMethod)) {
+            kotlinFunctionMetadata.referencedDefaultMethod = null;
             kotlinFunctionMetadata.referencedDefaultMethodClass = null;
         }
 
-        if (kotlinFunctionMetadata.referencedDefaultImplementationMethod != null &&
-            !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultImplementationMethod))
-        {
-            kotlinFunctionMetadata.referencedDefaultImplementationMethod      = null;
+        if (kotlinFunctionMetadata.referencedDefaultImplementationMethod != null
+                && !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultImplementationMethod)) {
+            kotlinFunctionMetadata.referencedDefaultImplementationMethod = null;
             kotlinFunctionMetadata.referencedDefaultImplementationMethodClass = null;
         }
 
+        shrinkAnnotations(kotlinFunctionMetadata.annotations);
+
         // Fix inconsistencies that were introduced as
         // a result of shrinking.
-        if (!kotlinFunctionMetadata.flags.modality.isAbstract &&
-            kotlinMetadata.k == KotlinConstants.METADATA_KIND_CLASS &&
-            ((KotlinClassKindMetadata)kotlinMetadata).flags.isInterface &&
-            kotlinFunctionMetadata.referencedDefaultImplementationMethod == null)
-        {
+        if (!kotlinFunctionMetadata.flags.modality.isAbstract
+                && kotlinMetadata.k == KotlinConstants.METADATA_KIND_CLASS
+                && ((KotlinClassKindMetadata) kotlinMetadata).flags.isInterface
+                && kotlinFunctionMetadata.referencedDefaultImplementationMethod == null) {
             kotlinFunctionMetadata.flags.modality.isAbstract = true;
         }
     }
@@ -285,171 +294,177 @@ implements   KotlinMetadataVisitor,
     // Implementations for KotlinConstructorVisitor.
 
     @Override
-    public void visitConstructor(Clazz                     clazz,
-                                 KotlinClassKindMetadata   kotlinClassKindMetadata,
-                                 KotlinConstructorMetadata kotlinConstructorMetadata)
-    {
-        kotlinConstructorMetadata.valueParametersAccept(   clazz, kotlinClassKindMetadata, this);
+    public void visitConstructor(
+            Clazz clazz,
+            KotlinClassKindMetadata kotlinClassKindMetadata,
+            KotlinConstructorMetadata kotlinConstructorMetadata) {
+        kotlinConstructorMetadata.valueParametersAccept(clazz, kotlinClassKindMetadata, this);
         kotlinConstructorMetadata.versionRequirementAccept(clazz, kotlinClassKindMetadata, this);
     }
 
     // Implementations for KotlinTypeAliasVisitor.
 
     @Override
-    public void visitTypeAlias(Clazz clazz,
-                               KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
-                               KotlinTypeAliasMetadata kotlinTypeAliasMetadata)
-    {
-        kotlinTypeAliasMetadata.typeParametersAccept(    clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinTypeAliasMetadata.underlyingTypeAccept(    clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinTypeAliasMetadata.expandedTypeAccept(      clazz, kotlinDeclarationContainerMetadata, this);
-        kotlinTypeAliasMetadata.versionRequirementAccept(clazz, kotlinDeclarationContainerMetadata, this);
+    public void visitTypeAlias(
+            Clazz clazz,
+            KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+            KotlinTypeAliasMetadata kotlinTypeAliasMetadata) {
+        kotlinTypeAliasMetadata.typeParametersAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinTypeAliasMetadata.underlyingTypeAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinTypeAliasMetadata.expandedTypeAccept(clazz, kotlinDeclarationContainerMetadata, this);
+        kotlinTypeAliasMetadata.versionRequirementAccept(
+                clazz, kotlinDeclarationContainerMetadata, this);
 
-        shrinkMetadataArray(kotlinTypeAliasMetadata.annotations);
+        shrinkAnnotations(kotlinTypeAliasMetadata.annotations);
     }
 
     // Implementations for KotlinTypeVisitor.
 
     @Override
-    public void visitAnyType(Clazz clazz, KotlinTypeMetadata kotlinTypeMetadata)
-    {
+    public void visitAnyType(Clazz clazz, KotlinTypeMetadata kotlinTypeMetadata) {
         kotlinTypeMetadata.typeArgumentsAccept(clazz, this);
-        kotlinTypeMetadata.upperBoundsAccept(  clazz, this);
-        kotlinTypeMetadata.abbreviationAccept( clazz, this);
+        kotlinTypeMetadata.upperBoundsAccept(clazz, this);
+        kotlinTypeMetadata.abbreviationAccept(clazz, this);
 
-        shrinkMetadataArray(kotlinTypeMetadata.annotations);
+        shrinkAnnotations(kotlinTypeMetadata.annotations);
     }
 
     // Implementations for KotlinTypeParameterVisitor.
 
     @Override
-    public void visitAnyTypeParameter(Clazz clazz, KotlinTypeParameterMetadata kotlinTypeParameterMetadata)
-    {
+    public void visitAnyTypeParameter(
+            Clazz clazz, KotlinTypeParameterMetadata kotlinTypeParameterMetadata) {
         kotlinTypeParameterMetadata.upperBoundsAccept(clazz, this);
 
-        shrinkMetadataArray(kotlinTypeParameterMetadata.annotations);
+        shrinkAnnotations(kotlinTypeParameterMetadata.annotations);
     }
 
     // Implementations for KotlinValueParameterVisitor.
     @Override
-    public void visitAnyValueParameter(Clazz clazz,
-                                       KotlinValueParameterMetadata kotlinValueParameterMetadata) {}
+    public void visitAnyValueParameter(
+            Clazz clazz, KotlinValueParameterMetadata kotlinValueParameterMetadata) {
+        shrinkAnnotations(kotlinValueParameterMetadata.annotations);
+    }
 
     @Override
-    public void visitFunctionValParameter(Clazz                        clazz,
-                                          KotlinMetadata               kotlinMetadata,
-                                          KotlinFunctionMetadata       kotlinFunctionMetadata,
-                                          KotlinValueParameterMetadata kotlinValueParameterMetadata)
-    {
+    public void visitFunctionValParameter(
+            Clazz clazz,
+            KotlinMetadata kotlinMetadata,
+            KotlinFunctionMetadata kotlinFunctionMetadata,
+            KotlinValueParameterMetadata kotlinValueParameterMetadata) {
 
-        kotlinValueParameterMetadata.typeAccept(clazz,
-                                                kotlinMetadata,
-                                                kotlinFunctionMetadata,
-                                                this);
+        kotlinValueParameterMetadata.typeAccept(clazz, kotlinMetadata, kotlinFunctionMetadata, this);
 
-        if (kotlinValueParameterMetadata.flags.hasDefaultValue &&
-            !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultMethod))
-        {
+        if (kotlinValueParameterMetadata.flags.hasDefaultValue
+                && !usageMarker.isUsed(kotlinFunctionMetadata.referencedDefaultMethod)) {
             kotlinValueParameterMetadata.flags.hasDefaultValue = false;
         }
+
+        visitAnyValueParameter(clazz, kotlinValueParameterMetadata);
     }
 
     @Override
-    public void visitConstructorValParameter(Clazz                        clazz,
-                                             KotlinClassKindMetadata      kotlinClassKindMetadata,
-                                             KotlinConstructorMetadata    kotlinConstructorMetadata,
-                                             KotlinValueParameterMetadata kotlinValueParameterMetadata)
-    {
-        kotlinValueParameterMetadata.typeAccept(clazz,
-                                                kotlinClassKindMetadata,
-                                                kotlinConstructorMetadata,
-                                                this);
+    public void visitConstructorValParameter(
+            Clazz clazz,
+            KotlinClassKindMetadata kotlinClassKindMetadata,
+            KotlinConstructorMetadata kotlinConstructorMetadata,
+            KotlinValueParameterMetadata kotlinValueParameterMetadata) {
+        kotlinValueParameterMetadata.typeAccept(
+                clazz, kotlinClassKindMetadata, kotlinConstructorMetadata, this);
+
+        visitAnyValueParameter(clazz, kotlinValueParameterMetadata);
     }
 
     @Override
-    public void visitPropertyValParameter(Clazz                              clazz,
-                                          KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
-                                          KotlinPropertyMetadata             kotlinPropertyMetadata,
-                                          KotlinValueParameterMetadata       kotlinValueParameterMetadata)
-    {
-        kotlinValueParameterMetadata.typeAccept(clazz,
-                                                kotlinDeclarationContainerMetadata,
-                                                kotlinPropertyMetadata,
-                                                this);
+    public void visitPropertyValParameter(
+            Clazz clazz,
+            KotlinDeclarationContainerMetadata kotlinDeclarationContainerMetadata,
+            KotlinPropertyMetadata kotlinPropertyMetadata,
+            KotlinValueParameterMetadata kotlinValueParameterMetadata) {
+        kotlinValueParameterMetadata.typeAccept(
+                clazz, kotlinDeclarationContainerMetadata, kotlinPropertyMetadata, this);
+
+        visitAnyValueParameter(clazz, kotlinValueParameterMetadata);
     }
 
     @Override
-    public void visitAnyVersionRequirement(Clazz                            clazz,
-                                           KotlinVersionRequirementMetadata kotlinVersionRequirementMetadata)
-    {
+    public void visitAnyEnumEntry(
+            Clazz clazz,
+            KotlinClassKindMetadata kotlinClassKindMetadata,
+            KotlinEnumEntryMetadata kotlinEnumEntryMetadata) {
+        shrinkAnnotations(kotlinEnumEntryMetadata.annotations);
     }
+
+    @Override
+    public void visitAnyPropertyAccessor(
+            Clazz clazz,
+            KotlinMetadata kotlinMetadata,
+            KotlinPropertyMetadata kotlinPropertyMetadata,
+            KotlinPropertyAccessorMetadata kotlinPropertyAccessorMetadata) {
+        shrinkAnnotations(kotlinPropertyAccessorMetadata.annotations);
+    }
+
+    @Override
+    public void visitAnyVersionRequirement(
+            Clazz clazz, KotlinVersionRequirementMetadata kotlinVersionRequirementMetadata) {}
 
     // Small helper methods.
 
     /**
-     * Returns whether the given metadata element has its corresponding jvm
-     * implementation element shrunk, and thus should be shrunk itself.
+     * Returns whether the given metadata element has its corresponding jvm implementation element
+     * shrunk, and thus should be shrunk itself.
      */
-    private boolean shouldShrinkMetadata(Object metadataElement, Processable jvmElement)
-    {
+    private boolean shouldShrinkMetadata(Object metadataElement, Processable jvmElement) {
         // If this method throws a NPE, there is a kotlin metadata
         // element for which we could not find the corresponding
         // jvm element to cache yet (see ClassReferenceFixer.visitKotlinMetadata).
-        return metadataElement != null &&
-               !usageMarker.isUsed(jvmElement);
+        return metadataElement != null && !usageMarker.isUsed(jvmElement);
     }
-
-    private boolean shouldShrinkMetadata(KotlinPropertyAccessorMetadata kotlinPropertyAccessorMetadata) {
-        return  kotlinPropertyAccessorMetadata != null && !usageMarker.isUsed(kotlinPropertyAccessorMetadata.referencedMethod);
-    }
-
-
 
     /**
-     * Shrinks elements and their corresponding referenced element, based on
-     * markings on the referenced element.
+     * Shrinks elements and their corresponding referenced element, based on markings on the
+     * referenced element.
      *
-     * List is modified - must be a modifiable list!
+     * <p>List is modified - must be a modifiable list!
      */
-    private void shrinkArray(List<?>                         elements,
-                             List<? extends Processable> referencedJavaElements)
-    {
+    private void shrinkArray(List<?> elements, List<? extends Processable> referencedJavaElements) {
         shrinkArray(usageMarker, elements, referencedJavaElements);
     }
 
-    private void shrinkEnumEntries(List<KotlinEnumEntryMetadata> enumEntries) {
-        enumEntries.removeIf(usageMarker::isUsed);
-    }
-
     /**
-     * Shrinks elements and their corresponding referenced element, based on
-     * markings on the referenced element.
-     * List is modified - must be a modifiable list!
+     * Shrinks elements and their corresponding referenced element, based on markings on the
+     * referenced element.
+     *
+     * <p>List is modified - must be a modifiable list!
      */
-    static void shrinkArray(SimpleUsageMarker               usageMarker,
-                            List<?>                         elements,
-                            List<? extends Processable> referencedJavaElements)
-    {
-        for (int k = elements.size() - 1; k >= 0; k--)
-        {
-            if (!usageMarker.isUsed(referencedJavaElements.get(k)))
-            {
-                elements              .remove(k);
+    static void shrinkArray(
+            SimpleUsageMarker usageMarker,
+            List<?> elements,
+            List<? extends Processable> referencedJavaElements) {
+        for (int k = elements.size() - 1; k >= 0; k--) {
+            if (!usageMarker.isUsed(referencedJavaElements.get(k))) {
+                elements.remove(k);
                 referencedJavaElements.remove(k);
             }
         }
     }
 
+    /** Shrinks Kotlin annotations and their arguments. */
+    private void shrinkAnnotations(List<KotlinAnnotation> annotations) {
+        for (int k = annotations.size() - 1; k >= 0; k--) {
+            KotlinAnnotation annotation = annotations.get(k);
+            if (usageMarker.isUsed(annotation)) {
+                shrinkMetadataArray(annotation.arguments);
+            } else {
+                annotations.remove(k);
+            }
+        }
+    }
 
-    /**
-     * Shrinks elements based on their markings.
-     */
-    private void shrinkMetadataArray(List<? extends Processable> elements)
-    {
-        for (int k = elements.size() - 1; k >= 0; k--)
-        {
-            if (!usageMarker.isUsed(elements.get(k)))
-            {
+    /** Shrinks elements based on their markings. */
+    private void shrinkMetadataArray(List<? extends Processable> elements) {
+        for (int k = elements.size() - 1; k >= 0; k--) {
+            if (!usageMarker.isUsed(elements.get(k))) {
                 elements.remove(k);
             }
         }
