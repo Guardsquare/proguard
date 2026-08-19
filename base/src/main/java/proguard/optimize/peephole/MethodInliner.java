@@ -444,7 +444,6 @@ implements            AttributeVisitor,
         // The line numbers need to be inserted sequentially.
         minimumLineNumberIndex = 0;
 
-        codeAttribute.attributesAccept(clazz, method, this);
 
         // Add a marker at the start of the method. The LineNumberLinearizer relies on this to detect
         // inlined blocks.

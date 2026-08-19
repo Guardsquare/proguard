@@ -1,38 +1,40 @@
 package proguard.optimize.peephole
 
 import io.kotest.core.spec.IsolationMode
-import io.kotest.core.spec.style.FreeSpec
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.string.shouldMatch
-import proguard.classfile.ClassPool
 import proguard.classfile.Clazz
 import proguard.classfile.Method
 import proguard.classfile.ProgramClass
 import proguard.classfile.ProgramMethod
+import proguard.classfile.attribute.Attribute.LINE_NUMBER_TABLE
 import proguard.classfile.attribute.CodeAttribute
+import proguard.classfile.attribute.LineNumberTableAttribute
+import proguard.classfile.attribute.ProGuardOrigin
 import proguard.classfile.attribute.visitor.AllAttributeVisitor
 import proguard.classfile.instruction.visitor.AllInstructionVisitor
 import proguard.classfile.visitor.AllMethodVisitor
-import proguard.classfile.visitor.ClassPrinter
 import proguard.classfile.visitor.ClassVisitor
-import proguard.classfile.visitor.MemberVisitor
 import proguard.classfile.visitor.MultiClassVisitor
 import proguard.classfile.visitor.MultiMemberVisitor
 import proguard.optimize.info.BackwardBranchMarker
 import proguard.optimize.info.ProgramClassOptimizationInfoSetter
 import proguard.optimize.info.ProgramMemberOptimizationInfoSetter
 import proguard.testutils.ClassPoolBuilder
+import proguard.testutils.CodeAttributeFinder
 import proguard.testutils.JavaSource
-import java.io.ByteArrayOutputStream
-import java.io.PrintWriter
+import proguard.testutils.classfile.extensions.get
+import proguard.testutils.classfile.extensions.shouldMatch
 
-class MethodInlinerTest : FreeSpec({
+class MethodInlinerTest : BehaviorSpec({
     isolationMode = IsolationMode.InstancePerTest
 
-    "Given two simple functions, one calling the other" - {
+    Given("two simple functions, one calling the other") {
         val (programClassPool, _) =
             ClassPoolBuilder.fromSource(
                 JavaSource(
@@ -50,15 +52,16 @@ class MethodInlinerTest : FreeSpec({
             )
 
         // Sanity check how the instructions look before.
-        val instructionsBefore = printProgramMethodInstructions(programClassPool, "Foo", "f1", "()I")
-
-        instructionsBefore.size shouldBe 4
-        instructionsBefore[0] shouldMatch """(.*)invokestatic(.*)Foo.f2\(\)I(.*)""".toRegex()
-        instructionsBefore[1] shouldContain "iconst_1"
-        instructionsBefore[2] shouldContain "iadd"
-        instructionsBefore[3] shouldContain "ireturn"
-
-        "When calling the method inliner, specifying that we should always inline" - {
+        val clazz = programClassPool.getClass("Foo")
+        val f1 = clazz.findMethod("f1","()I") as ProgramMethod
+        val f2 = clazz.findMethod("f2","()I") as ProgramMethod
+        clazz[f1].shouldMatch {
+            invokestatic(clazz,f2)
+            iconst_1()
+            iadd()
+            ireturn()
+        }
+        When("calling the method inliner, specifying that we should always inline") {
             // Initialize optimization info (used when inlining).
             val optimizationInfoInitializer: ClassVisitor =
                 MultiClassVisitor(
@@ -88,18 +91,35 @@ class MethodInlinerTest : FreeSpec({
                 ),
             )
 
-            "Then the called function is inlined as expected" {
-                val instructionsAfter = printProgramMethodInstructions(programClassPool, "Foo", "f1", "()I")
-
-                instructionsAfter.size shouldBe 4
-                instructionsAfter[0] shouldContain "iconst_1"
-                instructionsAfter[1] shouldContain "iconst_1"
-                instructionsAfter[2] shouldContain "iadd"
-                instructionsAfter[3] shouldContain "ireturn"
+            Then("the called function is inlined as expected") {
+                clazz[f1].shouldMatch {
+                    iconst_1()
+                    iconst_1()
+                    iadd()
+                    ireturn()
+                }
+            }
+            Then("The line number table should look correct") {
+                val codeAttribute = CodeAttributeFinder.findCodeAttribute(f1)!!
+                val lineNumberTableAttribute = codeAttribute.getAttribute(clazz, LINE_NUMBER_TABLE) as LineNumberTableAttribute
+                val table = lineNumberTableAttribute.lineNumberTable
+                table.size shouldBe 4
+                table[0].u2lineNumber shouldBe MethodInliner.INLINED_METHOD_START_LINE_NUMBER
+                table[0].origin.shouldContainOnly(ProGuardOrigin.INLINED)
+                table[0].source shouldBe "Foo.f2()I:7:7"
+                table[1].u2lineNumber shouldBe 3
+                table[1].origin.shouldBeEmpty()
+                table[1].source.shouldBeNull()
+                table[2].u2lineNumber shouldBe 7
+                table[2].origin.shouldContainOnly(ProGuardOrigin.INLINED)
+                table[2].source shouldBe "Foo.f2()I:7:7"
+                table[3].u2lineNumber shouldBe MethodInliner.INLINED_METHOD_END_LINE_NUMBER
+                table[3].origin.shouldContainOnly(ProGuardOrigin.INLINED)
+                table[3].source shouldBe "Foo.f2()I:7:7"
             }
         }
 
-        "When calling the method inliner, specifying that we should never inline" - {
+        When("calling the method inliner, specifying that we should never inline") {
             // Initialize optimization info (used when inlining).
             val optimizationInfoInitializer: ClassVisitor =
                 MultiClassVisitor(
@@ -129,19 +149,21 @@ class MethodInlinerTest : FreeSpec({
                 ),
             )
 
-            "Then the called function is not inlined" {
-                val instructionsAfter = printProgramMethodInstructions(programClassPool, "Foo", "f1", "()I")
-
-                instructionsAfter.size shouldBe 4
-                instructionsAfter[0] shouldMatch """(.*)invokestatic(.*)Foo.f2\(\)I(.*)""".toRegex()
-                instructionsAfter[1] shouldContain "iconst_1"
-                instructionsAfter[2] shouldContain "iadd"
-                instructionsAfter[3] shouldContain "ireturn"
+            Then("the called function is not inlined") {
+                val clazz = programClassPool.getClass("Foo")
+                val f1 = clazz.findMethod("f1","()I")
+                val f2 = clazz.findMethod("f2","()I")
+                clazz[f1].shouldMatch {
+                    invokestatic(clazz,f2)
+                    iconst_1()
+                    iadd()
+                    ireturn()
+                }
             }
         }
     }
 
-    "Given a function calling a big function" - {
+    Given("a function calling a big function") {
         val lotsOfPrints = (1..3000).joinToString("\n") { "System.out.println(\"${it}\");" }
 
         val (programClassPool, _) =
@@ -168,7 +190,7 @@ class MethodInlinerTest : FreeSpec({
 
         val lengthBefore = codeAttr.u4codeLength
 
-        "When using the default maximum resulting code length parameter" - {
+        When("using the default maximum resulting code length parameter") {
             // Initialize optimization info (used when inlining).
             val optimizationInfoInitializer: ClassVisitor =
                 MultiClassVisitor(
@@ -190,7 +212,7 @@ class MethodInlinerTest : FreeSpec({
                     ): Boolean = true
                 }
 
-            "Then the large method is not inlined" {
+            Then("the large method is not inlined") {
                 programClassPool.classesAccept(
                     AllMethodVisitor(
                         AllAttributeVisitor(
@@ -205,7 +227,7 @@ class MethodInlinerTest : FreeSpec({
             }
         }
 
-        "When using the maximum resulting code length parameter" - {
+        When("using the maximum resulting code length parameter") {
             // Initialize optimization info (used when inlining).
             val optimizationInfoInitializer: ClassVisitor =
                 MultiClassVisitor(
@@ -235,7 +257,7 @@ class MethodInlinerTest : FreeSpec({
                 ),
             )
 
-            "Then the large method is inlined" {
+            Then("the large method is inlined") {
                 val lengthAfter = codeAttr.u4codeLength
 
                 lengthAfter shouldBeGreaterThan lengthBefore
@@ -243,7 +265,7 @@ class MethodInlinerTest : FreeSpec({
         }
     }
 
-    "Given a method initializing a library class and calling a method with backwards branching " - {
+    Given("a method initializing a library class and calling a method with backwards branching") {
         val (programClassPool, _) =
             ClassPoolBuilder.fromSource(
                 JavaSource(
@@ -272,7 +294,7 @@ class MethodInlinerTest : FreeSpec({
 
         val lengthBefore = codeAttr.u4codeLength
 
-        "When inlining the method call" - {
+        When("inlining the method call") {
             // Initialize optimization info (used when inlining).
             // Make sure the backwards branching info is set correctly.
             val optimizationInfoInitializer: ClassVisitor =
@@ -302,7 +324,7 @@ class MethodInlinerTest : FreeSpec({
                     ): Boolean = true
                 }
 
-            "Then the method is inlined" {
+            Then("the method is inlined") {
                 programClassPool.classesAccept(
                     AllMethodVisitor(
                         AllAttributeVisitor(methodInliner),
@@ -316,7 +338,7 @@ class MethodInlinerTest : FreeSpec({
         }
     }
 
-    "Given a method calling another non-private method in an interface" - {
+    Given("a method calling another non-private method in an interface") {
         val (programClassPool, _) =
             ClassPoolBuilder.fromSource(
                 JavaSource(
@@ -362,7 +384,7 @@ class MethodInlinerTest : FreeSpec({
                 ): Boolean = true
             }
 
-        "Then the interface method is not inlined" {
+        Then("the interface method is not inlined") {
             programClassPool.classesAccept(
                 AllMethodVisitor(
                     AllAttributeVisitor(
@@ -377,32 +399,3 @@ class MethodInlinerTest : FreeSpec({
         }
     }
 })
-
-private fun printProgramMethodInstructions(
-    classPool: ClassPool,
-    className: String,
-    methodName: String,
-    methodDescriptor: String,
-): List<String> {
-    val output = ByteArrayOutputStream()
-    val pw = PrintWriter(output)
-
-    classPool.classAccept(className) { clazz ->
-        clazz.methodAccept(
-            methodName,
-            methodDescriptor,
-            object : MemberVisitor {
-                override fun visitProgramMethod(
-                    programClass: ProgramClass?,
-                    programMethod: ProgramMethod?,
-                ) {
-                    programMethod?.accept(programClass, AllAttributeVisitor(AllInstructionVisitor(ClassPrinter(pw))))
-                }
-            },
-        )
-    }
-
-    pw.flush()
-    val result = output.toString().trimEnd()
-    return result.lines()
-}

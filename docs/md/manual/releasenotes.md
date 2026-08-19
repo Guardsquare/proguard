@@ -3,6 +3,7 @@
 ### Bugfixes
 
 - Fix regression in Kotlin metadata shrinking (#527).
+- Fix broken mapping file when applying method inlining (#520).
 
 ## Version 7.9
 
