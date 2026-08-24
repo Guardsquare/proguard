@@ -78,8 +78,7 @@ extends      ReferenceTracingInvocationUnit
             super.getMethodReturnValue(clazz, refConstant, type);
 
         // We only need to worry about reference values.
-        if (returnValue.computationalType() != Value.TYPE_REFERENCE)
-        {
+        if (returnValue == null || returnValue.computationalType() != Value.TYPE_REFERENCE) {
             return returnValue;
         }
 

@@ -6,10 +6,10 @@ gson = "2.11.0"
 javaSemver = "0.10.2"
 json = "20231013"
 kotest = "6.1.4"
-kotlin = "2.2.0"
+kotlin = "2.4.0"
 log4j = "2.26.1"
 mockk = "1.13.13"
-proguardCore = "9.3.2"
+proguardCore = "9.4.0"
 kotlin-compile-testing = "0.8.0"
 
 [libraries]

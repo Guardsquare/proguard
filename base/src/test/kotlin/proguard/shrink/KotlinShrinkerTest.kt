@@ -83,7 +83,6 @@ class KotlinShrinkerTest : BehaviorSpec({
             val x: @MyTypeAnnotation(annotationArgument = "annotated") String = "foo"
                 """.trimIndent(),
             ),
-            kotlincArguments = listOf("-Xannotations-in-metadata"),
         )
 
         val fileFacadeClass = programClassPool.getClass("TestKt")
@@ -200,7 +199,6 @@ class KotlinShrinkerTest : BehaviorSpec({
                 annotationArgument = "annotated") fun foo(): String { return "Foo" }
                 """.trimIndent(),
             ),
-            kotlincArguments = listOf("-Xannotations-in-metadata"),
         )
 
         val fileFacadeClass = programClassPool.getClass("TestKt")
@@ -322,7 +320,6 @@ class KotlinShrinkerTest : BehaviorSpec({
                         { field = valueParam + "concat" }
                 """.trimIndent(),
             ),
-            kotlincArguments = listOf("-Xannotations-in-metadata"),
         )
 
         val usageMarker = SimpleUsageMarker()
@@ -468,7 +465,6 @@ class KotlinShrinkerTest : BehaviorSpec({
                 }
                 """.trimIndent(),
             ),
-            kotlincArguments = listOf("-Xannotations-in-metadata"),
         )
 
         val myEnumClass = programClassPool.getClass("MyEnumClass")
