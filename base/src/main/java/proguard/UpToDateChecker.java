@@ -136,7 +136,11 @@ public class UpToDateChecker
                 {
                     updateModificationTime(new File(url.toURI()), false);
                 }
-                catch (URISyntaxException ignore) {}
+                catch (URISyntaxException exception)
+                {
+                    // The input couldn't be checked, so conservatively consider the output outdated.
+                    throw new IllegalStateException("Can't check the input modification time", exception);
+                }
             }
         }
 
