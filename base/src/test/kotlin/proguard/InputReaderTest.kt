@@ -98,8 +98,14 @@ class InputReaderTest : FreeSpec({
         fun createHardLink(sourceDir: Path, destDir: Path, pathPieces: List<String>) {
             val source = pathPieces.fold(sourceDir, Path::resolve)
             val dest = pathPieces.fold(destDir, Path::resolve)
+
+            // Only support linking files, not directories; otherwise could accidentally corrupt JDK when
+            // following links during cleanup
+            require(Files.isRegularFile(source))
+
             Files.createDirectories(dest.parent)
-            // Some of the copied files are > 100 MB; for better performance just create a hardlink
+            // Some of the copied files are > 100 MB; for better performance just create a hardlink instead
+            // of copying file contents
             Files.createLink(dest, source)
         }
 
