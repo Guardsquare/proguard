@@ -319,7 +319,7 @@ public class InputReader implements Pass
             moduleName = fileName.substring(0, fileName.lastIndexOf('.'));
         }
 
-        // First check if this is really a non-existent `JAVA_HOME/jmods` directory
+        // Check if this is a non-existent `JAVA_HOME/jmods` directory
         if (!jmodsDir.getName().equals("jmods")) {
             return null;
         }

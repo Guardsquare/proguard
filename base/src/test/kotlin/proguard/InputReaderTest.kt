@@ -104,6 +104,9 @@ class InputReaderTest : FreeSpec({
         }
 
         // Create a dummy JAVA_HOME without jmods
+        // Note: Most likely this tempdir will not be fully cleaned up (at least on Windows) because internally
+        // the JDK creates an additional URLClassLoader in JrtFileSystemProvider#newJrtFsLoader and does not close it
+        // when the FileSystem is closed; at least the tempdir only contains hardlinks and only takes up little space
         val customJavaHome = tempdir().toPath()
         // Copy only the files needed to make it look like a JDK without jmod files
         createHardLink(javaHome, customJavaHome, listOf("lib", "jrt-fs.jar"))
