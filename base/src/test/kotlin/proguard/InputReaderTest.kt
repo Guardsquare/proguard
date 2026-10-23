@@ -85,7 +85,7 @@ class InputReaderTest : FreeSpec({
         "It should read a specific jmod file with filter" {
             val classPathEntry = ClassPathEntry(
                 javaHomeJmods.resolve("java.base.jmod").toFile(), false)
-            classPathEntry.filter = mutableListOf("java/lang/String.class")
+            classPathEntry.filter = listOf("java/lang/String.class")
             val entryReader = ExpectingDataEntryReader(false,
                 setOf(javaBaseEntryString),
                 setOf(javaCompilerEntry, javaBaseEntryNumber))
@@ -150,7 +150,7 @@ class InputReaderTest : FreeSpec({
         "It should read a specific module with filter" {
             val classPathEntry = ClassPathEntry(
                 customJavaHome.resolve("jmods").resolve("java.base.jmod").toFile(), false)
-            classPathEntry.filter = mutableListOf("java/lang/String.class")
+            classPathEntry.filter = listOf("java/lang/String.class")
             val entryReader = ExpectingDataEntryReader(true,
                 setOf(javaBaseEntryString),
                 setOf(javaCompilerEntry, javaBaseEntryNumber))
