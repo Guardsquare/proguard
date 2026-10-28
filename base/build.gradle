@@ -7,12 +7,8 @@ plugins {
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'jacoco'
     id "org.jlleitschuh.gradle.ktlint" version '12.1.2'
+    id 'proguard.conventions'
 }
-
-repositories {
-    mavenCentral()
-}
-
 
 dependencies {
     api(libs.proguard.core)
@@ -85,12 +81,10 @@ jacocoTestReport {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications.named(project.name) {
-            pom {
-                description = 'ProGuard is a free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
-            }
+publishing {
+    publications.named(project.name) {
+        pom {
+            description = 'ProGuard is a free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
         }
     }
 }

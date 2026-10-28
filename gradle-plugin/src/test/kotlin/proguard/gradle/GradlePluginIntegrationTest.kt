@@ -96,6 +96,7 @@ fun testConfigOption(task: String) =
             vararg tasks: String,
         ): BuildResult? =
             GradleRunner.create()
+                .withGradleVersion("8.14.6")
                 .forwardOutput()
                 .withArguments(tasks.asList())
                 .withPluginClasspath()
