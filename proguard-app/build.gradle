@@ -4,10 +4,7 @@ plugins {
     id 'com.gradleup.shadow'
     id 'java'
     id 'application'
-}
-
-repositories {
-    mavenCentral()
+    id 'proguard.conventions'
 }
 
 application {
@@ -20,7 +17,7 @@ dependencies {
 
 jar.manifest.attributes('Implementation-Version': version)
 
-tasks.named('shadowJar', ShadowJar) {
+def shadowJar = tasks.named('shadowJar', ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('proguard.jar')
     manifest {
@@ -29,4 +26,15 @@ tasks.named('shadowJar', ShadowJar) {
                 'Multi-Release': true,
         )
     }
+}
+
+configurations {
+    jarDistribution {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+artifacts {
+    jarDistribution shadowJar
 }

@@ -4,17 +4,14 @@ plugins {
     id 'com.gradleup.shadow'
     id 'java'
     id 'maven-publish'
-}
-
-repositories {
-    mavenCentral()
+    id 'proguard.conventions'
 }
 
 dependencies {
     implementation project(':base')
 }
 
-tasks.named('shadowJar', ShadowJar) {
+def shadowJar = tasks.named('shadowJar', ShadowJar) {
     destinationDirectory.set(file("$rootDir/lib"))
     archiveFileName.set('retrace.jar')
     manifest {
@@ -25,12 +22,21 @@ tasks.named('shadowJar', ShadowJar) {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications.named(project.name) {
-            pom {
-                description = "ReTrace is a companion tool for ProGuard and DexGuard that 'de-obfuscates' stack traces."
-            }
+configurations {
+    jarDistribution {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+artifacts {
+    jarDistribution shadowJar
+}
+
+publishing {
+    publications.named(project.name) {
+        pom {
+            description = "ReTrace is a companion tool for ProGuard and DexGuard that 'de-obfuscates' stack traces."
         }
     }
 }

@@ -6,13 +6,8 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id 'maven-publish'
     id 'org.jlleitschuh.gradle.ktlint' version '12.1.2'
+    id 'proguard.conventions'
 }
-
-repositories {
-    google()
-    mavenCentral()
-}
-
 
 gradlePlugin {
     plugins {
@@ -110,12 +105,12 @@ afterEvaluate {
     } each {task ->
         task.enabled = false
     }
+}
 
-    publishing {
-        publications.getByName(project.name) {
-            pom {
-                description = 'Gradle plugin for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
-            }
+publishing {
+    publications.named(project.name) {
+        pom {
+            description = 'Gradle plugin for ProGuard, the free shrinker, optimizer, obfuscator, and preverifier for Java bytecode'
         }
     }
 }

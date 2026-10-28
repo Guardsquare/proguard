@@ -1,0 +1,7 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+dependencies {
+    implementation libs.kotlin.gradle.plugin
+}

@@ -7,10 +7,12 @@ javaSemver = "0.10.2"
 json = "20231013"
 kotest = "6.1.4"
 kotlin = "2.4.0"
+kotlin-compile-testing = "0.8.0"
 log4j = "2.26.1"
 mockk = "1.13.13"
+nexus = "2.0.0"
 proguardCore = "9.4.1"
-kotlin-compile-testing = "0.8.0"
+shadow = "9.1.0"
 
 [libraries]
 android-gradle = {group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -23,6 +25,7 @@ kotest-runner-jvm = { group = "io.kotest", name = "kotest-runner-junit5-jvm", ve
 kotest-assertions-jvm = { group = "io.kotest", name = "kotest-assertions-core-jvm", version.ref = "kotest" }
 kotest-propery-jvm = { group = "io.kotest", name = "kotest-property-jvm", version.ref = "kotest" }
 kotlin-compile-testing = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlin-compile-testing" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 log4j-api =  { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
@@ -36,3 +39,5 @@ kotest = ["kotest-assertions-jvm", "kotest-runner-jvm", "kotest-propery-jvm"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+nexus-publish = { id  = "io.github.gradle-nexus.publish-plugin", version.ref = "nexus" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
