@@ -1,18 +1,21 @@
-pluginManagement {
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == 'io.github.gradle-nexus.publish-plugin') {
-                useVersion '2.0.0'
-            }
-        }
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
     }
 }
 
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
-}
-
 rootProject.name = 'proguard'
+
+includeBuild 'build-logic'
 
 include 'base'
 include 'proguard-app'
@@ -23,3 +26,8 @@ include 'ant'
 include 'annotations'
 
 project(':gradle-plugin').name = 'gradle'
+
+gradle.beforeProject { project ->
+    project.group = 'com.guardsquare'
+    project.version = providers.gradleProperty('proguardVersion').get()
+}

@@ -221,7 +221,9 @@ class AndroidPlugin(private val androidExtension: BaseExtension) : Plugin<Projec
     ) {
         srcConfiguration.attributes.keySet().forEach { attribute ->
             val attributeValue = srcConfiguration.attributes.getAttribute(attribute)
-            destConfiguration.attributes.attribute(attribute as Attribute<Any>, attributeValue)
+            if (attributeValue != null) {
+                destConfiguration.attributes.attribute(attribute as Attribute<Any>, attributeValue)
+            }
         }
     }
 
