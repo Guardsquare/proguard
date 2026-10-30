@@ -75,6 +75,27 @@ public class DataEntryReaderFactory
     }
 
     /**
+     * Creates a DataEntryReader which applies the filter obtained from
+     * {@link #getFilterExcludingVersionedClasses(ClassPathEntry)}.
+     * If no filter is configured, returns the given {@code reader} as is.
+     */
+    public static DataEntryReader applyGeneralFilter(ClassPathEntry classPathEntry, DataEntryReader reader) {
+        List<String> filter = getFilterExcludingVersionedClasses(classPathEntry);
+        if (filter != null)
+        {
+            WildcardManager wildcardManager = new WildcardManager();
+
+            StringFunction nameFunction =
+                new ListFunctionParser(
+                new SingleFunctionParser(
+                new FileNameParser(wildcardManager), wildcardManager)).parse(filter);
+
+            reader = new RenamedDataEntryReader(nameFunction, reader);
+        }
+        return reader;
+    }
+
+    /**
      * Creates a DataEntryReader that can read the given class path entry.
      *
      * @param classPathEntry the input class path entry.
@@ -93,7 +114,6 @@ public class DataEntryReaderFactory
         boolean isJmod = classPathEntry.isJmod();
         boolean isZip  = classPathEntry.isZip();
 
-        List<String> filter     = getFilterExcludingVersionedClasses(classPathEntry);
         List<String> apkFilter  = classPathEntry.getApkFilter();
         List<String> aabFilter  = classPathEntry.getAabFilter();
         List<String> jarFilter  = classPathEntry.getJarFilter();
@@ -104,17 +124,7 @@ public class DataEntryReaderFactory
         List<String> zipFilter  = classPathEntry.getZipFilter();
 
         // Add a renaming filter, if specified.
-        if (filter != null)
-        {
-            WildcardManager wildcardManager = new WildcardManager();
-
-            StringFunction nameFunction =
-                new ListFunctionParser(
-                new SingleFunctionParser(
-                new FileNameParser(wildcardManager), wildcardManager)).parse(filter);
-
-            reader = new RenamedDataEntryReader(nameFunction, reader);
-        }
+        reader = applyGeneralFilter(classPathEntry, reader);
 
         // Unzip any apks, if necessary.
         reader = wrapInJarReader(reader, false, false, isApk, apkFilter, ".apk");
@@ -165,7 +175,7 @@ public class DataEntryReaderFactory
      *                           entries contained in the jar file.
      * @param stripClassesPrefix specifies whether to strip the ""classes/"
      *                           prefix from contained .class data entries.
-     *@param stripJmodHeader     specifies whether to strip the jmod magic
+     * @param stripJmodHeader    specifies whether to strip the jmod magic
      *                           bytes from the zip.
      * @param isJar              specifies whether the data entries should
      *                           always be unzipped.
