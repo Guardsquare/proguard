@@ -22,6 +22,7 @@ package proguard;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import proguard.classfile.kotlin.KotlinConstants;
 import proguard.classfile.util.*;
 import proguard.classfile.visitor.*;
@@ -34,6 +35,7 @@ import proguard.resources.kotlinmodule.io.KotlinModuleDataEntryReader;
 import proguard.util.*;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.List;
 
 import static proguard.DataEntryReaderFactory.getFilterExcludingVersionedClasses;
@@ -235,9 +237,9 @@ public class InputReader implements Pass
     /**
      * Reads the given input class path entry.
      */
-    private void readInput(String          messagePrefix,
-                           ClassPathEntry  classPathEntry,
-                           DataEntryReader dataEntryReader)
+    void readInput(String          messagePrefix,
+                   ClassPathEntry  classPathEntry,
+                   DataEntryReader dataEntryReader)
     throws IOException
     {
         try
@@ -259,18 +261,26 @@ public class InputReader implements Pass
                 classPathEntry.getName(),
                 filter != null || classPathEntry.isFiltered() ? " (filtered)" : ""
             );
- 
-            // Create a reader that can unwrap jars, wars, ears, jmods and zips.
-            DataEntryReader reader =
-                new DataEntryReaderFactory(configuration.android)
-                    .createDataEntryReader(classPathEntry,
-                            dataEntryReader);
 
-            // Create the data entry source.
-            DataEntrySource source =
-                new DirectorySource(classPathEntry.getFile());
+            File classPathFile = classPathEntry.getFile();
+            DataEntryReader reader;
+            DataEntrySource source = maybeGetJrtFallback(classPathFile, classPathEntry.isJmod());
+            if (source != null) {
+                reader = DataEntryReaderFactory.applyGeneralFilter(classPathEntry, dataEntryReader);
+                logger.info("Using jrt:/ file system fallback due to missing jmods directory: {}", classPathFile);
+            } else {
+                // Create a reader that can unwrap jars, wars, ears, jmods and zips.
+                reader =
+                    new DataEntryReaderFactory(configuration.android)
+                        .createDataEntryReader(classPathEntry,
+                                dataEntryReader);
 
-            // Set he feature name for the class files and resource files
+                // Create the data entry source.
+                source =
+                    new DirectorySource(classPathFile);
+            }
+
+            // Set the feature name for the class files and resource files
             // that we'll read.
             featureName = classPathEntry.getFeatureName();
 
@@ -283,6 +293,47 @@ public class InputReader implements Pass
         }
     }
 
+    /**
+     * Fallback for JDK >= 24 without {@code jmods} directory, see <a href="https://github.com/Guardsquare/proguard/issues/473">
+     * issue 473</a>.
+     *
+     * <p>If the class path file is detected to be the non-existent {@code JAVA_HOME/jmods} directory or a jmod file
+     * within it, creates a {@link DataEntrySource} which uses the {@code jrt:/} file system to read JDK classes.
+     *
+     * @return a data entry source if the class path file refers to the non-existent {@code JAVA_HOME/jmods} directory,
+     *      or {@code null} otherwise (e.g. does not refer to jmods directory, or jmods directory exists)
+     */
+    @Nullable
+    private static JrtDataEntrySource maybeGetJrtFallback(File classPathFile, boolean isJmodFile) {
+        File jmodsDir = classPathFile;
+        String moduleName = null;
+
+        // Handle `jmods/<module>.jmod`
+        if (isJmodFile) {
+            jmodsDir = classPathFile.getParentFile();
+            if (jmodsDir == null) {
+                return null;
+            }
+
+            String fileName = classPathFile.getName();
+            moduleName = fileName.substring(0, fileName.lastIndexOf('.'));
+        }
+
+        // Check if this is a non-existent `JAVA_HOME/jmods` directory
+        if (!jmodsDir.getName().equals("jmods")) {
+            return null;
+        }
+        if (jmodsDir.exists()) {
+            return null;
+        }
+
+        Path javaHome = jmodsDir.toPath().getParent();
+        if (javaHome == null) {
+            return null;
+        }
+
+        return JrtDataEntrySource.tryCreate(javaHome, moduleName);
+    }
 
     /**
      * This resource file visitor attaches the current resource name, if any,
